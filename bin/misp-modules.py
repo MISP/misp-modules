@@ -24,9 +24,20 @@ import sys
 import tornado.web
 import importlib
 import json
+import logging
 
 runPath = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(os.path.join(runPath, '..'))
+port = 6666
+
+log = logging.getLogger('misp-modules')
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+handler = logging.StreamHandler(stream=sys.stdout)
+handler.setFormatter(formatter)
+handler.setLevel(logging.INFO)
+
+log.addHandler(handler)
+log.setLevel(logging.INFO)
 
 modulesdir = '../modules/expansion'
 
@@ -37,8 +48,8 @@ for module in os.listdir(modulesdir):
         continue
     modulename = module.split(".")[0]
     modules.append(modulename)
+    log.info('MISP modules {0} imported'.format(modulename))
     mhandlers[modulename] = importlib.import_module('modules.expansion.'+modulename)
-    print (module)
 
 class ListModules(tornado.web.RequestHandler):
     def get(self):
@@ -47,13 +58,14 @@ class ListModules(tornado.web.RequestHandler):
             x = {}
             x['name'] = module
             x['mispattributes'] = mhandlers[module].introspection()
-            print (x['mispattributes'])
             ret.append(x)
+        log.debug('MISP ListModules request')
         self.write(json.dumps(ret))
 class QueryModule(tornado.web.RequestHandler):
     def post(self):
         jsonpayload = self.request.body.decode('utf-8')
         x=json.loads(jsonpayload)
+        log.debug('MISP QueryModule request {0}'.format(jsonpayload))
         ret = mhandlers[x['module']].handler(q=jsonpayload)
         self.write(json.dumps(ret))
 
@@ -61,5 +73,6 @@ class QueryModule(tornado.web.RequestHandler):
 service = [(r'/modules',ListModules), (r'/query',QueryModule)]
 
 application = tornado.web.Application(service)
-application.listen(6666)
+log.info('MISP modules server started on TCP port {0}'.format(port))
+application.listen(port)
 tornado.ioloop.IOLoop.instance().start()
