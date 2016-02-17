@@ -38,7 +38,6 @@ for module in os.listdir(modulesdir):
     modulename = module.split(".")[0]
     modules.append(modulename)
     mhandlers[modulename] = importlib.import_module('modules.expansion.'+modulename)
-    print (module)
 
 class ListModules(tornado.web.RequestHandler):
     def get(self):
