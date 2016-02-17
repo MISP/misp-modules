@@ -1,0 +1,52 @@
+# MISP modules
+
+MISP modules are autonomous modules that can be used for expansion and other services in [MISP](https://github.com/MISP/MISP).
+
+The modules are written in Python 3 following a simple API interface. The objective is to ease the extensions of MISP functionalities
+without modifying core components. The API is available via a simple REST API which is independent from MISP installation or configuration. 
+
+MISP modules support is included in MISP starting from version 2.4.X.
+
+## Existing MISP modules
+
+* [DNS](modules/expansion/dns.py) - a simple module to resolve MISP attributes like hostname and domain to expand IP addresses attributes.
+
+## How to add your own MISP modules?
+
+Create your module in [modules/expansion/](modules/expansion/). The module should have at minimum two functions:
+
+* **introspection** function that returns an array of the supported attributes by your expansion module.
+* **handler** function which accepts a JSON document to expand the values and return a dictionary of the expanded values.
+
+## Testing your modules?
+
+MISP uses the **modules** function to discover the available MISP modules and their supported MISP attributes:
+
+~~~
+% curl -s http://127.0.0.1:6666/modules | jq .
+[
+  {
+    "name": "dns",
+    "mispattributes": [
+      "hostname",
+      "domain"
+    ]
+  }
+]
+
+~~~
+
+The MISP module service returns the available modules in a JSON array containing each module name along with their supported input attributes.
+
+Based on this information, a query can be built in a JSON format and saved as body.json:
+
+~~~json
+{"module": "dns", "hostname": "www.github.com"}
+~~~
+
+Then you can POST this JSON format query towards the MISP object server:
+
+~~~
+curl -s http://127.0.0.1:6666/query -H "Content-Type: application/json" --data @body.json -X POST
+~~~
+
