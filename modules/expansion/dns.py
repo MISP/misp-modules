@@ -2,6 +2,7 @@ import json
 import dns.resolver
 
 mispattributes = {'input':['hostname', 'domain'], 'output':['ip-src', 'ip-dst']}
+moduleinfo = "0.1"
 
 def handler(q=False):
     if q is False:
@@ -26,4 +27,6 @@ def handler(q=False):
 
 def introspection():
 
-    return mispattributes['input']
+    return mispattributes
+def version():
+    return moduleinfo
