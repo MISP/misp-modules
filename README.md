@@ -26,11 +26,19 @@ MISP uses the **modules** function to discover the available MISP modules and th
 % curl -s http://127.0.0.1:6666/modules | jq .
 [
   {
+    "mispattributes": {
+      "output": [
+        "ip-src",
+        "ip-dst"
+      ],
+      "input": [
+        "hostname",
+        "domain"
+      ]
+    },
+    "type": "expansion",
     "name": "dns",
-    "mispattributes": [
-      "hostname",
-      "domain"
-    ]
+    "version": "0.1"
   }
 ]
 
