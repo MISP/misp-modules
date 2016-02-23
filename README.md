@@ -41,7 +41,19 @@ The MISP module service returns the available modules in a JSON array containing
 Based on this information, a query can be built in a JSON format and saved as body.json:
 
 ~~~json
-{"module": "dns", "hostname": "www.github.com"}
+{
+  "results": [
+    {
+      "types": [
+        "ip-src",
+        "ip-dst"
+      ],
+      "values": [
+        "188.65.217.78"
+      ]
+    }
+  ]
+}
 ~~~
 
 Then you can POST this JSON format query towards the MISP object server:
