@@ -47,9 +47,11 @@ for module in os.listdir(modulesdir):
     if ".py" not in module or ".pyc" in module:
         continue
     modulename = module.split(".")[0]
+    moduletype = os.path.split(modulesdir)[1]
     modules.append(modulename)
     log.info('MISP modules {0} imported'.format(modulename))
     mhandlers[modulename] = importlib.import_module('modules.expansion.'+modulename)
+    mhandlers['type:'+modulename]= moduletype
 
 class ListModules(tornado.web.RequestHandler):
     def get(self):
@@ -57,10 +59,13 @@ class ListModules(tornado.web.RequestHandler):
         for module in modules:
             x = {}
             x['name'] = module
+            x['type'] = mhandlers['type:'+module]
             x['mispattributes'] = mhandlers[module].introspection()
+            x['version'] = mhandlers[module].version()
             ret.append(x)
         log.debug('MISP ListModules request')
         self.write(json.dumps(ret))
+
 class QueryModule(tornado.web.RequestHandler):
     def post(self):
         jsonpayload = self.request.body.decode('utf-8')
