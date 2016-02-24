@@ -50,8 +50,9 @@ for module in os.listdir(modulesdir):
     moduletype = os.path.split(modulesdir)[1]
     modules.append(modulename)
     log.info('MISP modules {0} imported'.format(modulename))
-    mhandlers[modulename] = importlib.import_module('modules.expansion.'+modulename)
-    mhandlers['type:'+modulename]= moduletype
+    mhandlers[modulename] = importlib.import_module('modules.expansion.' + modulename)
+    mhandlers['type:' + modulename] = moduletype
+
 
 class ListModules(tornado.web.RequestHandler):
     def get(self):
@@ -59,23 +60,24 @@ class ListModules(tornado.web.RequestHandler):
         for module in modules:
             x = {}
             x['name'] = module
-            x['type'] = mhandlers['type:'+module]
+            x['type'] = mhandlers['type:' + module]
             x['mispattributes'] = mhandlers[module].introspection()
             x['version'] = mhandlers[module].version()
             ret.append(x)
         log.debug('MISP ListModules request')
         self.write(json.dumps(ret))
 
+
 class QueryModule(tornado.web.RequestHandler):
     def post(self):
         jsonpayload = self.request.body.decode('utf-8')
-        x=json.loads(jsonpayload)
+        x = json.loads(jsonpayload)
         log.debug('MISP QueryModule request {0}'.format(jsonpayload))
         ret = mhandlers[x['module']].handler(q=jsonpayload)
         self.write(json.dumps(ret))
 
 
-service = [(r'/modules',ListModules), (r'/query',QueryModule)]
+service = [(r'/modules', ListModules), (r'/query', QueryModule)]
 
 application = tornado.web.Application(service)
 log.info('MISP modules server started on TCP port {0}'.format(port))

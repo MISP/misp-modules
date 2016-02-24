@@ -1,8 +1,9 @@
 import json
 import dns.resolver
 
-mispattributes = {'input':['hostname', 'domain'], 'output':['ip-src', 'ip-dst']}
+mispattributes = {'input': ['hostname', 'domain'], 'output': ['ip-src', 'ip-dst']}
 moduleinfo = "0.1"
+
 
 def handler(q=False):
     if q is False:
@@ -22,11 +23,13 @@ def handler(q=False):
         return False
     except dns.exception.Timeout:
         return False
-    r = {'results':[{'types':mispattributes['output'], 'values':[str(answer[0])]}]}
+    r = {'results': [{'types': mispattributes['output'], 'values':[str(answer[0])]}]}
     return r
 
-def introspection():
 
+def introspection():
     return mispattributes
+
+
 def version():
     return moduleinfo
