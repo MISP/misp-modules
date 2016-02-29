@@ -19,7 +19,7 @@ def handler(q=False):
     r = dns.resolver.Resolver()
     r.timeout = 2
     r.lifetime = 2
-    r.nameservers = ['8.1.8.7']
+    r.nameservers = ['8.8.8.8']
     try:
         answer = r.query(toquery, 'A')
     except dns.resolver.NXDOMAIN:
