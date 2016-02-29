@@ -18,6 +18,8 @@ Create your module in [modules/expansion/](modules/expansion/). The module shoul
 * **introspection** function that returns an array of the supported attributes by your expansion module.
 * **handler** function which accepts a JSON document to expand the values and return a dictionary of the expanded values.
 
+Don't forget to return an error key and value if an error is raised to propagate it to the MISP user-interface.
+
 ## Testing your modules?
 
 MISP uses the **modules** function to discover the available MISP modules and their supported MISP attributes:
