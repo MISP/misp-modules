@@ -1,6 +1,7 @@
 import json
 import dns.resolver
 
+misperrors = {'error' : 'Error'}
 mispattributes = {'input': ['hostname', 'domain'], 'output': ['ip-src', 'ip-dst']}
 moduleinfo = "0.1"
 
@@ -16,13 +17,20 @@ def handler(q=False):
     else:
         return False
     r = dns.resolver.Resolver()
-    r.nameservers = ['8.8.8.8']
+    r.timeout = 2
+    r.lifetime = 2
+    r.nameservers = ['8.1.8.7']
     try:
         answer = r.query(toquery, 'A')
     except dns.resolver.NXDOMAIN:
-        return False
+        misperrors['error'] = "NXDOMAIN"
+        return misperrors
     except dns.exception.Timeout:
-        return False
+        misperrors['error'] = "Timeout"
+        return misperrors
+    except:
+        misperrors['error'] = "DNS resolving error"
+        return misperrors
     r = {'results': [{'types': mispattributes['output'], 'values':[str(answer[0])]}]}
     return r
 
