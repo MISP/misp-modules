@@ -21,6 +21,12 @@ Create your module in [modules/expansion/](modules/expansion/). The module shoul
 
 Don't forget to return an error key and value if an error is raised to propagate it to the MISP user-interface.
 
+If your module requires authentication, the following reserved MISP attributes are used to pass the authentication
+values from MISP towards the module:
+
+* module-username
+* module-password
+
 ## Testing your modules?
 
 MISP uses the **modules** function to discover the available MISP modules and their supported MISP attributes:
