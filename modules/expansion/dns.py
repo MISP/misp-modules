@@ -3,7 +3,7 @@ import dns.resolver
 
 misperrors = {'error' : 'Error'}
 mispattributes = {'input': ['hostname', 'domain'], 'output': ['ip-src', 'ip-dst']}
-moduleinfo = "0.1"
+moduleinfo = {'version': '0.1', 'author': 'Alexandre Dulaunoy', 'description': 'Simple DNS expansion service to resolve IP address from MISP attributes'}
 
 
 def handler(q=False):

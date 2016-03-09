@@ -62,7 +62,7 @@ class ListModules(tornado.web.RequestHandler):
             x['name'] = module
             x['type'] = mhandlers['type:' + module]
             x['mispattributes'] = mhandlers[module].introspection()
-            x['version'] = mhandlers[module].version()
+            x['meta'] = mhandlers[module].version()
             ret.append(x)
         log.debug('MISP ListModules request')
         self.write(json.dumps(ret))
