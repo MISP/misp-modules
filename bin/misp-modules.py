@@ -25,6 +25,7 @@ import tornado.web
 import importlib
 import json
 import logging
+import re
 
 runPath = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(os.path.join(runPath, '..'))
@@ -45,6 +46,8 @@ mhandlers = {}
 modules = []
 for module in os.listdir(modulesdir):
     if ".py" not in module or ".pyc" in module:
+        continue
+    if re.match("^\.", module):
         continue
     modulename = module.split(".")[0]
     moduletype = os.path.split(modulesdir)[1]
