@@ -36,21 +36,45 @@ MISP uses the **modules** function to discover the available MISP modules and th
 [
   {
     "mispattributes": {
+      "input": [
+        "hostname",
+        "domain",
+        "ip-src",
+        "ip-dst",
+        "module-username",
+        "module-password"
+      ],
       "output": [
         "ip-src",
-        "ip-dst"
-      ],
-      "input": [
+        "ip-dst",
         "hostname",
         "domain"
       ]
     },
-    "type": "expansion",
+    "meta": "0.1",
+    "name": "passivetotal",
+    "type": "expansion"
+  },
+  {
+    "mispattributes": {
+      "input": [
+        "hostname",
+        "domain"
+      ],
+      "output": [
+        "ip-src",
+        "ip-dst"
+      ]
+    },
+    "meta": {
+      "description": "Simple DNS expansion services to resolve IP address from MISP attributes",
+      "version": "0.1",
+      "author": "Alexandre Dulaunoy"
+    },
     "name": "dns",
-    "version": "0.1"
+    "type": "expansion"
   }
 ]
-
 ~~~
 
 The MISP module service returns the available modules in a JSON array containing each module name along with their supported input attributes.
