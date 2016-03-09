@@ -52,7 +52,11 @@ MISP uses the **modules** function to discover the available MISP modules and th
         "domain"
       ]
     },
-    "meta": "0.1",
+    "meta": {
+     "description": "PassiveTotal expansion service to expand values with multiple Passive DNS sources",
+     "author": "Alexandre Dulaunoy",
+     "version": "0.1"
+    },
     "name": "passivetotal",
     "type": "expansion"
   },
