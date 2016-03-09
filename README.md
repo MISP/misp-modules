@@ -14,10 +14,11 @@ MISP modules support is included in MISP starting from version 2.4.X.
 
 ## How to add your own MISP modules?
 
-Create your module in [modules/expansion/](modules/expansion/). The module should have at minimum two functions:
+Create your module in [modules/expansion/](modules/expansion/). The module should have at minimum three functions:
 
-* **introspection** function that returns an array of the supported attributes by your expansion module.
+* **introspection** function that returns a dict of the supported attributes (input and output) by your expansion module.
 * **handler** function which accepts a JSON document to expand the values and return a dictionary of the expanded values.
+* **version** function that returns a dict with the version and the associated meta-data of the module.
 
 Don't forget to return an error key and value if an error is raised to propagate it to the MISP user-interface.
 
@@ -102,4 +103,8 @@ Then you can POST this JSON format query towards the MISP object server:
 ~~~
 curl -s http://127.0.0.1:6666/query -H "Content-Type: application/json" --data @body.json -X POST
 ~~~
+
+## How to contribute your own module?
+
+Fork the project, add your module, test it and make a pull-request. Modules can be also private as you can add a module in your own MISP installation.
 
