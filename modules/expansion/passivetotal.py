@@ -2,7 +2,7 @@ import json
 import requests
 
 misperrors = {'error' : 'Error'}
-mispattributes = {'input': ['hostname', 'domain', 'ip-src', 'ip-dst', 'module-username','module-password'], 'output': ['ip-src', 'ip-dst', 'hostname', 'domain']}
+mispattributes = {'input': ['hostname', 'domain', 'ip-src', 'ip-dst'], 'output': ['ip-src', 'ip-dst', 'hostname', 'domain']}
 moduleinfo = {'version': '0.1', 'author': 'Alexandre Dulaunoy', 'description': 'PassiveTotal expansion service to expand values with multiple Passive DNS sources'}
 moduleconfig = ['username', 'password']
 passivetotal_url = 'https://api.passivetotal.org/v2/dns/passive?query='
