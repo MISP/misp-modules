@@ -4,14 +4,21 @@ import requests
 misperrors = {'error' : 'Error'}
 mispattributes = {'input': ['hostname', 'domain', 'ip-src', 'ip-dst', 'module-username','module-password'], 'output': ['ip-src', 'ip-dst', 'hostname', 'domain']}
 moduleinfo = {'version': '0.1', 'author': 'Alexandre Dulaunoy', 'description': 'PassiveTotal expansion service to expand values with multiple Passive DNS sources'}
+moduleconfig = ['username', 'password']
 passivetotal_url = 'https://api.passivetotal.org/v2/dns/passive?query='
+
 
 def handler(q=False):
     if q is False:
         return False
     request = json.loads(q)
-    if (request.get('module-username') is False) or (request.get('module-password') is False):
-        misperrors['error'] = 'Passivetotal authentication is missing'
+
+    if (request.get('config')):
+        if (request['config'].get('username') is None) or (request['config'].get('password') is None):
+            misperrors['error'] = 'Passivetotal authentication is missing'
+            return misperrors
+    else:
+        misperrors['error'] = 'config is missing'
         return misperrors
     if request.get('hostname'):
         toquery = request['hostname']
@@ -28,7 +35,7 @@ def handler(q=False):
     else:
         return False
 
-    r = requests.get(passivetotal_url+toquery, auth=(request.get('module-username'),request.get('module-password')))
+    r = requests.get(passivetotal_url+toquery, auth=(request['config'].get('username'),request['config'].get('password')))
     if r.status_code == 200:
         x = json.loads(r.text)
         a = []
@@ -58,4 +65,5 @@ def introspection():
 
 
 def version():
+    moduleinfo['config'] = moduleconfig
     return moduleinfo
