@@ -2,7 +2,7 @@ import json
 from url_archiver import url_archiver
 
 misperrors = {'error': 'Error'}
-mispattributes = {'input': ['link'], 'output': ['link']}
+mispattributes = {'input': ['link', 'url'], 'output': ['attachment', 'malware-sample']}
 moduleinfo = {'version': '0.1', 'author': 'Alexandre Dulaunoy', 'description': 'Module to cache web pages of analysis reports, OSINT sources. The module returns a link of the cached page.'}
 moduleconfig = ['archivepath']
 
@@ -17,15 +17,22 @@ def handler(q=False):
         archive_path = '/tmp/'
     if request.get('link'):
         tocache = request['link']
-        archiver = url_archiver.Archive(archive_path=archive_path)
-        archiver.fetch(url=tocache)
-        mispattributes['output'] = ['link']
+        data = __archiveLink(archive_path, tocache)
+        mispattributes['output'] = ['attachment']
+    elif request.get('url'):
+        tocache = request['url']
+        data = __archiveLink(archive_path, tocache)
+        mispattributes['output'] = ['malware-sample']
     else:
         misperrors['error'] = "Link is missing"
         return misperrors
-    r = {'results': [{'types': mispattributes['output'], 'values': tocache}]}
+    r = {'results': [{'types': mispattributes['output'], 'values': tocache, 'data': data}]}
     return r
 
+
+def __archiveLink(archive_path, tocache):
+    archiver = url_archiver.Archive(archive_path=archive_path)
+    return archiver.fetch(url=tocache)
 
 def introspection():
     return mispattributes

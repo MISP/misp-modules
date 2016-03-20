@@ -45,7 +45,7 @@ modulesdir = '../modules/expansion'
 mhandlers = {}
 modules = []
 for module in os.listdir(modulesdir):
-    if ".py" not in module or ".pyc" in module:
+    if ".py" not in module or ".pyc" in module or ".py~" in module:
         continue
     if re.match("^\.", module):
         continue
