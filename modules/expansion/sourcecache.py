@@ -28,7 +28,6 @@ def handler(q=False):
         return misperrors
     enc_data = data.decode('ascii')
     r = {'results': [{'types': mispattributes['output'], 'values': tocache, 'data': enc_data}]}
-    print (r)
     return r
 
 
