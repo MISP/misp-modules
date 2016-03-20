@@ -3,7 +3,7 @@ import requests
 
 misperrors = {'error': 'Error'}
 mispattributes = {'input': ['vulnerability'], 'output': ['']}
-moduleinfo = {'version': '0.1', 'author': 'Alexandre Dulaunoy', 'description': 'An expansion hover module to expand information about CVE id.', 'module-type': 'hover'}
+moduleinfo = {'version': '0.1', 'author': 'Alexandre Dulaunoy', 'description': 'An expansion hover module to expand information about CVE id.', 'module-type': ['hover']}
 moduleconfig = []
 cveapi_url = 'https://cve.circl.lu/api/cve/'
 

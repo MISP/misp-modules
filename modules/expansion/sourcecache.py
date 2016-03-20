@@ -3,7 +3,7 @@ from url_archiver import url_archiver
 
 misperrors = {'error': 'Error'}
 mispattributes = {'input': ['link', 'url'], 'output': ['attachment', 'malware-sample']}
-moduleinfo = {'version': '0.1', 'author': 'Alexandre Dulaunoy', 'description': 'Module to cache web pages of analysis reports, OSINT sources. The module returns a link of the cached page.'}
+moduleinfo = {'version': '0.1', 'author': 'Alexandre Dulaunoy', 'description': 'Module to cache web pages of analysis reports, OSINT sources. The module returns a link of the cached page.', 'module-type': ['expansion']}
 moduleconfig = ['archivepath']
 
 
