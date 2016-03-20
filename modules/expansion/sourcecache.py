@@ -26,13 +26,14 @@ def handler(q=False):
     else:
         misperrors['error'] = "Link is missing"
         return misperrors
-    r = {'results': [{'types': mispattributes['output'], 'values': tocache, 'data': data}]}
+    enc_data = str(data)
+    r = {'results': [{'types': mispattributes['output'], 'values': tocache, 'data': enc_data}]}
     return r
 
 
 def __archiveLink(archive_path, tocache):
     archiver = url_archiver.Archive(archive_path=archive_path)
-    return archiver.fetch(url=tocache)
+    return archiver.fetch(url=tocache, armor=True)
 
 def introspection():
     return mispattributes
