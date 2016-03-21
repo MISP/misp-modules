@@ -5,7 +5,7 @@ MISP modules are autonomous modules that can be used for expansion and other ser
 The modules are written in Python 3 following a simple API interface. The objective is to ease the extensions of MISP functionalities
 without modifying core components. The API is available via a simple REST API which is independent from MISP installation or configuration. 
 
-MISP modules support is included in MISP starting from version 2.4.X.
+MISP modules support is included in MISP starting from version 2.4.28.
 
 ## Existing MISP modules
 
