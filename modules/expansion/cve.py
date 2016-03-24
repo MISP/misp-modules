@@ -2,8 +2,8 @@ import json
 import requests
 
 misperrors = {'error': 'Error'}
-mispattributes = {'input': ['vulnerability'], 'output': ['']}
-moduleinfo = {'version': '0.1', 'author': 'Alexandre Dulaunoy', 'description': 'An expansion hover module to expand information about CVE id.', 'module-type': ['hover']}
+mispattributes = {'input': ['vulnerability'], 'output': ['text']}
+moduleinfo = {'version': '0.2', 'author': 'Alexandre Dulaunoy', 'description': 'An expansion hover module to expand information about CVE id.', 'module-type': ['hover']}
 moduleconfig = []
 cveapi_url = 'https://cve.circl.lu/api/cve/'
 
@@ -20,11 +20,14 @@ def handler(q=False):
     r = requests.get(cveapi_url+request.get('vulnerability'))
     if r.status_code == 200:
         vulnerability = json.loads(r.text)
+        if vulnerability.get('summary'):
+            summary = vulnerability['summary']
     else:
         misperrors['error'] = 'cve.circl.lu API not accessible'
         return misperrors['error']
 
-    return vulnerability
+    r = {'results': [{'types': mispattributes['output'], 'values': summary}]}
+    return r
 
 
 def introspection():
