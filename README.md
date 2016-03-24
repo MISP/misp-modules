@@ -14,6 +14,16 @@ MISP modules support is included in MISP starting from version 2.4.28.
 * [passivetotal](modules/expansion/passivetotal.py) - a [passivetotal](https://www.passivetotal.org/) module to query the passivetotal passive DNS interface.
 * [sourcecache](modules/expansion/sourcecache.py) - a module to cache a specific link from a MISP instance.
 
+## How to install and start MISP modules?
+
+~~~~bash
+git clone git@github.com:MISP/misp-modules.git
+cd misp-modules
+pip3 install -r REQUIREMENTS
+cd bin
+python3 misp-modules.py
+~~~~
+
 ## How to add your own MISP modules?
 
 Create your module in [modules/expansion/](modules/expansion/). The module should have at minimum three functions:
