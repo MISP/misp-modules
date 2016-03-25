@@ -25,36 +25,40 @@ import tornado.web
 import importlib
 import json
 import logging
-import re
+import fnmatch
 
-runPath = os.path.dirname(os.path.realpath(__file__))
-sys.path.append(os.path.join(runPath, '..'))
 port = 6666
 
-log = logging.getLogger('misp-modules')
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-handler = logging.StreamHandler(stream=sys.stdout)
-handler.setFormatter(formatter)
-handler.setLevel(logging.INFO)
 
-log.addHandler(handler)
-log.setLevel(logging.INFO)
+def init_logger():
+    log = logging.getLogger('misp-modules')
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    handler = logging.StreamHandler(stream=sys.stdout)
+    handler.setFormatter(formatter)
+    handler.setLevel(logging.INFO)
 
-modulesdir = '../modules/expansion'
+    log.addHandler(handler)
+    log.setLevel(logging.INFO)
+    return log
 
-mhandlers = {}
-modules = []
-for module in os.listdir(modulesdir):
-    if ".py" not in module or ".pyc" in module or ".py~" in module:
-        continue
-    if re.match("^\.", module):
-        continue
-    modulename = module.split(".")[0]
-    moduletype = os.path.split(modulesdir)[1]
-    modules.append(modulename)
-    log.info('MISP modules {0} imported'.format(modulename))
-    mhandlers[modulename] = importlib.import_module('modules.expansion.' + modulename)
-    mhandlers['type:' + modulename] = moduletype
+
+def load_modules(mod_dir):
+    sys.path.append(mod_dir)
+    mhandlers = {}
+    modules = []
+    for root, dirnames, filenames in os.walk(mod_dir):
+        if os.path.basename(root) == '__pycache__':
+            continue
+        for filename in fnmatch.filter(filenames, '*.py'):
+            if filename == '__init__.py':
+                continue
+            modulename = filename.split(".")[0]
+            moduletype = os.path.split(modulesdir)[1]
+            modules.append(modulename)
+            log.info('MISP modules {0} imported'.format(modulename))
+            mhandlers[modulename] = importlib.import_module(os.path.basename(root) + '.' + modulename)
+            mhandlers['type:' + modulename] = moduletype
+    return mhandlers, modules
 
 
 class ListModules(tornado.web.RequestHandler):
@@ -80,9 +84,13 @@ class QueryModule(tornado.web.RequestHandler):
         self.write(json.dumps(ret))
 
 
-service = [(r'/modules', ListModules), (r'/query', QueryModule)]
+if __name__ == '__main__':
+    modulesdir = '../modules'
+    log = init_logger()
+    mhandlers, modules = load_modules(modulesdir)
+    service = [(r'/modules', ListModules), (r'/query', QueryModule)]
 
-application = tornado.web.Application(service)
-log.info('MISP modules server started on TCP port {0}'.format(port))
-application.listen(port)
-tornado.ioloop.IOLoop.instance().start()
+    application = tornado.web.Application(service)
+    log.info('MISP modules server started on TCP port {0}'.format(port))
+    application.listen(port)
+    tornado.ioloop.IOLoop.instance().start()
