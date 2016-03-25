@@ -11,7 +11,7 @@ MISP modules support is included in MISP starting from version 2.4.28.
 
 * [CVE](modules/expansion/cve.py) - a hover module to give more information about a vulnerability (CVE).
 * [DNS](modules/expansion/dns.py) - a simple module to resolve MISP attributes like hostname and domain to expand IP addresses attributes.
-* [passivetotal](modules/expansion/passivetotal.py) - a [passivetotal](https://www.passivetotal.org/) module to query the passivetotal passive DNS interface.
+* [passivetotal](modules/expansion/passivetotal.py) - a [passivetotal](https://www.passivetotal.org/) module that queries a number of different PassiveTotal datasets.
 * [sourcecache](modules/expansion/sourcecache.py) - a module to cache a specific link from a MISP instance.
 
 ## How to install and start MISP modules?
