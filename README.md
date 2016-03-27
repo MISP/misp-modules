@@ -7,6 +7,8 @@ without modifying core components. The API is available via a simple REST API wh
 
 MISP modules support is included in MISP starting from version 2.4.28.
 
+For more information: [Extending MISP with Python modules](https://www.circl.lu/assets/files/misp-training/3.1-MISP-modules.pdf) slides from MISP training.
+
 ## Existing MISP modules
 
 * [CVE](modules/expansion/cve.py) - a hover module to give more information about a vulnerability (CVE).
