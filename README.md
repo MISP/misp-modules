@@ -21,7 +21,8 @@ For more information: [Extending MISP with Python modules](https://www.circl.lu/
 ## How to install and start MISP modules?
 
 ~~~~bash
-git clone git@github.com:MISP/misp-modules.git
+apt-get install python-dev python3-pip
+git clone https://github.com/MISP/misp-modules.git
 cd misp-modules
 pip3 install -r REQUIREMENTS
 cd bin
