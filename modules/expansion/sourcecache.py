@@ -35,6 +35,7 @@ def __archiveLink(archive_path, tocache):
     archiver = url_archiver.Archive(archive_path=archive_path)
     return archiver.fetch(url=tocache, armor=True)
 
+
 def introspection():
     return mispattributes
 

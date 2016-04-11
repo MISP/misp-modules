@@ -1,9 +1,9 @@
 import json
 import pypdns
 
-misperrors = {'error' : 'Error'}
-mispattributes = {'input': ['hostname', 'domain','ip-src','ip-dst'], 'output': ['freetext']}
-moduleinfo = {'version': '0.1', 'author': 'Alexandre Dulaunoy', 'description': 'Module to access CIRCL Passive DNS',  'module-type': ['expansion','hover']}
+misperrors = {'error': 'Error'}
+mispattributes = {'input': ['hostname', 'domain', 'ip-src', 'ip-dst'], 'output': ['freetext']}
+moduleinfo = {'version': '0.1', 'author': 'Alexandre Dulaunoy', 'description': 'Module to access CIRCL Passive DNS', 'module-type': ['expansion', 'hover']}
 moduleconfig = ['username', 'password']
 
 
@@ -34,7 +34,7 @@ def handler(q=False):
     for v in res:
             out = out + "{} ".format(v['rdata'])
 
-    r = {'results': [{'types': mispattributes['output'], 'values': out }]}
+    r = {'results': [{'types': mispattributes['output'], 'values': out}]}
     return r
 
 

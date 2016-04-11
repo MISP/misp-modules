@@ -344,4 +344,3 @@ def introspection():
 def version():
     moduleinfo['config'] = moduleconfig
     return moduleinfo
-

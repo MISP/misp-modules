@@ -17,7 +17,7 @@ def handler(q=False):
         misperrors['error'] = 'Vulnerability id missing'
         return misperrors
 
-    r = requests.get(cveapi_url+request.get('vulnerability'))
+    r = requests.get(cveapi_url + request.get('vulnerability'))
     if r.status_code == 200:
         vulnerability = json.loads(r.text)
         if vulnerability.get('summary'):

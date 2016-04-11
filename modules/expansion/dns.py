@@ -1,9 +1,9 @@
 import json
 import dns.resolver
 
-misperrors = {'error' : 'Error'}
+misperrors = {'error': 'Error'}
 mispattributes = {'input': ['hostname', 'domain'], 'output': ['ip-src', 'ip-dst']}
-moduleinfo = {'version': '0.1', 'author': 'Alexandre Dulaunoy', 'description': 'Simple DNS expansion service to resolve IP address from MISP attributes',  'module-type': ['expansion','hover']}
+moduleinfo = {'version': '0.1', 'author': 'Alexandre Dulaunoy', 'description': 'Simple DNS expansion service to resolve IP address from MISP attributes', 'module-type': ['expansion', 'hover']}
 
 
 def handler(q=False):
