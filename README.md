@@ -7,8 +7,12 @@ without modifying core components. The API is available via a simple REST API wh
 
 MISP modules support is included in MISP starting from version 2.4.28.
 
+For more information: [Extending MISP with Python modules](https://www.circl.lu/assets/files/misp-training/3.1-MISP-modules.pdf) slides from MISP training.
+
 ## Existing MISP modules
 
+* [CIRCL Passive SSL](modules/expansion/circl_passivessl.py) - a hover and expansion module to expand IP addresses with the X.509 certificate seen.
+* [CIRCL Passive DNS](modules/expansion/circl_passivedns.py) - a hover and expansion module to expand hostname and IP addresses with passive DNS information.
 * [CVE](modules/expansion/cve.py) - a hover module to give more information about a vulnerability (CVE).
 * [DNS](modules/expansion/dns.py) - a simple module to resolve MISP attributes like hostname and domain to expand IP addresses attributes.
 * [passivetotal](modules/expansion/passivetotal.py) - a [passivetotal](https://www.passivetotal.org/) module that queries a number of different PassiveTotal datasets.
@@ -17,7 +21,8 @@ MISP modules support is included in MISP starting from version 2.4.28.
 ## How to install and start MISP modules?
 
 ~~~~bash
-git clone git@github.com:MISP/misp-modules.git
+apt-get install python-dev python3-pip
+git clone https://github.com/MISP/misp-modules.git
 cd misp-modules
 pip3 install -r REQUIREMENTS
 cd bin
