@@ -23,7 +23,7 @@ For more information: [Extending MISP with Python modules](https://www.circl.lu/
 ## How to install and start MISP modules?
 
 ~~~~bash
-apt-get install python-dev python3-pip
+apt-get install python3-dev python3-pip libpq5
 git clone https://github.com/MISP/misp-modules.git
 cd misp-modules
 pip3 install -r REQUIREMENTS
