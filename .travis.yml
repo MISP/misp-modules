@@ -1,0 +1,23 @@
+language: python
+
+cache: pip
+
+addons:
+    apt:
+         packages:
+             - libpq5
+
+
+python:
+    - "3.3"
+    - "3.4"
+    - "3.5"
+    - "nightly"
+
+install:
+    - pip install -r REQUIREMENTS
+
+script:
+    - pushd bin
+    - ./misp-modules.py -t
+    - popd

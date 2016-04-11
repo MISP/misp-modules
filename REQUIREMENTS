@@ -5,3 +5,4 @@ urlarchiver
 passivetotal
 PyPDNS
 pypssl
+psycopg2
