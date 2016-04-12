@@ -93,7 +93,7 @@ if __name__ == '__main__':
     application = tornado.web.Application(service)
     log.info('MISP modules server started on TCP port {0}'.format(port))
     application.listen(port)
-    if sys.argv[1] == '-t':
+    if len(sys.argv) == 2 and sys.argv[1] == '-t':
         log.info('MISP modules started in test-mode, quitting immediately.')
         sys.exit()
     tornado.ioloop.IOLoop.instance().start()
