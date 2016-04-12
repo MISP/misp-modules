@@ -26,6 +26,7 @@ import importlib
 import json
 import logging
 import fnmatch
+import argparse
 
 port = 6666
 
@@ -85,6 +86,9 @@ class QueryModule(tornado.web.RequestHandler):
 
 
 if __name__ == '__main__':
+    argParser = argparse.ArgumentParser(description='misp-modules server')
+    argParser.add_argument('-t', default=False, action='store_true', help='Test mode')
+    args = argParser.parse_args()
     modulesdir = '../modules'
     log = init_logger()
     mhandlers, modules = load_modules(modulesdir)
@@ -93,7 +97,7 @@ if __name__ == '__main__':
     application = tornado.web.Application(service)
     log.info('MISP modules server started on TCP port {0}'.format(port))
     application.listen(port)
-    if len(sys.argv) == 2 and sys.argv[1] == '-t':
+    if args.t:
         log.info('MISP modules started in test-mode, quitting immediately.')
         sys.exit()
     tornado.ioloop.IOLoop.instance().start()
