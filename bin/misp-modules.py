@@ -28,8 +28,6 @@ import logging
 import fnmatch
 import argparse
 
-port = 6666
-
 
 def init_logger():
     log = logging.getLogger('misp-modules')
@@ -88,7 +86,9 @@ class QueryModule(tornado.web.RequestHandler):
 if __name__ == '__main__':
     argParser = argparse.ArgumentParser(description='misp-modules server')
     argParser.add_argument('-t', default=False, action='store_true', help='Test mode')
+    argParser.add_argument('-p', default=6666, help='misp-modules TCP port (default 6666)')
     args = argParser.parse_args()
+    port = args.p
     modulesdir = '../modules'
     log = init_logger()
     mhandlers, modules = load_modules(modulesdir)
