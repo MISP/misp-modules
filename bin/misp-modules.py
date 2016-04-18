@@ -27,7 +27,7 @@ import json
 import logging
 import fnmatch
 import argparse
-
+import re
 
 def init_logger():
     log = logging.getLogger('misp-modules')
@@ -39,6 +39,26 @@ def init_logger():
     log.addHandler(handler)
     log.setLevel(logging.INFO)
     return log
+
+
+def load_helpers(helpersdir='../helpers'):
+    sys.path.append(helpersdir)
+    hhandlers = {}
+    helpers = []
+    for root, dirnames, filenames in os.walk(helpersdir):
+        if os.path.basename(root) == '__pycache__':
+            continue
+        if re.match(r'^\.', os.path.basename(root)):
+            continue
+        for filename in fnmatch.filter(filenames, '*.py'):
+            helpername = filename.split(".")[0]
+            hhandlers[helpername] = importlib.import_module(helpername)
+            selftest= hhandlers[helpername].selftest()
+            if selftest is None:
+                helpers.append(helpername)
+                log.info('Helpers loaded {} '.format(filename))
+            else:
+                log.info('Helpers failed {} due to {}'.format(filename, selftest))
 
 
 def load_modules(mod_dir):
@@ -90,7 +110,9 @@ if __name__ == '__main__':
     args = argParser.parse_args()
     port = args.p
     modulesdir = '../modules'
+    helpersdir = '../helpers'
     log = init_logger()
+    load_helpers(helpersdir=helpersdir)
     mhandlers, modules = load_modules(modulesdir)
     service = [(r'/modules', ListModules), (r'/query', QueryModule)]
 
