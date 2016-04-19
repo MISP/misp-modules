@@ -38,7 +38,7 @@ def selftest(enable=True):
 
 
 def get(modulename=None, query=None, value=None, debug=False):
-    if (modulename is None or query is None or value is None):
+    if (modulename is None or query is None):
         return False
     r = redis.StrictRedis(host=hostname, port=port, db=db)
     h = hashlib.sha1()
@@ -72,6 +72,8 @@ if __name__ == "__main__":
     v = get(modulename="testmodule", query="abcdef", value="barfoo", debug=True)
     if v == b'barfoo':
         print ("Cache ok")
+    v = get(modulename="testmodule", query="abcdef")
+    print (v)
     v = get(modulename="testmodule")
     if (not v):
         print ("Failed ok")
