@@ -76,8 +76,12 @@ def load_modules(mod_dir):
             modulename = filename.split(".")[0]
             moduletype = os.path.split(modulesdir)[1]
             modules.append(modulename)
+            try:
+                mhandlers[modulename] = importlib.import_module(os.path.basename(root) + '.' + modulename)
+            except Exception as e:
+                log.warning('MISP modules {0} failed due to {1}'.format(modulename, e))
+                continue
             log.info('MISP modules {0} imported'.format(modulename))
-            mhandlers[modulename] = importlib.import_module(os.path.basename(root) + '.' + modulename)
             mhandlers['type:' + modulename] = moduletype
     return mhandlers, modules
 
