@@ -68,6 +68,8 @@ def load_modules(mod_dir):
     for root, dirnames, filenames in os.walk(mod_dir):
         if os.path.basename(root) == '__pycache__':
             continue
+        if os.path.basename(root).startswith("."):
+            continue
         for filename in fnmatch.filter(filenames, '*.py'):
             if filename == '__init__.py':
                 continue
