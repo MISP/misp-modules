@@ -2,11 +2,13 @@ language: python
 
 cache: pip
 
+services:
+    - redis-server
+
 addons:
     apt:
          packages:
              - libpq5
-
 
 python:
     - "3.3"
