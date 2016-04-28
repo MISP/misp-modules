@@ -17,6 +17,7 @@ For more information: [Extending MISP with Python modules](https://www.circl.lu/
 * [CIRCL Passive DNS](modules/expansion/circl_passivedns.py) - a hover and expansion module to expand hostname and IP addresses with passive DNS information.
 * [CVE](modules/expansion/cve.py) - a hover module to give more information about a vulnerability (CVE).
 * [DNS](modules/expansion/dns.py) - a simple module to resolve MISP attributes like hostname and domain to expand IP addresses attributes.
+* [EUPI](modules/expansion/eupi.py) - a hover and expansion module to get information about an URL from the [Phishing Initiative project](https://phishing-initiative.eu/?lang=en).
 * [passivetotal](modules/expansion/passivetotal.py) - a [passivetotal](https://www.passivetotal.org/) module that queries a number of different PassiveTotal datasets.
 * [sourcecache](modules/expansion/sourcecache.py) - a module to cache a specific link from a MISP instance.
 
