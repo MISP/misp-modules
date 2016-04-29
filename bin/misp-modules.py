@@ -113,8 +113,10 @@ if __name__ == '__main__':
     argParser = argparse.ArgumentParser(description='misp-modules server')
     argParser.add_argument('-t', default=False, action='store_true', help='Test mode')
     argParser.add_argument('-p', default=6666, help='misp-modules TCP port (default 6666)')
+    argParser.add_argument('-l', default='localhost', help='misp-modules listen address (default localhost)')
     args = argParser.parse_args()
     port = args.p
+    listen = args.l
     modulesdir = '../modules'
     helpersdir = '../helpers'
     log = init_logger()
@@ -123,8 +125,8 @@ if __name__ == '__main__':
     service = [(r'/modules', ListModules), (r'/query', QueryModule)]
 
     application = tornado.web.Application(service)
-    log.info('MISP modules server started on TCP port {0}'.format(port))
-    application.listen(port)
+    application.listen(port, address=listen)
+    log.info('MISP modules server started on {0} port {1}'.format(listen, port))
     if args.t:
         log.info('MISP modules started in test-mode, quitting immediately.')
         sys.exit()
