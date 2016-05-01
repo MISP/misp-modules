@@ -7,3 +7,4 @@ PyPDNS
 pypssl
 redis
 pyeupi
+ipasn-redis
