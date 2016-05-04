@@ -33,7 +33,7 @@ def handler(q=False):
     ipasn = IPASN(host=request['config'].get('host'),
                   port=request['config'].get('port'), db=request['config'].get('db'))
 
-    values = ' \n '.join(list(ipasn.aggregate_history(toquery)))
+    values = ' \n '.join([' '.join(r)for r in ipasn.aggregate_history(toquery)])
     if not values:
         misperrors['error'] = 'Unable to find the history of this IP'
         return misperrors
