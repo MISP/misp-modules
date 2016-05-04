@@ -35,7 +35,7 @@ def handler(q=False):
 
     values = []
     for first_seen, last_seen, asn, block in ipasn.aggregate_history(toquery):
-        values.append('{} {} {} {}'.format(first_seen.decode('utf-8'), last_seen.decode('utf-8'), asn.decode('utf-8'), block.decode('utf-8')))
+        values.append('{} {} {} {}'.format(first_seen.decode(), last_seen.decode(), asn.decode(), block))
 
     if not values:
         misperrors['error'] = 'Unable to find the history of this IP'
