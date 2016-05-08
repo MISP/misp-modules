@@ -4,7 +4,7 @@ import json
 from asnhistory import ASNHistory
 
 misperrors = {'error': 'Error'}
-mispattributes = {'input': ['asn'], 'output': ['freetext']}
+mispattributes = {'input': ['AS'], 'output': ['freetext']}
 moduleinfo = {'version': '0.1', 'author': 'Raphaël Vinot',
               'description': 'Query an ASN Description history service (https://github.com/CIRCL/ASN-Description-History.git)',
               'module-type': ['expansion', 'hover']}
@@ -16,8 +16,8 @@ def handler(q=False):
     if q is False:
         return False
     request = json.loads(q)
-    if request.get('asn'):
-        toquery = request['asn']
+    if request.get('AS'):
+        toquery = request['AS']
     else:
         misperrors['error'] = "Unsupported attributes type"
         return misperrors
