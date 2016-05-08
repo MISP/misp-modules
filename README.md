@@ -13,6 +13,7 @@ For more information: [Extending MISP with Python modules](https://www.circl.lu/
 
 ## Existing MISP modules
 
+* [ASN History](/modules/expansion/asn_history.py) - a hover and expansion module to expand an AS number with the ASN description and its history.
 * [CIRCL Passive SSL](modules/expansion/circl_passivessl.py) - a hover and expansion module to expand IP addresses with the X.509 certificate seen.
 * [CIRCL Passive DNS](modules/expansion/circl_passivedns.py) - a hover and expansion module to expand hostname and IP addresses with passive DNS information.
 * [CVE](modules/expansion/cve.py) - a hover module to give more information about a vulnerability (CVE).
