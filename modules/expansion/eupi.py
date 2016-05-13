@@ -39,9 +39,8 @@ def handler(q=False):
             if r['tag_label'] != 'phishing':
                 continue
             to_return += ' {} {} {} '.format(r['url'], r['domain'], r['ip_address'])
-
-        r = {'results': [{'types': mispattributes['output'], 'values': to_return}]}
-        return r
+        if to_return:
+            return {'results': [{'types': mispattributes['output'], 'values': to_return}]}
 
 
 def introspection():
