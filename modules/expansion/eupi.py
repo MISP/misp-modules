@@ -41,6 +41,9 @@ def handler(q=False):
             to_return += ' {} {} {} '.format(r['url'], r['domain'], r['ip_address'])
         if to_return:
             return {'results': [{'types': mispattributes['output'], 'values': to_return}]}
+        else:
+            misperrors['error'] = 'Unknown in the Phishing Initiative service'
+            return misperrors
 
 
 def introspection():
