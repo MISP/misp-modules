@@ -27,11 +27,19 @@ def handler(q=False):
         return misperrors
 
     if not request.get('config') and not (request['config'].get('apikey') and request['config'].et('url')):
-        misperrors['error'] = 'Phishing Initiative authentication is missing'
+        misperrors['error'] = 'EUPI authentication is missing'
         return misperrors
 
-    p = PyEUPI(request['config']['apikey'], request['config']['url'])
-    results = p.search_url(url=toquery)
+    pyeupi = PyEUPI(request['config']['apikey'], request['config']['url'])
+
+    if 'event_id' in request:
+        return handle_expansion(pyeupi, toquery)
+    else:
+        return handle_hover(pyeupi, toquery)
+
+
+def handle_expansion(pyeupi, url):
+    results = pyeupi.search_url(url=url)
 
     if results.get('results'):
         to_return = ''
@@ -42,8 +50,22 @@ def handler(q=False):
         if to_return:
             return {'results': [{'types': mispattributes['output'], 'values': to_return}]}
         else:
-            misperrors['error'] = 'Unknown in the Phishing Initiative service'
+            misperrors['error'] = 'Unknown in the EUPI service'
             return misperrors
+    else:
+        misperrors['error'] = 'Error in EUPI lookup'
+        return misperrors
+
+
+def handle_hover(pyeupi, url):
+    try:
+        result = pyeupi.lookup(url=url)['results'][0]
+    except (KeyError, IndexError):
+        misperrors['error'] = 'Error in EUPI lookup'
+        return misperrors
+
+    return {'results': [{'types': mispattributes['output'],
+                         'values': result['tag_label'].title()}]}
 
 
 def introspection():
