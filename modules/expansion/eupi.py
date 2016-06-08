@@ -53,8 +53,7 @@ def handle_expansion(pyeupi, url):
             misperrors['error'] = 'Unknown in the EUPI service'
             return misperrors
     else:
-        misperrors['error'] = 'Error in EUPI lookup'
-        return misperrors
+        return {'results': [{'types': mispattributes['output'], 'values': ''}]}
 
 
 def handle_hover(pyeupi, url):
