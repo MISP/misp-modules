@@ -110,6 +110,7 @@ class QueryModule(tornado.web.RequestHandler):
 
 
 if __name__ == '__main__':
+    os.chdir(os.path.dirname(__file__))
     argParser = argparse.ArgumentParser(description='misp-modules server')
     argParser.add_argument('-t', default=False, action='store_true', help='Test mode')
     argParser.add_argument('-p', default=6666, help='misp-modules TCP port (default 6666)')
