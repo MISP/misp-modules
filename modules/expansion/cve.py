@@ -11,7 +11,6 @@ cveapi_url = 'https://cve.circl.lu/api/cve/'
 def handler(q=False):
     if q is False:
         return False
-    print (q)
     request = json.loads(q)
     if not request.get('vulnerability'):
         misperrors['error'] = 'Vulnerability id missing'

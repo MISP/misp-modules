@@ -32,7 +32,7 @@ def selftest(enable=True):
         return False
     r = redis.StrictRedis(host=hostname, port=port, db=db)
     try:
-        r.set('test', 'selftest')
+        r.ping()
     except:
         return 'Redis not running or not installed. Helper will be disabled.'
 
@@ -44,16 +44,15 @@ def get(modulename=None, query=None, value=None, debug=False):
     h = hashlib.sha1()
     h.update(query.encode('UTF-8'))
     hv = h.hexdigest()
-    key = "m:"+modulename+":"+hv
+    key = "m:" + modulename + ":" + hv
 
     if not r.exists(key):
         if debug:
-            print ("Key {} added in cache".format(key))
-        r.set(key, value)
-        r.expire(key, 86400)
+            print("Key {} added in cache".format(key))
+        r.setex(key, 86400, value)
     else:
         if debug:
-            print ("Cache hit with Key {}".format(key))
+            print("Cache hit with Key {}".format(key))
 
     return r.get(key)
 
@@ -68,14 +67,14 @@ if __name__ == "__main__":
     if selftest() is not None:
         sys.exit()
     else:
-        print ("Selftest ok")
+        print("Selftest ok")
     v = get(modulename="testmodule", query="abcdef", value="barfoo", debug=True)
     if v == b'barfoo':
-        print ("Cache ok")
+        print("Cache ok")
     v = get(modulename="testmodule", query="abcdef")
-    print (v)
+    print(v)
     v = get(modulename="testmodule")
     if (not v):
-        print ("Failed ok")
+        print("Failed ok")
     if flush():
-        print ("Cache flushed ok")
+        print("Cache flushed ok")

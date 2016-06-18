@@ -29,6 +29,7 @@ import fnmatch
 import argparse
 import re
 
+
 def init_logger():
     log = logging.getLogger('misp-modules')
     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -41,7 +42,7 @@ def init_logger():
     return log
 
 
-def load_helpers(helpersdir='../helpers'):
+def load_helpers(helpersdir):
     sys.path.append(helpersdir)
     hhandlers = {}
     helpers = []
@@ -51,9 +52,11 @@ def load_helpers(helpersdir='../helpers'):
         if re.match(r'^\.', os.path.basename(root)):
             continue
         for filename in fnmatch.filter(filenames, '*.py'):
+            if filename == '__init__.py':
+                continue
             helpername = filename.split(".")[0]
             hhandlers[helpername] = importlib.import_module(helpername)
-            selftest= hhandlers[helpername].selftest()
+            selftest = hhandlers[helpername].selftest()
             if selftest is None:
                 helpers.append(helpername)
                 log.info('Helpers loaded {} '.format(filename))
@@ -110,8 +113,8 @@ class QueryModule(tornado.web.RequestHandler):
 
 
 if __name__ == '__main__':
-    if os.path.dirname(__file__) is not '':
-        os.chdir(os.path.dirname(__file__))
+    if os.path.dirname(__file__) is '.':
+        os.chdir('../')
     argParser = argparse.ArgumentParser(description='misp-modules server')
     argParser.add_argument('-t', default=False, action='store_true', help='Test mode')
     argParser.add_argument('-p', default=6666, help='misp-modules TCP port (default 6666)')
@@ -119,8 +122,8 @@ if __name__ == '__main__':
     args = argParser.parse_args()
     port = args.p
     listen = args.l
-    modulesdir = '../modules'
-    helpersdir = '../helpers'
+    modulesdir = 'modules'
+    helpersdir = 'helpers'
     log = init_logger()
     load_helpers(helpersdir=helpersdir)
     mhandlers, modules = load_modules(modulesdir)
