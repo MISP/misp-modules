@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-from setuptools import setup
+from setuptools import setup, find_packages
 
 setup(
     name='misp-modules',
@@ -10,8 +10,8 @@ setup(
     maintainer='Alexandre Dulaunoy',
     url='https://github.com/MISP/misp-modules',
     description='MISP modules are autonomous modules that can be used for expansion and other services in MISP',
-    packages=['modules', 'helpers'],
-    scripts=['bin/misp-modules.py'],
+    packages=find_packages(),
+    scripts=['bin/misp-modules'],
     test_suite="tests",
     classifiers=[
         'License :: OSI Approved :: GNU Affero General Public License v3',
