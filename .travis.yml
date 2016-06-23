@@ -20,7 +20,12 @@ install:
     - python setup.py install
 
 script:
-    - misp-modules.py &
+    - misp-modules &
     - sleep 15
     - python setup.py test
-    - pkill misp-modules.py
+    - pkill misp-modules
+    - pushd ..
+    - misp-modules -s &
+    - sleep 15
+    - popd
+    - pkill misp-modules
