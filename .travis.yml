@@ -24,8 +24,9 @@ script:
     - sleep 15
     - python setup.py test
     - pkill misp-modules
-    - pushd ..
+    - pushd ~/
     - misp-modules -s &
-    - sleep 15
     - popd
+    - sleep 15
+    - python setup.py test
     - pkill misp-modules
