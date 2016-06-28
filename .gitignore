@@ -1,3 +1,6 @@
 *.pyc
 *.swp
 __pycache__
+build/
+dist/
+misp_modules.egg-info/

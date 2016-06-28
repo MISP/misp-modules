@@ -5,7 +5,7 @@
 MISP modules are autonomous modules that can be used for expansion and other services in [MISP](https://github.com/MISP/MISP).
 
 The modules are written in Python 3 following a simple API interface. The objective is to ease the extensions of MISP functionalities
-without modifying core components. The API is available via a simple REST API which is independent from MISP installation or configuration. 
+without modifying core components. The API is available via a simple REST API which is independent from MISP installation or configuration.
 
 MISP modules support is included in MISP starting from version 2.4.28.
 
@@ -13,15 +13,15 @@ For more information: [Extending MISP with Python modules](https://www.circl.lu/
 
 ## Existing MISP modules
 
-* [ASN History](/modules/expansion/asn_history.py) - a hover and expansion module to expand an AS number with the ASN description and its history.
-* [CIRCL Passive SSL](modules/expansion/circl_passivessl.py) - a hover and expansion module to expand IP addresses with the X.509 certificate seen.
-* [CIRCL Passive DNS](modules/expansion/circl_passivedns.py) - a hover and expansion module to expand hostname and IP addresses with passive DNS information.
-* [CVE](modules/expansion/cve.py) - a hover module to give more information about a vulnerability (CVE).
-* [DNS](modules/expansion/dns.py) - a simple module to resolve MISP attributes like hostname and domain to expand IP addresses attributes.
-* [EUPI](modules/expansion/eupi.py) - a hover and expansion module to get information about an URL from the [Phishing Initiative project](https://phishing-initiative.eu/?lang=en).
-* [IPASN](modules/expansion/ipasn.py) - a hover and expansion to get the BGP ASN of an IP address.
-* [passivetotal](modules/expansion/passivetotal.py) - a [passivetotal](https://www.passivetotal.org/) module that queries a number of different PassiveTotal datasets.
-* [sourcecache](modules/expansion/sourcecache.py) - a module to cache a specific link from a MISP instance.
+* [ASN History](misp_modules/modules/expansion/asn_history.py) - a hover and expansion module to expand an AS number with the ASN description and its history.
+* [CIRCL Passive SSL](misp_modules/modules/expansion/circl_passivessl.py) - a hover and expansion module to expand IP addresses with the X.509 certificate seen.
+* [CIRCL Passive DNS](misp_modules/modules/expansion/circl_passivedns.py) - a hover and expansion module to expand hostname and IP addresses with passive DNS information.
+* [CVE](misp_modules/modules/expansion/cve.py) - a hover module to give more information about a vulnerability (CVE).
+* [DNS](misp_modules/modules/expansion/dns.py) - a simple module to resolve MISP attributes like hostname and domain to expand IP addresses attributes.
+* [EUPI](misp_modules/modules/expansion/eupi.py) - a hover and expansion module to get information about an URL from the [Phishing Initiative project](https://phishing-initiative.eu/?lang=en).
+* [IPASN](misp_modules/modules/expansion/ipasn.py) - a hover and expansion to get the BGP ASN of an IP address.
+* [passivetotal](misp_modules/modules/expansion/passivetotal.py) - a [passivetotal](https://www.passivetotal.org/) module that queries a number of different PassiveTotal datasets.
+* [sourcecache](misp_modules/modules/expansion/sourcecache.py) - a module to cache a specific link from a MISP instance.
 
 ## How to install and start MISP modules?
 
@@ -30,13 +30,12 @@ apt-get install python3-dev python3-pip libpq5
 git clone https://github.com/MISP/misp-modules.git
 cd misp-modules
 pip3 install -r REQUIREMENTS
-cd bin
-python3 misp-modules.py
+python3 bin/misp-modules
 ~~~~
 
 ## How to add your own MISP modules?
 
-Create your module in [modules/expansion/](modules/expansion/). The module should have at minimum three functions:
+Create your module in [misp_modules/modules/expansion/](misp_modules/modules/expansion/). The module should have at minimum three functions:
 
 * **introspection** function that returns a dict of the supported attributes (input and output) by your expansion module.
 * **handler** function which accepts a JSON document to expand the values and return a dictionary of the expanded values.

@@ -29,6 +29,21 @@ import fnmatch
 import argparse
 import re
 
+try:
+    import misp_modules.modules
+    HAS_PACKAGE_MODULES = True
+except Exception as e:
+    print(e)
+    HAS_PACKAGE_MODULES = False
+
+try:
+    from misp_modules.helpers import *
+    HAS_PACKAGE_HELPERS = True
+except Exception as e:
+    print(e)
+    HAS_PACKAGE_HELPERS = False
+
+
 def init_logger():
     log = logging.getLogger('misp-modules')
     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -41,7 +56,7 @@ def init_logger():
     return log
 
 
-def load_helpers(helpersdir='../helpers'):
+def load_helpers(helpersdir):
     sys.path.append(helpersdir)
     hhandlers = {}
     helpers = []
@@ -51,14 +66,32 @@ def load_helpers(helpersdir='../helpers'):
         if re.match(r'^\.', os.path.basename(root)):
             continue
         for filename in fnmatch.filter(filenames, '*.py'):
+            if filename == '__init__.py':
+                continue
             helpername = filename.split(".")[0]
             hhandlers[helpername] = importlib.import_module(helpername)
-            selftest= hhandlers[helpername].selftest()
+            selftest = hhandlers[helpername].selftest()
             if selftest is None:
                 helpers.append(helpername)
                 log.info('Helpers loaded {} '.format(filename))
             else:
                 log.info('Helpers failed {} due to {}'.format(filename, selftest))
+
+
+def load_package_helpers():
+    if not HAS_PACKAGE_HELPERS:
+        log.info('Unable to load MISP helpers from package.')
+        sys.exit()
+    mhandlers = {}
+    helpers = []
+    for path, helper in sys.modules.items():
+        if not path.startswith('misp_modules.helpers.'):
+            continue
+        helpername = path.replace('misp_modules.helpers.', '')
+        mhandlers[helpername] = helper
+        helpers.append(helpername)
+        log.info('Helper loaded {}'.format(helpername))
+    return mhandlers, helpers
 
 
 def load_modules(mod_dir):
@@ -80,6 +113,23 @@ def load_modules(mod_dir):
             except Exception as e:
                 log.warning('MISP modules {0} failed due to {1}'.format(modulename, e))
                 continue
+            modules.append(modulename)
+            log.info('MISP modules {0} imported'.format(modulename))
+            mhandlers['type:' + modulename] = moduletype
+    return mhandlers, modules
+
+
+def load_package_modules():
+    if not HAS_PACKAGE_MODULES:
+        log.info('Unable to load MISP modules from package.')
+        sys.exit()
+    mhandlers = {}
+    modules = []
+    for path, module in sys.modules.items():
+        r = re.findall("misp_modules[.]modules[.](\w+)[.](\w+)", path)
+        if r and len(r[0]) == 2:
+            moduletype, modulename = r[0]
+            mhandlers[modulename] = module
             modules.append(modulename)
             log.info('MISP modules {0} imported'.format(modulename))
             mhandlers['type:' + modulename] = moduletype
@@ -110,20 +160,25 @@ class QueryModule(tornado.web.RequestHandler):
 
 
 if __name__ == '__main__':
-    if os.path.dirname(__file__) is not '':
-        os.chdir(os.path.dirname(__file__))
+    if os.path.dirname(__file__) is '.':
+        os.chdir('../')
     argParser = argparse.ArgumentParser(description='misp-modules server')
     argParser.add_argument('-t', default=False, action='store_true', help='Test mode')
+    argParser.add_argument('-s', default=False, action='store_true', help='Run a system install (package installed via pip)')
     argParser.add_argument('-p', default=6666, help='misp-modules TCP port (default 6666)')
     argParser.add_argument('-l', default='localhost', help='misp-modules listen address (default localhost)')
     args = argParser.parse_args()
     port = args.p
     listen = args.l
-    modulesdir = '../modules'
-    helpersdir = '../helpers'
     log = init_logger()
-    load_helpers(helpersdir=helpersdir)
-    mhandlers, modules = load_modules(modulesdir)
+    if args.s:
+        load_package_helpers()
+        mhandlers, modules = load_package_modules()
+    else:
+        modulesdir = 'misp_modules/modules'
+        helpersdir = 'misp_modules/helpers'
+        load_helpers(helpersdir=helpersdir)
+        mhandlers, modules = load_modules(modulesdir)
     service = [(r'/modules', ListModules), (r'/query', QueryModule)]
 
     application = tornado.web.Application(service)

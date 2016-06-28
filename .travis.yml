@@ -17,9 +17,16 @@ python:
     - "nightly"
 
 install:
-    - pip install -r REQUIREMENTS
+    - python setup.py install
 
 script:
-    - pushd bin
-    - ./misp-modules.py -t
+    - misp-modules &
+    - sleep 15
+    - python setup.py test
+    - pkill misp-modules
+    - pushd ~/
+    - misp-modules -s &
     - popd
+    - sleep 15
+    - python setup.py test
+    - pkill misp-modules
