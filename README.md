@@ -30,6 +30,9 @@ apt-get install python3-dev python3-pip libpq5
 git clone https://github.com/MISP/misp-modules.git
 cd misp-modules
 pip3 install -r REQUIREMENTS
+cd ..
+python3 setup.py build
+python3 setup.py install
 python3 bin/misp-modules
 ~~~~
 
