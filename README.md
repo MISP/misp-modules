@@ -26,14 +26,14 @@ For more information: [Extending MISP with Python modules](https://www.circl.lu/
 ## How to install and start MISP modules?
 
 ~~~~bash
-apt-get install python3-dev python3-pip libpq5
-git clone https://github.com/MISP/misp-modules.git
+sudo apt-get install python3-dev python3-pip libpq5
+cd /usr/local/src/
+sudo git clone https://github.com/MISP/misp-modules.git
 cd misp-modules
-pip3 install -r REQUIREMENTS
-cd ..
-python3 setup.py build
-python3 setup.py install
-python3 bin/misp-modules
+sudo pip3 install -r REQUIREMENTS
+sudo python3 setup.py build
+sudo python3 setup.py install
+sudo vi /etc/rc.local, add this line: `sudo -u www-data /usr/bin/python3 /usr/local/src/misp-modules/bin/misp-modules`
 ~~~~
 
 ## How to add your own MISP modules?
