@@ -181,6 +181,30 @@ The module should output the following JSON:
 }
 ~~~
 
+It is also possible to restrict the category options of the resolved attributes by passing a list of categories along (optional):
+
+~~~json
+{
+  "results": [
+    {
+      "types": [
+        "ip-src",
+        "ip-dst"
+      ],
+      "values": [
+        "188.65.217.78"
+      ],
+      "categories": [
+        "Network activity",
+        "Payload delivery"
+      ]
+    }
+  ]
+}
+~~~
+
+For both the type and the category lists, the first item in the list will be the default setting on the interface.
+
 ## How to contribute your own module?
 
 Fork the project, add your module, test it and make a pull-request. Modules can be also private as you can add a module in your own MISP installation.
