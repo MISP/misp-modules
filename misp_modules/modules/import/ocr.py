@@ -1,10 +1,7 @@
 import json
 import base64
 
-try:
-    import Image
-except ImportError:
-    from PIL import Image
+from PIL import Image
 
 from pytesseract import image_to_string
 from io import BytesIO
@@ -27,10 +24,11 @@ def handler(q=False):
     request = json.loads(q)
     image = base64.b64decode(request["data"])
     image_file = BytesIO(image)
+    image_file.seek(0)
     ocrized = image_to_string(Image.open(image_file))
     freetext = {}
     freetext['values'] = ocrized
-    freetext['type'] = 'freetext'
+    freetext['types'] = ['freetext']
     r['results'].append(freetext)
     return r
 
