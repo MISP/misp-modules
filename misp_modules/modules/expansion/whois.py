@@ -30,7 +30,7 @@ def handler(q=False):
         misperrors['error'] = 'EUPI authentication is missing'
         return misperrors
 
-    uwhois = Uwhois(request['config']['server'], request['config']['port'])
+    uwhois = Uwhois(request['config']['server'], int(request['config']['port']))
 
     if 'event_id' in request:
         return handle_expansion(uwhois, toquery)
