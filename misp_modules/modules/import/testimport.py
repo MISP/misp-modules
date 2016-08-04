@@ -4,19 +4,19 @@ import csv
 
 misperrors = {'error': 'Error'}
 userConfig = {
-               'value': {
+               'number1': {
                  'type': 'Integer',
                  'regex': '/^[0-4]$/i',
                  'errorMessage': 'Expected a number in range [0-4]',
                  'message': 'Column number used for value'
                },
-               'category': {
-                 'type': 'Integer',
-                 'message': 'Column number used for category'
+               'some_string': {
+                 'type': 'String',
+                 'message': 'A text field'
                },
-               'type': {
-                 'type': 'Integer',
-                 'message': 'Column number used for type'
+               'boolean_field': {
+                 'type': 'Boolean',
+                 'message': 'Boolean field test'
                },
                'comment': {
                  'type': 'Integer',
