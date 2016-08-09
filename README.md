@@ -26,7 +26,6 @@ For more information: [Extending MISP with Python modules](https://www.circl.lu/
 ## How to install and start MISP modules?
 
 ~~~~bash
-~~~~bash
 #first install the required dependencies - python, pip, libpq5: 
 # on Ubuntu/Debian: 
 sudo apt-get install python3-dev python3-pip libpq5
