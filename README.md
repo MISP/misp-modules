@@ -26,14 +26,29 @@ For more information: [Extending MISP with Python modules](https://www.circl.lu/
 ## How to install and start MISP modules?
 
 ~~~~bash
+~~~~bash
+#first install the required dependencies - python, pip, libpq5: 
+# on Ubuntu/Debian: 
 sudo apt-get install python3-dev python3-pip libpq5
+# on RedHat: 
+# first you need to enable SCL (Software Collections Library)
+yum install rh-python35
+#pip is installed by default as a dependency (alongside dwz,  rh-python35-python-devel, rh-python35-python-libs,  rh-python35-python-setuptools, and others)
+#add python3 to the environment
+scl enable rh-python35 bash
+#you can check version using python3 --version
+#libpq5 can be found under postgresql-libs on RedHat/CentOS
+yum install postgresql-libs
+
 cd /usr/local/src/
 sudo git clone https://github.com/MISP/misp-modules.git
 cd misp-modules
 sudo pip3 install -r REQUIREMENTS
 sudo python3 setup.py build
 sudo python3 setup.py install
-sudo vi /etc/rc.local, add this line: `sudo -u www-data /usr/bin/python3 /usr/local/src/misp-modules/bin/misp-modules`
+sudo vi /etc/rc.local, for Ubuntu/Debian add this line: `sudo -u www-data /usr/bin/python3 /usr/local/src/misp-modules/bin/misp-modules`
+#and for RedHat add this line
+su -s /bin/bash apache -c `python3 /usr/local/src/misp-modules/bin/misp-modules`
 ~~~~
 
 ## How to add your own MISP modules?
