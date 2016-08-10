@@ -22,8 +22,6 @@ moduleinfo = {'version': '0.1', 'author': 'Andras Iklody',
               'description': 'Skeleton export module',
               'module-type': ['export']}
 
-moduleconfig = []
-
 
 def handler(q=False):
     if q is False:
@@ -31,7 +29,6 @@ def handler(q=False):
     r = {'results': []}
     result = json.loads(q)
     output = ''; # Insert your magic here!
-    output = result["data"][0]["Event"]["info"]
     r = {"data":base64.b64encode(output.encode('utf-8')).decode('utf-8')}
     return r
 
