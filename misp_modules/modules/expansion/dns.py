@@ -2,8 +2,8 @@ import json
 import dns.resolver
 
 misperrors = {'error': 'Error'}
-mispattributes = {'input': ['hostname', 'domain'], 'output': ['ip-src',
-                                                              'ip-dst']}
+mispattributes = {'input': ['hostname', 'domain', 'domain|ip'], 'output': ['ip-src',
+                                                                           'ip-dst']}
 moduleinfo = {'version': '0.2', 'author': 'Alexandre Dulaunoy',
               'description': 'Simple DNS expansion service to resolve IP address from MISP attributes',
               'module-type': ['expansion', 'hover']}
@@ -19,6 +19,8 @@ def handler(q=False):
         toquery = request['hostname']
     elif request.get('domain'):
         toquery = request['domain']
+    elif request.get('domain|ip'):
+        toquery = request['domain|ip'].split('|')[0]
     else:
         return False
     r = dns.resolver.Resolver()
