@@ -34,7 +34,7 @@ setup(
         'ipasn-redis',
         'asnhistory',
         'stix',
-        'cybox'
+        'cybox',
         'pillow',
         'pytesseract',
     ]
