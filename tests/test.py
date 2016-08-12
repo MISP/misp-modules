@@ -30,7 +30,8 @@ class TestModules(unittest.TestCase):
     def test_stix(self):
         with open("tests/stix.xml", "r") as f:
             data = json.dumps({"module":"stiximport",
-                    "data":str(base64.b64encode(bytes(f.read(), 'utf-8')), 'utf-8')
+                    "data":str(base64.b64encode(bytes(f.read(), 'utf-8')), 'utf-8'),
+                    "config": {"max_size": "15000"},
                    })
             response = requests.post(self.url + "query", data=data)
             print(response.json())
