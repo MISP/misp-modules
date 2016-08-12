@@ -9,6 +9,7 @@ userConfig = {
 
 };
 
+moduleconfig = []
 
 # fixed for now, options in the future:
 # event, attribute, event-collection, attribute-collection

@@ -12,3 +12,5 @@ pyeupi
 ipasn-redis
 asnhistory
 git+https://github.com/Rafiot/uwhoisd.git@testing#egg=uwhois&subdirectory=client
+pillow
+pytesseract

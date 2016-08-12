@@ -30,8 +30,8 @@ sudo apt-get install python3-dev python3-pip libpq5
 cd /usr/local/src/
 sudo git clone https://github.com/MISP/misp-modules.git
 cd misp-modules
-sudo pip3 install -r REQUIREMENTS
-sudo pip3 install .
+sudo pip3 install --upgrade -r REQUIREMENTS
+sudo pip3 install --upgrade .
 sudo vi /etc/rc.local, add this line: `sudo -u www-data misp-modules -s`
 ~~~~
 
