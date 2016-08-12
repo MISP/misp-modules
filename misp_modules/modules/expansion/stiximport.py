@@ -97,7 +97,7 @@ def identifyHash(hsh):
   hashes = [x for x in hashlib.algorithms_guaranteed]
 
   for h in hashes:
-    if len(str(hsh.value)) == len(hashlib.new(h).hexdigest()):
+    if len(str(hsh)) == len(hashlib.new(h).hexdigest()):
       possible_hashes.append(h)
       possible_hashes.append("filename|{}".format(h))
  
@@ -113,12 +113,7 @@ def buildIndicator(ind):
 
   #Try to get hashes. I hate stix
   if ind.observable:
-    if ind.observable.object_:
-      #Get some hashes
-      hashes = ind.observable.object_.properties.hashes
-      for hsh in hashes:
-        r["values"].append(hsh.simple_hash_value.value)
-        r["types"] = identifyHash(hsh.simple_hash_value)
+    return buildObservable(ind.observable)
   return r
     
 def buildActor(ta):
@@ -150,15 +145,19 @@ def buildObservable(o):
   props = o["object"]["properties"]
 
   #If it has an address_value field, it's gonna be an address
-
+  print(props)
   #Kinda obvious really
-  if props["address_value"]:
-
+  if "address_value" in props:
+    
     #We've got ourselves a nice little address
     value = props["address_value"]
 
+    if isinstance(value, dict):
+      #Sometimes it's embedded in a dictionary
+      value = value["value"]
+
     #Is it an IP?
-    if ipre.match(value):
+    if ipre.match(str(value)):
 
       #Yes!
       r["values"].append(value)
@@ -169,6 +168,10 @@ def buildObservable(o):
       r["values"].append(value)
       r["types"] = ["domain", "hostname"]
 
+  if "hashes" in props:
+    for hsh in props["hashes"]:
+      r["values"].append(hsh["simple_hash_value"]["value"])
+      r["types"] = identifyHash(hsh["simple_hash_value"]["value"])
   return r
 
 def loadPackage(data):
