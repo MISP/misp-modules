@@ -1,1 +1,1 @@
-__all__ = ['testimport', 'ocr']
+__all__ = ['testimport', 'ocr', 'stiximport']
