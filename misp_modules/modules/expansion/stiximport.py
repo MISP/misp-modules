@@ -41,11 +41,25 @@ def handler(q=False):
     if package.observables:
       for obs in package.observables:
         r["results"].append(buildObservable(obs))
-      
+
+    if package.threat_actors:
+      for ta in package.threat_actors:
+        r["results"].append(buildActor(ta))      
     return r
 
 #Quick and dirty regex for IP addresses
 ipre = re.compile("([0-9]{1,3}.){3}[0-9]{1,3}")
+
+def buildActor(ta):
+  """
+    Extract the name
+    and comment of a 
+    threat actor
+  """
+  
+  r = {"values":[ta.title], "types":["threat-actor"]}
+ 
+  return r
 
 def buildObservable(o):
   """
