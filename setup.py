@@ -11,7 +11,7 @@ setup(
     url='https://github.com/MISP/misp-modules',
     description='MISP modules are autonomous modules that can be used for expansion and other services in MISP',
     packages=find_packages(),
-    scripts=['bin/misp-modules'],
+    entry_points = {'console_scripts': ['misp-modules = misp_modules:main']},
     test_suite="tests",
     classifiers=[
         'License :: OSI Approved :: GNU Affero General Public License v3',
