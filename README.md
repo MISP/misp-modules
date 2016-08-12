@@ -22,7 +22,7 @@ For more information: [Extending MISP with Python modules](https://www.circl.lu/
 * [IPASN](misp_modules/modules/expansion/ipasn.py) - a hover and expansion to get the BGP ASN of an IP address.
 * [passivetotal](misp_modules/modules/expansion/passivetotal.py) - a [passivetotal](https://www.passivetotal.org/) module that queries a number of different PassiveTotal datasets.
 * [sourcecache](misp_modules/modules/expansion/sourcecache.py) - a module to cache a specific link from a MISP instance.
-
+* [stiximport](misp_modules/modules/expansion/stiximport.py) - An import module to process STIX xml/json
 ## How to install and start MISP modules?
 
 ~~~~bash
