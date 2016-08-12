@@ -2,8 +2,7 @@ import json
 import requests
 
 misperrors = {'error': 'Error'}
-mispattributes = {'input': ['hostname', 'domain'], 'output': ['ip-src',
-                                                              'ip-dst']}
+mispattributes = {'input': ['hostname', 'domain']}
 
 # possible module-types: 'expansion', 'hover' or both
 moduleinfo = {'version': '1', 'author': 'Hannah Ward',
