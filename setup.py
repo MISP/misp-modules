@@ -33,6 +33,8 @@ setup(
         'pyeupi',
         'ipasn-redis',
         'asnhistory',
+        'stix',
+        'cybox',
         'pillow',
         'pytesseract',
     ]

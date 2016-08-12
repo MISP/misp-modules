@@ -28,6 +28,7 @@ For more information: [Extending MISP with Python modules](https://www.circl.lu/
 ### Import modules
 
 * [OCR](misp_modules/modules/import_mod/ocr.py) Optical Character Recognition (OCR) module for MISP to import attributes from images, scan or faxes.
+* [stiximport](misp_modules/modules/expansion/stiximport.py) - An import module to process STIX xml/json
 
 ## How to install and start MISP modules?
 
