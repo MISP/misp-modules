@@ -135,13 +135,17 @@ def buildObservable(o):
   """
 
   #Life is easier with json
-  o = json.loads(o.to_json())
-   
+  if not isinstance(o, dict):
+    o = json.loads(o.to_json())
   #Make a new record to store values in
   r = {"values":[]}
 
   #Get the object properties. This contains all the
   #fun stuff like values
+  if "observable_composition" in o:
+    #May as well be useless
+    return r 
+ 
   props = o["object"]["properties"]
 
   #If it has an address_value field, it's gonna be an address
