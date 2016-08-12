@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
 
 import json
-from uwhois import Uwhois
+try:
+    from uwhois import Uwhois
+except ImportError:
+    print("uwhois module not installed.")
 
 misperrors = {'error': 'Error'}
 mispattributes = {'input': ['domain', 'ip-src', 'ip-dst'], 'output': ['freetext']}

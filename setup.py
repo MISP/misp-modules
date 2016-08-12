@@ -33,5 +33,7 @@ setup(
         'pyeupi',
         'ipasn-redis',
         'asnhistory',
+        'pillow',
+        'pytesseract',
     ]
 )
