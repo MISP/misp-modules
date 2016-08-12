@@ -32,7 +32,7 @@ import argparse
 import re
 
 try:
-    from . import modules
+    from .modules import *
     HAS_PACKAGE_MODULES = True
 except Exception as e:
     print(e)
@@ -46,6 +46,7 @@ except Exception as e:
     HAS_PACKAGE_HELPERS = False
 
 log = logging.getLogger('misp-modules')
+
 
 def handle_signal(sig, frame):
     IOLoop.instance().add_callback(IOLoop.instance().stop)
@@ -95,8 +96,12 @@ def load_package_helpers():
             continue
         helpername = path.replace('misp_modules.helpers.', '')
         mhandlers[helpername] = helper
-        helpers.append(helpername)
-        log.info('Helper loaded {}'.format(helpername))
+        selftest = mhandlers[helpername].selftest()
+        if selftest is None:
+            helpers.append(helpername)
+            log.info('Helper loaded {}'.format(helpername))
+        else:
+            log.info('Helpers failed {} due to {}'.format(helpername, selftest))
     return mhandlers, helpers
 
 
@@ -113,7 +118,7 @@ def load_modules(mod_dir):
             if filename == '__init__.py':
                 continue
             modulename = filename.split(".")[0]
-            moduletype = os.path.split(modulesdir)[1]
+            moduletype = os.path.split(mod_dir)[1]
             try:
                 mhandlers[modulename] = importlib.import_module(os.path.basename(root) + '.' + modulename)
             except Exception as e:
@@ -144,8 +149,10 @@ def load_package_modules():
 
 class ListModules(tornado.web.RequestHandler):
     def get(self):
+        global mhandlers
+        global loaded_modules
         ret = []
-        for module in modules:
+        for module in loaded_modules:
             x = {}
             x['name'] = module
             x['type'] = mhandlers['type:' + module]
@@ -158,17 +165,19 @@ class ListModules(tornado.web.RequestHandler):
 
 class QueryModule(tornado.web.RequestHandler):
     def post(self):
+        global mhandlers
         jsonpayload = self.request.body.decode('utf-8')
         x = json.loads(jsonpayload)
         log.debug('MISP QueryModule request {0}'.format(jsonpayload))
         ret = mhandlers[x['module']].handler(q=jsonpayload)
         self.write(json.dumps(ret))
 
+
 def main():
+    global mhandlers
+    global loaded_modules
     signal.signal(signal.SIGINT, handle_signal)
     signal.signal(signal.SIGTERM, handle_signal)
-    if os.path.dirname(__file__) in ['.', '']:
-        os.chdir('../')
     argParser = argparse.ArgumentParser(description='misp-modules server')
     argParser.add_argument('-t', default=False, action='store_true', help='Test mode')
     argParser.add_argument('-s', default=False, action='store_true', help='Run a system install (package installed via pip)')
@@ -180,12 +189,13 @@ def main():
     log = init_logger()
     if args.s:
         load_package_helpers()
-        mhandlers, modules = load_package_modules()
+        mhandlers, loaded_modules = load_package_modules()
     else:
-        modulesdir = 'misp_modules/modules'
-        helpersdir = 'misp_modules/helpers'
+        os.chdir(os.path.dirname(__file__))
+        modulesdir = 'modules'
+        helpersdir = 'helpers'
         load_helpers(helpersdir=helpersdir)
-        mhandlers, modules = load_modules(modulesdir)
+        mhandlers, loaded_modules = load_modules(modulesdir)
     service = [(r'/modules', ListModules), (r'/query', QueryModule)]
 
     application = tornado.web.Application(service)
