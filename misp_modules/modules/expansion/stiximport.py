@@ -50,10 +50,42 @@ def handler(q=False):
     if package.indicators:
       for ind in package.indicators:
         r["results"].append(buildIndicator(ind))
+
+    if package.exploit_targets:
+      for et in package.exploit_targets:
+        r["results"].append(buildExploitTarget(et))
+
+    if package.campaigns:
+      for cpn in package.campaigns:
+        r["results"].append(buildCampaign(cpn))
+    #Clean up results
+    #Don't send on anything that didn't have a value
+    r["results"] = [x for x in r["results"] if len(x["values"]) != 0]
     return r
 
 #Quick and dirty regex for IP addresses
 ipre = re.compile("([0-9]{1,3}.){3}[0-9]{1,3}")
+
+def buildCampaign(cpn):
+  """
+    Extract a campaign name
+  """
+  
+  return {"values":[cpn.title], "types":["campaign-name"]}
+
+def buildExploitTarget(et):
+  """
+    Extract CVEs from exploit targets
+  """
+
+  r = {"values":[], "types":["vulnerability"]}
+
+  if et.vulnerabilities:
+    for v in et.vulnerabilities:
+      if v.cve_id:
+        r["values"].append(v.cve_id)
+
+  return r
 
 def identifyHash(hsh):
   """
