@@ -7,7 +7,7 @@ mispattributes = {'input': ['hostname', 'domain']}
 # possible module-types: 'expansion', 'hover' or both
 moduleinfo = {'version': '1', 'author': 'Hannah Ward',
               'description': 'Expand Country Codes',
-              'module-type': ['expansion', 'hover']}
+              'module-type': ['hover']}
 
 # config fields that your code expects from the site admin
 moduleconfig = []
