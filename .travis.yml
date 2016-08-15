@@ -5,28 +5,35 @@ cache: pip
 services:
     - redis-server
 
-addons:
-    apt:
-         packages:
-             - libpq5
-
 python:
     - "3.3"
     - "3.4"
     - "3.5"
+    - "3.5-dev"
     - "nightly"
 
 install:
-    - python setup.py install
+    - pip install -U nose
+    - pip install coveralls
+    - pip install codecov
+    - pip install -U -r REQUIREMENTS
+    - pip install .
 
 script:
-    - misp-modules &
-    - sleep 15
-    - python setup.py test
-    - pkill misp-modules
+    - coverage run -m --parallel-mode --source=misp_modules misp_modules.__init__ &
+    - pid=$!
+    - sleep 5
+    - nosetests --with-coverage --cover-package=misp_modules
+    - kill -s INT $pid
     - pushd ~/
-    - misp-modules -s &
+    - coverage run -m --parallel-mode --source=misp_modules misp_modules.__init__ -s &
+    - pid=$!
     - popd
-    - sleep 15
-    - python setup.py test
-    - pkill misp-modules
+    - sleep 5
+    - nosetests --with-coverage --cover-package=misp_modules
+    - kill -s INT $pid
+
+after_success:
+    - coverage combine .coverage*
+    - codecov
+    - coveralls

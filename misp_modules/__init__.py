@@ -188,9 +188,11 @@ def main():
     listen = args.l
     log = init_logger()
     if args.s:
+        log.info('Launch MISP modules server from package.')
         load_package_helpers()
         mhandlers, loaded_modules = load_package_modules()
     else:
+        log.info('Launch MISP modules server from current directory.')
         os.chdir(os.path.dirname(__file__))
         modulesdir = 'modules'
         helpersdir = 'helpers'
