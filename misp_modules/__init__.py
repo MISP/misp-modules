@@ -52,14 +52,17 @@ def handle_signal(sig, frame):
     IOLoop.instance().add_callback(IOLoop.instance().stop)
 
 
-def init_logger():
+def init_logger(level=False):
     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     handler = logging.StreamHandler(stream=sys.stdout)
     handler.setFormatter(formatter)
     handler.setLevel(logging.INFO)
-
+    if level:
+        handler.setLevel(logging.DEBUG)
     log.addHandler(handler)
     log.setLevel(logging.INFO)
+    if level:
+        log.setLevel(logging.DEBUG)
     return log
 
 
@@ -181,12 +184,13 @@ def main():
     argParser = argparse.ArgumentParser(description='misp-modules server')
     argParser.add_argument('-t', default=False, action='store_true', help='Test mode')
     argParser.add_argument('-s', default=False, action='store_true', help='Run a system install (package installed via pip)')
+    argParser.add_argument('-d', default=False, action='store_true', help='Enable debugging')
     argParser.add_argument('-p', default=6666, help='misp-modules TCP port (default 6666)')
     argParser.add_argument('-l', default='localhost', help='misp-modules listen address (default localhost)')
     args = argParser.parse_args()
     port = args.p
     listen = args.l
-    log = init_logger()
+    log = init_logger(level=args.d)
     if args.s:
         log.info('Launch MISP modules server from package.')
         load_package_helpers()
