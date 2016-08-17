@@ -35,8 +35,11 @@ def handler(q=False):
     if "domain" in q:
       r["results"] += getDomain(q["domain"], key)
 
-    with open("/home/hward/debug.txt", "w") as f:
-      f.write(json.dumps(r)) 
+    uniq = []
+    for res in r["results"]:
+      if res not in uniq:
+        uniq.append(res)
+    r["results"] = uniq
     return r
 
 def getIP(ip, key, do_not_recurse = False):
