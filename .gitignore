@@ -1,6 +1,6 @@
 *.pyc
 *.swp
-test/bodyvirustotal.json
+bodyvirustotal.json
 __pycache__
 build/
 dist/
