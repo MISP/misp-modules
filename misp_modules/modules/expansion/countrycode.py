@@ -20,7 +20,10 @@ common_tlds = {"com":"Commercial (Worldwide)",
                "gov":"Government (USA)"
               }
 
+codes = requests.get("http://www.geognos.com/api/en/countries/info/all.json").json()
+
 def handler(q=False):
+    global codes
     if q is False:
         return False
     request = json.loads(q)
@@ -34,8 +37,6 @@ def handler(q=False):
       val = common_tlds[ext]
     else:
       # Retrieve a json full of country info
-      codes = requests.get("http://www.geognos.com/api/en/countries/info/all.json").json()
-
       if not codes["StatusMsg"] == "OK":
         val = "Unknown"
       else:
