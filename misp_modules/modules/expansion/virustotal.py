@@ -49,7 +49,6 @@ def handler(q=False):
 
 def getIP(ip, key, do_not_recurse = False):
     global limit
-    print("Getting info for {}".format(ip))
     toReturn = []
     req = requests.get("https://www.virustotal.com/vtapi/v2/ip-address/report", 
                        params = {"ip":ip, "apikey":key}
@@ -70,8 +69,6 @@ def getIP(ip, key, do_not_recurse = False):
     
 def getDomain(domain, key, do_not_recurse=False):
     global limit
-
-    print("Getting info for {}".format(domain))
     toReturn = []
     req = requests.get("https://www.virustotal.com/vtapi/v2/domain/report", 
                        params = {"domain":domain, "apikey":key}
@@ -112,7 +109,6 @@ def isset(d, key):
 
 def getMoreInfo(req, key):
     global limit
-    print("Getting extra info for {}".format(req))
     r = []
     #Get all hashes first
     hashes = []
@@ -139,7 +135,6 @@ def getMoreInfo(req, key):
       sample = requests.get("https://www.virustotal.com/vtapi/v2/file/download",
                             params = {"hash":hsh, "apikey":key})
       
-      print(sample) 
       malsample = sample.content
       r.append({"types":["malware-sample"], 
                 "categories":["Payload delivery"],
