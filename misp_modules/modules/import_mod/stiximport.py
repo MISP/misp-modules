@@ -4,6 +4,7 @@ import re
 import base64
 import hashlib
 import tempfile
+import pickle
 
 misperrors = {'error': 'Error'}
 userConfig = {}
@@ -49,6 +50,9 @@ def handler(q=False):
     # Load up the package into STIX
     package = loadPackage(package, memsize)
 
+    # Hash it
+    with open("/home/hward/tmp.dat", "wb") as f:
+      pickle.dump( package, f)
     # Build all the observables
     if package.observables:
         for obs in package.observables:
@@ -62,7 +66,7 @@ def handler(q=False):
     # Aaaand the indicators
     if package.indicators:
         for ind in package.indicators:
-            r["results"].append(buildIndicator(ind))
+            r["results"] += buildIndicator(ind)
 
     # Are you seeing a pattern?
     if package.exploit_targets:
@@ -76,7 +80,7 @@ def handler(q=False):
 
     # Clean up results
     # Don't send on anything that didn't have a value
-    r["results"] = [x for x in r["results"] if len(x["values"]) != 0]
+    r["results"] = [x for x in r["results"] if isinstance(x, dict) and  len(x["values"]) != 0]
     return r
 
 # Quick and dirty regex for IP addresses
@@ -126,11 +130,14 @@ def buildIndicator(ind):
         and other fun things
         like that
     """
-    r = {"values": [], "types": []}
-
+    r = []
     # Try to get hashes. I hate stix
-    if ind.observable:
-        return buildObservable(ind.observable)
+    if ind.observables:
+        for i in ind.observables:
+          if i.observable_composition:
+            for j in i.observable_composition.observables:
+              r.append(buildObservable(j))
+          r.append(buildObservable(i))
     return r
 
 
@@ -152,7 +159,6 @@ def buildObservable(o):
         and extract the value
         and category
     """
-
     # Life is easier with json
     if not isinstance(o, dict):
         o = json.loads(o.to_json())
@@ -168,7 +174,6 @@ def buildObservable(o):
     props = o["object"]["properties"]
 
     # If it has an address_value field, it's gonna be an address
-    # print(props)
     # Kinda obvious really
     if "address_value" in props:
 
@@ -193,7 +198,21 @@ def buildObservable(o):
             for hsh in props["hashes"]:
                 r["values"].append(hsh["simple_hash_value"]["value"])
                 r["types"] = identifyHash(hsh["simple_hash_value"]["value"])
-        return r
+        
+    elif "xsi:type" in props:
+      # Cybox. Ew.
+      try:
+        type_ = props["xsi:type"]
+        val   = props["value"]
+
+        if type_ == "LinkObjectType":
+          r["types"] = ["link"]
+          r["values"].append(val)
+        else:
+          print("Ignoring {}".format(type_))
+      except:
+        pass 
+    return r
 
 
 def loadPackage(data, memsize=1024):
