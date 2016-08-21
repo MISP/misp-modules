@@ -167,6 +167,7 @@ class ListModules(tornado.web.RequestHandler):
 
 
 class QueryModule(tornado.web.RequestHandler):
+    @tornado.gen.coroutine
     def post(self):
         global mhandlers
         jsonpayload = self.request.body.decode('utf-8')
