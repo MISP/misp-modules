@@ -166,15 +166,23 @@ class ListModules(tornado.web.RequestHandler):
         self.write(json.dumps(ret))
 
 
+@tornado.gen.coroutine
+def async_module(request, write_fct):
+    jsonpayload = request.body.decode('utf-8')
+    x = json.loads(jsonpayload)
+    log.debug('MISP QueryModule request {0}'.format(jsonpayload))
+    ret = mhandlers[x['module']].handler(q=jsonpayload)
+    write_fct(json.dumps(ret))
+
+
 class QueryModule(tornado.web.RequestHandler):
     @tornado.gen.coroutine
     def post(self):
         global mhandlers
-        jsonpayload = self.request.body.decode('utf-8')
-        x = json.loads(jsonpayload)
-        log.debug('MISP QueryModule request {0}'.format(jsonpayload))
-        ret = mhandlers[x['module']].handler(q=jsonpayload)
-        self.write(json.dumps(ret))
+        try:
+            yield async_module(self.request, self.write)
+        except Exception:
+            log.exception("Someting bad happened.")
 
 
 def main():
