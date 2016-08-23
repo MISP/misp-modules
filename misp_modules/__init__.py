@@ -22,14 +22,17 @@
 import os
 import signal
 import sys
-from tornado.ioloop import IOLoop
-import tornado.web
 import importlib
 import json
 import logging
 import fnmatch
 import argparse
 import re
+
+import tornado.web
+from tornado.ioloop import IOLoop
+from tornado.concurrent import run_on_executor
+from concurrent.futures import ThreadPoolExecutor
 
 try:
     from .modules import *
@@ -166,23 +169,23 @@ class ListModules(tornado.web.RequestHandler):
         self.write(json.dumps(ret))
 
 
-@tornado.gen.coroutine
-def async_module(request, write_fct):
-    jsonpayload = request.body.decode('utf-8')
-    x = json.loads(jsonpayload)
-    log.debug('MISP QueryModule request {0}'.format(jsonpayload))
-    ret = mhandlers[x['module']].handler(q=jsonpayload)
-    write_fct(json.dumps(ret))
-
-
 class QueryModule(tornado.web.RequestHandler):
+    executor = ThreadPoolExecutor(None)
+
+    @run_on_executor
+    def run_request(self, jsonpayload):
+        x = json.loads(jsonpayload)
+        log.debug('MISP QueryModule request {0}'.format(jsonpayload))
+        return mhandlers[x['module']].handler(q=jsonpayload)
+
     @tornado.gen.coroutine
     def post(self):
-        global mhandlers
         try:
-            yield async_module(self.request, self.write)
+            jsonpayload = self.request.body.decode('utf-8')
+            response = yield self.run_request(jsonpayload)
+            self.write(json.dumps(response))
         except Exception:
-            log.exception("Someting bad happened.")
+            log.exception('Something went wrong:')
 
 
 def main():
