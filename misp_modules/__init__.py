@@ -170,7 +170,11 @@ class ListModules(tornado.web.RequestHandler):
 
 
 class QueryModule(tornado.web.RequestHandler):
-    executor = ThreadPoolExecutor(None)
+    try:
+        # Python 3.5, use as many threads as possible
+        executor = ThreadPoolExecutor()
+    except:
+        executor = ThreadPoolExecutor(5)
 
     @run_on_executor
     def run_request(self, jsonpayload):
