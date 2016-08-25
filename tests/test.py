@@ -26,6 +26,9 @@ class TestModules(unittest.TestCase):
         with open('tests/body.json', 'r') as f:
             response = requests.post(self.url + "query", data=f.read())
             print(response.json())
+        with open('tests/body_timeout.json', 'r') as f:
+            response = requests.post(self.url + "query", data=f.read())
+            print(response.json())
 
     def test_stix(self):
         with open("tests/stix.xml", "r") as f:

@@ -1,0 +1,1 @@
+{"module": "dns", "hostname": "www.circl.lu", "timeout": 1, "config" : {"nameserver":"8.8.8.8"}}

@@ -28,8 +28,10 @@ import logging
 import fnmatch
 import argparse
 import re
+import datetime
 
 import tornado.web
+import tornado.process
 from tornado.ioloop import IOLoop
 from tornado.concurrent import run_on_executor
 from concurrent.futures import ThreadPoolExecutor
@@ -155,8 +157,6 @@ def load_package_modules():
 
 class ListModules(tornado.web.RequestHandler):
     def get(self):
-        global mhandlers
-        global loaded_modules
         ret = []
         for module in loaded_modules:
             x = {}
@@ -170,26 +170,38 @@ class ListModules(tornado.web.RequestHandler):
 
 
 class QueryModule(tornado.web.RequestHandler):
-    try:
-        # Python 3.5, use as many threads as possible
-        executor = ThreadPoolExecutor()
-    except:
-        executor = ThreadPoolExecutor(5)
+
+    # Default value in Python 3.5
+    # https://docs.python.org/3/library/concurrent.futures.html#concurrent.futures.ThreadPoolExecutor
+    nb_threads = tornado.process.cpu_count() * 5
+    executor = ThreadPoolExecutor(nb_threads)
 
     @run_on_executor
     def run_request(self, jsonpayload):
         x = json.loads(jsonpayload)
         log.debug('MISP QueryModule request {0}'.format(jsonpayload))
-        return mhandlers[x['module']].handler(q=jsonpayload)
+        response = mhandlers[x['module']].handler(q=jsonpayload)
+        return json.dumps(response)
 
     @tornado.gen.coroutine
     def post(self):
         try:
             jsonpayload = self.request.body.decode('utf-8')
-            response = yield self.run_request(jsonpayload)
-            self.write(json.dumps(response))
+            dict_payload = json.loads(jsonpayload)
+            if dict_payload.get('timeout'):
+                timeout = datetime.timedelta(seconds=int(dict_payload.get('timeout')))
+            else:
+                timeout = datetime.timedelta(seconds=30)
+            response = yield tornado.gen.with_timeout(timeout, self.run_request(jsonpayload))
+            self.write(response)
+        except tornado.gen.TimeoutError:
+            log.warning('Timeout on {} '.format(dict_payload['module']))
+            self.write(json.dumps({'error': 'Timeout.'}))
         except Exception:
+            self.write(json.dumps({'error': 'Something went wrong, look in the server logs for details'}))
             log.exception('Something went wrong:')
+        finally:
+            self.finish()
 
 
 def main():
