@@ -31,7 +31,7 @@ For more information: [Extending MISP with Python modules](https://www.circl.lu/
 
 ### Export modules
 
-* [CEF](misp_modules/modules/export_mod/export_cef.py) module to export Common Event Format (CEF).
+* [CEF](misp_modules/modules/export_mod/cef_export.py) module to export Common Event Format (CEF).
 
 ### Import modules
 
