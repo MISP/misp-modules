@@ -6,7 +6,7 @@ import base64
 import os
 
 misperrors = {'error': 'Error'}
-mispattributes = {'input': ['domain', "ip-src", "ip-dst"],
+mispattributes = {'input': ['hostname', 'domain', "ip-src", "ip-dst"],
                   'output':['domain', "ip-src", "ip-dst", "text"]
                   }
 
@@ -16,16 +16,19 @@ moduleinfo = {'version': '1', 'author': 'Hannah Ward',
               'module-type': ['expansion']}
 
 # config fields that your code expects from the site admin
-moduleconfig = ["apikey"]
-
+moduleconfig = ["apikey", "event_limit"]
+limit = 5 #Default
 
 def handler(q=False):
+    global limit
     if q is False:
         return False
 
     q = json.loads(q)
 
     key = q["config"]["apikey"]
+    limit = int(q["config"].get("event_limit", 5))
+
     r = {"results": []}
     
     if "ip-src" in q:
@@ -34,6 +37,8 @@ def handler(q=False):
       r["results"] += getIP(q["ip-dst"], key)
     if "domain" in q:
       r["results"] += getDomain(q["domain"], key)
+    if 'hostname' in q:
+      r["results"] += getDomain(q['hostname'], key)
 
     uniq = []
     for res in r["results"]:
@@ -43,7 +48,7 @@ def handler(q=False):
     return r
 
 def getIP(ip, key, do_not_recurse = False):
-    print("Getting info for {}".format(ip))
+    global limit
     toReturn = []
     req = requests.get("https://www.virustotal.com/vtapi/v2/ip-address/report", 
                        params = {"ip":ip, "apikey":key}
@@ -53,7 +58,7 @@ def getIP(ip, key, do_not_recurse = False):
       return []
     
     if "resolutions" in req:
-      for res in req["resolutions"]:
+      for res in req["resolutions"][:limit]:
         toReturn.append( {"types":["domain"], "values":[res["hostname"]]})
         #Pivot from here to find all domain info
         if not do_not_recurse:
@@ -63,7 +68,7 @@ def getIP(ip, key, do_not_recurse = False):
     return toReturn
     
 def getDomain(domain, key, do_not_recurse=False):
-    print("Getting info for {}".format(domain))
+    global limit
     toReturn = []
     req = requests.get("https://www.virustotal.com/vtapi/v2/domain/report", 
                        params = {"domain":domain, "apikey":key}
@@ -73,7 +78,7 @@ def getDomain(domain, key, do_not_recurse=False):
       return []
     
     if "resolutions" in req:
-      for res in req["resolutions"]:
+      for res in req["resolutions"][:limit]:
         toReturn.append( {"types":["ip-dst", "ip-src"], "values":[res["ip_address"]]})
         #Pivot from here to find all info on IPs
         if not do_not_recurse:
@@ -103,13 +108,13 @@ def isset(d, key):
     return False
 
 def getMoreInfo(req, key):
-    print("Getting extra info for {}".format(req))
+    global limit
     r = []
     #Get all hashes first
     hashes = []
     hashes = findAll(req, ["md5", "sha1", "sha256", "sha512"])
     r.append({"types":["md5", "sha1", "sha256", "sha512"], "values":hashes})
-    for hsh in hashes[:5]:
+    for hsh in hashes[:limit]:
       #Search VT for some juicy info
       data = requests.get("http://www.virustotal.com/vtapi/v2/file/report",
                           params={"allinfo":1, "apikey":key, "resource":hsh}
@@ -130,7 +135,6 @@ def getMoreInfo(req, key):
       sample = requests.get("https://www.virustotal.com/vtapi/v2/file/download",
                             params = {"hash":hsh, "apikey":key})
       
-      print(sample) 
       malsample = sample.content
       r.append({"types":["malware-sample"], 
                 "categories":["Payload delivery"],

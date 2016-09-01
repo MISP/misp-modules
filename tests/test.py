@@ -5,6 +5,7 @@ import unittest
 import requests
 import base64
 import json
+import os
 
 class TestModules(unittest.TestCase):
 
@@ -38,6 +39,18 @@ class TestModules(unittest.TestCase):
                    })
             response = requests.post(self.url + "query", data=data)
             print(response.json())
+
+    def test_virustotal(self):
+        # This can't actually be tested without disclosing a private
+        # API key. This will attempt to run with a .gitignored keyfile
+        # and pass if it can't find one
+
+        if not os.path.exists("tests/bodyvirustotal.json"):
+          return
+        
+        with open("tests/bodyvirustotal.json", "r") as f:
+          response = requests.post(self.url + "query", data=f.read()).json()
+        assert(response)
 
 if __name__ == '__main__':
   unittest.main()
