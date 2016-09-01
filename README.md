@@ -29,6 +29,10 @@ For more information: [Extending MISP with Python modules](https://www.circl.lu/
 * [countrycode](misp_modules/modules/expansion/countrycode.py) - a hover module to tell you what country a URL belongs to.
 * [virustotal](misp_modules/modules/expansion/virustotal.py) - an expansion module to pull known resolutions and malware samples related with an IP/Domain from virusTotal (this modules require a VirusTotal private API key)
 
+### Export modules
+
+* [CEF](misp_modules/modules/export_mod/export_cef.py) module to export Common Event Format (CEF).
+
 ### Import modules
 
 * [OCR](misp_modules/modules/import_mod/ocr.py) Optical Character Recognition (OCR) module for MISP to import attributes from images, scan or faxes.
