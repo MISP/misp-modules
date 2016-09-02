@@ -47,7 +47,7 @@ sudo git clone https://github.com/MISP/misp-modules.git
 cd misp-modules
 sudo pip3 install --upgrade -r REQUIREMENTS
 sudo pip3 install --upgrade .
-sudo vi /etc/rc.local, add this line: `sudo -u www-data misp-modules -s`
+sudo vi /etc/rc.local, add this line: `sudo -u www-data misp-modules -s &`
 ~~~~
 
 ## How to add your own MISP modules?
