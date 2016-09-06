@@ -4,7 +4,6 @@ import re
 import base64
 import hashlib
 import tempfile
-import pickle
 
 misperrors = {'error': 'Error'}
 userConfig = {}
@@ -50,9 +49,6 @@ def handler(q=False):
     # Load up the package into STIX
     package = loadPackage(package, memsize)
 
-    # Hash it
-    with open("/home/hward/tmp.dat", "wb") as f:
-      pickle.dump( package, f)
     # Build all the observables
     if package.observables:
         for obs in package.observables:
@@ -106,6 +102,7 @@ def buildExploitTarget(et):
             if v.cve_id:
                 r["values"].append(v.cve_id)
     return r
+
 
 
 def identifyHash(hsh):
