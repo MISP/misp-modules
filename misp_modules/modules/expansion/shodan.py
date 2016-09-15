@@ -36,7 +36,7 @@ def handler(q=False):
 
 
 def handle_expansion(api, domain):
-    return {'results': [{'types': mispattributes['output'], 'values': api.host(domain)}]}
+    return {'results': [{'types': mispattributes['output'], 'values': json.dumps(api.host(domain))}]}
 
 
 def introspection():
