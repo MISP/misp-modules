@@ -3,10 +3,10 @@ import requests
 from SPARQLWrapper import SPARQLWrapper, JSON
 
 misperrors = {'error': 'Error'}
-mispattributes = {'input': ['label'], 'output': ['text']}
-moduleinfo = {'version': '0.1', 'author': 'Roman Graf', 'description': 'An expansion hover module to extract information from Wikidata to have additional information about particular term for analysis.', 'module-type': ['hover']}
+mispattributes = {'input': ['text'], 'output': ['text']}
+moduleinfo = {'version': '0.2', 'author': 'Roman Graf', 'description': 'An expansion hover module to extract information from Wikidata to have additional information about particular term for analysis.', 'module-type': ['hover']}
 moduleconfig = []
-# sample query label 'Microsoft' should provide Wikidata link https://www.wikidata.org/wiki/Q2283 in response
+# sample query text 'Microsoft' should provide Wikidata link https://www.wikidata.org/wiki/Q2283 in response
 wiki_api_url = 'https://query.wikidata.org/bigdata/namespace/wdq/sparql'
 
 
@@ -14,15 +14,15 @@ def handler(q=False):
     if q is False:
         return False
     request = json.loads(q)
-    if not request.get('label'):
-        misperrors['error'] = 'Query label missing'
+    if not request.get('text'):
+        misperrors['error'] = 'Query text missing'
         return misperrors
     
     sparql = SPARQLWrapper(wiki_api_url)
     query_string = \
 	"SELECT ?item \n" \
 	"WHERE { \n" \
-	"?item rdfs:label\"" + request.get('label') + "\" @en \n" \
+	"?item rdfs:label\"" + request.get('text') + "\" @en \n" \
 	"}\n";
     sparql.setQuery(query_string)
     sparql.setReturnFormat(JSON)
