@@ -37,6 +37,7 @@ For more information: [Extending MISP with Python modules](https://www.circl.lu/
 
 * [OCR](misp_modules/modules/import_mod/ocr.py) Optical Character Recognition (OCR) module for MISP to import attributes from images, scan or faxes.
 * [stiximport](misp_modules/modules/import_mod/stiximport.py) - An import module to process STIX xml/json
+* [Email Import](misp_modules/modules/import_mod/email_import.py) Email import module for MISP to import basic metadata.
 
 ## How to install and start MISP modules?
 
@@ -52,7 +53,7 @@ sudo vi /etc/rc.local, add this line: `sudo -u www-data misp-modules -s &`
 
 ## How to add your own MISP modules?
 
-Create your module in [misp_modules/modules/expansion/](misp_modules/modules/expansion/). The module should have at minimum three functions:
+Create your module in [misp_modules/modules/expansion/](misp_modules/modules/expansion/), [misp_modules/modules/export_mod/](misp_modules/modules/export_mod/), or [misp_modules/modules/import_mod/](misp_modules/modules/import_mod/). The module should have at minimum three functions:
 
 * **introspection** function that returns a dict of the supported attributes (input and output) by your expansion module.
 * **handler** function which accepts a JSON document to expand the values and return a dictionary of the expanded values.
@@ -60,7 +61,44 @@ Create your module in [misp_modules/modules/expansion/](misp_modules/modules/exp
 
 Don't forget to return an error key and value if an error is raised to propagate it to the MISP user-interface.
 
-If your module requires additional configuration (to be exposed via the MISP user-interface), a config array is added to the meta-data output containing all the potential configuration values:
+~~~python
+...
+    # Checking for required value
+    if not request.get('ip-src'):
+        # Return an error message
+        return {'error': "A source IP is required"}
+...
+~~~
+
+
+### introspection
+
+The function that returns a dict of the supported attributes (input and output) by your expansion module.
+
+~~~python
+mispattributes = {'input': ['link', 'url'],
+                  'output': ['attachment', 'malware-sample']}
+
+def introspection():
+    return mispattributes
+~~~
+
+### version
+
+The function that returns a dict with the version and the associated meta-data including potential configurations required of the module.
+
+If your module requires additional configuration (to be exposed via the MISP user-interface), you can define those in the moduleconfig value returned by the version function.
+
+~~~python
+# config fields that your code expects from the site admin
+moduleconfig = ["apikey", "event_limit"]
+
+def version():
+    moduleinfo['config'] = moduleconfig
+    return moduleinfo
+~~~
+
+When you do this a config array is added to the meta-data output containing all the potential configuration values:
 
 ~~~
 "meta": {
@@ -77,12 +115,33 @@ If your module requires additional configuration (to be exposed via the MISP use
 ...
 ~~~
 
+### handler
+
+The function which accepts a JSON document to expand the values and return a dictionary of the expanded values.
+
+~~~python
+def handler(q=False):
+    "Fully functional rot-13 encoder"
+    if q is False:
+        return False
+    request = json.loads(q)
+    src = request.get('ip-src')
+    if src is None:
+        # Return an error message
+        return {'error': "A source IP is required"}
+    else:
+        return {'results':
+                codecs.encode(src, "rot-13")}
+~~~
+
+
 ### Module type
 
-A MISP module can be of two types:
+A MISP module can be of three types:
 
 - **expansion** - service related to an attribute that can be used to extend and update an existing event.
 - **hover** - service related to an attribute to provide additional information to the users without updating the event.
+- **import** - service related to importing and parsing an external object that can be used to extend an existing event.
 
 module-type is an array where the list of supported types can be added.
 
@@ -173,7 +232,7 @@ Based on this information, a query can be built in a JSON format and saved as bo
 
 Then you can POST this JSON format query towards the MISP object server:
 
-~~~
+~~~bash
 curl -s http://127.0.0.1:6666/query -H "Content-Type: application/json" --data @body.json -X POST
 ~~~
 
@@ -219,7 +278,78 @@ It is also possible to restrict the category options of the resolved attributes 
 
 For both the type and the category lists, the first item in the list will be the default setting on the interface.
 
+### Enable your module in the web interface
+
+For a module to be activated in the MISP web interface it must be enabled in the "Plugin Settings.
+
+Go to "Administration > Server Settings" in the top menu
+- Go to "Plugin Settings" in the top "tab menu bar"
+- Click on the name of the type of module you have created to expand the list of plugins to show your module.
+- Find the name of your plugin's "enabled" value in the Setting Column.
+"Plugin.[MODULE NAME]_enabled"
+- Double click on its "Value" column
+
+~~~
+Priority        Setting                         Value   Description                             Error Message
+Recommended     Plugin.Import_ocr_enabled       false   Enable or disable the ocr module.       Value not set.
+~~~
+
+- Use the drop-down to set the enabled value to 'true'
+
+~~~
+Priority        Setting                         Value   Description                             Error Message
+Recommended     Plugin.Import_ocr_enabled       true   Enable or disable the ocr module.       Value not set.
+~~~
+
+### Set any other required settings for your module
+
+In this same menu set any other plugin settings that are required for testing.
+
+
 ## How to contribute your own module?
 
 Fork the project, add your module, test it and make a pull-request. Modules can be also private as you can add a module in your own MISP installation.
 
+
+## Tips for developers creating modules
+
+Download a pre-built virtual image from the [MISP training materials](https://www.circl.lu/services/misp-training-materials/).
+
+- Create a Host-Only adapter in VirtualBox
+- Start the virtual machine
+- SSH into the machine using the misp user
+- Go into the misp-modules directory
+
+~~~bash
+cd /usr/local/src/misp-modules
+~~~
+
+Set the git repo to your fork and checkout your development branch. If you SSH'ed in as the misp user you will have to use sudo.
+
+~~~bash
+sudo git remote set-url origin https://github.com/YourRepo/misp-modules.git
+sudo git pull
+sudo git checkout MyModBranch
+~~~
+
+Remove the contents of the build directory and re-install misp-modules.
+
+~~~python
+sudo rm -fr build/*
+sudo pip3 install --upgrade .
+~~~
+
+SSH in with a different terminal and run `misp-modules` with debugging enabled.
+
+~~~python
+misp-modules -d
+~~~
+
+
+In your original terminal you can now run your tests manually and see any errors that arrive
+
+~~~bash
+cd tests/
+curl -s http://127.0.0.1:6666/query -H "Content-Type: application/json" --data @MY_TEST_FILE.json -X POST
+cd ../
+~~~
