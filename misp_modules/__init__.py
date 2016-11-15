@@ -123,6 +123,8 @@ def load_modules(mod_dir):
         if os.path.basename(root).startswith("."):
             continue
         for filename in fnmatch.filter(filenames, '*.py'):
+            if root.split('/')[-1].startswith('_'):
+                continue
             if filename == '__init__.py':
                 continue
             modulename = filename.split(".")[0]
@@ -145,7 +147,7 @@ def load_package_modules():
     mhandlers = {}
     modules = []
     for path, module in sys.modules.items():
-        r = re.findall("misp_modules[.]modules[.](\w+)[.](\w+)", path)
+        r = re.findall("misp_modules[.]modules[.](\w+)[.]([^_]\w+)", path)
         if r and len(r[0]) == 2:
             moduletype, modulename = r[0]
             mhandlers[modulename] = module
