@@ -90,6 +90,7 @@ def handler(q=False):
             # Get all information on the sample, returns a set of finished analyze jobs
             data = vmrayGetInfoAnalysis(api, sample_id)
             if data["data"]:
+                vti_patterns_found = False
                 for analysis in data["data"]:
                     analysis_id = analysis["analysis_id"]
 
@@ -99,17 +100,25 @@ def handler(q=False):
 
                         if analysis_data:
                             p = vmrayVtiPatterns(analysis_data["vti_patterns"])
-                            if p:
-                                if include_analysisid:
-                                    url1 = "https://cloud.vmray.com/user/analysis/view?from_sample_id=%u" % sample_id
-                                    url2 = "&id=%u" % analysis_id
-                                    url3 = "&sub=%2Freport%2Foverview.html"
-                                    p["results"].append({ "values": url1 + url2 + url3, "types": "link" })
+                            if p and len(p["results"]) > 0:
+                                vti_patterns_found = True
                                 vmray_results = {'results': vmray_results["results"] + p["results"] }
 
+                            if include_analysisid:
+                                a_id = {'results': []}
+                                url1 = "https://cloud.vmray.com/user/analysis/view?from_sample_id=%u" % sample_id
+                                url2 = "&id=%u" % analysis_id
+                                url3 = "&sub=%2Freport%2Foverview.html"
+                                a_id["results"].append({ "values": url1 + url2 + url3, "types": "link" })
+                                vmray_results = {'results': vmray_results["results"] + a_id["results"] }
+
                 # Clean up (remove doubles)
-                vmray_results = vmrayCleanup(vmray_results)
-                return vmray_results
+                if vti_patterns_found:
+                    vmray_results = vmrayCleanup(vmray_results)
+                    return vmray_results
+                else:
+                    misperrors['error'] = "No vti_results returned or jobs not finished"
+                    return misperrors
             else:
                 misperrors['error'] = "Unable to fetch sample id %u" % (sample_id)
                 return misperrors
@@ -179,6 +188,8 @@ def vmrayVtiPatterns(vti_patterns):
                 content = vmrayGeneric(pattern)
             elif only_network_info == False and pattern["category"] == "_process" and pattern["operation"] == "_install_ipc_endpoint":
                 content = vmrayGeneric(pattern, "mutex", 1)
+            elif only_network_info == False and pattern["category"] == "_process" and pattern["operation"] == "_crashed_process":
+                content = vmrayGeneric(pattern)
 
             elif only_network_info == False and pattern["category"] == "_anti_analysis" and pattern["operation"] == "_delay_execution":
                 content = vmrayGeneric(pattern)
@@ -247,9 +258,11 @@ def vmrayGeneric(el, attr = "", attrpos = 1):
         if content:
             if attr:
                 content_split = content.split("\"")
-                content_split[attrpos] = vmraySanitizeInput(content_split[attrpos])
-                r["values"].append(content_split[attrpos])
-                r["types"] = [attr]
+                # Attributes are between open " and close "; so use >
+                if len(content_split) > attrpos:
+                    content_split[attrpos] = vmraySanitizeInput(content_split[attrpos])
+                    r["values"].append(content_split[attrpos])
+                    r["types"] = [attr]
 
             # Adding the value also as text to get the extra description,
             # but this is pretty useless for "url"

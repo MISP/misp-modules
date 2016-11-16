@@ -14,17 +14,20 @@ TODO:
 import json
 import re
 import base64
-
+import io
 import sys
 import os
+import zipfile
+
+
 base_dir = os.path.dirname(__file__) or '.'
 sys.path.append(base_dir)
 from vmray_rest_api import VMRayRESTAPI, VMRayRESTAPIError
-import io
+
 
 misperrors = {'error': 'Error'}
-mispattributes = {'input': ['attachment'], 'output': ['text', 'sha1', 'sha256', 'md5', 'link']}
-moduleinfo = {'version': '0.1', 'author': 'Koen Van Impe',
+mispattributes = {'input': ['attachment', 'malware-sample'], 'output': ['text', 'sha1', 'sha256', 'md5', 'link']}
+moduleinfo = {'version': '0.2', 'author': 'Koen Van Impe',
               'description': 'Submit a sample to VMRay',
               'module-type': ['expansion']}
 moduleconfig = ['apikey', 'url', 'shareable', 'do_not_reanalyze', 'do_not_include_vmrayjobids']
@@ -39,11 +42,25 @@ def handler(q=False):
     if q is False:
         return False
     request = json.loads(q)
-
     try:
         data = request.get("data")
-        attachment = request.get("attachment")
-        data = base64.b64decode(data)
+        if 'malware-sample' in request:
+            # malicious samples are encrypted with zip (password infected) and then base64 encoded
+            sample_filename = request.get("malware-sample").split("|",1)[0]
+            data = base64.b64decode(data)
+            fl = io.BytesIO(data)
+            zf = zipfile.ZipFile(fl)
+            sample_hashname = zf.namelist()[0]
+            data = zf.read(sample_hashname,b"infected")
+            zf.close()
+        elif 'attachment' in request:
+            # All attachments get base64 encoded
+            sample_filename = request.get("attachment")
+            data = base64.b64decode(data)
+
+        else:
+            misperrors['error'] = "No malware sample or attachment supplied"
+            return misperrors
     except:
         misperrors['error'] = "Unable to process submited sample data"
         return misperrors
@@ -78,10 +95,10 @@ def handler(q=False):
         do_not_include_vmrayjobids = False
     include_vmrayjobids = not do_not_include_vmrayjobids
 
-    if data and attachment:
+    if data and sample_filename:
         args = {}
         args["shareable"] = shareable
-        args["sample_file"] = {'data': io.BytesIO( data ) , 'filename': attachment }
+        args["sample_file"] = {'data': io.BytesIO( data ) , 'filename': sample_filename }
         args["reanalyze"] = reanalyze
 
         try:
