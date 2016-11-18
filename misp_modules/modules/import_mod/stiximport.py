@@ -28,7 +28,7 @@ def handler(q=False):
     q = json.loads(q)
 
     # It's b64 encoded, so decode that stuff
-    package = str(base64.b64decode(q.get("data", None)), 'utf-8')
+    package = base64.b64decode(q.get("data")).decode('utf-8')
 
     # If something really weird happened
     if not package:
@@ -168,6 +168,9 @@ def buildObservable(o):
         # May as well be useless
         return r
 
+    if not o.get('object'):
+        return r
+
     props = o["object"]["properties"]
 
     # If it has an address_value field, it's gonna be an address
@@ -195,7 +198,7 @@ def buildObservable(o):
             for hsh in props["hashes"]:
                 r["values"].append(hsh["simple_hash_value"]["value"])
                 r["types"] = identifyHash(hsh["simple_hash_value"]["value"])
-        
+
     elif "xsi:type" in props:
       # Cybox. Ew.
       try:
@@ -208,7 +211,7 @@ def buildObservable(o):
         else:
           print("Ignoring {}".format(type_))
       except:
-        pass 
+        pass
     return r
 
 

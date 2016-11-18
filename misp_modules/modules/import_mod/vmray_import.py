@@ -16,41 +16,35 @@ TODO:
 
 import json
 import re
-import sys
-import os
-base_dir = os.path.dirname(__file__) or '.'
-sys.path.append(base_dir)
-from vmray_rest_api import VMRayRESTAPI, VMRayRESTAPIError
+
+from ._vmray.vmray_rest_api import VMRayRESTAPI
 
 misperrors = {'error': 'Error'}
 inputSource = []
 moduleinfo = {'version': '0.1', 'author': 'Koen Van Impe',
               'description': 'Import VMRay (VTI) results',
               'module-type': ['import']}
-userConfig = {
-               'include_textdescr': {
-                 'type': 'Boolean',
-                 'message': 'Include textual description'
-               },
-               'include_analysisid': {
-                 'type': 'Boolean',
-                 'message': 'Include VMRay analysis_id text'
-               },
-               'only_network_info': {
-                 'type': 'Boolean',
-                 'message': 'Only include network (src-ip, hostname, domain, ...) information'
-               },
-               'sample_id': {
-                 'type': 'Integer',
-                 'errorMessage': 'Expected a sample ID',
-                 'message': 'The VMRay sample_id'
-               }
-             };
+userConfig = {'include_textdescr': {'type': 'Boolean',
+                                    'message': 'Include textual description'
+                                    },
+              'include_analysisid': {'type': 'Boolean',
+                                     'message': 'Include VMRay analysis_id text'
+                                     },
+              'only_network_info': {'type': 'Boolean',
+                                    'message': 'Only include network (src-ip, hostname, domain, ...) information'
+                                    },
+              'sample_id': {'type': 'Integer',
+                            'errorMessage': 'Expected a sample ID',
+                            'message': 'The VMRay sample_id'
+                            }
+              }
+
 moduleconfig = ['apikey', 'url']
 
 include_textdescr = False
 include_analysisid = False
 only_network_info = False
+
 
 def handler(q=False):
     global include_textdescr
@@ -100,9 +94,19 @@ def handler(q=False):
 
                         if analysis_data:
                             p = vmrayVtiPatterns(analysis_data["vti_patterns"])
+<<<<<<< HEAD
                             if p and len(p["results"]) > 0:
                                 vti_patterns_found = True
                                 vmray_results = {'results': vmray_results["results"] + p["results"] }
+=======
+                            if p:
+                                if include_analysisid:
+                                    url1 = "https://cloud.vmray.com/user/analysis/view?from_sample_id=%u" % sample_id
+                                    url2 = "&id=%u" % analysis_id
+                                    url3 = "&sub=%2Freport%2Foverview.html"
+                                    p["results"].append({"values": url1 + url2 + url3, "types": "link"})
+                                vmray_results = {'results': vmray_results["results"] + p["results"]}
+>>>>>>> upstream/master
 
                             if include_analysisid:
                                 a_id = {'results': []}
@@ -128,7 +132,6 @@ def handler(q=False):
     else:
         misperrors['error'] = "Not a valid sample id"
         return misperrors
-
 
 
 def introspection():
@@ -184,44 +187,44 @@ def vmrayVtiPatterns(vti_patterns):
             elif pattern["category"] == "_network" and pattern["operation"] == "_connect":
                 content = vmrayConnect(pattern)
 
-            elif only_network_info == False and pattern["category"] == "_process" and pattern["operation"] == "_alloc_wx_page":
+            elif only_network_info is False and pattern["category"] == "_process" and pattern["operation"] == "_alloc_wx_page":
                 content = vmrayGeneric(pattern)
-            elif only_network_info == False and pattern["category"] == "_process" and pattern["operation"] == "_install_ipc_endpoint":
+            elif only_network_info is False and pattern["category"] == "_process" and pattern["operation"] == "_install_ipc_endpoint":
                 content = vmrayGeneric(pattern, "mutex", 1)
             elif only_network_info == False and pattern["category"] == "_process" and pattern["operation"] == "_crashed_process":
                 content = vmrayGeneric(pattern)
 
-            elif only_network_info == False and pattern["category"] == "_anti_analysis" and pattern["operation"] == "_delay_execution":
+            elif only_network_info is False and pattern["category"] == "_anti_analysis" and pattern["operation"] == "_delay_execution":
                 content = vmrayGeneric(pattern)
-            elif only_network_info == False and pattern["category"] == "_anti_analysis" and pattern["operation"] == "_dynamic_api_usage":
+            elif only_network_info is False and pattern["category"] == "_anti_analysis" and pattern["operation"] == "_dynamic_api_usage":
                 content = vmrayGeneric(pattern)
 
-            elif only_network_info == False and pattern["category"] == "_static" and pattern["operation"] == "_drop_pe_file":
+            elif only_network_info is False and pattern["category"] == "_static" and pattern["operation"] == "_drop_pe_file":
                 content = vmrayGeneric(pattern, "filename", 1)
-            elif only_network_info == False and pattern["category"] == "_static" and pattern["operation"] == "_execute_dropped_pe_file":
+            elif only_network_info is False and pattern["category"] == "_static" and pattern["operation"] == "_execute_dropped_pe_file":
                 content = vmrayGeneric(pattern, "filename", 1)
 
-            elif only_network_info == False and pattern["category"] == "_injection" and pattern["operation"] == "_modify_memory":
+            elif only_network_info is False and pattern["category"] == "_injection" and pattern["operation"] == "_modify_memory":
                 content = vmrayGeneric(pattern)
-            elif only_network_info == False and pattern["category"] == "_injection" and pattern["operation"] == "_modify_control_flow":
+            elif only_network_info is False and pattern["category"] == "_injection" and pattern["operation"] == "_modify_control_flow":
                 content = vmrayGeneric(pattern)
-            elif only_network_info == False and pattern["category"] == "_file_system" and pattern["operation"] == "_create_many_files":
+            elif only_network_info is False and pattern["category"] == "_file_system" and pattern["operation"] == "_create_many_files":
                 content = vmrayGeneric(pattern)
 
-            elif only_network_info == False and pattern["category"] == "_persistence" and pattern["operation"] == "_install_startup_script":
+            elif only_network_info is False and pattern["category"] == "_persistence" and pattern["operation"] == "_install_startup_script":
                 content = vmrayGeneric(pattern, "regkey", 1)
-            elif only_network_info == False and pattern["category"] == "_os" and pattern["operation"] == "_enable_process_privileges":
+            elif only_network_info is False and pattern["category"] == "_os" and pattern["operation"] == "_enable_process_privileges":
                 content = vmrayGeneric(pattern)
 
             if content:
-                r["results"].append( content["attributes"] )
-                r["results"].append( content["text"] )
+                r["results"].append(content["attributes"])
+                r["results"].append(content["text"])
 
         # Remove empty results
-        r["results"] = [x for x in r["results"] if isinstance(x, dict) and  len(x["values"]) != 0]
+        r["results"] = [x for x in r["results"] if isinstance(x, dict) and len(x["values"]) != 0]
         for el in r["results"]:
-            if not el in y["results"]:
-                y["results"].append( el )
+            if el not in y["results"]:
+                y["results"].append(el)
         return y
     else:
         return False
@@ -232,22 +235,22 @@ def vmrayCleanup(x):
     y = {'results': []}
 
     for el in x["results"]:
-        if not el in y["results"]:
-            y["results"].append( el )
+        if el not in y["results"]:
+            y["results"].append(el)
     return y
 
 
 def vmraySanitizeInput(s):
     ''' Sanitize some input so it gets properly imported in MISP'''
     if s:
-        s = s.replace('"','')
-        s =  re.sub('\\\\', r'\\', s)
+        s = s.replace('"', '')
+        s = re.sub('\\\\', r'\\', s)
         return s
     else:
         return False
 
 
-def vmrayGeneric(el, attr = "", attrpos = 1):
+def vmrayGeneric(el, attr="", attrpos=1):
     ''' Convert a 'generic' VTI pattern to MISP data'''
 
     r = {"values": []}
@@ -270,8 +273,7 @@ def vmrayGeneric(el, attr = "", attrpos = 1):
                 f["values"].append(vmraySanitizeInput(content))
                 f["types"] = ["text"]
 
-            return {    "text": f,
-                        "attributes": r}
+            return {"text": f, "attributes": r}
         else:
             return False
     else:
@@ -289,7 +291,7 @@ def vmrayConnect(el):
         content = el["technique_desc"]
         if content:
             target = content.split("\"")
-            port = (target[1].split(":"))[1]
+            # port = (target[1].split(":"))[1]  ## FIXME: not used
             host = (target[1].split(":"))[0]
             if ipre.match(str(host)):
                 r["values"].append(host)
@@ -305,8 +307,7 @@ def vmrayConnect(el):
                 f["values"].append(vmraySanitizeInput(content))
                 f["types"] = ["text"]
 
-            return {    "text": f,
-                        "attributes": r}
+            return {"text": f, "attributes": r}
         else:
             return False
     else:

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 import unittest
@@ -6,6 +6,7 @@ import requests
 import base64
 import json
 import os
+
 
 class TestModules(unittest.TestCase):
 
@@ -32,13 +33,14 @@ class TestModules(unittest.TestCase):
             print(response.json())
 
     def test_stix(self):
-        with open("tests/stix.xml", "r") as f:
-            data = json.dumps({"module":"stiximport",
-                    "data":str(base64.b64encode(bytes(f.read(), 'utf-8')), 'utf-8'),
-                    "config": {"max_size": "15000"},
-                   })
+        with open("tests/stix.xml", "rb") as f:
+            content = base64.b64encode(f.read())
+            data = json.dumps({"module": "stiximport",
+                               "data": content.decode('utf-8'),
+                               "config": {"max_size": "15000"},
+                               })
             response = requests.post(self.url + "query", data=data)
-            print(response.json())
+            print('STIX', response.json())
 
     def test_virustotal(self):
         # This can't actually be tested without disclosing a private
@@ -46,11 +48,11 @@ class TestModules(unittest.TestCase):
         # and pass if it can't find one
 
         if not os.path.exists("tests/bodyvirustotal.json"):
-          return
-        
+            return
+
         with open("tests/bodyvirustotal.json", "r") as f:
-          response = requests.post(self.url + "query", data=f.read()).json()
+            response = requests.post(self.url + "query", data=f.read()).json()
         assert(response)
 
 if __name__ == '__main__':
-  unittest.main()
+    unittest.main()

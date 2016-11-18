@@ -1,15 +1,11 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 """Python client library for VMRay REST API"""
 
 import base64
 import datetime
 import os.path
 import requests
-#import urlparse
 import urllib.parse
-
-from io import IOBase
-from io import BytesIO
 
 # disable nasty certification warning
 # pylint: disable=no-member
@@ -87,7 +83,7 @@ class VMRayRESTAPI(object):
                     filename = value["filename"]
                     sample = value["data"]
                     file_params[key] = (filename, sample, "application/octet-stream")
-                elif isinstance(value, file) or hasattr(value, "read"):
+                elif hasattr(value, "read"):
                     filename = os.path.split(value.name)[1]
                     # For the following block refer to DEV-1820
                     try:

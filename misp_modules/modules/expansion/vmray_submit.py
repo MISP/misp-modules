@@ -12,8 +12,8 @@ TODO:
 '''
 
 import json
-import re
 import base64
+<<<<<<< HEAD
 import io
 import sys
 import os
@@ -24,6 +24,12 @@ base_dir = os.path.dirname(__file__) or '.'
 sys.path.append(base_dir)
 from vmray_rest_api import VMRayRESTAPI, VMRayRESTAPIError
 
+=======
+
+import io
+>>>>>>> upstream/master
+
+from ._vmray.vmray_rest_api import VMRayRESTAPI
 
 misperrors = {'error': 'Error'}
 mispattributes = {'input': ['attachment', 'malware-sample'], 'output': ['text', 'sha1', 'sha256', 'md5', 'link']}
@@ -98,7 +104,11 @@ def handler(q=False):
     if data and sample_filename:
         args = {}
         args["shareable"] = shareable
+<<<<<<< HEAD
         args["sample_file"] = {'data': io.BytesIO( data ) , 'filename': sample_filename }
+=======
+        args["sample_file"] = {'data': io.BytesIO(data), 'filename': attachment}
+>>>>>>> upstream/master
         args["reanalyze"] = reanalyze
 
         try:
@@ -135,13 +145,13 @@ def vmrayProcess(vmraydata):
             # Result received?
             if submissions and jobs:
                 r = {'results': []}
-                r["results"].append( {"types": "md5", "values": submissions["submission_sample_md5"]} )
-                r["results"].append( {"types": "sha1", "values": submissions["submission_sample_sha1"]} )
-                r["results"].append( {"types": "sha256", "values": submissions["submission_sample_sha256"]} )
-                r["results"].append( {"types": "text", "values": "VMRay Sample ID: %s" % submissions["submission_sample_id"]} )
-                r["results"].append( {"types": "text", "values": "VMRay Submission ID: %s" % submissions["submission_id"]} )
-                r["results"].append( {"types": "text", "values": "VMRay Submission Sample IP: %s" % submissions["submission_ip_ip"]} )
-                r["results"].append( {"types": "link", "values": submissions["submission_webif_url"]} )
+                r["results"].append({"types": "md5", "values": submissions["submission_sample_md5"]})
+                r["results"].append({"types": "sha1", "values": submissions["submission_sample_sha1"]})
+                r["results"].append({"types": "sha256", "values": submissions["submission_sample_sha256"]})
+                r["results"].append({"types": "text", "values": "VMRay Sample ID: %s" % submissions["submission_sample_id"]})
+                r["results"].append({"types": "text", "values": "VMRay Submission ID: %s" % submissions["submission_id"]})
+                r["results"].append({"types": "text", "values": "VMRay Submission Sample IP: %s" % submissions["submission_ip_ip"]})
+                r["results"].append({"types": "link", "values": submissions["submission_webif_url"]})
 
                 # Include data from different jobs
                 if include_vmrayjobids:
@@ -149,7 +159,7 @@ def vmrayProcess(vmraydata):
                         job_id = job["job_id"]
                         job_vm_name = job["job_vm_name"]
                         job_configuration_name = job["job_configuration_name"]
-                        r["results"].append( {"types": "text", "values": "VMRay Job ID %s (%s - %s)" % (job_id, job_vm_name, job_configuration_name) })
+                        r["results"].append({"types": "text", "values": "VMRay Job ID %s (%s - %s)" % (job_id, job_vm_name, job_configuration_name)})
                 return r
             else:
                 misperrors['error'] = "No valid results returned."
@@ -166,4 +176,3 @@ def vmraySubmit(api, args):
     ''' Submit the sample to VMRay'''
     vmraydata = api.call("POST", "/rest/sample/submit", args)
     return vmraydata
-
