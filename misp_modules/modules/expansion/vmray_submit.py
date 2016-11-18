@@ -14,6 +14,7 @@ TODO:
 import json
 import base64
 <<<<<<< HEAD
+<<<<<<< HEAD
 import io
 import sys
 import os
@@ -25,9 +26,13 @@ sys.path.append(base_dir)
 from vmray_rest_api import VMRayRESTAPI, VMRayRESTAPIError
 
 =======
+=======
+>>>>>>> MISP/master
 
 import io
 >>>>>>> upstream/master
+
+from ._vmray.vmray_rest_api import VMRayRESTAPI
 
 from ._vmray.vmray_rest_api import VMRayRESTAPI
 
@@ -105,10 +110,14 @@ def handler(q=False):
         args = {}
         args["shareable"] = shareable
 <<<<<<< HEAD
+<<<<<<< HEAD
         args["sample_file"] = {'data': io.BytesIO( data ) , 'filename': sample_filename }
 =======
         args["sample_file"] = {'data': io.BytesIO(data), 'filename': attachment}
 >>>>>>> upstream/master
+=======
+        args["sample_file"] = {'data': io.BytesIO(data), 'filename': attachment}
+>>>>>>> MISP/master
         args["reanalyze"] = reanalyze
 
         try:

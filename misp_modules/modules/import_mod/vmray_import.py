@@ -106,6 +106,7 @@ def handler(q=False):
                                     url3 = "&sub=%2Freport%2Foverview.html"
                                     p["results"].append({"values": url1 + url2 + url3, "types": "link"})
                                 vmray_results = {'results': vmray_results["results"] + p["results"]}
+<<<<<<< HEAD
 >>>>>>> upstream/master
 
                             if include_analysisid:
@@ -115,6 +116,8 @@ def handler(q=False):
                                 url3 = "&sub=%2Freport%2Foverview.html"
                                 a_id["results"].append({ "values": url1 + url2 + url3, "types": "link" })
                                 vmray_results = {'results': vmray_results["results"] + a_id["results"] }
+=======
+>>>>>>> MISP/master
 
                 # Clean up (remove doubles)
                 if vti_patterns_found:
