@@ -1,0 +1,44 @@
+import json
+
+misperrors = {'error': 'Error'}
+mispattributes = {'input': ['hostname', 'domain'], 'output': ['ip-src',
+                                                              'ip-dst']}
+
+# possible module-types: 'expansion', 'hover' or both
+moduleinfo = {'version': '1', 'author': 'YOUR_NAME_HERE',
+              'description': 'MODULE_DESCRIPTION',
+              'module-type': ['expansion', 'hover']}
+
+# config fields that your code expects from the site admin
+moduleconfig = []
+
+
+def handler(q=False):
+    if q is False:
+        return False
+    request = json.loads(q)
+    # You code that converts the data passed along in request
+    #  input will be the query values
+    #  output should be a list of dictionaries with types and values
+    # The types will be the types that the user can choose between
+    #  for a given value
+    # An example would be a network indicator enrichment that returns
+    #  a list of IP addresses and domain names.
+    # IP addresses would allow for attributes type ip-src and ip-dst,
+    #  either of which the user can choose
+    # So the resulting list would look like this:
+    # r = {'results': [{'types': ['ip-src', 'ip-dst'], 'values': ips},
+    #                 {'types': ['domain'], 'values': domains}]}
+    r = {'results': [{'types': types1, 'values': values1},
+                     {'types': types2, 'values': values2}]}
+    return r
+
+
+def introspection():
+    return mispattributes
+
+
+def version():
+    moduleinfo['config'] = moduleconfig
+    return moduleinfo
+

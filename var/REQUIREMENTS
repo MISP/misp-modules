@@ -1,0 +1,17 @@
+stix
+cybox
+tornado
+dnspython3
+requests
+urlarchiver
+passivetotal
+PyPDNS
+pypssl
+redis
+pyeupi
+ipasn-redis
+asnhistory
+git+https://github.com/Rafiot/uwhoisd.git@testing#egg=uwhois&subdirectory=client
+pillow
+pytesseract
+SPARQLWrapper
