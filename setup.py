@@ -38,6 +38,5 @@ setup(
         'pillow',
         'pytesseract',
         'shodan',
-        'misp_stix_converter'
     ],
 )
