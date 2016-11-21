@@ -1,7 +1,5 @@
 import json
-import re
 import base64
-import hashlib
 
 from pymisp.tools import stix
 
