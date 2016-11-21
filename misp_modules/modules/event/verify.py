@@ -26,9 +26,8 @@ def handler(q=False):
     request = json.loads(q)  # Assuming request has two keys: config & mispevent (mispevent being the json dump of the event)
     mispevent = MISPEvent()
     mispevent.load(request['mispevent'])
-    mispevent.verify(mispevent.Org['uuid'])
-    # TODO: what do we return there?
-    # return json.dumps(mispevent, cls=EncodeUpdate)
+    verified = mispevent.verify(mispevent.Org['uuid'])
+    return json.dumps(verified)
 
 
 def introspection():
