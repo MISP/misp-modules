@@ -12,7 +12,7 @@ pyeupi
 ipasn-redis
 asnhistory
 git+https://github.com/Rafiot/uwhoisd.git@testing#egg=uwhois&subdirectory=client
-git+https://github.com/MISP/PyMISP.git#egg=pymisp
+git+https://github.com/MISP/PyMISP.git
 pillow
 pytesseract
 SPARQLWrapper
