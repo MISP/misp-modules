@@ -16,11 +16,7 @@ install:
     - pip install codecov
     - pip install -U -r REQUIREMENTS
     - pip install .
-    # Force travis to use the right pymisp
-    - git clone https://github.com/CIRCL/PyMISP.git
-    - cd PyMISP 
-    - python setup.py install
-    - cd ..
+
 script:
     - coverage run -m --parallel-mode --source=misp_modules misp_modules.__init__ &
     - pid=$!
