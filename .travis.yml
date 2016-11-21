@@ -17,7 +17,7 @@ install:
     - pip install -U -r REQUIREMENTS
     - pip install .
     # Force travis to use the right pymisp
-    - git clone https://github.com/MISP/PyMISP.git
+    - git clone https://github.com/CIRCL/PyMISP.git
     - cd PyMISP 
     - python setup.py install
     - cd ..
