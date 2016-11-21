@@ -37,10 +37,15 @@ class TestModules(unittest.TestCase):
             content = base64.b64encode(f.read())
             data = json.dumps({"module": "stiximport",
                                "data": content.decode('utf-8'),
-                               "config": {"max_size": "15000"},
                                })
-            response = requests.post(self.url + "query", data=data)
-            print('STIX', response.json())
+            response = requests.post(self.url + "query", data=data).json()
+
+            print("STIX :: {}".format(response))
+            values = [x["values"][0] for x in response["results"]]
+
+            assert("209.239.79.47" in values)
+            assert("41.213.121.180" in values)
+            assert("eu-society.com" in values)
 
     def test_virustotal(self):
         # This can't actually be tested without disclosing a private
