@@ -2,8 +2,6 @@ import json
 import re
 import base64
 import hashlib
-import tempfile
-import os
 
 from pymisp.tools import stix
 
@@ -36,16 +34,11 @@ def handler(q=False):
     if not package:
         return json.dumps({"success": 0})
 
-    tfile = tempfile.NamedTemporaryFile(mode="w", prefix="STIX", delete=False)
-    tfile.write(package)
-    tfile.close()
-
-    pkg = stix.load_stix(tfile.name)
+    pkg = stix.load_stix(package)
 
     for attrib in pkg.attributes:
         r["results"].append({ "values" : [attrib.value] , "types": [attrib.type], "categories": [attrib.category]})
 
-    os.unlink(tfile.name)
     return r
 
 def introspection():
