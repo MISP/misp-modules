@@ -10,6 +10,12 @@ addons:
         packages:
             - libgpg-error-dev
             - libgpgme11-dev
+            - haveged
+            - swig
+
+dist: trusty
+group: beta
+sudo: required
 
 python:
     - "3.3"
@@ -20,6 +26,13 @@ python:
     - "nightly"
 
 before_install:
+    - wget ftp://ftp.gnupg.org/gcrypt/gpgme/gpgme-1.6.0.tar.bz2
+    - tar xjf gpgme-1.6.0.tar.bz2
+    - pushd gpgme-1.6.0
+    - ./configure --prefix=/usr && make
+    - sudo make install
+    - sudo ldconfig
+    - popd
     - gpg --batch --gen-key tests/gpg/test_org_gpg
 
 install:
