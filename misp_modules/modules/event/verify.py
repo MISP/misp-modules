@@ -10,7 +10,7 @@ moduleinfo = {'version': '0.1', 'author': 'Raphaël Vinot',
               'description': 'Verify the signature of a MISP Event',
               'module-type': ['event']}
 
-moduleconfig = ['uid']
+moduleconfig = []
 
 '''
 NOTE:
@@ -26,7 +26,7 @@ def handler(q=False):
     request = json.loads(q)  # Assuming request has two keys: config & mispevent (mispevent being the json dump of the event)
     mispevent = MISPEvent()
     mispevent.load(request['mispevent'])
-    verified = mispevent.verify(mispevent.Org['uuid'])
+    verified = mispevent.verify(mispevent.Orgc['uuid'])
     return json.dumps(verified)
 
 

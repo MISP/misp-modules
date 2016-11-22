@@ -6,6 +6,7 @@ import requests
 import base64
 import json
 import os
+from pymisp import MISPEvent, EncodeUpdate
 
 
 class TestModules(unittest.TestCase):
@@ -53,6 +54,20 @@ class TestModules(unittest.TestCase):
         with open("tests/bodyvirustotal.json", "r") as f:
             response = requests.post(self.url + "query", data=f.read()).json()
         assert(response)
+
+    def test_sign(self):
+        event = MISPEvent()
+        event.load('tests/57c4445b-c548-4654-af0b-4be3950d210f.json')
+        data = {'module': 'sign',
+                'config': {'uid': '5832bfa8-76d0-4bdb-a221-46fa950d210f', 'passphrase': 'misptestorg'},
+                'mispevent': json.dumps(event, cls=EncodeUpdate)}
+        signed_event = requests.post(self.url + "query", data=json.dumps(data)).json()
+        event.load(signed_event)
+        data = {'module': 'verify',
+                'config': {'uid': '5832bfa8-76d0-4bdb-a221-46fa950d210f'},
+                'mispevent': json.dumps(event, cls=EncodeUpdate)}
+        verified = requests.post(self.url + "query", data=json.dumps(data))
+        assert(verified)
 
 if __name__ == '__main__':
     unittest.main()

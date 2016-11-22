@@ -15,3 +15,5 @@ git+https://github.com/Rafiot/uwhoisd.git@testing#egg=uwhois&subdirectory=client
 pillow
 pytesseract
 SPARQLWrapper
+git+https://github.com/MISP/PyMISP.git
+--pre pyme3
