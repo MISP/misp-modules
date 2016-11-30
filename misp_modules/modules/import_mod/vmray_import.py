@@ -174,12 +174,18 @@ def vmrayVtiPatterns(vti_patterns):
                 content = vmrayGeneric(pattern, "url", 1)
             elif pattern["category"] == "_network" and pattern["operation"] == "_connect":
                 content = vmrayConnect(pattern)
+            elif pattern["category"] == "_network" and pattern["operation"] == "_install_server":
+                content = vmrayGeneric(pattern)
 
             elif only_network_info is False and pattern["category"] == "_process" and pattern["operation"] == "_alloc_wx_page":
                 content = vmrayGeneric(pattern)
             elif only_network_info is False and pattern["category"] == "_process" and pattern["operation"] == "_install_ipc_endpoint":
                 content = vmrayGeneric(pattern, "mutex", 1)
             elif only_network_info is False and pattern["category"] == "_process" and pattern["operation"] == "_crashed_process":
+                content = vmrayGeneric(pattern)
+            elif only_network_info is False and pattern["category"] == "_process" and pattern["operation"] == "_read_from_remote_process":
+                content = vmrayGeneric(pattern)
+            elif only_network_info is False and pattern["category"] == "_process" and pattern["operation"] == "_create_process_with_hidden_window":
                 content = vmrayGeneric(pattern)
 
             elif only_network_info is False and pattern["category"] == "_anti_analysis" and pattern["operation"] == "_delay_execution":
@@ -194,10 +200,19 @@ def vmrayVtiPatterns(vti_patterns):
 
             elif only_network_info is False and pattern["category"] == "_injection" and pattern["operation"] == "_modify_memory":
                 content = vmrayGeneric(pattern)
+            elif only_network_info is False and pattern["category"] == "_injection" and pattern["operation"] == "_modify_memory_system":
+                content = vmrayGeneric(pattern)
+            elif only_network_info is False and pattern["category"] == "_injection" and pattern["operation"] == "_modify_memory_non_system":
+                content = vmrayGeneric(pattern)
             elif only_network_info is False and pattern["category"] == "_injection" and pattern["operation"] == "_modify_control_flow":
+                content = vmrayGeneric(pattern)
+            elif only_network_info is False and pattern["category"] == "_injection" and pattern["operation"] == "_modify_control_flow_non_system":
                 content = vmrayGeneric(pattern)
             elif only_network_info is False and pattern["category"] == "_file_system" and pattern["operation"] == "_create_many_files":
                 content = vmrayGeneric(pattern)
+
+            elif only_network_info is False and pattern["category"] == "_hide_tracks" and pattern["operation"] == "_hide_data_in_registry":
+                content = vmrayGeneric(pattern, "regkey", 1)
 
             elif only_network_info is False and pattern["category"] == "_persistence" and pattern["operation"] == "_install_startup_script":
                 content = vmrayGeneric(pattern, "regkey", 1)
@@ -248,12 +263,14 @@ def vmrayGeneric(el, attr="", attrpos=1):
         content = el["technique_desc"]
         if content:
             if attr:
+                # Some elements are put between \"\" ; replace them to single
+                content = content.replace("\"\"","\"")
                 content_split = content.split("\"")
                 # Attributes are between open " and close "; so use >
                 if len(content_split) > attrpos:
                     content_split[attrpos] = vmraySanitizeInput(content_split[attrpos])
                     r["values"].append(content_split[attrpos])
-                    r["types"] = [attr]                
+                    r["types"] = [attr]
 
             # Adding the value also as text to get the extra description,
             # but this is pretty useless for "url"
