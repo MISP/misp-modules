@@ -1,7 +1,5 @@
 language: python
 
-cache: pip
-
 services:
     - redis-server
 

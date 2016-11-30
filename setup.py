@@ -38,5 +38,5 @@ setup(
         'pillow',
         'pytesseract',
         'shodan',
-    ]
+    ],
 )
