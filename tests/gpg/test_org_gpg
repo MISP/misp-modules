@@ -1,0 +1,7 @@
+     %echo Generating a basic OpenPGP key
+     Key-Type: RSA
+     Name-Real: 5832bfa8-76d0-4bdb-a221-46fa950d210f
+     Passphrase: misptestorg
+     # Do a commit here, so that we can later print "done" :-)
+     %commit
+     %echo done

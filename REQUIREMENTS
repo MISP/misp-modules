@@ -17,3 +17,5 @@ git+https://github.com/CIRCL/PyMISP.git#egg=pymisp
 pillow
 pytesseract
 SPARQLWrapper
+git+https://github.com/MISP/PyMISP.git
+--pre pyme3

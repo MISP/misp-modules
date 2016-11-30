@@ -3,17 +3,42 @@ language: python
 services:
     - redis-server
 
+addons:
+    apt:
+        packages:
+            - libgpg-error-dev
+            - libgpgme11-dev
+            - haveged
+            - swig
+
+dist: trusty
+group: beta
+sudo: required
+
 python:
     - "3.3"
     - "3.4"
     - "3.5"
     - "3.5-dev"
+    - "3.6-dev"
     - "nightly"
 
+before_install:
+    - wget ftp://ftp.gnupg.org/gcrypt/gpgme/gpgme-1.6.0.tar.bz2
+    - tar xjf gpgme-1.6.0.tar.bz2
+    - pushd gpgme-1.6.0
+    - ./configure --prefix=/usr && make
+    - sudo make install
+    - sudo ldconfig
+    - popd
+    - gpg --batch --gen-key tests/gpg/test_org_gpg
+
 install:
+    - pip install -U pip
     - pip install -U nose
     - pip install coveralls
     - pip install codecov
+    - pip install --pre pyme3
     - pip install -U -r REQUIREMENTS
     - pip install .
 
