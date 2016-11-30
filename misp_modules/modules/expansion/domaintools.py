@@ -33,27 +33,47 @@ moduleconfig = ['username', 'api_key']
 class DomainTools(object):
 
     def __init__(self):
-        self.reg_mail = set()
-        self.reg_phone = set()
-        self.reg_name = set()
+        self.reg_mail = {}
+        self.reg_phone = {}
+        self.reg_name = {}
         self.registrar = set()
         self.creation_date = set()
         self.freetext = ''
 
+    def _add_value(self, value_type, value, comment):
+        if value_type.get(value):
+            if comment:
+                value_type[value] += ' - {}'.format(comment)
+        else:
+            value_type[value] = comment
+        return value_type
+
+    def add_mail(self, mail, comment=None):
+        self.reg_mail = self._add_value(self.reg_mail, mail, comment)
+
+    def add_phone(self, phone, comment=None):
+        self.reg_phone = self._add_value(self.reg_phone, phone, comment)
+
+    def add_name(self, name, comment=None):
+        self.reg_name = self._add_value(self.reg_name, name, comment)
+
     def dump(self):
         to_return = []
         if self.reg_mail:
-            to_return.append({'type': ['whois-registrant-email'], 'values': list(self.reg_mail)})
+            for mail, comment in self.reg_mail.items():
+                to_return.append({'type': ['whois-registrant-email'], 'values': [mail], 'comment': comment})
         if self.reg_phone:
-            to_return.append({'type': ['whois-registrant-phone'], 'values': list(self.reg_phone)})
+            for phone, comment in self.reg_phone.items():
+                to_return.append({'type': ['whois-registrant-phone'], 'values': [phone], 'comment': comment})
         if self.reg_name:
-            to_return.append({'type': ['whois-registrant-name'], 'values': list(self.reg_name)})
+            for name, comment in self.reg_name.items():
+                to_return.append({'type': ['whois-registrant-name'], 'values': [name], 'comment': comment})
         if self.registrar:
             to_return.append({'type': ['whois-registrar'], 'values': list(self.registrar)})
         if self.creation_date:
             to_return.append({'type': ['whois-creation-date'], 'values': list(self.creation_date)})
         if self.freetext:
-            to_return.append({'type': ['freetext'], 'values': [self.freetext]})
+            to_return.append({'type': ['freetext'], 'values': [self.freetext], 'comment': 'Freetext import'})
         return to_return
 
 
@@ -82,36 +102,36 @@ def handler(q=False):
         return misperrors
 
     whois_entry = domtools.parsed_whois(to_query)
+    print(whois_entry)
     values = DomainTools()
 
-    if whois_entry.has_key('error'):
+    if whois_entry.get('error'):
         misperrors['error'] = whois_entry['error']['message']
         return misperrors
 
-    if whois_entry.has_key('registrant'):
-        values.reg_name.add(whois_entry['registrant'])
+    if whois_entry.get('registrant'):
+        values.add_name(whois_entry['registrant'], 'Parsed registrant')
 
-    if whois_entry.has_key('registration'):
+    if whois_entry.get('registration'):
         values.creation_date.add(whois_entry['registration']['created'])
 
-    if whois_entry.has_key('whois'):
+    if whois_entry.get('whois'):
         values.freetext = whois_entry['whois']['record']
-    if whois_entry.emails():
-        # NOTE: not sure we want to do that (contains registrar emails)
-        values.reg_mail |= whois_entry.emails()
-    if whois_entry.has_key('parsed_whois'):
+    if whois_entry.get('parsed_whois'):
         if whois_entry['parsed_whois']['created_date']:
             values.creation_date.add(whois_entry['parsed_whois']['created_date'])
         if whois_entry['parsed_whois']['registrar']['name']:
             values.registrar.add(whois_entry['parsed_whois']['registrar']['name'])
         for key, entry in whois_entry['parsed_whois']['contacts'].items():
-            # TODO: pass key as comment
             if entry['email']:
-                values.reg_mail.add(entry['email'])
+                values.add_mail(entry['email'], key)
             if entry['phone']:
-                values.reg_phone.add(entry['phone'])
+                values.add_phone(entry['phone'], key)
             if entry['name']:
-                values.reg_name.add(entry['name'])
+                values.add_name(entry['name'], key)
+    if whois_entry.emails():
+        for mail in whois_entry.emails():
+            values.add_mail(mail)
     return json.dumps({'results': values.dump()})
 
 
