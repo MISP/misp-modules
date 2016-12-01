@@ -132,7 +132,7 @@ def handler(q=False):
     if whois_entry.emails():
         for mail in whois_entry.emails():
             values.add_mail(mail)
-    return json.dumps({'results': values.dump()})
+    return {'results': values.dump()}
 
 
 def introspection():
