@@ -36,8 +36,8 @@ class DomainTools(object):
         self.reg_mail = {}
         self.reg_phone = {}
         self.reg_name = {}
-        self.registrar = set()
-        self.creation_date = set()
+        self.registrar = {}
+        self.creation_date = {}
         self.freetext = ''
 
     def _add_value(self, value_type, value, comment):
@@ -45,7 +45,7 @@ class DomainTools(object):
             if comment:
                 value_type[value] += ' - {}'.format(comment)
         else:
-            value_type[value] = comment
+            value_type[value] = comment or ''
         return value_type
 
     def add_mail(self, mail, comment=None):
@@ -57,23 +57,31 @@ class DomainTools(object):
     def add_name(self, name, comment=None):
         self.reg_name = self._add_value(self.reg_name, name, comment)
 
+    def add_registrar(self, reg, comment=None):
+        self.registrar = self._add_value(self.registrar, reg, comment)
+
+    def add_creation_date(self, date, comment=None):
+        self.creation_date = self._add_value(self.creation_date, date, comment)
+
     def dump(self):
         to_return = []
         if self.reg_mail:
             for mail, comment in self.reg_mail.items():
-                to_return.append({'types': ['whois-registrant-email'], 'values': [mail], 'comment': comment or ''})
+                to_return.append({'type': 'whois-registrant-email', 'values': [mail], 'comment': comment or ''})
         if self.reg_phone:
             for phone, comment in self.reg_phone.items():
-                to_return.append({'types': ['whois-registrant-phone'], 'values': [phone], 'comment': comment or ''})
+                to_return.append({'type': 'whois-registrant-phone', 'values': [phone], 'comment': comment or ''})
         if self.reg_name:
             for name, comment in self.reg_name.items():
-                to_return.append({'types': ['whois-registrant-name'], 'values': [name], 'comment': comment or ''})
+                to_return.append({'type': 'whois-registrant-name', 'values': [name], 'comment': comment or ''})
         if self.registrar:
-            to_return.append({'types': ['whois-registrar'], 'values': list(self.registrar)})
+            for reg, comment in self.registrar.items():
+                to_return.append({'type': 'whois-registrar', 'values': [reg], 'comment': comment or ''})
         if self.creation_date:
-            to_return.append({'types': ['whois-creation-date'], 'values': list(self.creation_date)})
+            for date, comment in self.creation_date.items():
+                to_return.append({'type': 'whois-creation-date', 'values': [date], 'comment': comment or ''})
         if self.freetext:
-            to_return.append({'types': ['freetext'], 'values': [self.freetext], 'comment': 'Freetext import'})
+            to_return.append({'type': 'freetext', 'values': [self.freetext], 'comment': 'Freetext import'})
         return to_return
 
 
@@ -113,15 +121,19 @@ def handler(q=False):
         values.add_name(whois_entry['registrant'], 'Parsed registrant')
 
     if whois_entry.get('registration'):
-        values.creation_date.add(whois_entry['registration']['created'])
+        values.add_creation_date(whois_entry['registration']['created'], 'timestamp')
 
     if whois_entry.get('whois'):
         values.freetext = whois_entry['whois']['record']
     if whois_entry.get('parsed_whois'):
         if whois_entry['parsed_whois']['created_date']:
-            values.creation_date.add(whois_entry['parsed_whois']['created_date'])
+            values.add_creation_date(whois_entry['parsed_whois']['created_date'])
         if whois_entry['parsed_whois']['registrar']['name']:
-            values.registrar.add(whois_entry['parsed_whois']['registrar']['name'])
+            values.add_registrar(whois_entry['parsed_whois']['registrar']['name'], 'name')
+        if whois_entry['parsed_whois']['registrar']['url']:
+            values.add_registrar(whois_entry['parsed_whois']['registrar']['url'], 'url')
+        if whois_entry['parsed_whois']['registrar']['iana_id']:
+            values.add_registrar(whois_entry['parsed_whois']['registrar']['iana_id'], 'iana_id')
         for key, entry in whois_entry['parsed_whois']['contacts'].items():
             if entry['email']:
                 values.add_mail(entry['email'], key)
@@ -131,7 +143,8 @@ def handler(q=False):
                 values.add_name(entry['name'], key)
     if whois_entry.emails():
         for mail in whois_entry.emails():
-            values.add_mail(mail)
+            if mail not in values.reg_mail.keys():
+                values.add_mail(mail, 'Maybe registrar')
     return {'results': values.dump()}
 
 
