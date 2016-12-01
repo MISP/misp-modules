@@ -87,7 +87,7 @@ class DomainTools(object):
                 to_return.append({'type': 'whois-creation-date', 'values': [date], 'comment': comment or ''})
         if self.domain_ip:
             for ip, comment in self.domain_ip.items():
-                to_return.append({'types': ['dst-ip', 'src-ip'], 'values': [ip], 'comment': comment or ''})
+                to_return.append({'types': ['ip-dst', 'ip-src'], 'values': [ip], 'comment': comment or ''})
         if self.freetext:
             to_return.append({'type': 'freetext', 'values': [self.freetext], 'comment': 'Freetext import'})
         if self.risk:
