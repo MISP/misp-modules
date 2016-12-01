@@ -17,3 +17,4 @@ git+https://github.com/CIRCL/PyMISP.git#egg=pymisp
 pillow
 pytesseract
 SPARQLWrapper
+domaintools_api
