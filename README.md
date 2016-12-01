@@ -49,6 +49,7 @@ cd misp-modules
 sudo pip3 install -I -r REQUIREMENTS
 sudo pip3 install -I .
 sudo vi /etc/rc.local, add this line: `sudo -u www-data misp-modules -s &`
+/usr/local/bin/misp-modules #to start the modules
 ~~~~
 
 ## How to add your own MISP modules?
