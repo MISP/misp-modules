@@ -38,11 +38,13 @@ class DomainTools(object):
         self.reg_name = {}
         self.registrar = {}
         self.creation_date = {}
+        self.domain_ip = {}
+        self.risk = ()
         self.freetext = ''
 
     def _add_value(self, value_type, value, comment):
         if value_type.get(value):
-            if comment:
+            if comment and comment not in value_type[value]:
                 value_type[value] += ' - {}'.format(comment)
         else:
             value_type[value] = comment or ''
@@ -63,6 +65,9 @@ class DomainTools(object):
     def add_creation_date(self, date, comment=None):
         self.creation_date = self._add_value(self.creation_date, date, comment)
 
+    def add_ip(self, ip, comment=None):
+        self.domain_ip = self._add_value(self.domain_ip, ip, comment)
+
     def dump(self):
         to_return = []
         if self.reg_mail:
@@ -80,8 +85,13 @@ class DomainTools(object):
         if self.creation_date:
             for date, comment in self.creation_date.items():
                 to_return.append({'type': 'whois-creation-date', 'values': [date], 'comment': comment or ''})
+        if self.domain_ip:
+            for ip, comment in self.domain_ip.items():
+                to_return.append({'types': ['dst-ip', 'src-ip'], 'values': [ip], 'comment': comment or ''})
         if self.freetext:
             to_return.append({'type': 'freetext', 'values': [self.freetext], 'comment': 'Freetext import'})
+        if self.risk:
+            to_return.append({'type': 'text', 'values': [self.risk[0]], 'comment': self.risk[1]})
         return to_return
 
 
@@ -110,15 +120,40 @@ def handler(q=False):
         return misperrors
 
     whois_entry = domtools.parsed_whois(to_query)
-    print(whois_entry)
+    profile = domtools.domain_profile(to_query)
+    # NOTE: profile['website_data']['response_code'] could be used to see if the host is still up. Maybe set a tag.
+    reputation = domtools.reputation(to_query, include_reasons=True)
+    # NOTE: use that value in a tag when we will have attribute level tagging
     values = DomainTools()
 
     if whois_entry.get('error'):
         misperrors['error'] = whois_entry['error']['message']
         return misperrors
 
+    if profile.get('error'):
+        misperrors['error'] = profile['error']['message']
+        return misperrors
+
+    if reputation and not reputation.get('error'):
+        reasons = ', '.join(reputation['reasons'])
+        values.risk = [reputation['risk_score'], 'Risk value of {} (via Domain Tools), Reasons: {}'.format(to_query, reasons)]
+
     if whois_entry.get('registrant'):
         values.add_name(whois_entry['registrant'], 'Parsed registrant')
+    if profile.get('registrant'):
+        values.add_name(profile['registrant']['name'], 'Profile registrant')
+
+    if profile.get('server'):
+        other_domains = profile['server']['other_domains']
+        values.add_ip(profile['server']['ip_address'], 'IP of {} (via DomainTools). Has {} other domains.'.format(to_query, other_domains))
+
+    if profile.get('registration'):
+        if profile['registration'].get('created'):
+            values.add_creation_date(profile['registration']['created'], 'created')
+        if profile['registration'].get('updated'):
+            values.add_creation_date(profile['registration']['updated'], 'updated')
+        if profile['registration'].get('registrar'):
+            values.add_registrar(profile['registration']['registrar'], 'name')
 
     if whois_entry.get('registration'):
         values.add_creation_date(whois_entry['registration']['created'], 'timestamp')
@@ -127,7 +162,7 @@ def handler(q=False):
         values.freetext = whois_entry['whois']['record']
     if whois_entry.get('parsed_whois'):
         if whois_entry['parsed_whois']['created_date']:
-            values.add_creation_date(whois_entry['parsed_whois']['created_date'])
+            values.add_creation_date(whois_entry['parsed_whois']['created_date'], 'created')
         if whois_entry['parsed_whois']['registrar']['name']:
             values.add_registrar(whois_entry['parsed_whois']['registrar']['name'], 'name')
         if whois_entry['parsed_whois']['registrar']['url']:
