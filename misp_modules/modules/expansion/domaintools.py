@@ -61,13 +61,13 @@ class DomainTools(object):
         to_return = []
         if self.reg_mail:
             for mail, comment in self.reg_mail.items():
-                to_return.append({'type': ['whois-registrant-email'], 'values': [mail], 'comment': comment})
+                to_return.append({'type': ['whois-registrant-email'], 'values': [mail], 'comment': comment or ''})
         if self.reg_phone:
             for phone, comment in self.reg_phone.items():
-                to_return.append({'type': ['whois-registrant-phone'], 'values': [phone], 'comment': comment})
+                to_return.append({'type': ['whois-registrant-phone'], 'values': [phone], 'comment': comment or ''})
         if self.reg_name:
             for name, comment in self.reg_name.items():
-                to_return.append({'type': ['whois-registrant-name'], 'values': [name], 'comment': comment})
+                to_return.append({'type': ['whois-registrant-name'], 'values': [name], 'comment': comment or ''})
         if self.registrar:
             to_return.append({'type': ['whois-registrar'], 'values': list(self.registrar)})
         if self.creation_date:
