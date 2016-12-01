@@ -53,7 +53,7 @@ sudo vi /etc/rc.local, add this line: `sudo -u www-data misp-modules -s &`
 
 ## How to add your own MISP modules?
 
-Create your module in [misp_modules/modules/expansion/](misp_modules/modules/expansion/). The module should have at minimum three functions:
+Create your module in [misp_modules/modules/](misp_modules/modules/). The module should have at minimum three functions:
 
 * **introspection** function that returns a dict of the supported attributes (input and output) by your expansion module.
 * **handler** function which accepts a JSON document to expand the values and return a dictionary of the expanded values.
@@ -80,10 +80,11 @@ If your module requires additional configuration (to be exposed via the MISP use
 
 ### Module type
 
-A MISP module can be of two types:
+A MISP module can be of different types:
 
 - **expansion** - service related to an attribute that can be used to extend and update an existing event.
 - **hover** - service related to an attribute to provide additional information to the users without updating the event.
+- **import/export** - import / export data
 
 module-type is an array where the list of supported types can be added.
 
