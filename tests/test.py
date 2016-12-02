@@ -7,7 +7,6 @@ import base64
 import json
 import os
 
-
 class TestModules(unittest.TestCase):
 
     def setUp(self):
@@ -58,6 +57,12 @@ class TestModules(unittest.TestCase):
         with open("tests/bodyvirustotal.json", "r") as f:
             response = requests.post(self.url + "query", data=f.read()).json()
         assert(response)
+
+    def test_domaintools(self):
+        query = {'config': {'username': 'test_user', 'api_key': 'test_key'}, 'module': 'domaintools', 'domain': 'domaintools.com'}
+        response = requests.post(self.url + "query", data=json.dumps(query)).json()
+        print(response)
+
 
 if __name__ == '__main__':
     unittest.main()
