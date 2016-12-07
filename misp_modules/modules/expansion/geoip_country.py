@@ -18,9 +18,6 @@ moduleinfo = {'version': '0.1', 'author': 'Andreas Muehlemann',
               'description': 'Query a local copy of Maxminds Geolite database',
               'module-type': ['expansion', 'hover']}
 
-# config fields that your code expects from the site admin
-moduleconfig = ['database']
-
 # get current db from http://geolite.maxmind.com/download/geoip/database/GeoLiteCountry/GeoIP.dat.gz
 config = ConfigParser.ConfigParser()
 config.read('./geoip_contry.cfg')
@@ -59,4 +56,3 @@ def introspection():
 def version():
     moduleinfo['config'] = moduleconfig
     return moduleinfo
-
