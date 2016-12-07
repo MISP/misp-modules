@@ -31,8 +31,6 @@ def handler(q=False):
         return False
     request = json.loads(q)
 
-    log.debug("BLA")
-
     if request.get('ip-dst'):
         toquery = request['ip-dst']
     elif request.get('ip-src'):
@@ -61,3 +59,4 @@ def introspection():
 def version():
     moduleinfo['config'] = moduleconfig
     return moduleinfo
+
