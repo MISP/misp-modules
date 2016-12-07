@@ -1,6 +1,6 @@
 import json, pygeoip
 import sys, logging
-import ConfigParser
+import configparser
 
 log = logging.getLogger('geoip_country')
 log.setLevel(logging.DEBUG)
@@ -19,7 +19,7 @@ moduleinfo = {'version': '0.1', 'author': 'Andreas Muehlemann',
               'module-type': ['expansion', 'hover']}
 
 # get current db from http://geolite.maxmind.com/download/geoip/database/GeoLiteCountry/GeoIP.dat.gz
-config = ConfigParser.ConfigParser()
+config = configparser.ConfigParser()
 config.read('./geoip_contry.cfg')
 gi = pygeoip.GeoIP(config.get('defaults', 'database'))
 
