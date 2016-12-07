@@ -21,7 +21,7 @@ moduleinfo = {'version': '0.1', 'author': 'Andreas Muehlemann',
 # get current db from http://geolite.maxmind.com/download/geoip/database/GeoLiteCountry/GeoIP.dat.gz
 config = ConfigParser.ConfigParser()
 config.read('./geoip_contry.cfg')
-gi = pygeoip.GeoIP(config.get('defaults', 'database')
+gi = pygeoip.GeoIP(config.get('defaults', 'database'))
 
 def handler(q=False):
     if q is False:
