@@ -1,5 +1,6 @@
 import json, pygeoip
 import sys, logging
+import ConfigParser
 
 log = logging.getLogger('geoip_country')
 log.setLevel(logging.DEBUG)
@@ -21,7 +22,9 @@ moduleinfo = {'version': '0.1', 'author': 'Andreas Muehlemann',
 moduleconfig = ['database']
 
 # get current db from http://geolite.maxmind.com/download/geoip/database/GeoLiteCountry/GeoIP.dat.gz
-gi = pygeoip.GeoIP('/opt/misp-modules/var/GeoIP.dat')
+config = ConfigParser.ConfigParser()
+config.read('./geoip_contry.cfg')
+gi = pygeoip.GeoIP(config.get('defaults', 'database')
 
 def handler(q=False):
     if q is False:
@@ -41,12 +44,6 @@ def handler(q=False):
 
     log.debug(toquery)
 
-    #if request.get('config'):
-    #    if request['config'].get('database'):
-    #        gi = pygeoip.GeoIP(request['config'].get('database'))
-    #else:
-    #    gi = pygeoip.GeoIP('/opt/misp-modules/var/GeoIP.dat')
-
     try:
         answer = gi.country_code_by_addr(toquery)
     except:
@@ -55,7 +52,7 @@ def handler(q=False):
 
     r = {'results': [{'types': mispattributes['output'],
                       'values': [str(answer)]}]}
-                     
+
     return r
 
 def introspection():
