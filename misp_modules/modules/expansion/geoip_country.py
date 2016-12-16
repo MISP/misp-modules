@@ -21,10 +21,14 @@ moduleinfo = {'version': '0.1', 'author': 'Andreas Muehlemann',
               'description': 'Query a local copy of Maxminds Geolite database',
               'module-type': ['expansion', 'hover']}
 
-# get current db from http://geolite.maxmind.com/download/geoip/database/GeoLiteCountry/GeoIP.dat.gz
-config = configparser.ConfigParser()
-config.read(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'geoip_country.cfg'))
-gi = pygeoip.GeoIP(config.get('GEOIP', 'database'))
+try:
+    # get current db from http://geolite.maxmind.com/download/geoip/database/GeoLiteCountry/GeoIP.dat.gz
+    config = configparser.ConfigParser()
+    config.read(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'geoip_country.cfg'))
+    gi = pygeoip.GeoIP(config.get('GEOIP', 'database'))
+    enabled = True
+except:
+    enabled = False
 
 
 def handler(q=False):
