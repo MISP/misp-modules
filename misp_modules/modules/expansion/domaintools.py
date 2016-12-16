@@ -33,7 +33,7 @@ moduleconfig = ['username', 'api_key']
 query_profiles = [
     {'inputs': ['domain'], 'services': ['parsed_whois', 'domain_profile', 'reputation', 'reverse_ip']},
     {'inputs': ['email-src', 'email-dst', 'target-email', 'whois-registrant-email', 'whois-registrant-name', 'whois-registrant-phone'], 'services': ['reverse_whois']},
-    {'inputs': ['ip-src', 'ip-dst'], 'services': ['host_domains', 'reverse_ip_whois']}
+    {'inputs': ['ip-src', 'ip-dst'], 'services': ['host_domains']}
 ]
 
 
@@ -173,11 +173,9 @@ def domain_profile(domtools, to_query, values):
 def reputation(domtools, to_query, values):
     rep = domtools.reputation(to_query, include_reasons=True)
     # NOTE: use that value in a tag when we will have attribute level tagging
-
     if rep and not rep.get('error'):
         reasons = ', '.join(rep['reasons'])
         values.risk = [rep['risk_score'], 'Risk value of {} (via Domain Tools), Reasons: {}'.format(to_query, reasons)]
-
     return values
 
 
@@ -188,6 +186,41 @@ def reverse_ip(domtools, to_query, values):
         values.add_ip(ip_addresses['ip_address'], 'IP of {} (via DomainTools). Has {} other domains.'.format(to_query, ip_addresses['domain_count']))
         for d in ip_addresses['domain_names']:
             values.add_domain(d, 'Other domain on {}.'.format(ip_addresses['ip_address']))
+    return values
+
+
+def reverse_whois(domtools, to_query, values):
+    rev_whois = domtools.reverse_whois(to_query, mode='purchase')
+    if rev_whois.get('error'):
+        misperrors['error'] = rev_whois['error']['message']
+        return misperrors
+    for d in rev_whois['domains']:
+        values.add_domain(d, 'Reverse domain related to {}.'.format(to_query))
+    return values
+
+
+def host_domains(domtools, to_query, values):
+    hostdom = domtools.host_domains(to_query)
+    if hostdom.get('error'):
+        misperrors['error'] = hostdom['error']['message']
+        return misperrors
+    ip_addresses = hostdom['ip_addresses']
+    if to_query != ip_addresses['ip_address']:
+        values.add_ip(ip_addresses['ip_address'], 'IP of {} (via DomainTools). Has {} other domains.'.format(to_query, ip_addresses['domain_count']))
+    for d in ip_addresses['domain_names']:
+        values.add_domain(d, 'Other domain on {}.'.format(ip_addresses['ip_address']))
+    return values
+
+
+def reverse_ip_whois(domtools, to_query, values):
+    # Disabled for now, dies with domaintools.exceptions.NotAuthorizedException
+    rev_whois = domtools.reverse_ip_whois(ip=to_query)
+    print(rev_whois)
+    if rev_whois.get('error'):
+        misperrors['error'] = rev_whois['error']['message']
+        return misperrors
+    # for d in rev_whois['domains']:
+    #    values.add_domain(d, 'Reverse domain related to {}.'.format(to_query))
     return values
 
 
