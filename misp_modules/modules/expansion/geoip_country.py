@@ -1,5 +1,8 @@
-import json, pygeoip
-import sys, logging
+import json
+import pygeoip
+import sys
+import os
+import logging
 import configparser
 
 log = logging.getLogger('geoip_country')
@@ -20,8 +23,9 @@ moduleinfo = {'version': '0.1', 'author': 'Andreas Muehlemann',
 
 # get current db from http://geolite.maxmind.com/download/geoip/database/GeoLiteCountry/GeoIP.dat.gz
 config = configparser.ConfigParser()
-config.read('geoip_country.cfg')
+config.read(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'geoip_country.cfg'))
 gi = pygeoip.GeoIP(config.get('GEOIP', 'database'))
+
 
 def handler(q=False):
     if q is False:
@@ -35,7 +39,7 @@ def handler(q=False):
     elif request.get('domain|ip'):
         toquery = request['domain|ip'].split('|')[1]
     else:
-        return false
+        return False
 
     log.debug(toquery)
 
@@ -45,14 +49,15 @@ def handler(q=False):
         misperrors['error'] = "GeoIP resolving error"
         return misperrors
 
-    r = {'results': [{'types': mispattributes['output'],
-                      'values': [str(answer)]}]}
+    r = {'results': [{'types': mispattributes['output'], 'values': [str(answer)]}]}
 
     return r
+
 
 def introspection():
     return mispattributes
 
+
 def version():
-    moduleinfo['config'] = moduleconfig
+    # moduleinfo['config'] = moduleconfig
     return moduleinfo
