@@ -18,3 +18,4 @@ pillow
 pytesseract
 SPARQLWrapper
 domaintools_api
+pygeoip
