@@ -265,7 +265,7 @@ def handler(q=False):
             for s in services:
                 globals()[s](domtools, to_query, values)
         except Exception as e:
-            print(type(e), e)
+            print(to_query, type(e), e)
 
     return {'results': values.dump()}
 
