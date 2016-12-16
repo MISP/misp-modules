@@ -261,8 +261,11 @@ def handler(q=False):
     values = DomainTools()
     services = get_services(request)
     if services:
-        for s in services:
-            globals()[s](domtools, to_query, values)
+        try:
+            for s in services:
+                globals()[s](domtools, to_query, values)
+        except Exception as e:
+            print(type(e), e)
 
     return {'results': values.dump()}
 
