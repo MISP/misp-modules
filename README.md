@@ -44,7 +44,7 @@ For more information: [Extending MISP with Python modules](https://www.circl.lu/
 ## How to install and start MISP modules?
 
 ~~~~bash
-sudo apt-get install python3-dev python3-pip libpq5
+sudo apt-get install python3-dev python3-pip libpq5 libjpeg-dev
 cd /usr/local/src/
 sudo git clone https://github.com/MISP/misp-modules.git
 cd misp-modules
