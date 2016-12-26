@@ -21,7 +21,7 @@ MIME-Version: 1.0
 To: "Testy Testerson" <test@domain.com>
 Cc: "Second Person" <second@domain.com>, "Other Friend" <other@friend.net>, "Last One" <last_one@finally.com>
 Subject: Example Message
-Content-Type: multipart/alternative; boundary=e89a8f3baa71eda1b3053f7a2c28
+Content-Type: multipart/alternative; boundary="e89a8f3baa71eda1b3053f7a2c28"
 MIME-Version: 1.0
 
 --e89a8f3baa71eda1b3053f7a2c28
