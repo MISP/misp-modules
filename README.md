@@ -173,7 +173,7 @@ If the binary file is malware you can use 'malware-sample' as the type. If you d
              "comment": "This is an attachment"}}
 ~~~
 
-
+[To learn more about how data attributes are processed you can read the processing code here.](https://github.com/MISP/PyMISP/blob/4f230c9299ad9d2d1c851148c629b61a94f3f117/pymisp/mispevent.py#L185-L200)
 
 
 ### Module type
@@ -357,8 +357,10 @@ Fork the project, add your module, test it and make a pull-request. Modules can 
 Download a pre-built virtual image from the [MISP training materials](https://www.circl.lu/services/misp-training-materials/).
 
 - Create a Host-Only adapter in VirtualBox
+- Set your Misp OVA to that Host-Only adapter
 - Start the virtual machine
-- SSH into the machine using the misp user
+- Get the IP address of the virutal machine
+- SSH into the machine (Login info on training page)
 - Go into the misp-modules directory
 
 ~~~bash
