@@ -21,12 +21,10 @@ moduleinfo = {'version': '0.1',
               'description': 'Email import module for MISP',
               'module-type': ['import']}
 
-# treat_attachments_as_malware : This treats all attachments as malware. This will zip all attachments and password protect using the password 'infected'
 # unzip_attachments : Unzip all zip files that are not password protected
 # guess_zip_attachment_passwords : This attempts to unzip all password protected zip files using all the strings found in the email body and subject
 # extract_urls : This attempts to extract all URL's from text/html parts of the email
-moduleconfig = ["treat_attachments_as_malware",
-                "unzip_attachments",
+moduleconfig = ["unzip_attachments",
                 "guess_zip_attachment_passwords",
                 "extract_urls"]
 
@@ -45,7 +43,7 @@ def handler(q=False):
     # Extract all header information
     all_headers = ""
     for k, v in message.items():
-        all_headers += "\n{0}: {1}".format(k, v)
+        all_headers += "{0}: {1}\n".format(k, v)
     results.append({"values": all_headers,
                     "types": ['email-header']})
 
@@ -77,14 +75,10 @@ def handler(q=False):
     from_addr = message.get('From')
     results.append({"values": parseaddr(from_addr)[1],
                     "types": ['email-src'],
-                    "comment": "From: {0}".format(re.sub('["\']',
-                                                         '',
-                                                         from_addr))})
-    results.append({"values": parseaddr(from_addr)[1],
+                    "comment": "From: {0}".format(from_addr)})
+    results.append({"values": parseaddr(from_addr)[0],
                     "types": ['email-src-display-name'],
-                    "comment": "From: {0}".format(re.sub('["\']',
-                                                         '',
-                                                         from_addr))})
+                    "comment": "From: {0}".format(from_addr)})
 
     # Return Path
     return_path = message.get('Return-Path')
@@ -111,15 +105,11 @@ def handler(q=False):
                 results.append({"values": parsed_addr[1],
                                 "types":  ["email-dst"],
                                 "comment": "{0}: {1}".format(hdr_val,
-                                                             re.sub('["\']',
-                                                                    '',
-                                                                    addr))})
+                                                             addr)})
                 results.append({"values": parsed_addr[0],
                                 "types":  ["email-dst-display-name"],
                                 "comment": "{0}: {1}".format(hdr_val,
-                                                             re.sub('["\']',
-                                                                    '',
-                                                                    addr))})
+                                                             addr)})
 
         except AttributeError:
             continue
@@ -127,45 +117,45 @@ def handler(q=False):
     # Get E-Mail Targets
     # Get the addresses that received the email.
     # As pulled from the Received header
-    received = message.get_all('received')
+    received = message.get_all('Received')
     email_targets = set()
-    for rec in received:
-        try:
-            email_check = re.search("for\s(.*@.*);", rec).group(1)
-            email_check = email_check.strip(' <>')
-            email_targets.add(parseaddr(email_check)[1])
-        except (AttributeError):
-            continue
-    for tar in email_targets:
-        results.append({"values":  tar,
-                        "types":   ["target-email"],
-                        "comment": "Extracted from email 'Received' header"})
+    try:
+        for rec in received:
+            try:
+                email_check = re.search("for\s(.*@.*);", rec).group(1)
+                email_check = email_check.strip(' <>')
+                email_targets.add(parseaddr(email_check)[1])
+            except (AttributeError):
+                continue
+        for tar in email_targets:
+            results.append({"values":  tar,
+                            "types":   ["target-email"],
+                            "comment": "Extracted from email 'Received' header"})
+    except TypeError:
+        pass # If received header is missing we can't iterate over NoneType
 
     # Check if we were given a configuration
     config = request.get("config", {})
     # Don't be picky about how the user chooses to say yes to these
     acceptable_config_yes = ['y', 'yes', 'true', 't']
 
-    # Do we treat all attachments as malware
-    treat_attachments_as_malware = config.get("treat_attachments_as_malware",
-                                              "false")
-    if treat_attachments_as_malware.lower() in acceptable_config_yes:
-        treat_attachments_as_malware = True
-
     # Do we unzip attachments we find?
-    unzip = config.get("unzip_attachments", "false")
-    if unzip.lower() in acceptable_config_yes:
+    unzip = config.get("unzip_attachments", None)
+    if (unzip is not None and
+        unzip.lower() in acceptable_config_yes):
         unzip = True
 
     # Do we try to find passwords for protected zip files?
-    zip_pass_crack = config.get("guess_zip_attachment_passwords", "false")
-    if zip_pass_crack.lower() in acceptable_config_yes:
+    zip_pass_crack = config.get("guess_zip_attachment_passwords", None)
+    if (zip_pass_crack is not None and
+        zip_pass_crack.lower() in acceptable_config_yes):
         zip_pass_crack = True
         password_list = None  # Only want to collect password list once
 
     # Do we extract URL's from the email.
-    extract_urls = config.get("extract_urls", "false")
-    if extract_urls.lower() in acceptable_config_yes:
+    extract_urls = config.get("extract_urls", None)
+    if (extract_urls is not None and
+        extract_urls.lower() in acceptable_config_yes):
         extract_urls = True
 
     # Get Attachments
@@ -174,41 +164,35 @@ def handler(q=False):
         filename = part.get_filename()
         if filename is not None:
             attachment_data = part.get_payload(decode=True)
+            # Base attachment data is default
+            attachment_files = [{"values": filename,
+                                 "data"  : base64.b64encode(attachment_data).decode()}]
             if unzip is True:  # Attempt to unzip the attachment and return its files
                 try:
-                    attachment_files = get_zipped_contents(filename,
+                    attachment_files += get_zipped_contents(filename,
                                                            attachment_data)
                 except RuntimeError:  # File is encrypted with a password
                     if zip_pass_crack is True:
                         if password_list is None:
                             password_list = get_zip_passwords(message)
                         password = test_zip_passwords(attachment_data, password_list)
-                        # If we don't guess the password just use the zip
-                        if password is None:
-                            attachment_files = [{"values": filename,
-                                                 "data"  : base64.b64encode(attachment_data),
-                                                 "comment":"Password could not be cracked from message"}]
+                        if password is None: # Inform the analyst that we could not crack password
+                            attachment_files[0]['comment'] = "Encrypted Zip: Password could not be cracked from message"
                         else:
-                            attachment_files = get_zipped_contents(filename,
+                            attachment_files[0]['comment'] = """Original Zipped Attachment with Password {0}""".format(password)
+                            attachment_files += get_zipped_contents(filename,
                                                                    attachment_data,
                                                                    password=password)
-
                 except zipfile.BadZipFile: # Attachment is not a zipfile
-                    attachment_files = [{"values": filename,
-                                        "data"  : base64.b64encode(attachment_data)}]
-            else:
-                attachment_files = [{"values": filename,
-                                    "data"  : base64.b64encode(attachment_data)}]
+                    attachment_files += [{"values": filename,
+                                          "data"  : base64.b64encode(attachment_data).decode()}]
             for attch_item in attachment_files:
-                if treat_attachments_as_malware is True: # Malware-samples are encrypted by server
-                    attch_item["types"] = ['malware-sample']
-                else:
-                    attch_item["types"] = ['attachment']
+                attch_item["types"] = ['attachment']
                 results.append(attch_item)
         else: # Check email body part for urls
             if (extract_urls is True and part.get_content_type() == 'text/html'):
                 url_parser = HTMLURLParser()
-                charset = get_charset(i, get_charset(message))
+                charset = get_charset(part, get_charset(message))
                 url_parser.feed(part.get_payload(decode=True).decode(charset))
                 urls = url_parser.urls
                 for url in urls:
@@ -235,11 +219,11 @@ def get_zipped_contents(filename, data, password=None):
         unzipped_files = []
         if password is not None:
             password = str.encode(password)  # Byte encoded password required
-        for zip_file_name in zf:  # Get all files in the zip file
+        for zip_file_name in zf.namelist():  # Get all files in the zip file
+            with zf.open(zip_file_name, mode='rU', pwd=password) as fp:
+                file_data = fp.read()
             unzipped_files.append({"values": zip_file_name,
-                                   "data"  : base64.b64encode(zf.open(zip_file_name,
-                                                                      mode='rU',
-                                                                      pwd=password)),  # Any password works when not encrypted
+                                   "data"  : base64.b64encode(file_data).decode(),  # Any password works when not encrypted
                                    "comment": "Extracted from {0}".format(filename)})
     return unzipped_files
 
@@ -256,11 +240,12 @@ def test_zip_passwords(data, test_passwords):
 
     """
     with zipfile.ZipFile(io.BytesIO(data), "r") as zf:
+        firstfile = zf.namelist()[0]
         for pw_test in test_passwords:
             byte_pwd = str.encode(pw_test)
             try:
-                zf.testzip()
-                return byte_pwd
+                zf.open(firstfile, pwd=byte_pwd)
+                return pw_test
             except RuntimeError:  # Incorrect Password
                 continue
     return None
@@ -315,10 +300,10 @@ def get_zip_passwords(message):
     raw_text += subject
 
     # Grab any strings that are marked off by special chars
-    marking_chars = [["'", "'"], ['"', '"'], ['[', ']'], ['(', ')']]
+    marking_chars = [["\'", "\'"], ['"', '"'], ['[', ']'], ['(', ')']]
     for char_set in marking_chars:
-        regex = re.compile("'{0}([^{1}]*){1}'".format(char_set[0],
-                                                      char_set[1]))
+        regex = re.compile("""\{0}([^\{1}]*)\{1}""".format(char_set[0],
+                                                           char_set[1]))
         marked_off = re.findall(regex, raw_text)
         possible_passwords += marked_off
 
@@ -350,7 +335,7 @@ class HTMLURLParser(HTMLParser):
         if urls is None:
             self.urls = []
         else:
-            self.urls = output_list
+            self.urls = urls
     def handle_starttag(self, tag, attrs):
         if tag == 'a':
             self.urls.append(dict(attrs).get('href'))
