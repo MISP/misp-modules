@@ -390,6 +390,7 @@ sudo pip3 install --upgrade .
 SSH in with a different terminal and run `misp-modules` with debugging enabled.
 
 ~~~python
+sudo killall misp-modules
 misp-modules -d
 ~~~
 

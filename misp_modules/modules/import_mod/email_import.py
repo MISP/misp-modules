@@ -148,23 +148,23 @@ def handler(q=False):
 
     # Do we treat all attachments as malware
     treat_attachments_as_malware = config.get("treat_attachments_as_malware",
-                                              False)
+                                              "false")
     if treat_attachments_as_malware.lower() in acceptable_config_yes:
         treat_attachments_as_malware = True
 
     # Do we unzip attachments we find?
-    unzip = config.get("unzip_attachments", False)
+    unzip = config.get("unzip_attachments", "false")
     if unzip.lower() in acceptable_config_yes:
         unzip = True
 
     # Do we try to find passwords for protected zip files?
-    zip_pass_crack = config.get("guess_zip_attachment_passwords", False)
+    zip_pass_crack = config.get("guess_zip_attachment_passwords", "false")
     if zip_pass_crack.lower() in acceptable_config_yes:
         zip_pass_crack = True
         password_list = None  # Only want to collect password list once
 
     # Do we extract URL's from the email.
-    extract_urls = config.get("extract_urls", False)
+    extract_urls = config.get("extract_urls", "false")
     if extract_urls.lower() in acceptable_config_yes:
         extract_urls = True
 

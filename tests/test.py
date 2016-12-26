@@ -99,7 +99,7 @@ class TestModules(unittest.TestCase):
 
         with open("tests/test_attachment.eml", "r") as f:
             data = json.dumps({"module":"email_import",
-                    "data":str(base64.b64encode(test_email)}).encode('utf8')
+                    "data":str(base64.b64encode(test_email)).encode('utf8')})
             response = requests.post(self.url + "query", data=data)
             response.connection.close()
             print(response.json())
