@@ -22,7 +22,9 @@ For more information: [Extending MISP with Python modules](https://www.circl.lu/
 * [CIRCL Passive DNS](misp_modules/modules/expansion/circl_passivedns.py) - a hover and expansion module to expand hostname and IP addresses with passive DNS information.
 * [CVE](misp_modules/modules/expansion/cve.py) - a hover module to give more information about a vulnerability (CVE).
 * [DNS](misp_modules/modules/expansion/dns.py) - a simple module to resolve MISP attributes like hostname and domain to expand IP addresses attributes.
+* [DomainTools](misp_modules/modules/expansion/domaintools.py) - a hover and expansion module to get information from [DomainTools](http://www.domaintools.com/) whois.
 * [EUPI](misp_modules/modules/expansion/eupi.py) - a hover and expansion module to get information about an URL from the [Phishing Initiative project](https://phishing-initiative.eu/?lang=en).
+* [GeoIP](misp_modules/modules/expansion/geoip_country.py) - a hover and expansion module to get GeoIP information from geolite/maxmind.
 * [IPASN](misp_modules/modules/expansion/ipasn.py) - a hover and expansion to get the BGP ASN of an IP address.
 * [passivetotal](misp_modules/modules/expansion/passivetotal.py) - a [passivetotal](https://www.passivetotal.org/) module that queries a number of different PassiveTotal datasets.
 * [sourcecache](misp_modules/modules/expansion/sourcecache.py) - a module to cache a specific link from a MISP instance.
@@ -38,17 +40,19 @@ For more information: [Extending MISP with Python modules](https://www.circl.lu/
 * [OCR](misp_modules/modules/import_mod/ocr.py) Optical Character Recognition (OCR) module for MISP to import attributes from images, scan or faxes.
 * [stiximport](misp_modules/modules/import_mod/stiximport.py) - An import module to process STIX xml/json
 * [Email Import](misp_modules/modules/import_mod/email_import.py) Email import module for MISP to import basic metadata.
+* [VMRay](misp_modules/modules/import_mod/vmray_import.py) - An import module to process VMRay export
 
 ## How to install and start MISP modules?
 
 ~~~~bash
-sudo apt-get install python3-dev python3-pip libpq5
+sudo apt-get install python3-dev python3-pip libpq5 libjpeg-dev
 cd /usr/local/src/
 sudo git clone https://github.com/MISP/misp-modules.git
 cd misp-modules
-sudo pip3 install --upgrade -r REQUIREMENTS
-sudo pip3 install --upgrade .
+sudo pip3 install -I -r REQUIREMENTS
+sudo pip3 install -I .
 sudo vi /etc/rc.local, add this line: `sudo -u www-data misp-modules -s &`
+/usr/local/bin/misp-modules #to start the modules
 ~~~~
 
 ## How to add your own MISP modules?
@@ -178,11 +182,12 @@ If the binary file is malware you can use 'malware-sample' as the type. If you d
 
 ### Module type
 
-A MISP module can be of three types:
+A MISP module can be of four types:
 
 - **expansion** - service related to an attribute that can be used to extend and update an existing event.
 - **hover** - service related to an attribute to provide additional information to the users without updating the event.
 - **import** - service related to importing and parsing an external object that can be used to extend an existing event.
+- **export** - service related to exporting an object, event, or data.
 
 module-type is an array where the list of supported types can be added.
 

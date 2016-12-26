@@ -38,15 +38,19 @@ class TestModules(unittest.TestCase):
             response.connection.close()
 
     def test_stix(self):
-        with open("tests/stix.xml", "r") as f:
-            data = json.dumps({"module":"stiximport",
-                    "data":str(base64.b64encode(bytes(f.read(), 'utf-8'))),
-                    "config": {"max_size": "15000"},
-                   })
+        with open("tests/stix.xml", "rb") as f:
+            content = base64.b64encode(f.read())
+            data = json.dumps({"module": "stiximport",
+                               "data": content.decode('utf-8'),
+                               })
+            response = requests.post(self.url + "query", data=data).json()
 
-            response = requests.post(self.url + "query", data=data)
-            response.connection.close()
-            print(response.json())
+            print("STIX :: {}".format(response))
+            values = [x["values"][0] for x in response["results"]]
+
+            assert("209.239.79.47" in values)
+            assert("41.213.121.180" in values)
+            assert("eu-society.com" in values)
 
     def test_email_headers(self):
         with open("tests/test_no_attach.eml", "r") as f:
@@ -184,10 +188,10 @@ class TestModules(unittest.TestCase):
         # and pass if it can't find one
 
         if not os.path.exists("tests/bodyvirustotal.json"):
-          return
+            return
 
         with open("tests/bodyvirustotal.json", "r") as f:
-          response = requests.post(self.url + "query", data=f.read()).json()
+            response = requests.post(self.url + "query", data=f.read()).json()
         assert(response)
         response.connection.close()
 
@@ -206,6 +210,16 @@ def helper_create_email(**conf):
 
 
 
+
+
+    #def test_domaintools(self):
+    #    query = {'config': {'username': 'test_user', 'api_key': 'test_key'}, 'module': 'domaintools', 'domain': 'domaintools.com'}
+    #    try:
+    #        response = requests.post(self.url + "query", data=json.dumps(query)).json()
+    #    except:
+    #        pass
+    #    response = requests.post(self.url + "query", data=json.dumps(query)).json()
+    #    print(response)
 
 
 if __name__ == '__main__':
