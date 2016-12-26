@@ -87,6 +87,9 @@ def introspection():
 
 The function that returns a dict with the version and the associated meta-data including potential configurations required of the module.
 
+
+### Additional Configuration Values
+
 If your module requires additional configuration (to be exposed via the MISP user-interface), you can define those in the moduleconfig value returned by the version function.
 
 ~~~python
@@ -97,6 +100,7 @@ def version():
     moduleinfo['config'] = moduleconfig
     return moduleinfo
 ~~~
+
 
 When you do this a config array is added to the meta-data output containing all the potential configuration values:
 
@@ -114,6 +118,20 @@ When you do this a config array is added to the meta-data output containing all 
 
 ...
 ~~~
+
+
+If you want to use the configuration values set in the web interface they are stored in the key `config` in the JSON object passed to the handler.
+
+~~~
+def handler(q=False):
+
+    # Check if we were given a configuration
+    config = q.get("config", {})
+
+    # Find out if there is a username field
+    username = config.get("username", None)
+~~~
+
 
 ### handler
 
@@ -133,6 +151,29 @@ def handler(q=False):
         return {'results':
                 codecs.encode(src, "rot-13")}
 ~~~
+
+### Returning Binary Data
+
+If you want to return a file or other data you need to add a data attribute.
+
+~~~python
+{"results": {"values": "filename.txt",
+             "types": "attachment",
+             "data"  : base64.b64encode(<ByteIO>)  # base64 encode your data first
+             "comment": "This is an attachment"}}
+~~~
+
+If the binary file is malware you can use 'malware-sample' as the type. If you do this the malware sample will be automatically zipped and password protected ('infected') after being uploaded.
+
+
+~~~python
+{"results": {"values": "filename.txt",
+             "types": "malware-sample",
+             "data"  : base64.b64encode(<ByteIO>)  # base64 encode your data first
+             "comment": "This is an attachment"}}
+~~~
+
+
 
 
 ### Module type
