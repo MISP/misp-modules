@@ -101,12 +101,6 @@ def findAll(data, keys):
     
   return a 
 
-def isset(d, key):
-    if key in d:
-      if  d[key] not in [None, '', ' ']:
-        return True
-    return False
-
 def getMoreInfo(req, key):
     global limit
     r = []
@@ -136,20 +130,16 @@ def getMoreInfo(req, key):
                             params = {"hash":hsh, "apikey":key})
       
       malsample = sample.content
-      if isset(data, "submission_names"):
+
+      # It is possible for VT to not give us any submission names
+      if "submission_names" in data:
         r.append({"types":["malware-sample"], 
                   "categories":["Payload delivery"],
                   "values":data["submission_names"],
                   "data": str(base64.b64encode(malsample), 'utf-8')
                   }
                 )
-      else:
-        r.append({"types":["malware-sample"], 
-                  "categories":["Payload delivery"],
-                  "values":data["submission_names"],
-                  "data": str(base64.b64encode(malsample), 'utf-8')
-                  }
-                ) 
+    
     return r
 
 def introspection():
