@@ -11,7 +11,7 @@ mispattributes = {'input': ['hostname', 'domain', "ip-src", "ip-dst"],
                   }
 
 # possible module-types: 'expansion', 'hover' or both
-moduleinfo = {'version': '1', 'author': 'Hannah Ward',
+moduleinfo = {'version': '', 'author': 'Hannah Ward',
               'description': 'Get information from virustotal',
               'module-type': ['expansion']}
 
@@ -113,16 +113,18 @@ def getMoreInfo(req, key):
       data = requests.get("http://www.virustotal.com/vtapi/v2/file/report",
                           params={"allinfo":1, "apikey":key, "resource":hsh}
                          ).json()
-      if isset(data, "submission_names"):
+
+      # Go through each key and check if it exists
+      if "submission_names" in data:
         r.append({'types':["filename"], "values":data["submission_names"]})
 
-      if isset(data, "ssdeep"):
+      if "ssdeep" in data:
         r.append({'types':["ssdeep"], "values":[data["ssdeep"]]})
 
-      if isset(data, "authentihash"):
+      if "authentihash" in data:
         r.append({"types":["authentihash"], "values":[data["authentihash"]]})
 
-      if isset(data, "ITW_urls"):
+      if "ITW_urls" in data:
         r.append({"types":["url"], "values":data["ITW_urls"]})
 
       #Get the malware sample
@@ -144,7 +146,6 @@ def getMoreInfo(req, key):
 
 def introspection():
     return mispattributes
-
 
 def version():
     moduleinfo['config'] = moduleconfig
