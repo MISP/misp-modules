@@ -43,7 +43,7 @@ def handler(q=False):
     # Extract all header information
     all_headers = ""
     for k, v in message.items():
-        all_headers += "{0}: {1}\n".format(k, v)
+        all_headers += "{0}: {1}\n".format(k.strip(), v.strip())
     results.append({"values": all_headers,
                     "types": ['email-header']})
 
@@ -52,7 +52,7 @@ def handler(q=False):
                     "types": ['email-mime-boundary']})
 
     # E-Mail Reply To
-    results.append({"values": message.get('In-Reply-To'),
+    results.append({"values": message.get('In-Reply-To').strip(),
                     "types": ['email-reply-to']})
 
     # X-Mailer
