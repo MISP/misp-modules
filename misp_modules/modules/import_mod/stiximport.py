@@ -33,11 +33,11 @@ def handler(q=False):
         return json.dumps({"success": 0})
 
     pkg = stix.load_stix(package)
-
     for attrib in pkg.attributes:
-        r["results"].append({ "values" : [attrib.value] , "types": [attrib.type], "categories": [attrib.category]})
+        r["results"].append({"values": [attrib.value], "types": [attrib.type], "categories": [attrib.category]})
 
     return r
+
 
 def introspection():
     modulesetup = {}
