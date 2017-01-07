@@ -136,12 +136,20 @@ def getMoreInfo(req, key):
                             params = {"hash":hsh, "apikey":key})
       
       malsample = sample.content
-      r.append({"types":["malware-sample"], 
-                "categories":["Payload delivery"],
-                "values":data["submission_names"],
-                "data": str(base64.b64encode(malsample), 'utf-8')
-                }
-              )  
+      if isset(data, "submission_names"):
+        r.append({"types":["malware-sample"], 
+                  "categories":["Payload delivery"],
+                  "values":data["submission_names"],
+                  "data": str(base64.b64encode(malsample), 'utf-8')
+                  }
+                )
+      else:
+        r.append({"types":["malware-sample"], 
+                  "categories":["Payload delivery"],
+                  "values":data["submission_names"],
+                  "data": str(base64.b64encode(malsample), 'utf-8')
+                  }
+                ) 
     return r
 
 def introspection():
