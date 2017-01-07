@@ -44,60 +44,45 @@ def handler(q=False):
     all_headers = ""
     for k, v in message.items():
         all_headers += "{0}: {1}\n".format(k.strip(), v.strip())
-    results.append({"values": all_headers,
-                    "types": ['email-header']})
+    results.append({"values": all_headers, "type": 'email-header'})
 
     # E-Mail MIME Boundry
     if message.get_boundary():
-        results.append({"values": message.get_boundary(),
-                        "types": ['email-mime-boundary']})
+        results.append({"values": message.get_boundary(), "type": 'email-mime-boundary'})
 
     # E-Mail Reply To
     if message.get('In-Reply-To'):
-        results.append({"values": message.get('In-Reply-To').strip(),
-                        "types": ['email-reply-to']})
+        results.append({"values": message.get('In-Reply-To').strip(), "type": 'email-reply-to'})
 
     # X-Mailer
     if message.get('X-Mailer'):
-        results.append({"values": message.get('X-Mailer'),
-                        "types": ['email-x-mailer']})
+        results.append({"values": message.get('X-Mailer'), "type": 'email-x-mailer'})
 
     # Thread Index
     if message.get('Thread-Index'):
-        results.append({"values": message.get('Thread-Index'),
-                        "types": ['email-thread-index']})
+        results.append({"values": message.get('Thread-Index'), "type": 'email-thread-index'})
 
     # Email Message ID
     if message.get('Message-ID'):
-        results.append({"values": message.get('Message-ID'),
-                        "types": ['email-message-id']})
+        results.append({"values": message.get('Message-ID'), "type": 'email-message-id'})
 
     # Subject
     if message.get('Subject'):
-        results.append({"values": message.get('Subject'),
-                        "types": ['email-subject']})
+        results.append({"values": message.get('Subject'), "type": 'email-subject'})
 
     # Source
     from_addr = message.get('From')
     if from_addr:
-        results.append({"values": parseaddr(from_addr)[1],
-                        "types": ['email-src'],
-                        "comment": "From: {0}".format(from_addr)})
-        results.append({"values": parseaddr(from_addr)[0],
-                        "types": ['email-src-display-name'],
-                        "comment": "From: {0}".format(from_addr)})
+        results.append({"values": parseaddr(from_addr)[1], "type": 'email-src', "comment": "From: {0}".format(from_addr)})
+        results.append({"values": parseaddr(from_addr)[0], "type": 'email-src-display-name', "comment": "From: {0}".format(from_addr)})
 
     # Return Path
     return_path = message.get('Return-Path')
     if return_path:
         # E-Mail Source
-        results.append({"values": parseaddr(return_path)[1],
-                        "types": ['email-src'],
-                        "comment": "Return Path: {0}".format(return_path)})
+        results.append({"values": parseaddr(return_path)[1], "type": 'email-src', "comment": "Return Path: {0}".format(return_path)})
         # E-Mail Source Name
-        results.append({"values": parseaddr(return_path)[0],
-                        "types": ['email-src-display-name'],
-                        "comment": "Return Path: {0}".format(return_path)})
+        results.append({"values": parseaddr(return_path)[0], "type": 'email-src-display-name', "comment": "Return Path: {0}".format(return_path)})
 
     # Destinations
     # Split and sort destination header values
@@ -109,14 +94,8 @@ def handler(q=False):
             for addr in addrs:
                 # Parse and add destination header values
                 parsed_addr = parseaddr(addr)
-                results.append({"values": parsed_addr[1],
-                                "types": ["email-dst"],
-                                "comment": "{0}: {1}".format(hdr_val,
-                                                             addr)})
-                results.append({"values": parsed_addr[0],
-                                "types": ["email-dst-display-name"],
-                                "comment": "{0}: {1}".format(hdr_val,
-                                                             addr)})
+                results.append({"values": parsed_addr[1], "type": "email-dst", "comment": "{0}: {1}".format(hdr_val, addr)})
+                results.append({"values": parsed_addr[0], "type": "email-dst-display-name", "comment": "{0}: {1}".format(hdr_val, addr)})
 
     # Get E-Mail Targets
     # Get the addresses that received the email.
@@ -132,9 +111,7 @@ def handler(q=False):
             except (AttributeError):
                 continue
         for tar in email_targets:
-            results.append({"values": tar,
-                            "types": ["target-email"],
-                            "comment": "Extracted from email 'Received' header"})
+            results.append({"values": tar, "type": "target-email", "comment": "Extracted from email 'Received' header"})
 
     # Check if we were given a configuration
     config = request.get("config", {})
@@ -162,10 +139,10 @@ def handler(q=False):
     for part in message.walk():
         filename = part.get_filename()
         if filename is not None:
+            results.append({"values": filename, "type": 'email-attachment'})
             attachment_data = part.get_payload(decode=True)
             # Base attachment data is default
-            attachment_files = [{"values": filename,
-                                 "data": base64.b64encode(attachment_data).decode()}]
+            attachment_files = [{"values": filename, "data": base64.b64encode(attachment_data).decode()}]
             if unzip is True:  # Attempt to unzip the attachment and return its files
                 try:
                     attachment_files += get_zipped_contents(filename, attachment_data)
@@ -180,10 +157,9 @@ def handler(q=False):
                             attachment_files[0]['comment'] = """Original Zipped Attachment with Password {0}""".format(password)
                             attachment_files += get_zipped_contents(filename, attachment_data, password=password)
                 except zipfile.BadZipFile:  # Attachment is not a zipfile
-                    attachment_files += [{"values": filename,
-                                          "data": base64.b64encode(attachment_data).decode()}]
+                    attachment_files += [{"values": filename, "data": base64.b64encode(attachment_data).decode()}]
             for attch_item in attachment_files:
-                attch_item["types"] = ['attachment']
+                attch_item["type"] = 'malware-sample'
                 results.append(attch_item)
         else:  # Check email body part for urls
             if (extract_urls is True and part.get_content_type() == 'text/html'):
@@ -192,8 +168,7 @@ def handler(q=False):
                 url_parser.feed(part.get_payload(decode=True).decode(charset))
                 urls = url_parser.urls
                 for url in urls:
-                    results.append({"values": url,
-                                    "types": "url"})
+                    results.append({"values": url, "type": "url"})
     r = {'results': results}
     return r
 
@@ -270,12 +245,8 @@ def get_zip_passwords(message):
 
     # Not checking for multi-part message because by having an
     # encrypted zip file it must be multi-part.
-    text_parts = [part for part in typed_subpart_iterator(message,
-                                                          'text',
-                                                          'plain')]
-    html_parts = [part for part in typed_subpart_iterator(message,
-                                                          'text',
-                                                          'html')]
+    text_parts = [part for part in typed_subpart_iterator(message, 'text', 'plain')]
+    html_parts = [part for part in typed_subpart_iterator(message, 'text', 'html')]
     body = []
     # Get full message character set once
     # Language example reference (using python2)
@@ -300,8 +271,7 @@ def get_zip_passwords(message):
     # Grab any strings that are marked off by special chars
     marking_chars = [["\'", "\'"], ['"', '"'], ['[', ']'], ['(', ')']]
     for char_set in marking_chars:
-        regex = re.compile("""\{0}([^\{1}]*)\{1}""".format(char_set[0],
-                                                           char_set[1]))
+        regex = re.compile("""\{0}([^\{1}]*)\{1}""".format(char_set[0], char_set[1]))
         marked_off = re.findall(regex, raw_text)
         possible_passwords += marked_off
 
