@@ -48,55 +48,63 @@ def handler(q=False):
                     "types": ['email-header']})
 
     # E-Mail MIME Boundry
-    results.append({"values": message.get_boundary(),
-                    "types": ['email-mime-boundary']})
+    if message.get_boundary():
+        results.append({"values": message.get_boundary(),
+                        "types": ['email-mime-boundary']})
 
     # E-Mail Reply To
-    results.append({"values": message.get('In-Reply-To').strip(),
-                    "types": ['email-reply-to']})
+    if message.get('In-Reply-To'):
+        results.append({"values": message.get('In-Reply-To').strip(),
+                        "types": ['email-reply-to']})
 
     # X-Mailer
-    results.append({"values": message.get('X-Mailer'),
-                    "types": ['email-x-mailer']})
+    if message.get('X-Mailer'):
+        results.append({"values": message.get('X-Mailer'),
+                        "types": ['email-x-mailer']})
 
     # Thread Index
-    results.append({"values": message.get('Thread-Index'),
-                    "types": ['email-thread-index']})
+    if message.get('Thread-Index'):
+        results.append({"values": message.get('Thread-Index'),
+                        "types": ['email-thread-index']})
 
     # Email Message ID
-    results.append({"values": message.get('Message-ID'),
-                    "types": ['email-message-id']})
+    if message.get('Message-ID'):
+        results.append({"values": message.get('Message-ID'),
+                        "types": ['email-message-id']})
 
     # Subject
-    results.append({"values": message.get('Subject'),
-                    "types": ['email-subject']})
+    if message.get('Subject'):
+        results.append({"values": message.get('Subject'),
+                        "types": ['email-subject']})
 
     # Source
     from_addr = message.get('From')
-    results.append({"values": parseaddr(from_addr)[1],
-                    "types": ['email-src'],
-                    "comment": "From: {0}".format(from_addr)})
-    results.append({"values": parseaddr(from_addr)[0],
-                    "types": ['email-src-display-name'],
-                    "comment": "From: {0}".format(from_addr)})
+    if from_addr:
+        results.append({"values": parseaddr(from_addr)[1],
+                        "types": ['email-src'],
+                        "comment": "From: {0}".format(from_addr)})
+        results.append({"values": parseaddr(from_addr)[0],
+                        "types": ['email-src-display-name'],
+                        "comment": "From: {0}".format(from_addr)})
 
     # Return Path
     return_path = message.get('Return-Path')
-    # E-Mail Source
-    results.append({"values": parseaddr(return_path)[1],
-                    "types": ['email-src'],
-                    "comment": "Return Path: {0}".format(return_path)})
-    # E-Mail Source Name
-    results.append({"values": parseaddr(return_path)[0],
-                    "types": ['email-src-display-name'],
-                    "comment": "Return Path: {0}".format(return_path)})
+    if return_path:
+        # E-Mail Source
+        results.append({"values": parseaddr(return_path)[1],
+                        "types": ['email-src'],
+                        "comment": "Return Path: {0}".format(return_path)})
+        # E-Mail Source Name
+        results.append({"values": parseaddr(return_path)[0],
+                        "types": ['email-src-display-name'],
+                        "comment": "Return Path: {0}".format(return_path)})
 
     # Destinations
     # Split and sort destination header values
     recipient_headers = ['To', 'Cc', 'Bcc']
 
     for hdr_val in recipient_headers:
-        try:
+        if message.get(hdr_val):
             addrs = message.get(hdr_val).split(',')
             for addr in addrs:
                 # Parse and add destination header values
@@ -110,15 +118,12 @@ def handler(q=False):
                                 "comment": "{0}: {1}".format(hdr_val,
                                                              addr)})
 
-        except AttributeError:
-            continue
-
     # Get E-Mail Targets
     # Get the addresses that received the email.
     # As pulled from the Received header
     received = message.get_all('Received')
-    email_targets = set()
-    try:
+    if received:
+        email_targets = set()
         for rec in received:
             try:
                 email_check = re.search("for\s(.*@.*);", rec).group(1)
@@ -130,8 +135,6 @@ def handler(q=False):
             results.append({"values": tar,
                             "types": ["target-email"],
                             "comment": "Extracted from email 'Received' header"})
-    except TypeError:
-        pass  # If received header is missing we can't iterate over NoneType
 
     # Check if we were given a configuration
     config = request.get("config", {})
