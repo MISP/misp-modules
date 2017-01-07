@@ -162,10 +162,10 @@ def handler(q=False):
     for part in message.walk():
         filename = part.get_filename()
         if filename is not None:
+            results.append({"values": filename, "types": ['email-attachment']})
             attachment_data = part.get_payload(decode=True)
             # Base attachment data is default
-            attachment_files = [{"values": filename,
-                                 "data": base64.b64encode(attachment_data).decode()}]
+            attachment_files = [{"values": filename, "data": base64.b64encode(attachment_data).decode()}]
             if unzip is True:  # Attempt to unzip the attachment and return its files
                 try:
                     attachment_files += get_zipped_contents(filename, attachment_data)
@@ -180,10 +180,9 @@ def handler(q=False):
                             attachment_files[0]['comment'] = """Original Zipped Attachment with Password {0}""".format(password)
                             attachment_files += get_zipped_contents(filename, attachment_data, password=password)
                 except zipfile.BadZipFile:  # Attachment is not a zipfile
-                    attachment_files += [{"values": filename,
-                                          "data": base64.b64encode(attachment_data).decode()}]
+                    attachment_files += [{"values": filename, "data": base64.b64encode(attachment_data).decode()}]
             for attch_item in attachment_files:
-                attch_item["types"] = ['attachment']
+                attch_item["types"] = ['malware-sample']
                 results.append(attch_item)
         else:  # Check email body part for urls
             if (extract_urls is True and part.get_content_type() == 'text/html'):
