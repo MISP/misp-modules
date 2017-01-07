@@ -3,6 +3,8 @@ language: python
 services:
     - redis-server
 
+cache: pip
+
 python:
     - "3.3"
     - "3.4"
