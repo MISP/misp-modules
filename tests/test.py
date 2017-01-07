@@ -70,8 +70,8 @@ class TestModules(unittest.TestCase):
         values = [x["values"] for x in results]
         types = {}
         for i in results:
-            types.setdefault(i["types"][0], 0)
-            types[i["types"][0]] += 1
+            types.setdefault(i["type"], 0)
+            types[i["type"]] += 1
         # Check that there are the appropriate number of items
         # Check that all the items were correct
         self.assertEqual(types['target-email'], 1)
@@ -125,11 +125,11 @@ class TestModules(unittest.TestCase):
         values = [x["values"] for x in response.json()['results']]
         self.assertIn('EICAR.com', values)
         for i in response.json()['results']:
-            if i["types"][0] == 'attachment':
+            if i["type"] == 'email-attachment':
                 self.assertEqual(i["values"], "EICAR.com")
+            if i['type'] == 'malware-sample':
                 attch_data = base64.b64decode(i["data"])
-                self.assertEqual(attch_data,
-                                 b'X5O!P%@AP[4\\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-')
+                self.assertEqual(attch_data, b'X5O!P%@AP[4\\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-')
 
 
     def test_email_attachment_unpack(self):
@@ -151,13 +151,13 @@ class TestModules(unittest.TestCase):
         self.assertIn('EICAR.com', values)
         self.assertIn('EICAR.com.zip', values)
         for i in response.json()['results']:
-            if i["values"] == 'EICAR.com.zip':
+            if i['type'] == 'malware-sample' and i["values"] == 'EICAR.com.zip':
                 with zipfile.ZipFile(io.BytesIO(base64.b64decode(i["data"])), 'r') as zf:
                     with zf.open("EICAR.com") as ec:
                         attch_data = ec.read()
                 self.assertEqual(attch_data,
                                  b'X5O!P%@AP[4\\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-')
-            if i["values"] == 'EICAR.com':
+            if i['type'] == 'malware-sample' and i["values"] == 'EICAR.com':
                 attch_data = base64.b64decode(i["data"])
                 self.assertEqual(attch_data,
                                  b'X5O!P%@AP[4\\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-')
@@ -182,11 +182,11 @@ class TestModules(unittest.TestCase):
         self.assertIn('EICAR.com', values)
         self.assertIn('EICAR.com.zip', values)
         for i in response.json()['results']:
-            if i["values"] == 'EICAR.com.zip':
+            if i['type'] == 'malware-sample' and i["values"] == 'EICAR.com.zip':
                 with zipfile.ZipFile(io.BytesIO(base64.b64decode(i["data"])), 'r') as zf:
                     # Make sure password was set and still in place
                     self.assertRaises(RuntimeError, zf.open, "EICAR.com")
-            if i["values"] == 'EICAR.com':
+            if i['type'] == 'malware-sample' and i["values"] == 'EICAR.com':
                 attch_data = base64.b64decode(i["data"])
                 self.assertEqual(attch_data,
                                  b'X5O!P%@AP[4\\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-')
@@ -238,7 +238,7 @@ class TestModules(unittest.TestCase):
         self.assertIn('EICAR.com', values)
         for i in response.json()['results']:
             # Check that it could be extracted.
-            if i["values"] == 'EICAR.com':
+            if i['type'] == 'malware-sample' and i["values"] == 'EICAR.com':
                 attch_data = base64.b64decode(i["data"]).decode()
                 self.assertEqual(attch_data,
                                  'X5O!P%@AP[4\\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-')
