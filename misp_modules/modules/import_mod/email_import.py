@@ -214,8 +214,8 @@ def get_zipped_contents(filename, data, password=None):
         if password is not None:
             password = str.encode(password)  # Byte encoded password required
         for zip_file_name in zf.namelist():  # Get all files in the zip file
-            with zf.open(zip_file_name, mode='rU', pwd=password) as fp:
-                file_data = fp.read()
+            with zf.open(zip_file_name, mode='r', pwd=password) as fp:
+                file_data = io.TextIOWrapper(fp).read().encode()
             unzipped_files.append({"values": zip_file_name,
                                    "data": base64.b64encode(file_data).decode(),  # Any password works when not encrypted
                                    "comment": "Extracted from {0}".format(filename)})
