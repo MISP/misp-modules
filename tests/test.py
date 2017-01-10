@@ -7,6 +7,7 @@ import base64
 import json
 import io
 import zipfile
+from hashlib import sha256
 from email.mime.application import MIMEApplication
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
@@ -101,11 +102,7 @@ class TestModules(unittest.TestCase):
         self.assertEqual(types['email-x-mailer'], 1)
         self.assertIn("mlx 5.1.7", values)
         self.assertEqual(types['email-reply-to'], 1)
-        # The parser inserts a newline that I can't diagnose.
-        # It does not impact analysis since the interface strips it.
-        # But, I'm leaving this test failing
         self.assertIn("<CI7DgL-A6dm92s7gf4-88g@E_0x238G4K2H08H9SDwsw8b6LwuA@mail.example.com>", values)
-        #self.assertIn("\n <CI7DgL-A6dm92s7gf4-88g@E_0x238G4K2H08H9SDwsw8b6LwuA@mail.example.com>", values)
 
     def test_email_attachment_basic(self):
         query = {"module":"email_import"}
@@ -161,6 +158,39 @@ class TestModules(unittest.TestCase):
                 attch_data = base64.b64decode(i["data"])
                 self.assertEqual(attch_data,
                                  b'X5O!P%@AP[4\\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-')
+
+    def test_email_dont_unpack_compressed_doc_attachments(self):
+        """Ensures that compressed
+        """
+        query = {"module":"email_import"}
+        query["config"] = {"unzip_attachments": "true",
+                           "guess_zip_attachment_passwords": None,
+                           "extract_urls": None}
+        message = get_base_email()
+        text = """I am a test e-mail"""
+        message.attach(MIMEText(text, 'plain'))
+        with open("tests/test_files/test.docx", "rb") as fp:
+            eicar_mime = MIMEApplication(fp.read(), 'zip')
+            eicar_mime.add_header('Content-Disposition', 'attachment', filename="test.docx")
+            message.attach(eicar_mime)
+        query['data'] = decode_email(message)
+        data = json.dumps(query)
+        response = requests.post(self.url + "query", data=data)
+        values = [x["values"] for x in response.json()["results"]]
+        self.assertIn('test.docx', values)
+        types = {}
+        for i in response.json()['results']:
+            types.setdefault(i["type"], 0)
+            types[i["type"]] += 1
+        # Check that there is only one attachment in the bundle
+        self.assertEqual(types['malware-sample'], 1)
+        for i in response.json()['results']:
+            if i['type'] == 'malware-sample' and i["values"] == 'test.docx':
+                attch_data = base64.b64decode(i["data"])
+                filesum = sha256()
+                filesum.update(attch_data)
+                self.assertEqual(filesum.hexdigest(),
+                                 '098da5381a90d4a51e6b844c18a0fecf2e364813c2f8b317cfdc51c21f2506a5')
 
 
     def test_email_attachment_unpack_with_password(self):

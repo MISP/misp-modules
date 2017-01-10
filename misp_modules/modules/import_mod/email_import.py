@@ -144,20 +144,33 @@ def handler(q=False):
             # Base attachment data is default
             attachment_files = [{"values": filename, "data": base64.b64encode(attachment_data).decode()}]
             if unzip is True:  # Attempt to unzip the attachment and return its files
-                try:
-                    attachment_files += get_zipped_contents(filename, attachment_data)
-                except RuntimeError:  # File is encrypted with a password
-                    if zip_pass_crack is True:
-                        if password_list is None:
-                            password_list = get_zip_passwords(message)
-                        password = test_zip_passwords(attachment_data, password_list)
-                        if password is None:  # Inform the analyst that we could not crack password
-                            attachment_files[0]['comment'] = "Encrypted Zip: Password could not be cracked from message"
-                        else:
-                            attachment_files[0]['comment'] = """Original Zipped Attachment with Password {0}""".format(password)
-                            attachment_files += get_zipped_contents(filename, attachment_data, password=password)
-                except zipfile.BadZipFile:  # Attachment is not a zipfile
-                    attachment_files += [{"values": filename, "data": base64.b64encode(attachment_data).decode()}]
+                zipped_files = ["doc", "docx", "dot", "dotx", "xls",
+                                "xlsx", "xlm", "xla", "xlc", "xlt",
+                                "xltx", "xlw", "ppt", "pptx", "pps",
+                                "ppsx", "pot", "potx", "potx", "sldx",
+                                "odt", "ods", "odp", "odg", "odf",
+                                "fodt", "fods", "fodp", "fodg", "ott",
+                                "uot"]
+
+                zipped_filetype = False
+                for ext in zipped_files:
+                    if filename.endswith(ext) is True:
+                        zipped_filetype = True
+                if zipped_filetype == False:
+                    try:
+                        attachment_files += get_zipped_contents(filename, attachment_data)
+                    except RuntimeError:  # File is encrypted with a password
+                        if zip_pass_crack is True:
+                            if password_list is None:
+                                password_list = get_zip_passwords(message)
+                            password = test_zip_passwords(attachment_data, password_list)
+                            if password is None:  # Inform the analyst that we could not crack password
+                                attachment_files[0]['comment'] = "Encrypted Zip: Password could not be cracked from message"
+                            else:
+                                attachment_files[0]['comment'] = """Original Zipped Attachment with Password {0}""".format(password)
+                                attachment_files += get_zipped_contents(filename, attachment_data, password=password)
+                    except zipfile.BadZipFile:  # Attachment is not a zipfile
+                        pass
             for attch_item in attachment_files:
                 attch_item["type"] = 'malware-sample'
                 results.append(attch_item)
