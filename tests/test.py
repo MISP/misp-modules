@@ -5,13 +5,14 @@ import unittest
 import requests
 import base64
 import json
+import os
 import io
 import zipfile
 from hashlib import sha256
 from email.mime.application import MIMEApplication
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-
+from email.header import Header
 
 class TestModules(unittest.TestCase):
 
@@ -313,6 +314,46 @@ class TestModules(unittest.TestCase):
                 attch_data = base64.b64decode(i["data"]).decode()
                 self.assertEqual(attch_data,
                                  'X5O!P%@AP[4\\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-')
+
+    def test_email_body_encoding(self):
+        query = {"module":"email_import"}
+        query["config"] = {"unzip_attachments": None,
+                           "guess_zip_attachment_passwords": None,
+                           "extract_urls": None}
+        filenames = os.listdir("tests/test_files/encodings")
+        for fn in filenames:
+            message = get_base_email()
+            encoding = os.path.splitext(fn)
+            with open("tests/test_files/encodings/{0}".format(fn), "r", encoding=encoding[0]) as fp:
+                # Encoding is used as the name of the file
+                text = fp.read()
+                message.attach(MIMEText(text, 'html', encoding[0]))
+                query['data'] = decode_email(message)
+                data = json.dumps(query)
+                response = requests.post(self.url + "query", data=data)
+
+
+    def test_email_header_encoding(self):
+        query = {"module":"email_import"}
+        query["config"] = {"unzip_attachments": None,
+                           "guess_zip_attachment_passwords": None,
+                           "extract_urls": None}
+        filenames = os.listdir("tests/test_files/encodings")
+        for encoding in ['utf-8', 'utf-16', 'utf-32']:
+            message = get_base_email()
+            text = """I am a test e-mail
+            the password is NOT "this string".
+            That is all.
+            """
+            message.attach(MIMEText(text, 'plain'))
+            for hdr, hdr_val in message.items():
+                # Encoding is used as the name of the file
+                msg = message
+                hdr_encoded = MIMEText(hdr_val.encode(encoding), 'plain', encoding)
+                msg[hdr] = Header(hdr_val, encoding)
+                query['data'] = decode_email(msg)
+                data = json.dumps(query)
+                response = requests.post(self.url + "query", data=data)
 
     def test_email_attachment_password_in_subject(self):
         query = {"module":"email_import"}
