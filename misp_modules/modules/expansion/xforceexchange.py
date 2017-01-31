@@ -1,7 +1,7 @@
 import requests
 import json
-
 import sys
+
 BASEurl = "https://api.xforce.ibmcloud.com/"
 
 extensions = {"ip1": "ipr/%s",
@@ -69,12 +69,12 @@ def handler(q=False):
 	return r
 	
 def apicall(indicator_type, indicator, key=False):
-	#try:
+	try:
 		myURL = BASEurl + (extensions[str(indicator_type)])%indicator
 		jsondata = requests.get(myURL, headers=MyHeader(key)).json()
-	#except:
-		#return None
-		return jsondata
+	except:
+		return None
+	return jsondata
 
 def introspection():
 	return mispattributes
