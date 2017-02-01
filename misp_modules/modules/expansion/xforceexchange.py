@@ -5,16 +5,17 @@ import sys
 BASEurl = "https://api.xforce.ibmcloud.com/"
 
 extensions = {"ip1": "ipr/%s",
-			  "ip2": "ipr/malware/%s",
-			  "url": "url/%s",
-			  "hash": "malware/%s",
-			  "vuln": "/vulnerabilities/search/%s"}
+	      "ip2": "ipr/malware/%s",
+	      "url": "url/%s",
+	      "hash": "malware/%s",
+	      "vuln": "/vulnerabilities/search/%s",
+	      "dns": "resolve/%s"}
 
 sys.path.append('./')
 
 misperrors = {'error': 'Error'}
 mispattributes = {'input': ['ip-src','ip-dst' 'vulnerability', 'md5', 'sha1', 'sha256'], 
-				'output': ['ip-src', 'ip-dst', 'text']}
+		  'output': ['ip-src', 'ip-dst', 'text', 'domain']}
 
 # possible module-types: 'expansion', 'hover' or both
 moduleinfo = {'version': '1', 'author': 'Joerg Stephan (@johest)',
@@ -49,9 +50,9 @@ def handler(q=False):
 	r = {"results": []}
 	
 	if "ip-src" in q:
-		r["results"] += dict( (apicall("ip1", q["ip-src"], key)).items() + (apicall("ip2", q["ip-src"], key)).items())
+		r["results"] += apicall("dns", q["ip-src"], key)
 	if "ip-dst" in q:
-		r["results"] += dict( (apicall("ip1", q["ip-src"], key)).items() + (apicall("ip2", q["ip-src"], key)).items())
+		r["results"] += apicall("dns", q["ip-dst"], key)
 	if "md5" in q:
 		r["results"] += apicall("hash", q["md5"], key)
 	if "sha1" in q:
@@ -60,6 +61,8 @@ def handler(q=False):
 		r["results"] += apicall("hash", q["sha256"], key)  
 	if 'vulnerability' in q:
 		r["results"] += apicall("vuln", q["vulnerability"], key)
+	if "domain" in q:
+                r["results"] += apicall("dns", q["domain"], key)
 
 	uniq = []
 	for res in r["results"]:
@@ -73,8 +76,21 @@ def apicall(indicator_type, indicator, key=False):
 		myURL = BASEurl + (extensions[str(indicator_type)])%indicator
 		jsondata = requests.get(myURL, headers=MyHeader(key)).json()
 	except:
-		return None
-	return jsondata
+		jsondata = None
+	redata = []
+	#print(jsondata)
+	if not jsondata is None:
+		if indicator_type is "hash":
+			if "malware" in jsondata:
+				lopointer = jsondata["malware"]
+				redata.append({"type": "text", "values": lopointer["risk"]})
+		if indicator_type is "dns":
+			if "records" in str(jsondata):
+				lopointer = jsondata["Passive"]["records"]
+				for dataset in lopointer:
+					redata.append({"type":"domain", "values": dataset["value"]})	
+	
+	return redata
 
 def introspection():
 	return mispattributes
