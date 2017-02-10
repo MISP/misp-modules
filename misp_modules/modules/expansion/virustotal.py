@@ -6,12 +6,12 @@ import base64
 import os
 
 misperrors = {'error': 'Error'}
-mispattributes = {'input': ['hostname', 'domain', "ip-src", "ip-dst"],
-                  'output':['domain', "ip-src", "ip-dst", "text"]
+mispattributes = {'input': ['hostname', 'domain', "ip-src", "ip-dst", "md5", "sha1", "sha256", "sha512"],
+                  'output':['domain', "ip-src", "ip-dst", "text", "md5", "sha1", "sha256", "sha512", "ssdeep", "authentihash", "filename"]
                   }
 
 # possible module-types: 'expansion', 'hover' or both
-moduleinfo = {'version': '', 'author': 'Hannah Ward',
+moduleinfo = {'version': '2', 'author': 'Hannah Ward',
               'description': 'Get information from virustotal',
               'module-type': ['expansion']}
 
@@ -39,6 +39,14 @@ def handler(q=False):
       r["results"] += getDomain(q["domain"], key)
     if 'hostname' in q:
       r["results"] += getDomain(q['hostname'], key)
+    if 'md5' in q:
+      r["results"] += getHash(q['md5'], key)
+    if 'sha1' in q:
+      r["results"] += getHash(q['sha1'], key)
+    if 'sha256' in q:
+      r["results"] += getHash(q['sha256'], key)
+    if 'sha512' in q:
+      r["results"] += getHash(q['sha512'], key)
 
     uniq = []
     for res in r["results"]:
@@ -46,6 +54,19 @@ def handler(q=False):
         uniq.append(res)
     r["results"] = uniq
     return r
+
+def getHash(hash, key, do_not_recurse = False):
+    global limit
+    toReturn = []
+    req = requests.get("https://www.virustotal.com/vtapi/v2/file/report", 
+            params = { "allinfo":1, "apikey":key, 'resource': hash}
+                      ).json()
+    if req["response_code"] == 0:
+      #Nothing found
+      return []
+
+    toReturn += getMoreInfo(req, key)
+    return toReturn
 
 def getIP(ip, key, do_not_recurse = False):
     global limit
