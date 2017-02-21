@@ -3,14 +3,14 @@ import base64
 
 misperrors = {'error': 'Error'}
 
-# possible module-types: 'expansion', 'hover' or both
 moduleinfo = {'version': '1', 
 			'author': 'TM',
 			'description': 'export lite',
 			'module-type': ['export']}
 
-# config fields that your code expects from the site admin
-moduleconfig = ["indent_json_export"]
+#~ config form admin site but do not work
+#~ moduleconfig = ["indent_json_export"]
+moduleconfig = []
 
 #~ mispattributes = {'input':'all'} ?
 mispattributes = {}
@@ -29,6 +29,7 @@ def handler(q=False):
 	if 'data' not in request:
 		return False
 
+	#~ Misp json structur
 	liteEvent = {'Event':{}}
 
 	for evt in request['data']:
@@ -38,11 +39,12 @@ def handler(q=False):
 		
 		attrs = evt['Attribute']
 		for attr in attrs:
-			liteAttr = {}
-			liteAttr['category'] = attr['category']
-			liteAttr['type'] = attr['type']
-			liteAttr['value'] = attr['value']
-			liteEvent['Event']['Attribute'].append(liteAttr)
+			if 'Internal reference' not in attr['category']:
+				liteAttr = {}
+				liteAttr['category'] = attr['category']
+				liteAttr['type'] = attr['type']
+				liteAttr['value'] = attr['value']
+				liteEvent['Event']['Attribute'].append(liteAttr)
 
 	return {"response":[],
 			'data': str(base64.b64encode(
