@@ -34,6 +34,7 @@ For more information: [Extending MISP with Python modules](https://www.circl.lu/
 ### Export modules
 
 * [CEF](misp_modules/modules/export_mod/cef_export.py) module to export Common Event Format (CEF).
+* [Lite Export](/misp-modules/blob/master/misp_modules/modules/export_mod/liteexport.py) module to export a lite event.
 
 ### Import modules
 
@@ -352,6 +353,23 @@ Recommended     Plugin.Import_ocr_enabled       true   Enable or disable the ocr
 
 In this same menu set any other plugin settings that are required for testing.
 
+## Install misp-module on an offline instance.
+First, you need to grab all necessery packages for example like this : 
+
+Use pip wheel to create an archive
+~~~
+mkdir misp-modules-offline
+pip3 wheel -r REQUIREMENTS shodan --wheel-dir=./misp-modules-offline
+tar -cjvf misp-module-bundeled.tar.bz2 ./misp-modules-offline/*
+~~~
+On offline machine : 
+~~~
+mkdir misp-modules-bundle
+tar xvf misp-module-bundeled.tar.bz2 -C misp-modules-bundle
+cd misp-modules-bundle
+ls -1|while read line; do sudo pip3 install --force-reinstall --ignore-installed --upgrade --no-index --no-deps ${line};done
+~~~
+Next you can follow standard install procedure.
 
 ## How to contribute your own module?
 
