@@ -40,6 +40,7 @@ For more information: [Extending MISP with Python modules](https://www.circl.lu/
 
 * [Cuckoo JSON](misp_modules/modules/import_mod/cuckooimport.py) Cuckoo JSON import.
 * [OCR](misp_modules/modules/import_mod/ocr.py) Optical Character Recognition (OCR) module for MISP to import attributes from images, scan or faxes.
+* [OpenIOC](misp_modules/modules/import_mod/openiocimport.py) OpenIOC import based on PyMISP library.
 * [stiximport](misp_modules/modules/import_mod/stiximport.py) - An import module to process STIX xml/json.
 * [Email Import](misp_modules/modules/import_mod/email_import.py) Email import module for MISP to import basic metadata.
 * [VMRay](misp_modules/modules/import_mod/vmray_import.py) - An import module to process VMRay export.
