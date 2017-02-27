@@ -19,3 +19,4 @@ pytesseract
 SPARQLWrapper
 domaintools_api
 pygeoip
+bs4
