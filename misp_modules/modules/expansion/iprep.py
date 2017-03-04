@@ -5,7 +5,7 @@ import requests
 
 
 misperrors = {'error': 'Error'}
-mispattributes = {'input': ['ip-src', 'ip-dst'], 'output': ['freetext']}
+mispattributes = {'input': ['ip-src', 'ip-dst'], 'output': ['text']}
 moduleinfo = {'version': '1.0', 'author': 'Keith Faber',
               'description': 'Query IPRep Data for IP Address',
               'module-type': ['expansion']}
@@ -33,7 +33,7 @@ def handler(q=False):
     if len(err) > 0:
         misperrors['error'] = ','.join(err)
         return misperrors
-    return rep
+    return {'results': rep}
 
 
 def parse_iprep(ip, api):
@@ -41,13 +41,14 @@ def parse_iprep(ip, api):
                    'MaxMind_Free_GeoIP', 'Unique_Lookups', 'query_result']
     rep = []
     err = []
+    full_text = ''
     url = 'https://www.packetmail.net/iprep.php/%s' % ip
     try:
         data = requests.get(url, params={'apikey': api}).json()
     except:
         return ['Error pulling data'], rep
     # print '%s' % data
-    for name, val in data.iteritems():
+    for name, val in data.items():
         if name not in meta_fields:
             try:
                 context = val['context']
@@ -62,17 +63,19 @@ def parse_iprep(ip, api):
                     elif context[0].get('phishing_kit') and context[0].get('url'):
                         context = ','.join(['%s (%s)' % (hit['phishing_kit'], hit['url']) for hit in context])
                     else:
-                        context = ';'.join(['%s: %s' % (k, v) for k, v in context[0].iteritems()])
+                        context = ';'.join(['%s: %s' % (k, v) for k, v in context[0].items()])
 
                 if val.get('special_note'):
                     context += '; ' + val['special_note']
 
                 misp_val = context
+                full_text += '\n%s' % context
                 misp_comment = 'IPRep Source %s: %s' % (name, val['last_seen'])
-                rep.append({'types': mispattributes['output'], 'values': misp_val, 'comment': misp_comment})
+                rep.append({'types': mispattributes['output'], 'categories':['External analysis'], 'values': misp_val, 'comment': misp_comment})
             except:
                 err.append('Error parsing source: %s' % name)
 
+    rep.append({'types': ['freetext'], 'values': full_text , 'comment': 'Free text import of IPRep'})
     return err, rep
 
 
