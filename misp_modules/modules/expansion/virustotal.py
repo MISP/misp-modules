@@ -1,9 +1,7 @@
 import json
 import requests
-import hashlib
-import re
+from requests import HTTPError
 import base64
-import os
 
 misperrors = {'error': 'Error'}
 mispattributes = {'input': ['hostname', 'domain', "ip-src", "ip-dst", "md5", "sha1", "sha256", "sha512"],
@@ -60,32 +58,33 @@ def handler(q=False):
 
 
 def getHash(hash, key, do_not_recurse=False):
-    global limit
-    toReturn = []
+    req = requests.get("https://www.virustotal.com/vtapi/v2/file/report",
+                       params={"allinfo": 1, "apikey": key, 'resource': hash})
     try:
-        req = requests.get("https://www.virustotal.com/vtapi/v2/file/report",
-                           params={"allinfo": 1, "apikey": key, 'resource': hash}
-                           ).json()
-    except:
-        return []
+        req.raise_for_status()
+        req = req.json()
+    except HTTPError as e:
+        misperrors['error'] = str(e)
+        return misperrors
 
     if req["response_code"] == 0:
         # Nothing found
         return []
 
-    toReturn += getMoreInfo(req, key)
-    return toReturn
+    return getMoreInfo(req, key)
 
 
 def getIP(ip, key, do_not_recurse=False):
     global limit
     toReturn = []
+    req = requests.get("https://www.virustotal.com/vtapi/v2/ip-address/report",
+                       params={"ip": ip, "apikey": key})
     try:
-        req = requests.get("https://www.virustotal.com/vtapi/v2/ip-address/report",
-                           params={"ip": ip, "apikey": key}
-                           ).json()
-    except:
-        return []
+        req.raise_for_status()
+        req = req.json()
+    except HTTPError as e:
+        misperrors['error'] = str(e)
+        return misperrors
 
     if req["response_code"] == 0:
         # Nothing found
@@ -93,7 +92,7 @@ def getIP(ip, key, do_not_recurse=False):
 
     if "resolutions" in req:
         for res in req["resolutions"][:limit]:
-            toReturn.append({"types": ["domain"], "values": [res["hostname"]], "comment":comment % ip})
+            toReturn.append({"types": ["domain"], "values": [res["hostname"]], "comment": comment % ip})
             # Pivot from here to find all domain info
             if not do_not_recurse:
                 toReturn += getDomain(res["hostname"], key, True)
@@ -105,12 +104,14 @@ def getIP(ip, key, do_not_recurse=False):
 def getDomain(domain, key, do_not_recurse=False):
     global limit
     toReturn = []
+    req = requests.get("https://www.virustotal.com/vtapi/v2/domain/report",
+                       params={"domain": domain, "apikey": key})
     try:
-        req = requests.get("https://www.virustotal.com/vtapi/v2/domain/report",
-                           params={"domain": domain, "apikey": key}
-                           ).json()
-    except:
-        return []
+        req.raise_for_status()
+        req = req.json()
+    except HTTPError as e:
+        misperrors['error'] = str(e)
+        return misperrors
 
     if req["response_code"] == 0:
         # Nothing found
@@ -118,7 +119,7 @@ def getDomain(domain, key, do_not_recurse=False):
 
     if "resolutions" in req:
         for res in req["resolutions"][:limit]:
-            toReturn.append({"types": ["ip-dst", "ip-src"], "values": [res["ip_address"]], "comment":comment % domain})
+            toReturn.append({"types": ["ip-dst", "ip-src"], "values": [res["ip_address"]], "comment": comment % domain})
             # Pivot from here to find all info on IPs
             if not do_not_recurse:
                 toReturn += getIP(res["ip_address"], key, True)
@@ -163,16 +164,16 @@ def getMoreInfo(req, key):
 
         # Go through each key and check if it exists
         if "submission_names" in data:
-            r.append({'types': ["filename"], "values": data["submission_names"], "comment":comment % hsh})
+            r.append({'types': ["filename"], "values": data["submission_names"], "comment": comment % hsh})
 
         if "ssdeep" in data:
-            r.append({'types': ["ssdeep"], "values": [data["ssdeep"]], "comment":comment % hsh})
+            r.append({'types': ["ssdeep"], "values": [data["ssdeep"]], "comment": comment % hsh})
 
         if "authentihash" in data:
-            r.append({"types": ["authentihash"], "values": [data["authentihash"]], "comment":comment % hsh})
+            r.append({"types": ["authentihash"], "values": [data["authentihash"]], "comment": comment % hsh})
 
         if "ITW_urls" in data:
-            r.append({"types": ["url"], "values": data["ITW_urls"], "comment":comment % hsh})
+            r.append({"types": ["url"], "values": data["ITW_urls"], "comment": comment % hsh})
 
         # Get the malware sample
         sample = requests.get("https://www.virustotal.com/vtapi/v2/file/download",
