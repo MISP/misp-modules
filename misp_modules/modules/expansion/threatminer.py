@@ -14,7 +14,7 @@ moduleinfo = {'version': '2', 'author': 'Hannah Ward',
               'description': 'Get information from virustotal',
               'module-type': ['expansion']}
 
-desc = '%s: %s Threatminer'
+desc = '%s: Threatminer - %s'
 
 
 def handler(q=False):
@@ -55,14 +55,16 @@ def get_domain(q):
     for flag in [1, 2, 3, 4, 5, 6]:
         req = requests.get('https://www.threatminer.org/domain.php', params={'q': q, 'api': 'True', 'rt': flag})
         if not req.status_code == 200:
-            return []
+            continue
         results = req.json().get('results')
         if not results:
-            return []
+            continue
 
         for result in results:
             if flag == 1: #whois
                 emails = result.get('whois', {}).get('emails')
+                if not emails:
+                    continue
                 for em_type, email in emails.items():
                     ret.append({'types': ['whois-registrant-email'], 'values': [email], 'comment': desc % (q, 'whois')})
             if flag == 2: #pdns
@@ -92,14 +94,16 @@ def get_ip(q):
     for flag in [1, 2, 3, 4, 5, 6]:
         req = requests.get('https://www.threatminer.org/host.php', params={'q': q, 'api': 'True', 'rt': flag})
         if not req.status_code == 200:
-            return []
+            continue
         results = req.json().get('results')
         if not results:
-            return []
+            continue
 
         for result in results:
             if flag == 1: #whois
                 emails = result.get('whois', {}).get('emails')
+                if not emails:
+                    continue
                 for em_type, email in emails.items():
                     ret.append({'types': ['whois-registrant-email'], 'values': [email], 'comment': desc % (q, 'whois')})
             if flag == 2: #pdns
@@ -115,7 +119,7 @@ def get_ip(q):
                     ret.append({'types': ['sha256'], 'values': [result], 'comment': desc % (q, 'samples')})
             if flag == 5: #ssl
                 if type(result) is str:
-                    ret.append({'types': ['x509-fingerprint-sha1'], 'values': [result], 'comment': desc % (q, 'subdomain')})
+                    ret.append({'types': ['x509-fingerprint-sha1'], 'values': [result], 'comment': desc % (q, 'ssl')})
             if flag == 6: #reports
                 link = result.get('URL')
                 if link:
@@ -129,10 +133,10 @@ def get_hash(q):
     for flag in [1, 3, 6, 7]:
         req = requests.get('https://www.threatminer.org/sample.php', params={'q': q, 'api': 'True', 'rt': flag})
         if not req.status_code == 200:
-            return []
+            continue
         results = req.json().get('results')
         if not results:
-            return []
+            continue
 
         for result in results:
             if flag == 1: #meta (filename)
