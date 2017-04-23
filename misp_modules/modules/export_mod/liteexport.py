@@ -8,11 +8,8 @@ moduleinfo = {'version': '1',
 			'description': 'export lite',
 			'module-type': ['export']}
 
-#~ config form admin site but do not work
-#~ moduleconfig = ["indent_json_export"]
-moduleconfig = []
+moduleconfig = ["indent_json_export"]
 
-#~ mispattributes = {'input':'all'} ?
 mispattributes = {}
 outputFileExtension = "json"
 responseType = "application/json"
@@ -20,11 +17,20 @@ responseType = "application/json"
 def handler(q=False):
 	if q is False:
 		return False
+
 	request = json.loads(q)
+
+	config = {}
 	if "config" in request:
-		config  = request["config"]
+		config = request["config"]
 	else:
-		config  = {"indent_json_export":None}
+		config = {"indent_json_export" : None}
+
+	if config['indent_json_export'] is not None:
+		try:
+			config['indent_json_export'] = int(config['indent_json_export'])
+		except:
+			config['indent_json_export'] = None
 
 	if 'data' not in request:
 		return False
@@ -46,8 +52,8 @@ def handler(q=False):
 				liteAttr['value'] = attr['value']
 				liteEvent['Event']['Attribute'].append(liteAttr)
 
-	return {"response":[],
-			'data': str(base64.b64encode(
+	return {'response' : [],
+			'data' : str(base64.b64encode(
 				bytes(
 					json.dumps(liteEvent, indent=config['indent_json_export']),
 					'utf-8')),
