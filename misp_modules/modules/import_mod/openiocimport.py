@@ -33,8 +33,24 @@ def handler(q=False):
         return json.dumps({"success": 0})
 
     pkg = openioc.load_openioc(package)
+
+    # add origin file as attachment
+    if q.get("filename"):
+        r["results"].append({
+            "values": [q.get('filename')],
+            "types": ['attachment'],
+            "categories": ['Support Tool'],
+            "data" : q.get('data'),
+            })
+
+    # return all attributes
     for attrib in pkg.attributes:
-        r["results"].append({"values": [attrib.value], "types": [attrib.type], "categories": [attrib.category]})
+        r["results"].append({
+            "values": [attrib.value],
+            "types": [attrib.type],
+            "categories": [attrib.category],
+            "comment":attrib.comment})
+
     return r
 
 
