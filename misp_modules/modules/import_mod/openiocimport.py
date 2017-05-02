@@ -4,7 +4,13 @@ import base64
 from pymisp.tools import openioc
 
 misperrors = {'error': 'Error'}
-userConfig = {}
+userConfig = {
+               'not save ioc': {
+                 'type': 'Boolean',
+                 'message': 'If you check this box, IOC file will not save as an attachment in MISP'
+               }
+           }
+
 inputSource = ['file']
 
 moduleinfo = {'version': '0.1', 'author': 'Raphaël Vinot',
@@ -33,8 +39,27 @@ def handler(q=False):
         return json.dumps({"success": 0})
 
     pkg = openioc.load_openioc(package)
+
+    if q.get('config'):
+        if q['config'].get('not save ioc') == "0":
+
+            # add origin file as attachment
+            if q.get("filename"):
+                r["results"].append({
+                    "values": [q.get('filename')],
+                    "types": ['attachment'],
+                    "categories": ['Support Tool'],
+                    "data" : q.get('data'),
+                    })
+
+    # return all attributes
     for attrib in pkg.attributes:
-        r["results"].append({"values": [attrib.value], "types": [attrib.type], "categories": [attrib.category]})
+        r["results"].append({
+            "values": [attrib.value],
+            "types": [attrib.type],
+            "categories": [attrib.category],
+            "comment":attrib.comment})
+
     return r
 
 
