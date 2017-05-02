@@ -9,7 +9,9 @@ userConfig = {
                  'type': 'Boolean',
                  'message': 'If you check this box, IOC file will not save as an attachment in MISP'
                }
-           }inputSource = ['file']
+           }
+
+inputSource = ['file']
 
 moduleinfo = {'version': '0.1', 'author': 'Raphaël Vinot',
               'description': 'Import OpenIOC package',
