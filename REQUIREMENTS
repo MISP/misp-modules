@@ -13,7 +13,7 @@ ipasn-redis
 asnhistory
 git+https://github.com/Rafiot/uwhoisd.git@testing#egg=uwhois&subdirectory=client
 git+https://github.com/MISP/MISP-STIX-Converter.git#egg=misp_stix_converter
-git+https://github.com/CIRCL/PyMISP.git#egg=pymisp
+git+https://github.com/MISP/PyMISP.git#egg=pymisp
 pillow
 pytesseract
 SPARQLWrapper
