@@ -9,12 +9,12 @@ python:
     - "3.4"
     - "3.5"
     - "3.5-dev"
+    - "3.6"
+    - "3.6-dev"
     - "nightly"
 
 install:
-    - pip install -U nose
-    - pip install coveralls
-    - pip install codecov
+    - pip install -U nose codecov pytest
     - pip install -U -r REQUIREMENTS
     - pip install .
 
@@ -35,4 +35,3 @@ script:
 after_success:
     - coverage combine .coverage*
     - codecov
-    - coveralls
