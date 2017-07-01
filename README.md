@@ -26,19 +26,26 @@ For more information: [Extending MISP with Python modules](https://www.circl.lu/
 * [EUPI](misp_modules/modules/expansion/eupi.py) - a hover and expansion module to get information about an URL from the [Phishing Initiative project](https://phishing-initiative.eu/?lang=en).
 * [GeoIP](misp_modules/modules/expansion/geoip_country.py) - a hover and expansion module to get GeoIP information from geolite/maxmind.
 * [IPASN](misp_modules/modules/expansion/ipasn.py) - a hover and expansion to get the BGP ASN of an IP address.
+* [iprep](misp-modules/modules/expansion/iprep.py) - an expansion module to get IP reputation from packetmail.net.
 * [passivetotal](misp_modules/modules/expansion/passivetotal.py) - a [passivetotal](https://www.passivetotal.org/) module that queries a number of different PassiveTotal datasets.
+* [shodan](misp_modules/modules/expansion/shodan.py) - a minimal [shodan](https://www.shodan.io/) expansion module.
 * [sourcecache](misp_modules/modules/expansion/sourcecache.py) - a module to cache a specific link from a MISP instance.
+* [threatminer](misp_modules/modules/expansion/threatminer.py) - an expansion module to expand from [ThreatMiner](https://www.threatminer.org/).
 * [countrycode](misp_modules/modules/expansion/countrycode.py) - a hover module to tell you what country a URL belongs to.
 * [virustotal](misp_modules/modules/expansion/virustotal.py) - an expansion module to pull known resolutions and malware samples related with an IP/Domain from virusTotal (this modules require a VirusTotal private API key)
+* [wikidata](misp_modules/modules/expansion/wiki.py) - a [wikidata](https://www.wikidata.org) expansion module.
+* [xforce](misp_modules/modules/expansion/xforceexchange.py) - an IBM X-Force Exchange expansion module.
 
 ### Export modules
 
 * [CEF](misp_modules/modules/export_mod/cef_export.py) module to export Common Event Format (CEF).
+* [Lite Export](/misp-modules/blob/master/misp_modules/modules/export_mod/liteexport.py) module to export a lite event.
 
 ### Import modules
 
 * [Cuckoo JSON](misp_modules/modules/import_mod/cuckooimport.py) Cuckoo JSON import.
 * [OCR](misp_modules/modules/import_mod/ocr.py) Optical Character Recognition (OCR) module for MISP to import attributes from images, scan or faxes.
+* [OpenIOC](misp_modules/modules/import_mod/openiocimport.py) OpenIOC import based on PyMISP library.
 * [stiximport](misp_modules/modules/import_mod/stiximport.py) - An import module to process STIX xml/json.
 * [Email Import](misp_modules/modules/import_mod/email_import.py) Email import module for MISP to import basic metadata.
 * [VMRay](misp_modules/modules/import_mod/vmray_import.py) - An import module to process VMRay export.
@@ -53,7 +60,7 @@ cd misp-modules
 sudo pip3 install -I -r REQUIREMENTS
 sudo pip3 install -I .
 sudo vi /etc/rc.local, add this line: `sudo -u www-data misp-modules -s &`
-/usr/local/bin/misp-modules #to start the modules
+misp-modules #to start the modules
 ~~~~
 
 ## How to add your own MISP modules?
@@ -352,6 +359,23 @@ Recommended     Plugin.Import_ocr_enabled       true   Enable or disable the ocr
 
 In this same menu set any other plugin settings that are required for testing.
 
+## Install misp-module on an offline instance.
+First, you need to grab all necessery packages for example like this : 
+
+Use pip wheel to create an archive
+~~~
+mkdir misp-modules-offline
+pip3 wheel -r REQUIREMENTS shodan --wheel-dir=./misp-modules-offline
+tar -cjvf misp-module-bundeled.tar.bz2 ./misp-modules-offline/*
+~~~
+On offline machine : 
+~~~
+mkdir misp-modules-bundle
+tar xvf misp-module-bundeled.tar.bz2 -C misp-modules-bundle
+cd misp-modules-bundle
+ls -1|while read line; do sudo pip3 install --force-reinstall --ignore-installed --upgrade --no-index --no-deps ${line};done
+~~~
+Next you can follow standard install procedure.
 
 ## How to contribute your own module?
 
