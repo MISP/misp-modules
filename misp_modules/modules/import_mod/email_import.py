@@ -5,11 +5,14 @@ import json
 import base64
 import io
 import zipfile
+import codecs
 import re
 from email import message_from_bytes
 from email.utils import parseaddr
 from email.iterators import typed_subpart_iterator
+from email.parser import Parser
 from html.parser import HTMLParser
+from email.header import decode_header
 
 misperrors = {'error': 'Error'}
 userConfig = {}
@@ -38,7 +41,14 @@ def handler(q=False):
     request = json.loads(q)
     # request data is always base 64 byte encoded
     data = base64.b64decode(request["data"])
-    message = message_from_bytes(data)
+
+    # Double decode to force headers to be re-parsed with proper encoding
+    message = Parser().parsestr(message_from_bytes(data).as_string())
+    # Decode any encoded headers to get at proper string
+    for key, val in message.items():
+        replacement = get_decoded_header(key, val)
+        if replacement is not None:
+            message.replace_header(key, replacement)
 
     # Extract all header information
     all_headers = ""
@@ -338,6 +348,36 @@ def get_charset(message, default="ascii"):
     if message.get_charset():
         return message.get_charset()
     return default
+
+
+def get_decoded_header(header, value):
+    subject, encoding = decode_header(value)[0]
+    subject = subject.strip()  # extra whitespace will mess up encoding
+    if isinstance(subject, bytes):
+        # Remove Byte Order Mark (BOM) from UTF strings
+        if encoding == 'utf-8':
+            return re.sub(codecs.BOM_UTF8, b"", subject).decode(encoding)
+        if encoding == 'utf-16':
+            return re.sub(codecs.BOM_UTF16, b"", subject).decode(encoding)
+        elif encoding == 'utf-32':
+            return re.sub(codecs.BOM_UTF32, b"", subject).decode(encoding)
+        # Try various UTF decodings for any unknown 8bit encodings
+        elif encoding == 'unknown-8bit':
+            for enc in [('utf-8', codecs.BOM_UTF8),
+                        ('utf-32', codecs.BOM_UTF32),  # 32 before 16 so it raises errors
+                        ('utf-16', codecs.BOM_UTF16)]:
+                try:
+                    return re.sub(enc[1], b"", subject).decode(enc[0])
+                except UnicodeDecodeError:
+                    continue
+            # If none of those encoding work return it in RFC2047 format
+            return str(subject)
+        # Provide RFC2047 format string if encoding is a unknown encoding
+        # Better to have the analyst decode themselves than to provide a mangled string
+        elif encoding is None:
+            return str(subject)
+        else:
+            return subject.decode(encoding)
 
 
 def introspection():

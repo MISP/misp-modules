@@ -5,13 +5,15 @@ import unittest
 import requests
 import base64
 import json
+import os
 import io
+import re
 import zipfile
 from hashlib import sha256
 from email.mime.application import MIMEApplication
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-
+from email.header import Header
 
 class TestModules(unittest.TestCase):
 
@@ -315,7 +317,6 @@ class TestModules(unittest.TestCase):
         query['data'] = decode_email(message)
         data = json.dumps(query)
         response = requests.post(self.url + "query", data=data)
-        # print(response.json())
         values = [x["values"] for x in response.json()["results"]]
         self.assertIn('EICAR.com', values)
         for i in response.json()['results']:
@@ -324,6 +325,271 @@ class TestModules(unittest.TestCase):
                 attch_data = base64.b64decode(i["data"]).decode()
                 self.assertEqual(attch_data,
                                  'X5O!P%@AP[4\\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-')
+
+    def test_email_body_encoding(self):
+        query = {"module":"email_import"}
+        query["config"] = {"unzip_attachments": None,
+                           "guess_zip_attachment_passwords": None,
+                           "extract_urls": None}
+        filenames = os.listdir("tests/test_files/encodings")
+        for fn in filenames:
+            message = get_base_email()
+            encoding = os.path.splitext(fn)
+            with open("tests/test_files/encodings/{0}".format(fn), "r", encoding=encoding[0]) as fp:
+                # Encoding is used as the name of the file
+                text = fp.read()
+                message.attach(MIMEText(text, 'html', encoding[0]))
+                query['data'] = decode_email(message)
+                data = json.dumps(query)
+                response = requests.post(self.url + "query", data=data).json()
+                self.assertNotIn('error', response, response.get('error', ""))
+                self.assertIn('results', response, "No server results found.")
+
+
+    def test_email_header_proper_encoding(self):
+        query = {"module":"email_import"}
+        query["config"] = {"unzip_attachments": None,
+                           "guess_zip_attachment_passwords": None,
+                           "extract_urls": None}
+        filenames = os.listdir("tests/test_files/encodings")
+        for encoding in ['utf-8', 'utf-16', 'utf-32']:
+            message = get_base_email()
+            text = """I am a test e-mail
+            the password is NOT "this string".
+            That is all.
+            """
+            message.attach(MIMEText(text, 'plain'))
+            for hdr, hdr_val in message.items():
+                msg = message
+                encoded_header = hdr_val.encode(encoding)
+                msg.replace_header(hdr, Header(encoded_header, encoding))
+                query['data'] = decode_email(msg)
+                data = json.dumps(query)
+                response = requests.post(self.url + "query", data=data)
+                results = response.json()['results']
+                values = []
+                for x in results:
+                    # Remove BOM from UTF-16 strings
+                    if re.search('\ufeff', x["values"]):
+                        values.append(re.sub('\ufeff', "", x["values"]))
+                    else:
+                        values.append(x["values"])
+                types = {}
+                for i in results:
+                    types.setdefault(i["type"], 0)
+                    types[i["type"]] += 1
+                # Check that all the items were correct
+                self.assertEqual(types['target-email'], 1)
+                self.assertIn('test@domain.com', values)
+                self.assertEqual(types['email-dst-display-name'], 4)
+                self.assertIn('Last One', values)
+                self.assertIn('Other Friend', values)
+                self.assertIn('Second Person', values)
+                self.assertIn('Testy Testerson', values)
+                self.assertEqual(types['email-dst'], 4)
+                self.assertIn('test@domain.com', values)
+                self.assertIn('second@domain.com', values)
+                self.assertIn('other@friend.net', values)
+                self.assertIn('last_one@finally.com', values)
+                self.assertEqual(types['email-src-display-name'], 2)
+                self.assertIn("Innocent Person", values)
+                self.assertEqual(types['email-src'], 2)
+                self.assertIn("evil_spoofer@example.com", values)
+                self.assertIn("IgnoreMeImInnocent@sender.com", values)
+                self.assertEqual(types['email-thread-index'], 1)
+                self.assertIn('AQHSR8Us3H3SoaY1oUy9AAwZfMF922bnA9GAgAAi9s4AAGvxAA==', values)
+                self.assertEqual(types['email-message-id'], 1)
+                self.assertIn("<4988EF2D.40804@example.com>", values)
+                self.assertEqual(types['email-subject'], 1)
+                self.assertIn("Example Message", values)
+                self.assertEqual(types['email-header'], 1)
+                self.assertEqual(types['email-x-mailer'], 1)
+                self.assertIn("mlx 5.1.7", values)
+                self.assertEqual(types['email-reply-to'], 1)
+                self.assertIn("<CI7DgL-A6dm92s7gf4-88g@E_0x238G4K2H08H9SDwsw8b6LwuA@mail.example.com>", values)
+
+                self.assertIn("<CI7DgL-A6dm92s7gf4-88g@E_0x238G4K2H08H9SDwsw8b6LwuA@mail.example.com>", values)
+
+    def test_email_header_malformed_encoding(self):
+        query = {"module":"email_import"}
+        query["config"] = {"unzip_attachments": None,
+                           "guess_zip_attachment_passwords": None,
+                           "extract_urls": None}
+        filenames = os.listdir("tests/test_files/encodings")
+        for encoding in ['utf-8', 'utf-16', 'utf-32']:
+            message = get_base_email()
+            text = """I am a test e-mail
+            the password is NOT "this string".
+            That is all.
+            """
+            message.attach(MIMEText(text, 'plain'))
+            for hdr, hdr_val in message.items():
+                msg = message
+                encoded_header = hdr_val.encode(encoding)
+                pat = re.compile(hdr_val.encode())
+                message_bytes = pat.sub(encoded_header, msg.as_bytes())
+                message64 = base64.b64encode(message_bytes).decode()
+                query['data'] = message64
+
+                data = json.dumps(query)
+                response = requests.post(self.url + "query", data=data)
+                results = response.json()['results']
+                values = []
+                for x in results:
+                    # Remove BOM from UTF-16 strings
+                    if re.search('\ufeff', x["values"]):
+                        values.append(re.sub('\ufeff', "", x["values"]))
+                    else:
+                        values.append(x["values"])
+                types = {}
+                for i in results:
+                    types.setdefault(i["type"], 0)
+                    types[i["type"]] += 1
+                # Check that all the items were correct
+                self.assertEqual(types['target-email'], 1)
+                self.assertIn('test@domain.com', values)
+                self.assertEqual(types['email-dst-display-name'], 4)
+                self.assertIn('Last One', values)
+                self.assertIn('Other Friend', values)
+                self.assertIn('Second Person', values)
+                self.assertIn('Testy Testerson', values)
+                self.assertEqual(types['email-dst'], 4)
+                self.assertIn('test@domain.com', values)
+                self.assertIn('second@domain.com', values)
+                self.assertIn('other@friend.net', values)
+                self.assertIn('last_one@finally.com', values)
+                self.assertEqual(types['email-src-display-name'], 2)
+                self.assertIn("Innocent Person", values)
+                self.assertEqual(types['email-src'], 2)
+                self.assertIn("evil_spoofer@example.com", values)
+                self.assertIn("IgnoreMeImInnocent@sender.com", values)
+                self.assertEqual(types['email-thread-index'], 1)
+                self.assertIn('AQHSR8Us3H3SoaY1oUy9AAwZfMF922bnA9GAgAAi9s4AAGvxAA==', values)
+                self.assertEqual(types['email-message-id'], 1)
+                self.assertIn("<4988EF2D.40804@example.com>", values)
+                self.assertEqual(types['email-subject'], 1)
+                self.assertIn("Example Message", values)
+                self.assertEqual(types['email-header'], 1)
+                self.assertEqual(types['email-x-mailer'], 1)
+                self.assertIn("mlx 5.1.7", values)
+                self.assertEqual(types['email-reply-to'], 1)
+                self.assertIn("<CI7DgL-A6dm92s7gf4-88g@E_0x238G4K2H08H9SDwsw8b6LwuA@mail.example.com>", values)
+
+                self.assertIn("<CI7DgL-A6dm92s7gf4-88g@E_0x238G4K2H08H9SDwsw8b6LwuA@mail.example.com>", values)
+
+    def test_email_header_CJK_encoding(self):
+        query = {"module":"email_import"}
+        query["config"] = {"unzip_attachments": None,
+                           "guess_zip_attachment_passwords": None,
+                           "extract_urls": None}
+        # filenames = os.listdir("tests/test_files/encodings")
+        # for encoding in ['utf-8', 'utf-16', 'utf-32']:
+        message = get_base_email()
+        text = """I am a test e-mail
+        the password is NOT "this string".
+        That is all.
+        """
+        message.attach(MIMEText(text, 'plain'))
+        japanese_charset = "ビット及び8ビットの2バイト情報交換用符号化拡張漢字集合"
+        jisx213 = Header(japanese_charset, 'euc_jisx0213')
+        message.replace_header("Subject", jisx213)
+        query['data'] = decode_email(message)
+        data = json.dumps(query)
+        response = requests.post(self.url + "query", data=data)
+        # Parse Response
+        RFC_format = '=?euc_jisx0213?b?pdOlw6XItdqk0zil06XDpcikzjKl0KWkpci+8MrzuPK0uc3RyeS55rK9s8jEpbTBu/q9uLnn?='
+        for i in response.json()['results']:
+            if i['type'] == 'email-subject':
+                RFC_encoding_error = "The subject was not decoded from RFC2047 format."
+                self.assertNotEqual(RFC_format, i['values'], RFC_encoding_error)
+                self.assertEqual(japanese_charset, i['values'], "Subject not properly decoded")
+
+    def test_email_malformed_header_CJK_encoding(self):
+        query = {"module":"email_import"}
+        query["config"] = {"unzip_attachments": None,
+                           "guess_zip_attachment_passwords": None,
+                           "extract_urls": None}
+        # filenames = os.listdir("tests/test_files/encodings")
+        # for encoding in ['utf-8', 'utf-16', 'utf-32']:
+        message = get_base_email()
+        text = """I am a test e-mail
+        the password is NOT "this string".
+        That is all.
+        """
+        message.attach(MIMEText(text, 'plain'))
+        japanese_charset = "ビット及び8ビットの2バイト情報交換用符号化拡張漢字集合"
+        japanese_bytes = japanese_charset.encode()
+        message.replace_header('Subject', "{{REPLACE}}")
+        pat = re.compile(b'{{REPLACE}}')
+        message_bytes = pat.sub(japanese_bytes, message.as_bytes())
+        message64 = base64.b64encode(message_bytes).decode()
+        query['data'] = message64
+        data = json.dumps(query)
+        response = requests.post(self.url + "query", data=data)
+        # Parse Response
+        RFC_format = '=?euc_jisx0213?b?pdOlw6XItdqk0zil06XDpcikzjKl0KWkpci+8MrzuPK0uc3RyeS55rK9s8jEpbTBu/q9uLnn?='
+        for i in response.json()['results']:
+            if i['type'] == 'email-subject':
+                RFC_encoding_error = "The subject was not decoded from RFC2047 format."
+                self.assertNotEqual(RFC_format, i['values'], RFC_encoding_error)
+                self.assertEqual(japanese_charset, i['values'], "Subject not properly decoded")
+
+    def test_email_malformed_header_emoji_encoding(self):
+        query = {"module":"email_import"}
+        query["config"] = {"unzip_attachments": None,
+                           "guess_zip_attachment_passwords": None,
+                           "extract_urls": None}
+        # filenames = os.listdir("tests/test_files/encodings")
+        # for encoding in ['utf-8', 'utf-16', 'utf-32']:
+        message = get_base_email()
+        text = """I am a test e-mail
+        the password is NOT "this string".
+        That is all.
+        """
+        message.attach(MIMEText(text, 'plain'))
+        emoji_string = "Emoji Test 👍 checking this"
+        emoji_bytes = emoji_string.encode()
+        message.replace_header('Subject', "{{EMOJI}}")
+        pat = re.compile(b'{{EMOJI}}')
+        message_bytes = pat.sub(emoji_bytes, message.as_bytes())
+        message64 = base64.b64encode(message_bytes).decode()
+        query['data'] = message64
+        data = json.dumps(query)
+        response = requests.post(self.url + "query", data=data)
+        # Parse Response
+        RFC_format = "=?unknown-8bit?q?Emoji_Test_=F0=9F=91=8D_checking_this?="
+        for i in response.json()['results']:
+            if i['type'] == 'email-subject':
+                RFC_encoding_error = "The subject was not decoded from RFC2047 format."
+                self.assertNotEqual(RFC_format, i['values'], RFC_encoding_error)
+                self.assertEqual(emoji_string, i['values'], "Subject not properly decoded")
+
+    def test_email_attachment_emoji_filename(self):
+        query = {"module": "email_import"}
+        query["config"] = {"unzip_attachments": None,
+                           "guess_zip_attachment_passwords": None,
+                           "extract_urls": None}
+        message = get_base_email()
+        text = """I am a test e-mail"""
+        message.attach(MIMEText(text, 'plain'))
+        with open("tests/EICAR.com", "rb") as fp:
+            eicar_mime = MIMEApplication(fp.read(), 'com')
+            eicar_mime.add_header('Content-Disposition',
+                                      'attachment',
+                                      filename="Emoji Test 👍 checking this")
+            message.attach(eicar_mime)
+        query['data'] = decode_email(message)
+        data = json.dumps(query)
+        response = requests.post(self.url + "query", data=data)
+        values = [x["values"] for x in response.json()['results']]
+        self.assertIn("Emoji Test 👍 checking this", values)
+        for i in response.json()['results']:
+            if i["type"] == 'email-attachment':
+                self.assertEqual(i["values"], "Emoji Test 👍 checking this")
+            if i['type'] == 'malware-sample':
+                attch_data = base64.b64decode(i["data"])
+                self.assertEqual(attch_data, b'X5O!P%@AP[4\\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-')
+
 
     def test_email_attachment_password_in_subject(self):
         query = {"module": "email_import"}
