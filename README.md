@@ -41,8 +41,8 @@ For more information: [Extending MISP with Python modules](https://www.circl.lu/
 ### Export modules
 
 * [CEF](misp_modules/modules/export_mod/cef_export.py) module to export Common Event Format (CEF).
-* [Lite Export](/misp-modules/blob/master/misp_modules/modules/export_mod/liteexport.py) module to export a lite event.
-* [ThreatConnect](/misp-modules/blob/master/misp_modules/modules/export_mod/threat_connect_export.py) module to export in ThreatConnect CSV format.
+* [Lite Export](misp_modules/modules/export_mod/liteexport.py) module to export a lite event.
+* [ThreatConnect](misp_modules/modules/export_mod/threat_connect_export.py) module to export in ThreatConnect CSV format.
 
 ### Import modules
 
