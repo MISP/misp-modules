@@ -217,6 +217,7 @@ def main():
     argParser.add_argument('-d', default=False, action='store_true', help='Enable debugging')
     argParser.add_argument('-p', default=6666, help='misp-modules TCP port (default 6666)')
     argParser.add_argument('-l', default='localhost', help='misp-modules listen address (default localhost)')
+    argParser.add_argument('-m', action='append', help='Register a custom module')
     args = argParser.parse_args()
     port = args.p
     listen = args.l
@@ -232,6 +233,11 @@ def main():
         helpersdir = 'helpers'
         load_helpers(helpersdir=helpersdir)
         mhandlers, loaded_modules = load_modules(modulesdir)
+
+    for module in args.m:
+        mispmod = importlib.import_module(module)
+        mispmod.register(mhandlers, loaded_modules)
+        
     service = [(r'/modules', ListModules), (r'/query', QueryModule)]
 
     application = tornado.web.Application(service)
