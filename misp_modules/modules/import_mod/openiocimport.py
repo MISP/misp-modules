@@ -4,23 +4,20 @@ import base64
 from pymisp.tools import openioc
 
 misperrors = {'error': 'Error'}
-userConfig = {
-            'not save ioc': {
-                'type': 'Boolean',
-                'message': 'If you check this box, IOC file will not save as an attachment in MISP'
-            },
-            'default tag': {
-                'type': 'String',
-                'message': 'Add tags spaced by a comma (tlp:white,misp:threat-level="no-risk")',
-                'validation' : '0'
-            }
-        }
+userConfig = {'not save ioc': {'type': 'Boolean',
+                               'message': 'If you check this box, IOC file will not save as an attachment in MISP'
+                               },
+              'default tag': {
+                  'type': 'String',
+                  'message': 'Add tags spaced by a comma (tlp:white,misp:threat-level="no-risk")',
+                  'validation': '0'}
+              }
 
 inputSource = ['file']
 
 moduleinfo = {'version': '0.1', 'author': 'Raphaël Vinot',
-            'description': 'Import OpenIOC package',
-            'module-type': ['import']}
+              'description': 'Import OpenIOC package',
+              'module-type': ['import']}
 
 moduleconfig = []
 
@@ -47,18 +44,15 @@ def handler(q=False):
 
     if q.get('config'):
         if q['config'].get('not save ioc') == "0":
-            addFile = {
-                    "values": [q.get('filename')],
-                    "types": ['attachment'],
-                    "categories": ['Support Tool'],
-                    "data" : q.get('data'),
-                    }
+            addFile = {"values": [q.get('filename')],
+                       "types": ['attachment'],
+                       "categories": ['Support Tool'],
+                       "data": q.get('data')}
             # add tag
             if q['config'].get('default tag') is not None:
                 addFile["tags"] = q['config']['default tag'].split(",")
             # add file as attachment
             r["results"].append(addFile)
-
 
     # return all attributes
     for attrib in pkg.attributes:
@@ -66,8 +60,7 @@ def handler(q=False):
             "values": [attrib.value],
             "types": [attrib.type],
             "categories": [attrib.category],
-            "comment":attrib.comment
-            }
+            "comment": getattr(attrib, 'comment', '')}
         # add tag
         if q.get('config') and q['config'].get('default tag') is not None:
                 toAppend["tags"] = q['config']['default tag'].split(",")
