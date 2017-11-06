@@ -19,8 +19,11 @@ def handler(q=False):
     r = requests.get(cveapi_url + request.get('vulnerability'))
     if r.status_code == 200:
         vulnerability = json.loads(r.text)
-        if vulnerability.get('summary'):
-            summary = vulnerability['summary']
+        if vulnerability:
+            if vulnerability.get('summary'):
+                summary = vulnerability['summary']
+        else:
+            summary = 'Non existing CVE'
     else:
         misperrors['error'] = 'cve.circl.lu API not accessible'
         return misperrors['error']
