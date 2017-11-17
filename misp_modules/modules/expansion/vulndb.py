@@ -43,12 +43,12 @@ def handler(q=False):
 
     # Only continue if we have a vulnerability attribute
     if not request.get('vulnerability'):
-        misperrors['error'] = 'Vulnerability id missing for VulnDB'
+        misperrors['error'] = 'Vulnerability ID missing for VulnDB.'
         return misperrors
     vulnerability = request.get('vulnerability')
 
     if request["config"].get("apikey") is None or request["config"].get("apisecret") is None:
-        misperrors["error"] = "Missing API key or secret value for VulnDB"
+        misperrors["error"] = "Missing API key or secret value for VulnDB."
         return misperrors
     apikey = request["config"].get("apikey")
     apisecret = request["config"].get("apisecret")
@@ -90,7 +90,7 @@ def handler(q=False):
 
         if content_json:
             if 'error' in content_json:
-                misperrors["error"] = "No CVE information found"
+                misperrors["error"] = "No CVE information found."
                 return misperrors
             else:
                 output = {'results': list()}
@@ -266,7 +266,7 @@ def handler(q=False):
                     output['results'] += [{'types': 'cpe', 'values':  values_cpe }]
                 return output
         else:
-            misperrors["error"] = "No information retrieved from VulnDB"
+            misperrors["error"] = "No information retrieved from VulnDB."
             return misperrors
     except:
         misperrors["error"] = "Error while fetching information from VulnDB, wrong API keys?"
