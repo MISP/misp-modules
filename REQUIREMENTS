@@ -20,3 +20,4 @@ SPARQLWrapper
 domaintools_api
 pygeoip
 bs4
+oauth2
