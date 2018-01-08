@@ -20,10 +20,10 @@ moduleinfo = {
 }
 
 
-moduleconfig = ["Default_Source"]
+moduleconfig = []
 
 
-# Map of MISP fields => ThreatStream itypes
+# Map of MISP fields => ThreatStream itypes, you can modify this to your liking
 fieldmap = {
     "domain": "mal_domain",
     "hostname": "mal_domain",
@@ -49,10 +49,9 @@ def handler(q=False):
     if q is False or not q:
         return False
 
-    # Check if we were given a configuration
+    
     request = json.loads(q)
-    config = request.get("config", {"Default_Source": ""})
-    logging.info("Setting config to: %s", config)
+  
 
     response = io.StringIO()
     writer = csv.DictWriter(response, fieldnames=["value", "itype", "tags"])
