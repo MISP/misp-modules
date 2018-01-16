@@ -50,10 +50,10 @@ def lookup_name(client, name):
             for i in item.get('rdata'):
                 # grab email field and replace first dot by @ to convert to an email address
                 yield(i.split(' ')[1].rstrip('.').replace('.', '@', 1))
-    res = client.query_rdata_name(name)  # RDATA = entries on the right-hand side of the domain name related labels
-    for item in res:
-        if item.get('rrtype') in ['A', 'AAAA', 'CNAME']:
-            yield(item.get('rrname').rstrip('.'))
+    # res = client.query_rdata_name(name)  # RDATA = entries on the right-hand side of the domain name related labels
+    # for item in res:
+    #     if item.get('rrtype') in ['A', 'AAAA', 'CNAME']:
+    #         yield(item.get('rrname').rstrip('.'))
 
 
 def lookup_ip(client, ip):
