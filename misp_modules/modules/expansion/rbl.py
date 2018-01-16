@@ -87,26 +87,21 @@ def handler(q=False):
     else:
         misperrors['error'] = "Unsupported attributes type"
         return misperrors
-    results = {}
-    results['query'] = ip
-    results['date'] = datetime.datetime.utcnow().replace(tzinfo=datetime.timezone.utc).isoformat()
-    results['listed'] = []
-    results['info'] = []
-    results['not_listed'] = []
+    listed = []
+    info = []
     for rbl in rbls:
         ipRev =  '.'.join(ip.split('.')[::-1])
         query = '{}.{}'.format(ipRev, rbl)
         try:
-            resolver.query(query,'A')
-            try:
-                txt = resolver.query(query, 'TXT')
-            except:
-                results['listed'].append(query)
-            results['listed'].append(query)
-            results['info'].append(str(txt[0]))
+            txt = resolver.query(query,'TXT')
+            listed.append(query)
+            info.append(str(txt[0]))
         except:
-            results['not_listed'].append(query)
-    r = {'results': [{'types': mispattributes.get('output'), 'values': json.dumps(results)}]}
+            continue
+    result = {}
+    for l, i in zip(listed, info):
+        result[l] = i
+    r = {'results': [{'types': mispattributes.get('output'), 'values': json.dumps(result)}]}
     return r
 
 def introspection():
