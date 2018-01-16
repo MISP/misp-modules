@@ -31,6 +31,7 @@ For more information: [Extending MISP with Python modules](https://www.circl.lu/
 * [iprep](misp-modules/modules/expansion/iprep.py) - an expansion module to get IP reputation from packetmail.net.
 * [OTX](misp_modules/modules/expansion/otx.py) - an expansion module for [OTX](https://otx.alienvault.com/).
 * [passivetotal](misp_modules/modules/expansion/passivetotal.py) - a [passivetotal](https://www.passivetotal.org/) module that queries a number of different PassiveTotal datasets.
+* [rbl](misp_modules/modules/expansion/rbl.py) - a module to get RBL (Real-Time Blackhost List) values from an attribute.
 * [shodan](misp_modules/modules/expansion/shodan.py) - a minimal [shodan](https://www.shodan.io/) expansion module.
 * [sourcecache](misp_modules/modules/expansion/sourcecache.py) - a module to cache a specific link from a MISP instance.
 * [ThreatCrowd](misp_modules/modules/expansion/threatcrowd.py) - an expansion module for [ThreatCrowd](https://www.threatcrowd.org/).
