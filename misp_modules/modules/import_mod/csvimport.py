@@ -24,13 +24,17 @@ def handler(q=False):
         misperrors['error'] = "Configuration error"
         return misperrors
     config = request['config'].get('header')
-    header = []
+    #header = []
     data = []
     with open(filename, 'r') as f:
         for line in f:
             # split comments from data
-            if line.startswith('#'):
-                header.append(line)
+            if '#' in line:
+                l = line.split('#')[0]
+                if l:
+                    data.append(l)
+                #else:
+                    #header.append(line)
             else:
                 data.append(line)
     # find which delimiter is used
@@ -43,10 +47,9 @@ def handler(q=False):
 def findDelimiter(header, data):
     n = len(header)
     if n > 1:
-        for d in (';', ',', '|'):
+        for d in (';', '|', '/', ','):
             if data[0].count(d) == (n-1):
                 return d, n
-                break
     else:
         return None, 1
 
@@ -100,6 +103,7 @@ def findMispTypes(header):
         elif h in duplicatedFields['attrField']:
             # fields that should be considered as attribute fields
             head.append(duplicatedFields['attrField'].get(h))
+        # otherwise, it is an attribute field
         else:
             head.append(h)
     # return list of indexes of the misp types, list of the misp types, remaining fields that will be attribute fields
