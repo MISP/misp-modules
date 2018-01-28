@@ -47,7 +47,7 @@ def handler(q=False):
 def findDelimiter(header, data):
     n = len(header)
     if n > 1:
-        for d in (';', '|', '/', ','):
+        for d in (';', '|', '/', ',', '    '):
             if data[0].count(d) == (n-1):
                 return d, n
     else:
@@ -59,7 +59,7 @@ def buildAttributes(header, dataValues, delimiter, length):
     if delimiter is None:
         mispType = header[0]
         for data in dataValues:
-            attributes.append({'type': mispType, 'value': data})
+            attributes.append({'type': mispType, 'value': data.strip()})
     else:
         # split fields that should be recognized as misp attribute types from the others
         list2pop, misp, head = findMispTypes(header)
@@ -107,7 +107,7 @@ def findMispTypes(header):
         else:
             head.append(h)
     # return list of indexes of the misp types, list of the misp types, remaining fields that will be attribute fields
-    return list2pop, misp, head
+    return list2pop, misp, list(reversed(head))
 
 def introspection():
     return mispattributes
