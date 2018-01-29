@@ -59,7 +59,9 @@ def buildAttributes(header, dataValues, delimiter, length):
     if delimiter is None:
         mispType = header[0]
         for data in dataValues:
-            attributes.append({'type': mispType, 'value': data.strip()})
+            d = data.strip()
+            if d:
+                attributes.append({'type': mispType, 'value': d})
     else:
         # split fields that should be recognized as misp attribute types from the others
         list2pop, misp, head = findMispTypes(header)
