@@ -30,13 +30,11 @@ def handler(q=False):
         for line in f:
             # split comments from data
             if '#' in line:
-                l = line.split('#')[0]
-                if l:
-                    data.append(l)
-                #else:
-                    #header.append(line)
+                l = line.split('#')[0].strip()
             else:
-                data.append(line)
+                l = line.strip()
+            if l:
+                data.append(l)
     # find which delimiter is used
     delimiter, length = findDelimiter(config, data)
     # build the attributes
@@ -47,9 +45,16 @@ def handler(q=False):
 def findDelimiter(header, data):
     n = len(header)
     if n > 1:
-        for d in (';', '|', '/', ',', '    '):
-            if data[0].count(d) == (n-1):
-                return d, n
+        tmpData = []
+        for da in data:
+            tmp = []
+            for d in (';', '|', '/', ',', '\t', '    ',):
+                if da.count(d) == (n-1):
+                    tmp.append(d)
+            if len(tmp) == 1 and tmp == tmpData:
+                return tmpData[0], n
+            else:
+                tmpData = tmp
     else:
         return None, 1
 
