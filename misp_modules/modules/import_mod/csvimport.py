@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import json, os
 import pymisp
 
@@ -25,8 +26,20 @@ def handler(q=False):
         return misperrors
     config = request['config'].get('header')
     #header = []
+    try:
+        data = readFile(filename, 'utf-8')
+    except:
+        data = readFile(filename, 'iso-8859-1')
+    # find which delimiter is used
+    delimiter, length = findDelimiter(config, data)
+    # build the attributes
+    result = buildAttributes(config, data, delimiter, length)
+    r = {'results': [{'types': mispattributes['output'], 'values': result}]}
+    return r
+
+def readFile(filename, encoding):
     data = []
-    with open(filename, 'r') as f:
+    with open(filename, 'r', encoding=encoding) as f:
         for line in f:
             # split comments from data
             if '#' in line:
@@ -35,12 +48,7 @@ def handler(q=False):
                 l = line.strip()
             if l:
                 data.append(l)
-    # find which delimiter is used
-    delimiter, length = findDelimiter(config, data)
-    # build the attributes
-    result = buildAttributes(config, data, delimiter, length)
-    r = {'results': [{'types': mispattributes['output'], 'values': result}]}
-    return r
+    return data
 
 def findDelimiter(header, data):
     n = len(header)
