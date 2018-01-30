@@ -11,7 +11,6 @@ python:
     - "3.5-dev"
     - "3.6"
     - "3.6-dev"
-    - "nightly"
 
 install:
     - pip install -U nose codecov pytest
