@@ -2,9 +2,9 @@
 
 import json
 try:
-    from uwhois import Uwhois
+    from uwhoisd import UWhois
 except ImportError:
-    print("uwhois module not installed.")
+    UWhois = None
 
 misperrors = {'error': 'Error'}
 mispattributes = {'input': ['domain', 'ip-src', 'ip-dst'], 'output': ['freetext']}
@@ -18,6 +18,9 @@ moduleconfig = ['server', 'port']
 def handler(q=False):
     if q is False:
         return False
+    if UWhois is None:
+        misperrors['error'] = "uwhoisd module not installed."
+        return misperrors
     request = json.loads(q)
     if request.get('domain'):
         toquery = request['domain']
@@ -33,7 +36,7 @@ def handler(q=False):
         misperrors['error'] = 'EUPI authentication is missing'
         return misperrors
 
-    uwhois = Uwhois(request['config']['server'], int(request['config']['port']))
+    uwhois = UWhois(request['config']['server'], int(request['config']['port']))
 
     if 'event_id' in request:
         return handle_expansion(uwhois, toquery)
