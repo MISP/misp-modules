@@ -51,6 +51,7 @@ For more information: [Extending MISP with Python modules](https://www.circl.lu/
 
 ### Import modules
 
+* [CSV import](misp_modules/modules/import_mod/csvimport.py) Customizable CSV import module.
 * [Cuckoo JSON](misp_modules/modules/import_mod/cuckooimport.py) Cuckoo JSON import.
 * [Email Import](misp_modules/modules/import_mod/email_import.py) Email import module for MISP to import basic metadata.
 * [OCR](misp_modules/modules/import_mod/ocr.py) Optical Character Recognition (OCR) module for MISP to import attributes from images, scan or faxes.
