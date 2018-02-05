@@ -11,7 +11,7 @@ mispattributes = {}
 outputFileExtension = "xml"
 responseType = "application/xml"
 
-objects_to_parse = ['bank-account', 'person']
+objects_to_parse = ['bank-account', 'person', 'geolocation']
 
 goAMLmapping = {'bank-account': 't_account', 'text': 'institution_name', 'institution-code': 'institution_code',
                 'swift': 'swift', 'branch': 'branch', 'non-banking-institution': 'non_bank_institution',
@@ -23,7 +23,9 @@ goAMLmapping = {'bank-account': 't_account', 'text': 'institution_name', 'instit
                 'last-name': 'last_name', 'mothers-name': 'mothers_name', 'title': 'title', 'alias': 'alias',
                 'date-of-birth': 'birthdate', 'place-of-birth': 'birth_place', 'gender': 'gender',
                 'passport-number': 'passport_number', 'passport-country': 'passport_country',
-                'social-security-number': 'ssn', 'nationality': 'nationality1'}
+                'social-security-number': 'ssn', 'nationality': 'nationality1', 'identity-card-number': 'id_number',
+                'geolocation': 'location', 'city': 'city', 'region': 'state', 'country': 'country-code',
+                'address': 'address', 'zipcode': 'zip'}
 
 class GoAmlGeneration():
     def __init__(self):
@@ -55,12 +57,19 @@ class GoAmlGeneration():
     def itterate(self):
         for t in self.document:
             self.xml += "<{}>".format(goAMLmapping[t])
-            for k in self.document[t]:
-                try:
-                    self.xml += "<{0}>{1}</{0}>".format(goAMLmapping[k], self.document[t][k])
-                except KeyError:
-                    pass
+            self.fill_xml(t)
+            if t == 'bank-account' and 'person' in self.document:
+                self.xml += "<signatory><t_person>"
+                self.fill_xml('person')
+                self.xml += "</t_person></signatory>"
             self.xml += "</{}>".format(goAMLmapping[t])
+
+    def fill_xml(self, t):
+        for k in self.document[t]:
+            try:
+                self.xml += "<{0}>{1}</{0}>".format(goAMLmapping[k], self.document[t][k])
+            except KeyError:
+                pass
 
 def handler(q=False):
     if q is False:
@@ -73,7 +82,7 @@ def handler(q=False):
     exp_doc.parse_objects()
     exp_doc.build_xml()
     return {'response': {}, 'data': exp_doc.xml}
-    #return {'response': [], 'data': str(base64.b64encode(bytes(exp_doc.document, 'utf-8')), 'utf-8')}
+    #return {'response': [], 'data': str(base64.b64encode(bytes(exp_doc.xml, 'utf-8')), 'utf-8')}
 
 def introspection():
     modulesetup = {}
