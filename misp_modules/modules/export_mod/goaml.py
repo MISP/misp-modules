@@ -101,18 +101,19 @@ class GoAmlGeneration(object):
                 pass
 
     def parse_references(self, object_type, next_object_type, uuid, relationship_type, xml_part):
+        reference = referencesMapping[next_object_type]
         try:
-            next_aml_type = referencesMapping[next_object_type][object_type].get('aml_type').format(relationship_type.split('_')[0])
+            next_aml_type = reference[object_type].get('aml_type').format(relationship_type.split('_')[0])
             try:
-                bracket = referencesMapping[next_object_type][object_type].get('bracket').format(relationship_type)
+                bracket = reference[object_type].get('bracket').format(relationship_type)
                 self.xml[xml_part] += "<{}>".format(bracket)
                 self.itterate(next_object_type, next_aml_type, uuid, xml_part)
                 self.xml[xml_part] += "</{}>".format(bracket)
             except KeyError:
                 self.itterate(next_object_type, next_aml_type, uuid, xml_part)
         except KeyError:
-            next_aml_type = referencesMapping[next_object_type].get('aml_type').format(relationship_type.split('_')[0])
-            bracket = referencesMapping[next_object_type].get('bracket').format(relationship_type)
+            next_aml_type = reference.get('aml_type').format(relationship_type.split('_')[0])
+            bracket = reference.get('bracket').format(relationship_type)
             self.xml[xml_part] += "<{}>".format(bracket)
             self.itterate(next_object_type, next_aml_type, uuid, xml_part)
             self.xml[xml_part] += "</{}>".format(bracket)
