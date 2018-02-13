@@ -30,13 +30,19 @@ goAMLmapping = {'bank-account': 't_account', 'institution-code': 'institution_co
                 'transaction': 'transaction', 'transaction-number': 'transactionnumber', 'date': 'date_transaction',
                 'location': 'transaction_location', 'transmode-code': 'transmode_code', 'amount': 'amount_local',
                 'transmode-comment': 'transmode_comment', 'date-posting': 'date_posting',
-                'entity': 'entity', 'name': 'name', 'commercial-name': 'commercial_name', 'business': 'business',
+                'legal-entity': 'entity', 'name': 'name', 'commercial-name': 'commercial_name', 'business': 'business',
                 'legal-form': 'incorporation_legal_form', 'registration-number': 'incorporation_number',
                 'phone-number': 'phone'}
+
+referencesMapping = {'bank-account': {'aml_type': '{}_account', 'bracket': 't_{}'},
+                     'person': {'transaction': {'aml_type': '{}_person', 'bracket': 't_{}'}, 'bank-account': {'aml_type': 't_person', 'bracket': 'signatory'}},
+                     'legal-entity': {'transaction': {'aml_type': '{}_entity', 'bracket': 't_{}'}, 'bank-account': {'aml_type': 'entity'}},
+                     'geolocation': {'aml_type': 'address', 'bracket': 'addresses'}}
 
 class GoAmlGeneration(object):
     def __init__(self, config):
         self.config = config
+        self.parsed_uuids = defaultdict(list)
 
     def from_event(self, event):
         self.misp_event = MISPEvent()
@@ -51,67 +57,65 @@ class GoAmlGeneration(object):
             uuids[obj_type].append(obj.uuid)
             if obj_type == 'bank-account':
                 try:
-                    report_code.append(obj.get_attributes_by_relation('report-code'))
-                    currency_code.append(obj.get_attributes_by_relation('currency-code'))
+                    report_code.append(obj.get_attributes_by_relation('report-code')[0])
+                    currency_code.append(obj.get_attributes_by_relation('currency-code')[0])
                 except:
-                    print('non')
-        self.uuids, self.report_code, self.currency_code = uuids, report_code, currency_code
+                    print('report_code or currency_code error')
+        self.uuids, self.report_codes, self.currency_codes = uuids, report_code, currency_code
 
     def build_xml(self):
-        self.xml = "<report><rentity_id>{}</rentity_id>".format(self.config)
+        self.xml = {'header': "<report><rentity_id>{}</rentity_id>".format(self.config),
+                    'data': ""}
         for trans_uuid in self.uuids.get('transaction'):
-            self.itterate('transaction', 'transaction', trans_uuid)
-        self.xml += "</report>"
+            self.itterate('transaction', 'transaction', trans_uuid, 'data')
+        person_to_parse = [person_uuid for person_uuid in self.uuids.get('person') if person_uuid not in self.parsed_uuids.get('person')]
+        if len(person_to_parse) == 1:
+            self.itterate('person', 'reporting_person', person_to_parse[0], 'header')
+        location_to_parse = [location_uuid for location_uuid in self.uuids.get('geolocation') if location_uuid not in self.parsed_uuids.get('geolocation')]
+        if len(location_to_parse) == 1:
+            self.itterate('geolocation', 'location', location_to_parse[0], 'header')
+        self.xml['data'] += "</report>"
 
-    def itterate(self, object_type, aml_type, uuid):
-        self.xml += "<{}>".format(aml_type)
+    def itterate(self, object_type, aml_type, uuid, xml_part):
+        self.xml[xml_part] += "<{}>".format(aml_type)
         obj = self.misp_event.get_object_by_uuid(uuid)
-        self.fill_xml(obj)
+        self.fill_xml(obj, xml_part)
+        self.parsed_uuids[object_type].append(uuid)
         if obj.ObjectReference:
             for ref in obj.ObjectReference:
                 uuid = ref.referenced_uuid
                 next_object_type = ref.Object.get('name')
                 relationship_type = ref.relationship_type
-                self.parse_references(object_type, next_object_type, uuid, relationship_type)
-        self.xml += "</{}>".format(aml_type)
+                self.parse_references(object_type, next_object_type, uuid, relationship_type, xml_part)
+        self.xml[xml_part] += "</{}>".format(aml_type)
 
-    def fill_xml(self, obj):
+    def fill_xml(self, obj, xml_part):
         for attribute in obj.attributes:
-            if obj.name == 'bank-account' and attribute.type in ('personal-account-type', 'status-code'):
+            if obj.name == 'bank-account' and attribute.object_relation in ('personal-account-type', 'status-code'):
                 attribute_value = attribute.value.split(' - ')[0]
             else:
                 attribute_value = attribute.value
             try:
-                self.xml += "<{0}>{1}</{0}>".format(goAMLmapping[attribute.object_relation], attribute_value)
+                self.xml[xml_part] += "<{0}>{1}</{0}>".format(goAMLmapping[attribute.object_relation], attribute_value)
             except KeyError:
                 pass
 
-    def parse_references(self, object_type, next_object_type, uuid, relationship_type):
-        if next_object_type == 'bank-account':
-            self.xml += "<t_{}>".format(relationship_type)
-            next_aml_type = "{}_account".format(relationship_type.split('_')[0])
-            self.itterate(next_object_type, next_aml_type, uuid)
-            self.xml += "</t_{}>".format(relationship_type)
-        elif next_object_type == 'person':
-            if object_type == 'transaction':
-                self.xml += "<t_{}>".format(relationship_type)
-                next_aml_type = "{}_person".format(relationship_type.split('_')[0])
-                self.itterate(next_object_type, next_aml_type, uuid)
-                self.xml += "</t_{}>".format(relationship_type)
-            elif object_type == 'bank-account':
-                self.xml += "<signatory>"
-                next_aml_type = goAMLmapping[next_object_type]
-                self.itterate(next_object_type, next_aml_type, uuid)
-                self.xml += "</signatory>"
-        elif next_object_type == 'legal-entity':
-            if object_type == 'transaction':
-                self.xml += "<t_{}>".format(relationship_type)
-                next_aml_type = "{}_entity".format(relationship_type.split('_')[0])
-                self.itterate(next_object_type, next_aml_type, uuid)
-                self.xml += "</t_{}>".format(relationship_type)
-            elif object_type == 'bank-account':
-                next_aml_type = goAMLmapping[next_object_type]
-                self.itterate(next_object_type, next_aml_type, uuid)
+    def parse_references(self, object_type, next_object_type, uuid, relationship_type, xml_part):
+        try:
+            next_aml_type = referencesMapping[next_object_type][object_type].get('aml_type').format(relationship_type.split('_')[0])
+            try:
+                bracket = referencesMapping[next_object_type][object_type].get('bracket').format(relationship_type)
+                self.xml[xml_part] += "<{}>".format(bracket)
+                self.itterate(next_object_type, next_aml_type, uuid, xml_part)
+                self.xml[xml_part] += "</{}>".format(bracket)
+            except KeyError:
+                self.itterate(next_object_type, next_aml_type, uuid, xml_part)
+        except KeyError:
+            next_aml_type = referencesMapping[next_object_type].get('aml_type').format(relationship_type.split('_')[0])
+            bracket = referencesMapping[next_object_type].get('bracket').format(relationship_type)
+            self.xml[xml_part] += "<{}>".format(bracket)
+            self.itterate(next_object_type, next_aml_type, uuid, xml_part)
+            self.xml[xml_part] += "</{}>".format(bracket)
 
 def handler(q=False):
     if q is False:
@@ -123,11 +127,12 @@ def handler(q=False):
         misperrors['error'] = "Configuration error."
         return misperrors
     config = request['config'].get('rentity_id')
-    exp_doc = GoAmlGeneration(config)
-    exp_doc.from_event(request['data'][0])
-    exp_doc.parse_objects()
-    exp_doc.build_xml()
-    return {'response': [], 'data': str(base64.b64encode(bytes(exp_doc.xml, 'utf-8')), 'utf-8')}
+    export_doc = GoAmlGeneration(config)
+    export_doc.from_event(request['data'][0])
+    export_doc.parse_objects()
+    export_doc.build_xml()
+    exp_doc = "{}{}".format(export_doc.xml.get('header'), export_doc.xml.get('data'))
+    return {'response': [], 'data': str(base64.b64encode(bytes(exp_doc, 'utf-8')), 'utf-8')}
 
 def introspection():
     modulesetup = {}
