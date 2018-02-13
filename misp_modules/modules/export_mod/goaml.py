@@ -1,7 +1,6 @@
-import json
+import json, datetime, base64
 from pymisp import MISPEvent
-from collections import defaultdict
-import base64
+from collections import defaultdict, Counter
 
 misperrors = {'error': 'Error'}
 moduleinfo = {'version': '1', 'author': 'Christian Studer',
@@ -57,15 +56,23 @@ class GoAmlGeneration(object):
             uuids[obj_type].append(obj.uuid)
             if obj_type == 'bank-account':
                 try:
-                    report_code.append(obj.get_attributes_by_relation('report-code')[0])
-                    currency_code.append(obj.get_attributes_by_relation('currency-code')[0])
+                    report_code.append(obj.get_attributes_by_relation('report-code')[0].value.split(' ')[0])
+                    currency_code.append(obj.get_attributes_by_relation('currency-code')[0].value)
                 except:
                     print('report_code or currency_code error')
         self.uuids, self.report_codes, self.currency_codes = uuids, report_code, currency_code
 
     def build_xml(self):
-        self.xml = {'header': "<report><rentity_id>{}</rentity_id>".format(self.config),
+        self.xml = {'header': "<report><rentity_id>{}</rentity_id><submission_code>E</submission_code>".format(self.config),
                     'data': ""}
+        if "STR" in self.report_codes:
+            report_code = "STR"
+        else:
+            report_code = Counter(self.report_codes).most_common(1)[0][0]
+        self.xml['header'] += "<report_code>{}</report_code>".format(report_code)
+        submission_date = str(self.misp_event.timestamp).replace(' ', 'T')
+        self.xml['header'] += "<submission_date>{}</submission_date>".format(submission_date)
+        self.xml['header'] += "<currency_code_local>{}</currency_code_local>".format(Counter(self.currency_codes).most_common(1)[0][0])
         for trans_uuid in self.uuids.get('transaction'):
             self.itterate('transaction', 'transaction', trans_uuid, 'data')
         person_to_parse = [person_uuid for person_uuid in self.uuids.get('person') if person_uuid not in self.parsed_uuids.get('person')]
