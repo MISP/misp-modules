@@ -40,6 +40,7 @@ For more information: [Extending MISP with Python modules](https://www.circl.lu/
 * [virustotal](misp_modules/modules/expansion/virustotal.py) - an expansion module to pull known resolutions and malware samples related with an IP/Domain from virusTotal (this modules require a VirusTotal private API key)
 * [wikidata](misp_modules/modules/expansion/wiki.py) - a [wikidata](https://www.wikidata.org) expansion module.
 * [xforce](misp_modules/modules/expansion/xforceexchange.py) - an IBM X-Force Exchange expansion module.
+* [YARA syntax validator](misp_modules/modules/expansion/yara_syntax_validator.py) - YARA syntax validator.
 
 ### Export modules
 
