@@ -28,7 +28,8 @@ goAMLmapping = {'bank-account': 't_account', 'institution-code': 'institution_co
                 'address': 'address', 'zipcode': 'zip',
                 'transaction': 'transaction', 'transaction-number': 'transactionnumber', 'date': 'date_transaction',
                 'location': 'transaction_location', 'transmode-code': 'transmode_code', 'amount': 'amount_local',
-                'transmode-comment': 'transmode_comment', 'date-posting': 'date_posting',
+                'transmode-comment': 'transmode_comment', 'date-posting': 'date_posting', 'teller': 'teller',
+                'authorized': 'authorized',
                 'legal-entity': 'entity', 'name': 'name', 'commercial-name': 'commercial_name', 'business': 'business',
                 'legal-form': 'incorporation_legal_form', 'registration-number': 'incorporation_number',
                 'phone-number': 'phone'}
@@ -102,6 +103,8 @@ class GoAmlGeneration(object):
                 attribute_value = attribute.value.split(' - ')[0]
             else:
                 attribute_value = attribute.value
+            if obj.name == 'transaction' and attribute.object_relation == 'date-posting':
+                self.xml[xml_part] += "<late_deposit>True</late_deposit>"
             try:
                 self.xml[xml_part] += "<{0}>{1}</{0}>".format(goAMLmapping[attribute.object_relation], attribute_value)
             except KeyError:
