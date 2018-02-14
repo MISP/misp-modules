@@ -4,10 +4,10 @@ from collections import defaultdict, Counter
 
 misperrors = {'error': 'Error'}
 moduleinfo = {'version': '1', 'author': 'Christian Studer',
-              'description': '',
+              'description': 'Export to GoAML',
               'module-type': ['export']}
-moduleconfig = []
-mispattributes = {}
+moduleconfig = ['rentity_id']
+mispattributes = {'input': ['MISPEvent'], 'output': ['xml file']}
 outputFileExtension = "xml"
 responseType = "application/xml"
 
@@ -85,30 +85,76 @@ class GoAmlGeneration(object):
         self.xml['data'] += "</report>"
 
     def itterate(self, object_type, aml_type, uuid, xml_part):
-        self.xml[xml_part] += "<{}>".format(aml_type)
         obj = self.misp_event.get_object_by_uuid(uuid)
+        if object_type == 'transaction':
+            self.xml[xml_part] += "<{}>".format(aml_type)
+            self.fill_xml_transaction(obj.attributes, xml_part)
+            self.parsed_uuids[object_type].append(uuid)
+            if obj.ObjectReference:
+                self.parseObjectReferences(object_type, xml_part, obj.ObjectReference)
+            self.xml[xml_part] += "</{}>".format(aml_type)
+        else:
+            if 'to_' in aml_type or 'from_' in aml_type:
+                relation_type = aml_type.split('_')[0]
+                self.xml[xml_part] += "<{0}_funds_code>{1}</{0}_funds_code>".format(relation_type, self.from_and_to_fields[relation_type]['funds'].split(' ')[0])
+                self.itterate_normal_case(object_type, obj, aml_type, uuid, xml_part)
+                self.xml[xml_part] += "<{0}_country>{1}</{0}_country>".format(relation_type, self.from_and_to_fields[relation_type]['country'])
+            else:
+                self.itterate_normal_case(object_type, obj, aml_type, uuid, xml_part)
+
+    def itterate_normal_case(self, object_type, obj, aml_type, uuid, xml_part):
+        self.xml[xml_part] += "<{}>".format(aml_type)
         self.fill_xml(obj, xml_part)
         self.parsed_uuids[object_type].append(uuid)
         if obj.ObjectReference:
-            for ref in obj.ObjectReference:
-                uuid = ref.referenced_uuid
-                next_object_type = ref.Object.get('name')
-                relationship_type = ref.relationship_type
-                self.parse_references(object_type, next_object_type, uuid, relationship_type, xml_part)
+            self.parseObjectReferences(object_type, xml_part, obj.ObjectReference)
         self.xml[xml_part] += "</{}>".format(aml_type)
 
-    def fill_xml(self, obj, xml_part):
-        for attribute in obj.attributes:
-            if obj.name == 'bank-account' and attribute.object_relation in ('personal-account-type', 'status-code'):
-                attribute_value = attribute.value.split(' - ')[0]
-            else:
-                attribute_value = attribute.value
-            if obj.name == 'transaction' and attribute.object_relation == 'date-posting':
+    def parseObjectReferences(self, object_type, xml_part, references):
+        for ref in references:
+            next_uuid = ref.referenced_uuid
+            next_object_type = ref.Object.get('name')
+            relationship_type = ref.relationship_type
+            self.parse_references(object_type, next_object_type, next_uuid, relationship_type, xml_part)
+
+    def fill_xml_transaction(self, attributes, xml_part):
+        from_and_to_fields = {'from': {}, 'to': {}}
+        for attribute in attributes:
+            object_relation = attribute.object_relation
+            attribute_value = attribute.value
+            if object_relation == 'date-posting':
                 self.xml[xml_part] += "<late_deposit>True</late_deposit>"
+            elif object_relation in ('from-funds-code', 'to-funds-code'):
+                relation_type, field, _ = object_relation.split('-')
+                from_and_to_fields[relation_type][field] = attribute_value
+                continue
+            elif object_relation in ('from-country', 'to-country'):
+                relation_type, field = object_relation.split('-')
+                from_and_to_fields[relation_type][field] = attribute_value
+                continue
             try:
-                self.xml[xml_part] += "<{0}>{1}</{0}>".format(goAMLmapping[attribute.object_relation], attribute_value)
+                self.xml[xml_part] += "<{0}>{1}</{0}>".format(goAMLmapping[object_relation], attribute_value)
             except KeyError:
                 pass
+        self.from_and_to_fields = from_and_to_fields
+
+    def fill_xml(self, obj, xml_part):
+        if obj.name == 'bank-account':
+            for attribute in obj.attributes:
+                if attribute.object_relation in ('personal-account-type', 'status-code'):
+                    attribute_value = attribute.value.split(' - ')[0]
+                else:
+                    attribute_value = attribute.value
+                try:
+                    self.xml[xml_part] += "<{0}>{1}</{0}>".format(goAMLmapping[attribute.object_relation], attribute_value)
+                except KeyError:
+                    pass
+        else:
+            for attribute in obj.attributes:
+                try:
+                    self.xml[xml_part] += "<{0}>{1}</{0}>".format(goAMLmapping[attribute.object_relation], attribute.value)
+                except KeyError:
+                    pass
 
     def parse_references(self, object_type, next_object_type, uuid, relationship_type, xml_part):
         reference = referencesMapping[next_object_type]
