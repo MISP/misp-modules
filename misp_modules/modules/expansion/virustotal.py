@@ -152,7 +152,7 @@ def getMoreInfo(req, key):
     # Get all hashes first
     hashes = []
     hashes = findAll(req, ["md5", "sha1", "sha256", "sha512"])
-    r.append({"types": ["md5", "sha1", "sha256", "sha512"], "values": hashes})
+    r.append({"types": ["freetext"], "values": hashes})
     for hsh in hashes[:limit]:
         # Search VT for some juicy info
         try:
