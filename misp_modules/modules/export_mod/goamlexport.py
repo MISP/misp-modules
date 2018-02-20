@@ -210,7 +210,7 @@ def introspection():
         pass
     try:
         inputSource
-        mmoduleSetup['inputSource'] = inputSource
+        moduleSetup['inputSource'] = inputSource
     except NameError:
         pass
     return modulesetup
