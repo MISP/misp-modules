@@ -5,7 +5,8 @@ from collections import defaultdict, Counter
 misperrors = {'error': 'Error'}
 moduleinfo = {'version': '1', 'author': 'Christian Studer',
               'description': 'Export to GoAML',
-              'module-type': ['export']}
+              'module-type': ['export'],
+              'require_standard_format': True}
 moduleconfig = ['rentity_id']
 mispattributes = {'input': ['MISPEvent'], 'output': ['xml file']}
 outputFileExtension = "xml"
