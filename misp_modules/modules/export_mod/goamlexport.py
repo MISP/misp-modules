@@ -5,7 +5,8 @@ from collections import defaultdict, Counter
 misperrors = {'error': 'Error'}
 moduleinfo = {'version': '1', 'author': 'Christian Studer',
               'description': 'Export to GoAML',
-              'module-type': ['export']}
+              'module-type': ['export'],
+              'require_standard_format': True}
 moduleconfig = ['rentity_id']
 mispattributes = {'input': ['MISPEvent'], 'output': ['xml file']}
 outputFileExtension = "xml"
@@ -13,26 +14,33 @@ responseType = "application/xml"
 
 objects_to_parse = ['transaction', 'bank-account', 'person', 'entity', 'geolocation']
 
-goAMLmapping = {'bank-account': 't_account', 'institution-code': 'institution_code', 'iban': 'iban',
-                'swift': 'swift', 'branch': 'branch', 'non-banking-institution': 'non_bank_institution',
-                'account': 'account', 'currency-code': 'currency_code', 'account-name': 'account_name',
-                'client-number': 'client_number', 'personal-account-type': 'personal_account_type',
-                'opened': 'opened', 'closed': 'closed', 'balance': 'balance', 'status-code': 'status_code',
-                'beneficiary': 'beneficiary', 'beneficiary-comment': 'beneficiary_comment', 'comments': 'comments',
-                'person': 't_person', 'text': 'comments', 'first-name': 'first_name', 'middle-name': 'middle_name',
-                'last-name': 'last_name', 'mothers-name': 'mothers_name', 'title': 'title', 'alias': 'alias',
-                'date-of-birth': 'birthdate', 'place-of-birth': 'birth_place', 'gender': 'gender',
-                'passport-number': 'passport_number', 'passport-country': 'passport_country',
-                'social-security-number': 'ssn', 'nationality': 'nationality1', 'identity-card-number': 'id_number',
-                'geolocation': 'location', 'city': 'city', 'region': 'state', 'country': 'country-code',
-                'address': 'address', 'zipcode': 'zip',
-                'transaction': 'transaction', 'transaction-number': 'transactionnumber', 'date': 'date_transaction',
-                'location': 'transaction_location', 'transmode-code': 'transmode_code', 'amount': 'amount_local',
-                'transmode-comment': 'transmode_comment', 'date-posting': 'date_posting', 'teller': 'teller',
-                'authorized': 'authorized',
-                'legal-entity': 'entity', 'name': 'name', 'commercial-name': 'commercial_name', 'business': 'business',
-                'legal-form': 'incorporation_legal_form', 'registration-number': 'incorporation_number',
-                'phone-number': 'phone'}
+goAMLmapping = {'bank-account': {'bank-account': 't_account', 'institution-name': 'institution_name',
+                                 'institution-code': 'institution_code', 'iban': 'iban', 'swift': 'swift',
+                                 'branch': 'branch', 'non-banking-institution': 'non_bank_institution',
+                                 'account': 'account', 'currency-code': 'currency_code',
+                                 'account-name': 'account_name', 'client-number': 'client_number',
+                                 'personal-account-type': 'personal_account_type', 'opened': 'opened',
+                                 'closed': 'closed', 'balance': 'balance', 'status-code': 'status_code',
+                                 'beneficiary': 'beneficiary', 'beneficiary-comment': 'beneficiary_comment',
+                                 'comments': 'comments'},
+                'person': {'person': 't_person', 'text': 'comments', 'first-name': 'first_name',
+                           'middle-name': 'middle_name', 'last-name': 'last_name', 'title': 'title',
+                           'mothers-name': 'mothers_name', 'alias': 'alias', 'date-of-birth': 'birthdate',
+                           'place-of-birth': 'birth_place', 'gender': 'gender','nationality': 'nationality1',
+                           'passport-number': 'passport_number', 'passport-country': 'passport_country',
+                           'social-security-number': 'ssn', 'identity-card-number': 'id_number'},
+                'geolocation': {'geolocation': 'location', 'city': 'city', 'region': 'state',
+                                'country': 'country-code', 'address': 'address', 'zipcode': 'zip'},
+                'transaction': {'transaction': 'transaction', 'transaction-number': 'transactionnumber',
+                                'date': 'date_transaction', 'location': 'transaction_location',
+                                'transmode-code': 'transmode_code', 'amount': 'amount_local',
+                                'transmode-comment': 'transmode_comment', 'date-posting': 'date_posting',
+                                'teller': 'teller', 'authorized': 'authorized',
+                                'text': 'transaction_description'},
+                'legal-enitty': {'legal-entity': 'entity', 'name': 'name', 'business': 'business',
+                                 'commercial-name': 'commercial_name', 'phone-number': 'phone',
+                                 'legal-form': 'incorporation_legal_form',
+                                 'registration-number': 'incorporation_number'}}
 
 referencesMapping = {'bank-account': {'aml_type': '{}_account', 'bracket': 't_{}'},
                      'person': {'transaction': {'aml_type': '{}_person', 'bracket': 't_{}'}, 'bank-account': {'aml_type': 't_person', 'bracket': 'signatory'}},
@@ -88,7 +96,7 @@ class GoAmlGeneration(object):
         obj = self.misp_event.get_object_by_uuid(uuid)
         if object_type == 'transaction':
             self.xml[xml_part] += "<{}>".format(aml_type)
-            self.fill_xml_transaction(obj.attributes, xml_part)
+            self.fill_xml_transaction(object_type, obj.attributes, xml_part)
             self.parsed_uuids[object_type].append(uuid)
             if obj.ObjectReference:
                 self.parseObjectReferences(object_type, xml_part, obj.ObjectReference)
@@ -104,7 +112,7 @@ class GoAmlGeneration(object):
 
     def itterate_normal_case(self, object_type, obj, aml_type, uuid, xml_part):
         self.xml[xml_part] += "<{}>".format(aml_type)
-        self.fill_xml(obj, xml_part)
+        self.fill_xml(object_type, obj, xml_part)
         self.parsed_uuids[object_type].append(uuid)
         if obj.ObjectReference:
             self.parseObjectReferences(object_type, xml_part, obj.ObjectReference)
@@ -117,7 +125,7 @@ class GoAmlGeneration(object):
             relationship_type = ref.relationship_type
             self.parse_references(object_type, next_object_type, next_uuid, relationship_type, xml_part)
 
-    def fill_xml_transaction(self, attributes, xml_part):
+    def fill_xml_transaction(self, object_type, attributes, xml_part):
         from_and_to_fields = {'from': {}, 'to': {}}
         for attribute in attributes:
             object_relation = attribute.object_relation
@@ -133,12 +141,12 @@ class GoAmlGeneration(object):
                 from_and_to_fields[relation_type][field] = attribute_value
                 continue
             try:
-                self.xml[xml_part] += "<{0}>{1}</{0}>".format(goAMLmapping[object_relation], attribute_value)
+                self.xml[xml_part] += "<{0}>{1}</{0}>".format(goAMLmapping[object_type][object_relation], attribute_value)
             except KeyError:
                 pass
         self.from_and_to_fields = from_and_to_fields
 
-    def fill_xml(self, obj, xml_part):
+    def fill_xml(self, object_type, obj, xml_part):
         if obj.name == 'bank-account':
             for attribute in obj.attributes:
                 if attribute.object_relation in ('personal-account-type', 'status-code'):
@@ -146,13 +154,13 @@ class GoAmlGeneration(object):
                 else:
                     attribute_value = attribute.value
                 try:
-                    self.xml[xml_part] += "<{0}>{1}</{0}>".format(goAMLmapping[attribute.object_relation], attribute_value)
+                    self.xml[xml_part] += "<{0}>{1}</{0}>".format(goAMLmapping[object_type][attribute.object_relation], attribute_value)
                 except KeyError:
                     pass
         else:
             for attribute in obj.attributes:
                 try:
-                    self.xml[xml_part] += "<{0}>{1}</{0}>".format(goAMLmapping[attribute.object_relation], attribute.value)
+                    self.xml[xml_part] += "<{0}>{1}</{0}>".format(goAMLmapping[object_type][attribute.object_relation], attribute.value)
                 except KeyError:
                     pass
 
@@ -210,7 +218,7 @@ def introspection():
         pass
     try:
         inputSource
-        mmoduleSetup['inputSource'] = inputSource
+        moduleSetup['inputSource'] = inputSource
     except NameError:
         pass
     return modulesetup
