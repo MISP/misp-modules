@@ -44,7 +44,7 @@ goAMLmapping = {'bank-account': {'bank-account': 't_account', 'institution-name'
 
 referencesMapping = {'bank-account': {'aml_type': '{}_account', 'bracket': 't_{}'},
                      'person': {'transaction': {'aml_type': '{}_person', 'bracket': 't_{}'}, 'bank-account': {'aml_type': 't_person', 'bracket': 'signatory'}},
-                     'legal-entity': {'transaction': {'aml_type': '{}_entity', 'bracket': 't_{}'}, 'bank-account': {'aml_type': 'entity'}},
+                     'legal-entity': {'transaction': {'aml_type': '{}_entity', 'bracket': 't_{}'}, 'bank-account': {'aml_type': 't_entity'}},
                      'geolocation': {'aml_type': 'address', 'bracket': 'addresses'}}
 
 class GoAmlGeneration(object):
