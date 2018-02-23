@@ -194,6 +194,15 @@ def handler(q=False):
     config = request['config'].get('rentity_id')
     export_doc = GoAmlGeneration(config)
     export_doc.from_event(request['data'][0])
+    if not export_doc.misp_event.Object:
+        misperrors['error'] = "There is no object in this event."
+        return misperrors
+    types = []
+    for obj in export_doc.misp_event.Object:
+        types.append(obj.name)
+    if 'transaction' not in types:
+        misperrors['error'] = "There is no transaction object in this event."
+        return misperrors
     export_doc.parse_objects()
     export_doc.build_xml()
     exp_doc = "{}{}".format(export_doc.xml.get('header'), export_doc.xml.get('data'))
