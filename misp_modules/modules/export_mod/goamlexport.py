@@ -37,7 +37,7 @@ goAMLmapping = {'bank-account': {'bank-account': 't_account', 'institution-name'
                                 'transmode-comment': 'transmode_comment', 'date-posting': 'date_posting',
                                 'teller': 'teller', 'authorized': 'authorized',
                                 'text': 'transaction_description'},
-                'legal-enitty': {'legal-entity': 'entity', 'name': 'name', 'business': 'business',
+                'legal-entity': {'legal-entity': 'entity', 'name': 'name', 'business': 'business',
                                  'commercial-name': 'commercial_name', 'phone-number': 'phone',
                                  'legal-form': 'incorporation_legal_form',
                                  'registration-number': 'incorporation_number'}}
