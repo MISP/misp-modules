@@ -30,7 +30,7 @@ goAMLmapping = {'bank-account': {'bank-account': 't_account', 'institution-name'
                            'passport-number': 'passport_number', 'passport-country': 'passport_country',
                            'social-security-number': 'ssn', 'identity-card-number': 'id_number'},
                 'geolocation': {'geolocation': 'location', 'city': 'city', 'region': 'state',
-                                'country': 'country-code', 'address': 'address', 'zipcode': 'zip'},
+                                'country': 'country_code', 'address': 'address', 'zipcode': 'zip'},
                 'transaction': {'transaction': 'transaction', 'transaction-number': 'transactionnumber',
                                 'date': 'date_transaction', 'location': 'transaction_location',
                                 'transmode-code': 'transmode_code', 'amount': 'amount_local',
