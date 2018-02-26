@@ -24,7 +24,7 @@ t_account = {'nodes': ['signatory'],
 entity = {'nodes': ['addresses'],
           'leaves': ['name', 'commercial_name', 'incorporation_legal_form', 'incorporation_number', 'business', 'phone']}
 
-goAMLobjects = {'report': {'nodes': ['reporting_person', 'location', 'transaction'],
+goAMLobjects = {'report': {'nodes': ['reporting_person', 'location'],
                            'leaves': ['rentity_id', 'submission_code', 'report_code', 'submission_date',
                                       'currency_code_local']},
                 'reporting_person': {'nodes': ['addresses'],
@@ -53,25 +53,27 @@ goAMLobjects = {'report': {'nodes': ['reporting_person', 'location', 'transactio
 
 class GoAmlParser():
     def __init__(self):
-        self.dict = defaultdict(list)
+        self.dict = {}
 
     def readFile(self, filename):
         self.tree = ET.parse(filename).getroot()
 
     def parse_xml(self):
-        self.itterate(self.tree, 'report')
+        self.dict = self.itterate(self.tree, 'report')
+        self.dict['transaction'] = []
+        for t in self.tree.findall('transaction'):
+            self.dict['transaction'].append(self.itterate(t, 'transaction'))
 
     def itterate(self, tree, aml_type):
         elementDict = {}
         for element in tree:
             tag = element.tag
-            print(tag)
             mapping = goAMLobjects.get(aml_type)
             if tag in mapping.get('nodes'):
-                self.itterate(element, tag)
+                elementDict[tag] = self.itterate(element, tag)
             elif tag in mapping.get('leaves'):
                 elementDict[tag] = element.text
-        self.dict[aml_type].append(elementDict)
+        return elementDict
 
 def handler(q=False):
     if q is False:
