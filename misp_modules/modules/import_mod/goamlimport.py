@@ -88,15 +88,29 @@ class GoAmlParser():
         self.misp_event.timestamp = self.dict.get('submission_date')
 
     def itterate(self, tree, aml_type):
-        elementDict = {}
+        element_dict = {}
         for element in tree:
             tag = element.tag
             mapping = goAMLobjects.get(aml_type)
             if tag in mapping.get('nodes'):
-                elementDict[tag] = self.itterate(element, tag)
+                if aml_type == 'transaction':
+                    self.fill_transaction(element, element_dict, tag)
+                element_dict[tag] = self.itterate(element, tag)
             elif tag in mapping.get('leaves'):
-                elementDict[tag] = element.text
-        return elementDict
+                try:
+                    element_dict[goAMLmapping[aml_type][tag]] = element.text
+                except KeyError:
+                    pass
+        return element_dict
+
+    @staticmethod
+    def fill_transaction(element, element_dict, tag):
+        if 't_from' in tag:
+            element_dict['from-funds-code'] = element.find('from_funds_code').text
+            element_dict['from-country'] = element.find('from_country').text
+        if 't_to' in tag:
+            element_dict['to-funds-code'] = element.find('to_funds_code').text
+            element_dict['to-country'] = element.find('to_country').text
 
 def handler(q=False):
     if q is False:
