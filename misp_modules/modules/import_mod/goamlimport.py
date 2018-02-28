@@ -1,7 +1,7 @@
 import json, datetime
 import xml.etree.ElementTree as ET
 from collections import defaultdict
-from pymisp import MISPEvent
+from pymisp import MISPEvent, MISPObject
 
 misperrors = {'error': 'Error'}
 moduleinfo = {'version': 1, 'author': 'Christian Studer',
@@ -18,12 +18,12 @@ t_person_objects = {'nodes': ['addresses'],
             'leaves': ['first_name', 'middle_name', 'last_name', 'gender', 'title', 'mothers_name', 'birthdate',
                        'passport_number', 'passport_country', 'id_number', 'birth_place', 'alias', 'nationality1']}
 t_account_objects = {'nodes': ['signatory'],
-             'leaves': ['institution_name', 'institution_code', 'swift', 'branch', 'non_banking_insitution',
-                        'account', 'currency_code', 'account_name', 'iban', 'client_number', 'opened', 'closed',
-                        'personal_account_type', 'balance', 'date_balance', 'status_code', 'beneficiary',
-                        'beneficiary_comment', 'comments']}
+                     'leaves': ['institution_name', 'institution_code', 'swift', 'branch', 'non_banking_insitution',
+                                'account', 'currency_code', 'account_name', 'iban', 'client_number', 'opened', 'closed',
+                                'personal_account_type', 'balance', 'date_balance', 'status_code', 'beneficiary',
+                                'beneficiary_comment', 'comments']}
 entity_objects = {'nodes': ['addresses'],
-          'leaves': ['name', 'commercial_name', 'incorporation_legal_form', 'incorporation_number', 'business', 'phone']}
+                  'leaves': ['name', 'commercial_name', 'incorporation_legal_form', 'incorporation_number', 'business', 'phone']}
 
 goAMLobjects = {'report': {'nodes': ['reporting_person', 'location'],
                            'leaves': ['rentity_id', 'submission_code', 'report_code', 'submission_date', 'currency_code_local']},
@@ -42,30 +42,30 @@ goAMLobjects = {'report': {'nodes': ['reporting_person', 'location'],
                 'from_entity': entity_objects, 'to_entity': entity_objects,
                 }
 
-t_account_mapping = {'t_account': 'bank-account', 'institution_name': 'institution-name', 'institution_code': 'institution-code',
+t_account_mapping = {'misp_name': 'bank-account', 'institution_name': 'institution-name', 'institution_code': 'institution-code',
                      'iban': 'iban', 'swift': 'swift', 'branch': 'branch', 'non_banking_institution': 'non-bank-institution',
                      'account': 'account', 'currency_code': 'currency-code', 'account_name': 'account-name',
                      'client_number': 'client-number', 'personal_account_type': 'personal-account-type', 'opened': 'opened',
                      'closed': 'closed', 'balance': 'balance', 'status_code': 'status-code', 'beneficiary': 'beneficiary',
                      'beneficiary_comment': 'beneficiary-comment', 'comments': 'comments'}
 
-t_person_mapping = {'t_person': 'person', 'comments': 'text', 'first_name': 'first-name', 'middle_name': 'middle-name',
+t_person_mapping = {'misp_name': 'person', 'comments': 'text', 'first_name': 'first-name', 'middle_name': 'middle-name',
                     'last_name': 'last-name', 'title': 'title', 'mothers_name': 'mothers-name', 'alias': 'alias',
                     'birthdate': 'date-of-birth', 'birth_place': 'place-of-birth', 'gender': 'gender','nationality1': 'nationality',
                     'passport_number': 'passport-number', 'passport_country': 'passport-country', 'ssn': 'social-security-number',
                     'id_number': 'identity-card-number'}
 
-location_mapping = {'location': 'geolocation', 'city': 'city', 'state': 'region', 'country-code': 'country', 'address': 'address',
-                   'zip': 'zipcode'}
+location_mapping = {'misp_name': 'geolocation', 'city': 'city', 'state': 'region', 'country_code': 'country', 'address': 'address',
+                    'zip': 'zipcode'}
 
-t_entity_mapping = {'entity': 'legal-entity', 'name': 'name', 'business': 'business', 'commercial_name': 'commercial-name',
+t_entity_mapping = {'misp_name': 'legal-entity', 'name': 'name', 'business': 'business', 'commercial_name': 'commercial-name',
                     'phone': 'phone-number', 'incorporation_legal_form': 'legal-form', 'incorporation_number': 'registration-number'}
 
-goAMLmapping = {'from_account': t_account_mapping, 'to_account': t_account_mapping,
+goAMLmapping = {'from_account': t_account_mapping, 'to_account': t_account_mapping, 't_person': t_person_mapping,
                 'from_person': t_person_mapping, 'to_person': t_person_mapping, 'reporting_person': t_person_mapping,
                 'from_entity': t_entity_mapping, 'to_entity': t_entity_mapping,
                 'location': location_mapping, 'address': location_mapping,
-                'transaction': {'transaction': 'transaction', 'transactionnumber': 'transaction-number', 'date_transaction': 'date',
+                'transaction': {'misp_name': 'transaction', 'transactionnumber': 'transaction-number', 'date_transaction': 'date',
                                 'transaction_location': 'location', 'transmode_code': 'transmode-code', 'amount_local': 'amount',
                                 'transmode_comment': 'transmode-comment', 'date_posting': 'date-posting', 'teller': 'teller',
                                 'authorized': 'authorized', 'transaction_description': 'text'}}
@@ -74,43 +74,64 @@ nodes_to_ignore = ['addresses', 'signatory']
 
 class GoAmlParser():
     def __init__(self):
-        self.dict = {}
         self.misp_event = MISPEvent()
 
     def readFile(self, filename):
         self.tree = ET.parse(filename).getroot()
 
     def parse_xml(self):
-        self.dict = self.itterate(self.tree, 'report')
-        self.dict['transaction'] = []
+        self.first_itteration()
         for t in self.tree.findall('transaction'):
-            self.dict['transaction'].append(self.itterate(t, 'transaction'))
-        self.misp_event.timestamp = self.dict.get('submission_date')
+            self.itterate(t, 'transaction')
+
+    def first_itteration(self):
+        self.misp_event.timestamp = self.tree.find('submission_date').text
+        for node in goAMLobjects['report']['nodes']:
+            element = self.tree.find(node)
+            if element is not None:
+                self.itterate(element, element.tag)
 
     def itterate(self, tree, aml_type):
-        element_dict = {}
-        for element in tree:
-            tag = element.tag
-            mapping = goAMLobjects.get(aml_type)
-            if tag in mapping.get('nodes'):
+        objects = goAMLobjects[aml_type]
+        if aml_type not in nodes_to_ignore:
+            try:
+                mapping = goAMLmapping[aml_type]
+                misp_object = MISPObject(name=mapping['misp_name'])
+                for leaf in objects['leaves']:
+                    element = tree.find(leaf)
+                    if element is not None:
+                        object_relation = mapping[element.tag]
+                        attribute = {'object_relation': object_relation, 'value': element.text}
+                        misp_object.add_attribute(**attribute)
                 if aml_type == 'transaction':
-                    self.fill_transaction(element, element_dict, tag)
-                element_dict[tag] = self.itterate(element, tag)
-            elif tag in mapping.get('leaves'):
-                try:
-                    element_dict[goAMLmapping[aml_type][tag]] = element.text
-                except KeyError:
-                    pass
-        return element_dict
+                    for node in objects['nodes']:
+                        element = tree.find(node)
+                        if element is not None:
+                            self.fill_transaction(element, element.tag, misp_object)
+                self.misp_event.add_object(misp_object)
+            except KeyError:
+                pass
+        for node in objects['nodes']:
+            element = tree.find(node)
+            if element is not None:
+                self.itterate(element, element.tag)
 
     @staticmethod
-    def fill_transaction(element, element_dict, tag):
+    def fill_transaction(element, tag, misp_object):
         if 't_from' in tag:
-            element_dict['from-funds-code'] = element.find('from_funds_code').text
-            element_dict['from-country'] = element.find('from_country').text
+            from_funds = element.find('from_funds_code').text
+            from_funds_attribute = {'object_relation': 'from-funds-code', 'value': from_funds}
+            misp_object.add_attribute(**from_funds_attribute)
+            from_country = element.find('from_country').text
+            from_country_attribute = {'object_relation': 'from-country', 'value': from_country}
+            misp_object.add_attribute(**from_country_attribute)
         if 't_to' in tag:
-            element_dict['to-funds-code'] = element.find('to_funds_code').text
-            element_dict['to-country'] = element.find('to_country').text
+            to_funds = element.find('to_funds_code').text
+            to_funds_attribute = {'object_relation': 'to-funds-code', 'value': to_funds}
+            misp_object.add_attribute(**to_funds_attribute)
+            to_country = element.find('to_country').text
+            to_country_attribute = {'object_relation': 'to-country', 'value': to_country}
+            misp_object.add_attribute(**to_country_attribute)
 
 def handler(q=False):
     if q is False:
@@ -128,7 +149,7 @@ def handler(q=False):
         misperrors['error'] = "Impossible to read the file"
         return misperrors
     aml_parser.parse_xml()
-    return aml_parser.dict
+    return aml_parser.misp_event.to_json()
 
 def introspection():
     return mispattributes
