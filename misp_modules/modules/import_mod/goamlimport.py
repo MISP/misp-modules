@@ -1,4 +1,4 @@
-import json, datetime
+import json, datetime, time
 import xml.etree.ElementTree as ET
 from collections import defaultdict
 from pymisp import MISPEvent, MISPObject
@@ -85,7 +85,8 @@ class GoAmlParser():
             self.itterate(t, 'transaction')
 
     def first_itteration(self):
-        self.misp_event.timestamp = self.tree.find('submission_date').text
+        submission_date = self.tree.find('submission_date').text.split('+')[0]
+        self.misp_event.timestamp = int(time.mktime(time.strptime(submission_date, "%Y-%m-%dT%H:%M:%S")))
         for node in goAMLobjects['report']['nodes']:
             element = self.tree.find(node)
             if element is not None:
@@ -149,7 +150,8 @@ def handler(q=False):
         misperrors['error'] = "Impossible to read the file"
         return misperrors
     aml_parser.parse_xml()
-    return aml_parser.misp_event.to_json()
+    r = {'results': [{'types': mispattributes['output'], 'values': aml_parser.misp_event.to_json()}]}
+    return r
 
 def introspection():
     return mispattributes
