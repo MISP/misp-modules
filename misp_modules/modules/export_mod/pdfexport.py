@@ -15,7 +15,8 @@ misperrors = {'error': 'Error'}
 moduleinfo = {'version': '1',
               'author': 'Raphaël Vinot',
               'description': 'Simple export to PDF',
-              'module-type': ['export']}
+              'module-type': ['export'],
+              'require_standard_format': True}
 
 moduleconfig = []
 
