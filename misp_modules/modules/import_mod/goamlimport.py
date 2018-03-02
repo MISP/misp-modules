@@ -1,4 +1,4 @@
-import json, datetime, time
+import json, datetime, time, base64
 import xml.etree.ElementTree as ET
 from collections import defaultdict
 from pymisp import MISPEvent, MISPObject
@@ -8,7 +8,7 @@ moduleinfo = {'version': 1, 'author': 'Christian Studer',
               'description': 'Import from GoAML',
               'module-type': ['import']}
 moduleconfig = []
-mispattributes = {'input': ['xml file'], 'output': ['MISPEvent']}
+mispattributes = {'inputSource': ['file'], 'output': ['MISP objects']}
 
 t_from_objects = {'nodes': ['from_person', 'from_account', 'from_entity'],
           'leaves': ['from_funds_code', 'from_country']}
@@ -76,8 +76,8 @@ class GoAmlParser():
     def __init__(self):
         self.misp_event = MISPEvent()
 
-    def readFile(self, filename):
-        self.tree = ET.parse(filename).getroot()
+    def read_xml(self, data):
+        self.tree = ET.fromstring(data)
 
     def parse_xml(self):
         self.first_itteration()
@@ -138,19 +138,19 @@ def handler(q=False):
     if q is False:
         return False
     request = json.loads(q)
-    if request.get('file'):
-        filename = request['file']
+    if request.get('data'):
+        data = base64.b64decode(request['data']).decode('utf-8')
     else:
         misperrors['error'] = "Unsupported attributes type"
         return misperrors
     aml_parser = GoAmlParser()
     try:
-        aml_parser.readFile(filename)
+        aml_parser.read_xml(data)
     except:
-        misperrors['error'] = "Impossible to read the file"
+        misperrors['error'] = "Impossible to read XML data"
         return misperrors
     aml_parser.parse_xml()
-    r = {'results': [{'types': mispattributes['output'], 'values': aml_parser.misp_event.to_json()}]}
+    r = {'results': [obj.to_json() for obj in aml_parser.misp_event.objects]}
     return r
 
 def introspection():
