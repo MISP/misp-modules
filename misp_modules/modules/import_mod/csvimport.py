@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
-import json, os
+import json, os, base64
 import pymisp
 
 misperrors = {'error': 'Error'}
-mispattributes = {'input': ['file'], 'output': ['MISP attributes']}
+mispattributes = {'inputSource': ['file'], 'output': ['MISP attributes']}
 moduleinfo = {'version': '0.1', 'author': 'Christian Studer',
               'description': 'Import Attributes from a csv file.',
               'module-type': ['import']}
@@ -16,39 +16,31 @@ def handler(q=False):
     if q is False:
         return False
     request = json.loads(q)
-    if request.get('file'):
-        filename = request['file']
+    if request.get('data'):
+        data = base64.b64decode(request['data']).decode('utf-8')
     else:
         misperrors['error'] = "Unsupported attributes type"
         return misperrors
     if not request.get('config') and not request['config'].get('header'):
         misperrors['error'] = "Configuration error"
         return misperrors
-    config = request['config'].get('header')
-    #header = []
-    try:
-        data = readFile(filename, 'utf-8')
-    except:
-        data = readFile(filename, 'iso-8859-1')
+    config = request['config'].get('header').split(',')
+    config = [c.strip() for c in config]
+    data = parse_data(data.split('\n'))
     # find which delimiter is used
     delimiter, length = findDelimiter(config, data)
     # build the attributes
     result = buildAttributes(config, data, delimiter, length)
-    r = {'results': [{'types': mispattributes['output'], 'values': result}]}
+    r = {'results': result}
     return r
 
-def readFile(filename, encoding):
-    data = []
-    with open(filename, 'r', encoding=encoding) as f:
-        for line in f:
-            # split comments from data
-            if '#' in line:
-                l = line.split('#')[0].strip()
-            else:
-                l = line.strip()
-            if l:
-                data.append(l)
-    return data
+def parse_data(data):
+    return_data = []
+    for line in data:
+        l = line.split('#')[0].strip() if '#' in line else line.strip()
+        if l:
+            return_data.append(l)
+    return return_data
 
 def findDelimiter(header, data):
     n = len(header)
@@ -74,7 +66,7 @@ def buildAttributes(header, dataValues, delimiter, length):
         for data in dataValues:
             d = data.strip()
             if d:
-                attributes.append({'type': mispType, 'value': d})
+                attributes.append({'types': mispType, 'values': d})
     else:
         # split fields that should be recognized as misp attribute types from the others
         list2pop, misp, head = findMispTypes(header)
@@ -90,7 +82,7 @@ def buildAttributes(header, dataValues, delimiter, length):
                 datamisp.append(datasplit.pop(l).strip())
             # for each misp type, we create an attribute
             for m, dm in zip(misp, datamisp):
-                attribute = {'type': m, 'value': dm}
+                attribute = {'types': m, 'values': dm}
                 for h, ds in zip(head, datasplit):
                     if h:
                         attribute[h] = ds.strip()
