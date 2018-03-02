@@ -30,21 +30,21 @@ goAMLmapping = {'bank-account': {'bank-account': 't_account', 'institution-name'
                            'passport-number': 'passport_number', 'passport-country': 'passport_country',
                            'social-security-number': 'ssn', 'identity-card-number': 'id_number'},
                 'geolocation': {'geolocation': 'location', 'city': 'city', 'region': 'state',
-                                'country': 'country-code', 'address': 'address', 'zipcode': 'zip'},
+                                'country': 'country_code', 'address': 'address', 'zipcode': 'zip'},
                 'transaction': {'transaction': 'transaction', 'transaction-number': 'transactionnumber',
                                 'date': 'date_transaction', 'location': 'transaction_location',
                                 'transmode-code': 'transmode_code', 'amount': 'amount_local',
                                 'transmode-comment': 'transmode_comment', 'date-posting': 'date_posting',
                                 'teller': 'teller', 'authorized': 'authorized',
                                 'text': 'transaction_description'},
-                'legal-enitty': {'legal-entity': 'entity', 'name': 'name', 'business': 'business',
+                'legal-entity': {'legal-entity': 'entity', 'name': 'name', 'business': 'business',
                                  'commercial-name': 'commercial_name', 'phone-number': 'phone',
                                  'legal-form': 'incorporation_legal_form',
                                  'registration-number': 'incorporation_number'}}
 
 referencesMapping = {'bank-account': {'aml_type': '{}_account', 'bracket': 't_{}'},
                      'person': {'transaction': {'aml_type': '{}_person', 'bracket': 't_{}'}, 'bank-account': {'aml_type': 't_person', 'bracket': 'signatory'}},
-                     'legal-entity': {'transaction': {'aml_type': '{}_entity', 'bracket': 't_{}'}, 'bank-account': {'aml_type': 'entity'}},
+                     'legal-entity': {'transaction': {'aml_type': '{}_entity', 'bracket': 't_{}'}, 'bank-account': {'aml_type': 't_entity'}},
                      'geolocation': {'aml_type': 'address', 'bracket': 'addresses'}}
 
 class GoAmlGeneration(object):
