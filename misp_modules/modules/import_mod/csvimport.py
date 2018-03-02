@@ -40,7 +40,6 @@ def parse_data(data):
         l = line.split('#')[0].strip() if '#' in line else line.strip()
         if l:
             return_data.append(l)
-    print(len(return_data))
     return return_data
 
 def findDelimiter(header, data):
