@@ -71,6 +71,7 @@ goAMLmapping = {'from_account': t_account_mapping, 'to_account': t_account_mappi
                                 'authorized': 'authorized', 'transaction_description': 'text'}}
 
 nodes_to_ignore = ['addresses', 'signatory']
+relationship_to_keep = ['signatory', 't_from', 't_from_my_client', 't_to', 't_to_my_client', 'address']
 
 class GoAmlParser():
     def __init__(self):
@@ -92,8 +93,10 @@ class GoAmlParser():
             if element is not None:
                 self.itterate(element, element.tag)
 
-    def itterate(self, tree, aml_type):
+    def itterate(self, tree, aml_type, referencing_uuid=None, relationship_type=None):
         objects = goAMLobjects[aml_type]
+        referenced_uuid = referencing_uuid
+        rel = relationship_type
         if aml_type not in nodes_to_ignore:
             try:
                 mapping = goAMLmapping[aml_type]
@@ -110,12 +113,20 @@ class GoAmlParser():
                         if element is not None:
                             self.fill_transaction(element, element.tag, misp_object)
                 self.misp_event.add_object(misp_object)
+                last_object = self.misp_event.objects[-1]
+                referenced_uuid = last_object.uuid
+                if referencing_uuid and relationship_type:
+                    referencing_object = self.misp_event.get_object_by_uuid(referencing_uuid)
+                    referencing_object.add_reference(referenced_uuid, rel, None, **last_object)
             except KeyError:
                 pass
         for node in objects['nodes']:
             element = tree.find(node)
             if element is not None:
-                self.itterate(element, element.tag)
+                tag = element.tag
+                if tag in relationship_to_keep:
+                    rel = tag[2:] if tag.startswith('t_') else tag
+                self.itterate(element, element.tag, referencing_uuid=referenced_uuid, relationship_type=rel)
 
     @staticmethod
     def fill_transaction(element, tag, misp_object):
