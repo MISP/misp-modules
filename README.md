@@ -372,7 +372,7 @@ Recommended     Plugin.Import_ocr_enabled       true   Enable or disable the ocr
 In this same menu set any other plugin settings that are required for testing.
 
 ## Install misp-module on an offline instance.
-First, you need to grab all necessery packages for example like this : 
+First, you need to grab all necessery packages for example like this :
 
 Use pip wheel to create an archive
 ~~~
@@ -380,7 +380,7 @@ mkdir misp-modules-offline
 pip3 wheel -r REQUIREMENTS shodan --wheel-dir=./misp-modules-offline
 tar -cjvf misp-module-bundeled.tar.bz2 ./misp-modules-offline/*
 ~~~
-On offline machine : 
+On offline machine :
 ~~~
 mkdir misp-modules-bundle
 tar xvf misp-module-bundeled.tar.bz2 -C misp-modules-bundle
@@ -439,3 +439,14 @@ cd tests/
 curl -s http://127.0.0.1:6666/query -H "Content-Type: application/json" --data @MY_TEST_FILE.json -X POST
 cd ../
 ~~~
+
+## Documentation
+
+In order to provide documentation about some modules that require specific input / output / configuration, the [doc](doc) directory contains detailed information about the general purpose, requirements, features, input and ouput of each of these modules:
+
+- ***description** - quick description of the general purpose of the module, as the one given by the moduleinfo
+- **requirements** - special libraries needed to make the module work
+- **features** - description of the way to use the module, with the required MISP features to make the module give the intended result
+- **references** - link(s) giving additional information about the format concerned in the module
+- **input** - description of the format of data used in input
+- **output** - description of the format given as the result of the module execution
