@@ -1,3 +1,8 @@
 {
-    "description": "Module to import some stix stuff."
+  "description": "Module to import some stix stuff.",
+  "requirements": ["stix"],
+  "features": "The module imports MISP Attributes from a STIX 1 file, using the stix library, there is thus no special feature for users to make it work.",
+  "references": ["https://oasis-open.github.io/cti-documentation/", "https://github.com/STIXProject/python-stix"],
+  "input": "STIX format file",
+  "output": "MISP Event attributes"
 }
