@@ -1,5 +1,5 @@
 import json
-from ._dnsdb_query.dnsdb_query import DnsdbClient
+from ._dnsdb_query.dnsdb_query import DnsdbClient, QueryError
 
 
 misperrors = {'error': 'Error'}
@@ -41,26 +41,35 @@ def handler(q=False):
 
 
 def lookup_name(client, name):
-    res = client.query_rrset(name)  # RRSET = entries in the left-hand side of the domain name related labels
-    for item in res:
-        if item.get('rrtype') in ['A', 'AAAA', 'CNAME']:
-            for i in item.get('rdata'):
-                yield(i.rstrip('.'))
-        if item.get('rrtype') in ['SOA']:
-            for i in item.get('rdata'):
-                # grab email field and replace first dot by @ to convert to an email address
-                yield(i.split(' ')[1].rstrip('.').replace('.', '@', 1))
-    # res = client.query_rdata_name(name)  # RDATA = entries on the right-hand side of the domain name related labels
-    # for item in res:
-    #     if item.get('rrtype') in ['A', 'AAAA', 'CNAME']:
-    #         yield(item.get('rrname').rstrip('.'))
+    try:
+        res = client.query_rrset(name)  # RRSET = entries in the left-hand side of the domain name related labels
+        for item in res:
+            if item.get('rrtype') in ['A', 'AAAA', 'CNAME']:
+                for i in item.get('rdata'):
+                    yield(i.rstrip('.'))
+            if item.get('rrtype') in ['SOA']:
+                for i in item.get('rdata'):
+                    # grab email field and replace first dot by @ to convert to an email address
+                    yield(i.split(' ')[1].rstrip('.').replace('.', '@', 1))
+    except QueryError as e:
+        pass
+
+    try:
+        res = client.query_rdata_name(name)  # RDATA = entries on the right-hand side of the domain name related labels
+        for item in res:
+            if item.get('rrtype') in ['A', 'AAAA', 'CNAME']:
+                yield(item.get('rrname').rstrip('.'))
+    except QueryError as e:
+        pass
 
 
 def lookup_ip(client, ip):
-    res = client.query_rdata_ip(ip)
-    for item in res:
-        print(item)
-        yield(item['rrname'].rstrip('.'))
+    try:
+        res = client.query_rdata_ip(ip)
+        for item in res:
+            yield(item['rrname'].rstrip('.'))
+    except QueryError as e:
+        pass
 
 
 def introspection():
