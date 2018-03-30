@@ -11,7 +11,6 @@ python:
     - "3.5-dev"
     - "3.6"
     - "3.6-dev"
-    - "nightly"
 
 install:
     - pip install -U nose codecov pytest
@@ -19,13 +18,13 @@ install:
     - pip install .
 
 script:
-    - coverage run -m --parallel-mode --source=misp_modules misp_modules.__init__ &
+    - coverage run -m --parallel-mode --source=misp_modules misp_modules.__init__  -l 127.0.0.1 &
     - pid=$!
     - sleep 5
     - nosetests --with-coverage --cover-package=misp_modules
     - kill -s INT $pid
     - pushd ~/
-    - coverage run -m --parallel-mode --source=misp_modules misp_modules.__init__ -s &
+    - coverage run -m --parallel-mode --source=misp_modules misp_modules.__init__ -s -l 127.0.0.1 &
     - pid=$!
     - popd
     - sleep 5
