@@ -93,7 +93,10 @@ def handler(q=False):
                         analysis_data = vmrayDownloadAnalysis(api, analysis_id)
 
                         if analysis_data:
-                            p = vmrayVtiPatterns(analysis_data["vti_patterns"])
+                            if "analysis_vti_patterns" in analysis_data:
+                                p = vmrayVtiPatterns(analysis_data["analysis_vti_patterns"])
+                            else:
+                                p = vmrayVtiPatterns(analysis_data["vti_patterns"])
                             if p and len(p["results"]) > 0:
                                 vti_patterns_found = True
                                 vmray_results = {'results': vmray_results["results"] + p["results"]}
