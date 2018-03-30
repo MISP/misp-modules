@@ -14,7 +14,7 @@ extensions = {"ip1": "ipr/%s",
 sys.path.append('./')
 
 misperrors = {'error': 'Error'}
-mispattributes = {'input': ['ip-src','ip-dst' 'vulnerability', 'md5', 'sha1', 'sha256'], 
+mispattributes = {'input': ['ip-src', 'ip-dst', 'vulnerability', 'md5', 'sha1', 'sha256'], 
 		  'output': ['ip-src', 'ip-dst', 'text', 'domain']}
 
 # possible module-types: 'expansion', 'hover' or both
