@@ -457,8 +457,6 @@ def cleanup_regkey(item):
         r'\\Local Settings\\Software\\Microsoft\\Windows\\Shell\\Bag',
         r'\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\RunMRU\\'
     }
-    item = item.replace('\\REGISTRY\\MACHINE\\', 'HKLM\\')
-    item = item.replace('\\REGISTRY\\USER\\', 'HKCU\\')
     if list_in_string(noise_substrings, item, regex=True):
         return None
     return item
