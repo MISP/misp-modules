@@ -62,12 +62,12 @@ def handler(q=False):
                 if re.match(r"Analysis/proc_\d+/modified_files/.+\.", zip_file_name) and "mapping.log" not in zip_file_name:
                     sample_md5 = zip_file_name.split('/')[-1].split('.')[0]
                     if sample_md5 in modified_files_mapping:
-                        sample_filename = modified_files_mapping[sample_md5]
-                        # print("{} maps to {}".format(sample_md5, sample_filename))
+                        current_sample_filename = modified_files_mapping[sample_md5]
+                        # print("{} maps to {}".format(sample_md5, current_sample_filename))
                         with zf.open(zip_file_name, mode='r', pwd=None) as fp:
                             file_data = fp.read()
                             results.append({
-                                'values': sample_filename,
+                                'values': current_sample_filename,
                                 'data': base64.b64encode(file_data).decode(),
                                 'type': 'malware-sample', 'categories': ['Artifacts dropped', 'Payload delivery'], 'to_ids': True, 'comment': ''})
 
@@ -76,8 +76,18 @@ def handler(q=False):
                         file_data = fp.read()
                         analysis_json = json.loads(file_data.decode('utf-8'))
                     results += process_analysis_json(analysis_json)
-                # if 'sample' in zip_file_name:
-                #     sample['data'] = base64.b64encode(file_data).decode()
+            try:
+                sample_filename = analysis_json.get('analysis').get('@filename')
+                if sample_filename:
+                    with zf.open('sample', mode='r', pwd=None) as fp:
+                        file_data = fp.read()
+                        results.append({
+                            'values': sample_filename,
+                            'data': base64.b64encode(file_data).decode(),
+                            'type': 'malware-sample', 'categories': ['Artifacts dropped', 'Payload delivery'], 'to_ids': True, 'comment': ''})
+            except Exception as e:
+                # no 'sample' in archive, might be an url analysis, just ignore
+                pass
 
     else:
         try:
@@ -455,7 +465,9 @@ def cleanup_regkey(item):
         r'\\Software\\Classes\\CLSID\\',
         r'\\Software\\Classes\\Local Settings\\MuiCache\\',
         r'\\Local Settings\\Software\\Microsoft\\Windows\\Shell\\Bag',
-        r'\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\RunMRU\\'
+        r'\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\RunMRU\\',
+        r'\\Software\\Microsoft\\Tracing\\powershell_RASMANCS\\',
+        r'\\Software\\Microsoft\\Tracing\\powershell_RASAPI32\\'
     }
     if list_in_string(noise_substrings, item, regex=True):
         return None
