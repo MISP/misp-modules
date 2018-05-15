@@ -15,7 +15,7 @@ misperrors = {'error': 'Error'}
 userConfig = {}
 inputSource = ['file']
 
-moduleinfo = {'version': '0.6', 'author': 'Christophe Vandeplas',
+moduleinfo = {'version': '0.7', 'author': 'Christophe Vandeplas',
               'description': 'Import for ThreatAnalyzer archive.zip/analysis.json files',
               'module-type': ['import']}
 
@@ -451,23 +451,24 @@ def cleanup_filepath(item):
 
 def cleanup_regkey(item):
     noise_substrings = {
-        r'\\Software\\Microsoft\\Windows\\CurrentVersion\\Installer\\UserData\\',
-        r'\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings\\',
+        r'\\CurrentVersion\\Explorer\\FileExts\\[a-z\.]+\\OpenWith',
         r'\\CurrentVersion\\Explorer\\RecentDocs\\',
         r'\\CurrentVersion\\Explorer\\UserAssist\\',
-        r'\\CurrentVersion\\Explorer\\FileExts\\[a-z\.]+\\OpenWith',
-        r'\\Software\\Microsoft\\Internet Explorer\\Main\\WindowsSearch',
-        r'\\Software\\Microsoft\\Office\\[0-9\.]+\\',
-        r'\\SOFTWARE\\Microsoft\\OfficeSoftwareProtectionPlatform\\',
-        r'\\Software\\Microsoft\\Office\\Common\\Smart Tag\\',
-        r'\\Usage\\SpellingAndGrammarFiles',
-        r'^HKLM\\Software\\Microsoft\\Tracing\\',
+        r'\\Local Settings\\Software\\Microsoft\\Windows\\Shell\\Bag',
         r'\\Software\\Classes\\CLSID\\',
         r'\\Software\\Classes\\Local Settings\\MuiCache\\',
-        r'\\Local Settings\\Software\\Microsoft\\Windows\\Shell\\Bag',
-        r'\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\RunMRU\\',
+        r'\\Software\\Microsoft\\Internet Explorer\\Main\\WindowsSearch',
+        r'\\Software\\Microsoft\\Office\\[0-9\.]+\\',
+        r'\\Software\\Microsoft\\Office\\Common\\Smart Tag\\',
+        r'\\SOFTWARE\\Microsoft\\OfficeSoftwareProtectionPlatform\\',
+        r'\\Software\\Microsoft\\Shared Tools\\Panose\\',
+        r'\\Software\\Microsoft\\Tracing\\',
+        r'\\Software\\Microsoft\\Tracing\\powershell_RASAPI32\\',
         r'\\Software\\Microsoft\\Tracing\\powershell_RASMANCS\\',
-        r'\\Software\\Microsoft\\Tracing\\powershell_RASAPI32\\'
+        r'\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\RunMRU\\',
+        r'\\Software\\Microsoft\\Windows\\CurrentVersion\\Installer\\UserData\\',
+        r'\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings\\',
+        r'\\Usage\\SpellingAndGrammarFiles'
     }
     if list_in_string(noise_substrings, item, regex=True):
         return None
