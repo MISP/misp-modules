@@ -3,11 +3,14 @@ import json, os, base64
 import pymisp
 
 misperrors = {'error': 'Error'}
-mispattributes = {'inputSource': ['file'], 'output': ['MISP attributes']}
 moduleinfo = {'version': '0.1', 'author': 'Christian Studer',
               'description': 'Import Attributes from a csv file.',
               'module-type': ['import']}
-moduleconfig = ['header']
+moduleconfig = []
+inputSource = ['file']
+userConfig = {'header': {
+                'type': 'String',
+                'message': 'Define the header of the csv file, with types (included in MISP attribute types or attribute fields) separated by commas.\nFor fields that do not match these types, please use space or simply nothing between commas.\nFor instance: ip-src,domain, ,timestamp'}}
 
 duplicatedFields = {'mispType': {'mispComment': 'comment'},
                     'attrField': {'attrComment': 'comment'}}
@@ -121,7 +124,18 @@ def handler(q=False):
     return r
 
 def introspection():
-    return mispattributes
+    modulesetup = {}
+    try:
+        userConfig
+        modulesetup['userConfig'] = userConfig
+    except NameError:
+        pass
+    try:
+        inputSource
+        modulesetup['inputSource'] = inputSource
+    except NameError:
+        pass
+    return modulesetup
 
 def version():
     moduleinfo['config'] = moduleconfig
