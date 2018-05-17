@@ -14,6 +14,7 @@ userConfig = {'header': {
 
 duplicatedFields = {'mispType': {'mispComment': 'comment'},
                     'attrField': {'attrComment': 'comment'}}
+attributesFields = ['type', 'value', 'category', 'to_ids', 'comment', 'distribution']
 
 class CsvParser():
     def __init__(self, header):
@@ -96,9 +97,12 @@ class CsvParser():
             elif h in duplicatedFields['attrField']:
                 # fields that should be considered as attribute fields
                 head.append(duplicatedFields['attrField'].get(h))
-            # otherwise, it is an attribute field
-            else:
+            # or, it could be an attribute field
+            elif h in attributesFields:
                 head.append(h)
+            # otherwise, it is not defined
+            else:
+                head.append('')
         # return list of indexes of the misp types, list of the misp types, remaining fields that will be attribute fields
         return list2pop, misp, list(reversed(head))
 
