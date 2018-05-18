@@ -19,6 +19,7 @@ userConfig = {'header': {
 duplicatedFields = {'mispType': {'mispComment': 'comment'},
                     'attrField': {'attrComment': 'comment'}}
 attributesFields = ['type', 'value', 'category', 'to_ids', 'comment', 'distribution']
+delimiters = [',', ';', '|', '/', '\t', '    ']
 
 class CsvParser():
     def __init__(self, header, has_header):
@@ -29,29 +30,31 @@ class CsvParser():
 
     def parse_data(self, data):
         return_data = []
-        for line in data:
-            l = line.split('#')[0].strip() if '#' in line else line.strip()
-            if l:
-                return_data.append(l)
+        if self.fields_number == 1:
+            for line in data:
+                l = line.split('#')[0].strip()
+                if l:
+                    return_data.append(l)
+            self.delimiter = None
+        else:
+            self.delimiter_count = dict([(d, 0) for d in delimiters])
+            for line in data:
+                l = line.split('#')[0].strip()
+                if l:
+                    self.parse_delimiter(l)
+                    return_data.append(l)
+            # find which delimiter is used
+            self.delimiter = self.find_delimiter()
         self.data = return_data[1:] if self.has_header else return_data
-        # find which delimiter is used
-        self.delimiter = self.find_delimiter()
+
+    def parse_delimiter(self, line):
+        for d in delimiters:
+            if line.count(d) >= (self.fields_number - 1):
+                self.delimiter_count[d] += 1
 
     def find_delimiter(self):
-        n = self.fields_number
-        if n > 1:
-            tmpData = []
-            for da in self.data:
-                tmp = []
-                for d in (';', '|', '/', ',', '\t', '    ',):
-                    if da.count(d) == (n-1):
-                        tmp.append(d)
-                if len(tmp) == 1 and tmp == tmpData:
-                    return tmpData[0]
-                else:
-                    tmpData = tmp
-        else:
-            return None
+        _, delimiter = max((n, v) for v, n in self.delimiter_count.items())
+        return delimiter
 
     def buildAttributes(self):
         # if there is only 1 field of data
