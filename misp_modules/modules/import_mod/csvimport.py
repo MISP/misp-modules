@@ -10,15 +10,21 @@ moduleconfig = []
 inputSource = ['file']
 userConfig = {'header': {
                 'type': 'String',
-                'message': 'Define the header of the csv file, with types (included in MISP attribute types or attribute fields) separated by commas.\nFor fields that do not match these types, please use space or simply nothing between commas.\nFor instance: ip-src,domain, ,timestamp'}}
+                'message': 'Define the header of the csv file, with types (included in MISP attribute types or attribute fields) separated by commas.\nFor fields that do not match these types, please use space or simply nothing between commas.\nFor instance: ip-src,domain, ,timestamp'},
+              'has_header':{
+                'type': 'Boolean',
+                'message': 'Tick this box ONLY if there is a header line, NOT COMMENTED, in the file (which will be skipped atm).'
+              }}
 
 duplicatedFields = {'mispType': {'mispComment': 'comment'},
                     'attrField': {'attrComment': 'comment'}}
 attributesFields = ['type', 'value', 'category', 'to_ids', 'comment', 'distribution']
 
 class CsvParser():
-    def __init__(self, header):
+    def __init__(self, header, has_header):
         self.header = header
+        self.fields_number = len(header)
+        self.has_header = has_header
         self.attributes = []
 
     def parse_data(self, data):
@@ -27,12 +33,12 @@ class CsvParser():
             l = line.split('#')[0].strip() if '#' in line else line.strip()
             if l:
                 return_data.append(l)
-        self.data = return_data
+        self.data = return_data[1:] if self.has_header else return_data
         # find which delimiter is used
-        self.delimiter, self.length = self.findDelimiter()
+        self.delimiter = self.find_delimiter()
 
-    def findDelimiter(self):
-        n = len(self.header)
+    def find_delimiter(self):
+        n = self.fields_number
         if n > 1:
             tmpData = []
             for da in self.data:
@@ -41,11 +47,11 @@ class CsvParser():
                     if da.count(d) == (n-1):
                         tmp.append(d)
                 if len(tmp) == 1 and tmp == tmpData:
-                    return tmpData[0], n
+                    return tmpData[0]
                 else:
                     tmpData = tmp
         else:
-            return None, 1
+            return None
 
     def buildAttributes(self):
         # if there is only 1 field of data
@@ -63,7 +69,7 @@ class CsvParser():
                 datamisp = []
                 datasplit = data.split(self.delimiter)
                 # in case there is an empty line or an error
-                if len(datasplit) != self.length:
+                if len(datasplit) != self.fields_number:
                     continue
                 # pop from the line data that matches with a misp type, using the list of indexes
                 for l in list2pop:
@@ -118,9 +124,11 @@ def handler(q=False):
     if not request.get('config') and not request['config'].get('header'):
         misperrors['error'] = "Configuration error"
         return misperrors
-    config = request['config'].get('header').split(',')
-    config = [c.strip() for c in config]
-    csv_parser = CsvParser(config)
+    header = request['config'].get('header').split(',')
+    header = [c.strip() for c in header]
+    has_header = request['config'].get('has_header')
+    has_header = True if has_header == '1' else False
+    csv_parser = CsvParser(header, has_header)
     csv_parser.parse_data(data.split('\n'))
     # build the attributes
     csv_parser.buildAttributes()
