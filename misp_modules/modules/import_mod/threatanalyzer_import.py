@@ -15,7 +15,7 @@ misperrors = {'error': 'Error'}
 userConfig = {}
 inputSource = ['file']
 
-moduleinfo = {'version': '0.6', 'author': 'Christophe Vandeplas',
+moduleinfo = {'version': '0.7', 'author': 'Christophe Vandeplas',
               'description': 'Import for ThreatAnalyzer archive.zip/analysis.json files',
               'module-type': ['import']}
 
@@ -62,12 +62,12 @@ def handler(q=False):
                 if re.match(r"Analysis/proc_\d+/modified_files/.+\.", zip_file_name) and "mapping.log" not in zip_file_name:
                     sample_md5 = zip_file_name.split('/')[-1].split('.')[0]
                     if sample_md5 in modified_files_mapping:
-                        sample_filename = modified_files_mapping[sample_md5]
-                        # print("{} maps to {}".format(sample_md5, sample_filename))
+                        current_sample_filename = modified_files_mapping[sample_md5]
+                        # print("{} maps to {}".format(sample_md5, current_sample_filename))
                         with zf.open(zip_file_name, mode='r', pwd=None) as fp:
                             file_data = fp.read()
                             results.append({
-                                'values': sample_filename,
+                                'values': current_sample_filename,
                                 'data': base64.b64encode(file_data).decode(),
                                 'type': 'malware-sample', 'categories': ['Artifacts dropped', 'Payload delivery'], 'to_ids': True, 'comment': ''})
 
@@ -76,8 +76,18 @@ def handler(q=False):
                         file_data = fp.read()
                         analysis_json = json.loads(file_data.decode('utf-8'))
                     results += process_analysis_json(analysis_json)
-                # if 'sample' in zip_file_name:
-                #     sample['data'] = base64.b64encode(file_data).decode()
+            try:
+                sample_filename = analysis_json.get('analysis').get('@filename')
+                if sample_filename:
+                    with zf.open('sample', mode='r', pwd=None) as fp:
+                        file_data = fp.read()
+                        results.append({
+                            'values': sample_filename,
+                            'data': base64.b64encode(file_data).decode(),
+                            'type': 'malware-sample', 'categories': ['Artifacts dropped', 'Payload delivery'], 'to_ids': True, 'comment': ''})
+            except Exception as e:
+                # no 'sample' in archive, might be an url analysis, just ignore
+                pass
 
     else:
         try:
@@ -411,20 +421,22 @@ def cleanup_url(item):
 
 def cleanup_filepath(item):
     noise_substrings = {
-        'C:\\Windows\\Prefetch\\',
-        '\\AppData\\Roaming\\Microsoft\\Windows\\Recent\\',
-        '\\AppData\\Roaming\\Microsoft\\Office\\Recent\\',
-        'C:\\ProgramData\\Microsoft\\OfficeSoftwareProtectionPlatform\\Cache\\cache.dat',
-        '\\AppData\\Local\\Microsoft\\Windows\\Temporary Internet Files\\Content.',
-        '\\AppData\\Local\\Microsoft\\Internet Explorer\\Recovery\\High\\',
+        '\\AppData\\Local\\GDIPFONTCACHEV1.DAT',
         '\\AppData\\Local\\Microsoft\\Internet Explorer\\DOMStore\\',
-        '\\AppData\\LocalLow\\Microsoft\\Internet Explorer\\Services\\search_',
-        '\\AppData\\Local\\Microsoft\\Windows\\History\\History.',
-        '\\AppData\\Roaming\\Microsoft\\Windows\\Cookies\\',
-        '\\AppData\\LocalLow\\Microsoft\\CryptnetUrlCache\\',
+        '\\AppData\\Local\\Microsoft\\Internet Explorer\\Recovery\\High\\',
         '\\AppData\\Local\\Microsoft\\Windows\\Caches\\',
-        '\\AppData\\Local\\Microsoft\\Windows\WebCache\\',
         '\\AppData\\Local\\Microsoft\\Windows\\Explorer\\thumbcache',
+        '\\AppData\\Local\\Microsoft\\Windows\\History\\History.',
+        '\\AppData\\Local\\Microsoft\\Windows\\Temporary Internet Files\\Content.',
+        '\\AppData\\Local\\Microsoft\\Windows\\WebCache\\',
+        '\\AppData\\Local\\Temp\\.*tmp$',
+        '\\AppData\\LocalLow\\Microsoft\\CryptnetUrlCache\\',
+        '\\AppData\\LocalLow\\Microsoft\\Internet Explorer\\Services\\search_',
+        '\\AppData\\Roaming\\Microsoft\\Office\\Recent\\',
+        '\\AppData\\Roaming\\Microsoft\\Windows\\Cookies\\',
+        '\\AppData\\Roaming\\Microsoft\\Windows\\Recent\\',
+        'C:\\ProgramData\\Microsoft\\OfficeSoftwareProtectionPlatform\\Cache\\cache.dat',
+        'C:\\Windows\\Prefetch\\',
 
         '\\AppData\\Roaming\\Adobe\\Acrobat\\9.0\\SharedDataEvents-journal',
         '\\AppData\\Roaming\\Adobe\\Acrobat\\9.0\\UserCache.bin',
@@ -441,24 +453,27 @@ def cleanup_filepath(item):
 
 def cleanup_regkey(item):
     noise_substrings = {
-        r'\\Software\\Microsoft\\Windows\\CurrentVersion\\Installer\\UserData\\',
-        r'\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings\\',
+        r'\\CurrentVersion\\Explorer\\FileExts\\[a-z\.]+\\OpenWith',
         r'\\CurrentVersion\\Explorer\\RecentDocs\\',
         r'\\CurrentVersion\\Explorer\\UserAssist\\',
-        r'\\CurrentVersion\\Explorer\\FileExts\\[a-z\.]+\\OpenWith',
-        r'\\Software\\Microsoft\\Internet Explorer\\Main\\WindowsSearch',
-        r'\\Software\\Microsoft\\Office\\[0-9\.]+\\',
-        r'\\SOFTWARE\\Microsoft\\OfficeSoftwareProtectionPlatform\\',
-        r'\\Software\\Microsoft\\Office\\Common\\Smart Tag\\',
-        r'\\Usage\\SpellingAndGrammarFiles',
-        r'^HKLM\\Software\\Microsoft\\Tracing\\',
+        r'\\Local Settings\\Software\\Microsoft\\Windows\\Shell\\Bag',
         r'\\Software\\Classes\\CLSID\\',
         r'\\Software\\Classes\\Local Settings\\MuiCache\\',
-        r'\\Local Settings\\Software\\Microsoft\\Windows\\Shell\\Bag',
-        r'\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\RunMRU\\'
+        r'\\Software\\Microsoft\\Internet Explorer\\Main\\WindowsSearch',
+        r'\\Software\\Microsoft\\Office\\[0-9\.]+\\',
+        r'\\Software\\Microsoft\\Office\\Common\\Smart Tag\\',
+        r'\\Software\\Microsoft\\OfficeSoftwareProtectionPlatform\\',
+        r'\\Software\\Microsoft\\Shared Tools\\Panose\\',
+        r'\\Software\\Microsoft\\Tracing\\',
+        r'\\Software\\Microsoft\\Tracing\\powershell_RASAPI32\\',
+        r'\\Software\\Microsoft\\Tracing\\powershell_RASMANCS\\',
+        r'\\Software\\Microsoft\\Windows\\CurrentVersion\\Action Center\\',
+        r'\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\RunMRU\\',
+        r'\\Software\\Microsoft\\Windows\\CurrentVersion\\Installer\\UserData\\',
+        r'\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings\\',
+        r'\\System\\CurrentControlSet\\Services\\RdyBoost\\',
+        r'\\Usage\\SpellingAndGrammarFiles'
     }
-    item = item.replace('\\REGISTRY\\MACHINE\\', 'HKLM\\')
-    item = item.replace('\\REGISTRY\\USER\\', 'HKCU\\')
     if list_in_string(noise_substrings, item, regex=True):
         return None
     return item
