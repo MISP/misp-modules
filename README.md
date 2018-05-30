@@ -28,6 +28,7 @@ For more information: [Extending MISP with Python modules](https://www.circl.lu/
 * [EUPI](misp_modules/modules/expansion/eupi.py) - a hover and expansion module to get information about an URL from the [Phishing Initiative project](https://phishing-initiative.eu/?lang=en).
 * [Farsight DNSDB Passive DNS](misp_modules/modules/expansion/farsight_passivedns.py) - a hover and expansion module to expand hostname and IP addresses with passive DNS information.
 * [GeoIP](misp_modules/modules/expansion/geoip_country.py) - a hover and expansion module to get GeoIP information from geolite/maxmind.
+* [hashdd](misp_modules/modules/expansion/hashdd.py) - a hover module to check file hashes against [hashdd.com](http://www.hashdd.com) including NSLR dataset.
 * [IPASN](misp_modules/modules/expansion/ipasn.py) - a hover and expansion to get the BGP ASN of an IP address.
 * [iprep](misp-modules/modules/expansion/iprep.py) - an expansion module to get IP reputation from packetmail.net.
 * [OTX](misp_modules/modules/expansion/otx.py) - an expansion module for [OTX](https://otx.alienvault.com/).
@@ -45,7 +46,7 @@ For more information: [Extending MISP with Python modules](https://www.circl.lu/
 ### Export modules
 
 * [CEF](misp_modules/modules/export_mod/cef_export.py) module to export Common Event Format (CEF).
-* [GoAML export](misp_modules/modules/export_mod/goamlexport.py) module to export in GoAML format.
+* [GoAML export](misp_modules/modules/export_mod/goamlexport.py) module to export in [GoAML format](http://goaml.unodc.org/goaml/en/index.html).
 * [Lite Export](misp_modules/modules/export_mod/liteexport.py) module to export a lite event.
 * [Simple PDF export](misp_modules/modules/export_mod/pdfexport.py) module to export in PDF (required: asciidoctor-pdf).
 * [ThreatConnect](misp_modules/modules/export_mod/threat_connect_export.py) module to export in ThreatConnect CSV format.
@@ -56,6 +57,7 @@ For more information: [Extending MISP with Python modules](https://www.circl.lu/
 * [CSV import](misp_modules/modules/import_mod/csvimport.py) Customizable CSV import module.
 * [Cuckoo JSON](misp_modules/modules/import_mod/cuckooimport.py) Cuckoo JSON import.
 * [Email Import](misp_modules/modules/import_mod/email_import.py) Email import module for MISP to import basic metadata.
+* [GoAML import](misp_modules/modules/import_mod/) Module to import [GoAML](http://goaml.unodc.org/goaml/en/index.html) XML format.
 * [OCR](misp_modules/modules/import_mod/ocr.py) Optical Character Recognition (OCR) module for MISP to import attributes from images, scan or faxes.
 * [OpenIOC](misp_modules/modules/import_mod/openiocimport.py) OpenIOC import based on PyMISP library.
 * [stiximport](misp_modules/modules/import_mod/stiximport.py) - An import module to process STIX xml/json.
