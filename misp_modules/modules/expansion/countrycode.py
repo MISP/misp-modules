@@ -20,10 +20,12 @@ common_tlds = {"com":"Commercial (Worldwide)",
                "gov":"Government (USA)"
               }
 
-codes = requests.get("http://www.geognos.com/api/en/countries/info/all.json").json()
+codes = False
 
 def handler(q=False):
     global codes
+    if not codes:
+      codes = requests.get("http://www.geognos.com/api/en/countries/info/all.json").json()
     if q is False:
         return False
     request = json.loads(q)
