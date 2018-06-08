@@ -55,13 +55,13 @@ def handle_expansion(api, ip, misperrors):
 
     categories = list(set([item['@category'] for item in result['results']]))
 
-    result_filtered = []
+    result_filtered =  {"results": []}
     urls_pasties = []
     for r in result['results']:
         if r['@category'] == 'pastries':
             if r['@type'] == 'pastebin':
                 urls_pasties.append('https://pastebin.com/raw/%s' % r['key'])
-    result_filtered.append({'type': ['url'], 'values': urls_pasties})
+    result_filtered['results'].append({'type': ['url'], 'values': urls_pasties})
 
     return result_filtered
 
