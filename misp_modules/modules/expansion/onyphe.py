@@ -9,7 +9,7 @@ except ImportError:
 
 misperrors = {'error': 'Error'}
 
-mispattributes = {'input': ['ip-src', 'ip-dst', 'hostname', 'domains'], 'output': ['freetext']}
+mispattributes = {'input': ['ip-src', 'ip-dst', 'hostname', 'domains'], 'output': ['hostname', 'domain', 'ip-src', 'ip-dst','url']}
 # possible module-types: 'expansion', 'hover' or both
 moduleinfo = {'version': '1', 'author': 'Sebastien Larinier @sebdraven',
               'description': 'Query on Onyphe',
@@ -48,12 +48,22 @@ def handler(q=False):
 
 def handle_expansion(api, ip, misperrors):
     result = api.ip(ip)
+
     if result['status'] == 'nok':
         misperrors['error'] = result['message']
         return misperrors
 
-    return {'results': [{'types': mispattributes['output'],
-                         'values': json.dumps(result)}]}
+    categories = list(set([item['@category'] for item in result['results']]))
+
+    result_filtered = []
+    urls_pasties = []
+    for r in result['results']:
+        if r['@category'] == 'pastries':
+            if r['@type'] == 'pastebin':
+                urls_pasties.append('https://pastebin.com/raw/%s' % r['key'])
+    result_filtered.append({'type': ['url'], 'values': urls_pasties})
+
+    return result_filtered
 
 
 def introspection():
