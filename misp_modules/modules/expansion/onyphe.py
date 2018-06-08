@@ -61,7 +61,7 @@ def handle_expansion(api, ip, misperrors):
         if r['@category'] == 'pastries':
             if r['@type'] == 'pastebin':
                 urls_pasties.append('https://pastebin.com/raw/%s' % r['key'])
-            result_filtered['results'].append({'types': ['url'], 'values': urls_pasties})
+    result_filtered['results'].append({'types': ['url'], 'values': urls_pasties})
 
     return result_filtered
 
