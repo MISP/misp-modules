@@ -55,14 +55,17 @@ def handle_expansion(api, ip, misperrors):
 
     categories = list(set([item['@category'] for item in result['results']]))
 
-    result_filtered =  {"results": []}
+    result_filtered = {"results": []}
     urls_pasties = []
+    asn_list = []
     for r in result['results']:
         if r['@category'] == 'pastries':
             if r['@type'] == 'pastebin':
                 urls_pasties.append('https://pastebin.com/raw/%s' % r['key'])
+        elif r['@category'] == 'synscan':
+            ans_list = r['asn']
     result_filtered['results'].append({'types': ['url'], 'values': urls_pasties})
-
+    result_filtered['results'].append({'types': ['AS'], 'values': asn_list})
     return result_filtered
 
 
