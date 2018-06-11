@@ -64,7 +64,8 @@ def handle_expansion(api, ip, misperrors):
                 urls_pasties.append('https://pastebin.com/raw/%s' % r['key'])
         elif r['@category'] == 'synscan':
             asn_list.append(r['asn'])
-    result_filtered['results'].append({'types': ['url'], 'values': urls_pasties})
+    result_filtered['results'].append({'types': ['url'], 'values': urls_pasties,
+                                       'category': 'External analysis'})
     result_filtered['results'].append({'types': ['AS'], 'values': list(set(asn_list))})
     return result_filtered
 
