@@ -58,16 +58,22 @@ def handle_expansion(api, ip, misperrors):
     result_filtered = {"results": []}
     urls_pasties = []
     asn_list = []
+    os_list = []
     for r in result['results']:
         if r['@category'] == 'pastries':
             if r['@type'] == 'pastebin':
                 urls_pasties.append('https://pastebin.com/raw/%s' % r['key'])
         elif r['@category'] == 'synscan':
             asn_list.append(r['asn'])
+            os_list.append(r['os'])
     result_filtered['results'].append({'types': ['url'], 'values': urls_pasties,
                                        'categories': ['External analysis']})
     result_filtered['results'].append({'types': ['AS'], 'values': list(set(asn_list)),
                                        'categories': ['Network activity']})
+
+    result_filtered['results'].append({'types': ['target-machine'],
+                                       'values': list(set(os_list)),
+                                       'categories': ['Targeting data']})
     return result_filtered
 
 
