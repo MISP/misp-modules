@@ -66,7 +66,8 @@ def handle_expansion(api, ip, misperrors):
             asn_list.append(r['asn'])
     result_filtered['results'].append({'types': ['url'], 'values': urls_pasties,
                                        'categories': ['External analysis']})
-    result_filtered['results'].append({'types': ['AS'], 'values': list(set(asn_list))})
+    result_filtered['results'].append({'types': ['AS'], 'values': list(set(asn_list)),
+                                       'categories': ['Network activity']})
     return result_filtered
 
 
