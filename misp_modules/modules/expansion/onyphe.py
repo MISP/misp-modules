@@ -19,31 +19,32 @@ moduleinfo = {'version': '1', 'author': 'Sebastien Larinier @sebdraven',
 moduleconfig = ['apikey']
 
 
-
 def handler(q=False):
-    if q is False:
-        return False
-    request = json.loads(q)
+    if q:
 
-    if not request.get('config') and not (request['config'].get('apikey')):
-        misperrors['error'] = 'Onyphe authentication is missing'
-        return misperrors
+        request = json.loads(q)
 
-    api = Onyphe(request['config'].get('apikey'))
+        if not request.get('config') and not (request['config'].get('apikey')):
+            misperrors['error'] = 'Onyphe authentication is missing'
+            return misperrors
 
-    if not api:
-        misperrors['error'] = 'Onyphe Error instance api'
+        api = Onyphe(request['config'].get('apikey'))
 
-    ip = ''
-    if request.get('ip-src'):
-        ip = request['ip-src']
-    elif request.get('ip-dst'):
-        ip = request['ip-dst']
+        if not api:
+            misperrors['error'] = 'Onyphe Error instance api'
+
+        ip = ''
+        if request.get('ip-src'):
+            ip = request['ip-src']
+        elif request.get('ip-dst'):
+            ip = request['ip-dst']
+        else:
+            misperrors['error'] = "Unsupported attributes type"
+            return misperrors
+
+        return handle_expansion(api, ip, misperrors)
     else:
-        misperrors['error'] = "Unsupported attributes type"
-        return misperrors
-
-    return handle_expansion(api, ip, misperrors)
+        return False
 
 
 def handle_expansion(api, ip, misperrors):
