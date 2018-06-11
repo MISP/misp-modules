@@ -85,12 +85,12 @@ def handle_expansion(api, ip, misperrors):
                                        'values': list(set(os_list)),
                                        'categories': ['Targeting data']})
 
-    result_filtered['results'].append({'types': ['domains'],
+    result_filtered['results'].append({'types': ['domain'],
                                        'values': list(set(domains_resolver)),
                                        'categories': ['Network activity'],
                                        'comments': ['resolver to %s' % ip]})
 
-    result_filtered['results'].append({'types': ['domains'],
+    result_filtered['results'].append({'types': ['domain'],
                                        'values': list(set(domains_forward)),
                                        'categories': ['Network activity'],
                                        'comments': ['forward to %s' % ip]})
