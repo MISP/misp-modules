@@ -61,6 +61,7 @@ def handle_expansion(api, ip, misperrors):
     os_list = []
     domains_resolver = []
     domains_forward = []
+
     for r in result['results']:
         if r['@category'] == 'pastries':
             if r['@type'] == 'pastebin':
