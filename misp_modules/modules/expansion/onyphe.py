@@ -59,21 +59,41 @@ def handle_expansion(api, ip, misperrors):
     urls_pasties = []
     asn_list = []
     os_list = []
+    domains_resolver = []
+    domains_forward = []
     for r in result['results']:
         if r['@category'] == 'pastries':
             if r['@type'] == 'pastebin':
                 urls_pasties.append('https://pastebin.com/raw/%s' % r['key'])
         elif r['@category'] == 'synscan':
             asn_list.append(r['asn'])
-            os_list.append(r['os'])
+            os_target = r['os']
+            if os_target != 'Unknown':
+                os_list.append(r['os'])
+        elif r['@category'] == 'resolver' and r['@type'] =='reverse':
+            domains_resolver.append(r['reverse'])
+        elif r['@category'] == 'resolver' and r['@type'] =='forward':
+            domains_forward.append(r['forward'])
+
     result_filtered['results'].append({'types': ['url'], 'values': urls_pasties,
                                        'categories': ['External analysis']})
+
     result_filtered['results'].append({'types': ['AS'], 'values': list(set(asn_list)),
                                        'categories': ['Network activity']})
 
     result_filtered['results'].append({'types': ['target-machine'],
                                        'values': list(set(os_list)),
                                        'categories': ['Targeting data']})
+
+    result_filtered['results'].append({'types': ['domains'],
+                                       'values': list(set(domains_resolver)),
+                                       'categories': ['Network activity'],
+                                       'comments': ['resolver to %s' % ip]})
+
+    result_filtered['results'].append({'types': ['domains'],
+                                       'values': list(set(domains_resolver)),
+                                       'categories': ['Network activity'],
+                                       'comments': ['forward to %s' % ip]})
     return result_filtered
 
 
