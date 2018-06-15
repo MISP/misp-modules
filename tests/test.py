@@ -57,21 +57,6 @@ class TestModules(unittest.TestCase):
             assert("mrxcls.sys" in values)
             assert("mdmcpq3.PNF" in values)
 
-    def test_stix(self):
-        with open("tests/stix.xml", "rb") as f:
-            content = base64.b64encode(f.read())
-            data = json.dumps({"module": "stiximport",
-                               "data": content.decode('utf-8'),
-                               })
-            response = requests.post(self.url + "query", data=data).json()
-
-            print("STIX :: {}".format(response))
-            values = [x["values"][0] for x in response["results"]]
-
-            assert("209.239.79.47" in values)
-            assert("41.213.121.180" in values)
-            assert("eu-society.com" in values)
-
     def test_email_headers(self):
         query = {"module": "email_import"}
         query["config"] = {"unzip_attachments": None,

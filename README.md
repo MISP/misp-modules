@@ -60,7 +60,6 @@ For more information: [Extending MISP with Python modules](https://www.circl.lu/
 * [GoAML import](misp_modules/modules/import_mod/) Module to import [GoAML](http://goaml.unodc.org/goaml/en/index.html) XML format.
 * [OCR](misp_modules/modules/import_mod/ocr.py) Optical Character Recognition (OCR) module for MISP to import attributes from images, scan or faxes.
 * [OpenIOC](misp_modules/modules/import_mod/openiocimport.py) OpenIOC import based on PyMISP library.
-* [stiximport](misp_modules/modules/import_mod/stiximport.py) - An import module to process STIX xml/json.
 * [ThreatAnalyzer](misp_modules/modules/import_mod/threatanalyzer_import.py) - An import module to process ThreatAnalyzer archive.zip/analysis.json sandbox exports.
 * [VMRay](misp_modules/modules/import_mod/vmray_import.py) - An import module to process VMRay export.
 
