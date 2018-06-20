@@ -62,12 +62,12 @@ def handle_ip(api, ip, misperrors):
 
     r, status_ok = expand_syscan(api, ip, misperrors)
 
-    # if status_ok:
-    #     result_filtered['results'].append(r)
-    # else:
-    #     misperrors['error'] = "Error syscan result"
+    if status_ok:
+         result_filtered['results'].append(r)
+    else:
+         misperrors['error'] = "Error syscan result"
 
-    r,status_ok = expand_pastries(api,misperrors,ip=ip)
+    r, status_ok = expand_pastries(api,misperrors,ip=ip)
 
     if status_ok:
         result_filtered['results'].extend(r)
@@ -101,7 +101,37 @@ def handle_ip(api, ip, misperrors):
 
 def expand_syscan(api, ip, misperror):
     status_ok = False
-    r = None
+    r = []
+    asn_list = []
+    os_list = []
+    geoloc = []
+    orgs = []
+    results = api.synscan(ip)
+
+    if results['status'] == 'ok':
+        status_ok = True
+        for elem in results['result']:
+            asn_list.append(elem['asn'])
+            os_list = elem['os']
+            geoloc.append(elem['location'])
+            orgs.append(elem['organization'])
+            if os_list != 'Unknown':
+                os_list.append(elem['os'])
+
+            r.append({'types': ['target-machine'],
+                    'values': list(set(os_list)),
+                    'categories': ['Targeting data']})
+
+            r.append({'types': ['target-location'],
+                      'values': list(set(geoloc)),
+                      'categories': ['Targeting data']})
+
+            r.append({'types': ['target-org'],
+                      'values': list(set(orgs)),
+                      'categories': ['Targeting data']})
+
+            r.append({'types': ['AS'], 'values': list(set(asn_list)),
+                    'categories': ['Network activity']})
 
     return r, status_ok
 
