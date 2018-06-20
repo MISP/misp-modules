@@ -200,8 +200,6 @@ def expand_datascan(api, misperror,**kwargs):
                   'categories': ['Network activity'],
                   'comment': 'As number of %s found with synscan of Onyphe' % ip
                   })
-
-
     return r, status_ok
 
 
