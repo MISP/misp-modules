@@ -162,7 +162,7 @@ def expand_reverse(api, ip, misperror):
     r = None
     status_ok = False
     r = []
-    results = api.forward(ip)
+    results = api.reverse(ip)
 
     domains_reverse = []
 
