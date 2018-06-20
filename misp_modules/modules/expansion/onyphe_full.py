@@ -92,12 +92,14 @@ def handle_ip(api, ip, misperrors):
         misperrors['error'] = 'Error forward result'
         return
     #
-    # r, status_ok = expand_reverse(api, ip, misperrors)
-    #
-    # if status_ok:
-    #     result_filtered['results'].append(r)
-    # else:
-    #     return r
+    r, status_ok = expand_reverse(api, ip, misperrors)
+
+    if status_ok:
+        result_filtered['results'].extend(r)
+    else:
+        misperrors['error'] = 'Error reverse result'
+        return misperrors
+
     print(result_filtered)
     return result_filtered
 
