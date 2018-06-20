@@ -158,7 +158,29 @@ def expand_datascan(api, misperror,**kwargs):
 def expand_reverse(api, ip, misperror):
     status_ok = False
     r = None
+    status_ok = False
+    r = []
+    results = api.forward(ip)
 
+    domains_reverse = []
+
+    domains = []
+    if results['status'] == 'ok':
+        status_ok = True
+
+    for elem in results['results']:
+        domains_reverse.append(elem['forward'])
+        domains.append(elem['domain'])
+
+    r.append({'types': ['domain'],
+              'values': list(set(domains)),
+              'categories': ['Network activity'],
+              'comment': 'Domains of %s from forward service of Onyphe' % ip})
+
+    r.append({'types': ['domain'],
+              'values': list(set(domains_reverse)),
+              'categories': ['Network activity'],
+              'comment': 'Reverse Domains of %s from forward service of Onyphe' % ip})
     return r, status_ok
 
 
