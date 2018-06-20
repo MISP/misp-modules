@@ -22,7 +22,6 @@ moduleconfig = ['apikey']
 
 
 def handler(q=False):
-    print(q)
     if q:
 
         request = json.loads(q)
@@ -83,7 +82,8 @@ def handle_ip(api, ip, misperrors):
     if status_ok:
         result_filtered['results'].append(r)
     else:
-        return r
+        misperrors['error'] = 'Error datascan result'
+        return misperrors
 
     r, status_ok = expand_forward(api, ip, misperrors)
 
@@ -91,8 +91,8 @@ def handle_ip(api, ip, misperrors):
         result_filtered['results'].extend(r)
     else:
         misperrors['error'] = 'Error forward result'
-        return
-    #
+        return misperrors
+
     r, status_ok = expand_reverse(api, ip, misperrors)
 
     if status_ok:
