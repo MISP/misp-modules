@@ -22,6 +22,7 @@ moduleconfig = ['apikey']
 
 
 def handler(q=False):
+    print(q)
     if q:
 
         request = json.loads(q)
