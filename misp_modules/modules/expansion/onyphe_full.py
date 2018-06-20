@@ -170,7 +170,6 @@ def expand_datascan(api, misperror,**kwargs):
     if results['status'] == 'ok':
         for elem in results['results']:
             asn_list.append(elem['asn'])
-            os_target = elem['os']
             geoloc.append(elem['location'])
             orgs.append(elem['organization'])
             ports.append(elem['port'])
