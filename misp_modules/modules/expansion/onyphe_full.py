@@ -70,7 +70,7 @@ def handle_ip(api, ip, misperrors):
     r,status_ok = expand_pastries(api,misperrors,ip=ip)
 
     if status_ok:
-        result_filtered['results'].append(r)
+        result_filtered['results'].extend(r)
     else:
         misperrors['error'] = 'Error pastries result'
         return misperrors
