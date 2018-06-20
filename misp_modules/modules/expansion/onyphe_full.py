@@ -169,7 +169,7 @@ def expand_reverse(api, ip, misperror):
         status_ok = True
 
     for elem in results['results']:
-        domains_reverse.append(elem['forward'])
+        domains_reverse.append(elem['reverse'])
         domains.append(elem['domain'])
 
     r.append({'types': ['domain'],
