@@ -82,7 +82,7 @@ def handle_ip(api, ip, misperrors):
     if status_ok:
         result_filtered['results'].append(r)
     else:
-        misperrors['error'] = 'Error datascan result'
+        misperrors['error'] = 'Error datascan result %s' % status_ok
         return misperrors
 
     r, status_ok = expand_forward(api, ip, misperrors)
@@ -90,7 +90,7 @@ def handle_ip(api, ip, misperrors):
     if status_ok:
         result_filtered['results'].extend(r)
     else:
-        misperrors['error'] = 'Error forward result'
+        misperrors['error'] = 'Error forward result %s' % status_ok
         return misperrors
 
     r, status_ok = expand_reverse(api, ip, misperrors)
@@ -167,6 +167,7 @@ def expand_datascan(api, misperror,**kwargs):
         query = kwargs.get('domain')
 
     results = api.datascan(query)
+    print(results)
 
     if results['status'] == 'ok':
         for elem in results['results']:
