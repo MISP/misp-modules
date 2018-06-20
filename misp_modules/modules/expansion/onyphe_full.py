@@ -112,10 +112,10 @@ def expand_syscan(api, ip, misperror):
         status_ok = True
         for elem in results['results']:
             asn_list.append(elem['asn'])
-            os_list = elem['os']
+            os_target = elem['os']
             geoloc.append(elem['location'])
             orgs.append(elem['organization'])
-            if os_list != 'Unknown':
+            if os_target != 'Unknown':
                 os_list.append(elem['os'])
 
             r.append({'types': ['target-machine'],
@@ -131,7 +131,7 @@ def expand_syscan(api, ip, misperror):
                       'categories': ['Targeting data']})
 
             r.append({'types': ['AS'], 'values': list(set(asn_list)),
-                    'categories': ['Network activity']})
+                      'categories': ['Network activity']})
 
     return r, status_ok
 
