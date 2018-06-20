@@ -62,32 +62,39 @@ def handle_ip(api, ip, misperrors):
 
     r, status_ok = expand_syscan(api, ip, misperrors)
 
+    # if status_ok:
+    #     result_filtered['results'].append(r)
+    # else:
+    #     misperrors['error'] = "Error syscan result"
+
+    r,status_ok = expand_pastries(api,misperrors,ip=ip)
+
     if status_ok:
         result_filtered['results'].append(r)
     else:
-        misperrors['error'] = "Error syscan result"
+        misperrors['error'] = 'Error pastries result'
         return misperrors
 
-    r, status_ok = expand_datascan(api, misperrors, ip=ip)
-
-    if status_ok:
-        result_filtered['results'].append(r)
-    else:
-        return r
-
-    r, status_ok = expand_forward(api, ip, misperrors)
-
-    if status_ok:
-        result_filtered['results'].append(r)
-    else:
-        return r
-
-    r, status_ok = expand_reverse(api, ip, misperrors)
-
-    if status_ok:
-        result_filtered['results'].append(r)
-    else:
-        return r
+    # r, status_ok = expand_datascan(api, misperrors, ip=ip)
+    #
+    # if status_ok:
+    #     result_filtered['results'].append(r)
+    # else:
+    #     return r
+    #
+    # r, status_ok = expand_forward(api, ip, misperrors)
+    #
+    # if status_ok:
+    #     result_filtered['results'].append(r)
+    # else:
+    #     return r
+    #
+    # r, status_ok = expand_reverse(api, ip, misperrors)
+    #
+    # if status_ok:
+    #     result_filtered['results'].append(r)
+    # else:
+    #     return r
 
     return result_filtered
 
