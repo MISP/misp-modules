@@ -95,7 +95,7 @@ def handle_ip(api, ip, misperrors):
     #     result_filtered['results'].append(r)
     # else:
     #     return r
-
+    print(result_filtered)
     return result_filtered
 
 
