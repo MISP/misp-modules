@@ -197,11 +197,13 @@ def expand_pastries(api, misperror, **kwargs):
                     if 'hostname' in item:
                         domains.extend(item['hostname'])
 
-        r.append({'types': ['url'], 'values': urls_pasties,
-                                           'categories': ['External analysis']})
+        r.append({'types': ['url'],
+                  'values': urls_pasties,
+                  'categories': ['External analysis'],
+                  'comment':'URLs of pasties where %s has found' % ip})
         r.append({'types': ['domain'], 'values': list(set(domains)),
                   'categories': ['Network activity'],
-                  'comment': 'domains found in pasties of Onyphe'})
+                  'comment': 'Domains found in pasties of Onyphe'})
 
         r.append({'types': ['ip-dst'], 'values': list(set(ips)),
                   'categories': ['Network activity'],
