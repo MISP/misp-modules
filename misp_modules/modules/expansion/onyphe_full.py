@@ -63,7 +63,7 @@ def handle_ip(api, ip, misperrors):
     r, status_ok = expand_syscan(api, ip, misperrors)
 
     if status_ok:
-         result_filtered['results'].append(r)
+         result_filtered['results'].extend(r)
     else:
          misperrors['error'] = "Error syscan result"
 
