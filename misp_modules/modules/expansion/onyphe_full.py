@@ -167,9 +167,10 @@ def expand_datascan(api, misperror,**kwargs):
         query = kwargs.get('domain')
 
     results = api.datascan(query)
-    print(results)
+
 
     if results['status'] == 'ok':
+        status_ok = False
         for elem in results['results']:
             asn_list.append(elem['asn'])
             geoloc.append(elem['location'])
