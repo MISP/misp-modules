@@ -115,23 +115,32 @@ def expand_syscan(api, ip, misperror):
             os_target = elem['os']
             geoloc.append(elem['location'])
             orgs.append(elem['organization'])
-            if os_target != 'Unknown':
+            if os_target != 'Unknown' and os_target != 'Undefined':
                 os_list.append(elem['os'])
 
         r.append({'types': ['target-machine'],
                     'values': list(set(os_list)),
-                    'categories': ['Targeting data']})
+                    'categories': ['Targeting data'],
+                  'comment':'OS found on %s with synscan of Onyphe' % ip})
 
         r.append({'types': ['target-location'],
                       'values': list(set(geoloc)),
-                      'categories': ['Targeting data']})
+                      'categories': ['Targeting data'],
+                  'comment': 'geolocalisation of %s found with synscan of Onyphe'
+                  % ip
+                  })
 
         r.append({'types': ['target-org'],
-                      'values': list(set(orgs)),
-                      'categories': ['Targeting data']})
+                  'values': list(set(orgs)),
+                  'categories': ['Targeting data'],
+                  'comment': 'Organisations of %s found with synscan of Onyphe'
+                  })
 
-        r.append({'types': ['AS'], 'values': list(set(asn_list)),
-                      'categories': ['Network activity']})
+        r.append({'types': ['AS'],
+                  'values': list(set(asn_list)),
+                  'categories': ['Network activity'],
+                  'comment': 'As number of %s found with synscan of Onyphe'
+                  })
 
     return r, status_ok
 
@@ -191,10 +200,12 @@ def expand_pastries(api, misperror, **kwargs):
         r.append({'types': ['url'], 'values': urls_pasties,
                                            'categories': ['External analysis']})
         r.append({'types': ['domain'], 'values': list(set(domains)),
-                                           'categories': ['Network activity']})
+                  'categories': ['Network activity'],
+                  'comment': 'domains found in pasties of Onyphe'})
 
         r.append({'types': ['ip-dst'], 'values': list(set(ips)),
-                  'categories': ['Network activity']})
+                  'categories': ['Network activity'],
+                  'comment': 'IPs found in pasties of Onyphe'})
 
     return r, status_ok
 
