@@ -56,31 +56,33 @@ def handler(q=False):
 def handle_domain(api, domain, misperrors):
     pass
 
+
 def handle_ip(api, ip, misperrors):
     result_filtered = {"results": []}
 
-    r,status_ok = expand_syscan(api,ip,misperrors)
+    r, status_ok = expand_syscan(api, ip, misperrors)
+
+    if status_ok:
+        result_filtered['results'].append(r)
+    else:
+        misperrors['error'] = "Error syscan result"
+        return misperrors
+
+    r, status_ok = expand_datascan(api, misperrors, ip=ip)
 
     if status_ok:
         result_filtered['results'].append(r)
     else:
         return r
 
-    r, status_ok = expand_datascan(api,misperrors, ip=ip)
+    r, status_ok = expand_forward(api, ip, misperrors)
 
     if status_ok:
         result_filtered['results'].append(r)
     else:
         return r
 
-    r, status_ok = expand_forward(api, ip,misperrors)
-
-    if status_ok:
-        result_filtered['results'].append(r)
-    else:
-        return r
-
-    r, status_ok = expand_reverse(api, ip,misperrors)
+    r, status_ok = expand_reverse(api, ip, misperrors)
 
     if status_ok:
         result_filtered['results'].append(r)
@@ -94,7 +96,7 @@ def expand_syscan(api, ip, misperror):
     status_ok = False
     r = None
 
-    return r,status_ok
+    return r, status_ok
 
 
 def expand_datascan(api, misperror,**kwargs):
@@ -108,14 +110,57 @@ def expand_reverse(api, ip, misperror):
     status_ok = False
     r = None
 
-    return r,status_ok
+    return r, status_ok
 
 
 def expand_forward(api, ip, misperror):
     status_ok = False
     r = None
 
-    return r,status_ok
+    return r, status_ok
+
+
+def expand_pastries(api, misperror, **kwargs):
+    status_ok = False
+    r = []
+    ip = None
+    domain = None
+    result = None
+    urls_pasties = []
+    domains = []
+    ips = []
+    if 'ip' in kwargs:
+        ip = kwargs.get('ip')
+        result = api.pastries(ip)
+
+    if 'domain' in kwargs:
+        domain = kwargs.get('domain')
+        result = api.pastries(domain)
+
+    if result['status'] =='ok':
+        status_ok = True
+        for item in result['results']:
+            if item['@category'] == 'pastries':
+                if item['@type'] == 'pastebin':
+                    urls_pasties.append('https://pastebin.com/raw/%s' % item['key'])
+
+                    if 'domain' in item:
+                        domains.extend(item['domain'])
+                    if 'ip' in item:
+                        ips.extend(item['ips'])
+                    if 'hostname' in item:
+                        domains.extend(item['hostname'])
+
+        r.append({'types': ['url'], 'values': urls_pasties,
+                                           'categories': ['External analysis']})
+        r.append({'types': ['domains'], 'values': list(set(domains)),
+                                           'categories': ['Network activity']})
+
+        r.append({'types': ['ip-dst'], 'values': list(set(ips)),
+                  'categories': ['Network activity']})
+
+    return r, status_ok
+
 
 def introspection():
     return mispattributes
