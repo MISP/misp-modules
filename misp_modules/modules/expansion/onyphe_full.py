@@ -154,7 +154,7 @@ def expand_pastries(api, misperror, **kwargs):
                     if 'domain' in item:
                         domains.extend(item['domain'])
                     if 'ip' in item:
-                        ips.extend(item['ips'])
+                        ips.extend(item['ip'])
                     if 'hostname' in item:
                         domains.extend(item['hostname'])
 
