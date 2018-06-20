@@ -77,13 +77,13 @@ def handle_ip(api, ip, misperrors):
         misperrors['error'] = 'Error pastries result'
         return misperrors
 
-    # r, status_ok = expand_datascan(api, misperrors, ip=ip)
-    #
-    # if status_ok:
-    #     result_filtered['results'].append(r)
-    # else:
-    #     return r
-    #
+    r, status_ok = expand_datascan(api, misperrors, ip=ip)
+
+    if status_ok:
+        result_filtered['results'].append(r)
+    else:
+        return r
+
     r, status_ok = expand_forward(api, ip, misperrors)
 
     if status_ok:
@@ -139,12 +139,13 @@ def expand_syscan(api, ip, misperror):
                   'values': list(set(orgs)),
                   'categories': ['Targeting data'],
                   'comment': 'Organisations of %s found with synscan of Onyphe'
+                  % ip
                   })
 
         r.append({'types': ['AS'],
                   'values': list(set(asn_list)),
                   'categories': ['Network activity'],
-                  'comment': 'As number of %s found with synscan of Onyphe'
+                  'comment': 'As number of %s found with synscan of Onyphe' % ip
                   })
 
     return r, status_ok
@@ -152,7 +153,55 @@ def expand_syscan(api, ip, misperror):
 
 def expand_datascan(api, misperror,**kwargs):
     status_ok = False
-    r = None
+    r = []
+    ip = ''
+    query =''
+    asn_list = []
+    geoloc = []
+    orgs = []
+    ports = []
+    if 'ip' in kwargs:
+        query = kwargs.get('ip')
+    else:
+        query = kwargs.get('domain')
+
+    results = api.datascan(query)
+
+    if results['status'] == 'ok':
+        for elem in results['results']:
+            asn_list.append(elem['asn'])
+            os_target = elem['os']
+            geoloc.append(elem['location'])
+            orgs.append(elem['organization'])
+            ports.append(elem['port'])
+
+        r.append({'types': ['port'],
+                  'values': list(set(ports)),
+                  'categories': ['Other'],
+                  'comment': 'Ports of %s found with datascan of Onyphe'
+                             % ip
+                  })
+
+        r.append({'types': ['target-location'],
+                  'values': list(set(geoloc)),
+                  'categories': ['Targeting data'],
+                  'comment': 'Geolocalisation of %s found with synscan of Onyphe'
+                             % ip
+                  })
+
+        r.append({'types': ['target-org'],
+                  'values': list(set(orgs)),
+                  'categories': ['Targeting data'],
+                  'comment': 'Organisations of %s found with synscan of Onyphe'
+                             % ip
+                  })
+
+        r.append({'types': ['AS'],
+                  'values': list(set(asn_list)),
+                  'categories': ['Network activity'],
+                  'comment': 'As number of %s found with synscan of Onyphe' % ip
+                  })
+
 
     return r, status_ok
 
