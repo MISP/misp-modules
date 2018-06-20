@@ -160,7 +160,7 @@ def expand_pastries(api, misperror, **kwargs):
 
         r.append({'types': ['url'], 'values': urls_pasties,
                                            'categories': ['External analysis']})
-        r.append({'types': ['domains'], 'values': list(set(domains)),
+        r.append({'types': ['domain'], 'values': list(set(domains)),
                                            'categories': ['Network activity']})
 
         r.append({'types': ['ip-dst'], 'values': list(set(ips)),
