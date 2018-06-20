@@ -110,7 +110,7 @@ def expand_syscan(api, ip, misperror):
 
     if results['status'] == 'ok':
         status_ok = True
-        for elem in results['result']:
+        for elem in results['results']:
             asn_list.append(elem['asn'])
             os_list = elem['os']
             geoloc.append(elem['location'])
