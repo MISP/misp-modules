@@ -118,19 +118,19 @@ def expand_syscan(api, ip, misperror):
             if os_target != 'Unknown':
                 os_list.append(elem['os'])
 
-            r.append({'types': ['target-machine'],
+        r.append({'types': ['target-machine'],
                     'values': list(set(os_list)),
                     'categories': ['Targeting data']})
 
-            r.append({'types': ['target-location'],
+        r.append({'types': ['target-location'],
                       'values': list(set(geoloc)),
                       'categories': ['Targeting data']})
 
-            r.append({'types': ['target-org'],
+        r.append({'types': ['target-org'],
                       'values': list(set(orgs)),
                       'categories': ['Targeting data']})
 
-            r.append({'types': ['AS'], 'values': list(set(asn_list)),
+        r.append({'types': ['AS'], 'values': list(set(asn_list)),
                       'categories': ['Network activity']})
 
     return r, status_ok
