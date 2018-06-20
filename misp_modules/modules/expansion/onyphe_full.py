@@ -170,7 +170,7 @@ def expand_datascan(api, misperror,**kwargs):
 
 
     if results['status'] == 'ok':
-        status_ok = False
+        status_ok = True
         for elem in results['results']:
             asn_list.append(elem['asn'])
             geoloc.append(elem['location'])
