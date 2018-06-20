@@ -9,7 +9,9 @@ except ImportError:
 
 misperrors = {'error': 'Error'}
 
-mispattributes = {'input': ['ip-src', 'ip-dst', 'hostname', 'domain'], 'output': ['hostname', 'domain', 'ip-src', 'ip-dst','url']}
+mispattributes = {'input': ['ip-src', 'ip-dst', 'hostname', 'domain'],
+                  'output': ['hostname', 'domain', 'ip-src', 'ip-dst','url']}
+
 # possible module-types: 'expansion', 'hover' or both
 moduleinfo = {'version': '1', 'author': 'Sebastien Larinier @sebdraven',
               'description': 'Query on Onyphe',
@@ -82,12 +84,13 @@ def handle_ip(api, ip, misperrors):
     # else:
     #     return r
     #
-    # r, status_ok = expand_forward(api, ip, misperrors)
-    #
-    # if status_ok:
-    #     result_filtered['results'].append(r)
-    # else:
-    #     return r
+    r, status_ok = expand_forward(api, ip, misperrors)
+
+    if status_ok:
+        result_filtered['results'].extend(r)
+    else:
+        misperrors['error'] = 'Error forward result'
+        return
     #
     # r, status_ok = expand_reverse(api, ip, misperrors)
     #
@@ -119,14 +122,14 @@ def expand_syscan(api, ip, misperror):
                 os_list.append(elem['os'])
 
         r.append({'types': ['target-machine'],
-                    'values': list(set(os_list)),
-                    'categories': ['Targeting data'],
-                  'comment':'OS found on %s with synscan of Onyphe' % ip})
+                  'values': list(set(os_list)),
+                  'categories': ['Targeting data'],
+                  'comment': 'OS found on %s with synscan of Onyphe' % ip})
 
         r.append({'types': ['target-location'],
-                      'values': list(set(geoloc)),
-                      'categories': ['Targeting data'],
-                  'comment': 'geolocalisation of %s found with synscan of Onyphe'
+                  'values': list(set(geoloc)),
+                  'categories': ['Targeting data'],
+                  'comment': 'Geolocalisation of %s found with synscan of Onyphe'
                   % ip
                   })
 
@@ -149,7 +152,7 @@ def expand_datascan(api, misperror,**kwargs):
     status_ok = False
     r = None
 
-    return r,status_ok
+    return r, status_ok
 
 
 def expand_reverse(api, ip, misperror):
@@ -161,8 +164,28 @@ def expand_reverse(api, ip, misperror):
 
 def expand_forward(api, ip, misperror):
     status_ok = False
-    r = None
+    r = []
+    results = api.forward(ip)
 
+    domains_forward = []
+
+    domains = []
+    if results['status'] == 'ok':
+        status_ok = True
+
+    for elem in results['results']:
+        domains_forward.append(elem['forward'])
+        domains.append(elem['domain'])
+
+    r.append({'types': ['domain'],
+              'values': list(set(domains)),
+              'categories': ['Network activity'],
+              'comment': 'Domains of %s from forward service of Onyphe' % ip})
+
+    r.append({'types': ['domain'],
+              'values': list(set(domains_forward)),
+              'categories': ['Network activity'],
+              'comment': 'Forward Domains of %s from forward service of Onyphe' % ip})
     return r, status_ok
 
 
