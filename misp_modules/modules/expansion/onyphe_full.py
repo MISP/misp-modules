@@ -49,13 +49,36 @@ def handler(q=False):
         else:
             misperrors['error'] = "Unsupported attributes type"
             return misperrors
-
-
     else:
         return False
 
 
 def handle_domain(api, domain, misperrors):
+    result_filtered = {"results": []}
+
+    r, status_ok = expand_pastries(api, misperrors, domain=domain)
+
+    if status_ok:
+        result_filtered['results'].extend(r)
+    else:
+        misperrors['error'] = 'Error pastries result'
+        return misperrors
+
+    r, status_ok = expand_datascan(api, misperrors, domain=domain)
+
+    if status_ok:
+        result_filtered['results'].extend(r)
+    else:
+        misperrors['error'] = 'Error datascan result '
+        return misperrors
+
+    r, status_ok = expand_threatlist(api, misperrors, domain=domain)
+
+    if status_ok:
+        result_filtered['results'].extend(r)
+    else:
+        misperrors['error'] = 'Error threat list'
+        return misperrors
     pass
 
 
@@ -271,19 +294,18 @@ def expand_forward(api, ip, misperror):
 def expand_pastries(api, misperror, **kwargs):
     status_ok = False
     r = []
-    ip = None
-    domain = None
+
+    query = None
     result = None
     urls_pasties = []
     domains = []
     ips = []
     if 'ip' in kwargs:
-        ip = kwargs.get('ip')
-        result = api.pastries(ip)
-
+        query = kwargs.get('ip')
     if 'domain' in kwargs:
-        domain = kwargs.get('domain')
-        result = api.pastries(domain)
+        query = kwargs.get('domain')
+
+    api.pastries(query)
 
     if result['status'] =='ok':
         status_ok = True
@@ -302,7 +324,7 @@ def expand_pastries(api, misperror, **kwargs):
         r.append({'types': ['url'],
                   'values': urls_pasties,
                   'categories': ['External analysis'],
-                  'comment':'URLs of pasties where %s has found' % ip})
+                  'comment':'URLs of pasties where %s has found' % query})
         r.append({'types': ['domain'], 'values': list(set(domains)),
                   'categories': ['Network activity'],
                   'comment': 'Domains found in pasties of Onyphe'})
