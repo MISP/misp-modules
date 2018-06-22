@@ -187,27 +187,27 @@ def expand_datascan(api, misperror,**kwargs):
                   'values': list(set(ports)),
                   'categories': ['Other'],
                   'comment': 'Ports of %s found with datascan of Onyphe'
-                             % ip
+                             % query
                   })
 
         r.append({'types': ['target-location'],
                   'values': list(set(geoloc)),
                   'categories': ['Targeting data'],
                   'comment': 'Geolocalisation of %s found with synscan of Onyphe'
-                             % ip
+                             % query
                   })
 
         r.append({'types': ['target-org'],
                   'values': list(set(orgs)),
                   'categories': ['Targeting data'],
                   'comment': 'Organisations of %s found with synscan of Onyphe'
-                             % ip
+                             % query
                   })
 
         r.append({'types': ['AS'],
                   'values': list(set(asn_list)),
                   'categories': ['Network activity'],
-                  'comment': 'As number of %s found with synscan of Onyphe' % ip
+                  'comment': 'As number of %s found with synscan of Onyphe' % query
                   })
     return r, status_ok
 
