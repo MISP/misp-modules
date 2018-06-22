@@ -44,8 +44,10 @@ def handler(q=False):
             return handle_ip(api,ip,misperrors)
         elif request.get('domain'):
             domain = request['domain']
+            return handle_domain(api, domain, misperrors)
         elif request.get('hostname'):
             hostname = request['hostname']
+            return handle_domain(api, hostname, misperrors)
         else:
             misperrors['error'] = "Unsupported attributes type"
             return misperrors
