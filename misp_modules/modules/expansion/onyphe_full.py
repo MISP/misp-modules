@@ -193,12 +193,13 @@ def expand_datascan(api, misperror,**kwargs):
     geoloc = []
     orgs = []
     ports = []
+
     if 'ip' in kwargs:
         query = kwargs.get('ip')
+        results = api.datascan(query)
     else:
         query = kwargs.get('domain')
-
-    results = api.datascan(query)
+        results = api.search_datascan('domain:%s' % query)
 
     if results['status'] == 'ok':
         status_ok = True
@@ -304,10 +305,10 @@ def expand_pastries(api, misperror, **kwargs):
     ips = []
     if 'ip' in kwargs:
         query = kwargs.get('ip')
+        result = api.pastries(query)
     if 'domain' in kwargs:
         query = kwargs.get('domain')
-
-    result = api.pastries(query)
+        result = api.search_pastries('domain:%s' % query)
 
     if result['status'] =='ok':
         status_ok = True
@@ -348,10 +349,11 @@ def expand_threatlist(api, misperror,**kwargs):
 
     if 'ip' in kwargs:
         query = kwargs.get('ip')
+        results = api.threatlist(query)
     else:
         query = kwargs.get('domain')
+        results = api.search_threatlist('domain:%s' % query)
 
-    results = api.threatlist(query)
     if results['status'] == 'ok':
         status_ok = True
         threat_list = ['seen %s on %s ' % (item['seen_date'], item['threatlist'])
