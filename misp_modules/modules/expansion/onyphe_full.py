@@ -305,7 +305,7 @@ def expand_pastries(api, misperror, **kwargs):
     if 'domain' in kwargs:
         query = kwargs.get('domain')
 
-    api.pastries(query)
+    result = api.pastries(query)
 
     if result['status'] =='ok':
         status_ok = True
