@@ -335,7 +335,7 @@ def expand_threatlist(api, misperror,**kwargs):
 
         r.append({'types': ['comment'],
                   'categories': ['Other'],
-                  'values': [threat_list]
+                  'values': threat_list
                   })
 
     return r,status_ok
