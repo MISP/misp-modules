@@ -82,7 +82,7 @@ def handle_ip(api, ip, misperrors):
     if status_ok:
         result_filtered['results'].extend(r)
     else:
-        misperrors['error'] = 'Error datascan result %s' % status_ok
+        misperrors['error'] = 'Error datascan result '
         return misperrors
 
     r, status_ok = expand_forward(api, ip, misperrors)
@@ -90,7 +90,7 @@ def handle_ip(api, ip, misperrors):
     if status_ok:
         result_filtered['results'].extend(r)
     else:
-        misperrors['error'] = 'Error forward result %s' % status_ok
+        misperrors['error'] = 'Error forward result'
         return misperrors
 
     r, status_ok = expand_reverse(api, ip, misperrors)
@@ -101,7 +101,14 @@ def handle_ip(api, ip, misperrors):
         misperrors['error'] = 'Error reverse result'
         return misperrors
 
-    print(result_filtered)
+    r, status_ok = expand_threatlist(api, misperrors, ip=ip)
+
+    if status_ok:
+        result_filtered['results'].extend(r)
+    else:
+        misperrors['error'] = 'Error threat list'
+        return misperrors
+
     return result_filtered
 
 
@@ -167,7 +174,6 @@ def expand_datascan(api, misperror,**kwargs):
         query = kwargs.get('domain')
 
     results = api.datascan(query)
-
 
     if results['status'] == 'ok':
         status_ok = True
@@ -307,6 +313,32 @@ def expand_pastries(api, misperror, **kwargs):
 
     return r, status_ok
 
+
+def expand_threatlist(api, misperror,**kwargs):
+    status_ok = False
+    r = []
+
+    query = None
+
+    threat_list = []
+
+    if 'ip' in kwargs:
+        query = kwargs.get('ip')
+    else:
+        query = kwargs.get('domain')
+
+    results = api.threatlist(query)
+    if results['status'] == 'ok':
+        status_ok = True
+        threat_list = ['seen %s on %s ' % (item['seen_date'], item['threatlist'])
+                       for item in results['results']]
+
+        r.append({'types': ['comment'],
+                  'categories': ['Other'],
+                  'values': [threat_list]
+                  })
+
+    return r,status_ok
 
 def introspection():
     return mispattributes
