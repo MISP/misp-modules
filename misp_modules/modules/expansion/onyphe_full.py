@@ -81,7 +81,8 @@ def handle_domain(api, domain, misperrors):
     else:
         misperrors['error'] = 'Error threat list'
         return misperrors
-    pass
+
+    return result_filtered
 
 
 def handle_ip(api, ip, misperrors):
