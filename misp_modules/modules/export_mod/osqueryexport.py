@@ -11,7 +11,7 @@ import re
 
 misperrors = {"error": "Error"}
 
-types_to_use = ['regkey', 'regkey|value', 'mutex', 'windows-service-displayname', 'yara']
+types_to_use = ['regkey', 'regkey|value', 'mutex', 'windows-service-displayname', 'windows-scheduled-task', 'yara']
 
 userConfig = {
 
@@ -52,11 +52,15 @@ def handle_service(value):
 def handle_yara(value):
     return 'not implemented yet, not sure it\'s easily feasible w/o dropping the sig on the hosts first'
 
+def handle_scheduledtask(value):
+    return 'SELECT * FROM scheduled_tasks WHERE name LIKE \'%s\';' % value
+
 handlers = {
     'regkey' : handle_regkey,
     'regkey|value' : handle_regkeyvalue,
     'mutex' : handle_mutex,
     'windows-service-displayname' : handle_service,
+    'windows-scheduled-task' : handle_scheduledtask,
     'yara' : handle_yara
 }
 
