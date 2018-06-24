@@ -1,5 +1,5 @@
 """
-Export module for coverting MISP events into OSQuery query pack.
+Export module for coverting MISP events into OSQuery queries.
 Source: https://github.com/0xmilkmix/misp-modules/blob/master/misp_modules/modules/export_mod/osqueryexport.py
 """
 
@@ -11,17 +11,13 @@ import re
 
 misperrors = {"error": "Error"}
 
-types_to_use = ['regkey', 'mutex']
-
+types_to_use = ['regkey', 'regkey|value', 'mutex', 'windows-service-displayname', 'yara']
 
 userConfig = {
 
 };
 
 moduleconfig = []
-
-# fixed for now, options in the future:
-# event, attribute, event-collection, attribute-collection
 inputSource = ['event']
 
 outputFileExtension = 'conf'
@@ -32,7 +28,6 @@ moduleinfo = {'version': '0.1', 'author': 'Julien Bachmann, Hacknowledge',
               'description': 'OSQuery query export module',
               'module-type': ['export']}
 
-# test : http://misp.vm/events/view/23
 def handle_regkey(value):
     rep = {'HKCU': 'HKEY_USERS\\%', 'HKLM': 'HKEY_LOCAL_MACHINE'}
     rep = dict((re.escape(k), v) for k, v in rep.items())
@@ -40,12 +35,29 @@ def handle_regkey(value):
     value = pattern.sub(lambda m: rep[re.escape(m.group(0))], value)
     return 'SELECT * FROM registry WHERE path LIKE \'%s\';' % value
 
+def handle_regkeyvalue(value):
+    key, value = value.split('|')
+    rep = {'HKCU': 'HKEY_USERS\\%', 'HKLM': 'HKEY_LOCAL_MACHINE'}
+    rep = dict((re.escape(k), v) for k, v in rep.items())
+    pattern = re.compile("|".join(rep.keys()))
+    key = pattern.sub(lambda m: rep[re.escape(m.group(0))], key)
+    return 'SELECT * FROM registry WHERE path LIKE \'%s\' AND data LIKE \'%s\';' % (key, value)
+
 def handle_mutex(value):
-    return '#waiting acceptance of Scott Lundgren PR that would allow to query Kernel Objects'
+    return 'not implemented yet'
+
+def handle_service(value):
+    return 'SELECT * FROM services WHERE display_name LIKE \'%s\' OR name like \'%s\';' % (value, value)
+
+def handle_yara(value):
+    return 'not implemented yet, not sure it\'s easily feasible w/o dropping the sig on the hosts first'
 
 handlers = {
     'regkey' : handle_regkey,
-    'mutex' : handle_mutex
+    'regkey|value' : handle_regkeyvalue,
+    'mutex' : handle_mutex,
+    'windows-service-displayname' : handle_service,
+    'yara' : handle_yara
 }
 
 def handler(q=False):
