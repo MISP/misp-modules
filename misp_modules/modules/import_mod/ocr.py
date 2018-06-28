@@ -32,8 +32,8 @@ def handler(q=False):
             pages=len(pdf.sequence)
             img = WImage(width=pdf.width, height=pdf.height * pages)
             for p in range(pages):
-                img.composite(pdf.sequence[p], top=pdf.height * i, left=0)
-        image = document
+                img.composite(pdf.sequence[p], top=pdf.height * p, left=0)
+    image = document
 
     image_file = BytesIO(image)
     image_file.seek(0)
