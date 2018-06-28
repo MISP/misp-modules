@@ -1,12 +1,5 @@
 import json
 import base64
-import magic
-
-from PIL import Image
-
-from wand.image import Image as WImage
-
-from pytesseract import image_to_string
 from io import BytesIO
 misperrors = {'error': 'Error'}
 userConfig = { };
@@ -21,6 +14,32 @@ moduleconfig = []
 
 
 def handler(q=False):
+    # try to import modules and return errors if module not found
+    try:
+        import magic
+    except ImportError:
+        misperrors['error'] = "Please pip(3) install magic"
+        return misperrors
+
+    try:
+        from PIL import Image
+    except ImportError:
+        misperrors['error'] = "Please pip(3) install pillow"
+        return misperrors
+
+    try:
+        # Official ImageMagick module
+        from wand.image import Image as WImage
+    except ImportError:
+        misperrors['error'] = "Please pip(3) install wand"
+        return misperrors
+
+    try:
+        from pytesseract import image_to_string
+    except ImportError:
+        misperrors['error'] = "Please pip(3) install pytesseract"
+        return misperrors
+
     if q is False:
         return False
     r = {'results': []}
@@ -32,14 +51,16 @@ def handler(q=False):
             pages=len(pdf.sequence)
             img = WImage(width=pdf.width, height=pdf.height * pages)
             for p in range(pages):
-                img.composite(pdf.sequence[p], top=pdf.height * p, left=0)
-    image = document
+                image = img.composite(pdf.sequence[p], top=pdf.height * p, left=0)
+            image = img.make_blob('png')
+    else:
+        image = document
 
     image_file = BytesIO(image)
     image_file.seek(0)
 
     try:
-        im = WImage(blob=image_file)
+        im = Image.open(image_file)
     except IOError:
         misperrors['error'] = "Corrupt or not an image file."
         return misperrors
