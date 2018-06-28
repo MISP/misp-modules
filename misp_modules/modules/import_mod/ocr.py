@@ -1,7 +1,10 @@
 import json
 import base64
+import magic
 
 from PIL import Image
+
+from wand.image import Image as WImage
 
 from pytesseract import image_to_string
 from io import BytesIO
@@ -10,7 +13,7 @@ userConfig = { };
 
 inputSource = ['file']
 
-moduleinfo = {'version': '0.1', 'author': 'Alexandre Dulaunoy',
+moduleinfo = {'version': '0.2', 'author': 'Alexandre Dulaunoy',
               'description': 'Optical Character Recognition (OCR) module for MISP',
               'module-type': ['import']}
 
@@ -22,10 +25,28 @@ def handler(q=False):
         return False
     r = {'results': []}
     request = json.loads(q)
-    image = base64.b64decode(request["data"])
+    document = base64.b64decode(request["data"])
+    if magic.from_buffer(document, mime=True).split("/")[1] == 'pdf':
+        print("PDF Detected")
+        with WImage(blob=document) as pdf:
+            pages=len(pdf.sequence)
+            img = WImage(width=pdf.width, height=pdf.height * pages)
+            for p in range(pages):
+                img.composite(pdf.sequence[p], top=pdf.height * i, left=0)
+        image = document
+
     image_file = BytesIO(image)
     image_file.seek(0)
-    ocrized = image_to_string(Image.open(image_file))
+
+    try:
+        im = WImage(blob=image_file)
+    except IOError:
+        misperrors['error'] = "Corrupt or not an image file."
+        return misperrors
+
+
+    ocrized = image_to_string(im)
+
     freetext = {}
     freetext['values'] = ocrized
     freetext['types'] = ['freetext']
