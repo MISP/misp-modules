@@ -45,7 +45,7 @@ def handler(q=False):
     r = {'results': []}
     request = json.loads(q)
     document = base64.b64decode(request["data"])
-    if magic.from_buffer(document, mime=True).split("/")[1] == 'pdf':
+    if magic.from_buffer(document, mime=True).split("/")[1] == 'pdf': # Eventually this could be replaced with wand.obj.format
         print("PDF Detected")
         with WImage(blob=document) as pdf:
             pages=len(pdf.sequence)
