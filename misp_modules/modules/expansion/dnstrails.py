@@ -16,7 +16,10 @@ log.addHandler(ch)
 misperrors = {'error': 'Error'}
 mispattributes = {
     'input': ['hostname', 'domain', 'ip-src', 'ip-dst'],
-    'output': ['hostname', 'domain', 'ip-src', 'ip-dst', 'dns-soa-email']
+    'output': ['hostname', 'domain', 'ip-src', 'ip-dst', 'dns-soa-email',
+               'whois-registrant-email', 'whois-registrant-phone',
+               'whois-registrant-name',
+               'whois-registrar', 'whois-creation-date', 'domain']
 }
 
 moduleinfo = {'version': '1', 'author': 'Sebastien Larinier @sebdraven',
@@ -76,6 +79,14 @@ def handle_domain(api, domain, misperrors):
         return misperrors
 
     r, status_ok = expand_subdomains(api, domain)
+
+    if status_ok:
+        result_filtered['results'].extend(r)
+    else:
+        misperrors['error'] = 'Error dns result'
+        return misperrors
+
+    r, status_ok = expand_whois(api, domain)
 
     if status_ok:
         result_filtered['results'].extend(r)
@@ -181,6 +192,7 @@ def expand_subdomains(api, domain):
     r = []
     status_ok = False
 
+
     try:
         results = api.subdomains(domain)
 
@@ -200,6 +212,36 @@ def expand_subdomains(api, domain):
     return r, status_ok
 
 
+def expand_whois(api, domain):
+    r = []
+    status_ok = False
+
+    try:
+        results = api.whois(domain)
+
+        if results:
+            status_ok = True
+            item_registrant = __select_registrant_item(results)
+
+            r.append({
+                'types': ['whois-registrant-email', 'whois-registrant-phone',
+                          'whois-registrant-name', 'whois-registrar',
+                          'whois-creation-date'],
+                'values': [item_registrant['email'],
+                           item_registrant['telephone'],
+                           item_registrant['name'], results['registrarName'],
+                           results['creationDate']],
+                'categories': ['attribution'],
+                'comment': 'whois information of %s by securitytrails' % domain
+            }
+
+            )
+
+    except APIError as e:
+        misperrors['error'] = e
+
+    return r, status_ok
+
 def introspection():
     return mispattributes
 
@@ -207,3 +249,10 @@ def introspection():
 def version():
     moduleinfo['config'] = moduleconfig
     return moduleinfo
+
+
+def __select_registrant_item(entry):
+    if 'contacts' in entry:
+        for c in entry['contacts']:
+            if c['type'] == 'registrant':
+                return entry
