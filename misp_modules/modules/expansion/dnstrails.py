@@ -190,6 +190,8 @@ def expand_subdomains(api, domain):
                 r.append({
                     'type': ['domain'],
                     'values': ['%s.%s' % (sub,domain) for sub in results['subdomains']],
+                    'categories': ['Network activity'],
+                    'comment': 'subdomains of %s' % domain
                 }
 
                 )
