@@ -19,7 +19,7 @@ mispattributes = {
 
 moduleinfo = {'version': '1', 'author': 'Sebastien Larinier @sebdraven',
               'description': 'Query on securitytrails.com',
-              'module-type': ['expansion', 'hover']}
+              'module-types': ['expansion', 'hover']}
 
 # config fields that your code expects from the site admin
 moduleconfig = ['apikey']
@@ -56,7 +56,7 @@ def handler(q=False):
             hostname = request['hostname']
             return handle_domain(api, hostname, misperrors)
         else:
-            misperrors['error'] = "Unsupported attributes type"
+            misperrors['error'] = "Unsupported attributes types"
             return misperrors
     else:
         return False
@@ -117,27 +117,27 @@ def expand_domain_info(api, misperror,domain):
                                'email' in soa_entry]
 
         if ns_servers:
-            r.append({'type': ['domain'],
+            r.append({'types': ['domain'],
                       'values': ns_servers,
-                      'Category': ['Network Activity'],
+                      'categories': ['Network Activity'],
                       'comment': 'List of name servers  of %s first seen %s ' %
                                  (domain, results['current_dns']['ns']['first_seen'])
         })
 
         if list_ipv4:
-            r.append({'type': ['domain|ip'],
+            r.append({'types': ['domain|ip'],
                       'values': ['%s|%s' % (domain, ipv4) for ipv4 in list_ipv4],
-                      'Category': ['Network Activity'],
+                      'categories': ['Network Activity'],
                       'comment': ' List ipv4 of %s first seen %s' %
                                  (domain,
                                   results['current_dns']['a']['first_seen'])
 
             })
         if list_ipv6:
-            r.append({'type': ['domain|ip'],
+            r.append({'types': ['domain|ip'],
                       'values': ['%s|%s' % (domain, ipv6) for ipv6 in
                                  list_ipv6],
-                      'Category': ['Network Activity'],
+                      'categories': ['Network Activity'],
                       'comment': ' List ipv6 of %s first seen %s' %
                                  (domain,
                                   results['current_dns']['aaaa']['first_seen'])
@@ -145,18 +145,18 @@ def expand_domain_info(api, misperror,domain):
                       })
 
         if servers_mx:
-            r.append({'type': ['domain'],
+            r.append({'types': ['domain'],
                       'values': servers_mx,
-                      'Category': ['Network Activity'],
+                      'categories': ['Network Activity'],
                       'comment': ' List mx of %s first seen %s' %
                                  (domain,
                                   results['current_dns']['mx']['first_seen'])
 
                       })
         if soa_hostnames:
-            r.append({'type': ['domain'],
+            r.append({'types': ['domain'],
                       'values': soa_hostnames,
-                      'Category': ['Network Activity'],
+                      'categories': ['Network Activity'],
                       'comment': ' List soa of %s first seen %s' %
                                  (domain,
                                   results['current_dns']['soa']['first_seen'])
