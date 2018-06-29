@@ -1,8 +1,9 @@
 import json
 import base64
 from io import BytesIO
+
 misperrors = {'error': 'Error'}
-userConfig = { };
+userConfig = {};
 
 inputSource = ['file']
 
@@ -15,12 +16,6 @@ moduleconfig = []
 
 def handler(q=False):
     # try to import modules and return errors if module not found
-    try:
-        import magic
-    except ImportError:
-        misperrors['error'] = "Please pip(3) install magic"
-        return misperrors
-
     try:
         from PIL import Image
     except ImportError:
@@ -45,13 +40,18 @@ def handler(q=False):
     r = {'results': []}
     request = json.loads(q)
     document = base64.b64decode(request["data"])
-    if magic.from_buffer(document, mime=True).split("/")[1] == 'pdf': # Eventually this could be replaced with wand.obj.format
-        print("PDF Detected")
+    document = WImage(blob=document)
+    if document.format == 'PDF':
         with WImage(blob=document) as pdf:
+            # Get number of pages
             pages=len(pdf.sequence)
+            print(f"PDF with {pages} page(s) detected")
+            # Create new image object where the height will be the number of pages. With huge PDFs this will overflow, break, consume silly memory etc…
             img = WImage(width=pdf.width, height=pdf.height * pages)
+            # Cycle through pages and stitch it together to one big file
             for p in range(pages):
                 image = img.composite(pdf.sequence[p], top=pdf.height * p, left=0)
+            # Create a png blob
             image = img.make_blob('png')
     else:
         image = document
