@@ -2,6 +2,7 @@ import json
 import logging
 import sys
 from dnstrails import DnsTrails
+from dnstrails import APIError
 
 log = logging.getLogger('dnstrails')
 log.setLevel(logging.DEBUG)
@@ -163,8 +164,30 @@ def expand_domain_info(api, misperror,domain):
                                   results['current_dns']['soa']['first_seen'])
                       })
 
-
     return r, status_ok
+
+
+def expand_subdomains(api, domain):
+
+    r = []
+    status_ok = False
+
+    try:
+        results = api.subdomains(domain)
+
+        if results:
+            status_ok = True
+            if 'subdomains' in results:
+                r.append({
+                    'type': ['domain'],
+                    'values': ['%s.%s' % (sub,domain) for sub in results['subdomains']],
+                }
+
+                )
+    except APIError as e:
+        misperrors['error'] = e
+    return r, status_ok
+
 
 def introspection():
     return mispattributes
