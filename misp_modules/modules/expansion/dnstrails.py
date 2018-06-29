@@ -1,8 +1,9 @@
 import json
 import logging
 import sys
-from dnstrails import DnsTrails
+
 from dnstrails import APIError
+from dnstrails import DnsTrails
 
 log = logging.getLogger('dnstrails')
 log.setLevel(logging.DEBUG)
@@ -67,6 +68,14 @@ def handle_domain(api, domain, misperrors):
     result_filtered = {"results": []}
 
     r, status_ok = expand_domain_info(api, misperrors, domain)
+
+    if status_ok:
+        result_filtered['results'].extend(r)
+    else:
+        misperrors['error'] = 'Error dns result'
+        return misperrors
+
+    r, status_ok = expand_subdomains(api, domain)
 
     if status_ok:
         result_filtered['results'].extend(r)
