@@ -188,7 +188,7 @@ def expand_subdomains(api, domain):
             status_ok = True
             if 'subdomains' in results:
                 r.append({
-                    'type': ['domain'],
+                    'types': ['domain'],
                     'values': ['%s.%s' % (sub,domain) for sub in results['subdomains']],
                     'categories': ['Network activity'],
                     'comment': 'subdomains of %s' % domain
