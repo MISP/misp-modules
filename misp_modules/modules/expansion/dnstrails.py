@@ -70,7 +70,7 @@ def handle_domain(api, domain, misperrors):
     if status_ok:
         result_filtered['results'].extend(r)
     else:
-        misperrors['error'] = 'Error pastries result'
+        misperrors['error'] = 'Error dns result'
         return misperrors
 
     return result_filtered
@@ -91,6 +91,7 @@ def expand_domain_info(api, misperror,domain):
     results = api.domain(domain)
 
     if results:
+        status_ok = True
         if 'current_dns' in results:
             if 'values' in results['current_dns']['ns']:
                 ns_servers = [ns_entry['nameserver'] for ns_entry in
