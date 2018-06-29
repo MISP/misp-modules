@@ -119,7 +119,7 @@ def expand_domain_info(api, misperror,domain):
         if ns_servers:
             r.append({'types': ['domain'],
                       'values': ns_servers,
-                      'categories': ['Network Activity'],
+                      'categories': ['Network activity'],
                       'comment': 'List of name servers  of %s first seen %s ' %
                                  (domain, results['current_dns']['ns']['first_seen'])
         })
@@ -127,7 +127,8 @@ def expand_domain_info(api, misperror,domain):
         if list_ipv4:
             r.append({'types': ['domain|ip'],
                       'values': ['%s|%s' % (domain, ipv4) for ipv4 in list_ipv4],
-                      'categories': ['Network Activity'],
+                      'categories': ['Network activity'],
+
                       'comment': ' List ipv4 of %s first seen %s' %
                                  (domain,
                                   results['current_dns']['a']['first_seen'])
@@ -137,7 +138,7 @@ def expand_domain_info(api, misperror,domain):
             r.append({'types': ['domain|ip'],
                       'values': ['%s|%s' % (domain, ipv6) for ipv6 in
                                  list_ipv6],
-                      'categories': ['Network Activity'],
+                      'categories': ['Network activity'],
                       'comment': ' List ipv6 of %s first seen %s' %
                                  (domain,
                                   results['current_dns']['aaaa']['first_seen'])
@@ -147,7 +148,7 @@ def expand_domain_info(api, misperror,domain):
         if servers_mx:
             r.append({'types': ['domain'],
                       'values': servers_mx,
-                      'categories': ['Network Activity'],
+                      'categories': ['Network activity'],
                       'comment': ' List mx of %s first seen %s' %
                                  (domain,
                                   results['current_dns']['mx']['first_seen'])
@@ -156,7 +157,7 @@ def expand_domain_info(api, misperror,domain):
         if soa_hostnames:
             r.append({'types': ['domain'],
                       'values': soa_hostnames,
-                      'categories': ['Network Activity'],
+                      'categories': ['Network activity'],
                       'comment': ' List soa of %s first seen %s' %
                                  (domain,
                                   results['current_dns']['soa']['first_seen'])
