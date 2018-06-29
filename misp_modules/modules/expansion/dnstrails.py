@@ -163,3 +163,11 @@ def expand_domain_info(api, misperror,domain):
 
 
     return r, status_ok
+
+def introspection():
+    return mispattributes
+
+
+def version():
+    moduleinfo['config'] = moduleconfig
+    return moduleinfo
