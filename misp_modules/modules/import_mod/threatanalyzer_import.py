@@ -69,7 +69,7 @@ def handler(q=False):
                             results.append({
                                 'values': current_sample_filename,
                                 'data': base64.b64encode(file_data).decode(),
-                                'type': 'malware-sample', 'categories': ['Artifacts dropped', 'Payload delivery'], 'to_ids': True, 'comment': ''})
+                                'type': 'malware-sample', 'categories': ['Payload delivery', 'Artifacts dropped'], 'to_ids': True, 'comment': ''})
 
                 if 'Analysis/analysis.json' in zip_file_name:
                     with zf.open(zip_file_name, mode='r', pwd=None) as fp:
