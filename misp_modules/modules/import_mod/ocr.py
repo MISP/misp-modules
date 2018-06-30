@@ -2,6 +2,16 @@ import json
 import base64
 from io import BytesIO
 
+import logging
+
+log = logging.getLogger('ocr')
+log.setLevel(logging.DEBUG)
+ch = logging.StreamHandler(sys.stdout)
+ch.setLevel(logging.DEBUG)
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+ch.setFormatter(formatter)
+log.addHandler(ch)
+
 misperrors = {'error': 'Error'}
 userConfig = {};
 
@@ -45,14 +55,16 @@ def handler(q=False):
         with document as pdf:
             # Get number of pages
             pages=len(pdf.sequence)
-            print(f"PDF with {pages} page(s) detected")
+            log.debug(f"PDF with {pages} page(s) detected")
             # Create new image object where the height will be the number of pages. With huge PDFs this will overflow, break, consume silly memory etc…
             img = WImage(width=pdf.width, height=pdf.height * pages)
             # Cycle through pages and stitch it together to one big file
             for p in range(pages):
+                log.debug(f"Stitching page {p}")
                 image = img.composite(pdf.sequence[p], top=pdf.height * p, left=0)
             # Create a png blob
             image = img.make_blob('png')
+            log.debug(f"Final image size is {pdf.width}x{pdf.height*p}")
     else:
         image = document
 
