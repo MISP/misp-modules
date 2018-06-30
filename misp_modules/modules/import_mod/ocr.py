@@ -42,7 +42,7 @@ def handler(q=False):
     document = base64.b64decode(request["data"])
     document = WImage(blob=document)
     if document.format == 'PDF':
-        with WImage(blob=document) as pdf:
+        with document as pdf:
             # Get number of pages
             pages=len(pdf.sequence)
             print(f"PDF with {pages} page(s) detected")
