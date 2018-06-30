@@ -61,11 +61,11 @@ def handler(q=False):
             img = WImage(width=pdf.width, height=pdf.height * pages)
             # Cycle through pages and stitch it together to one big file
             for p in range(pages):
-                log.debug(f"Stitching page {p}")
+                log.debug(f"Stitching page {p+1}")
                 image = img.composite(pdf.sequence[p], top=pdf.height * p, left=0)
             # Create a png blob
             image = img.make_blob('png')
-            log.debug(f"Final image size is {pdf.width}x{pdf.height*p}")
+            log.debug(f"Final image size is {pdf.width}x{pdf.height*(p+1)}")
     else:
         image = document
 
