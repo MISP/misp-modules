@@ -229,15 +229,14 @@ def expand_whois(api, domain):
                       item_registrant['telephone'],
                       item_registrant['name'], results['registrarName'],
                       results['createdDate']]
-            for t, v in zip(types, values):
-                r.append({
+
+            r = [{
                     'types': t,
                     'values': v,
-                    'categories': ['attribution'],
+                'categories': ['Attribution'],
                     'comment': 'whois information of %s by securitytrails' % domain
-                }
+            } for t, v in zip(types, values)]
 
-                )
     # TODO  File "modules/expansion/dnstrails.py", line 230, in expand_whois
     #    'values': [item_registrant['email'],
     # TypeError: 'NoneType' object is not subscriptable
