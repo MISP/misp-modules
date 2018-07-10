@@ -1,6 +1,7 @@
 import json
 import logging
 import sys
+import time
 
 from dnstrails import APIError
 from dnstrails import DnsTrails
@@ -79,6 +80,7 @@ def handle_domain(api, domain, misperrors):
         misperrors['error'] = 'Error dns result'
         return misperrors
 
+    time.sleep(1)
     r, status_ok = expand_subdomains(api, domain)
 
     if status_ok:
@@ -87,6 +89,7 @@ def handle_domain(api, domain, misperrors):
         misperrors['error'] = 'Error subdomains result'
         return misperrors
 
+    time.sleep(1)
     r, status_ok = expand_whois(api, domain)
 
     if status_ok:
@@ -95,6 +98,7 @@ def handle_domain(api, domain, misperrors):
         misperrors['error'] = 'Error whois result'
         return misperrors
 
+    time.sleep(1)
     r, status_ok = expand_history_ipv4(api, domain)
 
     if status_ok:
