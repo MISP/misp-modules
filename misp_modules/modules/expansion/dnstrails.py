@@ -9,7 +9,8 @@ log = logging.getLogger('dnstrails')
 log.setLevel(logging.DEBUG)
 ch = logging.StreamHandler(sys.stdout)
 ch.setLevel(logging.DEBUG)
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+formatter = logging.Formatter(
+    '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 ch.setFormatter(formatter)
 log.addHandler(ch)
 
@@ -94,13 +95,22 @@ def handle_domain(api, domain, misperrors):
         misperrors['error'] = 'Error whois result'
         return misperrors
 
+    r, status_ok = expand_history_ipv4(api, domain)
+
+    if status_ok:
+        result_filtered['results'].extend(r)
+    else:
+        misperrors['error'] = 'Error history ipv4'
+        return misperrors
+
     return result_filtered
+
 
 def handle_ip(api, ip, misperrors):
     pass
 
 
-def expand_domain_info(api, misperror,domain):
+def expand_domain_info(api, misperror, domain):
     r = []
     status_ok = False
     ns_servers = []
@@ -130,31 +140,33 @@ def expand_domain_info(api, misperror,domain):
 
             if 'values' in results['current_dns']['mx']:
                 servers_mx = [mx_entry['hostname'] for mx_entry in
-                           results['current_dns']['mx']['values'] if
-                           'hostname' in mx_entry]
+                              results['current_dns']['mx']['values'] if
+                              'hostname' in mx_entry]
             if 'values' in results['current_dns']['soa']:
                 soa_hostnames = [soa_entry['email'] for soa_entry in
-                               results['current_dns']['soa']['values'] if
-                               'email' in soa_entry]
+                                 results['current_dns']['soa']['values'] if
+                                 'email' in soa_entry]
 
         if ns_servers:
             r.append({'types': ['domain'],
                       'values': ns_servers,
                       'categories': ['Network activity'],
                       'comment': 'List of name servers  of %s first seen %s ' %
-                                 (domain, results['current_dns']['ns']['first_seen'])
-        })
+                                 (domain,
+                                  results['current_dns']['ns']['first_seen'])
+                      })
 
         if list_ipv4:
             r.append({'types': ['domain|ip'],
-                      'values': ['%s|%s' % (domain, ipv4) for ipv4 in list_ipv4],
+                      'values': ['%s|%s' % (domain, ipv4) for ipv4 in
+                                 list_ipv4],
                       'categories': ['Network activity'],
 
                       'comment': ' List ipv4 of %s first seen %s' %
                                  (domain,
                                   results['current_dns']['a']['first_seen'])
 
-            })
+                      })
         if list_ipv6:
             r.append({'types': ['domain|ip'],
                       'values': ['%s|%s' % (domain, ipv6) for ipv6 in
@@ -188,10 +200,8 @@ def expand_domain_info(api, misperror,domain):
 
 
 def expand_subdomains(api, domain):
-
     r = []
     status_ok = False
-
 
     try:
         results = api.subdomains(domain)
@@ -201,7 +211,8 @@ def expand_subdomains(api, domain):
             if 'subdomains' in results:
                 r.append({
                     'types': ['domain'],
-                    'values': ['%s.%s' % (sub,domain) for sub in results['subdomains']],
+                    'values': ['%s.%s' % (sub, domain)
+                               for sub in results['subdomains']],
                     'categories': ['Network activity'],
                     'comment': 'subdomains of %s' % domain
                 }
@@ -224,7 +235,7 @@ def expand_whois(api, domain):
             status_ok = True
             item_registrant = __select_registrant_item(results)
             types = ['whois-registrant-email', 'whois-registrant-phone',
-                          'whois-registrant-name', 'whois-registrar',
+                     'whois-registrant-name', 'whois-registrar',
                      'whois-creation-date']
             values = [item_registrant['email'],
                       item_registrant['telephone'],
@@ -232,10 +243,10 @@ def expand_whois(api, domain):
                       results['createdDate']]
 
             r = [{
-                    'types': t,
-                    'values': v,
+                'types': t,
+                'values': v,
                 'categories': ['Attribution'],
-                    'comment': 'whois information of %s by securitytrails' % domain
+                'comment': 'whois information of %s by securitytrails' % domain
             } for t, v in zip(types, values)]
 
     # TODO  File "modules/expansion/dnstrails.py", line 230, in expand_whois
@@ -247,6 +258,36 @@ def expand_whois(api, domain):
         print(e)
 
     return r, status_ok
+
+
+def expand_history_ipv4(api, domain):
+    r = []
+    status_ok = False
+
+    try:
+        results = api.history_dns_ipv4(domain)
+
+        if results:
+            status_ok = True
+            if 'records' in results:
+                for record in results['records']:
+                    if 'values' in record:
+                        r.append(
+                            {'type': ['domain|ip'],
+                             'values': ['%s|%s' % (domain, record['ip'])],
+                             'categories': ['Newtwork activity'],
+                             'comment': 'last seen: %s first seen: %s' %
+                                        (record['last_seen'],
+                                         record['first_seen'])
+                             }
+                        )
+
+    except APIError as e:
+        misperrors['error'] = e
+        print(e)
+
+    return r, status_ok
+
 
 def introspection():
     return mispattributes
