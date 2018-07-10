@@ -236,6 +236,9 @@ def expand_whois(api, domain):
             }
 
             )
+    # TODO  File "modules/expansion/dnstrails.py", line 230, in expand_whois
+    #    'values': [item_registrant['email'],
+    # TypeError: 'NoneType' object is not subscriptable
 
     except APIError as e:
         misperrors['error'] = e
@@ -254,5 +257,6 @@ def version():
 def __select_registrant_item(entry):
     if 'contacts' in entry:
         for c in entry['contacts']:
+            print(c)
             if c['type'] == 'registrant':
                 return entry
