@@ -279,7 +279,7 @@ def expand_history_ipv4(api, domain):
                     if 'values' in record:
                         for item in record['values']:
                             r.append(
-                                {'type': ['domain|ip'],
+                                {'types': ['domain|ip'],
                                  'values': ['%s|%s' % (domain, item['ip'])],
                                  'categories': ['Network activity'],
                                  'comment': 'last seen: %s first seen: %s' %
