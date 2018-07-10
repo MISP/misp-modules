@@ -234,20 +234,21 @@ def expand_whois(api, domain):
         if results:
             status_ok = True
             item_registrant = __select_registrant_item(results)
-            types = ['whois-registrant-email', 'whois-registrant-phone',
-                     'whois-registrant-name', 'whois-registrar',
-                     'whois-creation-date']
-            values = [item_registrant['email'],
-                      item_registrant['telephone'],
-                      item_registrant['name'], results['registrarName'],
-                      results['createdDate']]
+            if item_registrant:
+                types = ['whois-registrant-email', 'whois-registrant-phone',
+                         'whois-registrant-name', 'whois-registrar',
+                         'whois-creation-date']
+                values = [item_registrant['email'],
+                          item_registrant['telephone'],
+                          item_registrant['name'], results['registrarName'],
+                          results['createdDate']]
 
-            r = [{
-                'types': t,
-                'values': v,
-                'categories': ['Attribution'],
-                'comment': 'whois information of %s by securitytrails' % domain
-            } for t, v in zip(types, values)]
+                r = [{
+                    'types': t,
+                    'values': v,
+                    'categories': ['Attribution'],
+                    'comment': 'whois information of %s by securitytrails' % domain
+                } for t, v in zip(types, values)]
 
     # TODO  File "modules/expansion/dnstrails.py", line 230, in expand_whois
     #    'values': [item_registrant['email'],
