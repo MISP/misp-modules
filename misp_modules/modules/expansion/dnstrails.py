@@ -222,27 +222,28 @@ def expand_whois(api, domain):
         if results:
             status_ok = True
             item_registrant = __select_registrant_item(results)
-
-            r.append({
-                'types': ['whois-registrant-email', 'whois-registrant-phone',
+            types = ['whois-registrant-email', 'whois-registrant-phone',
                           'whois-registrant-name', 'whois-registrar',
-                          'whois-creation-date'],
-                'values': [item_registrant['email'],
-                           item_registrant['telephone'],
-                           item_registrant['name'], results['registrarName'],
-                           results['createdDate']],
-                'categories': ['attribution'],
-                'comment': 'whois information of %s by securitytrails' % domain
-            }
+                     'whois-creation-date']
+            values = [item_registrant['email'],
+                      item_registrant['telephone'],
+                      item_registrant['name'], results['registrarName'],
+                      results['createdDate']]
+            for t, v in zip(types, values):
+                r.append({
+                    'types': t,
+                    'values': v,
+                    'categories': ['attribution'],
+                    'comment': 'whois information of %s by securitytrails' % domain
+                }
 
-            )
+                )
     # TODO  File "modules/expansion/dnstrails.py", line 230, in expand_whois
     #    'values': [item_registrant['email'],
     # TypeError: 'NoneType' object is not subscriptable
 
     except APIError as e:
         misperrors['error'] = e
-        print(e)
 
     return r, status_ok
 
@@ -258,6 +259,6 @@ def version():
 def __select_registrant_item(entry):
     if 'contacts' in entry:
         for c in entry['contacts']:
-            print(c)
+
             if c['type'] == 'registrant':
                 return c
