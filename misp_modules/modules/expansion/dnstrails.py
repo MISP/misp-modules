@@ -277,15 +277,16 @@ def expand_history_ipv4(api, domain):
             if 'records' in results:
                 for record in results['records']:
                     if 'values' in record:
-                        r.append(
-                            {'type': ['domain|ip'],
-                             'values': ['%s|%s' % (domain, record['ip'])],
-                             'categories': ['Newtwork activity'],
-                             'comment': 'last seen: %s first seen: %s' %
-                                        (record['last_seen'],
-                                         record['first_seen'])
-                             }
-                        )
+                        for item in record['values']:
+                            r.append(
+                                {'type': ['domain|ip'],
+                                 'values': ['%s|%s' % (domain, item['ip'])],
+                                 'categories': ['Newtwork activity'],
+                                 'comment': 'last seen: %s first seen: %s' %
+                                            (record['last_seen'],
+                                             record['first_seen'])
+                                 }
+                            )
 
     except APIError as e:
         misperrors['error'] = e
