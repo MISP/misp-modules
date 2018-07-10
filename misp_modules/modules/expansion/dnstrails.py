@@ -281,7 +281,7 @@ def expand_history_ipv4(api, domain):
                             r.append(
                                 {'type': ['domain|ip'],
                                  'values': ['%s|%s' % (domain, item['ip'])],
-                                 'categories': ['Newtwork activity'],
+                                 'categories': ['Network activity'],
                                  'comment': 'last seen: %s first seen: %s' %
                                             (record['last_seen'],
                                              record['first_seen'])
