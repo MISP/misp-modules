@@ -242,6 +242,7 @@ def expand_whois(api, domain):
 
     except APIError as e:
         misperrors['error'] = e
+        print(e)
 
     return r, status_ok
 
