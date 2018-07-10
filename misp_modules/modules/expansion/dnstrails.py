@@ -83,7 +83,7 @@ def handle_domain(api, domain, misperrors):
     if status_ok:
         result_filtered['results'].extend(r)
     else:
-        misperrors['error'] = 'Error dns result'
+        misperrors['error'] = 'Error subdomains result'
         return misperrors
 
     r, status_ok = expand_whois(api, domain)
@@ -91,7 +91,7 @@ def handle_domain(api, domain, misperrors):
     if status_ok:
         result_filtered['results'].extend(r)
     else:
-        misperrors['error'] = 'Error dns result'
+        misperrors['error'] = 'Error whois result'
         return misperrors
 
     return result_filtered
