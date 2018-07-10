@@ -230,7 +230,7 @@ def expand_whois(api, domain):
                 'values': [item_registrant['email'],
                            item_registrant['telephone'],
                            item_registrant['name'], results['registrarName'],
-                           results['creationDate']],
+                           results['createdDate']],
                 'categories': ['attribution'],
                 'comment': 'whois information of %s by securitytrails' % domain
             }
