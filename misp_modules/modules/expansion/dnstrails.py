@@ -323,7 +323,7 @@ def expand_history_ipv4_ipv6(api, domain):
 
         if results:
             status_ok = True
-            r.extend(__history_ip(results, domain))
+            r.extend(__history_ip(results, domain, type_ip='ipv6'))
 
     except APIError as e:
         misperrors['error'] = e
@@ -332,7 +332,7 @@ def expand_history_ipv4_ipv6(api, domain):
     return r, status_ok
 
 
-def __history_ip(results, domain):
+def __history_ip(results, domain, type_ip='ip'):
     r = []
     if 'records' in results:
         for record in results['records']:
@@ -340,7 +340,7 @@ def __history_ip(results, domain):
                 for item in record['values']:
                     r.append(
                         {'types': ['domain|ip'],
-                         'values': ['%s|%s' % (domain, item['ip'])],
+                         'values': ['%s|%s' % (domain, item[type_ip])],
                          'categories': ['Network activity'],
                          'comment': 'last seen: %s first seen: %s' %
                                     (record['last_seen'],
