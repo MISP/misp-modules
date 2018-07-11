@@ -239,20 +239,62 @@ def expand_whois(api, domain):
             status_ok = True
             item_registrant = __select_registrant_item(results)
             if item_registrant:
-                types = ['whois-registrant-email', 'whois-registrant-phone',
-                         'whois-registrant-name', 'whois-registrar',
-                         'whois-creation-date']
-                values = [item_registrant['email'],
-                          item_registrant['telephone'],
-                          item_registrant['name'], results['registrarName'],
-                          results['createdDate']]
 
-                r = [{
-                    'types': t,
-                    'values': v,
-                    'categories': ['Attribution'],
-                    'comment': 'whois information of %s by securitytrails' % domain
-                } for t, v in zip(types, values)]
+                if 'email' in item_registrant:
+                    r.append(
+                        {
+                            'types': ['whois-registrant-email'],
+                            'values': [item_registrant['email']],
+                            'categories': ['Attribution'],
+                            'comment': 'Whois information of %s by securitytrails'
+                                       % domain
+                        }
+                    )
+
+                if 'telephone' in item_registrant:
+                    r.append(
+                        {
+                            'types': ['whois-registrant-phone'],
+                            'values': [item_registrant['telephone']],
+                            'categories': ['Attribution'],
+                            'comment': 'Whois information of %s by securitytrails'
+                                       % domain
+                        }
+                    )
+
+                if 'name' in item_registrant:
+                    r.append(
+                        {
+                            'types': ['whois-registrant-name'],
+                            'values': [item_registrant['name']],
+                            'categories': ['Attribution'],
+                            'comment': 'Whois information of %s by securitytrails'
+                                       % domain
+                        }
+                    )
+
+                if 'registrarName' in item_registrant:
+                    r.append(
+                        {
+                            'types': ['whois-registrar'],
+                            'values': [item_registrant['registrarName']],
+                            'categories': ['Attribution'],
+                            'comment': 'Whois information of %s by securitytrails'
+                                       % domain
+                        }
+                    )
+
+                if 'createdDate' in item_registrant:
+                    r.append(
+                        {
+                            'types': ['whois-creation-date'],
+                            'values': [item_registrant['createdDate']],
+                            'categories': ['Attribution'],
+                            'comment': 'Whois information of %s by securitytrails'
+                                       % domain
+                        }
+                    )
+
 
     # TODO  File "modules/expansion/dnstrails.py", line 230, in expand_whois
     #    'values': [item_registrant['email'],
