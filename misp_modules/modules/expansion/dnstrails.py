@@ -396,11 +396,23 @@ def __history_dns(results, domain, type_serv, service):
     if 'records' in results:
         for record in results['records']:
             if 'values' in record:
-                for item in record['values']:
-                    print(item)
+                values = record['values']
+                if type(values) is list:
+
+                    for item in record['values']:
+                        r.append(
+                            {'types': ['domain|ip'],
+                             'values': [item[type_serv]],
+                             'categories': ['Network activity'],
+                             'comment': 'history %s of %s last seen: %s first seen: %s' %
+                                        (service, domain, record['last_seen'],
+                                         record['first_seen'])
+                             }
+                        )
+                else:
                     r.append(
                         {'types': ['domain|ip'],
-                         'values': [item[type_serv]],
+                         'values': [values[type_serv]],
                          'categories': ['Network activity'],
                          'comment': 'history %s of %s last seen: %s first seen: %s' %
                                     (service, domain, record['last_seen'],
