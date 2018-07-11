@@ -26,7 +26,7 @@ mispattributes = {
 
 moduleinfo = {'version': '1', 'author': 'Sebastien Larinier @sebdraven',
               'description': 'Query on securitytrails.com',
-              'module-types': ['expansion', 'hover']}
+              'module-type': ['expansion', 'hover']}
 
 # config fields that your code expects from the site admin
 moduleconfig = ['apikey']
