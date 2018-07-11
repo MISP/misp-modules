@@ -397,6 +397,7 @@ def __history_dns(results, domain, type_serv, service):
         for record in results['records']:
             if 'values' in record:
                 for item in record['values']:
+                    print(item)
                     r.append(
                         {'types': ['domain|ip'],
                          'values': [item[type_serv]],
