@@ -77,7 +77,7 @@ def handle_domain(api, domain, misperrors):
     if status_ok:
         result_filtered['results'].extend(r)
     else:
-        misperrors['error'] = 'Error dns result'
+        misperrors['error'] = misperrors['error'] + ' Error DNS result'
         return misperrors
 
     time.sleep(1)
@@ -86,7 +86,7 @@ def handle_domain(api, domain, misperrors):
     if status_ok:
         result_filtered['results'].extend(r)
     else:
-        misperrors['error'] = 'Error subdomains result'
+        misperrors['error'] = misperrors['error'] + ' Error subdomains result'
         return misperrors
 
     time.sleep(1)
@@ -95,7 +95,7 @@ def handle_domain(api, domain, misperrors):
     if status_ok:
         result_filtered['results'].extend(r)
     else:
-        misperrors['error'] = 'Error whois result'
+        misperrors['error'] = misperrors['error'] + ' Error whois result'
         return misperrors
 
     time.sleep(1)
@@ -104,9 +104,18 @@ def handle_domain(api, domain, misperrors):
     if status_ok:
         result_filtered['results'].extend(r)
     else:
-        misperrors['error'] = 'Error history ipv4'
+        misperrors['error'] = misperrors['error'] + ' Error history ipv4'
         return misperrors
 
+    time.sleep(1)
+    r, status_ok = expand_history_dns(api, domain)
+
+    if status_ok:
+        result_filtered['results'].extend(r)
+    else:
+        misperrors['error'] = misperrors[
+                                  'error'] + ' Error in expand History DNS'
+        return misperrors
     return result_filtered
 
 
