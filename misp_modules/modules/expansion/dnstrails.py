@@ -295,11 +295,6 @@ def expand_whois(api, domain):
                         }
                     )
 
-
-    # TODO  File "modules/expansion/dnstrails.py", line 230, in expand_whois
-    #    'values': [item_registrant['email'],
-    # TypeError: 'NoneType' object is not subscriptable
-
     except APIError as e:
         misperrors['error'] = e
         print(e)
@@ -332,6 +327,37 @@ def expand_history_ipv4_ipv6(api, domain):
     return r, status_ok
 
 
+def expand_history_dns(api, domain):
+    r = []
+    status_ok = False
+
+    try:
+
+        results = api.history_dns_ns(domain)
+        if results:
+            status_ok = True
+
+            if 'records' in results:
+                for record in results['records']:
+                    if 'values' in record:
+                        for item in record['values']:
+                            r.append(
+                                {'types': ['domain|ip'],
+                                 'values': [
+                                     '%s|%s' % (domain, item['nameserver'])],
+                                 'categories': ['Network activity'],
+                                 'comment': 'history DNS of %s last seen: %s first seen: %s' %
+                                            (domain, record['last_seen'],
+                                             record['first_seen'])
+                                 }
+                            )
+
+    except APIError as e:
+        misperrors['error'] = e
+
+    return r, status_ok
+
+
 def __history_ip(results, domain, type_ip='ip'):
     r = []
     if 'records' in results:
@@ -342,13 +368,15 @@ def __history_ip(results, domain, type_ip='ip'):
                         {'types': ['domain|ip'],
                          'values': ['%s|%s' % (domain, item[type_ip])],
                          'categories': ['Network activity'],
-                         'comment': 'last seen: %s first seen: %s' %
-                                    (record['last_seen'],
+                         'comment': 'History IP on securitytrails %s '
+                                    'last seen: %s first seen: %s' %
+                                    (domain, record['last_seen'],
                                      record['first_seen'])
                          }
                     )
 
     return r
+
 
 def introspection():
     return mispattributes
