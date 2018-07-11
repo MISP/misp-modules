@@ -350,7 +350,7 @@ def expand_history_dns(api, domain):
 
         time.sleep(1)
 
-        results = api.history_dns_soa(results, domain)
+        results = api.history_dns_soa(domain)
 
         if results:
             status_ok = True
