@@ -123,6 +123,8 @@ def handle_domain(api, domain, misperrors):
         misperrors['error'] = misperrors[
                                   'error'] + ' Error in expand History DNS'
         return misperrors
+    print(result_filtered)
+    print(misperrors)
     return result_filtered
 
 
