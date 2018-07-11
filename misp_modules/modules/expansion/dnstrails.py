@@ -346,20 +346,23 @@ def expand_history_dns(api, domain):
         if results:
             status_ok = True
 
-            if 'records' in results:
-                for record in results['records']:
-                    if 'values' in record:
-                        for item in record['values']:
-                            r.append(
-                                {'types': ['domain|ip'],
-                                 'values': [
-                                     '%s|%s' % (domain, item['nameserver'])],
-                                 'categories': ['Network activity'],
-                                 'comment': 'history DNS of %s last seen: %s first seen: %s' %
-                                            (domain, record['last_seen'],
-                                             record['first_seen'])
-                                 }
-                            )
+            r.extend(__history_dns(results, domain, 'nameserver', 'ns'))
+
+        time.sleep(1)
+
+        results = api.history_dns_soa(results, domain)
+
+        if results:
+            status_ok = True
+            r.extend(__history_dns(results, domain, 'email', 'soa'))
+
+        time.sleep(1)
+
+        results = api.history_dns_mx(domain)
+
+        if results:
+            status_ok = True
+            r.extend(__history_dns(results, domain, 'host', 'mx'))
 
     except APIError as e:
         misperrors['error'] = e
@@ -386,6 +389,24 @@ def __history_ip(results, domain, type_ip='ip'):
 
     return r
 
+
+def __history_dns(results, domain, type_serv, service):
+    r = []
+
+    if 'records' in results:
+        for record in results['records']:
+            if 'values' in record:
+                for item in record['values']:
+                    r.append(
+                        {'types': ['domain|ip'],
+                         'values': [item[type_serv]],
+                         'categories': ['Network activity'],
+                         'comment': 'history %s of %s last seen: %s first seen: %s' %
+                                    (service, domain, record['last_seen'],
+                                     record['first_seen'])
+                         }
+                    )
+    return r
 
 def introspection():
     return mispattributes
