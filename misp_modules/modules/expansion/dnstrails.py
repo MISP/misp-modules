@@ -90,24 +90,24 @@ def handle_domain(api, domain, misperrors):
     #     return misperrors
     #
     # time.sleep(1)
-    # r, status_ok = expand_whois(api, domain)
-    #
-    # if status_ok:
-    #     result_filtered['results'].extend(r)
-    # else:
-    #     misperrors['error'] = misperrors['error'] + ' Error whois result'
-    #     return misperrors
-    #
-    # time.sleep(1)
-    r, status_ok = expand_history_ipv4_ipv6(api, domain)
-    #
+    r, status_ok = expand_whois(api, domain)
 
     if status_ok:
-        print(r)
         result_filtered['results'].extend(r)
     else:
-        misperrors['error'] = misperrors['error'] + ' Error history ipv4'
+        misperrors['error'] = misperrors['error'] + ' Error whois result'
         return misperrors
+    #
+    # time.sleep(1)
+    # r, status_ok = expand_history_ipv4_ipv6(api, domain)
+    # #
+    #
+    # if status_ok:
+    #     print(r)
+    #     result_filtered['results'].extend(r)
+    # else:
+    #     misperrors['error'] = misperrors['error'] + ' Error history ipv4'
+    #     return misperrors
 
     # time.sleep(1)
 
