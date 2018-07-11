@@ -344,7 +344,7 @@ def expand_history_dns(api, domain):
 
         results = api.history_dns_ns(domain)
         if results:
-            status_ok = True
+
 
             r.extend(__history_dns(results, domain, 'nameserver', 'ns'))
 
@@ -353,7 +353,6 @@ def expand_history_dns(api, domain):
         results = api.history_dns_soa(domain)
 
         if results:
-            status_ok = True
             r.extend(__history_dns(results, domain, 'email', 'soa'))
 
         time.sleep(1)
@@ -366,6 +365,8 @@ def expand_history_dns(api, domain):
 
     except APIError as e:
         misperrors['error'] = e
+
+    status_ok = True
 
     return r, status_ok
 
