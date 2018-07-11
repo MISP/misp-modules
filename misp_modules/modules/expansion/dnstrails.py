@@ -93,6 +93,7 @@ def handle_domain(api, domain, misperrors):
     r, status_ok = expand_whois(api, domain)
 
     if status_ok:
+        print(r)
         result_filtered['results'].extend(r)
     else:
         misperrors['error'] = misperrors['error'] + ' Error whois result'
