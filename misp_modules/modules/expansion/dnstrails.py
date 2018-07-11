@@ -265,7 +265,7 @@ def expand_whois(api, domain):
     return r, status_ok
 
 
-def expand_history_ipv4(api, domain):
+def expand_history_ipv4_ipv6(api, domain):
     r = []
     status_ok = False
 
@@ -274,19 +274,14 @@ def expand_history_ipv4(api, domain):
 
         if results:
             status_ok = True
-            if 'records' in results:
-                for record in results['records']:
-                    if 'values' in record:
-                        for item in record['values']:
-                            r.append(
-                                {'types': ['domain|ip'],
-                                 'values': ['%s|%s' % (domain, item['ip'])],
-                                 'categories': ['Network activity'],
-                                 'comment': 'last seen: %s first seen: %s' %
-                                            (record['last_seen'],
-                                             record['first_seen'])
-                                 }
-                            )
+            r.extend(__history_ip(results, domain))
+
+        time.sleep(1)
+        results = api.history_dns_aaaa(domain)
+
+        if results:
+            status_ok = True
+            r.extend(__history_ip(results, domain))
 
     except APIError as e:
         misperrors['error'] = e
@@ -294,6 +289,24 @@ def expand_history_ipv4(api, domain):
 
     return r, status_ok
 
+
+def __history_ip(results, domain):
+    r = []
+    if 'records' in results:
+        for record in results['records']:
+            if 'values' in record:
+                for item in record['values']:
+                    r.append(
+                        {'types': ['domain|ip'],
+                         'values': ['%s|%s' % (domain, item['ip'])],
+                         'categories': ['Network activity'],
+                         'comment': 'last seen: %s first seen: %s' %
+                                    (record['last_seen'],
+                                     record['first_seen'])
+                         }
+                    )
+
+    return r
 
 def introspection():
     return mispattributes
