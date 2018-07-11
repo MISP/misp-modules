@@ -99,7 +99,7 @@ def handle_domain(api, domain, misperrors):
         return misperrors
 
     time.sleep(1)
-    r, status_ok = expand_history_ipv4(api, domain)
+    r, status_ok = expand_history_ipv4_ipv6(api, domain)
 
     if status_ok:
         result_filtered['results'].extend(r)
@@ -139,7 +139,7 @@ def expand_domain_info(api, misperror, domain):
 
             if 'values' in results['current_dns']['aaaa']:
                 list_ipv6 = [ipv6_entry['ipv6'] for ipv6_entry in
-                             results['current_ns']['aaaa']['values'] if
+                             results['current_dns']['aaaa']['values'] if
                              'ipv6' in ipv6_entry]
 
             if 'values' in results['current_dns']['mx']:
