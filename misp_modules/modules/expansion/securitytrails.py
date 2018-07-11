@@ -353,8 +353,6 @@ def expand_history_dns(api, domain):
 
         results = api.history_dns_ns(domain)
         if results:
-
-
             r.extend(__history_dns(results, domain, 'nameserver', 'ns'))
 
         time.sleep(1)
