@@ -128,8 +128,12 @@ def handle_domain(api, domain, misperrors):
 
     if status_ok:
         if r:
-            print(r)
+
             result_filtered['results'].extend(r)
+        else:
+            misperrors['error'] = misperrors['error'] + \
+                                  ' Error in expand History Whois'
+
     return result_filtered
 
 
@@ -395,7 +399,7 @@ def expand_history_whois(api, domain):
             if 'items' in results['result']:
                 for item in results['result']['items']:
                     item_registrant = __select_registrant_item(item)
-                    print(item_registrant)
+
                     r.extend(
                         {
                             'type': ['domain'],
@@ -436,7 +440,7 @@ def expand_history_whois(api, domain):
     except APIError as e:
         misperrors['error'] = e
         return [], False
-
+    status_ok = True
     return r, status_ok
 
 
@@ -507,9 +511,7 @@ def __select_registrant_item(entry):
                            entry['contacts']))
 
     if 'contact' in entry:
-        print(entry)
-        print('\r\n')
         res = list(filter(lambda x: x['type'] == 'registrant',
                           entry['contact']))
-        print(res)
+
         return res
