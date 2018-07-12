@@ -130,9 +130,10 @@ def handle_domain(api, domain, misperrors):
         if r:
 
             result_filtered['results'].extend(r)
-        else:
-            misperrors['error'] = misperrors['error'] + \
-                                  ' Error in expand History Whois'
+    else:
+        misperrors['error'] = misperrors['error'] + \
+                              ' Error in expand History Whois'
+        return misperrors
 
     return result_filtered
 
