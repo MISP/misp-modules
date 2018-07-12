@@ -391,8 +391,8 @@ def expand_history_whois(api, domain):
 
         if results:
 
-            if 'items' in results['results']:
-                for item in results['results']['items']:
+            if 'items' in results['result']:
+                for item in results['result']['items']:
                     item_registrant = __select_registrant_item(item)
 
                     r.extend(
