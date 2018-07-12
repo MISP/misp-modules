@@ -340,7 +340,7 @@ def expand_history_ipv4_ipv6(api, domain):
 
     except APIError as e:
         misperrors['error'] = e
-        print(e)
+        return [], False
 
     return r, status_ok
 
@@ -372,8 +372,67 @@ def expand_history_dns(api, domain):
 
     except APIError as e:
         misperrors['error'] = e
+        return [], False
 
     status_ok = True
+
+    return r, status_ok
+
+
+def expand_history_whois(api, domain):
+    r = []
+    status_ok = False
+    try:
+        results = api.history_whois(domain)
+
+        if results:
+
+            if 'items' in results['results']:
+                for item in results['results']['items']:
+                    item_registrant = __select_registrant_item(item)
+
+                    r.extend(
+                        {
+                            'type': ['domain'],
+                            'values': item['nameServers'],
+                            'categories': ['Network activity'],
+                            'comment': 'Whois history Name Servers of %s '
+                                       'Status: %s ' % (domain, item['status'])
+
+                        }
+                    )
+                    if 'email' in item_registrant:
+                        r.append(
+                            {
+                                'types': ['whois-registrant-email'],
+                                'values': [item_registrant['email']],
+                                'categories': ['Attribution'],
+                                'comment': 'Whois history registrant email of %s'
+                                           'Status: %s' % (
+                                               domain, item['status'])
+                            }
+                        )
+
+                    if 'telephone' in item_registrant:
+                        r.append(
+                            {
+                                'types': ['whois-registrant-phone'],
+                                'values': [item_registrant['telephone']],
+                                'categories': ['Attribution'],
+                                'comment': 'Whois history registrant phone of %s'
+                                           'Status: %s' % (
+                                               domain, item['status'])
+                            }
+                        )
+
+
+
+
+    except APIError as e:
+        misperrors['error'] = e
+        return [], False
+
+
 
     return r, status_ok
 
