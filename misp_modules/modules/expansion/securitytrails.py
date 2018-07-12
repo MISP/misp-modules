@@ -91,17 +91,17 @@ def handle_domain(api, domain, misperrors):
     #     misperrors['error'] = misperrors['error'] + ' Error subdomains result'
     #     return misperrors
     #
-    # time.sleep(1)
-    # r, status_ok = expand_whois(api, domain)
-    #
-    # if status_ok:
-    #     if r:
-    #         result_filtered['results'].extend(r)
-    # else:
-    #     misperrors['error'] = misperrors['error'] + ' Error whois result'
-    #     return misperrors
-    #
-    # time.sleep(1)
+    time.sleep(1)
+    r, status_ok = expand_whois(api, domain)
+
+    if status_ok:
+        if r:
+            result_filtered['results'].extend(r)
+    else:
+        misperrors['error'] = misperrors['error'] + ' Error whois result'
+        return misperrors
+
+    time.sleep(1)
     # r, status_ok = expand_history_ipv4_ipv6(api, domain)
     # #
     #
@@ -268,7 +268,7 @@ def expand_whois(api, domain):
             item_registrant = __select_registrant_item(results)
             if item_registrant:
 
-                if 'email' in item_registrant:
+                if 'email' in item_registrant[0]:
                     r.append(
                         {
                             'types': ['whois-registrant-email'],
@@ -279,7 +279,7 @@ def expand_whois(api, domain):
                         }
                     )
 
-                if 'telephone' in item_registrant:
+                if 'telephone' in item_registrant[0]:
                     r.append(
                         {
                             'types': ['whois-registrant-phone'],
@@ -290,7 +290,7 @@ def expand_whois(api, domain):
                         }
                     )
 
-                if 'name' in item_registrant:
+                if 'name' in item_registrant[0]:
                     r.append(
                         {
                             'types': ['whois-registrant-name'],
@@ -301,7 +301,7 @@ def expand_whois(api, domain):
                         }
                     )
 
-                if 'registrarName' in item_registrant:
+                if 'registrarName' in item_registrant[0]:
                     r.append(
                         {
                             'types': ['whois-registrar'],
@@ -312,7 +312,7 @@ def expand_whois(api, domain):
                         }
                     )
 
-                if 'createdDate' in item_registrant:
+                if 'createdDate' in item_registrant[0]:
                     r.append(
                         {
                             'types': ['whois-creation-date'],
