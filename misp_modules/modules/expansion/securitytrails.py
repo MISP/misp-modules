@@ -426,7 +426,7 @@ def expand_history_whois(api, domain):
                                 }
                             )
 
-                        if 'telephone' in item_registrant:
+                        if 'telephone' in item_registrant[0]:
                             r.append(
                                 {
                                     'types': ['whois-registrant-phone'],
