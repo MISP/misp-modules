@@ -506,4 +506,5 @@ def __select_registrant_item(entry):
         for c in entry['contacts']:
 
             if c['type'] == 'registrant':
+                print(c)
                 return c
