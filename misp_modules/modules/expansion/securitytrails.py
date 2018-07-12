@@ -72,59 +72,63 @@ def handler(q=False):
 def handle_domain(api, domain, misperrors):
     result_filtered = {"results": []}
 
-    r, status_ok = expand_domain_info(api, misperrors, domain)
+    # r, status_ok = expand_domain_info(api, misperrors, domain)
+    # #
+    # if status_ok:
+    #     if r:
+    #         result_filtered['results'].extend(r)
+    # else:
+    #     misperrors['error'] = misperrors['error'] + ' Error DNS result'
+    #     return misperrors
     #
-    if status_ok:
-        if r:
-            result_filtered['results'].extend(r)
-    else:
-        misperrors['error'] = misperrors['error'] + ' Error DNS result'
-        return misperrors
-
-    time.sleep(1)
-    r, status_ok = expand_subdomains(api, domain)
-
-    if status_ok:
-        if r:
-            result_filtered['results'].extend(r)
-    else:
-        misperrors['error'] = misperrors['error'] + ' Error subdomains result'
-        return misperrors
-
-    time.sleep(1)
-    r, status_ok = expand_whois(api, domain)
-
-    if status_ok:
-        if r:
-            result_filtered['results'].extend(r)
-    else:
-        misperrors['error'] = misperrors['error'] + ' Error whois result'
-        return misperrors
-
-    time.sleep(1)
-    r, status_ok = expand_history_ipv4_ipv6(api, domain)
+    # time.sleep(1)
+    # r, status_ok = expand_subdomains(api, domain)
     #
+    # if status_ok:
+    #     if r:
+    #         result_filtered['results'].extend(r)
+    # else:
+    #     misperrors['error'] = misperrors['error'] + ' Error subdomains result'
+    #     return misperrors
+    #
+    # time.sleep(1)
+    # r, status_ok = expand_whois(api, domain)
+    #
+    # if status_ok:
+    #     if r:
+    #         result_filtered['results'].extend(r)
+    # else:
+    #     misperrors['error'] = misperrors['error'] + ' Error whois result'
+    #     return misperrors
+    #
+    # time.sleep(1)
+    # r, status_ok = expand_history_ipv4_ipv6(api, domain)
+    # #
+    #
+    # if status_ok:
+    #     if r:
+    #         result_filtered['results'].extend(r)
+    # else:
+    #     misperrors['error'] = misperrors['error'] + ' Error history ipv4'
+    #     return misperrors
+    #
+    # time.sleep(1)
+    #
+    # r, status_ok = expand_history_dns(api, domain)
+    #
+    # if status_ok:
+    #     if r:
+    #         result_filtered['results'].extend(r)
+    # else:
+    #     misperrors['error'] = misperrors[
+    #                               'error'] + ' Error in expand History DNS'
+    #     return misperrors
+
+    r, status_ok = expand_history_whois(api, domain)
 
     if status_ok:
         if r:
             result_filtered['results'].extend(r)
-    else:
-        misperrors['error'] = misperrors['error'] + ' Error history ipv4'
-        return misperrors
-
-    time.sleep(1)
-
-    r, status_ok = expand_history_dns(api, domain)
-
-    if status_ok:
-        if r:
-            result_filtered['results'].extend(r)
-    else:
-        misperrors['error'] = misperrors[
-                                  'error'] + ' Error in expand History DNS'
-        return misperrors
-    print(result_filtered)
-    print(misperrors)
     return result_filtered
 
 
