@@ -266,7 +266,7 @@ def expand_whois(api, domain):
                     r.append(
                         {
                             'types': ['whois-registrant-email'],
-                            'values': [item_registrant['email']],
+                            'values': [item_registrant[0]['email']],
                             'categories': ['Attribution'],
                             'comment': 'Whois information of %s by securitytrails'
                                        % domain
@@ -277,7 +277,7 @@ def expand_whois(api, domain):
                     r.append(
                         {
                             'types': ['whois-registrant-phone'],
-                            'values': [item_registrant['telephone']],
+                            'values': [item_registrant[0]['telephone']],
                             'categories': ['Attribution'],
                             'comment': 'Whois information of %s by securitytrails'
                                        % domain
@@ -288,7 +288,7 @@ def expand_whois(api, domain):
                     r.append(
                         {
                             'types': ['whois-registrant-name'],
-                            'values': [item_registrant['name']],
+                            'values': [item_registrant[0]['name']],
                             'categories': ['Attribution'],
                             'comment': 'Whois information of %s by securitytrails'
                                        % domain
@@ -299,7 +299,7 @@ def expand_whois(api, domain):
                     r.append(
                         {
                             'types': ['whois-registrar'],
-                            'values': [item_registrant['registrarName']],
+                            'values': [item_registrant[0]['registrarName']],
                             'categories': ['Attribution'],
                             'comment': 'Whois information of %s by securitytrails'
                                        % domain
@@ -310,7 +310,7 @@ def expand_whois(api, domain):
                     r.append(
                         {
                             'types': ['whois-creation-date'],
-                            'values': [item_registrant['createdDate']],
+                            'values': [item_registrant[0]['createdDate']],
                             'categories': ['Attribution'],
                             'comment': 'Whois information of %s by securitytrails'
                                        % domain
@@ -394,23 +394,24 @@ def expand_history_whois(api, domain):
             if 'items' in results['result']:
                 for item in results['result']['items']:
                     item_registrant = __select_registrant_item(item)
-                    if item_registrant:
-                        r.extend(
-                            {
-                                'type': ['domain'],
-                                'values': item['nameServers'],
-                                'categories': ['Network activity'],
-                                'comment': 'Whois history Name Servers of %s '
-                                           'Status: %s ' % (
+                    r.extend(
+                        {
+                            'type': ['domain'],
+                            'values': item['nameServers'],
+                            'categories': ['Network activity'],
+                            'comment': 'Whois history Name Servers of %s '
+                                       'Status: %s ' % (
                                            domain, item['status'])
 
-                            }
-                        )
-                        if 'email' in item_registrant:
+                        }
+                    )
+                    if item_registrant:
+
+                        if 'email' in item_registrant[0]:
                             r.append(
                                 {
                                     'types': ['whois-registrant-email'],
-                                    'values': [item_registrant['email']],
+                                    'values': [item_registrant[0]['email']],
                                     'categories': ['Attribution'],
                                     'comment': 'Whois history registrant email of %s'
                                                'Status: %s' % (
@@ -422,16 +423,13 @@ def expand_history_whois(api, domain):
                             r.append(
                                 {
                                     'types': ['whois-registrant-phone'],
-                                    'values': [item_registrant['telephone']],
+                                    'values': [item_registrant[0]['telephone']],
                                     'categories': ['Attribution'],
                                     'comment': 'Whois history registrant phone of %s'
                                                'Status: %s' % (
                                                    domain, item['status'])
                                 }
                             )
-
-
-
 
     except APIError as e:
         misperrors['error'] = e
@@ -506,8 +504,8 @@ def __select_registrant_item(entry):
 
     if 'contacts' in entry:
         return list(filter(lambda x: x['type'] == 'registrant',
-                           entry['contacts']))[0]
+                           entry['contacts']))
 
     if 'contact' in entry:
         return list(filter(lambda x: x['type'] == 'registrant',
-                           entry['contact']))[0]
+                           entry['contact']))
