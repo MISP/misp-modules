@@ -394,6 +394,7 @@ def expand_history_whois(api, domain):
             if 'items' in results['result']:
                 for item in results['result']['items']:
                     item_registrant = __select_registrant_item(item)
+                    print(item_registrant)
                     r.extend(
                         {
                             'type': ['domain'],
@@ -434,8 +435,6 @@ def expand_history_whois(api, domain):
     except APIError as e:
         misperrors['error'] = e
         return [], False
-
-
 
     return r, status_ok
 
