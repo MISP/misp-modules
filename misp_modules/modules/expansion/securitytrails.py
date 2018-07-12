@@ -502,9 +502,10 @@ def version():
 
 
 def __select_registrant_item(entry):
+    print(entry)
     if 'contacts' in entry:
         for c in entry['contacts']:
-
+            print(c)
             if c['type'] == 'registrant':
                 print(c)
                 return c
