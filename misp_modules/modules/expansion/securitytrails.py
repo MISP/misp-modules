@@ -441,6 +441,7 @@ def expand_history_whois(api, domain):
         misperrors['error'] = e
         return [], False
     status_ok = True
+    print(r)
     return r, status_ok
 
 
