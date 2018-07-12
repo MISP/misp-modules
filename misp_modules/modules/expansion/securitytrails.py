@@ -124,16 +124,16 @@ def handle_domain(api, domain, misperrors):
     #                               'error'] + ' Error in expand History DNS'
     #     return misperrors
 
-    r, status_ok = expand_history_whois(api, domain)
-
-    if status_ok:
-        if r:
-
-            result_filtered['results'].extend(r)
-    else:
-        misperrors['error'] = misperrors['error'] + \
-                              ' Error in expand History Whois'
-        return misperrors
+    # r, status_ok = expand_history_whois(api, domain)
+    #
+    # if status_ok:
+    #    if r:
+    #
+    #        result_filtered['results'].extend(r)
+    # else:
+    #    misperrors['error'] = misperrors['error'] + \
+    #                          ' Error in expand History Whois'
+    #    return misperrors
 
     return result_filtered
 
