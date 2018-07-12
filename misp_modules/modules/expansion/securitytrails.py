@@ -267,7 +267,7 @@ def expand_whois(api, domain):
             status_ok = True
             item_registrant = __select_registrant_item(results)
             if item_registrant:
-
+                print(item_registrant)
                 if 'email' in item_registrant[0]:
                     r.append(
                         {
@@ -511,7 +511,7 @@ def __select_registrant_item(entry):
     if 'contacts' in entry:
         res = list(filter(lambda x: x['type'] == 'registrant',
                           entry['contacts']))
-        print(res)
+        return res
     if 'contact' in entry:
         res = list(filter(lambda x: x['type'] == 'registrant',
                           entry['contact']))
