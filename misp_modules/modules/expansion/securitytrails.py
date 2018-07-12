@@ -501,7 +501,7 @@ def version():
 
 
 def __select_registrant_item(entry):
-
+    print(entry)
     if 'contacts' in entry:
         return list(filter(lambda x: x['type'] == 'registrant',
                            entry['contacts']))
