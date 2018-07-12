@@ -128,6 +128,7 @@ def handle_domain(api, domain, misperrors):
 
     if status_ok:
         if r:
+            print(r)
             result_filtered['results'].extend(r)
     return result_filtered
 
