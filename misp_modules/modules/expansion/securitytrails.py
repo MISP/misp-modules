@@ -401,9 +401,9 @@ def expand_history_whois(api, domain):
                 for item in results['result']['items']:
                     item_registrant = __select_registrant_item(item)
 
-                    r.extend(
+                    r.append(
                         {
-                            'type': ['domain'],
+                            'types': ['domain'],
                             'values': item['nameServers'],
                             'categories': ['Network activity'],
                             'comment': 'Whois history Name Servers of %s '
