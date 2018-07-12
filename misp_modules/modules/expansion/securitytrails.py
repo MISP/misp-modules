@@ -394,40 +394,41 @@ def expand_history_whois(api, domain):
             if 'items' in results['result']:
                 for item in results['result']['items']:
                     item_registrant = __select_registrant_item(item)
-
-                    r.extend(
-                        {
-                            'type': ['domain'],
-                            'values': item['nameServers'],
-                            'categories': ['Network activity'],
-                            'comment': 'Whois history Name Servers of %s '
-                                       'Status: %s ' % (domain, item['status'])
-
-                        }
-                    )
-                    if 'email' in item_registrant:
-                        r.append(
+                    if item_registrant:
+                        r.extend(
                             {
-                                'types': ['whois-registrant-email'],
-                                'values': [item_registrant['email']],
-                                'categories': ['Attribution'],
-                                'comment': 'Whois history registrant email of %s'
-                                           'Status: %s' % (
-                                               domain, item['status'])
+                                'type': ['domain'],
+                                'values': item['nameServers'],
+                                'categories': ['Network activity'],
+                                'comment': 'Whois history Name Servers of %s '
+                                           'Status: %s ' % (
+                                           domain, item['status'])
+
                             }
                         )
+                        if 'email' in item_registrant:
+                            r.append(
+                                {
+                                    'types': ['whois-registrant-email'],
+                                    'values': [item_registrant['email']],
+                                    'categories': ['Attribution'],
+                                    'comment': 'Whois history registrant email of %s'
+                                               'Status: %s' % (
+                                                   domain, item['status'])
+                                }
+                            )
 
-                    if 'telephone' in item_registrant:
-                        r.append(
-                            {
-                                'types': ['whois-registrant-phone'],
-                                'values': [item_registrant['telephone']],
-                                'categories': ['Attribution'],
-                                'comment': 'Whois history registrant phone of %s'
-                                           'Status: %s' % (
-                                               domain, item['status'])
-                            }
-                        )
+                        if 'telephone' in item_registrant:
+                            r.append(
+                                {
+                                    'types': ['whois-registrant-phone'],
+                                    'values': [item_registrant['telephone']],
+                                    'categories': ['Attribution'],
+                                    'comment': 'Whois history registrant phone of %s'
+                                               'Status: %s' % (
+                                                   domain, item['status'])
+                                }
+                            )
 
 
 
@@ -502,10 +503,11 @@ def version():
 
 
 def __select_registrant_item(entry):
-    print(entry)
+
     if 'contacts' in entry:
-        for c in entry['contacts']:
-            print(c)
-            if c['type'] == 'registrant':
-                print(c)
-                return c
+        return list(filter(lambda x: x['type'] == 'registrant',
+                           entry['contacts']))[0]
+
+    if 'contact' in entry:
+        return list(filter(lambda x: x['type'] == 'registrant',
+                           entry['contact']))[0]
