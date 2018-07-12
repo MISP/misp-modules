@@ -509,5 +509,7 @@ def __select_registrant_item(entry):
     if 'contact' in entry:
         print(entry)
         print('\r\n')
-        return list(filter(lambda x: x['type'] == 'registrant',
-                           entry['contact']))
+        res = list(filter(lambda x: x['type'] == 'registrant',
+                          entry['contact']))
+        print(res)
+        return res
