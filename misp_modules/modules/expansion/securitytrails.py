@@ -573,7 +573,7 @@ def expand_search_stats(api, ip, misperror):
                       })
             status_ok = True
     except APIError as e:
-        misperrors['error'] = e
+        misperrors['error'] = e.value
         return [], False
 
     return r, status_ok
