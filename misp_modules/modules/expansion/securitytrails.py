@@ -91,17 +91,17 @@ def handle_domain(api, domain, misperrors):
     #     misperrors['error'] = misperrors['error'] + ' Error subdomains result'
     #     return misperrors
     #
-    time.sleep(1)
-    r, status_ok = expand_whois(api, domain)
-
-    if status_ok:
-        if r:
-            result_filtered['results'].extend(r)
-    else:
-        misperrors['error'] = misperrors['error'] + ' Error whois result'
-        return misperrors
-
-    time.sleep(1)
+    # time.sleep(1)
+    # r, status_ok = expand_whois(api, domain)
+    #
+    # if status_ok:
+    #     if r:
+    #         result_filtered['results'].extend(r)
+    # else:
+    #     misperrors['error'] = misperrors['error'] + ' Error whois result'
+    #     return misperrors
+    #
+    # time.sleep(1)
     # r, status_ok = expand_history_ipv4_ipv6(api, domain)
     # #
     #
@@ -135,11 +135,23 @@ def handle_domain(api, domain, misperrors):
     #                          ' Error in expand History Whois'
     #    return misperrors
 
+
     return result_filtered
 
 
 def handle_ip(api, ip, misperrors):
-    pass
+    result_filtered = {"results": []}
+
+    r, status_ok = expand_searching_domain(api, ip)
+
+    if status_ok:
+        if r:
+            result_filtered['result'].extend(r)
+    else:
+        misperrors['error'] += ' Error in expand searching domain'
+        return misperrors
+    
+    return result_filtered
 
 
 def expand_domain_info(api, misperror, domain):
