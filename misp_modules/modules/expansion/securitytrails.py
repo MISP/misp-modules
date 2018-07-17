@@ -151,6 +151,17 @@ def handle_ip(api, ip, misperrors):
         misperrors['error'] += ' Error in expand searching domain'
         return misperrors
 
+    time.sleep(1)
+
+    r, status_ok = expand_search_stats(api, ip, misperrors)
+
+    if status_ok:
+        if r:
+            result_filtered['results'].extend(r)
+    else:
+        misperrors['error'] += ' Error in expand searching stats'
+        return misperrors
+
     return result_filtered
 
 
@@ -549,7 +560,7 @@ def expand_search_stats(api, ip, misperror):
     status_ok = False
 
     try:
-        result = api.searching_stats(ipv4=ip)
+        result = api.search_stats(ipv4=ip)
         if result and 'top_organizations' in result:
             comment = ''
             for reg in result['top_organizations']:
