@@ -150,7 +150,7 @@ def handle_ip(api, ip, misperrors):
     else:
         misperrors['error'] += ' Error in expand searching domain'
         return misperrors
-    
+
     return result_filtered
 
 
@@ -515,7 +515,7 @@ def expand_searching_domain(api, ip):
     status_ok = False
 
     try:
-        results = api.searching_domains(ip)
+        results = api.searching_domains(ipv4=ip)
 
         if results:
             if 'records' in results:
