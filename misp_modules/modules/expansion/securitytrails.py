@@ -442,7 +442,7 @@ def expand_history_whois(api, domain):
         misperrors['error'] = e
         return [], False
     status_ok = True
-    print(r)
+
     return r, status_ok
 
 
@@ -497,6 +497,40 @@ def __history_dns(results, domain, type_serv, service):
                     )
     return r
 
+
+def expand_searching_domain(api, ip):
+    r = []
+    status_ok = False
+
+    try:
+        results = api.searching_domains(ip)
+
+        if results:
+            if 'records' in results:
+                res = [(r['host_provider'], r['hostname'], r['whois'])
+                       for r in results['records']]
+
+                for host_provider, hostname, whois in res:
+                    comment = 'domain for %s by %s' % (ip, host_provider[0])
+                    if whois['registrant']:
+                        comment = comment + ' registrar %s' % whois['registrar']
+
+                    r.append(
+                        {
+                            'types': ['domain'],
+                            'category': ['Network activity'],
+                            'values': [hostname],
+                            'comment': comment
+
+                        }
+                    )
+        status_ok = True
+    except APIError as e:
+        misperrors['error'] = e
+        return [], False
+
+    return r, status_ok
+
 def introspection():
     return mispattributes
 
@@ -507,13 +541,13 @@ def version():
 
 
 def __select_registrant_item(entry):
-
+    res = None
     if 'contacts' in entry:
         res = list(filter(lambda x: x['type'] == 'registrant',
                           entry['contacts']))
-        return res
+
     if 'contact' in entry:
         res = list(filter(lambda x: x['type'] == 'registrant',
                           entry['contact']))
 
-        return res
+    return res
