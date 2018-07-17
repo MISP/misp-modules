@@ -146,7 +146,7 @@ def handle_ip(api, ip, misperrors):
 
     if status_ok:
         if r:
-            result_filtered['result'].extend(r)
+            result_filtered['results'].extend(r)
     else:
         misperrors['error'] += ' Error in expand searching domain'
         return misperrors
