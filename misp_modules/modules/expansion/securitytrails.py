@@ -524,7 +524,7 @@ def expand_searching_domain(api, ip):
 
                 for host_provider, hostname, whois in res:
                     comment = 'domain for %s by %s' % (ip, host_provider[0])
-                    if whois['registrant']:
+                    if whois['registrar']:
                         comment = comment + ' registrar %s' % whois['registrar']
 
                     r.append(
