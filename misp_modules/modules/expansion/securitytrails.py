@@ -543,6 +543,31 @@ def expand_searching_domain(api, ip):
 
     return r, status_ok
 
+
+def expand_search_stats(api, ip, misperror):
+    r = []
+    status_ok = False
+
+    try:
+        result = api.searching_stats(ipv4=ip)
+        if result and 'top_organizations' in result:
+            comment = ''
+            for reg in result['top_organizations']:
+                comment += 'Organization %s used %s count: %s' % (reg['key'],
+                                                                  ip,
+                                                                  reg['count'])
+            r.append({'types': ['comment'],
+                      'categories': ['Other'],
+                      'values': comment,
+                      })
+            status_ok = True
+    except APIError as e:
+        misperrors['error'] = e
+        return [], False
+
+    return r, status_ok
+
+
 def introspection():
     return mispattributes
 
