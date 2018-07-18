@@ -72,69 +72,66 @@ def handler(q=False):
 def handle_domain(api, domain, misperrors):
     result_filtered = {"results": []}
 
-    # r, status_ok = expand_domain_info(api, misperrors, domain)
-    # #
-    # if status_ok:
-    #     if r:
-    #         result_filtered['results'].extend(r)
-    # else:
-    #     misperrors['error'] = misperrors['error'] + ' Error DNS result'
-    #     return misperrors
-    #
-    # time.sleep(1)
-    # r, status_ok = expand_subdomains(api, domain)
-    #
-    # if status_ok:
-    #     if r:
-    #         result_filtered['results'].extend(r)
-    # else:
-    #     misperrors['error'] = misperrors['error'] + ' Error subdomains result'
-    #     return misperrors
-    #
-    # time.sleep(1)
-    # r, status_ok = expand_whois(api, domain)
-    #
-    # if status_ok:
-    #     if r:
-    #         result_filtered['results'].extend(r)
-    # else:
-    #     misperrors['error'] = misperrors['error'] + ' Error whois result'
-    #     return misperrors
-    #
-    # time.sleep(1)
-    # r, status_ok = expand_history_ipv4_ipv6(api, domain)
-    # #
-    #
-    # if status_ok:
-    #     if r:
-    #         result_filtered['results'].extend(r)
-    # else:
-    #     misperrors['error'] = misperrors['error'] + ' Error history ipv4'
-    #     return misperrors
-    #
-    # time.sleep(1)
-    #
-    # r, status_ok = expand_history_dns(api, domain)
-    #
-    # if status_ok:
-    #     if r:
-    #         result_filtered['results'].extend(r)
-    # else:
-    #     misperrors['error'] = misperrors[
-    #                               'error'] + ' Error in expand History DNS'
-    #     return misperrors
+    r, status_ok = expand_domain_info(api, misperrors, domain)
 
-    # r, status_ok = expand_history_whois(api, domain)
-    #
-    # if status_ok:
-    #    if r:
-    #
-    #        result_filtered['results'].extend(r)
-    # else:
-    #    misperrors['error'] = misperrors['error'] + \
-    #                          ' Error in expand History Whois'
-    #    return misperrors
+    if status_ok:
+        if r:
+            result_filtered['results'].extend(r)
+    else:
+        misperrors['error'] = misperrors['error'] + ' Error DNS result'
+        return misperrors
 
+    time.sleep(1)
+    r, status_ok = expand_subdomains(api, domain)
+
+    if status_ok:
+        if r:
+            result_filtered['results'].extend(r)
+    else:
+        misperrors['error'] = misperrors['error'] + ' Error subdomains result'
+        return misperrors
+
+    time.sleep(1)
+    r, status_ok = expand_whois(api, domain)
+
+    if status_ok:
+        if r:
+            result_filtered['results'].extend(r)
+    else:
+        misperrors['error'] = misperrors['error'] + ' Error whois result'
+        return misperrors
+
+    time.sleep(1)
+    r, status_ok = expand_history_ipv4_ipv6(api, domain)
+
+    if status_ok:
+        if r:
+            result_filtered['results'].extend(r)
+    else:
+        misperrors['error'] = misperrors['error'] + ' Error history ipv4'
+        return misperrors
+
+    time.sleep(1)
+
+    r, status_ok = expand_history_dns(api, domain)
+
+    if status_ok:
+        if r:
+            result_filtered['results'].extend(r)
+    else:
+        misperrors['error'] = misperrors[
+                                  'error'] + ' Error in expand History DNS'
+        return misperrors
+
+    r, status_ok = expand_history_whois(api, domain)
+
+    if status_ok:
+        if r:
+            result_filtered['results'].extend(r)
+    else:
+        misperrors['error'] = misperrors['error'] + \
+                              ' Error in expand History Whois'
+        return misperrors
 
     return result_filtered
 
@@ -149,17 +146,6 @@ def handle_ip(api, ip, misperrors):
             result_filtered['results'].extend(r)
     else:
         misperrors['error'] += ' Error in expand searching domain'
-        return misperrors
-
-    time.sleep(1)
-
-    r, status_ok = expand_search_stats(api, ip, misperrors)
-
-    if status_ok:
-        if r:
-            result_filtered['results'].extend(r)
-    else:
-        misperrors['error'] += ' Error in expand searching stats'
         return misperrors
 
     return result_filtered
@@ -274,7 +260,8 @@ def expand_subdomains(api, domain):
 
                 )
     except APIError as e:
-        misperrors['error'] = e
+        misperrors['error'] = e.value
+        return [], False
 
     return r, status_ok
 
@@ -347,8 +334,8 @@ def expand_whois(api, domain):
                     )
 
     except APIError as e:
-        misperrors['error'] = e
-        print(e)
+        misperrors['error'] = e.value
+        return [], False
 
     return r, status_ok
 
@@ -372,7 +359,7 @@ def expand_history_ipv4_ipv6(api, domain):
             r.extend(__history_ip(results, domain, type_ip='ipv6'))
 
     except APIError as e:
-        misperrors['error'] = e
+        misperrors['error'] = e.value
         return [], False
 
     return r, status_ok
@@ -404,7 +391,7 @@ def expand_history_dns(api, domain):
             r.extend(__history_dns(results, domain, 'host', 'mx'))
 
     except APIError as e:
-        misperrors['error'] = e
+        misperrors['error'] = e.value
         return [], False
 
     status_ok = True
@@ -462,7 +449,7 @@ def expand_history_whois(api, domain):
                             )
 
     except APIError as e:
-        misperrors['error'] = e
+        misperrors['error'] = e.value
         return [], False
     status_ok = True
 
@@ -548,30 +535,6 @@ def expand_searching_domain(api, ip):
                         }
                     )
         status_ok = True
-    except APIError as e:
-        misperrors['error'] = e
-        return [], False
-
-    return r, status_ok
-
-
-def expand_search_stats(api, ip, misperror):
-    r = []
-    status_ok = False
-
-    try:
-        result = api.search_stats(ipv4=ip)
-        if result and 'top_organizations' in result:
-            comment = ''
-            for reg in result['top_organizations']:
-                comment += 'Organization %s used %s count: %s' % (reg['key'],
-                                                                  ip,
-                                                                  reg['count'])
-            r.append({'types': ['comment'],
-                      'categories': ['Other'],
-                      'values': comment,
-                      })
-            status_ok = True
     except APIError as e:
         misperrors['error'] = e.value
         return [], False
