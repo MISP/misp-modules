@@ -12,6 +12,7 @@ asnhistory
 git+https://github.com/Rafiot/uwhoisd.git@testing#egg=uwhois&subdirectory=client
 git+https://github.com/MISP/PyMISP.git#egg=pymisp
 git+https://github.com/sebdraven/pyonyphe#egg=pyonyphe
+git+https://github.com/sebdraven/pydnstrails#egg=pydnstrails
 pillow
 pytesseract
 wand
