@@ -15,6 +15,7 @@ git+https://github.com/sebdraven/pyonyphe#egg=pyonyphe
 git+https://github.com/sebdraven/pydnstrails#egg=pydnstrails
 pillow
 pytesseract
+wand
 SPARQLWrapper
 domaintools_api
 pygeoip
@@ -22,3 +23,4 @@ bs4
 oauth2
 yara
 sigmatools
+stix2-patterns
