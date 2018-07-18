@@ -418,7 +418,7 @@ def expand_history_whois(api, domain):
                             'categories': ['Network activity'],
                             'comment': 'Whois history Name Servers of %s '
                                        'Status: %s ' % (
-                                           domain, item['status'])
+                                           domain, ' '.join(item['status']))
 
                         }
                     )
@@ -432,7 +432,8 @@ def expand_history_whois(api, domain):
                                     'categories': ['Attribution'],
                                     'comment': 'Whois history registrant email of %s'
                                                'Status: %s' % (
-                                                   domain, item['status'])
+                                                   domain,
+                                                   ' '.join(item['status']))
                                 }
                             )
 
@@ -444,7 +445,8 @@ def expand_history_whois(api, domain):
                                     'categories': ['Attribution'],
                                     'comment': 'Whois history registrant phone of %s'
                                                'Status: %s' % (
-                                                   domain, item['status'])
+                                                   domain,
+                                                   ' '.join(item['status']))
                                 }
                             )
 
