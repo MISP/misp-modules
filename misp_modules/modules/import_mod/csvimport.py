@@ -203,9 +203,9 @@ def handler(q=False):
     else:
         header = request['config'].get('header').split(',')
         header = [c.strip() for c in header]
-    csv_parser = CsvParser(header, has_header)
+    csv_parser = CsvParser(header, has_header, data.split('\n'))
     # build the attributes
-    csv_parser.buildAttributes()
+    csv_parser.parse_csv()
     r = {'results': csv_parser.result}
     return r
 
