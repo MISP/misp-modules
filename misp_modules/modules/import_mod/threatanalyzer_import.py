@@ -46,15 +46,19 @@ def handler(q=False):
                     with zf.open(zip_file_name, mode='r', pwd=None) as fp:
                         file_data = fp.read()
                         for line in file_data.decode().split('\n'):
-                            if line:
+                            if not line:
+                                continue
+                            if line.count('|') == 3:
                                 l_fname, l_size, l_md5, l_created = line.split('|')
-                                l_fname = cleanup_filepath(l_fname)
-                                if l_fname:
-                                    if l_size == 0:
-                                        pass  # FIXME create an attribute for the filename/path
-                                    else:
-                                        # file is a non empty sample, upload the sample later
-                                        modified_files_mapping[l_md5] = l_fname
+                            if line.count('|') == 4:
+                                l_fname, l_size, l_md5, l_sha256, l_created = line.split('|')
+                            l_fname = cleanup_filepath(l_fname)
+                            if l_fname:
+                                if l_size == 0:
+                                    pass  # FIXME create an attribute for the filename/path
+                                else:
+                                    # file is a non empty sample, upload the sample later
+                                    modified_files_mapping[l_md5] = l_fname
 
             # now really process the data
             for zip_file_name in zf.namelist():  # Get all files in the zip file
