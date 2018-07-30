@@ -87,9 +87,12 @@ class GoAmlGeneration(object):
         person_to_parse = [person_uuid for person_uuid in self.uuids.get('person') if person_uuid not in self.parsed_uuids.get('person')]
         if len(person_to_parse) == 1:
             self.itterate('person', 'reporting_person', person_to_parse[0], 'header')
-        location_to_parse = [location_uuid for location_uuid in self.uuids.get('geolocation') if location_uuid not in self.parsed_uuids.get('geolocation')]
-        if len(location_to_parse) == 1:
-            self.itterate('geolocation', 'location', location_to_parse[0], 'header')
+        try:
+            location_to_parse = [location_uuid for location_uuid in self.uuids.get('geolocation') if location_uuid not in self.parsed_uuids.get('geolocation')]
+            if len(location_to_parse) == 1:
+                self.itterate('geolocation', 'location', location_to_parse[0], 'header')
+        except TypeError:
+            pass
         self.xml['data'] += "</report>"
 
     def itterate(self, object_type, aml_type, uuid, xml_part):
