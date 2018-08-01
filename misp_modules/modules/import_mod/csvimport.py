@@ -22,11 +22,14 @@ duplicatedFields = {'mispType': {'mispComment': 'comment'},
 attributesFields = ['type', 'value', 'category', 'to_ids', 'comment', 'distribution']
 misp_standard_csv_header = ['uuid','event_id','category','type','value','comment','to_ids','date',
                             'object_relation','object_uuid','object_name','object_meta_category']
+misp_context_additional_fields = ['event_info','event_member_org','event_source_org','event_distribution',
+                                  'event_threat_level_id','event_analysis','event_date','event_tag']
 delimiters = [',', ';', '|', '/', '\t', '    ']
 
 class CsvParser():
     def __init__(self, header, has_header, data):
-        if data[0].split(',') == misp_standard_csv_header:
+        data_header = data[0].split(',')
+        if data_header == misp_standard_csv_header or data_header == (misp_standard_csv_header + misp_context_additional_fields):
             self.header = misp_standard_csv_header
             self.from_misp = True
             self.data = data[1:]
@@ -100,10 +103,11 @@ class CsvParser():
         attribute_fields = self.header[:1] + self.header[2:8]
         relation_type = self.header[8]
         object_fields = self.header[9:]
+        header_length = len(self.header)
         for line in self.data:
             attribute = {}
             try:
-                a_uuid,_,category,a_type,value,comment,to_ids,date,relation,o_uuid,o_name,o_meta_category = line.split(',')
+                a_uuid,_,category,a_type,value,comment,to_ids,date,relation,o_uuid,o_name,o_meta_category = line.split(',')[:header_length]
             except ValueError:
                 continue
             for t, v in zip(attribute_fields, [a_uuid,category,a_type,value,comment,to_ids,date]):
