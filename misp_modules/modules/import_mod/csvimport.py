@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import json, os, base64
+import base64, csv, io, json, os
 from pymisp import __path__ as pymisp_path
 from collections import defaultdict
 
@@ -24,13 +24,14 @@ misp_standard_csv_header = ['uuid','event_id','category','type','value','comment
                             'object_relation','object_uuid','object_name','object_meta_category']
 misp_context_additional_fields = ['event_info','event_member_org','event_source_org','event_distribution',
                                   'event_threat_level_id','event_analysis','event_date','event_tag']
+misp_extended_csv_header = misp_standard_csv_header[:9] + ['attribute_tag'] + misp_standard_csv_header[9:] + misp_context_additional_fields
 delimiters = [',', ';', '|', '/', '\t', '    ']
 
 class CsvParser():
     def __init__(self, header, has_header, data):
-        data_header = data[0].split(',')
-        if data_header == misp_standard_csv_header or data_header == (misp_standard_csv_header + misp_context_additional_fields):
-            self.header = misp_standard_csv_header
+        data_header = data[0]
+        if data_header == misp_standard_csv_header or data_header == misp_extended_csv_header:
+            self.header = misp_standard_csv_header if data_header == misp_standard_csv_header else misp_extended_csv_header[:13]
             self.from_misp = True
             self.data = data[1:]
         else:
@@ -100,23 +101,24 @@ class CsvParser():
         l_attributes = []
         l_objects = []
         objects = defaultdict(list)
-        attribute_fields = self.header[:1] + self.header[2:8]
-        relation_type = self.header[8]
-        object_fields = self.header[9:]
         header_length = len(self.header)
+        attribute_fields = self.header[:1] + self.header[2:6]
         for line in self.data:
             attribute = {}
             try:
-                a_uuid,_,category,a_type,value,comment,to_ids,date,relation,o_uuid,o_name,o_meta_category = line.split(',')[:header_length]
+                try:
+                    a_uuid,_,a_category,a_type,value,comment,to_ids,_,relation,o_uuid,o_name,o_category = line[:header_length]
+                except ValueError:
+                    a_uuid,_,a_category,a_type,value,comment,to_ids,_,relation,tag,o_uuid,o_name,o_category = line[:header_length]
+                    if tag: attribute['tags'] = tag
             except ValueError:
                 continue
-            for t, v in zip(attribute_fields, [a_uuid,category,a_type,value,comment,to_ids,date]):
+            for t, v in zip(attribute_fields, [a_uuid, a_category, a_type, value, comment]):
                 attribute[t] = v.replace('"', '')
             attribute['to_ids'] = True if to_ids == '1' else False
-            relation = relation.replace('"', '')
             if relation:
-                attribute[relation_type] = relation
-                object_index = tuple(o.replace('"', '') for o in (o_uuid,o_name,o_meta_category))
+                attribute["object_relation"] = relation.replace('"', '')
+                object_index = tuple(o.replace('"', '') for o in (o_uuid,o_name,o_category))
                 objects[object_index].append(attribute)
             else:
                 l_attributes.append(attribute)
@@ -193,6 +195,7 @@ def handler(q=False):
     request = json.loads(q)
     if request.get('data'):
         data = base64.b64decode(request['data']).decode('utf-8')
+        data = [line for line in csv.reader(io.TextIOWrapper(io.BytesIO(data.encode()), encoding='utf-8'))]
     else:
         misperrors['error'] = "Unsupported attributes type"
         return misperrors
@@ -207,7 +210,7 @@ def handler(q=False):
     else:
         header = request['config'].get('header').split(',')
         header = [c.strip() for c in header]
-    csv_parser = CsvParser(header, has_header, data.split('\n'))
+    csv_parser = CsvParser(header, has_header, data)
     # build the attributes
     csv_parser.parse_csv()
     r = {'results': csv_parser.result}
