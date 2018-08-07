@@ -21,7 +21,7 @@ def handler(q=False):
         return misperrors
     config = SigmaConfiguration()
     try:
-        parser = SigmaParser(yaml.load(request.get('sigma')), config)
+        parser = SigmaParser(yaml.safe_load(request.get('sigma')), config)
         result = ("Syntax valid: {}".format(parser.values))
     except Exception as e:
         result = ("Syntax error: {}".format(str(e)))
