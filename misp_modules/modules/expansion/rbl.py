@@ -6,7 +6,7 @@ try:
     resolver = dns.resolver.Resolver()
     resolver.timeout = 0.2
     resolver.lifetime = 0.2
-except:
+except ModuleNotFoundError:
     print("dnspython3 is missing, use 'pip install dnspython3' to install it.")
     sys.exit(0)
 
