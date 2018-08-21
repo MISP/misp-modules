@@ -15,7 +15,7 @@ misperrors = {'error': 'Error'}
 userConfig = {}
 inputSource = ['file']
 
-moduleinfo = {'version': '0.8', 'author': 'Christophe Vandeplas',
+moduleinfo = {'version': '0.9', 'author': 'Christophe Vandeplas',
               'description': 'Import for ThreatAnalyzer archive.zip/analysis.json files',
               'module-type': ['import']}
 
@@ -45,7 +45,7 @@ def handler(q=False):
                 if re.match(r"Analysis/proc_\d+/modified_files/mapping\.log", zip_file_name):
                     with zf.open(zip_file_name, mode='r', pwd=None) as fp:
                         file_data = fp.read()
-                        for line in file_data.decode().split('\n'):
+                        for line in file_data.decode("utf-8", 'ignore').split('\n'):
                             if not line:
                                 continue
                             if line.count('|') == 3:
@@ -55,7 +55,8 @@ def handler(q=False):
                             l_fname = cleanup_filepath(l_fname)
                             if l_fname:
                                 if l_size == 0:
-                                    pass  # FIXME create an attribute for the filename/path
+                                    results.append({'values': l_fname, 'type': 'filename', 'to_ids': True,
+                                                    'categories': ['Artifacts dropped', 'Payload delivery'], 'comment': ''})
                                 else:
                                     # file is a non empty sample, upload the sample later
                                     modified_files_mapping[l_md5] = l_fname
@@ -144,13 +145,14 @@ def process_analysis_json(analysis_json):
                         # )
                         yield({'values': connection_section_connection['@remote_hostname'], 'type': 'hostname', 'to_ids': True, 'comment': ''})
                     if 'http_command' in connection_section_connection:
-                        # print('connection_section_connection HTTP COMMAND: {}\t{}'.format(
-                        #     connection_section_connection['http_command']['@method'],                    # comment
-                        #     connection_section_connection['http_command']['@url'])                       # url
-                        # )
-                        val = cleanup_url(connection_section_connection['http_command']['@url'])
-                        if val:
-                            yield({'values': val, 'type': 'url', 'categories': ['Network activity'], 'to_ids': True, 'comment': connection_section_connection['http_command']['@method']})
+                        for http_command in connection_section_connection['http_command']:
+                            # print('connection_section_connection HTTP COMMAND: {}\t{}'.format(
+                            #     connection_section_connection['http_command']['@method'],                    # comment
+                            #     connection_section_connection['http_command']['@url'])                       # url
+                            # )
+                            val = cleanup_url(http_command['@url'])
+                            if val:
+                                yield({'values': val, 'type': 'url', 'categories': ['Network activity'], 'to_ids': True, 'comment': http_command['@method']})
 
                     if 'http_header' in connection_section_connection:
                         for http_header in connection_section_connection['http_header']:
@@ -453,9 +455,9 @@ def cleanup_filepath(item):
         '\\AppData\\Roaming\\Adobe\\Acrobat\\9.0\\UserCache.bin',
 
         '\\AppData\\Roaming\\Macromedia\\Flash Player\\macromedia.com\\support\\flashplayer\\sys\\settings.sol',
-        '\\AppData\\Roaming\Adobe\\Flash Player\\NativeCache\\',
+        '\\AppData\\Roaming\\Adobe\\Flash Player\\NativeCache\\',
         'C:\\Windows\\AppCompat\\Programs\\',
-        'C:\~'  # caused by temp file created by MS Office when opening malicious doc/xls/...
+        'C:\\~'  # caused by temp file created by MS Office when opening malicious doc/xls/...
     }
     if list_in_string(noise_substrings, item):
         return None
@@ -531,4 +533,3 @@ def introspection():
 def version():
     moduleinfo['config'] = moduleconfig
     return moduleinfo
-
