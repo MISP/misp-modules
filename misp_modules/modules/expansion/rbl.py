@@ -96,13 +96,12 @@ def handler(q=False):
             txt = resolver.query(query,'TXT')
             listed.append(query)
             info.append(str(txt[0]))
-        except:
+        except Exception:
             continue
     result = {}
     for l, i in zip(listed, info):
         result[l] = i
-    r = {'results': [{'types': mispattributes.get('output'), 'values': json.dumps(result)}]}
-    return r
+    return {'results': [{'types': mispattributes.get('output'), 'values': json.dumps(result)}]}
 
 def introspection():
     return mispattributes
