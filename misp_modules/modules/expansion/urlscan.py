@@ -22,8 +22,8 @@ moduleinfo = {
 moduleconfig = ['apikey']
 misperrors = {'error': 'Error'}
 mispattributes = {
-    'input': ['hostname', 'domain', 'url'],
-    'output': ['hostname', 'domain', 'ip-src', 'ip-dst', 'url', 'text', 'link']
+    'input': ['hostname', 'domain', 'url', 'hash'],
+    'output': ['hostname', 'domain', 'ip-src', 'ip-dst', 'url', 'text', 'link', 'hash']
 }
 
 
@@ -49,6 +49,8 @@ def handler(q=False):
         r['results'] += lookup_indicator(client, request['hostname'])
     if 'url' in request:
         r['results'] += lookup_indicator(client, request['url'])
+    f 'hash' in request:
+        r['results'] += lookup_indicator(client, request['hash'])
 
     # Return any errors generated from lookup to the UI and remove duplicates
 
