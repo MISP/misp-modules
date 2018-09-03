@@ -124,7 +124,7 @@ class VirusTotalRequest(object):
         for h in hashes[:self.limit]:
             # Search VT for some juicy info
             try:
-                data = requests.get(self.base_url.format('file'), params={'resource': h, 'apikey': apikey, 'allinfo': 1}).json()
+            data = requests.get(self.base_url.format('file'), params={'resource': h, 'apikey': self.apikey, 'allinfo': 1}).json()
             except Exception:
                 continue
             # Go through euch key and check if it exists
@@ -132,7 +132,7 @@ class VirusTotalRequest(object):
                 if VT_type in data:
                     self.results[((MISP_type,), comment.format(h))].add(data[VT_type])
             # Get the malware sample
-            sample = requests.get(self.base_url[:-6].format('file/download'), params={'hash': h, 'apikey': apikey})
+            sample = requests.get(self.base_url[:-6].format('file/download'), params={'hash': h, 'apikey': self.apikey})
             malsample = sample.content
             # It is possible for VT to not give us any submission names
             if "submission_names" in data:
