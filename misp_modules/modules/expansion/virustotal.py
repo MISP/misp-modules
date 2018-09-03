@@ -104,7 +104,6 @@ class VirusTotalRequest(object):
         if isinstance(data, dict):
             for key, value in data.items():
                 if key in hash_types:
-                    print(key)
                     self.results[key].add(value)
                     hashes.append(value)
                 else:
