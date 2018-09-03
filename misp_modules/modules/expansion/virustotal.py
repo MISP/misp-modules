@@ -154,11 +154,6 @@ def handler(q=False):
         return misperrors
     return {'results': r}
 
-def get_ip(ip, key):
-    params = {'ip': ip, 'apikey': key}
-    req = requests.get('https://www.virustotal.com/vtapi/v2/ip-address/report', params=params)
-    return json.dumps(req.json(), indent=2)
-
 def introspection():
     return mispattributes
 
