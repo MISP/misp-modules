@@ -33,10 +33,14 @@ class VirusTotalRequest(object):
         self.output_types_mapping = {'submission_names': 'filename', 'ssdeep': 'ssdeep',
                                      'authentihash': 'authentihash', 'ITW_urls': 'url'}
 
-    def parse_request(self, attribute_type, attribute_value):
-        error = self.input_types_mapping[attribute_type](attribute_value)
-        if error is not None:
-            return error
+    def parse_request(self, q):
+        for attribute_type, attribute_value in q.items():
+            try:
+                error = self.input_types_mapping[attribute_type](attribute_value)
+            except KeyError:
+                continue
+            if error is not None:
+                return error
         for key, values in self.results.items():
             if isinstance(key, tuple):
                 types, comment = key
@@ -144,7 +148,7 @@ def handler(q=False):
         return misperrors
     del q['module']
     query = VirusTotalRequest(q.pop('config'))
-    r = query.parse_request(*list(q.items())[0])
+    r = query.parse_request(q)
     if isinstance(r, str):
         misperrors['error'] = r
         return misperrors
