@@ -34,7 +34,9 @@ class VirusTotalRequest(object):
                                      'authentihash': 'authentihash', 'ITW_urls': 'url'}
 
     def parse_request(self, q):
+        req_values = set()
         for attribute_type, attribute_value in q.items():
+            req_values.add(attribute_value)
             try:
                 error = self.input_types_mapping[attribute_type](attribute_value)
             except KeyError:
@@ -42,11 +44,13 @@ class VirusTotalRequest(object):
             if error is not None:
                 return error
         for key, values in self.results.items():
-            if isinstance(key, tuple):
-                types, comment = key
-                self.to_return.append({'types': list(types), 'values': list(values), 'comment': comment})
-            else:
-                self.to_return.append({'types': key, 'values': list(values)})
+            values = values.difference(req_values)
+            if values:
+                if isinstance(key, tuple):
+                    types, comment = key
+                    self.to_return.append({'types': list(types), 'values': list(values), 'comment': comment})
+                else:
+                    self.to_return.append({'types': key, 'values': list(values)})
         return self.to_return
 
     def get_domain(self, domain, do_not_recurse=False):
