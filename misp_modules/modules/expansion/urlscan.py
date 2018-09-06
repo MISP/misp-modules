@@ -49,7 +49,7 @@ def handler(q=False):
         r['results'] += lookup_indicator(client, request['hostname'])
     if 'url' in request:
         r['results'] += lookup_indicator(client, request['url'])
-    f 'hash' in request:
+    if 'hash' in request:
         r['results'] += lookup_indicator(client, request['hash'])
 
     # Return any errors generated from lookup to the UI and remove duplicates
