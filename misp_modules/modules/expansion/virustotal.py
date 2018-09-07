@@ -148,7 +148,7 @@ def handler(q=False):
         return False
     q = json.loads(q)
     if not q.get('config') or not q['config'].get('apikey'):
-        misperrors['error']: "A VirusTotal api key is required for this module."
+        misperrors['error'] = "A VirusTotal api key is required for this module."
         return misperrors
     del q['module']
     query = VirusTotalRequest(q.pop('config'))
