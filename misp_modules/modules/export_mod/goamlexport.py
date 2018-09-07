@@ -1,4 +1,5 @@
-import json, datetime, base64
+import json
+import base64
 from pymisp import MISPEvent
 from collections import defaultdict, Counter
 
@@ -67,7 +68,7 @@ class GoAmlGeneration(object):
                 try:
                     report_code.append(obj.get_attributes_by_relation('report-code')[0].value.split(' ')[0])
                     currency_code.append(obj.get_attributes_by_relation('currency-code')[0].value)
-                except:
+                except IndexError:
                     print('report_code or currency_code error')
         self.uuids, self.report_codes, self.currency_codes = uuids, report_code, currency_code
 

@@ -32,16 +32,15 @@ def valid_ip(ip):
 def findAll(data, keys):
     a = []
     if isinstance(data, dict):
-        for key in data.keys():
+        for key, value in data.items():
             if key == keys:
-                a.append(data[key])
+                a.append(value)
             else:
-                if isinstance(data[key], (dict, list)):
-                    a += findAll(data[key], keys)
+                if isinstance(value, (dict, list)):
+                    a.extend(findAll(value, keys))
     if isinstance(data, list):
         for i in data:
-            a += findAll(i, keys)
-
+            a.extend(findAll(i, keys))
     return a
 
 def valid_email(email):
@@ -82,10 +81,10 @@ def handler(q=False):
     return r
 
 
-def getHash(hash, key):
+def getHash(_hash, key):
 
     ret = []
-    req = json.loads(requests.get("https://otx.alienvault.com/otxapi/indicator/file/analysis/" + hash).text)
+    req = json.loads(requests.get("https://otx.alienvault.com/otxapi/indicator/file/analysis/" + _hash).text)
 
     for ip in findAll(req, "dst"):
         if not isBlacklisted(ip) and valid_ip(ip):
@@ -102,8 +101,8 @@ def getIP(ip, key):
     ret = []
     req = json.loads( requests.get("https://otx.alienvault.com/otxapi/indicator/ip/malware/" + ip + "?limit=1000").text )
 
-    for hash in findAll(req, "hash"):
-        ret.append({"types": ["sha256"], "values": [hash]})
+    for _hash in findAll(req, "hash"):
+        ret.append({"types": ["sha256"], "values": [_hash]})
 
 
     req = json.loads( requests.get("https://otx.alienvault.com/otxapi/indicator/ip/passive_dns/" + ip).text )
@@ -122,21 +121,21 @@ def getDomain(domain, key):
 
     req = json.loads( requests.get("https://otx.alienvault.com/otxapi/indicator/domain/malware/" + domain + "?limit=1000").text )
 
-    for hash in findAll(req, "hash"):
-        ret.append({"types": ["sha256"], "values": [hash]})
+    for _hash in findAll(req, "hash"):
+        ret.append({"types": ["sha256"], "values": [_hash]})
 
     req = json.loads(requests.get("https://otx.alienvault.com/otxapi/indicator/domain/whois/" + domain).text)
 
-    for domain in findAll(req, "domain"):
-        ret.append({"types": ["hostname"], "values": [domain]})
+    for _domain in findAll(req, "domain"):
+        ret.append({"types": ["hostname"], "values": [_domain]})
 
     for email in findAll(req, "value"):
         if valid_email(email):
-            ret.append({"types": ["email"], "values": [domain]})
+            ret.append({"types": ["email"], "values": [email]})
 
-    for domain in findAll(req, "hostname"):
-        if "." in domain and not isBlacklisted(domain):
-            ret.append({"types": ["hostname"], "values": [domain]})
+    for _domain in findAll(req, "hostname"):
+        if "." in _domain and not isBlacklisted(_domain):
+            ret.append({"types": ["hostname"], "values": [_domain]})
 
     req = json.loads(requests.get("https://otx.alienvault.com/otxapi/indicator/hostname/passive_dns/" + domain).text)
     for ip in findAll(req, "address"):
