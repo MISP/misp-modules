@@ -128,7 +128,7 @@ class VirusTotalRequest(object):
         for h in hashes[:self.limit]:
             # Search VT for some juicy info
             try:
-            data = requests.get(self.base_url.format('file'), params={'resource': h, 'apikey': self.apikey, 'allinfo': 1}).json()
+                data = requests.get(self.base_url.format('file'), params={'resource': h, 'apikey': self.apikey, 'allinfo': 1}).json()
             except Exception:
                 continue
             # Go through euch key and check if it exists
