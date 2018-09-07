@@ -2,7 +2,7 @@ import json
 import requests
 try:
     import yara
-except ModuleNotFoundError:
+except (OSError, ModuleNotFoundError):
     print("yara is missing, use 'pip3 install yara' to install it.")
 
 misperrors = {'error': 'Error'}
