@@ -1,7 +1,7 @@
 import json
 try:
     from stix2patterns.validator import run_validator
-except ModuleNotFoundError:
+except ImportError:
     print("stix2 patterns python library is missing, use 'pip3 install stix2-patterns' to install it.")
 
 misperrors = {'error': 'Error'}

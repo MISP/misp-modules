@@ -3,7 +3,7 @@ try:
     from sigma.parser import SigmaCollectionParser
     from sigma.config import SigmaConfiguration
     from sigma.backends import getBackend, BackendOptions
-except ModuleNotFoundError:
+except ImportError:
     print("sigma or yaml is missing, use 'pip3 install sigmatools' to install it.")
 
 misperrors = {'error': 'Error'}
