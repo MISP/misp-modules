@@ -9,12 +9,14 @@ markdown= ["# MISP modules documentation\n"]
 for _path, title in zip(module_types, titles):
     markdown.append('\n## {}\n'.format(title))
     current_path = os.path.join(root_path, _path)
-    files = os.listdir(current_path)
+    files = sorted(os.listdir(current_path))
     for _file in files:
-        markdown.append('\n### {}\n'.format(_file.split('.json')[0]))
+        markdown.append('\n#### {}\n'.format(_file.split('.json')[0]))
         filename = os.path.join(current_path, _file)
         with open(filename, 'rt', encoding='utf-8') as f:
             definition = json.loads(f.read())
+        if 'logo' in definition:
+            markdown.append('\n<img src={} height=100>\n'.format(definition.pop('logo')))
         if 'description' in definition:
             markdown.append('\n{}\n'.format(definition.pop('description')))
         for field, value in definition.items():

@@ -1,5 +1,6 @@
 {
   "description": "Module to import MISP objects about financial transactions from GoAML files.",
+  "logo": "logos/goAML.jpg",
   "requirements": ["PyMISP"],
   "features": "Unlike the GoAML export module, there is here no special feature to import data from GoAML external files, since the module will import MISP Objects with their References on its own, as it is required for the export module to rebuild a valid GoAML document.",
   "references": "http://goaml.unodc.org/",

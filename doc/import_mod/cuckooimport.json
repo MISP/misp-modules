@@ -1,5 +1,6 @@
 {
   "description": "Module to import Cuckoo JSON.",
+  "logo": "logos/cuckoo.png",
   "requirements": [],
   "features": "The module simply imports MISP Attributes from a Cuckoo JSON format file. There is thus no special feature to make it work.",
   "references": ["https://cuckoosandbox.org/", "https://github.com/cuckoosandbox/cuckoo"],
