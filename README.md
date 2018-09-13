@@ -384,11 +384,7 @@ Recommended     Plugin.Import_ocr_enabled       true   Enable or disable the ocr
 In this same menu set any other plugin settings that are required for testing.
 
 ## Install misp-module on an offline instance.
-<<<<<<< HEAD
-First, you need to grab all necessery packages for example like this :
-=======
 First, you need to grab all necessary packages for example like this :
->>>>>>> 79633242c842a6ca7c90a4c4e6bc002e05403aef
 
 Use pip wheel to create an archive
 ~~~
