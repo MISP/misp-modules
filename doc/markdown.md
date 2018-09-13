@@ -6,25 +6,37 @@
 
 Module to query a local copy of Maxminds Geolite database.
 
+-----
+
 ### iprep
 
 Module to query IPRep data for IP addresses.
+
+-----
 
 ### crowdstrike_falcon
 
 Module to query Crowdstrike Falcon.
 
+-----
+
 ### dns
 
 A simple DNS expansion service to resolve IP address from MISP attributes.
+
+-----
 
 ### vulndb
 
 Module to query VulnDB (RiskBasedSecurity.com).
 
+-----
+
 ### wiki
 
 An expansion hover module to extract information from Wikidata to have additional information about particular term for analysis.
+
+-----
 
 ### rbl
 
@@ -32,19 +44,27 @@ Module to check an IPv4 address against known RBLs.
 - **requirements**:
 >dnspython3
 
+-----
+
 ### asn_history
 
 Query an ASN description history service (https://github.com/CIRCL/ASN-Description-History.git).
 - **requirements**:
 >asnhistory
 
+-----
+
 ### circl_passivedns
 
 Module to access CIRCL Passive DNS.
 
+-----
+
 ### farsight_passivedns
 
 Module to access Farsight DNSDB Passive DNS.
+
+-----
 
 ### whois
 
@@ -52,83 +72,123 @@ Module to query a local instance of uwhois (https://github.com/rafiot/uwhoisd).
 - **requirements**:
 >uwhois
 
+-----
+
 ### threatcrowd
 
 Module to get information from ThreatCrowd.
+
+-----
 
 ### domaintools
 
 DomainTools MISP expansion module.
 
+-----
+
 ### eupi
 
 A module to query the Phishing Initiative service (https://phishing-initiative.lu).
+
+-----
 
 ### shodan
 
 Module to query on Shodan.
 
+-----
+
 ### xforceexchange
 
 An expansion module for IBM X-Force Exchange.
+
+-----
 
 ### circl_passivessl
 
 Modules to access CIRCL Passive SSL.
 
+-----
+
 ### virustotal
 
 Module to get information from virustotal.
+
+-----
 
 ### otx
 
 Module to get information from AlienVault OTX.
 
+-----
+
 ### cve
 
 An expansion hover module to expand information about CVE id.
+
+-----
 
 ### reversedns
 
 Simple Reverse DNS expansion service to resolve reverse DNS from MISP attributes.
 
+-----
+
 ### threatminer
 
 Module to get information from ThreatMiner.
+
+-----
 
 ### sourcecache
 
 Module to cache web pages of analysis reports, OSINT sources. The module returns a link of the cached page.
 
+-----
+
 ### ipasn
 
 Module to query an IP ASN history service (https://github.com/CIRCL/IP-ASN-history.git).
+
+-----
 
 ### intelmq_eventdb
 
 Module to access intelmqs eventdb.
 
+-----
+
 ### vmray_submit
 
 Module to submit a sample to VMRay.
+
+-----
 
 ### countrycode
 
 Module to expand country codes.
 
+-----
+
 ### passivetotal
 
 The PassiveTotal MISP expansion module brings the datasets derived from Internet scanning directly into your MISP instance. This module supports passive DNS, historic SSL, WHOIS, and host attributes. In order to use the module, you must have a valid PassiveTotal account username and API key. Registration is free and can be done by visiting https://www.passivetotal.org/register
 
+-----
+
 ### yara_syntax_validator
 
 An expansion hover module to perform a syntax check on if yara rules are valid or not.
+
+-----
 
 ## Export Modules
 
 ### testexport
 
 Skeleton export module.
+
+-----
 
 ### goamlexport
 
@@ -161,6 +221,8 @@ This module is used to export MISP events containing transaction objects into Go
 - **output**:
 >GoAML format file, describing financial transactions, with their origin and target (bank accounts, persons or entities).
 
+-----
+
 ### threatStream_misp_export
 
 Module to export a structured CSV file for uploading to threatStream.
@@ -174,6 +236,8 @@ Module to export a structured CSV file for uploading to threatStream.
 >MISP Event attributes
 - **output**:
 >ThreatStream CSV format file
+
+-----
 
 ### threat_connect_export
 
@@ -190,6 +254,8 @@ Module to export a structured CSV file for uploading to ThreatConnect.
 - **output**:
 >ThreatConnect CSV format file
 
+-----
+
 ### pdfexport
 
 Simple export of a MISP event to PDF.
@@ -204,6 +270,8 @@ Simple export of a MISP event to PDF.
 - **output**:
 >MISP Event in a PDF file.
 
+-----
+
 ### cef_export
 
 Module to export a MISP event in CEF format.
@@ -217,6 +285,8 @@ Module to export a MISP event in CEF format.
 - **output**:
 >Common Event Format file
 
+-----
+
 ### liteexport
 
 Lite export of a MISP event.
@@ -226,6 +296,8 @@ Lite export of a MISP event.
 >MISP Event attributes
 - **output**:
 >Lite MISP Event
+
+-----
 
 ## Import Modules
 
@@ -244,6 +316,8 @@ Module to import VMRay (VTI) results.
 - **output**:
 >MISP Event attributes
 
+-----
+
 ### threatanalyzer_import
 
 Module to import ThreatAnalyzer archive.zip / analysis.json files.
@@ -257,6 +331,8 @@ Module to import ThreatAnalyzer archive.zip / analysis.json files.
 - **output**:
 >MISP Event attributes
 
+-----
+
 ### ocr
 
 Optical Character Recognition (OCR) module for MISP.
@@ -266,6 +342,8 @@ Optical Character Recognition (OCR) module for MISP.
 >Image
 - **output**:
 >freetext MISP attribute
+
+-----
 
 ### csvimport
 
@@ -286,6 +364,8 @@ Module to import MISP attributes from a csv file.
 - **output**:
 >MISP Event attributes
 
+-----
+
 ### goamlimport
 
 Module to import MISP objects about financial transactions from GoAML files.
@@ -300,6 +380,8 @@ Module to import MISP objects about financial transactions from GoAML files.
 - **output**:
 >MISP objects (transaction, bank-account, person, legal-entity, geolocation), with references, describing financial transactions and their origin and target.
 
+-----
+
 ### cuckooimport
 
 Module to import Cuckoo JSON.
@@ -312,6 +394,8 @@ Module to import Cuckoo JSON.
 - **output**:
 >MISP Event attributes
 
+-----
+
 ### email_import
 
 Module to import emails in MISP.
@@ -323,6 +407,8 @@ Module to import emails in MISP.
 - **output**:
 >MISP Event attributes
 
+-----
+
 ### mispjson
 
 Module to import MISP JSON format for merging MISP events.
@@ -332,6 +418,8 @@ Module to import MISP JSON format for merging MISP events.
 >MISP Event
 - **output**:
 >MISP Event attributes
+
+-----
 
 ### openiocimport
 
@@ -346,3 +434,5 @@ Module to import OpenIOC packages.
 >OpenIOC packages
 - **output**:
 >MISP Event attributes
+
+-----
