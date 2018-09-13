@@ -2,51 +2,7 @@
 
 ## Expansion Modules
 
-### geoip_country
-
-Module to query a local copy of Maxminds Geolite database.
-
------
-
-### iprep
-
-Module to query IPRep data for IP addresses.
-
------
-
-### crowdstrike_falcon
-
-Module to query Crowdstrike Falcon.
-
------
-
-### dns
-
-A simple DNS expansion service to resolve IP address from MISP attributes.
-
------
-
-### vulndb
-
-Module to query VulnDB (RiskBasedSecurity.com).
-
------
-
-### wiki
-
-An expansion hover module to extract information from Wikidata to have additional information about particular term for analysis.
-
------
-
-### rbl
-
-Module to check an IPv4 address against known RBLs.
-- **requirements**:
->dnspython3
-
------
-
-### asn_history
+#### asn_history
 
 Query an ASN description history service (https://github.com/CIRCL/ASN-Description-History.git).
 - **requirements**:
@@ -54,19 +10,205 @@ Query an ASN description history service (https://github.com/CIRCL/ASN-Descripti
 
 -----
 
-### circl_passivedns
+#### circl_passivedns
+
+<img src=logos/passivedns.png height=100>
 
 Module to access CIRCL Passive DNS.
 
 -----
 
-### farsight_passivedns
+#### circl_passivessl
+
+<img src=logos/passivessl.png height=100>
+
+Modules to access CIRCL Passive SSL.
+
+-----
+
+#### countrycode
+
+Module to expand country codes.
+
+-----
+
+#### crowdstrike_falcon
+
+<img src=logos/crowdstrike.png height=100>
+
+Module to query Crowdstrike Falcon.
+
+-----
+
+#### cve
+
+An expansion hover module to expand information about CVE id.
+
+-----
+
+#### dbl_spamhaus
+
+<img src=logos/spamhaus.jpg height=100>
+
+Module to check Spamhaus DBL for a domain name.
+
+-----
+
+#### dns
+
+A simple DNS expansion service to resolve IP address from MISP attributes.
+
+-----
+
+#### domaintools
+
+<img src=logos/domaintools.png height=100>
+
+DomainTools MISP expansion module.
+
+-----
+
+#### eupi
+
+<img src=logos/eupi.png height=100>
+
+A module to query the Phishing Initiative service (https://phishing-initiative.lu).
+
+-----
+
+#### farsight_passivedns
+
+<img src=logos/farsight.png height=100>
 
 Module to access Farsight DNSDB Passive DNS.
 
 -----
 
-### whois
+#### geoip_country
+
+Module to query a local copy of Maxminds Geolite database.
+
+-----
+
+#### intelmq_eventdb
+
+Module to access intelmqs eventdb.
+
+-----
+
+#### ipasn
+
+Module to query an IP ASN history service (https://github.com/CIRCL/IP-ASN-history.git).
+
+-----
+
+#### iprep
+
+Module to query IPRep data for IP addresses.
+
+-----
+
+#### onyphe
+
+<img src=logos/onyphe.jpg height=100>
+
+
+
+-----
+
+#### onyphe_full
+
+<img src=logos/onyphe.jpg height=100>
+
+
+
+-----
+
+#### otx
+
+<img src=logos/otx.png height=100>
+
+Module to get information from AlienVault OTX.
+
+-----
+
+#### passivetotal
+
+<img src=logos/passivetotal.png height=100>
+
+The PassiveTotal MISP expansion module brings the datasets derived from Internet scanning directly into your MISP instance. This module supports passive DNS, historic SSL, WHOIS, and host attributes. In order to use the module, you must have a valid PassiveTotal account username and API key. Registration is free and can be done by visiting https://www.passivetotal.org/register
+
+-----
+
+#### rbl
+
+Module to check an IPv4 address against known RBLs.
+- **requirements**:
+>dnspython3
+
+-----
+
+#### reversedns
+
+Simple Reverse DNS expansion service to resolve reverse DNS from MISP attributes.
+
+-----
+
+#### shodan
+
+<img src=logos/shodan.png height=100>
+
+Module to query on Shodan.
+
+-----
+
+#### sourcecache
+
+Module to cache web pages of analysis reports, OSINT sources. The module returns a link of the cached page.
+
+-----
+
+#### threatcrowd
+
+<img src=logos/threatcrowd.png height=100>
+
+Module to get information from ThreatCrowd.
+
+-----
+
+#### threatminer
+
+<img src=logos/threatminer.png height=100>
+
+Module to get information from ThreatMiner.
+
+-----
+
+#### virustotal
+
+<img src=logos/virustotal.png height=100>
+
+Module to get information from virustotal.
+
+-----
+
+#### vmray_submit
+
+<img src=logos/vmray.png height=100>
+
+Module to submit a sample to VMRay.
+
+-----
+
+#### vulndb
+
+<img src=logos/vulndb.png height=100>
+
+Module to query VulnDB (RiskBasedSecurity.com).
+
+-----
+
+#### whois
 
 Module to query a local instance of uwhois (https://github.com/rafiot/uwhoisd).
 - **requirements**:
@@ -74,109 +216,25 @@ Module to query a local instance of uwhois (https://github.com/rafiot/uwhoisd).
 
 -----
 
-### threatcrowd
+#### wiki
 
-Module to get information from ThreatCrowd.
+<img src=logos/wikidata.png height=100>
 
------
-
-### domaintools
-
-DomainTools MISP expansion module.
+An expansion hover module to extract information from Wikidata to have additional information about particular term for analysis.
 
 -----
 
-### eupi
+#### xforceexchange
 
-A module to query the Phishing Initiative service (https://phishing-initiative.lu).
-
------
-
-### shodan
-
-Module to query on Shodan.
-
------
-
-### xforceexchange
+<img src=logos/xforce.png height=100>
 
 An expansion module for IBM X-Force Exchange.
 
 -----
 
-### circl_passivessl
+#### yara_syntax_validator
 
-Modules to access CIRCL Passive SSL.
-
------
-
-### virustotal
-
-Module to get information from virustotal.
-
------
-
-### otx
-
-Module to get information from AlienVault OTX.
-
------
-
-### cve
-
-An expansion hover module to expand information about CVE id.
-
------
-
-### reversedns
-
-Simple Reverse DNS expansion service to resolve reverse DNS from MISP attributes.
-
------
-
-### threatminer
-
-Module to get information from ThreatMiner.
-
------
-
-### sourcecache
-
-Module to cache web pages of analysis reports, OSINT sources. The module returns a link of the cached page.
-
------
-
-### ipasn
-
-Module to query an IP ASN history service (https://github.com/CIRCL/IP-ASN-history.git).
-
------
-
-### intelmq_eventdb
-
-Module to access intelmqs eventdb.
-
------
-
-### vmray_submit
-
-Module to submit a sample to VMRay.
-
------
-
-### countrycode
-
-Module to expand country codes.
-
------
-
-### passivetotal
-
-The PassiveTotal MISP expansion module brings the datasets derived from Internet scanning directly into your MISP instance. This module supports passive DNS, historic SSL, WHOIS, and host attributes. In order to use the module, you must have a valid PassiveTotal account username and API key. Registration is free and can be done by visiting https://www.passivetotal.org/register
-
------
-
-### yara_syntax_validator
+<img src=logos/yara.png height=100>
 
 An expansion hover module to perform a syntax check on if yara rules are valid or not.
 
@@ -184,13 +242,24 @@ An expansion hover module to perform a syntax check on if yara rules are valid o
 
 ## Export Modules
 
-### testexport
+#### cef_export
 
-Skeleton export module.
+Module to export a MISP event in CEF format.
+- **features**:
+>The module takes a MISP event in input, to look every attribute. Each attribute matching with some predefined types is then exported in Common Event Format.
+>Thus, there is no particular feature concerning MISP Events since any event can be exported. However, 4 configuration parameters recognized by CEF format are required and should be provided by users before exporting data: the device vendor, product and version, as well as the default severity of data.
+- **references**:
+>https://community.softwaregrp.com/t5/ArcSight-Connectors/ArcSight-Common-Event-Format-CEF-Guide/ta-p/1589306?attachment-id=65537
+- **input**:
+>MISP Event attributes
+- **output**:
+>Common Event Format file
 
 -----
 
-### goamlexport
+#### goamlexport
+
+<img src=logos/goAML.jpg height=100>
 
 This module is used to export MISP events containing transaction objects into GoAML format.
 - **requirements**:
@@ -223,7 +292,43 @@ This module is used to export MISP events containing transaction objects into Go
 
 -----
 
-### threatStream_misp_export
+#### liteexport
+
+Lite export of a MISP event.
+- **features**:
+>This module is simply producing a json MISP event format file, but exporting only Attributes from the Event. Thus, MISP Events exported with this module should have attributes that are not internal references, otherwise the resulting event would be empty.
+- **input**:
+>MISP Event attributes
+- **output**:
+>Lite MISP Event
+
+-----
+
+#### pdfexport
+
+Simple export of a MISP event to PDF.
+- **requirements**:
+>PyMISP, asciidoctor
+- **features**:
+>The module takes care of the PDF file building, and work with any MISP Event. Except the requirement of asciidoctor, used to create the file, there is no special feature concerning the Event.
+- **references**:
+>https://acrobat.adobe.com/us/en/acrobat/about-adobe-pdf.html
+- **input**:
+>MISP Event
+- **output**:
+>MISP Event in a PDF file.
+
+-----
+
+#### testexport
+
+Skeleton export module.
+
+-----
+
+#### threatStream_misp_export
+
+<img src=logos/threatstream.png height=100>
 
 Module to export a structured CSV file for uploading to threatStream.
 - **requirements**:
@@ -239,7 +344,9 @@ Module to export a structured CSV file for uploading to threatStream.
 
 -----
 
-### threat_connect_export
+#### threat_connect_export
+
+<img src=logos/threatconnect.png height=100>
 
 Module to export a structured CSV file for uploading to ThreatConnect.
 - **requirements**:
@@ -256,96 +363,9 @@ Module to export a structured CSV file for uploading to ThreatConnect.
 
 -----
 
-### pdfexport
-
-Simple export of a MISP event to PDF.
-- **requirements**:
->PyMISP, asciidoctor
-- **features**:
->The module takes care of the PDF file building, and work with any MISP Event. Except the requirement of asciidoctor, used to create the file, there is no special feature concerning the Event.
-- **references**:
->https://acrobat.adobe.com/us/en/acrobat/about-adobe-pdf.html
-- **input**:
->MISP Event
-- **output**:
->MISP Event in a PDF file.
-
------
-
-### cef_export
-
-Module to export a MISP event in CEF format.
-- **features**:
->The module takes a MISP event in input, to look every attribute. Each attribute matching with some predefined types is then exported in Common Event Format.
->Thus, there is no particular feature concerning MISP Events since any event can be exported. However, 4 configuration parameters recognized by CEF format are required and should be provided by users before exporting data: the device vendor, product and version, as well as the default severity of data.
-- **references**:
->https://community.softwaregrp.com/t5/ArcSight-Connectors/ArcSight-Common-Event-Format-CEF-Guide/ta-p/1589306?attachment-id=65537
-- **input**:
->MISP Event attributes
-- **output**:
->Common Event Format file
-
------
-
-### liteexport
-
-Lite export of a MISP event.
-- **features**:
->This module is simply producing a json MISP event format file, but exporting only Attributes from the Event. Thus, MISP Events exported with this module should have attributes that are not internal references, otherwise the resulting event would be empty.
-- **input**:
->MISP Event attributes
-- **output**:
->Lite MISP Event
-
------
-
 ## Import Modules
 
-### vmray_import
-
-Module to import VMRay (VTI) results.
-- **requirements**:
->vmray_rest_api
-- **features**:
->The module imports MISP Attributes from VMRay format, using the VMRay api.
->Users should then provide as the module configuration the API Key as well as the server url in order to fetch their data to import.
-- **references**:
->https://www.vmray.com/
-- **input**:
->VMRay format
-- **output**:
->MISP Event attributes
-
------
-
-### threatanalyzer_import
-
-Module to import ThreatAnalyzer archive.zip / analysis.json files.
-- **features**:
->The module imports MISP Attributes from a ThreatAnalyzer format file. This file can be either ZIP, or JSON format.
->There is by the way no special feature for users to make the module work.
-- **references**:
->https://www.threattrack.com/malware-analysis.aspx
-- **input**:
->ThreatAnalyzer format file
-- **output**:
->MISP Event attributes
-
------
-
-### ocr
-
-Optical Character Recognition (OCR) module for MISP.
-- **features**:
->The module tries to recognize some text from an image and import the result as a freetext attribute, there is then no special feature asked to users to make it work.
-- **input**:
->Image
-- **output**:
->freetext MISP attribute
-
------
-
-### csvimport
+#### csvimport
 
 Module to import MISP attributes from a csv file.
 - **requirements**:
@@ -366,7 +386,38 @@ Module to import MISP attributes from a csv file.
 
 -----
 
-### goamlimport
+#### cuckooimport
+
+<img src=logos/cuckoo.png height=100>
+
+Module to import Cuckoo JSON.
+- **features**:
+>The module simply imports MISP Attributes from a Cuckoo JSON format file. There is thus no special feature to make it work.
+- **references**:
+>https://cuckoosandbox.org/, https://github.com/cuckoosandbox/cuckoo
+- **input**:
+>Cuckoo JSON file
+- **output**:
+>MISP Event attributes
+
+-----
+
+#### email_import
+
+Module to import emails in MISP.
+- **features**:
+>This module can be used to import e-mail text as well as attachments and urls.
+>3 configuration parameters are then used to unzip attachments, guess zip attachment passwords, and extract urls: set each one of them to True or False to process or not the respective corresponding actions.
+- **input**:
+>E-mail file
+- **output**:
+>MISP Event attributes
+
+-----
+
+#### goamlimport
+
+<img src=logos/goAML.jpg height=100>
 
 Module to import MISP objects about financial transactions from GoAML files.
 - **requirements**:
@@ -382,34 +433,7 @@ Module to import MISP objects about financial transactions from GoAML files.
 
 -----
 
-### cuckooimport
-
-Module to import Cuckoo JSON.
-- **features**:
->The module simply imports MISP Attributes from a Cuckoo JSON format file. There is thus no special feature to make it work.
-- **references**:
->https://cuckoosandbox.org/, https://github.com/cuckoosandbox/cuckoo
-- **input**:
->Cuckoo JSON file
-- **output**:
->MISP Event attributes
-
------
-
-### email_import
-
-Module to import emails in MISP.
-- **features**:
->This module can be used to import e-mail text as well as attachments and urls.
->3 configuration parameters are then used to unzip attachments, guess zip attachment passwords, and extract urls: set each one of them to True or False to process or not the respective corresponding actions.
-- **input**:
->E-mail file
-- **output**:
->MISP Event attributes
-
------
-
-### mispjson
+#### mispjson
 
 Module to import MISP JSON format for merging MISP events.
 - **features**:
@@ -421,7 +445,19 @@ Module to import MISP JSON format for merging MISP events.
 
 -----
 
-### openiocimport
+#### ocr
+
+Optical Character Recognition (OCR) module for MISP.
+- **features**:
+>The module tries to recognize some text from an image and import the result as a freetext attribute, there is then no special feature asked to users to make it work.
+- **input**:
+>Image
+- **output**:
+>freetext MISP attribute
+
+-----
+
+#### openiocimport
 
 Module to import OpenIOC packages.
 - **requirements**:
@@ -432,6 +468,40 @@ Module to import OpenIOC packages.
 >https://www.fireeye.com/blog/threat-research/2013/10/openioc-basics.html
 - **input**:
 >OpenIOC packages
+- **output**:
+>MISP Event attributes
+
+-----
+
+#### threatanalyzer_import
+
+Module to import ThreatAnalyzer archive.zip / analysis.json files.
+- **features**:
+>The module imports MISP Attributes from a ThreatAnalyzer format file. This file can be either ZIP, or JSON format.
+>There is by the way no special feature for users to make the module work.
+- **references**:
+>https://www.threattrack.com/malware-analysis.aspx
+- **input**:
+>ThreatAnalyzer format file
+- **output**:
+>MISP Event attributes
+
+-----
+
+#### vmray_import
+
+<img src=logos/vmray.png height=100>
+
+Module to import VMRay (VTI) results.
+- **requirements**:
+>vmray_rest_api
+- **features**:
+>The module imports MISP Attributes from VMRay format, using the VMRay api.
+>Users should then provide as the module configuration the API Key as well as the server url in order to fetch their data to import.
+- **references**:
+>https://www.vmray.com/
+- **input**:
+>VMRay format
 - **output**:
 >MISP Event attributes
 
