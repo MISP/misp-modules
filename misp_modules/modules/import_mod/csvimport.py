@@ -3,45 +3,58 @@ import json, os, base64
 import pymisp
 
 misperrors = {'error': 'Error'}
-mispattributes = {'inputSource': ['file'], 'output': ['MISP attributes']}
 moduleinfo = {'version': '0.1', 'author': 'Christian Studer',
               'description': 'Import Attributes from a csv file.',
               'module-type': ['import']}
-moduleconfig = ['header']
+moduleconfig = []
+inputSource = ['file']
+userConfig = {'header': {
+                'type': 'String',
+                'message': 'Define the header of the csv file, with types (included in MISP attribute types or attribute fields) separated by commas.\nFor fields that do not match these types, please use space or simply nothing between commas.\nFor instance: ip-src,domain, ,timestamp'},
+              'has_header':{
+                'type': 'Boolean',
+                'message': 'Tick this box ONLY if there is a header line, NOT COMMENTED, in the file (which will be skipped atm).'
+              }}
 
 duplicatedFields = {'mispType': {'mispComment': 'comment'},
                     'attrField': {'attrComment': 'comment'}}
+attributesFields = ['type', 'value', 'category', 'to_ids', 'comment', 'distribution']
+delimiters = [',', ';', '|', '/', '\t', '    ']
 
 class CsvParser():
-    def __init__(self, header):
+    def __init__(self, header, has_header):
         self.header = header
+        self.fields_number = len(header)
+        self.has_header = has_header
         self.attributes = []
 
     def parse_data(self, data):
         return_data = []
-        for line in data:
-            l = line.split('#')[0].strip() if '#' in line else line.strip()
-            if l:
-                return_data.append(l)
-        self.data = return_data
-        # find which delimiter is used
-        self.delimiter, self.length = self.findDelimiter()
-
-    def findDelimiter(self):
-        n = len(self.header)
-        if n > 1:
-            tmpData = []
-            for da in self.data:
-                tmp = []
-                for d in (';', '|', '/', ',', '\t', '    ',):
-                    if da.count(d) == (n-1):
-                        tmp.append(d)
-                if len(tmp) == 1 and tmp == tmpData:
-                    return tmpData[0], n
-                else:
-                    tmpData = tmp
+        if self.fields_number == 1:
+            for line in data:
+                l = line.split('#')[0].strip()
+                if l:
+                    return_data.append(l)
+            self.delimiter = None
         else:
-            return None, 1
+            self.delimiter_count = dict([(d, 0) for d in delimiters])
+            for line in data:
+                l = line.split('#')[0].strip()
+                if l:
+                    self.parse_delimiter(l)
+                    return_data.append(l)
+            # find which delimiter is used
+            self.delimiter = self.find_delimiter()
+        self.data = return_data[1:] if self.has_header else return_data
+
+    def parse_delimiter(self, line):
+        for d in delimiters:
+            if line.count(d) >= (self.fields_number - 1):
+                self.delimiter_count[d] += 1
+
+    def find_delimiter(self):
+        _, delimiter = max((n, v) for v, n in self.delimiter_count.items())
+        return delimiter
 
     def buildAttributes(self):
         # if there is only 1 field of data
@@ -59,7 +72,7 @@ class CsvParser():
                 datamisp = []
                 datasplit = data.split(self.delimiter)
                 # in case there is an empty line or an error
-                if len(datasplit) != self.length:
+                if len(datasplit) != self.fields_number:
                     continue
                 # pop from the line data that matches with a misp type, using the list of indexes
                 for l in list2pop:
@@ -93,9 +106,12 @@ class CsvParser():
             elif h in duplicatedFields['attrField']:
                 # fields that should be considered as attribute fields
                 head.append(duplicatedFields['attrField'].get(h))
-            # otherwise, it is an attribute field
-            else:
+            # or, it could be an attribute field
+            elif h in attributesFields:
                 head.append(h)
+            # otherwise, it is not defined
+            else:
+                head.append('')
         # return list of indexes of the misp types, list of the misp types, remaining fields that will be attribute fields
         return list2pop, misp, list(reversed(head))
 
@@ -111,9 +127,11 @@ def handler(q=False):
     if not request.get('config') and not request['config'].get('header'):
         misperrors['error'] = "Configuration error"
         return misperrors
-    config = request['config'].get('header').split(',')
-    config = [c.strip() for c in config]
-    csv_parser = CsvParser(config)
+    header = request['config'].get('header').split(',')
+    header = [c.strip() for c in header]
+    has_header = request['config'].get('has_header')
+    has_header = True if has_header == '1' else False
+    csv_parser = CsvParser(header, has_header)
     csv_parser.parse_data(data.split('\n'))
     # build the attributes
     csv_parser.buildAttributes()
@@ -121,7 +139,18 @@ def handler(q=False):
     return r
 
 def introspection():
-    return mispattributes
+    modulesetup = {}
+    try:
+        userConfig
+        modulesetup['userConfig'] = userConfig
+    except NameError:
+        pass
+    try:
+        inputSource
+        modulesetup['inputSource'] = inputSource
+    except NameError:
+        pass
+    return modulesetup
 
 def version():
     moduleinfo['config'] = moduleconfig

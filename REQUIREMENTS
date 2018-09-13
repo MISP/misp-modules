@@ -1,5 +1,3 @@
-stix
-cybox
 tornado
 dnspython
 requests
@@ -12,13 +10,17 @@ pyeupi
 ipasn-redis
 asnhistory
 git+https://github.com/Rafiot/uwhoisd.git@testing#egg=uwhois&subdirectory=client
-git+https://github.com/MISP/MISP-STIX-Converter.git#egg=misp_stix_converter
 git+https://github.com/MISP/PyMISP.git#egg=pymisp
+git+https://github.com/sebdraven/pyonyphe#egg=pyonyphe
+git+https://github.com/sebdraven/pydnstrails#egg=pydnstrails
 pillow
 pytesseract
+wand
 SPARQLWrapper
 domaintools_api
 pygeoip
 bs4
 oauth2
 yara
+sigmatools
+stix2-patterns
