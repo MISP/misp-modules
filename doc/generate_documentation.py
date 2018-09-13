@@ -24,5 +24,5 @@ for _path, title in zip(module_types, titles):
                 value = ', '.join(value) if isinstance(value, list) else '{}'.format(value.replace('\n', '\n>'))
                 markdown.append('- **{}**:\n>{}\n'.format(field, value))
         markdown.append('\n-----\n')
-with open('markdown.md', 'w') as w:
+with open('documentation.md', 'w') as w:
     w.write(''.join(markdown))
