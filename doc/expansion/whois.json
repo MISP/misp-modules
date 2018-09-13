@@ -1,0 +1,4 @@
+{
+    "description": "Module to query a local instance of uwhois (https://github.com/rafiot/uwhoisd).",
+    "requirements": ["uwhois"]
+}

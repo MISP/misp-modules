@@ -1,0 +1,4 @@
+{
+    "description": "An expansion hover module to perform a syntax check on if yara rules are valid or not.",
+    "logo": "logos/yara.png"
+}
