@@ -27,7 +27,7 @@ def handler(q=False):
     vulnerability = request.get('vulnerability')
     vulners_document = vulners_api.document(vulnerability)
     vulners_exploits = vulners_api.searchExploit(vulnerability)
-    vulners_ai_score = vulners_api.aiScore(vulnerability)
+    vulners_ai_score = vulners_api.aiScore(vulners_document.get('description'))
 
     if vulners_document:
         vuln_summary += vulners_document.get('description')
