@@ -26,8 +26,15 @@ def handler(q=False):
     vulners_api = vulners.Vulners(api_key=key)
     vulnerability = request.get('vulnerability')
     vulners_document = vulners_api.document(vulnerability)
+
+    # Get AI scoring from the document if it's already calculated
+    # There is no need to call AI Scoring method
+    if 'score' in vulners_document.get('enchantments', {}):
+        vulners_ai_score = vulners_document['enchantments']['score']['value']
+    else:
+        vulners_ai_score = None
+
     vulners_exploits = vulners_api.searchExploit(vulnerability)
-    vulners_ai_score = vulners_api.aiScore(vulners_document.get('description'))
 
     if vulners_document:
         vuln_summary += vulners_document.get('description')
