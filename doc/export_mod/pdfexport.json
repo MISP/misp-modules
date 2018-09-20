@@ -1,0 +1,8 @@
+{
+  "description": "Simple export of a MISP event to PDF.",
+  "requirements": ["PyMISP", "asciidoctor"],
+  "features": "The module takes care of the PDF file building, and work with any MISP Event. Except the requirement of asciidoctor, used to create the file, there is no special feature concerning the Event.",
+  "references": ["https://acrobat.adobe.com/us/en/acrobat/about-adobe-pdf.html"],
+  "input": "MISP Event",
+  "output": "MISP Event in a PDF file."
+}

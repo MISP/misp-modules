@@ -1,0 +1,9 @@
+{
+  "description": "This module is used to export MISP events containing transaction objects into GoAML format.",
+  "logo": "logos/goAML.jpg",
+  "requirements": ["PyMISP","MISP objects"],
+  "features": "The module works as long as there is at least one transaction object in the Event.\n\nThen in order to have a valid GoAML document, please follow these guidelines:\n- For each transaction object, use either a bank-account, person, or legal-entity object to describe the origin of the transaction, and again one of them to describe the target of the transaction.\n- Create an object reference for both origin and target objects of the transaction.\n- A bank-account object needs a signatory, which is a person object, put as object reference of the bank-account.\n- A person can have an address, which is a geolocation object, put as object reference of the person.\n\nSupported relation types for object references that are recommended for each object are the folowing:\n- transaction:\n\t- 'from', 'from_my_client': Origin of the transaction - at least one of them is required.\n\t- 'to', 'to_my_client': Target of the transaction - at least one of them is required.\n\t- 'address': Location of the transaction - optional.\n- bank-account:\n\t- 'signatory': Signatory of a bank-account - the reference from bank-account to a signatory is required, but the relation-type is optional at the moment since this reference will always describe a signatory.\n\t- 'entity': Entity owning the bank account - optional.\n- person:\n\t- 'address': Address of a person - optional.",
+  "references": ["http://goaml.unodc.org/"],
+  "input": "MISP objects (transaction, bank-account, person, legal-entity, geolocation), with references, describing financial transactions and their origin and target.",
+  "output": "GoAML format file, describing financial transactions, with their origin and target (bank accounts, persons or entities)."
+}

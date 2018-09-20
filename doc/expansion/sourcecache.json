@@ -1,0 +1,3 @@
+{
+    "description": "Module to cache web pages of analysis reports, OSINT sources. The module returns a link of the cached page."
+}
