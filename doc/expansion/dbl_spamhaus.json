@@ -1,0 +1,4 @@
+{
+    "description": "Module to check Spamhaus DBL for a domain name.",
+    "logo": "logos/spamhaus.jpg"
+}

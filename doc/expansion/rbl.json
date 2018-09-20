@@ -1,0 +1,4 @@
+{
+    "description": "Module to check an IPv4 address against known RBLs.",
+    "requirements": ["dnspython3"]
+}

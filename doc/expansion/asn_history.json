@@ -1,0 +1,4 @@
+{
+    "description": "Query an ASN description history service (https://github.com/CIRCL/ASN-Description-History.git).",
+    "requirements": ["asnhistory"]
+}

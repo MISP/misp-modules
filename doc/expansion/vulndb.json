@@ -1,0 +1,4 @@
+{
+    "description": "Module to query VulnDB (RiskBasedSecurity.com).",
+    "logo": "logos/vulndb.png"
+}
