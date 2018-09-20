@@ -12,7 +12,7 @@ Query an ASN description history service (https://github.com/CIRCL/ASN-Descripti
 
 #### circl_passivedns
 
-<img src=logos/passivedns.png height=100>
+<img src=logos/passivedns.png height=60>
 
 Module to access CIRCL Passive DNS.
 
@@ -20,7 +20,7 @@ Module to access CIRCL Passive DNS.
 
 #### circl_passivessl
 
-<img src=logos/passivessl.png height=100>
+<img src=logos/passivessl.png height=60>
 
 Modules to access CIRCL Passive SSL.
 
@@ -34,7 +34,7 @@ Module to expand country codes.
 
 #### crowdstrike_falcon
 
-<img src=logos/crowdstrike.png height=100>
+<img src=logos/crowdstrike.png height=60>
 
 Module to query Crowdstrike Falcon.
 
@@ -48,7 +48,7 @@ An expansion hover module to expand information about CVE id.
 
 #### dbl_spamhaus
 
-<img src=logos/spamhaus.jpg height=100>
+<img src=logos/spamhaus.jpg height=60>
 
 Module to check Spamhaus DBL for a domain name.
 
@@ -62,7 +62,7 @@ A simple DNS expansion service to resolve IP address from MISP attributes.
 
 #### domaintools
 
-<img src=logos/domaintools.png height=100>
+<img src=logos/domaintools.png height=60>
 
 DomainTools MISP expansion module.
 
@@ -70,7 +70,7 @@ DomainTools MISP expansion module.
 
 #### eupi
 
-<img src=logos/eupi.png height=100>
+<img src=logos/eupi.png height=60>
 
 A module to query the Phishing Initiative service (https://phishing-initiative.lu).
 
@@ -78,7 +78,7 @@ A module to query the Phishing Initiative service (https://phishing-initiative.l
 
 #### farsight_passivedns
 
-<img src=logos/farsight.png height=100>
+<img src=logos/farsight.png height=60>
 
 Module to access Farsight DNSDB Passive DNS.
 
@@ -110,23 +110,23 @@ Module to query IPRep data for IP addresses.
 
 #### onyphe
 
-<img src=logos/onyphe.jpg height=100>
+<img src=logos/onyphe.jpg height=60>
 
-
+Module to process a query on Onyphe.
 
 -----
 
 #### onyphe_full
 
-<img src=logos/onyphe.jpg height=100>
+<img src=logos/onyphe.jpg height=60>
 
-
+Module to process a full query on Onyphe.
 
 -----
 
 #### otx
 
-<img src=logos/otx.png height=100>
+<img src=logos/otx.png height=60>
 
 Module to get information from AlienVault OTX.
 
@@ -134,7 +134,7 @@ Module to get information from AlienVault OTX.
 
 #### passivetotal
 
-<img src=logos/passivetotal.png height=100>
+<img src=logos/passivetotal.png height=60>
 
 The PassiveTotal MISP expansion module brings the datasets derived from Internet scanning directly into your MISP instance. This module supports passive DNS, historic SSL, WHOIS, and host attributes. In order to use the module, you must have a valid PassiveTotal account username and API key. Registration is free and can be done by visiting https://www.passivetotal.org/register
 
@@ -156,7 +156,7 @@ Simple Reverse DNS expansion service to resolve reverse DNS from MISP attributes
 
 #### shodan
 
-<img src=logos/shodan.png height=100>
+<img src=logos/shodan.png height=60>
 
 Module to query on Shodan.
 
@@ -170,7 +170,7 @@ Module to cache web pages of analysis reports, OSINT sources. The module returns
 
 #### threatcrowd
 
-<img src=logos/threatcrowd.png height=100>
+<img src=logos/threatcrowd.png height=60>
 
 Module to get information from ThreatCrowd.
 
@@ -178,7 +178,7 @@ Module to get information from ThreatCrowd.
 
 #### threatminer
 
-<img src=logos/threatminer.png height=100>
+<img src=logos/threatminer.png height=60>
 
 Module to get information from ThreatMiner.
 
@@ -186,7 +186,7 @@ Module to get information from ThreatMiner.
 
 #### virustotal
 
-<img src=logos/virustotal.png height=100>
+<img src=logos/virustotal.png height=60>
 
 Module to get information from virustotal.
 
@@ -194,7 +194,7 @@ Module to get information from virustotal.
 
 #### vmray_submit
 
-<img src=logos/vmray.png height=100>
+<img src=logos/vmray.png height=60>
 
 Module to submit a sample to VMRay.
 
@@ -202,7 +202,7 @@ Module to submit a sample to VMRay.
 
 #### vulndb
 
-<img src=logos/vulndb.png height=100>
+<img src=logos/vulndb.png height=60>
 
 Module to query VulnDB (RiskBasedSecurity.com).
 
@@ -218,7 +218,7 @@ Module to query a local instance of uwhois (https://github.com/rafiot/uwhoisd).
 
 #### wiki
 
-<img src=logos/wikidata.png height=100>
+<img src=logos/wikidata.png height=60>
 
 An expansion hover module to extract information from Wikidata to have additional information about particular term for analysis.
 
@@ -226,7 +226,7 @@ An expansion hover module to extract information from Wikidata to have additiona
 
 #### xforceexchange
 
-<img src=logos/xforce.png height=100>
+<img src=logos/xforce.png height=60>
 
 An expansion module for IBM X-Force Exchange.
 
@@ -234,7 +234,7 @@ An expansion module for IBM X-Force Exchange.
 
 #### yara_syntax_validator
 
-<img src=logos/yara.png height=100>
+<img src=logos/yara.png height=60>
 
 An expansion hover module to perform a syntax check on if yara rules are valid or not.
 
@@ -259,7 +259,7 @@ Module to export a MISP event in CEF format.
 
 #### goamlexport
 
-<img src=logos/goAML.jpg height=100>
+<img src=logos/goAML.jpg height=60>
 
 This module is used to export MISP events containing transaction objects into GoAML format.
 - **requirements**:
@@ -328,7 +328,7 @@ Skeleton export module.
 
 #### threatStream_misp_export
 
-<img src=logos/threatstream.png height=100>
+<img src=logos/threatstream.png height=60>
 
 Module to export a structured CSV file for uploading to threatStream.
 - **requirements**:
@@ -346,7 +346,7 @@ Module to export a structured CSV file for uploading to threatStream.
 
 #### threat_connect_export
 
-<img src=logos/threatconnect.png height=100>
+<img src=logos/threatconnect.png height=60>
 
 Module to export a structured CSV file for uploading to ThreatConnect.
 - **requirements**:
@@ -388,7 +388,7 @@ Module to import MISP attributes from a csv file.
 
 #### cuckooimport
 
-<img src=logos/cuckoo.png height=100>
+<img src=logos/cuckoo.png height=60>
 
 Module to import Cuckoo JSON.
 - **features**:
@@ -417,7 +417,7 @@ Module to import emails in MISP.
 
 #### goamlimport
 
-<img src=logos/goAML.jpg height=100>
+<img src=logos/goAML.jpg height=60>
 
 Module to import MISP objects about financial transactions from GoAML files.
 - **requirements**:
@@ -490,7 +490,7 @@ Module to import ThreatAnalyzer archive.zip / analysis.json files.
 
 #### vmray_import
 
-<img src=logos/vmray.png height=100>
+<img src=logos/vmray.png height=60>
 
 Module to import VMRay (VTI) results.
 - **requirements**:
