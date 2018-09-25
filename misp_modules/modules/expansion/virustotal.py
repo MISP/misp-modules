@@ -134,7 +134,10 @@ class VirusTotalRequest(object):
             # Go through euch key and check if it exists
             for VT_type, MISP_type in self.output_types_mapping.items():
                 if VT_type in data:
-                    self.results[((MISP_type,), comment.format(h))].add(data[VT_type])
+                    try:
+                        self.results[((MISP_type,), comment.format(h))].add(data[VT_type])
+                    except TypeError:
+                        self.results[((MISP_type,), comment.format(h))].update(data[VT_type])
             # Get the malware sample
             sample = requests.get(self.base_url[:-6].format('file/download'), params={'hash': h, 'apikey': self.apikey})
             malsample = sample.content
