@@ -5,14 +5,18 @@ import json
 module_types = ['expansion', 'export_mod', 'import_mod']
 titles = ['Expansion Modules', 'Export Modules', 'Import Modules']
 markdown= ["# MISP modules documentation\n"]
+githublink = 'https://github.com/MISP/misp-modules/tree/master/misp_modules/modules'
 
 def generate_doc(root_path):
     for _path, title in zip(module_types, titles):
         markdown.append('\n## {}\n'.format(title))
         current_path = os.path.join(root_path, _path)
         files = sorted(os.listdir(current_path))
+        githubpath = '{}/{}'.format(githublink, _path)
         for _file in files:
-            markdown.append('\n#### {}\n'.format(_file.split('.json')[0]))
+            modulename = _file.split('.json')[0]
+            githubref = '{}/{}.py'.format(githubpath, modulename)
+            markdown.append('\n#### [{}]({})\n'.format(modulename, githubref))
             filename = os.path.join(current_path, _file)
             with open(filename, 'rt', encoding='utf-8') as f:
                 definition = json.loads(f.read())
