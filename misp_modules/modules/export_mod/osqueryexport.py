@@ -5,9 +5,7 @@ Source: https://github.com/0xmilkmix/misp-modules/blob/master/misp_modules/modul
 
 import base64
 import json
-import csv
 import re
-
 
 misperrors = {"error": "Error"}
 
@@ -24,7 +22,7 @@ outputFileExtension = 'conf'
 responseType = 'application/txt'
 
 
-moduleinfo = {'version': '0.1', 'author': 'Julien Bachmann, Hacknowledge',
+moduleinfo = {'version': '1.0', 'author': 'Julien Bachmann, Hacknowledge',
               'description': 'OSQuery query export module',
               'module-type': ['export']}
 
