@@ -42,7 +42,7 @@ def handle_regkeyvalue(value):
     return 'SELECT * FROM registry WHERE path LIKE \'%s\' AND data LIKE \'%s\';' % (key, value)
 
 def handle_mutex(value):
-    return 'not implemented yet'
+    return 'SELECT * FROM winbaseobj WHERE object_name LIKE \'%s\';' % value
 
 def handle_service(value):
     return 'SELECT * FROM services WHERE display_name LIKE \'%s\' OR name like \'%s\';' % (value, value)
