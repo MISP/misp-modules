@@ -304,6 +304,18 @@ Lite export of a MISP event.
 
 -----
 
+#### [osqueryexport](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/export_mod/osqueryexport.py)
+
+OSQuery export of a MISP event.
+- **features**:
+>This module export an event as osquery queries that can be used in packs or in fleet management solution like Kolide.
+- **input**:
+>MISP Event attributes
+- **output**:
+>osquery SQL queries
+
+-----
+
 #### [pdfexport](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/export_mod/pdfexport.py)
 
 Simple export of a MISP event to PDF.
