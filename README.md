@@ -116,6 +116,8 @@ Create your module in [misp_modules/modules/expansion/](misp_modules/modules/exp
 
 Don't forget to return an error key and value if an error is raised to propagate it to the MISP user-interface.
 
+Your module's script name should also be added in the `__all__` list of `<module type folder>/__init__.py` in order for it to be loaded.
+
 ~~~python
 ...
     # Checking for required value
@@ -206,6 +208,19 @@ def handler(q=False):
         return {'results':
                 codecs.encode(src, "rot-13")}
 ~~~
+
+#### export module
+
+For an export module, the `request["data"]` object corresponds to a list of events (dictionaries) to handle.
+
+Iterating over events attributes is performed using their `Attribute` key.
+
+~~~python
+...
+for event in request["data"]:
+        for attribute in event["Attribute"]:
+          # do stuff w/ attribute['type'], attribute['value'], ...
+...
 
 ### Returning Binary Data
 
