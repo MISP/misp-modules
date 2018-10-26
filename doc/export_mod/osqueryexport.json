@@ -4,5 +4,6 @@
   "features": "This module export an event as osquery queries that can be used in packs or in fleet management solution like Kolide.",
   "references": [],
   "input": "MISP Event attributes",
-  "output": "osquery SQL queries"
+  "output": "osquery SQL queries",
+  "logo": "logos/osquery.png"
 }
