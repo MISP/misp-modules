@@ -53,6 +53,7 @@ For more information: [Extending MISP with Python modules](https://www.circl.lu/
 * [whois](misp_modules/modules/expansion) - a module to query a local instance of [uwhois](https://github.com/rafiot/uwhoisd).
 * [wikidata](misp_modules/modules/expansion/wiki.py) - a [wikidata](https://www.wikidata.org) expansion module.
 * [xforce](misp_modules/modules/expansion/xforceexchange.py) - an IBM X-Force Exchange expansion module.
+* [YARA query](misp_modules/modules/expansion/yara_query.py) - a module to create YARA rules from single hash attributes.
 * [YARA syntax validator](misp_modules/modules/expansion/yara_syntax_validator.py) - YARA syntax validator.
 
 ### Export modules
