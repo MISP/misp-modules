@@ -75,17 +75,35 @@ For more information: [Extending MISP with Python modules](https://www.circl.lu/
 * [ThreatAnalyzer](misp_modules/modules/import_mod/threatanalyzer_import.py) - An import module to process ThreatAnalyzer archive.zip/analysis.json sandbox exports.
 * [VMRay](misp_modules/modules/import_mod/vmray_import.py) - An import module to process VMRay export.
 
+## How to install and start MISP modules in a Python virtualenv?
+
+~~~~bash
+sudo apt-get install python3-dev python3-pip libpq5 libjpeg-dev tesseract-ocr imagemagick
+sudo -u www-data virtualenv -p python3 /var/www/MISP/venv
+cd /usr/local/src/
+sudo git clone https://github.com/MISP/misp-modules.git
+cd misp-modules
+sudo -u www-data /var/www/MISP/venv/bin/pip install -I -r REQUIREMENTS
+sudo -u www-data /var/www/MISP/venv/bin/pip install .
+sudo apt install ruby-pygments.rb -y
+sudo gem install asciidoctor-pdf --pre
+sudo sed -i -e '$i \sudo -u www-data /var/www/MISP/venv/bin/misp-modules -l 127.0.0.1 -s > /tmp/misp-modules_rc.local.log &\n' /etc/rc.local
+/var/www/MISP/venv/bin/misp-modules -l 127.0.0.1 -s & #to start the modules
+~~~~
+
 ## How to install and start MISP modules?
 
 ~~~~bash
-sudo apt-get install python3-dev python3-pip libpq5 libjpeg-dev
+sudo apt-get install python3-dev python3-pip libpq5 libjpeg-dev tesseract-ocr imagemagick
 cd /usr/local/src/
 sudo git clone https://github.com/MISP/misp-modules.git
 cd misp-modules
 sudo pip3 install -I -r REQUIREMENTS
 sudo pip3 install -I .
-sudo vi /etc/rc.local, add this line: `sudo -u www-data misp-modules -s &`
-misp-modules #to start the modules
+sudo apt install ruby-pygments.rb -y
+sudo gem install asciidoctor-pdf --pre
+sudo sed -i -e '$i \sudo -u www-data /var/www/MISP/venv/bin/misp-modules -l 127.0.0.1 -s > /tmp/misp-modules_rc.local.log &\n' /etc/rc.local
+/var/www/MISP/venv/bin/misp-modules -l 127.0.0.1 -s & #to start the modules
 ~~~~
 
 ## How to add your own MISP modules?
@@ -97,6 +115,8 @@ Create your module in [misp_modules/modules/expansion/](misp_modules/modules/exp
 * **version** function that returns a dict with the version and the associated meta-data including potential configurations required of the module.
 
 Don't forget to return an error key and value if an error is raised to propagate it to the MISP user-interface.
+
+Your module's script name should also be added in the `__all__` list of `<module type folder>/__init__.py` in order for it to be loaded.
 
 ~~~python
 ...
@@ -188,6 +208,19 @@ def handler(q=False):
         return {'results':
                 codecs.encode(src, "rot-13")}
 ~~~
+
+#### export module
+
+For an export module, the `request["data"]` object corresponds to a list of events (dictionaries) to handle.
+
+Iterating over events attributes is performed using their `Attribute` key.
+
+~~~python
+...
+for event in request["data"]:
+        for attribute in event["Attribute"]:
+          # do stuff w/ attribute['type'], attribute['value'], ...
+...
 
 ### Returning Binary Data
 
