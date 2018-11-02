@@ -1,5 +1,9 @@
 import json
 import re
+try:
+    import yara
+except (OSError, ImportError):
+    print("yara is missing, use 'pip3 install yara' to install it.")
 
 misperrors = {'error': 'Error'}
 moduleinfo = {'version': '1', 'author': 'Christian STUDER',
@@ -30,7 +34,12 @@ def handler(q=False):
     rule_start = 'import "hash" \r\nrule %s_%s {' % (attribute_type.upper(), re.sub(r'\W+', '_', uuid)) if uuid else 'import "hash"\r\nrule %s {' % attribute_type.upper()
     condition = '\tcondition:\r\n\t\t{}'.format(condition)
     rule = '\r\n'.join([rule_start, condition, '}'])
-    return {'results': [{'types': mispattributes['output'], 'values': [rule]}]}
+    try:
+        yara.compile(source=rule)
+    except Exception as e:
+        misperrors['error'] = 'Syntax error: {}'.format(e)
+        return misperrors
+    return {'results': [{'types': mispattributes['output'], 'values': rule}]}
 
 def introspection():
     return mispattributes
