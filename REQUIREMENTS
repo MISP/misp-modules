@@ -26,3 +26,4 @@ sigmatools
 stix2-patterns
 maclookup
 vulners
+psutil
