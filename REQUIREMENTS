@@ -21,9 +21,10 @@ domaintools_api
 pygeoip
 bs4
 oauth2
-yara
+yara-python
 sigmatools
 stix2-patterns
 maclookup
 vulners
 psutil
+blockchain
