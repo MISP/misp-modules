@@ -10,6 +10,12 @@ Query an ASN description history service (https://github.com/CIRCL/ASN-Descripti
 
 -----
 
+#### [btc](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/btc.py)
+
+An expansion hover module to get a blockchain balance from a BTC address in MISP.
+
+-----
+
 #### [circl_passivedns](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/circl_passivedns.py)
 
 <img src=logos/passivedns.png height=60>
