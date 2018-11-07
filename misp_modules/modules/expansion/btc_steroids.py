@@ -107,7 +107,8 @@ def handler(q=False):
         jreq = req.json()
     except Exception as e:
         #print(e)
-        mprint(req.text)
+        print(req.text)
+        result_text = ""
         sys.exit(1) 
 
     n_tx = jreq['n_tx']
