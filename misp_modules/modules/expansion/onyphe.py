@@ -65,16 +65,16 @@ def handle_expansion(api, ip, misperrors):
 
     for r in result['results']:
         if r['@category'] == 'pastries':
-            if r['@type'] == 'pastebin':
+            if r['source'] == 'pastebin':
                 urls_pasties.append('https://pastebin.com/raw/%s' % r['key'])
         elif r['@category'] == 'synscan':
             asn_list.append(r['asn'])
             os_target = r['os']
             if os_target != 'Unknown':
                 os_list.append(r['os'])
-        elif r['@category'] == 'resolver' and r['@type'] =='reverse':
+        elif r['@category'] == 'resolver' and r['type'] =='reverse':
             domains_resolver.append(r['reverse'])
-        elif r['@category'] == 'resolver' and r['@type'] =='forward':
+        elif r['@category'] == 'resolver' and r['type'] =='forward':
             domains_forward.append(r['forward'])
 
     result_filtered['results'].append({'types': ['url'], 'values': urls_pasties,

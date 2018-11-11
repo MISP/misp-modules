@@ -315,7 +315,7 @@ def expand_pastries(api, misperror, **kwargs):
         status_ok = True
         for item in result['results']:
             if item['@category'] == 'pastries':
-                if item['@type'] == 'pastebin':
+                if item['source'] == 'pastebin':
                     urls_pasties.append('https://pastebin.com/raw/%s' % item['key'])
 
                     if 'domain' in item:
