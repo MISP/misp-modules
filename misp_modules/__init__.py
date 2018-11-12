@@ -29,6 +29,7 @@ import fnmatch
 import argparse
 import re
 import datetime
+import psutil
 
 import tornado.web
 import tornado.process
@@ -241,7 +242,23 @@ def main():
     service = [(r'/modules', ListModules), (r'/query', QueryModule)]
 
     application = tornado.web.Application(service)
-    application.listen(port, address=listen)
+    try:
+        application.listen(port, address=listen)
+    except Exception as e:
+        if e.errno == 98:
+            pids = psutil.pids()
+            for pid in pids:
+                p = psutil.Process(pid)
+                if p.name() == "misp-modules":
+                    print("\n\n\n")
+                    print(e)
+                    print("\nmisp-modules is still running as PID: {}\n".format(pid))
+                    print("Please kill accordingly:")
+                    print("sudo kill {}".format(pid))
+                    sys.exit(-1)
+            print(e)
+            print("misp-modules might still be running.")
+
     log.info('MISP modules server started on {0} port {1}'.format(listen, port))
     if args.t:
         log.info('MISP modules started in test-mode, quitting immediately.')
