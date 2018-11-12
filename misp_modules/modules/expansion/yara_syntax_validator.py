@@ -3,7 +3,7 @@ import requests
 try:
     import yara
 except (OSError, ImportError):
-    print("yara is missing, use 'pip3 install yara' to install it.")
+    print("yara is missing, use 'pip3 install -I -r REQUIREMENTS' from the root of this repository to install it.")
 
 misperrors = {'error': 'Error'}
 mispattributes = {'input': ['yara'], 'output': ['text']}
