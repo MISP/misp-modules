@@ -21,7 +21,7 @@ domaintools_api
 pygeoip
 bs4
 oauth2
-yara-python
+yara-python==3.8.0
 sigmatools
 stix2-patterns
 maclookup
