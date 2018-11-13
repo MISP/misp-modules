@@ -243,8 +243,6 @@ An expansion module for IBM X-Force Exchange.
 <img src=logos/yara.png height=60>
 
 An expansion & hover module to translate any hash attribute into a yara rule.
-- **requirements**:
->yara-python python library
 - **features**:
 >The module takes a hash attribute (md5, sha1, sha256, imphash) as input, and is returning a YARA rule from it. This YARA rule is also validated using the same method as in 'yara_syntax_validator' module.
 >Both hover and expansion functionalities are supported with this module, where the hover part is displaying the resulting YARA rule and the expansion part allows you to add the rule as a new attribute, as usual with expansion modules.
@@ -254,6 +252,8 @@ An expansion & hover module to translate any hash attribute into a yara rule.
 >YARA rule.
 - **references**:
 >https://virustotal.github.io/yara/, https://github.com/virustotal/yara-python
+- **requirements**:
+>yara-python python library
 
 -----
 
@@ -262,16 +262,16 @@ An expansion & hover module to translate any hash attribute into a yara rule.
 <img src=logos/yara.png height=60>
 
 An expansion hover module to perform a syntax check on if yara rules are valid or not.
-- **requirements**:
->yara_python python library
+- **features**:
+>This modules simply takes a YARA rule as input, and checks its syntax. It returns then a confirmation if the syntax is valid, otherwise the syntax error is displayed.
 - **input**:
 >YARA rule attribute.
 - **output**:
 >Text to inform users if their rule is valid.
 - **references**:
 >http://virustotal.github.io/yara/
-- **features**:
->This modules simply takes a YARA rule as input, and checks its syntax. It returns then a confirmation if the syntax is valid, otherwise the syntax error is displayed.
+- **requirements**:
+>yara_python python library
 
 -----
 
@@ -283,12 +283,12 @@ Module to export a MISP event in CEF format.
 - **features**:
 >The module takes a MISP event in input, to look every attribute. Each attribute matching with some predefined types is then exported in Common Event Format.
 >Thus, there is no particular feature concerning MISP Events since any event can be exported. However, 4 configuration parameters recognized by CEF format are required and should be provided by users before exporting data: the device vendor, product and version, as well as the default severity of data.
-- **references**:
->https://community.softwaregrp.com/t5/ArcSight-Connectors/ArcSight-Common-Event-Format-CEF-Guide/ta-p/1589306?attachment-id=65537
 - **input**:
 >MISP Event attributes
 - **output**:
 >Common Event Format file
+- **references**:
+>https://community.softwaregrp.com/t5/ArcSight-Connectors/ArcSight-Common-Event-Format-CEF-Guide/ta-p/1589306?attachment-id=65537
 
 -----
 
@@ -297,8 +297,6 @@ Module to export a MISP event in CEF format.
 <img src=logos/goAML.jpg height=60>
 
 This module is used to export MISP events containing transaction objects into GoAML format.
-- **requirements**:
->PyMISP, MISP objects
 - **features**:
 >The module works as long as there is at least one transaction object in the Event.
 >
@@ -318,12 +316,14 @@ This module is used to export MISP events containing transaction objects into Go
 >	- 'entity': Entity owning the bank account - optional.
 >- person:
 >	- 'address': Address of a person - optional.
-- **references**:
->http://goaml.unodc.org/
 - **input**:
 >MISP objects (transaction, bank-account, person, legal-entity, geolocation), with references, describing financial transactions and their origin and target.
 - **output**:
 >GoAML format file, describing financial transactions, with their origin and target (bank accounts, persons or entities).
+- **references**:
+>http://goaml.unodc.org/
+- **requirements**:
+>PyMISP, MISP objects
 
 -----
 
@@ -356,16 +356,16 @@ OSQuery export of a MISP event.
 #### [pdfexport](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/export_mod/pdfexport.py)
 
 Simple export of a MISP event to PDF.
-- **requirements**:
->PyMISP, asciidoctor
 - **features**:
 >The module takes care of the PDF file building, and work with any MISP Event. Except the requirement of asciidoctor, used to create the file, there is no special feature concerning the Event.
-- **references**:
->https://acrobat.adobe.com/us/en/acrobat/about-adobe-pdf.html
 - **input**:
 >MISP Event
 - **output**:
 >MISP Event in a PDF file.
+- **references**:
+>https://acrobat.adobe.com/us/en/acrobat/about-adobe-pdf.html
+- **requirements**:
+>PyMISP, asciidoctor
 
 -----
 
@@ -380,16 +380,16 @@ Skeleton export module.
 <img src=logos/threatstream.png height=60>
 
 Module to export a structured CSV file for uploading to threatStream.
-- **requirements**:
->csv
 - **features**:
 >The module takes a MISP event in input, to look every attribute. Each attribute matching with some predefined types is then exported in a CSV format recognized by ThreatStream.
-- **references**:
->https://www.anomali.com/platform/threatstream, https://github.com/threatstream
 - **input**:
 >MISP Event attributes
 - **output**:
 >ThreatStream CSV format file
+- **references**:
+>https://www.anomali.com/platform/threatstream, https://github.com/threatstream
+- **requirements**:
+>csv
 
 -----
 
@@ -398,17 +398,17 @@ Module to export a structured CSV file for uploading to threatStream.
 <img src=logos/threatconnect.png height=60>
 
 Module to export a structured CSV file for uploading to ThreatConnect.
-- **requirements**:
->csv
 - **features**:
 >The module takes a MISP event in input, to look every attribute. Each attribute matching with some predefined types is then exported in a CSV format recognized by ThreatConnect.
 >Users should then provide, as module configuration, the source of data they export, because it is required by the output format.
-- **references**:
->https://www.threatconnect.com
 - **input**:
 >MISP Event attributes
 - **output**:
 >ThreatConnect CSV format file
+- **references**:
+>https://www.threatconnect.com
+- **requirements**:
+>csv
 
 -----
 
@@ -417,8 +417,6 @@ Module to export a structured CSV file for uploading to ThreatConnect.
 #### [csvimport](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/import_mod/csvimport.py)
 
 Module to import MISP attributes from a csv file.
-- **requirements**:
->PyMISP
 - **features**:
 >In order to parse data from a csv file, a header is required to let the module know which column is matching with known attribute fields / MISP types.
 >This header is part of the configuration of the module and should be filled out in MISP plugin settings, each field separated by COMMAS. Fields that do not match with any type known in MISP can be ignored in import, using a space or simply nothing between two separators (example: 'ip-src, , comment, ').
@@ -426,12 +424,14 @@ Module to import MISP attributes from a csv file.
 >
 >For each MISP attribute type, an attribute is created.
 >Attribute fields that are imported are the following: value, type, category, to-ids, distribution, comment, tag.
-- **references**:
->https://tools.ietf.org/html/rfc4180, https://tools.ietf.org/html/rfc7111
 - **input**:
 >CSV format file.
 - **output**:
 >MISP Event attributes
+- **references**:
+>https://tools.ietf.org/html/rfc4180, https://tools.ietf.org/html/rfc7111
+- **requirements**:
+>PyMISP
 
 -----
 
@@ -442,12 +442,12 @@ Module to import MISP attributes from a csv file.
 Module to import Cuckoo JSON.
 - **features**:
 >The module simply imports MISP Attributes from a Cuckoo JSON format file. There is thus no special feature to make it work.
-- **references**:
->https://cuckoosandbox.org/, https://github.com/cuckoosandbox/cuckoo
 - **input**:
 >Cuckoo JSON file
 - **output**:
 >MISP Event attributes
+- **references**:
+>https://cuckoosandbox.org/, https://github.com/cuckoosandbox/cuckoo
 
 -----
 
@@ -469,16 +469,16 @@ Module to import emails in MISP.
 <img src=logos/goAML.jpg height=60>
 
 Module to import MISP objects about financial transactions from GoAML files.
-- **requirements**:
->PyMISP
 - **features**:
 >Unlike the GoAML export module, there is here no special feature to import data from GoAML external files, since the module will import MISP Objects with their References on its own, as it is required for the export module to rebuild a valid GoAML document.
-- **references**:
->http://goaml.unodc.org/
 - **input**:
 >GoAML format file, describing financial transactions, with their origin and target (bank accounts, persons or entities).
 - **output**:
 >MISP objects (transaction, bank-account, person, legal-entity, geolocation), with references, describing financial transactions and their origin and target.
+- **references**:
+>http://goaml.unodc.org/
+- **requirements**:
+>PyMISP
 
 -----
 
@@ -509,16 +509,16 @@ Optical Character Recognition (OCR) module for MISP.
 #### [openiocimport](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/import_mod/openiocimport.py)
 
 Module to import OpenIOC packages.
-- **requirements**:
->PyMISP
 - **features**:
 >The module imports MISP Attributes from OpenIOC packages, there is then no special feature for users to make it work.
-- **references**:
->https://www.fireeye.com/blog/threat-research/2013/10/openioc-basics.html
 - **input**:
 >OpenIOC packages
 - **output**:
 >MISP Event attributes
+- **references**:
+>https://www.fireeye.com/blog/threat-research/2013/10/openioc-basics.html
+- **requirements**:
+>PyMISP
 
 -----
 
@@ -528,12 +528,12 @@ Module to import ThreatAnalyzer archive.zip / analysis.json files.
 - **features**:
 >The module imports MISP Attributes from a ThreatAnalyzer format file. This file can be either ZIP, or JSON format.
 >There is by the way no special feature for users to make the module work.
-- **references**:
->https://www.threattrack.com/malware-analysis.aspx
 - **input**:
 >ThreatAnalyzer format file
 - **output**:
 >MISP Event attributes
+- **references**:
+>https://www.threattrack.com/malware-analysis.aspx
 
 -----
 
@@ -542,16 +542,16 @@ Module to import ThreatAnalyzer archive.zip / analysis.json files.
 <img src=logos/vmray.png height=60>
 
 Module to import VMRay (VTI) results.
-- **requirements**:
->vmray_rest_api
 - **features**:
 >The module imports MISP Attributes from VMRay format, using the VMRay api.
 >Users should then provide as the module configuration the API Key as well as the server url in order to fetch their data to import.
-- **references**:
->https://www.vmray.com/
 - **input**:
 >VMRay format
 - **output**:
 >MISP Event attributes
+- **references**:
+>https://www.vmray.com/
+- **requirements**:
+>vmray_rest_api
 
 -----
