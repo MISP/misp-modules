@@ -29,8 +29,7 @@ def get_consumption(output=False):
         jreq = req.json()
         minute = str(jreq['Data']['calls_left']['minute'])
         hour   = str(jreq['Data']['calls_left']['hour'])
-    except Exception as e:
-        print(e)
+    except:
         minute = str(-1)
         hour = str(-1)
     # Debug out for the console
