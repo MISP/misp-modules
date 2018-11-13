@@ -238,11 +238,40 @@ An expansion module for IBM X-Force Exchange.
 
 -----
 
+#### [yara_query](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/yara_query.py)
+
+<img src=logos/yara.png height=60>
+
+An expansion & hover module to translate any hash attribute into a yara rule.
+- **requirements**:
+>yara-python python library
+- **features**:
+>The module takes a hash attribute (md5, sha1, sha256, imphash) as input, and is returning a YARA rule from it. This YARA rule is also validated using the same method as in 'yara_syntax_validator' module.
+>Both hover and expansion functionalities are supported with this module, where the hover part is displaying the resulting YARA rule and the expansion part allows you to add the rule as a new attribute, as usual with expansion modules.
+- **input**:
+>MISP Hash attribute (md5, sha1, sha256, imphash, or any of the composite attribute with filename and one of the previous hash type).
+- **output**:
+>YARA rule.
+- **references**:
+>https://virustotal.github.io/yara/, https://github.com/virustotal/yara-python
+
+-----
+
 #### [yara_syntax_validator](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/yara_syntax_validator.py)
 
 <img src=logos/yara.png height=60>
 
 An expansion hover module to perform a syntax check on if yara rules are valid or not.
+- **requirements**:
+>yara_python python library
+- **input**:
+>YARA rule attribute.
+- **output**:
+>Text to inform users if their rule is valid.
+- **references**:
+>http://virustotal.github.io/yara/
+- **features**:
+>This modules simply takes a YARA rule as input, and checks its syntax. It returns then a confirmation if the syntax is valid, otherwise the syntax error is displayed.
 
 -----
 
