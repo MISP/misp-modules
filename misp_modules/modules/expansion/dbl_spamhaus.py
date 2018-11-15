@@ -49,7 +49,7 @@ def handler(q=False):
         query_result = resolver.query(query, 'A')[0]
         result = "{} - {}".format(requested_value, dbl_mapping[str(query_result)])
     except Exception as e:
-        result = e
+        result = str(e)
     return {'results': [{'types': mispattributes.get('output'), 'values': result}]}
 
 def introspection():
