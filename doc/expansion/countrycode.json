@@ -1,3 +1,6 @@
 {
-    "description": "Module to expand country codes."
+    "description": "Module to expand country codes.",
+    "input": "Hostname or domain attribute.",
+    "output": "Text with the country code the input belongs to.",
+    "features": "The module takes a domain or a hostname as input, and returns the country it belongs to.\n\nFor non country domains, a list of the most common possible extensions is used."
 }
