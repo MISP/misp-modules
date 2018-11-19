@@ -1,0 +1,7 @@
+{
+    "description": "A hover module to check hashes against hashdd.com including NSLR dataset.",
+    "input": "A hash MISP attribute (md5)",
+    "output": "Text describing the known level of the hash in the hashdd databases.",
+    "references": ["https://hashdd.com/"],
+    "features": "This module takes a hash attribute as input to check its known level, using the hashdd API. This information is then displayed."
+}
