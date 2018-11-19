@@ -9,7 +9,7 @@ except ImportError:
 
 misperrors = {'error': 'Error'}
 
-mispattributes = {'input': ['ip-src', 'ip-dst', 'hostname', 'domains'], 'output': ['hostname', 'domain', 'ip-src', 'ip-dst','url']}
+mispattributes = {'input': ['ip-src', 'ip-dst', 'hostname', 'domain'], 'output': ['hostname', 'domain', 'ip-src', 'ip-dst','url']}
 # possible module-types: 'expansion', 'hover' or both
 moduleinfo = {'version': '1', 'author': 'Sebastien Larinier @sebdraven',
               'description': 'Query on Onyphe',
