@@ -89,19 +89,17 @@ def handler(q=False):
         return misperrors
     listed = []
     info = []
+    ipRev =  '.'.join(ip.split('.')[::-1])
     for rbl in rbls:
-        ipRev =  '.'.join(ip.split('.')[::-1])
         query = '{}.{}'.format(ipRev, rbl)
         try:
             txt = resolver.query(query,'TXT')
             listed.append(query)
-            info.append(str(txt[0]))
+            info.append([str(t) for t in txt])
         except Exception:
             continue
-    result = {}
-    for l, i in zip(listed, info):
-        result[l] = i
-    return {'results': [{'types': mispattributes.get('output'), 'values': json.dumps(result)}]}
+    result = "\n".join(["{}: {}".format(l, "  -  ".join(i)) for l, i in zip(listed, info)])
+    return {'results': [{'types': mispattributes.get('output'), 'values': result}]}
 
 def introspection():
     return mispattributes
