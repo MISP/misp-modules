@@ -45,11 +45,6 @@ def handler(q=False):
 
         if not api:
             misperrors['error'] = 'Onyphe Error instance api'
-
-        ip = ""
-        dns_name = ""
-
-        ip = ''
         if request.get('ip-src'):
             ip = request['ip-src']
             return handle_ip(api, ip, misperrors)
