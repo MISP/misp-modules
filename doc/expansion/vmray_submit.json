@@ -1,4 +1,9 @@
 {
     "description": "Module to submit a sample to VMRay.",
-    "logo": "logos/vmray.png"
+    "logo": "logos/vmray.png",
+    "requirements": ["An access to the VMRay API (apikey & url)"],
+    "input": "An attachment or malware-sample attribute.",
+    "output": "MISP attributes mapped from the result of the query on VMRay API, included in the following list:\n- text\n- sha1\n- sha256\n- md5\n- link",
+    "references": ["https://www.vmray.com/"],
+    "features": "This module takes an attachment or malware-sample attribute as input to query the VMRay API.\n\nThe sample contained within the attribute in then enriched with data from VMRay mapped into MISP attributes."
 }

@@ -1,4 +1,9 @@
 {
     "description": "Module to query on Shodan.",
-    "logo": "logos/shodan.png"
+    "logo": "logos/shodan.png",
+    "requirements": ["shodan python library", "An access to the Shodan API (apikey)"],
+    "input": "An IP address MISP attribute.",
+    "output": "Text with additional data about the input, resulting from the query on Shodan.",
+    "references": ["https://www.shodan.io/"],
+    "features": "The module takes an IP address as input and queries the Shodan API to get some additional data about it."
 }
