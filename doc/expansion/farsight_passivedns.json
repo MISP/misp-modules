@@ -1,4 +1,9 @@
 {
     "description": "Module to access Farsight DNSDB Passive DNS.",
-    "logo": "logos/farsight.png"
+    "logo": "logos/farsight.png",
+    "requirements": ["An access to the Farsight Passive DNS API (apikey)"],
+    "input": "A domain, hostname or IP address MISP attribute.",
+    "output": "Text containing information about the input, resulting from the query on the Farsight Passive DNS API.",
+    "references": ["https://www.farsightsecurity.com/"],
+    "features": "This module takes a domain, hostname or IP address MISP attribute as input to query the Farsight Passive DNS API. The API returns then the result of the query with some information about the value queried."
 }

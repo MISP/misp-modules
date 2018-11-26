@@ -24,7 +24,7 @@ def generate_doc(root_path):
                 markdown.append('\n<img src={} height=60>\n'.format(definition.pop('logo')))
             if 'description' in definition:
                 markdown.append('\n{}\n'.format(definition.pop('description')))
-            for field, value in definition.items():
+            for field, value in sorted(definition.items()):
                 if value:
                     value = ', '.join(value) if isinstance(value, list) else '{}'.format(value.replace('\n', '\n>'))
                     markdown.append('- **{}**:\n>{}\n'.format(field, value))

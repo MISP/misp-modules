@@ -1,4 +1,9 @@
 {
     "description": "An expansion module for IBM X-Force Exchange.",
-    "logo": "logos/xforce.png"
+    "logo": "logos/xforce.png",
+    "requirements": ["An access to the X-Force API (apikey)"],
+    "input": "A MISP attribute included in the following list:\n- ip-src\n- ip-dst\n- vulnerability\n- md5\n- sha1\n- sha256",
+    "output": "MISP attributes mapped from the result of the query on X-Force Exchange.",
+    "references": ["https://exchange.xforce.ibmcloud.com/"],
+    "features": "This module takes a MISP attribute as input to query the X-Force API. The API returns then additional information known in their threats data, that is mapped into MISP attributes."
 }

@@ -1,4 +1,8 @@
 {
     "description": "Query an ASN description history service (https://github.com/CIRCL/ASN-Description-History.git).",
-    "requirements": ["asnhistory"]
+    "requirements": ["asnhistory python library"],
+    "features": "The module takes an AS number attribute as input and displays its description and history.\n\nFor a proper working, a communication with a redis database is needed, thus 3 parameters are needed:\n- host, the address of the redis server\n- port, the port used by redis\n- db, the index of the database used\n",
+    "references": ["https://github.com/CIRCL/ASN-Description-History.git"],
+    "input": "Autonomous system number.",
+    "output": "Text containing a description of the ASN and its history."
 }

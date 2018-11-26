@@ -15,7 +15,7 @@ misperrors = {'error': 'Error'}
 userConfig = {}
 inputSource = ['file']
 
-moduleinfo = {'version': '0.9', 'author': 'Christophe Vandeplas',
+moduleinfo = {'version': '0.10', 'author': 'Christophe Vandeplas',
               'description': 'Import for ThreatAnalyzer archive.zip/analysis.json files',
               'module-type': ['import']}
 
@@ -118,8 +118,15 @@ def process_analysis_json(analysis_json):
                 # this will always create a list, even with only one item
                 if isinstance(process['connection_section']['connection'], dict):
                     process['connection_section']['connection'] = [process['connection_section']['connection']]
+                
                 # iterate over each entry
                 for connection_section_connection in process['connection_section']['connection']:
+                    # compensate for absurd behavior of the data format: if one entry = immediately the dict, if multiple entries = list containing dicts
+                    # this will always create a list, even with only one item
+                    for subsection in ['http_command', 'http_header']:
+                        if isinstance(connection_section_connection[subsection], dict):
+                            connection_section_connection[subsection] = [connection_section_connection[subsection]]
+                
                     if 'name_to_ip' in connection_section_connection:  # TA 6.1 data format
                         connection_section_connection['@remote_ip'] = connection_section_connection['name_to_ip']['@result_addresses']
                         connection_section_connection['@remote_hostname'] = connection_section_connection['name_to_ip']['@request_name']

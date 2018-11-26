@@ -2,8 +2,8 @@ import json
 import requests
 
 misperrors = {'error': 'Error'}
-mispattributes = {'input': ['md5'], 'output': ['text']}
-moduleinfo = {'version': '0.1', 'author': 'Alexandre Dulaunoy', 'description': 'An expansion module to check hashes against hashdd.com including NSLR dataset.', 'module-type': ['hover']}
+mispattributes = {'input': ['md5', 'sha1', 'sha256'], 'output': ['text']}
+moduleinfo = {'version': '0.2', 'author': 'Alexandre Dulaunoy', 'description': 'An expansion module to check hashes against hashdd.com including NSLR dataset.', 'module-type': ['hover']}
 moduleconfig = []
 hashddapi_url = 'https://api.hashdd.com/'
 
@@ -11,11 +11,15 @@ hashddapi_url = 'https://api.hashdd.com/'
 def handler(q=False):
     if q is False:
         return False
+    v = None
     request = json.loads(q)
-    if not request.get('md5'):
-        misperrors['error'] = 'MD5 hash value is missing missing'
+    for input_type in mispattributes['input']:
+        if request.get(input_type):
+            v = request[input_type].upper()
+            break
+    if v is None:
+        misperrors['error'] = 'Hash value is missing.'
         return misperrors
-    v = request.get('md5').upper()
     r = requests.post(hashddapi_url, data={'hash':v})
     if r.status_code == 200:
         state = json.loads(r.text)
