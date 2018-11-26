@@ -125,7 +125,8 @@ def handler(q=False):
         mprint("Transactions:\t" + str(n_tx) + "\t (previewing up to 5 most recent)")
     else:
         mprint("Transactions:\t" + str(n_tx))
-    mprint("======================================================================================")
+    if n_tx > 0:
+        mprint("======================================================================================")
     i = 0
     while i < n_tx:
         if click is False:
