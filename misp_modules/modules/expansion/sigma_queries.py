@@ -1,4 +1,6 @@
-import sys, os, io, json
+import sys
+import io
+import json
 try:
     from sigma.parser import SigmaCollectionParser
     from sigma.config import SigmaConfiguration
@@ -12,6 +14,7 @@ moduleinfo = {'version': '0.1', 'author': 'Christian Studer', 'module-type': ['e
               'description': 'An expansion hover module to display the result of sigma queries.'}
 moduleconfig = []
 sigma_targets = ('es-dsl', 'es-qs', 'graylog', 'kibana', 'xpack-watcher', 'logpoint', 'splunk', 'grep', 'wdatp', 'splunkxml', 'arcsight', 'qualys')
+
 
 def handler(q=False):
     if q is False:
@@ -35,15 +38,17 @@ def handler(q=False):
             backend.finalize()
             print("#NEXT")
             targets.append(t)
-        except:
+        except Exception:
             continue
     sys.stdout = old_stdout
     results = result.getvalue()[:-5].split('#NEXT')
-    d_result = {t: r.strip() for t,r in zip(targets, results)}
+    d_result = {t: r.strip() for t, r in zip(targets, results)}
     return {'results': [{'types': mispattributes['output'], 'values': d_result}]}
+
 
 def introspection():
     return mispattributes
+
 
 def version():
     moduleinfo['config'] = moduleconfig

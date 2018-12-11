@@ -15,9 +15,10 @@ moduleinfo = {'version': '1', 'author': 'chrisdoman',
 # We're not actually using the API key yet
 moduleconfig = ["apikey"]
 
+
 # Avoid adding windows update to enrichment etc.
 def isBlacklisted(value):
-    blacklist = ['0.0.0.0', '8.8.8.8', '255.255.255.255', '192.168.56.' , 'time.windows.com']
+    blacklist = ['0.0.0.0', '8.8.8.8', '255.255.255.255', '192.168.56.', 'time.windows.com']
 
     for b in blacklist:
         if value in b:
@@ -25,9 +26,11 @@ def isBlacklisted(value):
 
     return True
 
+
 def valid_ip(ip):
     m = re.match(r"^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$", ip)
     return bool(m) and all(map(lambda n: 0 <= int(n) <= 255, m.groups()))
+
 
 def findAll(data, keys):
     a = []
@@ -43,8 +46,10 @@ def findAll(data, keys):
             a.extend(findAll(i, keys))
     return a
 
+
 def valid_email(email):
     return bool(re.search(r"[a-zA-Z0-9!#$%&'*+\/=?^_`{|}~-]+(?:\.[a-zA-Z0-9!#$%&'*+\/=?^_`{|}~-]+)*@(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?\.)+[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?", email))
+
 
 def handler(q=False):
     if q is False:
@@ -99,18 +104,16 @@ def getHash(_hash, key):
 
 def getIP(ip, key):
     ret = []
-    req = json.loads( requests.get("https://otx.alienvault.com/otxapi/indicator/ip/malware/" + ip + "?limit=1000").text )
+    req = json.loads(requests.get("https://otx.alienvault.com/otxapi/indicator/ip/malware/" + ip + "?limit=1000").text)
 
     for _hash in findAll(req, "hash"):
         ret.append({"types": ["sha256"], "values": [_hash]})
 
-
-    req = json.loads( requests.get("https://otx.alienvault.com/otxapi/indicator/ip/passive_dns/" + ip).text )
+    req = json.loads(requests.get("https://otx.alienvault.com/otxapi/indicator/ip/passive_dns/" + ip).text)
 
     for hostname in findAll(req, "hostname"):
         if not isBlacklisted(hostname):
             ret.append({"types": ["hostname"], "values": [hostname]})
-
 
     return ret
 
@@ -119,7 +122,7 @@ def getDomain(domain, key):
 
     ret = []
 
-    req = json.loads( requests.get("https://otx.alienvault.com/otxapi/indicator/domain/malware/" + domain + "?limit=1000").text )
+    req = json.loads(requests.get("https://otx.alienvault.com/otxapi/indicator/domain/malware/" + domain + "?limit=1000").text)
 
     for _hash in findAll(req, "hash"):
         ret.append({"types": ["sha256"], "values": [_hash]})
@@ -143,6 +146,7 @@ def getDomain(domain, key):
             ret.append({"types": ["ip-dst"], "values": [ip]})
 
     return ret
+
 
 def introspection():
     return mispattributes

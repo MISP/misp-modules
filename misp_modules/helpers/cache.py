@@ -33,7 +33,7 @@ def selftest(enable=True):
     r = redis.StrictRedis(host=hostname, port=port, db=db)
     try:
         r.ping()
-    except:
+    except Exception:
         return 'Redis not running or not installed. Helper will be disabled.'
 
 
@@ -61,6 +61,7 @@ def flush():
     r = redis.StrictRedis(host=hostname, port=port, db=db)
     returncode = r.flushdb()
     return returncode
+
 
 if __name__ == "__main__":
     import sys

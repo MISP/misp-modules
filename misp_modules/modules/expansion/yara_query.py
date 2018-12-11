@@ -13,10 +13,12 @@ moduleinfo = {'version': '1', 'author': 'Christian STUDER',
 moduleconfig = []
 mispattributes = {'input': ['md5', 'sha1', 'sha256', 'filename|md5', 'filename|sha1', 'filename|sha256', 'imphash'], 'output': ['yara']}
 
+
 def get_hash_condition(hashtype, hashvalue):
     hashvalue = hashvalue.lower()
     required_module, params = ('pe', '()') if hashtype == 'imphash' else ('hash', '(0, filesize)')
     return '{}.{}{} == "{}"'.format(required_module, hashtype, params, hashvalue), required_module
+
 
 def handler(q=False):
     if q is False:
@@ -42,8 +44,10 @@ def handler(q=False):
         return misperrors
     return {'results': [{'types': mispattributes['output'], 'values': rule}]}
 
+
 def introspection():
     return mispattributes
+
 
 def version():
     moduleinfo['config'] = moduleconfig

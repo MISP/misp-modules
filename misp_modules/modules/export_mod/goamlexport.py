@@ -27,7 +27,7 @@ goAMLmapping = {'bank-account': {'bank-account': 't_account', 'institution-name'
                 'person': {'person': 't_person', 'text': 'comments', 'first-name': 'first_name',
                            'middle-name': 'middle_name', 'last-name': 'last_name', 'title': 'title',
                            'mothers-name': 'mothers_name', 'alias': 'alias', 'date-of-birth': 'birthdate',
-                           'place-of-birth': 'birth_place', 'gender': 'gender','nationality': 'nationality1',
+                           'place-of-birth': 'birth_place', 'gender': 'gender', 'nationality': 'nationality1',
                            'passport-number': 'passport_number', 'passport-country': 'passport_country',
                            'social-security-number': 'ssn', 'identity-card-number': 'id_number'},
                 'geolocation': {'geolocation': 'location', 'city': 'city', 'region': 'state',
@@ -47,6 +47,7 @@ referencesMapping = {'bank-account': {'aml_type': '{}_account', 'bracket': 't_{}
                      'person': {'transaction': {'aml_type': '{}_person', 'bracket': 't_{}'}, 'bank-account': {'aml_type': 't_person', 'bracket': 'signatory'}},
                      'legal-entity': {'transaction': {'aml_type': '{}_entity', 'bracket': 't_{}'}, 'bank-account': {'aml_type': 't_entity'}},
                      'geolocation': {'aml_type': 'address', 'bracket': 'addresses'}}
+
 
 class GoAmlGeneration(object):
     def __init__(self, config):
@@ -186,6 +187,7 @@ class GoAmlGeneration(object):
             self.itterate(next_object_type, next_aml_type, uuid, xml_part)
             self.xml[xml_part] += "</{}>".format(bracket)
 
+
 def handler(q=False):
     if q is False:
         return False
@@ -212,6 +214,7 @@ def handler(q=False):
     exp_doc = "{}{}".format(export_doc.xml.get('header'), export_doc.xml.get('data'))
     return {'response': [], 'data': str(base64.b64encode(bytes(exp_doc, 'utf-8')), 'utf-8')}
 
+
 def introspection():
     modulesetup = {}
     try:
@@ -235,6 +238,7 @@ def introspection():
     except NameError:
         pass
     return modulesetup
+
 
 def version():
     moduleinfo['config'] = moduleconfig

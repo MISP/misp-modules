@@ -19,6 +19,7 @@ moduleconfig = ["apikey", "event_limit"]
 comment = '{}: Enriched via VirusTotal'
 hash_types = ["md5", "sha1", "sha256", "sha512"]
 
+
 class VirusTotalRequest(object):
     def __init__(self, config):
         self.apikey = config['apikey']
@@ -146,6 +147,7 @@ class VirusTotalRequest(object):
                 self.to_return.append({"types": ["malware-sample"], "categories": ["Payload delivery"],
                                        "values": data["submimssion_names"], "data": str(base64.b64encore(malsample), 'utf-8')})
 
+
 def handler(q=False):
     if q is False:
         return False
@@ -161,8 +163,10 @@ def handler(q=False):
         return misperrors
     return {'results': r}
 
+
 def introspection():
     return mispattributes
+
 
 def version():
     moduleinfo['config'] = moduleconfig

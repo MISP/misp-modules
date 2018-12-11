@@ -38,14 +38,14 @@ from tornado.concurrent import run_on_executor
 from concurrent.futures import ThreadPoolExecutor
 
 try:
-    from .modules import *
+    from .modules import *  # noqa
     HAS_PACKAGE_MODULES = True
 except Exception as e:
     print(e)
     HAS_PACKAGE_MODULES = False
 
 try:
-    from .helpers import *
+    from .helpers import *  # noqa
     HAS_PACKAGE_HELPERS = True
 except Exception as e:
     print(e)
@@ -148,7 +148,7 @@ def load_package_modules():
     mhandlers = {}
     modules = []
     for path, module in sys.modules.items():
-        r = re.findall("misp_modules[.]modules[.](\w+)[.]([^_]\w+)", path)
+        r = re.findall(r"misp_modules[.]modules[.](\w+)[.]([^_]\w+)", path)
         if r and len(r[0]) == 2:
             moduletype, modulename = r[0]
             mhandlers[modulename] = module
@@ -159,6 +159,9 @@ def load_package_modules():
 
 
 class ListModules(tornado.web.RequestHandler):
+    global loaded_modules
+    global mhandlers
+
     def get(self):
         ret = []
         for module in loaded_modules:
@@ -238,7 +241,7 @@ def main():
     for module in args.m:
         mispmod = importlib.import_module(module)
         mispmod.register(mhandlers, loaded_modules)
-        
+
     service = [(r'/modules', ListModules), (r'/query', QueryModule)]
 
     application = tornado.web.Application(service)

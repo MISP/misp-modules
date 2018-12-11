@@ -2,7 +2,7 @@ import json
 import base64
 
 misperrors = {'error': 'Error'}
-userConfig = { };
+userConfig = {}
 
 inputSource = ['file']
 
@@ -19,22 +19,23 @@ def handler(q=False):
     r = {'results': []}
     request = json.loads(q)
     try:
-      mfile = base64.b64decode(request["data"]).decode('utf-8')
-      misp = json.loads(mfile)
-      event = misp['response'][0]['Event']
-      for a in event["Attribute"]:
-        tmp = {}
-        tmp["values"]     = a["value"]
-        tmp["categories"] = a["category"]
-        tmp["types"]      = a["type"]
-        tmp["to_ids"]     = a["to_ids"]
-        tmp["comment"]    = a["comment"]
-        if a.get("data"):
-          tmp["data"]     = a["data"]
-        r['results'].append(tmp)
-    except:
-      pass
+        mfile = base64.b64decode(request["data"]).decode('utf-8')
+        misp = json.loads(mfile)
+        event = misp['response'][0]['Event']
+        for a in event["Attribute"]:
+            tmp = {}
+            tmp["values"] = a["value"]
+            tmp["categories"] = a["category"]
+            tmp["types"] = a["type"]
+            tmp["to_ids"] = a["to_ids"]
+            tmp["comment"] = a["comment"]
+            if a.get("data"):
+                tmp["data"] = a["data"]
+            r['results'].append(tmp)
+    except Exception:
+        pass
     return r
+
 
 def introspection():
     modulesetup = {}
@@ -54,6 +55,7 @@ def introspection():
 def version():
     moduleinfo['config'] = moduleconfig
     return moduleinfo
+
 
 if __name__ == '__main__':
     x = open('test.json', 'r')

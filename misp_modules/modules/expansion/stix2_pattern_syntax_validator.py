@@ -10,6 +10,7 @@ moduleinfo = {'version': '0.1', 'author': 'Christian Studer', 'module-type': ['e
               'description': 'An expansion hover module to perform a syntax check on stix2 patterns.'}
 moduleconfig = []
 
+
 def handler(q=False):
     if q is False:
         return False
@@ -27,15 +28,17 @@ def handler(q=False):
     if syntax_errors:
         s = 's' if len(syntax_errors) > 1 else ''
         s_errors = ""
-        for error in  syntax_errors:
+        for error in syntax_errors:
             s_errors += "{}\n".format(error[6:])
         result = "Syntax error{}: \n{}".format(s, s_errors[:-1])
     else:
         result = "Syntax valid"
     return {'results': [{'types': mispattributes['output'], 'values': result}]}
 
+
 def introspection():
     return mispattributes
+
 
 def version():
     moduleinfo['config'] = moduleconfig

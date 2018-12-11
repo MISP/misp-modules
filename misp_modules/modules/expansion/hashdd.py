@@ -20,7 +20,7 @@ def handler(q=False):
     if v is None:
         misperrors['error'] = 'Hash value is missing.'
         return misperrors
-    r = requests.post(hashddapi_url, data={'hash':v})
+    r = requests.post(hashddapi_url, data={'hash': v})
     if r.status_code == 200:
         state = json.loads(r.text)
         if state:

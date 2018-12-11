@@ -13,7 +13,7 @@ types_to_use = ['regkey', 'regkey|value', 'mutex', 'windows-service-displayname'
 
 userConfig = {
 
-};
+}
 
 moduleconfig = []
 inputSource = ['event']
@@ -26,12 +26,14 @@ moduleinfo = {'version': '1.0', 'author': 'Julien Bachmann, Hacknowledge',
               'description': 'OSQuery query export module',
               'module-type': ['export']}
 
+
 def handle_regkey(value):
     rep = {'HKCU': 'HKEY_USERS\\%', 'HKLM': 'HKEY_LOCAL_MACHINE'}
     rep = dict((re.escape(k), v) for k, v in rep.items())
     pattern = re.compile("|".join(rep.keys()))
     value = pattern.sub(lambda m: rep[re.escape(m.group(0))], value)
     return 'SELECT * FROM registry WHERE path LIKE \'%s\';' % value
+
 
 def handle_regkeyvalue(value):
     key, value = value.split('|')
@@ -41,26 +43,32 @@ def handle_regkeyvalue(value):
     key = pattern.sub(lambda m: rep[re.escape(m.group(0))], key)
     return 'SELECT * FROM registry WHERE path LIKE \'%s\' AND data LIKE \'%s\';' % (key, value)
 
+
 def handle_mutex(value):
     return 'SELECT * FROM winbaseobj WHERE object_name LIKE \'%s\';' % value
+
 
 def handle_service(value):
     return 'SELECT * FROM services WHERE display_name LIKE \'%s\' OR name like \'%s\';' % (value, value)
 
+
 def handle_yara(value):
     return 'not implemented yet, not sure it\'s easily feasible w/o dropping the sig on the hosts first'
+
 
 def handle_scheduledtask(value):
     return 'SELECT * FROM scheduled_tasks WHERE name LIKE \'%s\';' % value
 
+
 handlers = {
-    'regkey' : handle_regkey,
-    'regkey|value' : handle_regkeyvalue,
-    'mutex' : handle_mutex,
-    'windows-service-displayname' : handle_service,
-    'windows-scheduled-task' : handle_scheduledtask,
-    'yara' : handle_yara
+    'regkey': handle_regkey,
+    'regkey|value': handle_regkeyvalue,
+    'mutex': handle_mutex,
+    'windows-service-displayname': handle_service,
+    'windows-scheduled-task': handle_scheduledtask,
+    'yara': handle_yara
 }
+
 
 def handler(q=False):
     if q is False:
@@ -73,7 +81,7 @@ def handler(q=False):
         for attribute in event["Attribute"]:
             if attribute['type'] in types_to_use:
                     output = output + handlers[attribute['type']](attribute['value']) + '\n'
-    r = {"response":[], "data":str(base64.b64encode(bytes(output, 'utf-8')), 'utf-8')}
+    r = {"response": [], "data": str(base64.b64encode(bytes(output, 'utf-8')), 'utf-8')}
     return r
 
 

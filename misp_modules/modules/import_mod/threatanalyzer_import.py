@@ -90,7 +90,7 @@ def handler(q=False):
                             'values': sample_filename,
                             'data': base64.b64encode(file_data).decode(),
                             'type': 'malware-sample', 'categories': ['Payload delivery', 'Artifacts dropped'], 'to_ids': True, 'comment': ''})
-            except Exception as e:
+            except Exception:
                 # no 'sample' in archive, might be an url analysis, just ignore
                 pass
 
@@ -118,7 +118,7 @@ def process_analysis_json(analysis_json):
                 # this will always create a list, even with only one item
                 if isinstance(process['connection_section']['connection'], dict):
                     process['connection_section']['connection'] = [process['connection_section']['connection']]
-                
+
                 # iterate over each entry
                 for connection_section_connection in process['connection_section']['connection']:
                     # compensate for absurd behavior of the data format: if one entry = immediately the dict, if multiple entries = list containing dicts
@@ -126,7 +126,7 @@ def process_analysis_json(analysis_json):
                     for subsection in ['http_command', 'http_header']:
                         if isinstance(connection_section_connection[subsection], dict):
                             connection_section_connection[subsection] = [connection_section_connection[subsection]]
-                
+
                     if 'name_to_ip' in connection_section_connection:  # TA 6.1 data format
                         connection_section_connection['@remote_ip'] = connection_section_connection['name_to_ip']['@result_addresses']
                         connection_section_connection['@remote_hostname'] = connection_section_connection['name_to_ip']['@request_name']
@@ -171,7 +171,7 @@ def process_analysis_json(analysis_json):
                                 if ':' in val:
                                     try:
                                         val_port = int(val.split(':')[1])
-                                    except ValueError as e:
+                                    except ValueError:
                                         val_port = False
                                     val_hostname = cleanup_hostname(val.split(':')[0])
                                     val_ip = cleanup_ip(val.split(':')[0])

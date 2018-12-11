@@ -12,6 +12,7 @@ moduleinfo = {'version': '0.1', 'author': 'Christian Studer', 'module-type': ['e
               'description': 'An expansion hover module to perform a syntax check on sigma rules'}
 moduleconfig = []
 
+
 def handler(q=False):
     if q is False:
         return False
@@ -27,8 +28,10 @@ def handler(q=False):
         result = ("Syntax error: {}".format(str(e)))
     return {'results': [{'types': mispattributes['output'], 'values': result}]}
 
+
 def introspection():
     return mispattributes
+
 
 def version():
     moduleinfo['config'] = moduleconfig

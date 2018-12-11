@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
-import json, os, base64
+import json
+import os
+import base64
 import pymisp
 
 misperrors = {'error': 'Error'}
@@ -9,17 +11,18 @@ moduleinfo = {'version': '0.1', 'author': 'Christian Studer',
 moduleconfig = []
 inputSource = ['file']
 userConfig = {'header': {
-                'type': 'String',
-                'message': 'Define the header of the csv file, with types (included in MISP attribute types or attribute fields) separated by commas.\nFor fields that do not match these types, please use space or simply nothing between commas.\nFor instance: ip-src,domain, ,timestamp'},
-              'has_header':{
-                'type': 'Boolean',
-                'message': 'Tick this box ONLY if there is a header line, NOT COMMENTED, in the file (which will be skipped atm).'
-              }}
+    'type': 'String',
+    'message': 'Define the header of the csv file, with types (included in MISP attribute types or attribute fields) separated by commas.\nFor fields that do not match these types, please use space or simply nothing between commas.\nFor instance: ip-src,domain, ,timestamp'},
+    'has_header': {
+        'type': 'Boolean',
+        'message': 'Tick this box ONLY if there is a header line, NOT COMMENTED, in the file (which will be skipped atm).'
+}}
 
 duplicatedFields = {'mispType': {'mispComment': 'comment'},
                     'attrField': {'attrComment': 'comment'}}
 attributesFields = ['type', 'value', 'category', 'to_ids', 'comment', 'distribution']
 delimiters = [',', ';', '|', '/', '\t', '    ']
+
 
 class CsvParser():
     def __init__(self, header, has_header):
@@ -32,17 +35,17 @@ class CsvParser():
         return_data = []
         if self.fields_number == 1:
             for line in data:
-                l = line.split('#')[0].strip()
-                if l:
-                    return_data.append(l)
+                line = line.split('#')[0].strip()
+                if line:
+                    return_data.append(line)
             self.delimiter = None
         else:
             self.delimiter_count = dict([(d, 0) for d in delimiters])
             for line in data:
-                l = line.split('#')[0].strip()
-                if l:
-                    self.parse_delimiter(l)
-                    return_data.append(l)
+                line = line.split('#')[0].strip()
+                if line:
+                    self.parse_delimiter(line)
+                    return_data.append(line)
             # find which delimiter is used
             self.delimiter = self.find_delimiter()
         self.data = return_data[1:] if self.has_header else return_data
@@ -115,6 +118,7 @@ class CsvParser():
         # return list of indexes of the misp types, list of the misp types, remaining fields that will be attribute fields
         return list2pop, misp, list(reversed(head))
 
+
 def handler(q=False):
     if q is False:
         return False
@@ -138,6 +142,7 @@ def handler(q=False):
     r = {'results': csv_parser.attributes}
     return r
 
+
 def introspection():
     modulesetup = {}
     try:
@@ -151,6 +156,7 @@ def introspection():
     except NameError:
         pass
     return modulesetup
+
 
 def version():
     moduleinfo['config'] = moduleconfig

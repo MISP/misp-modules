@@ -1,5 +1,4 @@
 import json
-import requests
 import vulners
 
 misperrors = {'error': 'Error'}
@@ -48,10 +47,10 @@ def handler(q=False):
         exploit_summary += " ||  " + str(len(vulners_exploits[0])) + " Public exploits available:\n  "
         for exploit in vulners_exploits[0]:
             exploit_summary += exploit['title'] + " " + exploit['href'] + "\n  "
-        exploit_summary +=  "|| Vulnerability Description:  " + vuln_summary
-    
-    summary = ai_summary + exploit_summary + vuln_summary    
-    
+        exploit_summary += "|| Vulnerability Description:  " + vuln_summary
+
+    summary = ai_summary + exploit_summary + vuln_summary
+
     r = {'results': [{'types': mispattributes['output'], 'values': summary}]}
     return r
 

@@ -45,7 +45,7 @@ def parse_iprep(ip, api):
     url = 'https://www.packetmail.net/iprep.php/%s' % ip
     try:
         data = requests.get(url, params={'apikey': api}).json()
-    except:
+    except Exception:
         return ['Error pulling data'], rep
     # print '%s' % data
     for name, val in data.items():
@@ -71,11 +71,11 @@ def parse_iprep(ip, api):
                 misp_val = context
                 full_text += '\n%s' % context
                 misp_comment = 'IPRep Source %s: %s' % (name, val['last_seen'])
-                rep.append({'types': mispattributes['output'], 'categories':['External analysis'], 'values': misp_val, 'comment': misp_comment})
-            except:
+                rep.append({'types': mispattributes['output'], 'categories': ['External analysis'], 'values': misp_val, 'comment': misp_comment})
+            except Exception:
                 err.append('Error parsing source: %s' % name)
 
-    rep.append({'types': ['freetext'], 'values': full_text , 'comment': 'Free text import of IPRep'})
+    rep.append({'types': ['freetext'], 'values': full_text, 'comment': 'Free text import of IPRep'})
     return err, rep
 
 

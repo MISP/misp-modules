@@ -1,5 +1,4 @@
 import json
-import requests
 try:
     import yara
 except (OSError, ImportError):
@@ -20,7 +19,7 @@ def handler(q=False):
         return misperrors
 
     try:
-        rules = yara.compile(source=request.get('yara'))
+        yara.compile(source=request.get('yara'))
         summary = ("Syntax valid")
     except Exception as e:
         summary = ("Syntax error: " + str(e))

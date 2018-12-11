@@ -1,6 +1,7 @@
-import json, datetime, time, base64
+import json
+import time
+import base64
 import xml.etree.ElementTree as ET
-from collections import defaultdict
 from pymisp import MISPEvent, MISPObject
 
 misperrors = {'error': 'Error'}
@@ -11,12 +12,12 @@ moduleconfig = []
 mispattributes = {'inputSource': ['file'], 'output': ['MISP objects']}
 
 t_from_objects = {'nodes': ['from_person', 'from_account', 'from_entity'],
-          'leaves': ['from_funds_code', 'from_country']}
+                  'leaves': ['from_funds_code', 'from_country']}
 t_to_objects = {'nodes': ['to_person', 'to_account', 'to_entity'],
-        'leaves': ['to_funds_code', 'to_country']}
+                'leaves': ['to_funds_code', 'to_country']}
 t_person_objects = {'nodes': ['addresses'],
-            'leaves': ['first_name', 'middle_name', 'last_name', 'gender', 'title', 'mothers_name', 'birthdate',
-                       'passport_number', 'passport_country', 'id_number', 'birth_place', 'alias', 'nationality1']}
+                    'leaves': ['first_name', 'middle_name', 'last_name', 'gender', 'title', 'mothers_name', 'birthdate',
+                               'passport_number', 'passport_country', 'id_number', 'birth_place', 'alias', 'nationality1']}
 t_account_objects = {'nodes': ['signatory'],
                      'leaves': ['institution_name', 'institution_code', 'swift', 'branch', 'non_banking_insitution',
                                 'account', 'currency_code', 'account_name', 'iban', 'client_number', 'opened', 'closed',
@@ -51,7 +52,7 @@ t_account_mapping = {'misp_name': 'bank-account', 'institution_name': 'instituti
 
 t_person_mapping = {'misp_name': 'person', 'comments': 'text', 'first_name': 'first-name', 'middle_name': 'middle-name',
                     'last_name': 'last-name', 'title': 'title', 'mothers_name': 'mothers-name', 'alias': 'alias',
-                    'birthdate': 'date-of-birth', 'birth_place': 'place-of-birth', 'gender': 'gender','nationality1': 'nationality',
+                    'birthdate': 'date-of-birth', 'birth_place': 'place-of-birth', 'gender': 'gender', 'nationality1': 'nationality',
                     'passport_number': 'passport-number', 'passport_country': 'passport-country', 'ssn': 'social-security-number',
                     'id_number': 'identity-card-number'}
 
@@ -72,6 +73,7 @@ goAMLmapping = {'from_account': t_account_mapping, 'to_account': t_account_mappi
 
 nodes_to_ignore = ['addresses', 'signatory']
 relationship_to_keep = ['signatory', 't_from', 't_from_my_client', 't_to', 't_to_my_client', 'address']
+
 
 class GoAmlParser():
     def __init__(self):
@@ -145,6 +147,7 @@ class GoAmlParser():
             to_country_attribute = {'object_relation': 'to-country', 'value': to_country}
             misp_object.add_attribute(**to_country_attribute)
 
+
 def handler(q=False):
     if q is False:
         return False
@@ -157,15 +160,17 @@ def handler(q=False):
     aml_parser = GoAmlParser()
     try:
         aml_parser.read_xml(data)
-    except:
+    except Exception:
         misperrors['error'] = "Impossible to read XML data"
         return misperrors
     aml_parser.parse_xml()
     r = {'results': [obj.to_json() for obj in aml_parser.misp_event.objects]}
     return r
 
+
 def introspection():
     return mispattributes
+
 
 def version():
     moduleinfo['config'] = moduleconfig

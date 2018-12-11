@@ -40,12 +40,12 @@ def handler(q=False):
         data = request.get("data")
         if 'malware-sample' in request:
             # malicious samples are encrypted with zip (password infected) and then base64 encoded
-            sample_filename = request.get("malware-sample").split("|",1)[0]
+            sample_filename = request.get("malware-sample").split("|", 1)[0]
             data = base64.b64decode(data)
             fl = io.BytesIO(data)
             zf = zipfile.ZipFile(fl)
             sample_hashname = zf.namelist()[0]
-            data = zf.read(sample_hashname,b"infected")
+            data = zf.read(sample_hashname, b"infected")
             zf.close()
         elif 'attachment' in request:
             # All attachments get base64 encoded
@@ -55,7 +55,7 @@ def handler(q=False):
         else:
             misperrors['error'] = "No malware sample or attachment supplied"
             return misperrors
-    except:
+    except Exception:
         misperrors['error'] = "Unable to process submited sample data"
         return misperrors
 
@@ -102,7 +102,7 @@ def handler(q=False):
                 return misperrors
             else:
                 return vmrayProcess(vmraydata)
-        except:
+        except Exception:
             misperrors['error'] = "Problem when calling API."
             return misperrors
     else:
@@ -148,7 +148,7 @@ def vmrayProcess(vmraydata):
             else:
                 misperrors['error'] = "No valid results returned."
                 return misperrors
-        except:
+        except Exception:
             misperrors['error'] = "No valid submission data returned."
             return misperrors
     else:

@@ -24,9 +24,9 @@ def handler(q=False):
         misperrors['error'] = "Unsupported attributes type"
         return misperrors
 
-    if not request.get('config') and not (request['config'].get('host') and
-                                          request['config'].get('port') and
-                                          request['config'].get('db')):
+    if not request.get('config') and not (request['config'].get('host')
+                                          and request['config'].get('port')
+                                          and request['config'].get('db')):
         misperrors['error'] = 'IP ASN history configuration is missing'
         return misperrors
 

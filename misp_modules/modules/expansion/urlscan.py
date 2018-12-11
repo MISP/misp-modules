@@ -169,8 +169,8 @@ def lookup_indicator(client, query):
                       'categories': ['External analysis'],
                       'values': image_url,
                       'comment': misp_comment})
-            ### TO DO ###
-            ### Add ability to add an in-line screenshot of the target website into an attribute
+            # ## TO DO ###
+            # ## Add ability to add an in-line screenshot of the target website into an attribute
             # screenshot = requests.get(image_url).content
             # r.append({'types': ['attachment'],
             #           'categories': ['External analysis'],

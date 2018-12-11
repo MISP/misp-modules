@@ -43,7 +43,7 @@ def handler(q=False):
     except dns.exception.Timeout:
         misperrors['error'] = "Timeout"
         return misperrors
-    except:
+    except Exception:
         misperrors['error'] = "DNS resolving error"
         return misperrors
 

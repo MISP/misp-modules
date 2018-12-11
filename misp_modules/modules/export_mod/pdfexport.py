@@ -126,7 +126,7 @@ class ReportGenerator():
                     summary = a.value
 
         return title.format(internal_id=internal_id, title=self.misp_event.info,
-                                          summary=summary)
+                            summary=summary)
 
     def asciidoc(self, lang='en'):
         self.report += self.title()

@@ -1,6 +1,5 @@
 import json
-import datetime
-from collections import defaultdict
+import sys
 
 try:
     import dns.resolver
@@ -30,11 +29,13 @@ dbl_mapping = {'127.0.1.2': 'spam domain',
                '127.0.1.106': 'abused legit botnet C&C',
                '127.0.1.255': 'IP queries prohibited!'}
 
+
 def fetch_requested_value(request):
     for attribute_type in mispattributes['input']:
         if request.get(attribute_type):
             return request[attribute_type].split('|')[0]
     return None
+
 
 def handler(q=False):
     if q is False:
@@ -52,8 +53,10 @@ def handler(q=False):
         result = str(e)
     return {'results': [{'types': mispattributes.get('output'), 'values': result}]}
 
+
 def introspection():
     return mispattributes
+
 
 def version():
     moduleinfo['config'] = moduleconfig

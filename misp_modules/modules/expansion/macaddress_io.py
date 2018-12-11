@@ -86,32 +86,30 @@ def handler(q=False):
         response.block_details.date_updated.strftime('%d %B %Y') if response.block_details.date_updated else None
 
     results = {
-        'results': [
-            {'types': ['text'], 'values':
-                {
-                    # Mac address details
-                    'Valid MAC address': "True" if response.mac_address_details.is_valid else "False",
-                    'Transmission type': response.mac_address_details.transmission_type,
-                    'Administration type': response.mac_address_details.administration_type,
+        'results':
+        [{'types': ['text'], 'values':
+            {
+                # Mac address details
+                'Valid MAC address': "True" if response.mac_address_details.is_valid else "False",
+                'Transmission type': response.mac_address_details.transmission_type,
+                'Administration type': response.mac_address_details.administration_type,
 
-                    # Vendor details
-                    'OUI': response.vendor_details.oui,
-                    'Vendor details are hidden': "True" if response.vendor_details.is_private else "False",
-                    'Company name': response.vendor_details.company_name,
-                    'Company\'s address': response.vendor_details.company_address,
-                    'County code': response.vendor_details.country_code,
+                # Vendor details
+                'OUI': response.vendor_details.oui,
+                'Vendor details are hidden': "True" if response.vendor_details.is_private else "False",
+                'Company name': response.vendor_details.company_name,
+                'Company\'s address': response.vendor_details.company_address,
+                'County code': response.vendor_details.country_code,
 
-                    # Block details
-                    'Block found': "True" if response.block_details.block_found else "False",
-                    'The left border of the range': response.block_details.border_left,
-                    'The right border of the range': response.block_details.border_right,
-                    'The total number of MAC addresses in this range': response.block_details.block_size,
-                    'Assignment block size': response.block_details.assignment_block_size,
-                    'Date when the range was allocated': date_created,
-                    'Date when the range was last updated': date_updated
-                }
-             }
-        ]
+                # Block details
+                'Block found': "True" if response.block_details.block_found else "False",
+                'The left border of the range': response.block_details.border_left,
+                'The right border of the range': response.block_details.border_right,
+                'The total number of MAC addresses in this range': response.block_details.block_size,
+                'Assignment block size': response.block_details.assignment_block_size,
+                'Date when the range was allocated': date_created,
+                'Date when the range was last updated': date_updated
+        }}]
     }
 
     return results

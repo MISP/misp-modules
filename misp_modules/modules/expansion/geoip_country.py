@@ -27,7 +27,7 @@ try:
     config.read(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'geoip_country.cfg'))
     gi = pygeoip.GeoIP(config.get('GEOIP', 'database'))
     enabled = True
-except:
+except Exception:
     enabled = False
 
 
@@ -49,7 +49,7 @@ def handler(q=False):
 
     try:
         answer = gi.country_code_by_addr(toquery)
-    except:
+    except Exception:
         misperrors['error'] = "GeoIP resolving error"
         return misperrors
 

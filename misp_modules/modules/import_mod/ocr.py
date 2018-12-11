@@ -14,7 +14,7 @@ ch.setFormatter(formatter)
 log.addHandler(ch)
 
 misperrors = {'error': 'Error'}
-userConfig = {};
+userConfig = {}
 
 inputSource = ['file']
 
@@ -55,17 +55,17 @@ def handler(q=False):
     if document.format == 'PDF':
         with document as pdf:
             # Get number of pages
-            pages=len(pdf.sequence)
+            pages = len(pdf.sequence)
             log.debug("PDF with {} page(s) detected".format(pages))
             # Create new image object where the height will be the number of pages. With huge PDFs this will overflow, break, consume silly memory etc…
             img = WImage(width=pdf.width, height=pdf.height * pages)
             # Cycle through pages and stitch it together to one big file
             for p in range(pages):
-                log.debug("Stitching page {}".format(p+1))
+                log.debug("Stitching page {}".format(p + 1))
                 image = img.composite(pdf.sequence[p], top=pdf.height * p, left=0)
             # Create a png blob
             image = img.make_blob('png')
-            log.debug("Final image size is {}x{}".format(pdf.width, pdf.height*(p+1)))
+            log.debug("Final image size is {}x{}".format(pdf.width, pdf.height * (p + 1)))
     else:
         image = document
 
@@ -77,7 +77,6 @@ def handler(q=False):
     except IOError:
         misperrors['error'] = "Corrupt or not an image file."
         return misperrors
-
 
     ocrized = image_to_string(im)
 
@@ -106,6 +105,7 @@ def introspection():
 def version():
     moduleinfo['config'] = moduleconfig
     return moduleinfo
+
 
 if __name__ == '__main__':
     x = open('test.json', 'r')
