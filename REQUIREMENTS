@@ -28,3 +28,4 @@ maclookup
 vulners
 psutil
 blockchain
+git+https://github.com/MISP/PyIntel471.git
