@@ -10,7 +10,7 @@ import re
 
 misperrors = {"error": "Error"}
 
-types_to_use = ['sha1']
+types_to_use = ['sha1', 'md5']
 
 userConfig = {
 
@@ -29,16 +29,26 @@ moduleinfo = {'version': '1.0', 'author': 'Julien Bachmann, Hacknowledge',
 
 
 def handle_sha1(value, period):
-    return '''
-    (select ((binary (executable_name version)) (user (name)) (device (name last_ip_address)) (execution (binary_path start_time)))
-	(from (binary user device execution)
-    (where binary (eq hash (sha1 %s))))
-    (between now-%s now)
-	(limit 1000))
+    query = '''select ((binary (executable_name version)) (user (name)) (device (name last_ip_address)) (execution (binary_path start_time)))
+(from (binary user device execution)
+(where binary (eq sha1 (sha1 %s)))
+(between now-%s now))
+(limit 1000)
     ''' % (value, period)
+    return query.replace('\n', ' ')
+
+def handle_md5(value, period):
+    query = '''select ((binary (executable_name version)) (user (name)) (device (name last_ip_address)) (execution (binary_path start_time)))
+(from (binary user device execution)
+(where binary (eq hash (md5 %s)))
+(between now-%s now))
+(limit 1000)
+    ''' % (value, period)
+    return query.replace('\n', ' ')
 
 handlers = {
-    'sha1': handle_sha1
+    'sha1': handle_sha1,
+    'md5': handle_md5
 }
 
 def handler(q=False):
@@ -55,7 +65,6 @@ def handler(q=False):
                     output = output + handlers[attribute['type']](attribute['value'], config['Period']) + '\n'
     r = {"response": [], "data": str(base64.b64encode(bytes(output, 'utf-8')), 'utf-8')}
     return r
-
 
 def introspection():
     modulesetup = {}
