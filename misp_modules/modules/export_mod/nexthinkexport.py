@@ -6,7 +6,6 @@ Config['Period'] : allows to define period over witch to look for IOC from now (
 
 import base64
 import json
-import re
 
 misperrors = {"error": "Error"}
 
@@ -22,7 +21,6 @@ inputSource = ['event']
 outputFileExtension = 'nxql'
 responseType = 'application/txt'
 
-
 moduleinfo = {'version': '1.0', 'author': 'Julien Bachmann, Hacknowledge',
               'description': 'Nexthink NXQL query export module',
               'module-type': ['export']}
@@ -36,6 +34,7 @@ def handle_sha1(value, period):
     ''' % (value, period)
     return query.replace('\n', ' ')
 
+
 def handle_sha256(value, period):
     query = '''select ((binary (executable_name version)) (user (name)) (device (name last_ip_address)) (execution (binary_path start_time)))
 (from (binary user device execution)
@@ -44,6 +43,7 @@ def handle_sha256(value, period):
 (limit 1000)
     ''' % (value, period)
     return query.replace('\n', ' ')
+
 
 def handle_md5(value, period):
     query = '''select ((binary (executable_name version)) (user (name)) (device (name last_ip_address)) (execution (binary_path start_time)))
@@ -54,6 +54,7 @@ def handle_md5(value, period):
     ''' % (value, period)
     return query.replace('\n', ' ')
 
+
 def handle_domain(value, period):
     query = '''select ((device name) (device (name last_ip_address)) (user name)(user department) (binary executable_name)(binary application_name)(binary description)(binary application_category)(binary (executable_name version)) (binary #"Suspicious binary")(binary first_seen)(binary last_seen)(binary threat_level)(binary hash) (binary paths)
 (destination name)(domain name) (domain domain_category)(domain hosting_country)(domain protocol)(domain threat_level) (port port_number)(web_request incoming_traffic)(web_request outgoing_traffic))
@@ -63,6 +64,7 @@ def handle_domain(value, period):
 (limit 1000)
     ''' % (value, period)
     return query.replace('\n', ' ')
+
 
 handlers = {
     'sha1': handle_sha1,
@@ -85,6 +87,7 @@ def handler(q=False):
                     output = output + handlers[attribute['type']](attribute['value'], config['Period']) + '\n'
     r = {"response": [], "data": str(base64.b64encode(bytes(output, 'utf-8')), 'utf-8')}
     return r
+
 
 def introspection():
     modulesetup = {}
@@ -109,6 +112,7 @@ def introspection():
     except NameError:
         pass
     return modulesetup
+
 
 def version():
     moduleinfo['config'] = moduleconfig
