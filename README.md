@@ -67,6 +67,7 @@ For more information: [Extending MISP with Python modules](https://www.circl.lu/
 * [Lite Export](misp_modules/modules/export_mod/liteexport.py) module to export a lite event.
 * [Simple PDF export](misp_modules/modules/export_mod/pdfexport.py) module to export in PDF (required: asciidoctor-pdf).
 * [Nexthink query format](misp_modules/modules/export_mod/nexthinkexport.py) module to export in Nexthink query format.
+* [osquery](misp_modules/modules/export_mod/osqueryexport.py) module to export in [osquery](https://osquery.io/) query format.
 * [ThreatConnect](misp_modules/modules/export_mod/threat_connect_export.py) module to export in ThreatConnect CSV format.
 * [ThreatStream](misp_modules/modules/export_mod/threatStream_misp_export.py) module to export in ThreatStream format.
 
