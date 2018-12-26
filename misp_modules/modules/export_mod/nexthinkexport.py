@@ -25,6 +25,7 @@ moduleinfo = {'version': '1.0', 'author': 'Julien Bachmann, Hacknowledge',
               'description': 'Nexthink NXQL query export module',
               'module-type': ['export']}
 
+
 def handle_sha1(value, period):
     query = '''select ((binary (executable_name version)) (user (name)) (device (name last_ip_address)) (execution (binary_path start_time)))
 (from (binary user device execution)
@@ -72,6 +73,7 @@ handlers = {
     'md5': handle_md5,
     'domain': handle_domain
 }
+
 
 def handler(q=False):
     if q is False:
