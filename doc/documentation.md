@@ -1013,6 +1013,22 @@ Lite export of a MISP event.
 
 -----
 
+#### [nexthinkexport](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/export_mod/nexthinkexport.py)
+
+<img src=logos/nexthink.svg height=60>
+
+Nexthink NXQL query export module
+- **features**:
+>This module export an event as Nexthink NXQL queries that can then be used in your own python3 tool or from wget/powershell
+- **input**:
+>MISP Event attributes
+- **output**:
+>Nexthink NXQL queries
+- **references**:
+>https://doc.nexthink.com/Documentation/Nexthink/latest/APIAndIntegrations/IntroducingtheWebAPIV2
+
+-----
+
 #### [osqueryexport](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/export_mod/osqueryexport.py)
 
 <img src=logos/osquery.png height=60>
