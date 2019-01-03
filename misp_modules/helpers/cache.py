@@ -19,12 +19,14 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import os
+
 import redis
 import hashlib
 
-port = 6379
-hostname = '127.0.0.1'
-db = 5
+port = int(os.getenv("REDIS_PORT")) if os.getenv("REDIS_PORT") else 6379
+hostname = os.getenv("REDIS_BACKEND") or '127.0.0.1'
+db = int(os.getenv("REDIS_DATABASE")) if os.getenv("REDIS_DATABASE") else 0
 
 
 def selftest(enable=True):
