@@ -2,9 +2,10 @@ import sys
 import io
 import json
 try:
-    from sigma.parser import SigmaCollectionParser
-    from sigma.config import SigmaConfiguration
-    from sigma.backends import getBackend, BackendOptions
+    from sigma.parser.collection import SigmaCollectionParser
+    from sigma.configuration import SigmaConfiguration
+    from sigma.backends.base import BackendOptions
+    from sigma.backends.discovery import getBackend
 except ImportError:
     print("sigma or yaml is missing, use 'pip3 install sigmatools' to install it.")
 
