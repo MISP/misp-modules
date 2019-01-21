@@ -2,25 +2,21 @@
 
 ## Expansion Modules
 
-#### [asn_history](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/asn_history.py)
+#### [bgpranking](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/bgpranking.py)
 
-Query an ASN description history service (https://github.com/CIRCL/ASN-Description-History.git).
+Query BGP Ranking (https://bgpranking-ng.circl.lu/).
 - **features**:
->The module takes an AS number attribute as input and displays its description and history.
+>The module takes an AS number attribute as input and displays its description and history, and position in BGP Ranking.
 >
->For a proper working, a communication with a redis database is needed, thus 3 parameters are needed:
->- host, the address of the redis server
->- port, the port used by redis
->- db, the index of the database used
 >
 - **input**:
 >Autonomous system number.
 - **output**:
->Text containing a description of the ASN and its history.
+>Text containing a description of the ASN, its history, and the position in BGP Ranking.
 - **references**:
->https://github.com/CIRCL/ASN-Description-History.git
+>https://github.com/D4-project/BGP-Ranking/
 - **requirements**:
->asnhistory python library
+>pybgpranking python library
 
 -----
 
@@ -331,17 +327,17 @@ Module to access intelmqs eventdb.
 
 #### [ipasn](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/ipasn.py)
 
-Module to query an IP ASN history service (https://github.com/CIRCL/IP-ASN-history.git).
+Module to query an IP ASN history service (https://github.com/D4-project/IPASN-History).
 - **features**:
->This module takes an IP address attribute as input and queries the CIRCL IP ASN service to get additional information about the input.
+>This module takes an IP address attribute as input and queries the CIRCL IPASN service to get additional information about the input.
 - **input**:
 >An IP address MISP attribute.
 - **output**:
->Text describing additional information about the input after a query on the IP-ASN-history database.
+>Text describing additional information about the input after a query on the IPASN-history database.
 - **references**:
->https://www.circl.lu/services/ip-asn-history/
+>https://github.com/D4-project/IPASN-History
 - **requirements**:
->ipasn_redis: Python library to access IP-ASN-history instance via redis, An IP-ASN-history instance information (host, port and database index)
+>pyipasnhistory: Python library to access IPASN-history instance
 
 -----
 

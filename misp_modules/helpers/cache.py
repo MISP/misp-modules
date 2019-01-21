@@ -30,7 +30,7 @@ db = 5
 def selftest(enable=True):
     if not enable:
         return False
-    r = redis.StrictRedis(host=hostname, port=port, db=db)
+    r = redis.Redis(host=hostname, port=port, db=db)
     try:
         r.ping()
     except Exception:
@@ -40,11 +40,11 @@ def selftest(enable=True):
 def get(modulename=None, query=None, value=None, debug=False):
     if (modulename is None or query is None):
         return False
-    r = redis.StrictRedis(host=hostname, port=port, db=db)
+    r = redis.Redis(host=hostname, port=port, db=db, decode_responses=True)
     h = hashlib.sha1()
     h.update(query.encode('UTF-8'))
     hv = h.hexdigest()
-    key = "m:" + modulename + ":" + hv
+    key = "m:{}:{}".format(modulename, hv)
 
     if not r.exists(key):
         if debug:
@@ -58,7 +58,7 @@ def get(modulename=None, query=None, value=None, debug=False):
 
 
 def flush():
-    r = redis.StrictRedis(host=hostname, port=port, db=db)
+    r = redis.StrictRedis(host=hostname, port=port, db=db, decode_responses=True)
     returncode = r.flushdb()
     return returncode
 
@@ -70,7 +70,7 @@ if __name__ == "__main__":
     else:
         print("Selftest ok")
     v = get(modulename="testmodule", query="abcdef", value="barfoo", debug=True)
-    if v == b'barfoo':
+    if v == 'barfoo':
         print("Cache ok")
     v = get(modulename="testmodule", query="abcdef")
     print(v)
