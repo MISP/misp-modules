@@ -1,8 +1,8 @@
 import json
 try:
     import yaml
-    from sigma.parser import SigmaParser
-    from sigma.config import SigmaConfiguration
+    from sigma.parser.rule import SigmaParser
+    from sigma.configuration import SigmaConfiguration
 except ImportError:
     print("sigma or yaml is missing, use 'pip3 install sigmatools' to install it.")
 

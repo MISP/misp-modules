@@ -1,15 +1,14 @@
 # -*- coding: utf-8 -*-
 
 import json
-from asnhistory import ASNHistory
+from datetime import date, timedelta
+from pybgpranking import BGPRanking
 
 misperrors = {'error': 'Error'}
 mispattributes = {'input': ['AS'], 'output': ['freetext']}
 moduleinfo = {'version': '0.1', 'author': 'Raphaël Vinot',
               'description': 'Query an ASN Description history service (https://github.com/CIRCL/ASN-Description-History.git)',
               'module-type': ['expansion', 'hover']}
-
-moduleconfig = ['host', 'port', 'db']
 
 
 def handler(q=False):
@@ -22,19 +21,11 @@ def handler(q=False):
         misperrors['error'] = "Unsupported attributes type"
         return misperrors
 
-    if not request.get('config') and not (request['config'].get('host')
-                                          and request['config'].get('port')
-                                          and request['config'].get('db')):
-        misperrors['error'] = 'ASN description history configuration is missing'
-        return misperrors
-
-    asnhistory = ASNHistory(host=request['config'].get('host'),
-                            port=request['config'].get('port'), db=request['config'].get('db'))
-
-    values = ['{} {}'.format(date.isoformat(), description) for date, description in asnhistory.get_all_descriptions(toquery)]
+    bgpranking = BGPRanking()
+    values = bgpranking.query(toquery, date=(date.today() - timedelta(1)).isoformat())
 
     if not values:
-        misperrors['error'] = 'Unable to find descriptions for this ASN'
+        misperrors['error'] = 'Unable to find the ASN in BGP Ranking'
         return misperrors
     return {'results': [{'types': mispattributes['output'], 'values': values}]}
 
@@ -44,5 +35,4 @@ def introspection():
 
 
 def version():
-    moduleinfo['config'] = moduleconfig
     return moduleinfo

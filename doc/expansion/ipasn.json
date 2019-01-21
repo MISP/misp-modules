@@ -1,8 +1,8 @@
 {
-    "description": "Module to query an IP ASN history service (https://github.com/CIRCL/IP-ASN-history.git).",
-    "requirements": ["ipasn_redis: Python library to access IP-ASN-history instance via redis", "An IP-ASN-history instance information (host, port and database index)"],
+    "description": "Module to query an IP ASN history service (https://github.com/D4-project/IPASN-History).",
+    "requirements": ["pyipasnhistory: Python library to access IPASN-history instance"],
     "input": "An IP address MISP attribute.",
-    "output": "Text describing additional information about the input after a query on the IP-ASN-history database.",
-    "references": ["https://www.circl.lu/services/ip-asn-history/"],
-    "features": "This module takes an IP address attribute as input and queries the CIRCL IP ASN service to get additional information about the input."
+    "output": "Text describing additional information about the input after a query on the IPASN-history database.",
+    "references": ["https://github.com/D4-project/IPASN-History"],
+    "features": "This module takes an IP address attribute as input and queries the CIRCL IPASN service to get additional information about the input."
 }

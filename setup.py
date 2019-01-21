@@ -23,18 +23,7 @@ setup(
     ],
     install_requires=[
         'tornado',
-        'dnspython3',
-        'requests',
-        'urlarchiver',
-        'passivetotal',
-        'PyPDNS',
-        'pypssl',
-        'redis',
-        'pyeupi',
-        'ipasn-redis',
-        'asnhistory',
-        'pillow',
-        'pytesseract',
-        'shodan',
+        'psutil',
+        'redis>=3'
     ],
 )
