@@ -131,11 +131,23 @@ def handler(q=False):
     i = 0
     while i < n_tx:
         if click is False:
-            req = requests.get(blockchain_all.format(btc, "&limit=5&offset={}".format(i)))
+            try:
+                req = requests.get(blockchain_all.format(btc, "&limit=5&offset={}".format(i)))
+            except Exception as e:
+                # Lazy retry - cries for a function
+                print(e)
+                time.sleep(3)
+                req = requests.get(blockchain_all.format(btc, "&limit=5&offset={}".format(i)))
             if n_tx > 5:
                 n_tx = 5
         else:
-            req = requests.get(blockchain_all.format(btc, "&limit=50&offset={}".format(i)))
+            try:
+                req = requests.get(blockchain_all.format(btc, "&limit=50&offset={}".format(i)))
+            except Exception as e:
+                # Lazy retry - cries for a function
+                print(e)
+                time.sleep(3)
+                req = requests.get(blockchain_all.format(btc, "&limit=50&offset={}".format(i)))
         jreq = req.json()
         if jreq['txs']:
             for transactions in jreq['txs']:
@@ -143,7 +155,15 @@ def handler(q=False):
                 sum_counter = 0
                 for tx in transactions['inputs']:
                     script_old = tx['script']
-                    if tx['prev_out']['value'] != 0 and tx['prev_out']['addr'] == btc:
+                    try:
+                        addr_in = tx['prev_out']['addr']
+                    except KeyError:
+                        addr_in = None
+                    try:
+                        prev_out = tx['prev_out']['value']
+                    except KeyError:
+                        prev_out = None
+                    if prev_out != 0 and addr_in == btc:
                         datetime = time.strftime("%d %b %Y %H:%M:%S %Z", time.localtime(int(transactions['time'])))
                         value = float(tx['prev_out']['value'] / 100000000)
                         u, e = convert(value, transactions['time'])
@@ -158,12 +178,20 @@ def handler(q=False):
                     mprint("\t\t\t\t\t----------------------------------------------")
                     mprint("#" + str(n_tx - i) + "\t\t\t\t  Sum:\t-{0:10.8f} BTC {1:10.2f} USD\t{2:10.2f} EUR\n".format(sum, u, e).rstrip('0'))
                 for tx in transactions['out']:
-                    if tx['value'] != 0 and tx['addr'] == btc:
+                    try:
+                        addr_out = tx['addr']
+                    except KeyError:
+                        addr_out = None
+                    try:
+                        prev_out = tx['prev_out']['value']
+                    except KeyError:
+                        prev_out = None
+                    if prev_out != 0 and addr_out == btc:
                         datetime = time.strftime("%d %b %Y %H:%M:%S %Z", time.localtime(int(transactions['time'])))
                         value = float(tx['value'] / 100000000)
                         u, e = convert(value, transactions['time'])
                         mprint("#" + str(n_tx - i) + "\t" + str(datetime) + "\t {0:10.8f} BTC {1:10.2f} USD\t{2:10.2f} EUR".format(value, u, e).rstrip('0'))
-                        # i += 1
+                        #i += 1
                 i += 1
 
     r = {
