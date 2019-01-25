@@ -191,7 +191,7 @@ def handler(q=False):
                         value = float(tx['value'] / 100000000)
                         u, e = convert(value, transactions['time'])
                         mprint("#" + str(n_tx - i) + "\t" + str(datetime) + "\t {0:10.8f} BTC {1:10.2f} USD\t{2:10.2f} EUR".format(value, u, e).rstrip('0'))
-                        #i += 1
+                        # i += 1
                 i += 1
 
     r = {
