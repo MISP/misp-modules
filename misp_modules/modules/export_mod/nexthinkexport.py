@@ -86,7 +86,7 @@ def handler(q=False):
     for event in request["data"]:
         for attribute in event["Attribute"]:
             if attribute['type'] in types_to_use:
-                    output = output + handlers[attribute['type']](attribute['value'], config['Period']) + '\n'
+                output = output + handlers[attribute['type']](attribute['value'], config['Period']) + '\n'
     r = {"response": [], "data": str(base64.b64encode(bytes(output, 'utf-8')), 'utf-8')}
     return r
 

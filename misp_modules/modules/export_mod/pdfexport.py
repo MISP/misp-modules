@@ -152,36 +152,37 @@ def handler(q=False):
     command_line = 'asciidoctor-pdf -'
     args = shlex.split(command_line)
     with subprocess.Popen(args, stdout=subprocess.PIPE, stdin=subprocess.PIPE) as process:
-        cmd_out, cmd_err = process.communicate(input=report.report.encode('utf-8'))
+        cmd_out, cmd_err = process.communicate(
+            input=report.report.encode('utf-8'))
     return {'response': [], 'data': str(base64.b64encode(cmd_out), 'utf-8')}
 
 
 def introspection():
-        modulesetup = {}
-        try:
-                responseType
-                modulesetup['responseType'] = responseType
-        except NameError:
-            pass
+    modulesetup = {}
+    try:
+        responseType
+        modulesetup['responseType'] = responseType
+    except NameError:
+        pass
 
-        try:
-                userConfig
-                modulesetup['userConfig'] = userConfig
-        except NameError:
-                pass
-        try:
-                outputFileExtension
-                modulesetup['outputFileExtension'] = outputFileExtension
-        except NameError:
-                pass
-        try:
-                inputSource
-                modulesetup['inputSource'] = inputSource
-        except NameError:
-                pass
-        return modulesetup
+    try:
+        userConfig
+        modulesetup['userConfig'] = userConfig
+    except NameError:
+        pass
+    try:
+        outputFileExtension
+        modulesetup['outputFileExtension'] = outputFileExtension
+    except NameError:
+        pass
+    try:
+        inputSource
+        modulesetup['inputSource'] = inputSource
+    except NameError:
+        pass
+    return modulesetup
 
 
 def version():
-        moduleinfo['config'] = moduleconfig
-        return moduleinfo
+    moduleinfo['config'] = moduleconfig
+    return moduleinfo

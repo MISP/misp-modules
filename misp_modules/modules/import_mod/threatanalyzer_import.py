@@ -325,7 +325,7 @@ def process_analysis_json(analysis_json):
                 for stored_created_file in process['stored_files']['stored_created_file']:
                     stored_created_file['@filename'] = cleanup_filepath(stored_created_file['@filename'])
                     if stored_created_file['@filename']:
-                        if stored_created_file['@filesize'] is not '0':
+                        if stored_created_file['@filesize'] != '0':
                             val = '{}|{}'.format(stored_created_file['@filename'], stored_created_file['@md5'])
                             # print("stored_created_file filename|md5: {}|{}  IDS:yes".format(
                             #     stored_created_file['@filename'],                       # filename
@@ -346,7 +346,7 @@ def process_analysis_json(analysis_json):
                 for stored_modified_file in process['stored_files']['stored_modified_file']:
                     stored_modified_file['@filename'] = cleanup_filepath(stored_modified_file['@filename'])
                     if stored_modified_file['@filename']:
-                        if stored_modified_file['@filesize'] is not '0':
+                        if stored_modified_file['@filesize'] != '0':
                             val = '{}|{}'.format(stored_modified_file['@filename'], stored_modified_file['@md5'])
                             # print("stored_modified_file MODIFY FILE: {}\t{}".format(
                             #     stored_modified_file['@filename'],                       # filename
