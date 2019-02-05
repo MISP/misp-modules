@@ -13,7 +13,7 @@ except ImportError:
 misperrors = {'error': 'Error'}
 mispattributes = {'input': ['btc'], 'output': ['text']}
 moduleinfo = {'version': '0.1', 'author': 'Christian Studer',
-              'description': 'Checks if a BTC address is referenced as a scam.',
+              'description': 'Checks if a BTC address has been abused.',
               'module-type': ['hover']}
 moduleconfig = []
 
