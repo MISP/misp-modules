@@ -51,15 +51,13 @@ def handler(q=False):
     if not checks['success']:
         return misperrors
 
-    output = {'results': list()}
-
     try:
         bs = Backscatter(checks['config']['api_key'])
         response = bs.get_observations(query=output['value'], query_type='ip')
         if not response['success']:
             misperrors['error'] = '%s: %s' % (response['error'], response['message'])
             return misperrors
-        r = {'results': [{'types': mispattributes['output'], 'values': [str(response)]}]}
+        output = {'results': [{'types': mispattributes['output'], 'values': [str(response)]}]}
     except Exception, e:
         misperrors['error'] = str(e)
         return misperrors
