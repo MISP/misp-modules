@@ -53,7 +53,7 @@ def handler(q=False):
 
     try:
         bs = Backscatter(checks['config']['api_key'])
-        response = bs.get_observations(query=output['value'], query_type='ip')
+        response = bs.get_observations(query=checks['value'], query_type='ip')
         if not response['success']:
             misperrors['error'] = '%s: %s' % (response['error'], response['message'])
             return misperrors
