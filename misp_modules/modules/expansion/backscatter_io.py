@@ -58,7 +58,7 @@ def handler(q=False):
             misperrors['error'] = '%s: %s' % (response['error'], response['message'])
             return misperrors
         output = {'results': [{'types': mispattributes['output'], 'values': [str(response)]}]}
-    except Exception, e:
+    except Exception as e:
         misperrors['error'] = str(e)
         return misperrors
 
