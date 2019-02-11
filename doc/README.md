@@ -4,6 +4,8 @@
 
 #### [backscatter_io](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/backscatter_io.py)
 
+<img src=logos/backscatter_io.png height=60>
+
 Query backscatter.io (https://backscatter.io/).
 - **features**:
 >The module takes a source or destination IP address as input and displays the information known by backscatter.io.
