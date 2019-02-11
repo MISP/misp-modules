@@ -2,6 +2,24 @@
 
 ## Expansion Modules
 
+#### [backscatter_io](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/backscatter_io.py)
+
+Query backscatter.io (https://backscatter.io/).
+- **features**:
+>The module takes a source or destination IP address as input and displays the information known by backscatter.io.
+>
+>
+- **input**:
+>IP addresses.
+- **output**:
+>Text containing a history of the IP addresses especially on scanning based on backscatter.io information .
+- **references**:
+>https://pypi.org/project/backscatter/
+- **requirements**:
+>backscatter python library
+
+-----
+
 #### [bgpranking](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/bgpranking.py)
 
 Query BGP Ranking (https://bgpranking-ng.circl.lu/).
