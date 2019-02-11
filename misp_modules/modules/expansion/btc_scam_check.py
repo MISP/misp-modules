@@ -19,6 +19,7 @@ moduleconfig = []
 
 url = 'bl.btcblack.it'
 
+
 def handler(q=False):
     if q is False:
         return False
