@@ -100,7 +100,7 @@ sudo sed -i -e '$i \sudo -u www-data /var/www/MISP/venv/bin/misp-modules -l 127.
 /var/www/MISP/venv/bin/misp-modules -l 127.0.0.1 -s & #to start the modules
 ~~~~
 
-## How to install and start MISP modules?
+## How to install and start MISP modules on Debian-based distributions ?
 
 ~~~~bash
 sudo apt-get install python3-dev python3-pip libpq5 libjpeg-dev tesseract-ocr imagemagick
@@ -113,6 +113,42 @@ sudo apt install ruby-pygments.rb -y
 sudo gem install asciidoctor-pdf --pre
 sudo sed -i -e '$i \sudo -u www-data /var/www/MISP/venv/bin/misp-modules -l 127.0.0.1 -s > /tmp/misp-modules_rc.local.log &\n' /etc/rc.local
 /var/www/MISP/venv/bin/misp-modules -l 127.0.0.1 -s & #to start the modules
+~~~~
+
+## How to install and start MISP modules on RHEL-based distributions ?
+As of this writing, the official RHEL repositories only contain Ruby 2.0.0 and Ruby 2.1 or higher is required. As such, this guide installs Ruby 2.2 from the [SCL](https://access.redhat.com/documentation/en-us/red_hat_software_collections/3/html/3.2_release_notes/chap-installation#sect-Installation-Subscribe) repository. 
+~~~~bash
+yum install rh-ruby22
+cd /var/www/MISP
+git clone https://github.com/MISP/misp-modules.git
+cd misp-modules
+scl enable rh-python36 ‘python3 –m pip install cryptography’
+scl enable rh-python36 ‘python3 –m pip install -I -r REQUIREMENTS’
+scl enable rh-python36 ‘python3 –m pip install –I .’
+scl enable rh-ruby22 ‘gem install asciidoctor-pdf –pre’ 
+~~~~
+Create the service file /etc/systemd/system/misp-workers.service :
+~~~~
+[Unit]
+Description=MISP's modules
+After=misp-workers.service
+
+[Service]
+Type=simple
+User=apache
+Group=apache
+ExecStart=/usr/bin/scl enable rh-python36 rh-ruby22  ‘/opt/rh/rh-python36/root/bin/misp-modules –l 127.0.0.1 –s’
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
+~~~~
+The `After=misp-workers.service` must be changed or removed if you have not created a misp-workers service.
+Then, enable the misp-modules service and start it ;
+~~~~bash
+systemctl daemon-reload
+systemctl enable --now misp-modules
 ~~~~
 
 ## How to add your own MISP modules?
