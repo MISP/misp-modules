@@ -144,6 +144,8 @@ def handler(q=False):
         return False
 
     for evt in request['data']:
+        print(request['data'])
+        
         report = ReportGenerator()
         report.report_headers()
         report.from_event(evt)
