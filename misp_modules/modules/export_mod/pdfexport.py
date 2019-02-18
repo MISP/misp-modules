@@ -12,7 +12,7 @@ from pymisp import MISPEvent
 
 misperrors = {'error': 'Error'}
 
-moduleinfo = {'version': '1',
+moduleinfo = {'version': '42',
               'author': 'Raphaël Vinot',
               'description': 'Simple export to PDF',
               'module-type': ['export'],
