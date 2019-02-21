@@ -7,60 +7,25 @@ import shlex
 import subprocess
 import base64
 
-from pymisp import MISPEvent
+from pymisp import MISPEvent, reportlab_generator
 
 
 misperrors = {'error': 'Error'}
 
-moduleinfo = {'version': '42',
-              'author': 'Raphaël Vinot',
+moduleinfo = {'version': '2',
+              'author': 'Vincent Falconieri (prev. Raphaël Vinot)',
               'description': 'Simple export to PDF',
               'module-type': ['export'],
               'require_standard_format': True}
 
 moduleconfig = []
-
 mispattributes = {}
+
 outputFileExtension = "pdf"
 responseType = "application/pdf"
 
 types_to_attach = ['ip-dst', 'url', 'domain']
 objects_to_attach = ['domain-ip']
-
-headers = """
-:toc: right
-:toclevels: 1
-:toc-title: Daily Report
-:icons: font
-:sectanchors:
-:sectlinks:
-= Daily report by {org_name}
-{date}
-
-:icons: font
-
-"""
-
-event_level_tags = """
-IMPORTANT: This event is classified TLP:{value}.
-
-{expanded}
-
-"""
-
-attributes = """
-=== Indicator(s) of compromise
-
-{list_attributes}
-
-"""
-
-title = """
-== ({internal_id}) {title}
-
-{summary}
-
-"""
 
 
 class ReportGenerator():
@@ -79,6 +44,9 @@ class ReportGenerator():
         self.misp_event = MISPEvent()
         self.misp_event.load(event)
 
+    '''
+
+    
     def attributes(self):
         if not self.misp_event.attributes:
             return ''
@@ -132,7 +100,7 @@ class ReportGenerator():
         self.report += self.title()
         self.report += self.event_level_tags()
         self.report += self.attributes()
-
+    '''
 
 def handler(q=False):
     if q is False:
@@ -144,19 +112,27 @@ def handler(q=False):
         return False
 
     for evt in request['data']:
+
+        '''
+        print(" DATA ")
         print(request['data'])
+
+        reportlab_generator.
         
         report = ReportGenerator()
         report.report_headers()
         report.from_event(evt)
         report.asciidoc()
 
-    command_line = 'asciidoctor-pdf -'
-    args = shlex.split(command_line)
-    with subprocess.Popen(args, stdout=subprocess.PIPE, stdin=subprocess.PIPE) as process:
-        cmd_out, cmd_err = process.communicate(
-            input=report.report.encode('utf-8'))
-    return {'response': [], 'data': str(base64.b64encode(cmd_out), 'utf-8')}
+        print(" REPORT : ")
+        print(report)
+        '''
+    misp_event = MISPEvent()
+    misp_event.load(request['data'])
+
+    pdf = reportlab_generator.get_base64_from_buffer(reportlab_generator.convert_event_in_pdf_buffer(misp_event))
+
+    return {'response': [], 'data': str(pdf, 'utf-8')}
 
 
 def introspection():
