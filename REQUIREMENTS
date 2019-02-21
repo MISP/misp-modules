@@ -54,7 +54,8 @@ soupsieve==1.7.3
 sparqlwrapper==1.8.2
 stix2-patterns==1.1.0
 tornado==5.1.1
-url-normalize==1.4.1
+# Python 3.5 only provides url-normalize v1.3.3
+url-normalize>=1.3.3
 urlarchiver==0.2
 urllib3==1.24.1
 vulners==1.4.0
