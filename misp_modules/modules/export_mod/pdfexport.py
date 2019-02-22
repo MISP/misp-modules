@@ -7,8 +7,10 @@ import shlex
 import subprocess
 import base64
 
-from pymisp import MISPEvent, reportlab_generator
+print("test PDF pdf export (reportlab generator import)")
 
+from pymisp import MISPEvent
+from pymisp.tools import reportlab_generator
 
 misperrors = {'error': 'Error'}
 
@@ -45,8 +47,6 @@ class ReportGenerator():
         self.misp_event.load(event)
 
     '''
-
-    
     def attributes(self):
         if not self.misp_event.attributes:
             return ''
@@ -127,12 +127,13 @@ def handler(q=False):
         print(" REPORT : ")
         print(report)
         '''
-    misp_event = MISPEvent()
-    misp_event.load(request['data'])
 
-    pdf = reportlab_generator.get_base64_from_buffer(reportlab_generator.convert_event_in_pdf_buffer(misp_event))
+        misp_event = MISPEvent()
+        misp_event.load(evt)
 
-    return {'response': [], 'data': str(pdf, 'utf-8')}
+        pdf = reportlab_generator.get_base64_from_value(reportlab_generator.convert_event_in_pdf_buffer(misp_event))
+
+        return {'response': [], 'data': str(pdf, 'utf-8')}
 
 
 def introspection():
@@ -164,3 +165,8 @@ def introspection():
 def version():
     moduleinfo['config'] = moduleconfig
     return moduleinfo
+
+import pprint
+
+if __name__ == "__main__":
+    pprint.pprint("test")
