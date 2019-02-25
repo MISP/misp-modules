@@ -1,0 +1,14 @@
+[Unit]
+Description=System-wide instance of the MISP Modules
+After=network.target
+
+[Service]
+User=www-data
+Group=www-data
+WorkingDirectory=/usr/local/src/misp-modules
+Environment="PATH=/var/www/MISP/venv/bin"
+ExecStart=misp-modules -l 127.0.0.1 -s
+
+[Install]
+WantedBy=multi-user.target
+
