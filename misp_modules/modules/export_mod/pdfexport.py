@@ -1,11 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from datetime import date
 import json
-import shlex
-import subprocess
-import base64
 
 from pymisp import MISPEvent
 from pymisp.tools import reportlab_generator
@@ -46,6 +42,7 @@ class ReportGenerator():
         self.misp_event = MISPEvent()
         self.misp_event.load(event)
 
+
 def handler(q=False):
     if q is False:
         return False
@@ -58,12 +55,11 @@ def handler(q=False):
     config = {}
 
     # Construct config object for reportlab_generator
-    for config_item in moduleconfig :
+    for config_item in moduleconfig:
         if (request.get('config')) and (request['config'].get(config_item) is not None):
             config[config_item] = request['config'].get(config_item)
 
     for evt in request['data']:
-
         misp_event = MISPEvent()
         misp_event.load(evt)
 
