@@ -18,7 +18,9 @@ moduleinfo = {'version': '2',
               'module-type': ['export'],
               'require_standard_format': True}
 
-moduleconfig = []
+# config fields that your code expects from the site admin
+moduleconfig = ["MISP_base_url_for_dynamic_link", "MISP_name_for_metadata"]
+
 mispattributes = {}
 
 outputFileExtension = "pdf"
@@ -53,12 +55,19 @@ def handler(q=False):
     if 'data' not in request:
         return False
 
+    config = {}
+
+    # Construct config object for reportlab_generator
+    for config_item in moduleconfig :
+        if (request.get('config')) and (request['config'].get(config_item) is not None):
+            config[config_item] = request['config'].get(config_item)
+
     for evt in request['data']:
 
         misp_event = MISPEvent()
         misp_event.load(evt)
 
-        pdf = reportlab_generator.get_base64_from_value(reportlab_generator.convert_event_in_pdf_buffer(misp_event))
+        pdf = reportlab_generator.get_base64_from_value(reportlab_generator.convert_event_in_pdf_buffer(misp_event, config))
 
         return {'response': [], 'data': str(pdf, 'utf-8')}
 
