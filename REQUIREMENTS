@@ -3,7 +3,7 @@
 -e git+https://github.com/D4-project/BGP-Ranking.git/@7e698f87366e6f99b4d0d11852737db28e3ddc62#egg=pybgpranking&subdirectory=client
 -e git+https://github.com/D4-project/IPASN-History.git/@e846cd36fe1ed6b22f60890bba89f84e61b62e59#egg=pyipasnhistory&subdirectory=client
 -e git+https://github.com/MISP/PyIntel471.git@0df8d51f1c1425de66714b3a5a45edb69b8cc2fc#egg=pyintel471
--e git+https://github.com/MISP/PyMISP.git@2c877f2aec11b7f5d2f23dfc5ce7398b2ce33b48#egg=pymisp
+-e git+https://github.com/MISP/PyMISP.git@634ecc3ac308d01ebf5f5fbb9aace7746a2b8707#egg=pymisp
 -e git+https://github.com/Rafiot/uwhoisd.git@f6f035e52213c8abc20f2084d28cfffb399457cb#egg=uwhois&subdirectory=client
 -e git+https://github.com/sebdraven/pydnstrails@48c1f740025c51289f43a24863d1845ff12fd21a#egg=pydnstrails
 -e git+https://github.com/sebdraven/pyonyphe@66329baeee7cab844f2203c047c2551828eaf14d#egg=pyonyphe
@@ -47,6 +47,7 @@ rdflib==4.2.2
 redis==3.1.0
 requests-cache==0.4.13
 requests==2.21.0
+reportlab
 shodan==1.10.4
 sigmatools==0.7.1
 six==1.12.0
