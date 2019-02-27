@@ -20,6 +20,8 @@ then
     sudo -H -u ${USER} ${PATH_TO_MISP}/venv/bin/pip install -U -r REQUIREMENTS
     sudo -H -u ${USER} ${PATH_TO_MISP}/venv/bin/pip install -U -e .
 
+    service misp-modules restart
+
     popd
 else
     if ! [ -x "$(command -v pipenv)" ]; then
