@@ -333,7 +333,7 @@
         "pymisp": {
             "editable": true,
             "git": "https://github.com/MISP/PyMISP.git",
-            "ref": "634ecc3ac308d01ebf5f5fbb9aace7746a2b8707"
+            "ref": "62e047f3c1972e21aa36a8882bebf4488cdc1f84"
         },
         "pyonyphe": {
             "editable": true,
