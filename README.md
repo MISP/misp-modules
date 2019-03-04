@@ -94,8 +94,6 @@ sudo git clone https://github.com/MISP/misp-modules.git
 cd misp-modules
 sudo -u www-data /var/www/MISP/venv/bin/pip install -I -r REQUIREMENTS
 sudo -u www-data /var/www/MISP/venv/bin/pip install .
-sudo apt install ruby-pygments.rb -y
-sudo gem install asciidoctor-pdf --pre
 sudo sed -i -e '$i \sudo -u www-data /var/www/MISP/venv/bin/misp-modules -l 127.0.0.1 -s > /tmp/misp-modules_rc.local.log &\n' /etc/rc.local
 /var/www/MISP/venv/bin/misp-modules -l 127.0.0.1 -s & #to start the modules
 ~~~~
@@ -109,8 +107,6 @@ sudo git clone https://github.com/MISP/misp-modules.git
 cd misp-modules
 sudo pip3 install -I -r REQUIREMENTS
 sudo pip3 install -I .
-sudo apt install ruby-pygments.rb -y
-sudo gem install asciidoctor-pdf --pre
 sudo sed -i -e '$i \sudo -u www-data /var/www/MISP/venv/bin/misp-modules -l 127.0.0.1 -s > /tmp/misp-modules_rc.local.log &\n' /etc/rc.local
 /var/www/MISP/venv/bin/misp-modules -l 127.0.0.1 -s & #to start the modules
 ~~~~
@@ -125,7 +121,6 @@ cd misp-modules
 scl enable rh-python36 ‘python3 –m pip install cryptography’
 scl enable rh-python36 ‘python3 –m pip install -I -r REQUIREMENTS’
 scl enable rh-python36 ‘python3 –m pip install –I .’
-scl enable rh-ruby22 ‘gem install asciidoctor-pdf –pre’ 
 ~~~~
 Create the service file /etc/systemd/system/misp-workers.service :
 ~~~~
