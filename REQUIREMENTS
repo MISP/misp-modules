@@ -3,14 +3,14 @@
 -e git+https://github.com/D4-project/BGP-Ranking.git/@37c97ae252ec4bf1d67733a49d4895c8cb009cf9#egg=pybgpranking&subdirectory=client
 -e git+https://github.com/D4-project/IPASN-History.git/@e846cd36fe1ed6b22f60890bba89f84e61b62e59#egg=pyipasnhistory&subdirectory=client
 -e git+https://github.com/MISP/PyIntel471.git@0df8d51f1c1425de66714b3a5a45edb69b8cc2fc#egg=pyintel471
--e git+https://github.com/MISP/PyMISP.git@62e047f3c1972e21aa36a8882bebf4488cdc1f84#egg=pymisp
+-e git+https://github.com/MISP/PyMISP.git@b8759673b91e733c307698abdc0d5ed82fd7e0de#egg=pymisp
 -e git+https://github.com/Rafiot/uwhoisd.git@411572840eba4c72dc321c549b36a54ed5cea9de#egg=uwhois&subdirectory=client
 -e git+https://github.com/sebdraven/pydnstrails@48c1f740025c51289f43a24863d1845ff12fd21a#egg=pydnstrails
 -e git+https://github.com/sebdraven/pyonyphe@cbb0168d5cb28a9f71f7ab3773164a7039ccdb12#egg=pyonyphe
 aiohttp==3.4.4
 antlr4-python3-runtime==4.7.2 ; python_version >= '3'
 async-timeout==3.0.1
-attrs==18.2.0
+attrs==19.1.0
 beautifulsoup4==4.7.1
 blockchain==1.4.4
 certifi==2018.11.29
@@ -27,13 +27,13 @@ httplib2==0.12.1
 idna-ssl==1.1.0 ; python_version < '3.7'
 idna==2.8
 isodate==0.6.0
-jsonschema==3.0.0
+jsonschema==3.0.1
 maclookup==1.0.3
 multidict==4.5.2
 oauth2==1.9.0.post1
 passivetotal==1.0.30
 pillow==5.4.1
-psutil==5.5.1
+psutil==5.6.0
 pyeupi==1.0
 pygeoip==0.3.2
 pyparsing==2.3.1
@@ -49,16 +49,16 @@ reportlab==3.5.13
 requests-cache==0.4.13
 requests==2.21.0
 shodan==1.11.1
-sigmatools==0.7.1
+sigmatools==0.9
 six==1.12.0
 soupsieve==1.8
 sparqlwrapper==1.8.2
 stix2-patterns==1.1.0
-tornado==5.1.1
+tornado==6.0.1
 url-normalize==1.4.1
 urlarchiver==0.2
 urllib3==1.24.1
-vulners==1.4.4
+vulners==1.4.5
 wand==0.5.1
 xlsxwriter==1.1.5
 yara-python==3.8.1
