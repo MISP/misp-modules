@@ -41,6 +41,7 @@ domaintools_api = "*"
 misp-modules = {editable = true,path = "."}
 pybgpranking = {editable = true,git = "https://github.com/D4-project/BGP-Ranking.git/",subdirectory = "client"}
 pyipasnhistory = {editable = true,git = "https://github.com/D4-project/IPASN-History.git/",subdirectory = "client"}
+backscatter = "*"
 
 [requires]
 python_version = "3.6"

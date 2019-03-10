@@ -11,9 +11,10 @@ aiohttp==3.4.4
 antlr4-python3-runtime==4.7.2 ; python_version >= '3'
 async-timeout==3.0.1
 attrs==19.1.0
+backscatter==0.2.4
 beautifulsoup4==4.7.1
 blockchain==1.4.4
-certifi==2018.11.29
+certifi==2019.3.9
 chardet==3.0.4
 click-plugins==1.0.4
 click==7.0
@@ -54,6 +55,7 @@ six==1.12.0
 soupsieve==1.8
 sparqlwrapper==1.8.2
 stix2-patterns==1.1.0
+tabulate==0.8.3
 tornado==6.0.1
 url-normalize==1.4.1
 urlarchiver==0.2
