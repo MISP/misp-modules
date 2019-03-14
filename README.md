@@ -505,14 +505,14 @@ sudo git checkout MyModBranch
 
 Remove the contents of the build directory and re-install misp-modules.
 
-~~~python
+~~~bash
 sudo rm -fr build/*
 sudo pip3 install --upgrade .
 ~~~
 
 SSH in with a different terminal and run `misp-modules` with debugging enabled.
 
-~~~python
+~~~bash
 sudo killall misp-modules
 misp-modules -d
 ~~~
