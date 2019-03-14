@@ -17,7 +17,9 @@ For more information: [Extending MISP with Python modules](https://www.circl.lu/
 
 ### Expansion modules
 
+* [Backscatter.io](misp_modules/modules/expansion/backscatter_io) - a hover and expansion module to expand an IP address with mass-scanning observations.
 * [BGP Ranking](misp_modules/modules/expansion/bgpranking.py) - a hover and expansion module to expand an AS number with the ASN description, its history, and position in BGP Ranking.
+* [BTC scam check](misp_modules/modules/expansion/btc_scam_check.py) - An expansion hover module to instantly check if a BTC address has been abused.
 * [BTC transactions](misp_modules/modules/expansion/btc_steroids.py) - An expansion hover module to get a blockchain balance and the transactions from a BTC address in MISP.
 * [CIRCL Passive DNS](misp_modules/modules/expansion/circl_passivedns.py) - a hover and expansion module to expand hostname and IP addresses with passive DNS information.
 * [CIRCL Passive SSL](misp_modules/modules/expansion/circl_passivessl.py) - a hover and expansion module to expand IP addresses with the X.509 certificate seen.
@@ -65,7 +67,7 @@ For more information: [Extending MISP with Python modules](https://www.circl.lu/
 * [CEF](misp_modules/modules/export_mod/cef_export.py) module to export Common Event Format (CEF).
 * [GoAML export](misp_modules/modules/export_mod/goamlexport.py) module to export in [GoAML format](http://goaml.unodc.org/goaml/en/index.html).
 * [Lite Export](misp_modules/modules/export_mod/liteexport.py) module to export a lite event.
-* [Simple PDF export](misp_modules/modules/export_mod/pdfexport.py) module to export in PDF (required: asciidoctor-pdf).
+* [PDF export](misp_modules/modules/export_mod/pdfexport.py) module to export an event in PDF.
 * [Nexthink query format](misp_modules/modules/export_mod/nexthinkexport.py) module to export in Nexthink query format.
 * [osquery](misp_modules/modules/export_mod/osqueryexport.py) module to export in [osquery](https://osquery.io/) query format.
 * [ThreatConnect](misp_modules/modules/export_mod/threat_connect_export.py) module to export in ThreatConnect CSV format.
@@ -85,20 +87,18 @@ For more information: [Extending MISP with Python modules](https://www.circl.lu/
 ## How to install and start MISP modules in a Python virtualenv?
 
 ~~~~bash
-sudo apt-get install python3-dev python3-pip libpq5 libjpeg-dev tesseract-ocr imagemagick
+sudo apt-get install python3-dev python3-pip libpq5 libjpeg-dev tesseract-ocr imagemagick virtualenv
 sudo -u www-data virtualenv -p python3 /var/www/MISP/venv
 cd /usr/local/src/
 sudo git clone https://github.com/MISP/misp-modules.git
 cd misp-modules
 sudo -u www-data /var/www/MISP/venv/bin/pip install -I -r REQUIREMENTS
 sudo -u www-data /var/www/MISP/venv/bin/pip install .
-sudo apt install ruby-pygments.rb -y
-sudo gem install asciidoctor-pdf --pre
 sudo sed -i -e '$i \sudo -u www-data /var/www/MISP/venv/bin/misp-modules -l 127.0.0.1 -s > /tmp/misp-modules_rc.local.log &\n' /etc/rc.local
 /var/www/MISP/venv/bin/misp-modules -l 127.0.0.1 -s & #to start the modules
 ~~~~
 
-## How to install and start MISP modules?
+## How to install and start MISP modules on Debian-based distributions ?
 
 ~~~~bash
 sudo apt-get install python3-dev python3-pip libpq5 libjpeg-dev tesseract-ocr imagemagick
@@ -107,10 +107,43 @@ sudo git clone https://github.com/MISP/misp-modules.git
 cd misp-modules
 sudo pip3 install -I -r REQUIREMENTS
 sudo pip3 install -I .
-sudo apt install ruby-pygments.rb -y
-sudo gem install asciidoctor-pdf --pre
 sudo sed -i -e '$i \sudo -u www-data /var/www/MISP/venv/bin/misp-modules -l 127.0.0.1 -s > /tmp/misp-modules_rc.local.log &\n' /etc/rc.local
 /var/www/MISP/venv/bin/misp-modules -l 127.0.0.1 -s & #to start the modules
+~~~~
+
+## How to install and start MISP modules on RHEL-based distributions ?
+As of this writing, the official RHEL repositories only contain Ruby 2.0.0 and Ruby 2.1 or higher is required. As such, this guide installs Ruby 2.2 from the [SCL](https://access.redhat.com/documentation/en-us/red_hat_software_collections/3/html/3.2_release_notes/chap-installation#sect-Installation-Subscribe) repository. 
+~~~~bash
+yum install rh-ruby22
+cd /var/www/MISP
+git clone https://github.com/MISP/misp-modules.git
+cd misp-modules
+scl enable rh-python36 ‘python3 –m pip install cryptography’
+scl enable rh-python36 ‘python3 –m pip install -I -r REQUIREMENTS’
+scl enable rh-python36 ‘python3 –m pip install –I .’
+~~~~
+Create the service file /etc/systemd/system/misp-workers.service :
+~~~~
+[Unit]
+Description=MISP's modules
+After=misp-workers.service
+
+[Service]
+Type=simple
+User=apache
+Group=apache
+ExecStart=/usr/bin/scl enable rh-python36 rh-ruby22  ‘/opt/rh/rh-python36/root/bin/misp-modules –l 127.0.0.1 –s’
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
+~~~~
+The `After=misp-workers.service` must be changed or removed if you have not created a misp-workers service.
+Then, enable the misp-modules service and start it ;
+~~~~bash
+systemctl daemon-reload
+systemctl enable --now misp-modules
 ~~~~
 
 ## How to add your own MISP modules?

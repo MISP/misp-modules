@@ -1,0 +1,9 @@
+{
+    "description": "An expansion hover module to query a special dns blacklist to check if a bitcoin address has been abused.",
+    "requirements": ["dnspython3: dns python library"],
+    "features": "The module queries a dns blacklist directly with the bitcoin address and get a response if the address has been abused.",
+    "logo": "logos/bitcoin.png",
+    "input": "btc address attribute.",
+    "output" : "Text to indicate if the BTC address has been abused.",
+    "references": ["https://btcblack.it/"]
+}

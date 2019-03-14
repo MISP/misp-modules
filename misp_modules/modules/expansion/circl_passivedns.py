@@ -32,7 +32,7 @@ def handler(q=False):
     res = x.query(toquery)
     out = ''
     for v in res:
-            out = out + "{} ".format(v['rdata'])
+        out = out + "{} ".format(v['rdata'])
 
     r = {'results': [{'types': mispattributes['output'], 'values': out}]}
     return r

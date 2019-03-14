@@ -8,4 +8,4 @@ __all__ = ['vmray_submit', 'bgpranking', 'circl_passivedns', 'circl_passivessl',
            'yara_syntax_validator', 'hashdd', 'onyphe', 'onyphe_full', 'rbl',
            'xforceexchange', 'sigma_syntax_validator', 'stix2_pattern_syntax_validator',
            'sigma_queries', 'dbl_spamhaus', 'vulners', 'yara_query', 'macaddress_io',
-           'intel471']
+           'intel471', 'backscatter_io', 'btc_scam_check']
