@@ -58,7 +58,7 @@ def _query_host_api(attribute):
     attributes = []
     if 'urls' in response and response['urls']:
         for url in response['urls']:
-            attributes.append(_create_url_attribute(url['url']).to_json())
+            attributes.append(_create_url_attribute(url['url']).to_dict())
     return {'results': {'Attribute': attributes}}
 
 
@@ -78,9 +78,9 @@ def _query_payload_api(attribute):
         file_object.add_attribute('filename', **{'type': 'filename', 'value': filename})
     for url in urls:
         attribute = _create_url_attribute(url)
-        results['Attribute'].append(attribute.to_json())
+        results['Attribute'].append(attribute.to_dict())
         file_object.add_reference(attribute.uuid, 'retrieved-from')
-    results['Object'].append(file_object.to_json())
+    results['Object'].append(file_object.to_dict())
     return {'results': results}
 
 
@@ -108,7 +108,7 @@ def _query_url_api(attribute):
                     object_score += 2
                     args.append(vt_attributes)
             try:
-                results['Object'].extend([misp_object.to_json() for misp_object in objects_mapping[object_score](*args)])
+                results['Object'].extend([misp_object.to_dict() for misp_object in objects_mapping[object_score](*args)])
             except KeyError:
                 continue
     return {'results': results}
