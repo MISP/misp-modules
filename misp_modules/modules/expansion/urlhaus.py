@@ -62,7 +62,7 @@ class PayloadQuery(URLhaus):
         hash_type = self.attribute.type
         file_object = MISPObject('file')
         if self.attribute.event_id != '0':
-            file_object.id = self.attribute.event_id
+            file_object.id = self.attribute.object_id
         response = requests.post(self.url, data={'{}_hash'.format(hash_type): self.attribute.value}).json()
         other_hash_type = 'md5' if hash_type == 'sha256' else 'sha256'
         for key, relation in zip(('{}_hash'.format(other_hash_type), 'file_size'), (other_hash_type, 'size-in-bytes')):
