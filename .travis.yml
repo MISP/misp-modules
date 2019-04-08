@@ -19,14 +19,14 @@ script:
     - pid=$!
     - sleep 5
     - pipenv run nosetests --with-coverage --cover-package=misp_modules
-    - kill -s INT $pid
+    - kill -s KILL $pid
     - pushd ~/
     - pipenv run coverage run -m --parallel-mode --source=misp_modules misp_modules.__init__ -s -l 127.0.0.1 &
     - pid=$!
     - popd
     - sleep 5
     - pipenv run nosetests --with-coverage --cover-package=misp_modules
-    - kill -s INT $pid
+    - kill -s KILL $pid
     - pipenv run flake8 --ignore=E501,W503 misp_modules
 
 after_success:

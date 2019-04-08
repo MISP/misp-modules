@@ -15,8 +15,7 @@ moduleinfo = {'version': '2',
               'require_standard_format': True}
 
 # config fields that your code expects from the site admin
-moduleconfig = ["MISP_base_url_for_dynamic_link", "MISP_name_for_metadata"]
-
+moduleconfig = ["MISP_base_url_for_dynamic_link", "MISP_name_for_metadata", "Activate_textual_description", "Activate_galaxy_description", "Activate_related_events", "Activate_internationalization_fonts", "Custom_fonts_path"]
 mispattributes = {}
 
 outputFileExtension = "pdf"
