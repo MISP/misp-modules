@@ -125,7 +125,7 @@ scl enable rh-python36 ‘python3 –m pip install cryptography’
 scl enable rh-python36 ‘python3 –m pip install -I -r REQUIREMENTS’
 scl enable rh-python36 ‘python3 –m pip install –I .’
 ~~~~
-Create the service file /etc/systemd/system/misp-workers.service :
+Create the service file /etc/systemd/system/misp-modules.service :
 ~~~~
 [Unit]
 Description=MISP's modules
