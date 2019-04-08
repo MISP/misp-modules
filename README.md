@@ -87,7 +87,7 @@ For more information: [Extending MISP with Python modules](https://www.circl.lu/
 * [ThreatAnalyzer](misp_modules/modules/import_mod/threatanalyzer_import.py) - An import module to process ThreatAnalyzer archive.zip/analysis.json sandbox exports.
 * [VMRay](misp_modules/modules/import_mod/vmray_import.py) - An import module to process VMRay export.
 
-## How to install and start MISP modules in a Python virtualenv?
+## How to install and start MISP modules in a Python virtualenv? (recommended)
 
 ~~~~bash
 sudo apt-get install python3-dev python3-pip libpq5 libjpeg-dev tesseract-ocr imagemagick virtualenv
@@ -97,7 +97,10 @@ sudo git clone https://github.com/MISP/misp-modules.git
 cd misp-modules
 sudo -u www-data /var/www/MISP/venv/bin/pip install -I -r REQUIREMENTS
 sudo -u www-data /var/www/MISP/venv/bin/pip install .
-sudo sed -i -e '$i \sudo -u www-data /var/www/MISP/venv/bin/misp-modules -l 127.0.0.1 -s > /tmp/misp-modules_rc.local.log &\n' /etc/rc.local
+# Start misp-modules as a service
+sudo cp etc/systemd/system/misp-modules.service /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable --now misp-modules
 /var/www/MISP/venv/bin/misp-modules -l 127.0.0.1 -s & #to start the modules
 ~~~~
 
@@ -110,7 +113,10 @@ sudo git clone https://github.com/MISP/misp-modules.git
 cd misp-modules
 sudo pip3 install -I -r REQUIREMENTS
 sudo pip3 install -I .
-sudo sed -i -e '$i \sudo -u www-data /var/www/MISP/venv/bin/misp-modules -l 127.0.0.1 -s > /tmp/misp-modules_rc.local.log &\n' /etc/rc.local
+# Start misp-modules as a service
+sudo cp etc/systemd/system/misp-modules.service /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable --now misp-modules
 /var/www/MISP/venv/bin/misp-modules -l 127.0.0.1 -s & #to start the modules
 ~~~~
 
@@ -490,7 +496,7 @@ Download a pre-built virtual image from the [MISP training materials](https://ww
 - Create a Host-Only adapter in VirtualBox
 - Set your Misp OVA to that Host-Only adapter
 - Start the virtual machine
-- Get the IP address of the virutal machine
+- Get the IP address of the virtual machine
 - SSH into the machine (Login info on training page)
 - Go into the misp-modules directory
 
@@ -510,14 +516,16 @@ Remove the contents of the build directory and re-install misp-modules.
 
 ~~~bash
 sudo rm -fr build/*
-sudo pip3 install --upgrade .
+sudo -u www-data /var/www/MISP/venv/bin/pip install --upgrade .
 ~~~
 
 SSH in with a different terminal and run `misp-modules` with debugging enabled.
 
 ~~~bash
-sudo killall misp-modules
-misp-modules -d
+# In case misp-modules is not a service do:
+# sudo killall misp-modules
+sudo systemctl disable --now misp-modules
+sudo -u www-data /var/www/MISP/venv/bin/misp-modules -d
 ~~~
 
 
