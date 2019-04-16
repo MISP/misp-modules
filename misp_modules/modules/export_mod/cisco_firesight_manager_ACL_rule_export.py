@@ -11,21 +11,20 @@
 
 import json
 import base64
-import csv
 from urllib.parse import quote
 
 misperrors = {'error': 'Error'}
 
 moduleinfo = {'version': '1', 'author': 'Stanislav Klevtsov',
-			'description': 'Export malicious network activity attributes of the MISP event to Cisco firesight manager block rules',
-			'module-type': ['export']}
+              'description': 'Export malicious network activity attributes of the MISP event to Cisco firesight manager block rules',
+              'module-type': ['export']}
 
 
 moduleconfig = ['fmc_ip_addr', 'fmc_login', 'fmc_pass', 'domain_id', 'acpolicy_id']
 
-fsmapping = {"ip-dst":"dst", "url":"request"}
+fsmapping = {"ip-dst": "dst", "url": "request"}
 
-mispattributes = {'input':list(fsmapping.keys())}
+mispattributes = {'input': list(fsmapping.keys())}
 
 # options: event, attribute, event-collection, attribute-collection
 inputSource = ['event']
@@ -48,88 +47,94 @@ curl -X POST -v -k -H 'Content-Type: application/json' -H \"Authorization: Basic
 
 
 def handler(q=False):
-	if q is False:
-		return False
-		
-	r = {'results': []}
-	request = json.loads(q)
+    if q is False:
+        return False
 
-	if "config" in request: 
-		config  = request["config"]
+    r = {'results': []}
+    request = json.loads(q)
 
-	#check if config is empty
-	if not config['fmc_ip_addr']: config['fmc_ip_addr'] = "0.0.0.0"
-	if not config['fmc_login']: config['fmc_login'] = "login"
-	if not config['fmc_pass']: config['fmc_pass'] = "password"
-	if not config['domain_id']: config['domain_id'] = "SET_FIRESIGHT_DOMAIN_ID"
-	if not config['acpolicy_id']: config['acpolicy_id'] = "SET_FIRESIGHT_ACPOLICY_ID"
+    if "config" in request:
+        config = request["config"]
 
-	data = request["data"]
-	output = ""
-	ipdst = []
-	urls = []
+    # check if config is empty
+    if not config['fmc_ip_addr']:
+        config['fmc_ip_addr'] = "0.0.0.0"
+    if not config['fmc_login']:
+        config['fmc_login'] = "login"
+    if not config['fmc_pass']:
+        config['fmc_pass'] = "password"
+    if not config['domain_id']:
+        config['domain_id'] = "SET_FIRESIGHT_DOMAIN_ID"
+    if not config['acpolicy_id']:
+        config['acpolicy_id'] = "SET_FIRESIGHT_ACPOLICY_ID"
 
-	#populate the ACL rule with attributes
-	for ev in data:
+    data = request["data"]
+    output = ""
+    ipdst = []
+    urls = []
 
-		event = ev["Attribute"]
-		event_id = ev["Event"]["id"]
-		event_info = ev["Event"]["info"]
+    # populate the ACL rule with attributes
+    for ev in data:
 
-		for index, attr in enumerate(event):
-			if attr["to_ids"] is True:
+        event = ev["Attribute"]
+        event_id = ev["Event"]["id"]
+        event_info = ev["Event"]["info"]
 
-				if attr["type"] in fsmapping:
-					if attr["type"] in "ip-dst":
-						ipdst.append(BLOCK_DST_JSON_TMPL.format(ipdst=attr["value"]))
-					else:
-						urls.append(BLOCK_URL_JSON_TMPL.format(url=quote(attr["value"], safe='@/:;?&=-_.,+!*')))
+        for index, attr in enumerate(event):
+            if attr["to_ids"] is True:
+                if attr["type"] in fsmapping:
+                    if attr["type"] == "ip-dst":
+                        ipdst.append(BLOCK_DST_JSON_TMPL.format(ipdst=attr["value"]))
+                    else:
+                        urls.append(BLOCK_URL_JSON_TMPL.format(url=quote(attr["value"], safe='@/:;?&=-_.,+!*')))
 
+    # building the .sh file
+    output += SH_FILE_HEADER
+    output += "FIRESIGHT_IP_ADDR='{}'\n".format(config['fmc_ip_addr'])
 
-	#building the .sh file
-	output += SH_FILE_HEADER
-	output += "FIRESIGHT_IP_ADDR='" + config['fmc_ip_addr'] + "'\n"
+    output += "LOGINPASS_BASE64=`echo -n '{}:{}' | base64`\n".format(config['fmc_login'], config['fmc_pass'])
+    output += "DOMAIN_ID='{}'\n".format(config['domain_id'])
+    output += "ACPOLICY_ID='{}'\n\n".format(config['acpolicy_id'])
 
-	output += "LOGINPASS_BASE64=`echo -n '" + config['fmc_login'] + ":" + config['fmc_pass'] + "' | base64`\n"
-	output += "DOMAIN_ID='" + config['domain_id'] + "'\n"
-	output += "ACPOLICY_ID='" + config['acpolicy_id'] + "'\n\n"
-	
-	output += "ACC_TOKEN=`curl -X POST -v -k -sD - -o /dev/null -H \"Authorization: Basic $LOGINPASS_BASE64\" -i \"https://$FIRESIGHT_IP_ADDR/api/fmc_platform/v1/auth/generatetoken\" | grep -i x-auth-acc | sed 's/.*:\\ //g' | tr -d '[:space:]' | tr -d '\\n'`" + "\n"
+    output += "ACC_TOKEN=`curl -X POST -v -k -sD - -o /dev/null -H \"Authorization: Basic $LOGINPASS_BASE64\" -i \"https://$FIRESIGHT_IP_ADDR/api/fmc_platform/v1/auth/generatetoken\" | grep -i x-auth-acc | sed 's/.*:\\ //g' | tr -d '[:space:]' | tr -d '\\n'`\n"
 
-	output += BLOCK_JSON_TMPL.format(rule_name="misp_event_"+event_id,dst_networks=', '.join(ipdst), urls=', '.join(urls), event_info_comment=event_info) + "\n"
+    output += BLOCK_JSON_TMPL.format(rule_name="misp_event_{}".format(event_id),
+                                     dst_networks=', '.join(ipdst),
+                                     urls=', '.join(urls),
+                                     event_info_comment=event_info) + "\n"
 
-	output += CURL_ADD_RULE_TMPL
-	# END building the .sh file
+    output += CURL_ADD_RULE_TMPL
+    # END building the .sh file
 
-	r = {"data":base64.b64encode(output.encode('utf-8')).decode('utf-8')}
-	return r
+    r = {"data": base64.b64encode(output.encode('utf-8')).decode('utf-8')}
+    return r
 
 
 def introspection():
-	modulesetup = {}
-	try:
-		responseType
-		modulesetup['responseType'] = responseType
-	except NameError:
-		pass
-	try:
-		userConfig
-		modulesetup['userConfig'] = userConfig
-	except NameError:
-		pass
-	try:
-		outputFileExtension
-		modulesetup['outputFileExtension'] = outputFileExtension
-	except NameError:
-		pass
-	try:
-		inputSource
-		modulesetup['inputSource'] = inputSource
-	except NameError:
-		pass
-	return modulesetup
+    modulesetup = {}
+    try:
+        responseType
+        modulesetup['responseType'] = responseType
+    except NameError:
+        pass
+    try:
+        userConfig
+        modulesetup['userConfig'] = userConfig
+    except NameError:
+        pass
+    try:
+        outputFileExtension
+        modulesetup['outputFileExtension'] = outputFileExtension
+    except NameError:
+        pass
+    try:
+        inputSource
+        modulesetup['inputSource'] = inputSource
+    except NameError:
+        pass
+    return modulesetup
 
 
 def version():
-	moduleinfo['config'] = moduleconfig
-	return moduleinfo
+    moduleinfo['config'] = moduleconfig
+    return moduleinfo
