@@ -1,6 +1,6 @@
 from . import _vmray  # noqa
 
-__all__ = ['vmray_submit', 'bgpranking', 'circl_passivedns', 'circl_passivessl',
+__all__ = ['cuckoo_submit', 'vmray_submit', 'bgpranking', 'circl_passivedns', 'circl_passivessl',
            'countrycode', 'cve', 'dns', 'btc_steroids', 'domaintools', 'eupi',
            'farsight_passivedns', 'ipasn', 'passivetotal', 'sourcecache', 'virustotal',
            'whois', 'shodan', 'reversedns', 'geoip_country', 'wiki', 'iprep',
