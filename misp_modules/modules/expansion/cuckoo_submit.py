@@ -9,25 +9,25 @@ import zipfile
 
 from requests.exceptions import RequestException
 
-log = logging.getLogger('cuckoo_submit')
+log = logging.getLogger("cuckoo_submit")
 log.setLevel(logging.DEBUG)
 sh = logging.StreamHandler(sys.stdout)
 sh.setLevel(logging.DEBUG)
 fmt = logging.Formatter(
-    '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 sh.setFormatter(fmt)
 log.addHandler(sh)
 
 moduleinfo = {
-    "version": "0.1", 'author': "Evert Kors",
+    "version": "0.1", "author": "Evert Kors",
     "description": "Submit files and URLs to Cuckoo Sandbox",
     "module-type": ["expansion", "hover"]
 }
 misperrors = {"error": "Error"}
-moduleconfig = ["cuckoo_api", "api_key"]
+moduleconfig = ["api_url", "api_key"]
 mispattributes = {
-    "input": ["attachment', 'malware-sample", "url", "domain"],
+    "input": ["attachment", "malware-sample", "url", "domain"],
     "output": ["text"]
 }
 
@@ -56,7 +56,7 @@ class CuckooAPI(object):
             response = requests.post(
                 urllib.parse.urljoin(self.api_url, endpoint),
                 files=files, data=data,
-                headers={"Authorization: Bearer {}".format(self.api_key)}
+                headers={"Authorization": "Bearer {}".format(self.api_key)}
             )
         except RequestException as e:
             log.error("Failed to submit sample to Cuckoo Sandbox. %s", e)
@@ -64,6 +64,10 @@ class CuckooAPI(object):
 
         if response.status_code == 401:
             raise APIKeyError("Invalid or no Cuckoo Sandbox API key provided")
+
+        if response.status_code != 200:
+            log.error("Invalid Cuckoo API response")
+            return None
 
         return response.json()
 
@@ -145,5 +149,5 @@ def introspection():
 
 
 def version():
-    moduleinfo['config'] = moduleconfig
+    moduleinfo["config"] = moduleconfig
     return moduleinfo
