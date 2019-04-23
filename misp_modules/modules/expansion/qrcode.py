@@ -16,8 +16,8 @@ debug = True
 debug_prefix = "[DEBUG] QR Code module: "
 # format example: bitcoin:1GXZ6v7FZzYBEnoRaG77SJxhu7QkvQmFuh?amount=0.15424
 # format example: http://example.com
-cryptocurrencies = {'bitcoin'}
-schemas = {'http://', 'https://', 'ftp://'}
+cryptocurrencies = ['bitcoin']
+schemas = ['http://', 'https://', 'ftp://']
 moduleconfig = []
 
 
