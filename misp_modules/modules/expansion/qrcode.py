@@ -20,6 +20,7 @@ cryptocurrencies = {'bitcoin'}
 schemas = {'http://', 'https://', 'ftp://'}
 moduleconfig = []
 
+
 def handler(q=False):
     if q is False:
         return False
@@ -27,7 +28,7 @@ def handler(q=False):
     filename = q['attachment']
     try:
         img_array = np.fromstring(binascii.a2b_base64(q['data']), np.uint8)
-    except:
+    except Exception as e:
         err = "Couldn't fetch attachment (JSON 'data' is empty). Are you using the 'Query enrichment' action?"
         misperrors['error'] = err
         print(err)
@@ -46,7 +47,7 @@ def handler(q=False):
         for item in cryptocurrencies:
             if item in result:
                 try:
-                    currency, address, extra =  re.split('\:|\?', result)
+                    currency, address, extra = re.split('\:|\?', result)
                 except Exception as e:
                     print(e)
                 if currency in cryptocurrencies:
@@ -60,7 +61,7 @@ def handler(q=False):
                         print(e)
                 else:
                     print(address)
-        for item  in schemas:
+        for item in schemas:
             if item in result:
                 try:
                     url = result
@@ -76,6 +77,7 @@ def handler(q=False):
                     print(e)
     misperrors['error'] = "Couldn't decode QR code in attachment."
     return misperrors
+
 
 def introspection():
     return mispattributes
