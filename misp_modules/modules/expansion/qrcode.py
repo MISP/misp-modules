@@ -32,6 +32,7 @@ def handler(q=False):
         err = "Couldn't fetch attachment (JSON 'data' is empty). Are you using the 'Query enrichment' action?"
         misperrors['error'] = err
         print(err)
+        print(e)
         return misperrors
     image = cv2.imdecode(img_array, cv2.IMREAD_COLOR)
     if q:
@@ -47,7 +48,7 @@ def handler(q=False):
         for item in cryptocurrencies:
             if item in result:
                 try:
-                    currency, address, extra = re.split('\:|\?', result)
+                    currency, address, extra = re.split(r'\:|\?', result)
                 except Exception as e:
                     print(e)
                 if currency in cryptocurrencies:
