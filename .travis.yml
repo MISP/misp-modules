@@ -11,6 +11,7 @@ python:
     - "3.7-dev"
 
 install:
+    - apt-get install libzbar0 libzbar-dev
     - pip install pipenv
     - pipenv install --dev
 
