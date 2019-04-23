@@ -44,6 +44,7 @@ For more information: [Extending MISP with Python modules](https://www.circl.lu/
 * [onyphe_full](misp_modules/modules/expansion/onyphe_full.py) - a modules to process full queries on Onyphe.
 * [OTX](misp_modules/modules/expansion/otx.py) - an expansion module for [OTX](https://otx.alienvault.com/).
 * [passivetotal](misp_modules/modules/expansion/passivetotal.py) - a [passivetotal](https://www.passivetotal.org/) module that queries a number of different PassiveTotal datasets.
+* [qrcode](misp_modules/modules/expansion/qrcode.py) - a module decode QR code, barcode and similar codes from an image and enrich with the decoded values.
 * [rbl](misp_modules/modules/expansion/rbl.py) - a module to get RBL (Real-Time Blackhost List) values from an attribute.
 * [reversedns](misp_modules/modules/expansion/reversedns.py) - Simple Reverse DNS expansion service to resolve reverse DNS from MISP attributes.
 * [securitytrails](misp_modules/modules/expansion/securitytrails.py) - an expansion module for [securitytrails](https://securitytrails.com/).
@@ -68,6 +69,7 @@ For more information: [Extending MISP with Python modules](https://www.circl.lu/
 ### Export modules
 
 * [CEF](misp_modules/modules/export_mod/cef_export.py) module to export Common Event Format (CEF).
+* [Cisco FireSight Manager ACL rule](misp_modules/modules/export_mod/cisco_firesight_manager_ACL_rule_export.py) module to export as rule for the Cisco FireSight manager ACL.
 * [GoAML export](misp_modules/modules/export_mod/goamlexport.py) module to export in [GoAML format](http://goaml.unodc.org/goaml/en/index.html).
 * [Lite Export](misp_modules/modules/export_mod/liteexport.py) module to export a lite event.
 * [PDF export](misp_modules/modules/export_mod/pdfexport.py) module to export an event in PDF.
