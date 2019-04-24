@@ -1,5 +1,4 @@
 import json
-import re
 import binascii
 import cv2
 import np
