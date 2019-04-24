@@ -9,4 +9,4 @@ __all__ = ['cuckoo_submit', 'vmray_submit', 'bgpranking', 'circl_passivedns', 'c
            'xforceexchange', 'sigma_syntax_validator', 'stix2_pattern_syntax_validator',
            'sigma_queries', 'dbl_spamhaus', 'vulners', 'yara_query', 'macaddress_io',
            'intel471', 'backscatter_io', 'btc_scam_check', 'hibp', 'greynoise', 'macvendors', 
-           'qrcode', 'ocr']
+           'qrcode', 'ocr-enrich']
