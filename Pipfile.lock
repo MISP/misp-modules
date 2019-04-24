@@ -633,12 +633,12 @@
         },
         "vulners": {
             "hashes": [
-                "sha256:6506f3ad45bf3fd72f9cd1ebd5fbc13f814e7cf62faed6897e33db949fe4584a",
-                "sha256:a0e86015343ecf1c3313f6101567749988b5eb5299a672f19fd2974121817444",
-                "sha256:f243fe025a84b85bd6f37e45d6cf693e24697d30661695fe5d29b652dff6a5a1"
+                "sha256:146ef130f215b50cdff790b06b4886c7edb325c075e9fce4bf1d3ab8d64a10d0",
+                "sha256:53406a86126159eaee9575fa667c99459bfdf9dd8c06bd0ce73fbe536b305e30",
+                "sha256:a258ccdbaee586207bc80d3590f0315ff151cfe16ea54f2e1629a6018fd9f2a3"
             ],
             "index": "pypi",
-            "version": "==1.4.9"
+            "version": "==1.5.0"
         },
         "wand": {
             "hashes": [
