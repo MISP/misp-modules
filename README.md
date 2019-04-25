@@ -90,47 +90,41 @@ For more information: [Extending MISP with Python modules](https://www.circl.lu/
 * [ThreatAnalyzer](misp_modules/modules/import_mod/threatanalyzer_import.py) - An import module to process ThreatAnalyzer archive.zip/analysis.json sandbox exports.
 * [VMRay](misp_modules/modules/import_mod/vmray_import.py) - An import module to process VMRay export.
 
-## How to install and start MISP modules in a Python virtualenv?
+## How to install and start MISP modules in a Python virtualenv? (recommended)
 
 ~~~~bash
-sudo apt-get install python3-dev python3-pip libpq5 libjpeg-dev tesseract-ocr imagemagick virtualenv
+sudo apt-get install python3-dev python3-pip libpq5 libjpeg-dev tesseract-ocr imagemagick virtualenv libopencv-dev zbar-tools
 sudo -u www-data virtualenv -p python3 /var/www/MISP/venv
 cd /usr/local/src/
 sudo git clone https://github.com/MISP/misp-modules.git
 cd misp-modules
 sudo -u www-data /var/www/MISP/venv/bin/pip install -I -r REQUIREMENTS
 sudo -u www-data /var/www/MISP/venv/bin/pip install .
-sudo sed -i -e '$i \sudo -u www-data /var/www/MISP/venv/bin/misp-modules -l 127.0.0.1 -s > /tmp/misp-modules_rc.local.log &\n' /etc/rc.local
-/var/www/MISP/venv/bin/misp-modules -l 127.0.0.1 -s & #to start the modules
-~~~~
-
-## How to install and start MISP modules on Debian-based distributions ?
-
-~~~~bash
-sudo apt-get install python3-dev python3-pip libpq5 libjpeg-dev tesseract-ocr imagemagick
-cd /usr/local/src/
-sudo git clone https://github.com/MISP/misp-modules.git
-cd misp-modules
-sudo pip3 install -I -r REQUIREMENTS
-sudo pip3 install -I .
-sudo sed -i -e '$i \sudo -u www-data /var/www/MISP/venv/bin/misp-modules -l 127.0.0.1 -s > /tmp/misp-modules_rc.local.log &\n' /etc/rc.local
+# Start misp-modules as a service
+sudo cp etc/systemd/system/misp-modules.service /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable --now misp-modules
 /var/www/MISP/venv/bin/misp-modules -l 127.0.0.1 -s & #to start the modules
 ~~~~
 
 ## How to install and start MISP modules on RHEL-based distributions ?
 As of this writing, the official RHEL repositories only contain Ruby 2.0.0 and Ruby 2.1 or higher is required. As such, this guide installs Ruby 2.2 from the [SCL](https://access.redhat.com/documentation/en-us/red_hat_software_collections/3/html/3.2_release_notes/chap-installation#sect-Installation-Subscribe) repository. 
+
 ~~~~bash
-yum install rh-ruby22
+sudo yum install rh-ruby22
+sudo yum install openjpeg-devel
+sudo yum install rubygem-rouge rubygem-asciidoctor zbar-devel opencv-devel
 cd /var/www/MISP
 git clone https://github.com/MISP/misp-modules.git
 cd misp-modules
-scl enable rh-python36 ‘python3 –m pip install cryptography’
-scl enable rh-python36 ‘python3 –m pip install -I -r REQUIREMENTS’
-scl enable rh-python36 ‘python3 –m pip install –I .’
+sudo -u apache /usr/bin/scl enable rh-python36 "virtualenv -p python3 /var/www/MISP/venv"
+sudo -u apache /var/www/MISP/venv/bin/pip install -U -I -r REQUIREMENTS
+sudo -u apache /var/www/MISP/venv/bin/pip install -U .
 ~~~~
+
 Create the service file /etc/systemd/system/misp-modules.service :
 ~~~~
-[Unit]
+echo "[Unit]
 Description=MISP's modules
 After=misp-workers.service
 
@@ -138,15 +132,16 @@ After=misp-workers.service
 Type=simple
 User=apache
 Group=apache
-ExecStart=/usr/bin/scl enable rh-python36 rh-ruby22  ‘/opt/rh/rh-python36/root/bin/misp-modules –l 127.0.0.1 –s’
+ExecStart=/usr/bin/scl enable rh-python36 rh-ruby22  '/opt/rh/rh-python36/root/bin/misp-modules –l 127.0.0.1 –s'
 Restart=always
 RestartSec=10
 
 [Install]
-WantedBy=multi-user.target
+WantedBy=multi-user.target" | sudo tee /etc/systemd/system/misp-modules.service
 ~~~~
+
 The `After=misp-workers.service` must be changed or removed if you have not created a misp-workers service.
-Then, enable the misp-modules service and start it ;
+Then, enable the misp-modules service and start it:
 ~~~~bash
 systemctl daemon-reload
 systemctl enable --now misp-modules
@@ -493,7 +488,7 @@ Download a pre-built virtual image from the [MISP training materials](https://ww
 - Create a Host-Only adapter in VirtualBox
 - Set your Misp OVA to that Host-Only adapter
 - Start the virtual machine
-- Get the IP address of the virutal machine
+- Get the IP address of the virtual machine
 - SSH into the machine (Login info on training page)
 - Go into the misp-modules directory
 
@@ -513,14 +508,16 @@ Remove the contents of the build directory and re-install misp-modules.
 
 ~~~bash
 sudo rm -fr build/*
-sudo pip3 install --upgrade .
+sudo -u www-data /var/www/MISP/venv/bin/pip install --upgrade .
 ~~~
 
 SSH in with a different terminal and run `misp-modules` with debugging enabled.
 
 ~~~bash
-sudo killall misp-modules
-misp-modules -d
+# In case misp-modules is not a service do:
+# sudo killall misp-modules
+sudo systemctl disable --now misp-modules
+sudo -u www-data /var/www/MISP/venv/bin/misp-modules -d
 ~~~
 
 
