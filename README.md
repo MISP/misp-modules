@@ -93,7 +93,7 @@ For more information: [Extending MISP with Python modules](https://www.circl.lu/
 ## How to install and start MISP modules in a Python virtualenv? (recommended)
 
 ~~~~bash
-sudo apt-get install python3-dev python3-pip libpq5 libjpeg-dev tesseract-ocr imagemagick virtualenv
+sudo apt-get install python3-dev python3-pip libpq5 libjpeg-dev tesseract-ocr imagemagick virtualenv libopencv-dev zbar-tools
 sudo -u www-data virtualenv -p python3 /var/www/MISP/venv
 cd /usr/local/src/
 sudo git clone https://github.com/MISP/misp-modules.git
@@ -107,36 +107,24 @@ sudo systemctl enable --now misp-modules
 /var/www/MISP/venv/bin/misp-modules -l 127.0.0.1 -s & #to start the modules
 ~~~~
 
-## How to install and start MISP modules on Debian-based distributions ?
-
-~~~~bash
-sudo apt-get install python3-dev python3-pip libpq5 libjpeg-dev tesseract-ocr imagemagick
-cd /usr/local/src/
-sudo git clone https://github.com/MISP/misp-modules.git
-cd misp-modules
-sudo pip3 install -I -r REQUIREMENTS
-sudo pip3 install -I .
-# Start misp-modules as a service
-sudo cp etc/systemd/system/misp-modules.service /etc/systemd/system/
-sudo systemctl daemon-reload
-sudo systemctl enable --now misp-modules
-/var/www/MISP/venv/bin/misp-modules -l 127.0.0.1 -s & #to start the modules
-~~~~
-
 ## How to install and start MISP modules on RHEL-based distributions ?
 As of this writing, the official RHEL repositories only contain Ruby 2.0.0 and Ruby 2.1 or higher is required. As such, this guide installs Ruby 2.2 from the [SCL](https://access.redhat.com/documentation/en-us/red_hat_software_collections/3/html/3.2_release_notes/chap-installation#sect-Installation-Subscribe) repository. 
+
 ~~~~bash
-yum install rh-ruby22
+sudo yum install rh-ruby22
+sudo yum install openjpeg-devel
+sudo yum install rubygem-rouge rubygem-asciidoctor zbar-devel opencv-devel
 cd /var/www/MISP
 git clone https://github.com/MISP/misp-modules.git
 cd misp-modules
-scl enable rh-python36 ‘python3 –m pip install cryptography’
-scl enable rh-python36 ‘python3 –m pip install -I -r REQUIREMENTS’
-scl enable rh-python36 ‘python3 –m pip install –I .’
+sudo -u apache /usr/bin/scl enable rh-python36 "virtualenv -p python3 /var/www/MISP/venv"
+sudo -u apache /var/www/MISP/venv/bin/pip install -U -I -r REQUIREMENTS
+sudo -u apache /var/www/MISP/venv/bin/pip install -U .
 ~~~~
+
 Create the service file /etc/systemd/system/misp-modules.service :
 ~~~~
-[Unit]
+echo "[Unit]
 Description=MISP's modules
 After=misp-workers.service
 
@@ -144,15 +132,16 @@ After=misp-workers.service
 Type=simple
 User=apache
 Group=apache
-ExecStart=/usr/bin/scl enable rh-python36 rh-ruby22  ‘/opt/rh/rh-python36/root/bin/misp-modules –l 127.0.0.1 –s’
+ExecStart=/usr/bin/scl enable rh-python36 rh-ruby22  '/opt/rh/rh-python36/root/bin/misp-modules –l 127.0.0.1 –s'
 Restart=always
 RestartSec=10
 
 [Install]
-WantedBy=multi-user.target
+WantedBy=multi-user.target" | sudo tee /etc/systemd/system/misp-modules.service
 ~~~~
+
 The `After=misp-workers.service` must be changed or removed if you have not created a misp-workers service.
-Then, enable the misp-modules service and start it ;
+Then, enable the misp-modules service and start it:
 ~~~~bash
 systemctl daemon-reload
 systemctl enable --now misp-modules
