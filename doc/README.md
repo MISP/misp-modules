@@ -178,6 +178,25 @@ Module to query Crowdstrike Falcon.
 
 -----
 
+#### [cuckoo_submit](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/cuckoo_submit.py)
+
+<img src=logos/cuckoo.png height=60>
+
+An expansion module to submit files and URLs to Cuckoo Sandbox.
+- **features**:
+>The module takes a malware-sample, attachment, url or domain and submits it to Cuckoo Sandbox.
+> The returned task id can be used to retrieve results when the analysis completed.
+- **input**:
+>A malware-sample or attachment for files. A url or domain for URLs.
+- **output**:
+>A text field containing 'Cuckoo task id: <id>'
+- **references**:
+>https://cuckoosandbox.org/, https://cuckoo.sh/docs/
+- **requirements**:
+>Access to a Cuckoo Sandbox API and an API key if the API requires it. (api_url and api_key)
+
+-----
+
 #### [cve](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/cve.py)
 
 <img src=logos/cve.png height=60>
@@ -1081,7 +1100,13 @@ OSQuery export of a MISP event.
 
 Simple export of a MISP event to PDF.
 - **features**:
->The module takes care of the PDF file building, and work with any MISP Event. Except the requirement of asciidoctor, used to create the file, there is no special feature concerning the Event.
+>The module takes care of the PDF file building, and work with any MISP Event. Except the requirement of reportlab, used to create the file, there is no special feature concerning the Event. Some parameters can be given through the config dict. 'MISP_base_url_for_dynamic_link' is your MISP URL, to attach an hyperlink to your event on your MISP instance from the PDF. Keep it clear to avoid hyperlinks in the generated pdf.
+>  'MISP_name_for_metadata' is your CERT or MISP instance name. Used as text in the PDF' metadata
+>  'Activate_textual_description' is a boolean (True or void) to activate the textual description/header abstract of an event
+>  'Activate_galaxy_description' is a boolean (True or void) to activate the description of event related galaxies.
+>  'Activate_related_events' is a boolean (True or void) to activate the description of related event. Be aware this might leak information on confidential events linked to the current event !
+>  'Activate_internationalization_fonts' is a boolean (True or void) to activate Noto fonts instead of default fonts (Helvetica). This allows the support of CJK alphabet. Be sure to have followed the procedure to download Noto fonts (~70Mo) in the right place (/tools/pdf_fonts/Noto_TTF), to allow PyMisp to find and use them during PDF generation.
+>  'Custom_fonts_path' is a text (path or void) to the TTF file of your choice, to create the PDF with it. Be aware the PDF won't support bold/italic/special style anymore with this option 
 - **input**:
 >MISP Event
 - **output**:
@@ -1089,7 +1114,7 @@ Simple export of a MISP event to PDF.
 - **references**:
 >https://acrobat.adobe.com/us/en/acrobat/about-adobe-pdf.html
 - **requirements**:
->PyMISP, asciidoctor
+>PyMISP, reportlab
 
 -----
 
