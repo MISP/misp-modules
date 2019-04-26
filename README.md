@@ -29,6 +29,7 @@ For more information: [Extending MISP with Python modules](https://www.circl.lu/
 * [Cuckoo submit](misp_modules/modules/expansion/cuckoo_submit.py) - A hover module to submit malware sample, url, attachment, domain to Cuckoo Sandbox.
 * [DBL Spamhaus](misp_modules/modules/expansion/dbl_spamhaus.py) - a hover module to check Spamhaus DBL for a domain name.
 * [DNS](misp_modules/modules/expansion/dns.py) - a simple module to resolve MISP attributes like hostname and domain to expand IP addresses attributes.
+* [docx-enrich](misp_modules/modules/expansion/docx-enrich.py) - an enrichment module to get text out of Word document into MISP (using free-text parser).
 * [DomainTools](misp_modules/modules/expansion/domaintools.py) - a hover and expansion module to get information from [DomainTools](http://www.domaintools.com/) whois.
 * [EUPI](misp_modules/modules/expansion/eupi.py) - a hover and expansion module to get information about an URL from the [Phishing Initiative project](https://phishing-initiative.eu/?lang=en).
 * [Farsight DNSDB Passive DNS](misp_modules/modules/expansion/farsight_passivedns.py) - a hover and expansion module to expand hostname and IP addresses with passive DNS information.
@@ -41,10 +42,15 @@ For more information: [Extending MISP with Python modules](https://www.circl.lu/
 * [iprep](misp_modules/modules/expansion/iprep.py) - an expansion module to get IP reputation from packetmail.net.
 * [macaddress.io](misp_modules/modules/expansion/macaddress_io.py) - a hover module to retrieve vendor details and other information regarding a given MAC address or an OUI from [MAC address Vendor Lookup](https://macaddress.io). See [integration tutorial here](https://macaddress.io/integrations/MISP-module).
 * [macvendors](misp_modules/modules/expansion/macvendors.py) - a hover module to retrieve mac vendor information.
+* [ocr-enrich](misp_modules/modules/expansion/ocr-enrich.py) - an enrichment module to get OCRized data from images into MISP.
+* [ods-enrich](misp_modules/modules/expansion/ods-enrich.py) - an enrichment module to get text out of OpenOffice spreadsheet document into MISP (using free-text parser).
+* [odt-enrich](misp_modules/modules/expansion/odt-enrich.py) - an enrichment module to get text out of OpenOffice document into MISP (using free-text parser).
 * [onyphe](misp_modules/modules/expansion/onyphe.py) - a modules to process queries on Onyphe.
 * [onyphe_full](misp_modules/modules/expansion/onyphe_full.py) - a modules to process full queries on Onyphe.
 * [OTX](misp_modules/modules/expansion/otx.py) - an expansion module for [OTX](https://otx.alienvault.com/).
 * [passivetotal](misp_modules/modules/expansion/passivetotal.py) - a [passivetotal](https://www.passivetotal.org/) module that queries a number of different PassiveTotal datasets.
+* [pdf-enrich](misp_modules/modules/expansion/pdf-enrich.py) - an enrichment module to extract text from PDF into MISP (using free-text parser).
+* [pptx-enrich](misp_modules/modules/expansion/pptx-enrich.py) - an enrichment module to get text out of PowerPoint document into MISP (using free-text parser).
 * [qrcode](misp_modules/modules/expansion/qrcode.py) - a module decode QR code, barcode and similar codes from an image and enrich with the decoded values.
 * [rbl](misp_modules/modules/expansion/rbl.py) - a module to get RBL (Real-Time Blackhost List) values from an attribute.
 * [reversedns](misp_modules/modules/expansion/reversedns.py) - Simple Reverse DNS expansion service to resolve reverse DNS from MISP attributes.
@@ -64,6 +70,7 @@ For more information: [Extending MISP with Python modules](https://www.circl.lu/
 * [whois](misp_modules/modules/expansion) - a module to query a local instance of [uwhois](https://github.com/rafiot/uwhoisd).
 * [wikidata](misp_modules/modules/expansion/wiki.py) - a [wikidata](https://www.wikidata.org) expansion module.
 * [xforce](misp_modules/modules/expansion/xforceexchange.py) - an IBM X-Force Exchange expansion module.
+* [xlsx-enrich](misp_modules/modules/expansion/xlsx-enrich.py) - an enrichment module to get text out of an Excel document into MISP (using free-text parser).
 * [YARA query](misp_modules/modules/expansion/yara_query.py) - a module to create YARA rules from single hash attributes.
 * [YARA syntax validator](misp_modules/modules/expansion/yara_syntax_validator.py) - YARA syntax validator.
 
