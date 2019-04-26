@@ -3,7 +3,7 @@
 -e git+https://github.com/D4-project/BGP-Ranking.git/@4e0741056bcc0077de1120b8724a31330b26033e#egg=pybgpranking&subdirectory=client
 -e git+https://github.com/D4-project/IPASN-History.git/@c0c2bbf8d70811982dad065ea463a7e01593a38d#egg=pyipasnhistory&subdirectory=client
 -e git+https://github.com/MISP/PyIntel471.git@0df8d51f1c1425de66714b3a5a45edb69b8cc2fc#egg=pyintel471
--e git+https://github.com/MISP/PyMISP.git@921f414e0e026a3a4b77112012cf930242a33b04#egg=pymisp
+-e git+https://github.com/MISP/PyMISP.git@582dda0ce2a8ca8e1dd2cf3842e0491caca51c62#egg=pymisp
 -e git+https://github.com/Rafiot/uwhoisd.git@411572840eba4c72dc321c549b36a54ed5cea9de#egg=uwhois&subdirectory=client
 -e git+https://github.com/sebdraven/pydnstrails@48c1f740025c51289f43a24863d1845ff12fd21a#egg=pydnstrails
 -e git+https://github.com/sebdraven/pyonyphe@cbb0168d5cb28a9f71f7ab3773164a7039ccdb12#egg=pyonyphe
@@ -36,20 +36,20 @@ oauth2==1.9.0.post1
 opencv-python==4.1.0.25
 passivetotal==1.0.30
 pillow==6.0.0
-psutil==5.6.1
+psutil==5.6.2
 pyeupi==1.0
 pygeoip==0.3.2
 pyparsing==2.4.0
 pypdns==1.3
 pypssl==2.1
-pyrsistent==0.14.11
+pyrsistent==0.15.1
 pytesseract==0.2.6
 python-dateutil==2.8.0
 pyyaml==5.1
 pyzbar==0.1.8
 rdflib==4.2.2
 redis==3.2.1
-reportlab==3.5.19
+reportlab==3.5.20
 requests-cache==0.5.0
 requests==2.21.0
 shodan==1.12.1
