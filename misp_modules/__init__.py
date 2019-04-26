@@ -55,7 +55,7 @@ log = logging.getLogger('misp-modules')
 
 
 def handle_signal(sig, frame):
-    IOLoop.instance().add_callback(IOLoop.instance().stop)
+    IOLoop.instance().add_callback_from_signal(IOLoop.instance().stop)
 
 
 def init_logger(level=False):
@@ -266,8 +266,11 @@ def main():
     if args.t:
         log.info('MISP modules started in test-mode, quitting immediately.')
         sys.exit()
-    IOLoop.instance().start()
-    IOLoop.instance().stop()
+    try:
+        IOLoop.instance().start()
+    finally:
+        IOLoop.instance().stop()
+
     return 0
 
 
