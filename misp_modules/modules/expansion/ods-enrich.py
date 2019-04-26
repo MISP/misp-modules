@@ -29,14 +29,14 @@ def handler(q=False):
         print(err)
         return misperrors
 
-    ods_content = "" 
+    ods_content = ""
     ods_file = io.BytesIO(ods_array)
     doc = ezodf.opendoc(ods_file)
     num_sheets = len(doc.sheets)
     try:
         for i in range(0, num_sheets):
             ods = pandas_ods_reader.read_ods(ods_file, i, headers=False)
-            ods_content = ods_content + "\n" + ods.to_string(max_rows=None)    
+            ods_content = ods_content + "\n" + ods.to_string(max_rows=None)
         print(ods_content)
         return {'results': [{'types': ['freetext'], 'values': ods_content, 'comment': ".ods-to-text from file " + filename},
                             {'types': ['text'], 'values': ods_content, 'comment': ".ods-to-text from file " + filename}]}

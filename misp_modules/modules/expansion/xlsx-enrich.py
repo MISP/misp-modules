@@ -1,7 +1,7 @@
 import json
 import binascii
 import np
-import pandas 
+import pandas
 import io
 
 misperrors = {'error': 'Error'}
@@ -28,12 +28,12 @@ def handler(q=False):
         print(err)
         return misperrors
 
-    xls_content = "" 
+    xls_content = ""
     xls_file = io.BytesIO(xlsx_array)
     pandas.set_option('display.max_colwidth', -1)
     try:
         xls = pandas.read_excel(xls_file)
-        xls_content = xls.to_string(max_rows=None)    
+        xls_content = xls.to_string(max_rows=None)
         print(xls_content)
         return {'results': [{'types': ['freetext'], 'values': xls_content, 'comment': ".xlsx-to-text from file " + filename},
                             {'types': ['text'], 'values': xls_content, 'comment': ".xlsx-to-text from file " + filename}]}

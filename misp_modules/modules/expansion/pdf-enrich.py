@@ -2,7 +2,7 @@ import json
 import binascii
 import np
 import pytesseract
-import pdftotext 
+import pdftotext
 import io
 import collections
 

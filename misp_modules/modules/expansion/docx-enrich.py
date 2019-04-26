@@ -28,7 +28,7 @@ def handler(q=False):
         print(err)
         return misperrors
 
-    doc_content = "" 
+    doc_content = ""
     doc_file = io.BytesIO(docx_array)
     try:
         doc = docx.Document(doc_file)

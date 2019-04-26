@@ -28,7 +28,7 @@ def handler(q=False):
         print(err)
         return misperrors
 
-    odt_content = "" 
+    odt_content = ""
     odt_file = io.BytesIO(odt_array)
     try:
         odt_content = odtToText(odt_file)

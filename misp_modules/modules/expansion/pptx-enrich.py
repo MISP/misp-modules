@@ -28,7 +28,7 @@ def handler(q=False):
         print(err)
         return misperrors
 
-    ppt_content = "" 
+    ppt_content = ""
     ppt_file = io.BytesIO(pptx_array)
     try:
         ppt = Presentation(ppt_file)
