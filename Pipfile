@@ -54,6 +54,7 @@ pandas_ods_reader = "*"
 pdftotext = "*"
 lxml = "*"
 xlrd = "*"
+idna-ssl = {markers="python_version < '3.7'"}
 
 [requires]
 python_version = "3"
