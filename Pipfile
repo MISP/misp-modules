@@ -47,7 +47,6 @@ opencv-python = "*"
 np = "*"
 ODTReader = {editable = true,git = "https://github.com/cartertemm/ODTReader.git"}
 python-pptx = "*"
-collections = "*"
 python-docx = "*"
 ezodf = "*"
 pandas = "*"
