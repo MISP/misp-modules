@@ -11,7 +11,7 @@ python:
     - "3.7-dev"
 
 install:
-    - sudo apt-get install libzbar0 libzbar-dev
+    - sudo apt-get install libzbar0 libzbar-dev libpoppler-cpp-dev
     - pip install pipenv
     - pipenv install --dev
 
