@@ -1,10 +1,8 @@
 import json
 import binascii
 import np
-import pytesseract
 import pdftotext
 import io
-import collections
 
 misperrors = {'error': 'Error'}
 mispattributes = {'input': ['attachment'],
