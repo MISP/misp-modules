@@ -45,7 +45,7 @@ backscatter = "*"
 pyzbar = "*"
 opencv-python = "*"
 np = "*"
-ODTReader = {editable = true,git = "https://github.com/cartertemm/ODTReader.git"}
+ODTReader = {editable = true,git = "https://github.com/cartertemm/ODTReader.git/"}
 python-pptx = "*"
 python-docx = "*"
 ezodf = "*"
