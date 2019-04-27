@@ -1,0 +1,1 @@
+../../available/expansion/yara_syntax_validator.py
