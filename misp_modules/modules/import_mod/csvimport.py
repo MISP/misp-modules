@@ -21,15 +21,48 @@ userConfig = {'header': {
 duplicatedFields = {'mispType': {'mispComment': 'comment'},
                     'attrField': {'attrComment': 'comment'}}
 attributesFields = ['type', 'value', 'category', 'to_ids', 'comment', 'distribution']
+misp_standard_csv_header = ['uuid','event_id','category','type','value','comment','to_ids','date',
+                            'object_relation','object_uuid','object_name','object_meta_category']
+misp_context_additional_fields = ['event_info','event_member_org','event_source_org','event_distribution',
+                                  'event_threat_level_id','event_analysis','event_date','event_tag']
+misp_extended_csv_header = misp_standard_csv_header[:9] + ['attribute_tag'] + misp_standard_csv_header[9:] + misp_context_additional_fields
 delimiters = [',', ';', '|', '/', '\t', '    ']
 
 
 class CsvParser():
-    def __init__(self, header, has_header):
-        self.header = header
-        self.fields_number = len(header)
-        self.has_header = has_header
-        self.attributes = []
+    def __init__(self, header, has_header, data):
+        data_header = data[0]
+        if data_header == misp_standard_csv_header or data_header == misp_extended_csv_header:
+            self.header = misp_standard_csv_header if data_header == misp_standard_csv_header else misp_extended_csv_header[:13]
+            self.from_misp = True
+            self.data = data[1:]
+        else:
+            self.from_misp = False
+            self.has_header = has_header
+            if header:
+                self.header = header
+                self.fields_number = len(header)
+                self.parse_data(data)
+            else:
+                self.has_delimiter = True
+                self.fields_number, self.delimiter, self.header = self.get_delimiter_from_header(data[0])
+                self.data = data
+            self.result = []
+
+    def get_delimiter_from_header(self, data):
+        delimiters_count = {}
+        for d in delimiters:
+            length = data.count(d)
+            if length > 0:
+                delimiters_count[d] = data.count(d)
+        if len(delimiters_count) == 0:
+            length = 0
+            delimiter = None
+            header = [data]
+        else:
+            length, delimiter = max((n, v) for v, n in delimiters_count.items())
+            header = data.split(delimiter)
+        return length + 1, delimiter, header
 
     def parse_data(self, data):
         return_data = []
@@ -48,6 +81,7 @@ class CsvParser():
                     return_data.append(line)
             # find which delimiter is used
             self.delimiter = self.find_delimiter()
+            if self.fields_number == 0: self.header = return_data[0].split(self.delimiter)
         self.data = return_data[1:] if self.has_header else return_data
 
     def parse_delimiter(self, line):
@@ -59,6 +93,45 @@ class CsvParser():
         _, delimiter = max((n, v) for v, n in self.delimiter_count.items())
         return delimiter
 
+    def parse_csv(self):
+        if self.from_misp:
+            self.build_misp_event()
+        else:
+            self.buildAttributes()
+
+    def build_misp_event(self):
+        l_attributes = []
+        l_objects = []
+        objects = defaultdict(list)
+        header_length = len(self.header)
+        attribute_fields = self.header[:1] + self.header[2:6]
+        for line in self.data:
+            attribute = {}
+            try:
+                try:
+                    a_uuid,_,a_category,a_type,value,comment,to_ids,_,relation,o_uuid,o_name,o_category = line[:header_length]
+                except ValueError:
+                    a_uuid,_,a_category,a_type,value,comment,to_ids,_,relation,tag,o_uuid,o_name,o_category = line[:header_length]
+                    if tag: attribute['tags'] = tag
+            except ValueError:
+                continue
+            for t, v in zip(attribute_fields, [a_uuid, a_category, a_type, value, comment]):
+                attribute[t] = v.replace('"', '')
+            attribute['to_ids'] = True if to_ids == '1' else False
+            if relation:
+                attribute["object_relation"] = relation.replace('"', '')
+                object_index = tuple(o.replace('"', '') for o in (o_uuid,o_name,o_category))
+                objects[object_index].append(attribute)
+            else:
+                l_attributes.append(attribute)
+        for keys, attributes in objects.items():
+            misp_object = {}
+            for t, v in zip(['uuid','name','meta-category'], keys):
+                misp_object[t] = v
+            misp_object['Attribute'] = attributes
+            l_objects.append(misp_object)
+        self.result = {"Attribute": l_attributes, "Object": l_objects}
+
     def buildAttributes(self):
         # if there is only 1 field of data
         if self.delimiter is None:
@@ -66,7 +139,7 @@ class CsvParser():
             for data in self.data:
                 d = data.strip()
                 if d:
-                    self.attributes.append({'types': mispType, 'values': d})
+                    self.result.append({'types': mispType, 'values': d})
         else:
             # split fields that should be recognized as misp attribute types from the others
             list2pop, misp, head = self.findMispTypes()
@@ -86,10 +159,10 @@ class CsvParser():
                     for h, ds in zip(head, datasplit):
                         if h:
                             attribute[h] = ds.strip()
-                    self.attributes.append(attribute)
+                    self.result.append(attribute)
 
     def findMispTypes(self):
-        descFilename = os.path.join(pymisp.__path__[0], 'data/describeTypes.json')
+        descFilename = os.path.join(pymisp_path[0], 'data/describeTypes.json')
         with open(descFilename, 'r') as f:
             MispTypes = json.loads(f.read())['result'].get('types')
         list2pop = []
@@ -125,21 +198,25 @@ def handler(q=False):
     request = json.loads(q)
     if request.get('data'):
         data = base64.b64decode(request['data']).decode('utf-8')
+        data = [line for line in csv.reader(io.TextIOWrapper(io.BytesIO(data.encode()), encoding='utf-8'))]
     else:
         misperrors['error'] = "Unsupported attributes type"
         return misperrors
-    if not request.get('config') and not request['config'].get('header'):
-        misperrors['error'] = "Configuration error"
-        return misperrors
-    header = request['config'].get('header').split(',')
-    header = [c.strip() for c in header]
     has_header = request['config'].get('has_header')
     has_header = True if has_header == '1' else False
-    csv_parser = CsvParser(header, has_header)
-    csv_parser.parse_data(data.split('\n'))
+    if not request.get('config') and not request['config'].get('header'):
+        if has_header:
+            header = []
+        else:
+            misperrors['error'] = "Configuration error"
+            return misperrors
+    else:
+        header = request['config'].get('header').split(',')
+        header = [c.strip() for c in header]
+    csv_parser = CsvParser(header, has_header, data)
     # build the attributes
-    csv_parser.buildAttributes()
-    r = {'results': csv_parser.attributes}
+    csv_parser.parse_csv()
+    r = {'results': csv_parser.result}
     return r
 
 
