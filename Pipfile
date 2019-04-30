@@ -42,6 +42,19 @@ misp-modules = {editable = true,path = "."}
 pybgpranking = {editable = true,git = "https://github.com/D4-project/BGP-Ranking.git/",subdirectory = "client"}
 pyipasnhistory = {editable = true,git = "https://github.com/D4-project/IPASN-History.git/",subdirectory = "client"}
 backscatter = "*"
+pyzbar = "*"
+opencv-python = "*"
+np = "*"
+ODTReader = {editable = true,git = "https://github.com/cartertemm/ODTReader.git/"}
+python-pptx = "*"
+python-docx = "*"
+ezodf = "*"
+pandas = "*"
+pandas_ods_reader = "*"
+pdftotext = "*"
+lxml = "*"
+xlrd = "*"
+idna-ssl = {markers="python_version < '3.7'"}
 
 [requires]
-python_version = "3.6"
+python_version = "3"
