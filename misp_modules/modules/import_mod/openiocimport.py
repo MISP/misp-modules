@@ -63,7 +63,7 @@ def handler(q=False):
             "comment": getattr(attrib, 'comment', '')}
         # add tag
         if q.get('config') and q['config'].get('default tag') is not None:
-                toAppend["tags"] = q['config']['default tag'].split(",")
+            toAppend["tags"] = q['config']['default tag'].split(",")
 
         r["results"].append(toAppend)
     return r

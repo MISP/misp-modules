@@ -17,37 +17,72 @@ For more information: [Extending MISP with Python modules](https://www.circl.lu/
 
 ### Expansion modules
 
-* [ASN History](misp_modules/modules/expansion/asn_history.py) - a hover and expansion module to expand an AS number with the ASN description and its history.
+* [Backscatter.io](misp_modules/modules/expansion/backscatter_io) - a hover and expansion module to expand an IP address with mass-scanning observations.
+* [BGP Ranking](misp_modules/modules/expansion/bgpranking.py) - a hover and expansion module to expand an AS number with the ASN description, its history, and position in BGP Ranking.
+* [BTC scam check](misp_modules/modules/expansion/btc_scam_check.py) - An expansion hover module to instantly check if a BTC address has been abused.
+* [BTC transactions](misp_modules/modules/expansion/btc_steroids.py) - An expansion hover module to get a blockchain balance and the transactions from a BTC address in MISP.
 * [CIRCL Passive DNS](misp_modules/modules/expansion/circl_passivedns.py) - a hover and expansion module to expand hostname and IP addresses with passive DNS information.
 * [CIRCL Passive SSL](misp_modules/modules/expansion/circl_passivessl.py) - a hover and expansion module to expand IP addresses with the X.509 certificate seen.
 * [countrycode](misp_modules/modules/expansion/countrycode.py) - a hover module to tell you what country a URL belongs to.
 * [CrowdStrike Falcon](misp_modules/modules/expansion/crowdstrike_falcon.py) - an expansion module to expand using CrowdStrike Falcon Intel Indicator API.
 * [CVE](misp_modules/modules/expansion/cve.py) - a hover module to give more information about a vulnerability (CVE).
+* [Cuckoo submit](misp_modules/modules/expansion/cuckoo_submit.py) - A hover module to submit malware sample, url, attachment, domain to Cuckoo Sandbox.
+* [DBL Spamhaus](misp_modules/modules/expansion/dbl_spamhaus.py) - a hover module to check Spamhaus DBL for a domain name.
 * [DNS](misp_modules/modules/expansion/dns.py) - a simple module to resolve MISP attributes like hostname and domain to expand IP addresses attributes.
+* [docx-enrich](misp_modules/modules/expansion/docx-enrich.py) - an enrichment module to get text out of Word document into MISP (using free-text parser).
 * [DomainTools](misp_modules/modules/expansion/domaintools.py) - a hover and expansion module to get information from [DomainTools](http://www.domaintools.com/) whois.
 * [EUPI](misp_modules/modules/expansion/eupi.py) - a hover and expansion module to get information about an URL from the [Phishing Initiative project](https://phishing-initiative.eu/?lang=en).
 * [Farsight DNSDB Passive DNS](misp_modules/modules/expansion/farsight_passivedns.py) - a hover and expansion module to expand hostname and IP addresses with passive DNS information.
 * [GeoIP](misp_modules/modules/expansion/geoip_country.py) - a hover and expansion module to get GeoIP information from geolite/maxmind.
+* [Greynoise](misp_modules/modules/expansion/greynoise.py) - a hover to get information from greynoise.
+* [hashdd](misp_modules/modules/expansion/hashdd.py) - a hover module to check file hashes against [hashdd.com](http://www.hashdd.com) including NSLR dataset.
+* [hibp](misp_modules/modules/expansion/hibp.py) - a hover module to lookup against Have I Been Pwned?
+* [intel471](misp_modules/modules/expansion/intel471.py) - an expansion module to get info from [Intel471](https://intel471.com).
 * [IPASN](misp_modules/modules/expansion/ipasn.py) - a hover and expansion to get the BGP ASN of an IP address.
-* [iprep](misp-modules/modules/expansion/iprep.py) - an expansion module to get IP reputation from packetmail.net.
+* [iprep](misp_modules/modules/expansion/iprep.py) - an expansion module to get IP reputation from packetmail.net.
+* [macaddress.io](misp_modules/modules/expansion/macaddress_io.py) - a hover module to retrieve vendor details and other information regarding a given MAC address or an OUI from [MAC address Vendor Lookup](https://macaddress.io). See [integration tutorial here](https://macaddress.io/integrations/MISP-module).
+* [macvendors](misp_modules/modules/expansion/macvendors.py) - a hover module to retrieve mac vendor information.
+* [ocr-enrich](misp_modules/modules/expansion/ocr-enrich.py) - an enrichment module to get OCRized data from images into MISP.
+* [ods-enrich](misp_modules/modules/expansion/ods-enrich.py) - an enrichment module to get text out of OpenOffice spreadsheet document into MISP (using free-text parser).
+* [odt-enrich](misp_modules/modules/expansion/odt-enrich.py) - an enrichment module to get text out of OpenOffice document into MISP (using free-text parser).
+* [onyphe](misp_modules/modules/expansion/onyphe.py) - a modules to process queries on Onyphe.
+* [onyphe_full](misp_modules/modules/expansion/onyphe_full.py) - a modules to process full queries on Onyphe.
 * [OTX](misp_modules/modules/expansion/otx.py) - an expansion module for [OTX](https://otx.alienvault.com/).
 * [passivetotal](misp_modules/modules/expansion/passivetotal.py) - a [passivetotal](https://www.passivetotal.org/) module that queries a number of different PassiveTotal datasets.
+* [pdf-enrich](misp_modules/modules/expansion/pdf-enrich.py) - an enrichment module to extract text from PDF into MISP (using free-text parser).
+* [pptx-enrich](misp_modules/modules/expansion/pptx-enrich.py) - an enrichment module to get text out of PowerPoint document into MISP (using free-text parser).
+* [qrcode](misp_modules/modules/expansion/qrcode.py) - a module decode QR code, barcode and similar codes from an image and enrich with the decoded values.
 * [rbl](misp_modules/modules/expansion/rbl.py) - a module to get RBL (Real-Time Blackhost List) values from an attribute.
+* [reversedns](misp_modules/modules/expansion/reversedns.py) - Simple Reverse DNS expansion service to resolve reverse DNS from MISP attributes.
+* [securitytrails](misp_modules/modules/expansion/securitytrails.py) - an expansion module for [securitytrails](https://securitytrails.com/).
 * [shodan](misp_modules/modules/expansion/shodan.py) - a minimal [shodan](https://www.shodan.io/) expansion module.
+* [Sigma queries](misp_modules/modules/expansion/sigma_queries.py) - Experimental expansion module querying a sigma rule to convert it into all the available SIEM signatures.
+* [Sigma syntax validator](misp_modules/modules/expansion/sigma_syntax_validator.py) - Sigma syntax validator.
 * [sourcecache](misp_modules/modules/expansion/sourcecache.py) - a module to cache a specific link from a MISP instance.
+* [STIX2 pattern syntax validator](misp_modules/modules/expansion/stix2_pattern_syntax_validator.py) - a module to check a STIX2 pattern syntax.
 * [ThreatCrowd](misp_modules/modules/expansion/threatcrowd.py) - an expansion module for [ThreatCrowd](https://www.threatcrowd.org/).
 * [threatminer](misp_modules/modules/expansion/threatminer.py) - an expansion module to expand from [ThreatMiner](https://www.threatminer.org/).
+* [urlscan](misp_modules/modules/expansion/urlscan.py) - an expansion module to query [urlscan.io](https://urlscan.io).
 * [virustotal](misp_modules/modules/expansion/virustotal.py) - an expansion module to pull known resolutions and malware samples related with an IP/Domain from virusTotal (this modules require a VirusTotal private API key)
+* [VMray](misp_modules/modules/expansion/vmray_submit.py) - a module to submit a sample to VMray.
+* [VulnDB](misp_modules/modules/expansion/vulndb.py) - a module to query [VulnDB](https://www.riskbasedsecurity.com/).
+* [Vulners](misp_modules/modules/expansion/vulners.py) - an expansion module to expand information about CVEs using Vulners API.
+* [whois](misp_modules/modules/expansion) - a module to query a local instance of [uwhois](https://github.com/rafiot/uwhoisd).
 * [wikidata](misp_modules/modules/expansion/wiki.py) - a [wikidata](https://www.wikidata.org) expansion module.
 * [xforce](misp_modules/modules/expansion/xforceexchange.py) - an IBM X-Force Exchange expansion module.
+* [xlsx-enrich](misp_modules/modules/expansion/xlsx-enrich.py) - an enrichment module to get text out of an Excel document into MISP (using free-text parser).
+* [YARA query](misp_modules/modules/expansion/yara_query.py) - a module to create YARA rules from single hash attributes.
 * [YARA syntax validator](misp_modules/modules/expansion/yara_syntax_validator.py) - YARA syntax validator.
 
 ### Export modules
 
 * [CEF](misp_modules/modules/export_mod/cef_export.py) module to export Common Event Format (CEF).
-* [GoAML export](misp_modules/modules/export_mod/goamlexport.py) module to export in GoAML format.
+* [Cisco FireSight Manager ACL rule](misp_modules/modules/export_mod/cisco_firesight_manager_ACL_rule_export.py) module to export as rule for the Cisco FireSight manager ACL.
+* [GoAML export](misp_modules/modules/export_mod/goamlexport.py) module to export in [GoAML format](http://goaml.unodc.org/goaml/en/index.html).
 * [Lite Export](misp_modules/modules/export_mod/liteexport.py) module to export a lite event.
-* [Simple PDF export](misp_modules/modules/export_mod/pdfexport.py) module to export in PDF (required: asciidoctor-pdf).
+* [PDF export](misp_modules/modules/export_mod/pdfexport.py) module to export an event in PDF.
+* [Nexthink query format](misp_modules/modules/export_mod/nexthinkexport.py) module to export in Nexthink query format.
+* [osquery](misp_modules/modules/export_mod/osqueryexport.py) module to export in [osquery](https://osquery.io/) query format.
 * [ThreatConnect](misp_modules/modules/export_mod/threat_connect_export.py) module to export in ThreatConnect CSV format.
 * [ThreatStream](misp_modules/modules/export_mod/threatStream_misp_export.py) module to export in ThreatStream format.
 
@@ -56,23 +91,67 @@ For more information: [Extending MISP with Python modules](https://www.circl.lu/
 * [CSV import](misp_modules/modules/import_mod/csvimport.py) Customizable CSV import module.
 * [Cuckoo JSON](misp_modules/modules/import_mod/cuckooimport.py) Cuckoo JSON import.
 * [Email Import](misp_modules/modules/import_mod/email_import.py) Email import module for MISP to import basic metadata.
+* [GoAML import](misp_modules/modules/import_mod/) Module to import [GoAML](http://goaml.unodc.org/goaml/en/index.html) XML format.
 * [OCR](misp_modules/modules/import_mod/ocr.py) Optical Character Recognition (OCR) module for MISP to import attributes from images, scan or faxes.
 * [OpenIOC](misp_modules/modules/import_mod/openiocimport.py) OpenIOC import based on PyMISP library.
-* [stiximport](misp_modules/modules/import_mod/stiximport.py) - An import module to process STIX xml/json.
 * [ThreatAnalyzer](misp_modules/modules/import_mod/threatanalyzer_import.py) - An import module to process ThreatAnalyzer archive.zip/analysis.json sandbox exports.
 * [VMRay](misp_modules/modules/import_mod/vmray_import.py) - An import module to process VMRay export.
 
-## How to install and start MISP modules?
+## How to install and start MISP modules in a Python virtualenv? (recommended)
 
 ~~~~bash
-sudo apt-get install python3-dev python3-pip libpq5 libjpeg-dev
+sudo apt-get install python3-dev python3-pip libpq5 libjpeg-dev tesseract-ocr libpoppler-cpp-dev imagemagick virtualenv libopencv-dev zbar-tools libzbar0 libzbar-dev libfuzzy-dev -y
+sudo -u www-data virtualenv -p python3 /var/www/MISP/venv
 cd /usr/local/src/
 sudo git clone https://github.com/MISP/misp-modules.git
 cd misp-modules
-sudo pip3 install -I -r REQUIREMENTS
-sudo pip3 install -I .
-sudo vi /etc/rc.local, add this line: `sudo -u www-data misp-modules -s &`
-misp-modules #to start the modules
+sudo -u www-data /var/www/MISP/venv/bin/pip install -I -r REQUIREMENTS
+sudo -u www-data /var/www/MISP/venv/bin/pip install .
+# Start misp-modules as a service
+sudo cp etc/systemd/system/misp-modules.service /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable --now misp-modules
+/var/www/MISP/venv/bin/misp-modules -l 127.0.0.1 -s & #to start the modules
+~~~~
+
+## How to install and start MISP modules on RHEL-based distributions ?
+As of this writing, the official RHEL repositories only contain Ruby 2.0.0 and Ruby 2.1 or higher is required. As such, this guide installs Ruby 2.2 from the [SCL](https://access.redhat.com/documentation/en-us/red_hat_software_collections/3/html/3.2_release_notes/chap-installation#sect-Installation-Subscribe) repository. 
+
+~~~~bash
+sudo yum install rh-ruby22
+sudo yum install openjpeg-devel
+sudo yum install rubygem-rouge rubygem-asciidoctor zbar-devel opencv-devel
+cd /var/www/MISP
+git clone https://github.com/MISP/misp-modules.git
+cd misp-modules
+sudo -u apache /usr/bin/scl enable rh-python36 "virtualenv -p python3 /var/www/MISP/venv"
+sudo -u apache /var/www/MISP/venv/bin/pip install -U -I -r REQUIREMENTS
+sudo -u apache /var/www/MISP/venv/bin/pip install -U .
+~~~~
+
+Create the service file /etc/systemd/system/misp-modules.service :
+~~~~
+echo "[Unit]
+Description=MISP's modules
+After=misp-workers.service
+
+[Service]
+Type=simple
+User=apache
+Group=apache
+ExecStart=/usr/bin/scl enable rh-python36 rh-ruby22  '/opt/rh/rh-python36/root/bin/misp-modules –l 127.0.0.1 –s'
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target" | sudo tee /etc/systemd/system/misp-modules.service
+~~~~
+
+The `After=misp-workers.service` must be changed or removed if you have not created a misp-workers service.
+Then, enable the misp-modules service and start it:
+~~~~bash
+systemctl daemon-reload
+systemctl enable --now misp-modules
 ~~~~
 
 ## How to add your own MISP modules?
@@ -84,6 +163,8 @@ Create your module in [misp_modules/modules/expansion/](misp_modules/modules/exp
 * **version** function that returns a dict with the version and the associated meta-data including potential configurations required of the module.
 
 Don't forget to return an error key and value if an error is raised to propagate it to the MISP user-interface.
+
+Your module's script name should also be added in the `__all__` list of `<module type folder>/__init__.py` in order for it to be loaded.
 
 ~~~python
 ...
@@ -175,6 +256,19 @@ def handler(q=False):
         return {'results':
                 codecs.encode(src, "rot-13")}
 ~~~
+
+#### export module
+
+For an export module, the `request["data"]` object corresponds to a list of events (dictionaries) to handle.
+
+Iterating over events attributes is performed using their `Attribute` key.
+
+~~~python
+...
+for event in request["data"]:
+        for attribute in event["Attribute"]:
+          # do stuff w/ attribute['type'], attribute['value'], ...
+...
 
 ### Returning Binary Data
 
@@ -372,7 +466,7 @@ Recommended     Plugin.Import_ocr_enabled       true   Enable or disable the ocr
 In this same menu set any other plugin settings that are required for testing.
 
 ## Install misp-module on an offline instance.
-First, you need to grab all necessery packages for example like this : 
+First, you need to grab all necessary packages for example like this :
 
 Use pip wheel to create an archive
 ~~~
@@ -380,7 +474,7 @@ mkdir misp-modules-offline
 pip3 wheel -r REQUIREMENTS shodan --wheel-dir=./misp-modules-offline
 tar -cjvf misp-module-bundeled.tar.bz2 ./misp-modules-offline/*
 ~~~
-On offline machine : 
+On offline machine :
 ~~~
 mkdir misp-modules-bundle
 tar xvf misp-module-bundeled.tar.bz2 -C misp-modules-bundle
@@ -401,7 +495,7 @@ Download a pre-built virtual image from the [MISP training materials](https://ww
 - Create a Host-Only adapter in VirtualBox
 - Set your Misp OVA to that Host-Only adapter
 - Start the virtual machine
-- Get the IP address of the virutal machine
+- Get the IP address of the virtual machine
 - SSH into the machine (Login info on training page)
 - Go into the misp-modules directory
 
@@ -419,16 +513,18 @@ sudo git checkout MyModBranch
 
 Remove the contents of the build directory and re-install misp-modules.
 
-~~~python
+~~~bash
 sudo rm -fr build/*
-sudo pip3 install --upgrade .
+sudo -u www-data /var/www/MISP/venv/bin/pip install --upgrade .
 ~~~
 
 SSH in with a different terminal and run `misp-modules` with debugging enabled.
 
-~~~python
-sudo killall misp-modules
-misp-modules -d
+~~~bash
+# In case misp-modules is not a service do:
+# sudo killall misp-modules
+sudo systemctl disable --now misp-modules
+sudo -u www-data /var/www/MISP/venv/bin/misp-modules -d
 ~~~
 
 
@@ -439,3 +535,14 @@ cd tests/
 curl -s http://127.0.0.1:6666/query -H "Content-Type: application/json" --data @MY_TEST_FILE.json -X POST
 cd ../
 ~~~
+
+## Documentation
+
+In order to provide documentation about some modules that require specific input / output / configuration, the [doc](doc) directory contains detailed information about the general purpose, requirements, features, input and ouput of each of these modules:
+
+- ***description** - quick description of the general purpose of the module, as the one given by the moduleinfo
+- **requirements** - special libraries needed to make the module work
+- **features** - description of the way to use the module, with the required MISP features to make the module give the intended result
+- **references** - link(s) giving additional information about the format concerned in the module
+- **input** - description of the format of data used in input
+- **output** - description of the format given as the result of the module execution

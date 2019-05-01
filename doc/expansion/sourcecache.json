@@ -1,0 +1,8 @@
+{
+    "description": "Module to cache web pages of analysis reports, OSINT sources. The module returns a link of the cached page.",
+    "requirements": ["urlarchiver: python library to fetch and archive URL on the file-system"],
+    "input": "A link or url attribute.",
+    "output": "A malware-sample attribute describing the cached page.",
+    "references": ["https://github.com/adulau/url_archiver"],
+    "features": "This module takes a link or url attribute as input and caches the related web page. It returns then a link of the cached page."
+}

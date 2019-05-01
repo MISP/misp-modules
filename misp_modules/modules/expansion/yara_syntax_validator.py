@@ -1,9 +1,8 @@
 import json
-import requests
 try:
     import yara
-except:
-    print("yara is missing, use 'pip3 install yara' to install it.")
+except (OSError, ImportError):
+    print("yara is missing, use 'pip3 install -I -r REQUIREMENTS' from the root of this repository to install it.")
 
 misperrors = {'error': 'Error'}
 mispattributes = {'input': ['yara'], 'output': ['text']}
@@ -20,7 +19,7 @@ def handler(q=False):
         return misperrors
 
     try:
-        rules = yara.compile(source=request.get('yara'))
+        yara.compile(source=request.get('yara'))
         summary = ("Syntax valid")
     except Exception as e:
         summary = ("Syntax error: " + str(e))

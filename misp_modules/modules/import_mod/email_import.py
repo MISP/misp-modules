@@ -115,7 +115,7 @@ def handler(q=False):
         email_targets = set()
         for rec in received:
             try:
-                email_check = re.search("for\s(.*@.*);", rec).group(1)
+                email_check = re.search(r"for\s(.*@.*);", rec).group(1)
                 email_check = email_check.strip(' <>')
                 email_targets.add(parseaddr(email_check)[1])
             except (AttributeError):
@@ -166,7 +166,7 @@ def handler(q=False):
                 for ext in zipped_files:
                     if filename.endswith(ext) is True:
                         zipped_filetype = True
-                if zipped_filetype == False:
+                if not zipped_filetype:
                     try:
                         attachment_files += get_zipped_contents(filename, attachment_data)
                     except RuntimeError:  # File is encrypted with a password
@@ -294,7 +294,7 @@ def get_zip_passwords(message):
     # Grab any strings that are marked off by special chars
     marking_chars = [["\'", "\'"], ['"', '"'], ['[', ']'], ['(', ')']]
     for char_set in marking_chars:
-        regex = re.compile("""\{0}([^\{1}]*)\{1}""".format(char_set[0], char_set[1]))
+        regex = re.compile(r"""\{0}([^\{1}]*)\{1}""".format(char_set[0], char_set[1]))
         marked_off = re.findall(regex, raw_text)
         possible_passwords += marked_off
 
@@ -396,6 +396,7 @@ def introspection():
 def version():
     moduleinfo['config'] = moduleconfig
     return moduleinfo
+
 
 if __name__ == '__main__':
     with open('tests/test_no_attach.eml', 'r') as email_file:

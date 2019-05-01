@@ -331,7 +331,7 @@ def handler(q=False):
             output['results'] += results
         else:
             log.error("Unsupported query pattern issued.")
-    except:
+    except Exception:
         return misperrors
 
     return output

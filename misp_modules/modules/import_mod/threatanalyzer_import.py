@@ -15,7 +15,7 @@ misperrors = {'error': 'Error'}
 userConfig = {}
 inputSource = ['file']
 
-moduleinfo = {'version': '0.6', 'author': 'Christophe Vandeplas',
+moduleinfo = {'version': '0.10', 'author': 'Christophe Vandeplas',
               'description': 'Import for ThreatAnalyzer archive.zip/analysis.json files',
               'module-type': ['import']}
 
@@ -45,16 +45,21 @@ def handler(q=False):
                 if re.match(r"Analysis/proc_\d+/modified_files/mapping\.log", zip_file_name):
                     with zf.open(zip_file_name, mode='r', pwd=None) as fp:
                         file_data = fp.read()
-                        for line in file_data.decode().split('\n'):
-                            if line:
+                        for line in file_data.decode("utf-8", 'ignore').split('\n'):
+                            if not line:
+                                continue
+                            if line.count('|') == 3:
                                 l_fname, l_size, l_md5, l_created = line.split('|')
-                                l_fname = cleanup_filepath(l_fname)
-                                if l_fname:
-                                    if l_size == 0:
-                                        pass  # FIXME create an attribute for the filename/path
-                                    else:
-                                        # file is a non empty sample, upload the sample later
-                                        modified_files_mapping[l_md5] = l_fname
+                            if line.count('|') == 4:
+                                l_fname, l_size, l_md5, l_sha256, l_created = line.split('|')
+                            l_fname = cleanup_filepath(l_fname)
+                            if l_fname:
+                                if l_size == 0:
+                                    results.append({'values': l_fname, 'type': 'filename', 'to_ids': True,
+                                                    'categories': ['Artifacts dropped', 'Payload delivery'], 'comment': ''})
+                                else:
+                                    # file is a non empty sample, upload the sample later
+                                    modified_files_mapping[l_md5] = l_fname
 
             # now really process the data
             for zip_file_name in zf.namelist():  # Get all files in the zip file
@@ -62,12 +67,12 @@ def handler(q=False):
                 if re.match(r"Analysis/proc_\d+/modified_files/.+\.", zip_file_name) and "mapping.log" not in zip_file_name:
                     sample_md5 = zip_file_name.split('/')[-1].split('.')[0]
                     if sample_md5 in modified_files_mapping:
-                        sample_filename = modified_files_mapping[sample_md5]
-                        # print("{} maps to {}".format(sample_md5, sample_filename))
+                        current_sample_filename = modified_files_mapping[sample_md5]
+                        # print("{} maps to {}".format(sample_md5, current_sample_filename))
                         with zf.open(zip_file_name, mode='r', pwd=None) as fp:
                             file_data = fp.read()
                             results.append({
-                                'values': sample_filename,
+                                'values': current_sample_filename,
                                 'data': base64.b64encode(file_data).decode(),
                                 'type': 'malware-sample', 'categories': ['Artifacts dropped', 'Payload delivery'], 'to_ids': True, 'comment': ''})
 
@@ -76,8 +81,18 @@ def handler(q=False):
                         file_data = fp.read()
                         analysis_json = json.loads(file_data.decode('utf-8'))
                     results += process_analysis_json(analysis_json)
-                # if 'sample' in zip_file_name:
-                #     sample['data'] = base64.b64encode(file_data).decode()
+            try:
+                sample_filename = analysis_json.get('analysis').get('@filename')
+                if sample_filename:
+                    with zf.open('sample', mode='r', pwd=None) as fp:
+                        file_data = fp.read()
+                        results.append({
+                            'values': sample_filename,
+                            'data': base64.b64encode(file_data).decode(),
+                            'type': 'malware-sample', 'categories': ['Payload delivery', 'Artifacts dropped'], 'to_ids': True, 'comment': ''})
+            except Exception:
+                # no 'sample' in archive, might be an url analysis, just ignore
+                pass
 
     else:
         try:
@@ -99,7 +114,22 @@ def process_analysis_json(analysis_json):
         for process in analysis_json['analysis']['processes']['process']:
             # print_json(process)
             if 'connection_section' in process and 'connection' in process['connection_section']:
+                # compensate for absurd behavior of the data format: if one entry = immediately the dict, if multiple entries = list containing dicts
+                # this will always create a list, even with only one item
+                if isinstance(process['connection_section']['connection'], dict):
+                    process['connection_section']['connection'] = [process['connection_section']['connection']]
+
+                # iterate over each entry
                 for connection_section_connection in process['connection_section']['connection']:
+                    # compensate for absurd behavior of the data format: if one entry = immediately the dict, if multiple entries = list containing dicts
+                    # this will always create a list, even with only one item
+                    for subsection in ['http_command', 'http_header']:
+                        if isinstance(connection_section_connection[subsection], dict):
+                            connection_section_connection[subsection] = [connection_section_connection[subsection]]
+
+                    if 'name_to_ip' in connection_section_connection:  # TA 6.1 data format
+                        connection_section_connection['@remote_ip'] = connection_section_connection['name_to_ip']['@result_addresses']
+                        connection_section_connection['@remote_hostname'] = connection_section_connection['name_to_ip']['@request_name']
 
                     connection_section_connection['@remote_ip'] = cleanup_ip(connection_section_connection['@remote_ip'])
                     connection_section_connection['@remote_hostname'] = cleanup_hostname(connection_section_connection['@remote_hostname'])
@@ -110,7 +140,7 @@ def process_analysis_json(analysis_json):
                         #     connection_section_connection['@remote_hostname'],
                         #     connection_section_connection['@remote_ip'])
                         # )
-                        yield({'values': val, 'type': 'domain|ip', 'categories': 'Network activity', 'to_ids': True, 'comment': ''})
+                        yield({'values': val, 'type': 'domain|ip', 'categories': ['Network activity'], 'to_ids': True, 'comment': ''})
                     elif connection_section_connection['@remote_ip']:
                         # print("connection_section_connection ip-dst: {}  IDS:yes".format(
                         #     connection_section_connection['@remote_ip'])
@@ -124,31 +154,31 @@ def process_analysis_json(analysis_json):
                     if 'http_command' in connection_section_connection:
                         for http_command in connection_section_connection['http_command']:
                             # print('connection_section_connection HTTP COMMAND: {}\t{}'.format(
-                            #     http_command['@method'],                    # comment
-                            #     http_command['@url'])                       # url
+                            #     connection_section_connection['http_command']['@method'],                    # comment
+                            #     connection_section_connection['http_command']['@url'])                       # url
                             # )
                             val = cleanup_url(http_command['@url'])
                             if val:
-                                yield({'values': val, 'type': 'url', 'categories': 'Network activity', 'to_ids': True, 'comment': http_command['@method']})
+                                yield({'values': val, 'type': 'url', 'categories': ['Network activity'], 'to_ids': True, 'comment': http_command['@method']})
 
                     if 'http_header' in connection_section_connection:
                         for http_header in connection_section_connection['http_header']:
                             if 'User-Agent:' in http_header['@header']:
                                 val = http_header['@header'][len('User-Agent: '):]
-                                yield({'values': val, 'type': 'user-agent', 'categories': 'Network activity', 'to_ids': False, 'comment': ''})
+                                yield({'values': val, 'type': 'user-agent', 'categories': ['Network activity'], 'to_ids': False, 'comment': ''})
                             elif 'Host:' in http_header['@header']:
                                 val = http_header['@header'][len('Host: '):]
                                 if ':' in val:
                                     try:
                                         val_port = int(val.split(':')[1])
-                                    except ValueError as e:
+                                    except ValueError:
                                         val_port = False
                                     val_hostname = cleanup_hostname(val.split(':')[0])
                                     val_ip = cleanup_ip(val.split(':')[0])
                                     if val_hostname and val_port:
                                         val_combined = '{}|{}'.format(val_hostname, val_port)
                                         # print({'values': val_combined, 'type': 'hostname|port', 'to_ids': True, 'comment': ''})
-                                        yield({'values': val_combined, 'type': 'hostname|port', 'to_ids': True, 'comment': ''})
+                                        yield({'values': val_combined, 'type': 'hostname|port', 'categories': ['Network activity'], 'to_ids': True, 'comment': ''})
                                     elif val_ip and val_port:
                                         val_combined = '{}|{}'.format(val_ip, val_port)
                                         # print({'values': val_combined, 'type': 'ip-dst|port', 'to_ids': True, 'comment': ''})
@@ -193,7 +223,7 @@ def process_analysis_json(analysis_json):
                         #     networkoperation_section_dns_request_by_name['@request_name'],
                         #     networkoperation_section_dns_request_by_name['@result_addresses'])
                         # )
-                        yield({'values': val, 'type': 'domain|ip', 'categories': 'Network activity', 'to_ids': True, 'comment': ''})
+                        yield({'values': val, 'type': 'domain|ip', 'categories': ['Network activity'], 'to_ids': True, 'comment': ''})
                     elif networkoperation_section_dns_request_by_name['@request_name']:
                         # print("networkoperation_section_dns_request_by_name hostname: {}  IDS:yes".format(
                         #     networkoperation_section_dns_request_by_name['@request_name'])
@@ -217,14 +247,14 @@ def process_analysis_json(analysis_json):
                         #     networkpacket_section_connect_to_computer['@remote_port'])
                         # )
                         val_combined = "{}|{}".format(networkpacket_section_connect_to_computer['@remote_hostname'], networkpacket_section_connect_to_computer['@remote_ip'])
-                        yield({'values': val_combined, 'type': 'hostname|ip', 'to_ids': True, 'comment': ''})
+                        yield({'values': val_combined, 'type': 'domain|ip', 'to_ids': True, 'comment': ''})
                     elif networkpacket_section_connect_to_computer['@remote_hostname']:
                         # print("networkpacket_section_connect_to_computer hostname: {}  IDS:yes COMMENT:port {}".format(
                         #     networkpacket_section_connect_to_computer['@remote_hostname'],
                         #     networkpacket_section_connect_to_computer['@remote_port'])
                         # )
                         val_combined = "{}|{}".format(networkpacket_section_connect_to_computer['@remote_hostname'], networkpacket_section_connect_to_computer['@remote_port'])
-                        yield({'values': val_combined, 'type': 'hostname|port', 'to_ids': True, 'comment': ''})
+                        yield({'values': val_combined, 'type': 'hostname|port', 'categories': ['Network activity'], 'to_ids': True, 'comment': ''})
                     elif networkpacket_section_connect_to_computer['@remote_ip']:
                         # print("networkpacket_section_connect_to_computer ip-dst: {}  IDS:yes COMMENT:port {}".format(
                         #     networkpacket_section_connect_to_computer['@remote_ip'],
@@ -295,7 +325,7 @@ def process_analysis_json(analysis_json):
                 for stored_created_file in process['stored_files']['stored_created_file']:
                     stored_created_file['@filename'] = cleanup_filepath(stored_created_file['@filename'])
                     if stored_created_file['@filename']:
-                        if stored_created_file['@filesize'] is not '0':
+                        if stored_created_file['@filesize'] != '0':
                             val = '{}|{}'.format(stored_created_file['@filename'], stored_created_file['@md5'])
                             # print("stored_created_file filename|md5: {}|{}  IDS:yes".format(
                             #     stored_created_file['@filename'],                       # filename
@@ -316,7 +346,7 @@ def process_analysis_json(analysis_json):
                 for stored_modified_file in process['stored_files']['stored_modified_file']:
                     stored_modified_file['@filename'] = cleanup_filepath(stored_modified_file['@filename'])
                     if stored_modified_file['@filename']:
-                        if stored_modified_file['@filesize'] is not '0':
+                        if stored_modified_file['@filesize'] != '0':
                             val = '{}|{}'.format(stored_modified_file['@filename'], stored_modified_file['@md5'])
                             # print("stored_modified_file MODIFY FILE: {}\t{}".format(
                             #     stored_modified_file['@filename'],                       # filename
@@ -411,28 +441,30 @@ def cleanup_url(item):
 
 def cleanup_filepath(item):
     noise_substrings = {
-        'C:\\Windows\\Prefetch\\',
-        '\\AppData\\Roaming\\Microsoft\\Windows\\Recent\\',
-        '\\AppData\\Roaming\\Microsoft\\Office\\Recent\\',
-        'C:\\ProgramData\\Microsoft\\OfficeSoftwareProtectionPlatform\\Cache\\cache.dat',
-        '\\AppData\\Local\\Microsoft\\Windows\\Temporary Internet Files\\Content.',
-        '\\AppData\\Local\\Microsoft\\Internet Explorer\\Recovery\\High\\',
+        '\\AppData\\Local\\GDIPFONTCACHEV1.DAT',
         '\\AppData\\Local\\Microsoft\\Internet Explorer\\DOMStore\\',
-        '\\AppData\\LocalLow\\Microsoft\\Internet Explorer\\Services\\search_',
-        '\\AppData\\Local\\Microsoft\\Windows\\History\\History.',
-        '\\AppData\\Roaming\\Microsoft\\Windows\\Cookies\\',
-        '\\AppData\\LocalLow\\Microsoft\\CryptnetUrlCache\\',
+        '\\AppData\\Local\\Microsoft\\Internet Explorer\\Recovery\\High\\',
         '\\AppData\\Local\\Microsoft\\Windows\\Caches\\',
-        '\\AppData\\Local\\Microsoft\\Windows\WebCache\\',
         '\\AppData\\Local\\Microsoft\\Windows\\Explorer\\thumbcache',
+        '\\AppData\\Local\\Microsoft\\Windows\\History\\History.',
+        '\\AppData\\Local\\Microsoft\\Windows\\Temporary Internet Files\\Content.',
+        '\\AppData\\Local\\Microsoft\\Windows\\WebCache\\',
+        '\\AppData\\Local\\Temp\\.*tmp$',
+        '\\AppData\\LocalLow\\Microsoft\\CryptnetUrlCache\\',
+        '\\AppData\\LocalLow\\Microsoft\\Internet Explorer\\Services\\search_',
+        '\\AppData\\Roaming\\Microsoft\\Office\\Recent\\',
+        '\\AppData\\Roaming\\Microsoft\\Windows\\Cookies\\',
+        '\\AppData\\Roaming\\Microsoft\\Windows\\Recent\\',
+        'C:\\ProgramData\\Microsoft\\OfficeSoftwareProtectionPlatform\\Cache\\cache.dat',
+        'C:\\Windows\\Prefetch\\',
 
         '\\AppData\\Roaming\\Adobe\\Acrobat\\9.0\\SharedDataEvents-journal',
         '\\AppData\\Roaming\\Adobe\\Acrobat\\9.0\\UserCache.bin',
 
         '\\AppData\\Roaming\\Macromedia\\Flash Player\\macromedia.com\\support\\flashplayer\\sys\\settings.sol',
-        '\\AppData\\Roaming\Adobe\\Flash Player\\NativeCache\\',
+        '\\AppData\\Roaming\\Adobe\\Flash Player\\NativeCache\\',
         'C:\\Windows\\AppCompat\\Programs\\',
-        'C:\~'  # caused by temp file created by MS Office when opening malicious doc/xls/...
+        'C:\\~'  # caused by temp file created by MS Office when opening malicious doc/xls/...
     }
     if list_in_string(noise_substrings, item):
         return None
@@ -441,24 +473,27 @@ def cleanup_filepath(item):
 
 def cleanup_regkey(item):
     noise_substrings = {
-        r'\\Software\\Microsoft\\Windows\\CurrentVersion\\Installer\\UserData\\',
-        r'\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings\\',
+        r'\\CurrentVersion\\Explorer\\FileExts\\[a-z\.]+\\OpenWith',
         r'\\CurrentVersion\\Explorer\\RecentDocs\\',
         r'\\CurrentVersion\\Explorer\\UserAssist\\',
-        r'\\CurrentVersion\\Explorer\\FileExts\\[a-z\.]+\\OpenWith',
-        r'\\Software\\Microsoft\\Internet Explorer\\Main\\WindowsSearch',
-        r'\\Software\\Microsoft\\Office\\[0-9\.]+\\',
-        r'\\SOFTWARE\\Microsoft\\OfficeSoftwareProtectionPlatform\\',
-        r'\\Software\\Microsoft\\Office\\Common\\Smart Tag\\',
-        r'\\Usage\\SpellingAndGrammarFiles',
-        r'^HKLM\\Software\\Microsoft\\Tracing\\',
+        r'\\Local Settings\\Software\\Microsoft\\Windows\\Shell\\Bag',
         r'\\Software\\Classes\\CLSID\\',
         r'\\Software\\Classes\\Local Settings\\MuiCache\\',
-        r'\\Local Settings\\Software\\Microsoft\\Windows\\Shell\\Bag',
-        r'\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\RunMRU\\'
+        r'\\Software\\Microsoft\\Internet Explorer\\Main\\WindowsSearch',
+        r'\\Software\\Microsoft\\Office\\[0-9\.]+\\',
+        r'\\Software\\Microsoft\\Office\\Common\\Smart Tag\\',
+        r'\\Software\\Microsoft\\OfficeSoftwareProtectionPlatform\\',
+        r'\\Software\\Microsoft\\Shared Tools\\Panose\\',
+        r'\\Software\\Microsoft\\Tracing\\',
+        r'\\Software\\Microsoft\\Tracing\\powershell_RASAPI32\\',
+        r'\\Software\\Microsoft\\Tracing\\powershell_RASMANCS\\',
+        r'\\Software\\Microsoft\\Windows\\CurrentVersion\\Action Center\\',
+        r'\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\RunMRU\\',
+        r'\\Software\\Microsoft\\Windows\\CurrentVersion\\Installer\\UserData\\',
+        r'\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings\\',
+        r'\\System\\CurrentControlSet\\Services\\RdyBoost\\',
+        r'\\Usage\\SpellingAndGrammarFiles'
     }
-    item = item.replace('\\REGISTRY\\MACHINE\\', 'HKLM\\')
-    item = item.replace('\\REGISTRY\\USER\\', 'HKCU\\')
     if list_in_string(noise_substrings, item, regex=True):
         return None
     return item

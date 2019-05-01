@@ -105,8 +105,8 @@ def handler(q=False):
                                 url1 = "https://cloud.vmray.com/user/analysis/view?from_sample_id=%u" % sample_id
                                 url2 = "&id=%u" % analysis_id
                                 url3 = "&sub=%2Freport%2Foverview.html"
-                                a_id["results"].append({ "values": url1 + url2 + url3, "types": "link" })
-                                vmray_results = {'results': vmray_results["results"] + a_id["results"] }
+                                a_id["results"].append({"values": url1 + url2 + url3, "types": "link"})
+                                vmray_results = {'results': vmray_results["results"] + a_id["results"]}
                 # Clean up (remove doubles)
                 if vti_patterns_found:
                     vmray_results = vmrayCleanup(vmray_results)
@@ -117,7 +117,7 @@ def handler(q=False):
             else:
                 misperrors['error'] = "Unable to fetch sample id %u" % (sample_id)
                 return misperrors
-        except:
+        except Exception:
             misperrors['error'] = "Unable to access VMRay API"
             return misperrors
     else:
@@ -267,7 +267,7 @@ def vmrayGeneric(el, attr="", attrpos=1):
         if content:
             if attr:
                 # Some elements are put between \"\" ; replace them to single
-                content = content.replace("\"\"","\"")
+                content = content.replace("\"\"", "\"")
                 content_split = content.split("\"")
                 # Attributes are between open " and close "; so use >
                 if len(content_split) > attrpos:

@@ -17,7 +17,7 @@ moduleconfig = []
 
 # Avoid adding windows update to enrichment etc.
 def isBlacklisted(value):
-    blacklist = ['8.8.8.8', '255.255.255.255', '192.168.56.' , 'time.windows.com']
+    blacklist = ['8.8.8.8', '255.255.255.255', '192.168.56.', 'time.windows.com']
 
     for b in blacklist:
         if value in b:
@@ -25,27 +25,30 @@ def isBlacklisted(value):
 
     return False
 
+
 def valid_ip(ip):
     m = re.match(r"^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$", ip)
     return bool(m) and all(map(lambda n: 0 <= int(n) <= 255, m.groups()))
+
 
 def valid_domain(hostname):
     if len(hostname) > 255:
         return False
     if hostname[-1] == ".":
-        hostname = hostname[:-1] # strip exactly one dot from the right, if present
-    allowed = re.compile("(?!-)[A-Z\d-]{1,63}(?<!-)$", re.IGNORECASE)
+        hostname = hostname[:-1]  # strip exactly one dot from the right, if present
+    allowed = re.compile(r"(?!-)[A-Z\d-]{1,63}(?<!-)$", re.IGNORECASE)
     return all(allowed.match(x) for x in hostname.split("."))
+
 
 def valid_email(email):
     return bool(re.search(r"^[\w\.\+\-]+\@[\w]+\.[a-z]{2,3}$", email))
+
 
 def handler(q=False):
     if q is False:
         return False
 
     q = json.loads(q)
-
 
     r = {"results": []}
 
@@ -98,7 +101,7 @@ def getHash(hash):
 
 def getIP(ip):
     ret = []
-    req = json.loads( requests.get("https://www.threatcrowd.org/searchApi/v2/ip/report/?ip=" + ip).text )
+    req = json.loads(requests.get("https://www.threatcrowd.org/searchApi/v2/ip/report/?ip=" + ip).text)
 
     if "resolutions" in req:
         for dns in req["resolutions"]:
@@ -110,9 +113,7 @@ def getIP(ip):
         for hash in req["hashes"]:
             ret.append({"types": ["md5"], "values": [hash]})
 
-
     return ret
-
 
 
 def getEmail(email):
@@ -129,11 +130,10 @@ def getEmail(email):
     return ret
 
 
-
 def getDomain(domain):
 
     ret = []
-    req = json.loads( requests.get("https://www.threatcrowd.org/searchApi/v2/domain/report/?domain=" + domain).text )
+    req = json.loads(requests.get("https://www.threatcrowd.org/searchApi/v2/domain/report/?domain=" + domain).text)
 
     if "resolutions" in req:
         for dns in req["resolutions"]:
@@ -148,8 +148,8 @@ def getDomain(domain):
         for hash in req["hashes"]:
             ret.append({"types": ["md5"], "values": [hash]})
 
-
     return ret
+
 
 def introspection():
     return mispattributes

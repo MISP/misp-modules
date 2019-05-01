@@ -1,0 +1,8 @@
+{
+    "description": "Module to get information from ThreatMiner.",
+    "logo": "logos/threatminer.png",
+    "input": "A MISP attribute included in the following list:\n- hostname\n- domain\n- ip-src\n- ip-dst\n- md5\n- sha1\n- sha256\n- sha512",
+    "output": "MISP attributes mapped from the result of the query on ThreatMiner, included in the following list:\n- domain\n- ip-src\n- ip-dst\n- text\n- md5\n- sha1\n- sha256\n- sha512\n- ssdeep\n- authentihash\n- filename\n- whois-registrant-email\n- url\n- link",
+    "references": ["https://www.threatminer.org/"],
+    "features": "This module takes a MISP attribute as input and queries ThreatMiner with it.\n\nThe result of this query is then parsed and some data is mapped into MISP attributes in order to enrich the input attribute."
+}

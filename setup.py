@@ -12,6 +12,7 @@ setup(
     description='MISP modules are autonomous modules that can be used for expansion and other services in MISP',
     packages=find_packages(),
     entry_points={'console_scripts': ['misp-modules = misp_modules:main']},
+    scripts=['tools/update_misp_modules.sh'],
     test_suite="tests",
     classifiers=[
         'License :: OSI Approved :: GNU Affero General Public License v3',
@@ -23,20 +24,7 @@ setup(
     ],
     install_requires=[
         'tornado',
-        'dnspython3',
-        'requests',
-        'urlarchiver',
-        'passivetotal',
-        'PyPDNS',
-        'pypssl',
-        'redis',
-        'pyeupi',
-        'ipasn-redis',
-        'asnhistory',
-        'stix',
-        'cybox',
-        'pillow',
-        'pytesseract',
-        'shodan',
+        'psutil',
+        'redis>=3'
     ],
 )

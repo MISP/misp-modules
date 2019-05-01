@@ -1,5 +1,4 @@
 import json
-import requests
 from SPARQLWrapper import SPARQLWrapper, JSON
 
 misperrors = {'error': 'Error'}
@@ -17,17 +16,17 @@ def handler(q=False):
     if not request.get('text'):
         misperrors['error'] = 'Query text missing'
         return misperrors
-    
+
     sparql = SPARQLWrapper(wiki_api_url)
     query_string = \
-	"SELECT ?item \n" \
-	"WHERE { \n" \
-	"?item rdfs:label\"" + request.get('text') + "\" @en \n" \
-	"}\n";
+        "SELECT ?item \n" \
+        "WHERE { \n" \
+        "?item rdfs:label\"" + request.get('text') + "\" @en \n" \
+        "}\n"
     sparql.setQuery(query_string)
     sparql.setReturnFormat(JSON)
     results = sparql.query().convert()
-    
+
     summary = ''
     try:
         result = results["results"]["bindings"][0]
@@ -47,4 +46,3 @@ def introspection():
 def version():
     moduleinfo['config'] = moduleconfig
     return moduleinfo
-

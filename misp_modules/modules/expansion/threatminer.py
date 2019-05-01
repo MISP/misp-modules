@@ -1,7 +1,5 @@
 import json
 import requests
-from requests import HTTPError
-import base64
 
 misperrors = {'error': 'Error'}
 mispattributes = {'input': ['hostname', 'domain', 'ip-src', 'ip-dst', 'md5', 'sha1', 'sha256', 'sha512'],
@@ -61,27 +59,27 @@ def get_domain(q):
             continue
 
         for result in results:
-            if flag == 1: #whois
+            if flag == 1:  # whois
                 emails = result.get('whois', {}).get('emails')
                 if not emails:
                     continue
                 for em_type, email in emails.items():
                     ret.append({'types': ['whois-registrant-email'], 'values': [email], 'comment': desc.format(q, 'whois')})
-            if flag == 2: #pdns
+            if flag == 2:  # pdns
                 ip = result.get('ip')
                 if ip:
                     ret.append({'types': ['ip-src', 'ip-dst'], 'values': [ip], 'comment': desc.format(q, 'pdns')})
-            if flag == 3: #uri
+            if flag == 3:  # uri
                 uri = result.get('uri')
                 if uri:
                     ret.append({'types': ['url'], 'values': [uri], 'comment': desc.format(q, 'uri')})
-            if flag == 4: #samples
+            if flag == 4:  # samples
                 if type(result) is str:
                     ret.append({'types': ['sha256'], 'values': [result], 'comment': desc.format(q, 'samples')})
-            if flag == 5: #subdomains
+            if flag == 5:  # subdomains
                 if type(result) is str:
                     ret.append({'types': ['domain'], 'values': [result], 'comment': desc.format(q, 'subdomain')})
-            if flag == 6: #reports
+            if flag == 6:  # reports
                 link = result.get('URL')
                 if link:
                     ret.append({'types': ['url'], 'values': [link], 'comment': desc.format(q, 'report')})
@@ -100,27 +98,27 @@ def get_ip(q):
             continue
 
         for result in results:
-            if flag == 1: #whois
+            if flag == 1:  # whois
                 emails = result.get('whois', {}).get('emails')
                 if not emails:
                     continue
                 for em_type, email in emails.items():
                     ret.append({'types': ['whois-registrant-email'], 'values': [email], 'comment': desc.format(q, 'whois')})
-            if flag == 2: #pdns
+            if flag == 2:  # pdns
                 ip = result.get('ip')
                 if ip:
                     ret.append({'types': ['ip-src', 'ip-dst'], 'values': [ip], 'comment': desc.format(q, 'pdns')})
-            if flag == 3: #uri
+            if flag == 3:  # uri
                 uri = result.get('uri')
                 if uri:
                     ret.append({'types': ['url'], 'values': [uri], 'comment': desc.format(q, 'uri')})
-            if flag == 4: #samples
+            if flag == 4:  # samples
                 if type(result) is str:
                     ret.append({'types': ['sha256'], 'values': [result], 'comment': desc.format(q, 'samples')})
-            if flag == 5: #ssl
+            if flag == 5:  # ssl
                 if type(result) is str:
                     ret.append({'types': ['x509-fingerprint-sha1'], 'values': [result], 'comment': desc.format(q, 'ssl')})
-            if flag == 6: #reports
+            if flag == 6:  # reports
                 link = result.get('URL')
                 if link:
                     ret.append({'types': ['url'], 'values': [link], 'comment': desc.format(q, 'report')})
@@ -139,11 +137,11 @@ def get_hash(q):
             continue
 
         for result in results:
-            if flag == 1: #meta (filename)
+            if flag == 1:  # meta (filename)
                 name = result.get('file_name')
                 if name:
                     ret.append({'types': ['filename'], 'values': [name], 'comment': desc.format(q, 'file')})
-            if flag == 3: #network
+            if flag == 3:  # network
                 domains = result.get('domains')
                 for dom in domains:
                     if dom.get('domain'):
@@ -153,12 +151,12 @@ def get_hash(q):
                 for h in hosts:
                     if type(h) is str:
                         ret.append({'types': ['ip-src', 'ip-dst'], 'values': [h], 'comment': desc.format(q, 'network')})
-            if flag == 6: #detections
+            if flag == 6:  # detections
                 detections = result.get('av_detections')
                 for d in detections:
                     if d.get('detection'):
                         ret.append({'types': ['text'], 'values': [d['detection']], 'comment': desc.format(q, 'detection')})
-            if flag == 7: #report
+            if flag == 7:  # report
                 if type(result) is str:
                     ret.append({'types': ['sha256'], 'values': [result], 'comment': desc.format(q, 'report')})
 

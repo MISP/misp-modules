@@ -1,0 +1,8 @@
+{
+    "description": "Query BGP Ranking (https://bgpranking-ng.circl.lu/).",
+    "requirements": ["pybgpranking python library"],
+    "features": "The module takes an AS number attribute as input and displays its description and history, and position in BGP Ranking.\n\n",
+    "references": ["https://github.com/D4-project/BGP-Ranking/"],
+    "input": "Autonomous system number.",
+    "output": "Text containing a description of the ASN, its history, and the position in BGP Ranking."
+}
