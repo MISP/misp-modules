@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+from collections import defaultdict
+import csv
+import io
 import json
 import os
 import base64
@@ -162,7 +165,7 @@ class CsvParser():
                     self.result.append(attribute)
 
     def findMispTypes(self):
-        descFilename = os.path.join(pymisp_path[0], 'data/describeTypes.json')
+        descFilename = os.path.join(pymisp.__path__[0], 'data/describeTypes.json')
         with open(descFilename, 'r') as f:
             MispTypes = json.loads(f.read())['result'].get('types')
         list2pop = []
