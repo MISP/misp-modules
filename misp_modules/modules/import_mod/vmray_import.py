@@ -8,9 +8,10 @@ This version supports import from different analyze jobs, starting from one samp
 
 Requires "vmray_rest_api"
 
-TODO:
- # Import one job (analyze_id)
- # Import STIX package (XML version)
+The expansion module vmray_submit and import module vmray_import are a two step
+process to import data from VMRay.
+You can automate this by setting the PyMISP example script 'vmray_automation'
+as a cron job
 
 '''
 
@@ -21,55 +22,49 @@ from ._vmray.vmray_rest_api import VMRayRESTAPI
 
 misperrors = {'error': 'Error'}
 inputSource = []
-moduleinfo = {'version': '0.1', 'author': 'Koen Van Impe',
-              'description': 'Import VMRay (VTI) results',
+moduleinfo = {'version': '0.2', 'author': 'Koen Van Impe',
+              'description': 'Import VMRay results',
               'module-type': ['import']}
-userConfig = {'include_textdescr': {'type': 'Boolean',
-                                    'message': 'Include textual description'
-                                    },
+userConfig = {
               'include_analysisid': {'type': 'Boolean',
-                                     'message': 'Include VMRay analysis_id text'
+                                     'message': 'Include link to VMRay analysis'
                                      },
-              'only_network_info': {'type': 'Boolean',
-                                    'message': 'Only include network (src-ip, hostname, domain, ...) information'
-                                    },
+              'include_analysisdetails': {'type': 'Boolean',
+                                     'message': 'Include (textual) analysis details'
+                                     },
+              'include_vtidetails': {'type': 'Boolean',
+                                     'message': 'Include VMRay Threat Identifier (VTI) rules'
+                                     },
+              'include_imphash_ssdeep': {'type': 'Boolean',
+                                     'message': 'Include imphash and ssdeep'
+                                     },
+              'include_extracted_files': {'type': 'Boolean',
+                                     'message': 'Include extracted files section'
+                                     },
+
               'sample_id': {'type': 'Integer',
                             'errorMessage': 'Expected a sample ID',
                             'message': 'The VMRay sample_id'
                             }
               }
 
-moduleconfig = ['apikey', 'url']
-
-include_textdescr = False
-include_analysisid = False
-only_network_info = False
-
+moduleconfig = ['apikey', 'url', 'wait_period']
 
 def handler(q=False):
-    global include_textdescr
-    global include_analysisid
-    global only_network_info
+    global include_analysisid, include_imphash_ssdeep, include_extracted_files, include_analysisdetails, include_vtidetails, include_static_to_ids
 
     if q is False:
         return False
     request = json.loads(q)
 
-    include_textdescr = request["config"].get("include_textdescr")
-    include_analysisid = request["config"].get("include_analysisid")
-    only_network_info = request["config"].get("only_network_info")
-    if include_textdescr == "1":
-        include_textdescr = True
-    else:
-        include_textdescr = False
-    if include_analysisid == "1":
-        include_analysisid = True
-    else:
-        include_analysisid = False
-    if only_network_info == "1":
-        only_network_info = True
-    else:
-        only_network_info = False
+    include_analysisid = bool(int(request["config"].get("include_analysisid")))
+    include_imphash_ssdeep = bool(int(request["config"].get("include_imphash_ssdeep")))
+    include_extracted_files = bool(int(request["config"].get("include_extracted_files")))
+    include_analysisdetails = bool(int(request["config"].get("include_extracted_files")))
+    include_vtidetails = bool(int(request["config"].get("include_vtidetails")))
+    include_static_to_ids = True
+
+    #print("include_analysisid: %s  include_imphash_ssdeep: %s  include_extracted_files: %s  include_analysisdetails: %s  include_vtidetails: %s" % ( include_analysisid, include_imphash_ssdeep, include_extracted_files, include_analysisdetails, include_vtidetails))
 
     sample_id = int(request["config"].get("sample_id"))
 
@@ -81,34 +76,52 @@ def handler(q=False):
         try:
             api = VMRayRESTAPI(request["config"].get("url"), request["config"].get("apikey"), False)
             vmray_results = {'results': []}
+
             # Get all information on the sample, returns a set of finished analyze jobs
             data = vmrayGetInfoAnalysis(api, sample_id)
             if data["data"]:
-                vti_patterns_found = False
                 for analysis in data["data"]:
-                    analysis_id = analysis["analysis_id"]
-
+                    analysis_id = int(analysis["analysis_id"])
                     if analysis_id > 0:
                         # Get the details for an analyze job
                         analysis_data = vmrayDownloadAnalysis(api, analysis_id)
 
                         if analysis_data:
-                            if "analysis_vti_patterns" in analysis_data:
-                                p = vmrayVtiPatterns(analysis_data["analysis_vti_patterns"])
-                            else:
-                                p = vmrayVtiPatterns(analysis_data["vti_patterns"])
-                            if p and len(p["results"]) > 0:
-                                vti_patterns_found = True
-                                vmray_results = {'results': vmray_results["results"] + p["results"]}
+                            if include_analysisdetails and "analysis_details" in analysis_data:
+                                analysis_details = vmrayAnalysisDetails(analysis_data["analysis_details"], analysis_id)
+                                if analysis_details and len(analysis_details["results"]) > 0:
+                                    vmray_results = {'results': vmray_results["results"] + analysis_details["results"]}
+
+                            if "classifications" in analysis_data:
+                                classifications = vmrayClassifications(analysis_data["classifications"], analysis_id)
+                                if classifications and len(classifications["results"]) > 0:
+                                    vmray_results = {'results': vmray_results["results"] + classifications["results"]}
+
+                            if include_extracted_files and "extracted_files" in analysis_data:
+                                extracted_files = vmrayExtractedfiles(analysis_data["extracted_files"])
+                                if extracted_files and len(extracted_files["results"]) > 0:
+                                    vmray_results = {'results': vmray_results["results"] + extracted_files["results"]}
+
+                            if include_vtidetails and "vti" in analysis_data:
+                                vti = vmrayVti(analysis_data["vti"])
+                                if vti and len(vti["results"]) > 0:
+                                    vmray_results = {'results': vmray_results["results"] + vti["results"]}
+
+                            if "artifacts" in analysis_data:
+                                artifacts = vmrayArtifacts(analysis_data["artifacts"])
+                                if artifacts and len(artifacts["results"]) > 0:
+                                    vmray_results = {'results': vmray_results["results"] + artifacts["results"]}
+
                             if include_analysisid:
                                 a_id = {'results': []}
-                                url1 = "https://cloud.vmray.com/user/analysis/view?from_sample_id=%u" % sample_id
+                                url1 = request["config"].get("url") + "/user/analysis/view?from_sample_id=%u" % sample_id
                                 url2 = "&id=%u" % analysis_id
                                 url3 = "&sub=%2Freport%2Foverview.html"
                                 a_id["results"].append({"values": url1 + url2 + url3, "types": "link"})
                                 vmray_results = {'results': vmray_results["results"] + a_id["results"]}
+
                 # Clean up (remove doubles)
-                if vti_patterns_found:
+                if len(vmray_results["results"]) > 0:
                     vmray_results = vmrayCleanup(vmray_results)
                     return vmray_results
                 else:
@@ -117,8 +130,8 @@ def handler(q=False):
             else:
                 misperrors['error'] = "Unable to fetch sample id %u" % (sample_id)
                 return misperrors
-        except Exception:
-            misperrors['error'] = "Unable to access VMRay API"
+        except Exception as e:
+            misperrors['error'] = "Unable to access VMRay API : %s" % (e)
             return misperrors
     else:
         misperrors['error'] = "Not a valid sample id"
@@ -158,165 +171,216 @@ def vmrayGetInfoAnalysis(api, sample_id):
 def vmrayDownloadAnalysis(api, analysis_id):
     ''' Get the details from an analysis'''
     if analysis_id:
-        data = api.call("GET", "/rest/analysis/%u/archive/additional/vti_result.json" % (analysis_id), raw_data=True)
-        return json.loads(data.read().decode())
+        try:
+            data = api.call("GET", "/rest/analysis/%u/archive/logs/summary.json" % (analysis_id), raw_data=True)
+            return json.loads(data.read().decode())
+        except Exception as e:
+            misperrors['error'] = "Unable to download summary.json for analysis %s" % (analysis_id)
+            return misperrors
+    else:
+        return False
+
+def vmrayVti(vti):
+    '''VMRay Threat Identifier (VTI) rules that matched for this analysis'''
+
+    if vti:
+        r = {'results': []}
+        for rule in vti:
+            if rule == "vti_rule_matches":
+                vti_rule = vti["vti_rule_matches"]
+                for el in vti_rule:
+                    if "operation_desc" in el:
+                        comment = ""
+                        types = ["text"]
+                        values = el["operation_desc"]
+                        r['results'].append({'types': types, 'values': values, 'comment': comment})
+
+        return r
+
     else:
         return False
 
 
-def vmrayVtiPatterns(vti_patterns):
-    ''' Match the VTI patterns to MISP data'''
+def vmrayExtractedfiles(extracted_files):
+    ''' Information about files which were extracted during the analysis, such as files that were created, modified, or embedded by the malware'''
 
-    if vti_patterns:
+    if extracted_files:
+        r = {'results': []}
+
+        for file in extracted_files:
+            if "file_type" and "norm_filename" in file:
+                comment = "%s - %s" % (file["file_type"], file["norm_filename"])
+            else:
+                comment = ""
+
+            if "norm_filename" in file:
+                attr_filename_c = file["norm_filename"].rsplit("\\",1)
+                if len(attr_filename_c) > 1:
+                    attr_filename = attr_filename_c[len(attr_filename_c) - 1]
+                else:
+                    attr_filename = "vmray_sample"
+            else:
+                attr_filename = "vmray_sample"
+
+            if "md5_hash" in file and file["md5_hash"] is not None:
+                r['results'].append({'types': ["filename|md5"], 'values': '{}|{}'.format(attr_filename,file["md5_hash"]), 'comment': comment, 'categories': ['Payload delivery', 'Artifacts dropped'], 'to_ids': include_static_to_ids})
+            if include_imphash_ssdeep and "imp_hash" in file and file["imp_hash"] is not None:
+                r['results'].append({'types': ["filename|imphash"], 'values': '{}|{}'.format(attr_filename,file["imp_hash"]), 'comment': comment, 'categories': ['Payload delivery', 'Artifacts dropped'], 'to_ids': include_static_to_ids})
+            if "sha1_hash" in file and file["sha1_hash"] is not None:
+                r['results'].append({'types': ["filename|sha1"], 'values': '{}|{}'.format(attr_filename,file["sha1_hash"]), 'comment': comment, 'categories': ['Payload delivery', 'Artifacts dropped'], 'to_ids': include_static_to_ids})
+            if "sha256_hash" in file and file["sha256_hash"] is not None:
+                r['results'].append({'types': ["filename|sha256"], 'values': '{}|{}'.format(attr_filename,file["sha256_hash"]), 'comment': comment, 'categories': ['Payload delivery', 'Artifacts dropped'], 'to_ids': include_static_to_ids})
+            if include_imphash_ssdeep and "ssdeep_hash" in file and file["ssdeep_hash"] is not None:
+                r['results'].append({'types': ["filename|ssdeep"], 'values': '{}|{}'.format(attr_filename,file["ssdeep_hash"]), 'comment': comment, 'categories': ['Payload delivery', 'Artifacts dropped'], 'to_ids': include_static_to_ids})
+
+        return r
+
+    else:
+        return False
+
+
+def vmrayClassifications(classification, analysis_id):
+    ''' List the classifications, tag them on a "text" attribute '''
+
+    if classification:
+        r = {'results': []}
+        types = ["text"]
+        comment = ""
+        values = "Classification : %s " % (", ".join(str(x) for x in classification))
+        r['results'].append({'types': types, 'values': values, 'comment': comment})
+
+        return r
+
+    else:
+        return False
+
+
+def vmrayAnalysisDetails(details, analysis_id):
+    ''' General information about the analysis information '''
+
+    if details:
+        r = {'results': []}
+        types = ["text"]
+        comment = ""
+        if "execution_successful" in details:
+            values = "Analysis %s : execution_successful : %s " % (analysis_id, str(details["execution_successful"]))
+            r['results'].append({'types': types, 'values': values, 'comment': comment})
+        if "termination_reason" in details:
+            values = "Analysis %s : termination_reason : %s " % (analysis_id, str(details["termination_reason"]))
+            r['results'].append({'types': types, 'values': values, 'comment': comment})
+        if "result_str" in details:
+            values = "Analysis %s : result : %s " % (analysis_id, details["result_str"])
+            r['results'].append({'types': types, 'values': values, 'comment': comment})
+
+        return r
+
+    else:
+        return false
+
+
+def vmrayArtifacts(patterns):
+    ''' IOCs that were seen during the analysis '''
+
+    if patterns:
         r = {'results': []}
         y = {'results': []}
 
-        for pattern in vti_patterns:
-            content = False
-            if pattern["category"] == "_network" and pattern["operation"] == "_download_data":
-                content = vmrayGeneric(pattern, "url", 1)
-            elif pattern["category"] == "_network" and pattern["operation"] == "_connect":
-                content = vmrayConnect(pattern)
-            elif pattern["category"] == "_network" and pattern["operation"] == "_install_server":
-                content = vmrayGeneric(pattern)
+        for pattern in patterns:
+            if pattern == "domains":
+                for el in patterns[pattern]:
+                    values = el["domain"]
+                    types = ["domain", "hostname"]
+                    if "sources" in el:
+                        sources = el["sources"]
+                        comment = "Found in: " + ", ".join(str(x) for x in sources)
+                    else:
+                        comment = ""
+                    r['results'].append({'types': types, 'values': values, 'comment': comment, 'to_ids': include_static_to_ids})
+            if pattern == "files":
+                for el in patterns[pattern]:
+                    filename_values = el["filename"]
+                    attr_filename_c = filename_values.rsplit("\\",1)
+                    if len(attr_filename_c) > 1:
+                        attr_filename = attr_filename_c[len(attr_filename_c) - 1]
+                    else:
+                        attr_filename = ""
+                    filename_types = ["filename"]
+                    filename_operations = el["operations"]
+                    comment = "File operations: " + ", ".join(str(x) for x in filename_operations)
+                    r['results'].append({'types': filename_types, 'values': filename_values, 'comment': comment})
 
-            elif only_network_info is False and pattern["category"] == "_process" and pattern["operation"] == "_alloc_wx_page":
-                content = vmrayGeneric(pattern)
-            elif only_network_info is False and pattern["category"] == "_process" and pattern["operation"] == "_install_ipc_endpoint":
-                content = vmrayGeneric(pattern, "mutex", 1)
-            elif only_network_info is False and pattern["category"] == "_process" and pattern["operation"] == "_crashed_process":
-                content = vmrayGeneric(pattern)
-            elif only_network_info is False and pattern["category"] == "_process" and pattern["operation"] == "_read_from_remote_process":
-                content = vmrayGeneric(pattern)
-            elif only_network_info is False and pattern["category"] == "_process" and pattern["operation"] == "_create_process_with_hidden_window":
-                content = vmrayGeneric(pattern)
+                    # Run through all hashes
+                    if "hashes" in el:
+                        for hash in el["hashes"]:
+                            if "md5_hash" in hash and hash["md5_hash"] is not None:
+                                r['results'].append({'types': ["filename|md5"], 'values': '{}|{}'.format(attr_filename,hash["md5_hash"]), 'comment': comment, 'categories': ['Payload delivery', 'Artifacts dropped'], 'to_ids': include_static_to_ids})
+                            if include_imphash_ssdeep and "imp_hash" in hash and hash["imp_hash"] is not None:
+                                r['results'].append({'types': ["filename|imphash"], 'values': '{}|{}'.format(attr_filename,hash["imp_hash"]), 'comment': comment, 'categories': ['Payload delivery', 'Artifacts dropped'], 'to_ids': include_static_to_ids})
+                            if "sha1_hash" in hash and hash["sha1_hash"] is not None:
+                                r['results'].append({'types': ["filename|sha1"], 'values': '{}|{}'.format(attr_filename,hash["sha1_hash"]), 'comment': comment, 'categories': ['Payload delivery', 'Artifacts dropped'], 'to_ids': include_static_to_ids})
+                            if "sha256_hash" in hash and hash["sha256_hash"] is not None:
+                                r['results'].append({'types': ["filename|sha256"], 'values': '{}|{}'.format(attr_filename,hash["sha256_hash"]), 'comment': comment, 'categories': ['Payload delivery', 'Artifacts dropped'], 'to_ids': include_static_to_ids})
+                            if include_imphash_ssdeep and "ssdeep_hash" in hash and hash["ssdeep_hash"] is not None:
+                                r['results'].append({'types': ["filename|ssdeep"], 'values': '{}|{}'.format(attr_filename,hash["ssdeep_hash"]), 'comment': comment, 'categories': ['Payload delivery', 'Artifacts dropped'], 'to_ids': include_static_to_ids})
+            if pattern == "ips":
+                for el in patterns[pattern]:
+                    values = el["ip_address"]
+                    types = ["ip-dst"]
+                    if "sources" in el:
+                        sources = el["sources"]
+                        comment = "Found in: " + ", ".join(str(x) for x in sources)
+                    else:
+                        comment = ""
 
-            elif only_network_info is False and pattern["category"] == "_anti_analysis" and pattern["operation"] == "_delay_execution":
-                content = vmrayGeneric(pattern)
-            elif only_network_info is False and pattern["category"] == "_anti_analysis" and pattern["operation"] == "_dynamic_api_usage":
-                content = vmrayGeneric(pattern)
+                    r['results'].append({'types': types, 'values': values, 'comment': comment, 'to_ids': include_static_to_ids})
+            if pattern == "mutexes":
+                for el in patterns[pattern]:
+                    values = el["mutex_name"]
+                    types = ["mutex"]
+                    if "sources" in el:
+                        sources = el["operations"]
+                        comment = "Operations: " + ", ".join(str(x) for x in sources)
+                    else:
+                        comment = ""
 
-            elif only_network_info is False and pattern["category"] == "_static" and pattern["operation"] == "_drop_pe_file":
-                content = vmrayGeneric(pattern, "filename", 1)
-            elif only_network_info is False and pattern["category"] == "_static" and pattern["operation"] == "_execute_dropped_pe_file":
-                content = vmrayGeneric(pattern, "filename", 1)
+                    r['results'].append({'types': types, 'values': values, 'comment': comment, 'to_ids': include_static_to_ids})
+            if pattern == "registry":
+                for el in patterns[pattern]:
+                    values = el["reg_key_name"]
+                    types = ["regkey"]
+                    if "sources" in el:
+                        sources = el["operations"]
+                        comment = "Operations: " + ", ".join(str(x) for x in sources)
+                    else:
+                        comment = ""
 
-            elif only_network_info is False and pattern["category"] == "_injection" and pattern["operation"] == "_modify_memory":
-                content = vmrayGeneric(pattern)
-            elif only_network_info is False and pattern["category"] == "_injection" and pattern["operation"] == "_modify_memory_system":
-                content = vmrayGeneric(pattern)
-            elif only_network_info is False and pattern["category"] == "_injection" and pattern["operation"] == "_modify_memory_non_system":
-                content = vmrayGeneric(pattern)
-            elif only_network_info is False and pattern["category"] == "_injection" and pattern["operation"] == "_modify_control_flow":
-                content = vmrayGeneric(pattern)
-            elif only_network_info is False and pattern["category"] == "_injection" and pattern["operation"] == "_modify_control_flow_non_system":
-                content = vmrayGeneric(pattern)
-            elif only_network_info is False and pattern["category"] == "_file_system" and pattern["operation"] == "_create_many_files":
-                content = vmrayGeneric(pattern)
+                    r['results'].append({'types': types, 'values': values, 'comment': comment, 'to_ids': include_static_to_ids})
+            if pattern == "urls":
+                for el in patterns[pattern]:
+                    values = el["url"]
+                    types = ["url"]
+                    if "sources" in el:
+                        sources = el["operations"]
+                        comment = "Operations: " + ", ".join(str(x) for x in sources)
+                    else:
+                        comment = ""
 
-            elif only_network_info is False and pattern["category"] == "_hide_tracks" and pattern["operation"] == "_hide_data_in_registry":
-                content = vmrayGeneric(pattern, "regkey", 1)
+                    r['results'].append({'types': types, 'values': values, 'comment': comment, 'to_ids': include_static_to_ids})
 
-            elif only_network_info is False and pattern["category"] == "_persistence" and pattern["operation"] == "_install_startup_script":
-                content = vmrayGeneric(pattern, "regkey", 1)
-            elif only_network_info is False and pattern["category"] == "_os" and pattern["operation"] == "_enable_process_privileges":
-                content = vmrayGeneric(pattern)
-
-            if content:
-                r["results"].append(content["attributes"])
-                r["results"].append(content["text"])
-
-        # Remove empty results
-        r["results"] = [x for x in r["results"] if isinstance(x, dict) and len(x["values"]) != 0]
+        # Remove doubles
         for el in r["results"]:
             if el not in y["results"]:
                 y["results"].append(el)
         return y
+
     else:
-        return False
+        return false
 
 
 def vmrayCleanup(x):
     ''' Remove doubles'''
     y = {'results': []}
-
     for el in x["results"]:
         if el not in y["results"]:
             y["results"].append(el)
     return y
-
-
-def vmraySanitizeInput(s):
-    ''' Sanitize some input so it gets properly imported in MISP'''
-    if s:
-        s = s.replace('"', '')
-        s = re.sub('\\\\', r'\\', s)
-        return s
-    else:
-        return False
-
-
-def vmrayGeneric(el, attr="", attrpos=1):
-    ''' Convert a 'generic' VTI pattern to MISP data'''
-
-    r = {"values": []}
-    f = {"values": []}
-
-    if el:
-        content = el["technique_desc"]
-        if content:
-            if attr:
-                # Some elements are put between \"\" ; replace them to single
-                content = content.replace("\"\"", "\"")
-                content_split = content.split("\"")
-                # Attributes are between open " and close "; so use >
-                if len(content_split) > attrpos:
-                    content_split[attrpos] = vmraySanitizeInput(content_split[attrpos])
-                    r["values"].append(content_split[attrpos])
-                    r["types"] = [attr]
-
-            # Adding the value also as text to get the extra description,
-            # but this is pretty useless for "url"
-            if include_textdescr and attr != "url":
-                f["values"].append(vmraySanitizeInput(content))
-                f["types"] = ["text"]
-
-            return {"text": f, "attributes": r}
-        else:
-            return False
-    else:
-        return False
-
-
-def vmrayConnect(el):
-    ''' Extension of vmrayGeneric , parse network connect data'''
-    ipre = re.compile("([0-9]{1,3}.){3}[0-9]{1,3}")
-
-    r = {"values": []}
-    f = {"values": []}
-
-    if el:
-        content = el["technique_desc"]
-        if content:
-            target = content.split("\"")
-            # port = (target[1].split(":"))[1]  ## FIXME: not used
-            host = (target[1].split(":"))[0]
-            if ipre.match(str(host)):
-                r["values"].append(host)
-                r["types"] = ["ip-dst"]
-            else:
-                r["values"].append(host)
-                r["types"] = ["domain", "hostname"]
-
-            f["values"].append(vmraySanitizeInput(target[1]))
-            f["types"] = ["text"]
-
-            if include_textdescr:
-                f["values"].append(vmraySanitizeInput(content))
-                f["types"] = ["text"]
-
-            return {"text": f, "attributes": r}
-        else:
-            return False
-    else:
-        return False
