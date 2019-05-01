@@ -9,7 +9,8 @@ moduleinfo = {'version': 1, 'author': 'Christian Studer',
               'description': 'Import from GoAML',
               'module-type': ['import']}
 moduleconfig = []
-mispattributes = {'inputSource': ['file'], 'output': ['MISP objects']}
+mispattributes = {'inputSource': ['file'], 'output': ['MISP objects'],
+                  'format': 'misp_standard'}
 
 t_from_objects = {'nodes': ['from_person', 'from_account', 'from_entity'],
                   'leaves': ['from_funds_code', 'from_country']}

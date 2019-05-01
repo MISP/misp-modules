@@ -12,7 +12,6 @@ moduleinfo = {'version': '0.1', 'author': 'Christian Studer',
               'description': 'Import Attributes from a csv file.',
               'module-type': ['import']}
 moduleconfig = []
-inputSource = ['file']
 userConfig = {'header': {
     'type': 'String',
     'message': 'Define the header of the csv file, with types (included in MISP attribute types or attribute fields) separated by commas.\nFor fields that do not match these types, please use space or simply nothing between commas.\nFor instance: ip-src,domain, ,timestamp'},
@@ -20,6 +19,7 @@ userConfig = {'header': {
         'type': 'Boolean',
         'message': 'Tick this box ONLY if there is a header line, NOT COMMENTED, in the file (which will be skipped atm).'
 }}
+mispattributes = {'userConfig': userConfig, 'inputSource': ['file'], 'format': 'misp_standard'}
 
 duplicatedFields = {'mispType': {'mispComment': 'comment'},
                     'attrField': {'attrComment': 'comment'}}
@@ -224,18 +224,7 @@ def handler(q=False):
 
 
 def introspection():
-    modulesetup = {}
-    try:
-        userConfig
-        modulesetup['userConfig'] = userConfig
-    except NameError:
-        pass
-    try:
-        inputSource
-        modulesetup['inputSource'] = inputSource
-    except NameError:
-        pass
-    return modulesetup
+    return mispattributes
 
 
 def version():
