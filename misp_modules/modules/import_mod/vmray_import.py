@@ -72,7 +72,6 @@ def handler(q=False):
         return misperrors
 
     if sample_id > 0:
-        e = None
         try:
             api = VMRayRESTAPI(request["config"].get("url"), request["config"].get("apikey"), False)
             vmray_results = {'results': []}
@@ -130,7 +129,7 @@ def handler(q=False):
             else:
                 misperrors['error'] = "Unable to fetch sample id %u" % (sample_id)
                 return misperrors
-        except Exception as e:
+        except Exception as e: # noqa
             misperrors['error'] = "Unable to access VMRay API : %s" % (e)
             return misperrors
     else:
@@ -174,7 +173,7 @@ def vmrayDownloadAnalysis(api, analysis_id):
         try:
             data = api.call("GET", "/rest/analysis/%u/archive/logs/summary.json" % (analysis_id), raw_data=True)
             return json.loads(data.read().decode())
-        except Exception as e:
+        except Exception as e: # noqa
             misperrors['error'] = "Unable to download summary.json for analysis %s" % (analysis_id)
             return misperrors
     else:
