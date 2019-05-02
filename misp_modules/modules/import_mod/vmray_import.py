@@ -26,31 +26,31 @@ moduleinfo = {'version': '0.2', 'author': 'Koen Van Impe',
               'module-type': ['import']}
 userConfig = {'include_analysisid': {'type': 'Boolean',
                                      'message': 'Include link to VMRay analysis'
-                                      },
+                                     },
               'include_analysisdetails': {'type': 'Boolean',
                                           'message': 'Include (textual) analysis details'
-                                           },
+                                          },
               'include_vtidetails': {'type': 'Boolean',
                                      'message': 'Include VMRay Threat Identifier (VTI) rules'
-                                      },
-              'include_imphash_ssdeep': {'type': 'Boolean',
-                                     'message': 'Include imphash and ssdeep'
                                      },
+              'include_imphash_ssdeep': {'type': 'Boolean',
+                                         'message': 'Include imphash and ssdeep'
+                                         },
               'include_extracted_files': {'type': 'Boolean',
                                           'message': 'Include extracted files section'
-                                           },
+                                          },
 
               'sample_id': {'type': 'Integer',
                             'errorMessage': 'Expected a sample ID',
                             'message': 'The VMRay sample_id'
                             }
-             }
+              }
 
 moduleconfig = ['apikey', 'url', 'wait_period']
 
+
 def handler(q=False):
     global include_analysisid, include_imphash_ssdeep, include_extracted_files, include_analysisdetails, include_vtidetails, include_static_to_ids
-
 
     if q is False:
         return False
@@ -72,6 +72,7 @@ def handler(q=False):
         return misperrors
 
     if sample_id > 0:
+        e = None
         try:
             api = VMRayRESTAPI(request["config"].get("url"), request["config"].get("apikey"), False)
             vmray_results = {'results': []}
@@ -179,9 +180,9 @@ def vmrayDownloadAnalysis(api, analysis_id):
     else:
         return False
 
+
 def vmrayVti(vti):
     '''VMRay Threat Identifier (VTI) rules that matched for this analysis'''
-
 
     if vti:
         r = {'results': []}
