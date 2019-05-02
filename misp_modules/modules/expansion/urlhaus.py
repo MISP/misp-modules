@@ -1,4 +1,3 @@
-from collections import defaultdict
 from pymisp import MISPAttribute, MISPEvent, MISPObject
 import json
 import requests
