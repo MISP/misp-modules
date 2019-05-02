@@ -16,7 +16,6 @@ as a cron job
 '''
 
 import json
-import re
 
 from ._vmray.vmray_rest_api import VMRayRESTAPI
 
@@ -25,33 +24,33 @@ inputSource = []
 moduleinfo = {'version': '0.2', 'author': 'Koen Van Impe',
               'description': 'Import VMRay results',
               'module-type': ['import']}
-userConfig = {
-              'include_analysisid': {'type': 'Boolean',
+userConfig = {'include_analysisid': {'type': 'Boolean',
                                      'message': 'Include link to VMRay analysis'
-                                     },
+                                      },
               'include_analysisdetails': {'type': 'Boolean',
-                                     'message': 'Include (textual) analysis details'
-                                     },
+                                          'message': 'Include (textual) analysis details'
+                                           },
               'include_vtidetails': {'type': 'Boolean',
                                      'message': 'Include VMRay Threat Identifier (VTI) rules'
-                                     },
+                                      },
               'include_imphash_ssdeep': {'type': 'Boolean',
                                      'message': 'Include imphash and ssdeep'
                                      },
               'include_extracted_files': {'type': 'Boolean',
-                                     'message': 'Include extracted files section'
-                                     },
+                                          'message': 'Include extracted files section'
+                                           },
 
               'sample_id': {'type': 'Integer',
                             'errorMessage': 'Expected a sample ID',
                             'message': 'The VMRay sample_id'
                             }
-              }
+             }
 
 moduleconfig = ['apikey', 'url', 'wait_period']
 
 def handler(q=False):
     global include_analysisid, include_imphash_ssdeep, include_extracted_files, include_analysisdetails, include_vtidetails, include_static_to_ids
+
 
     if q is False:
         return False
@@ -64,7 +63,7 @@ def handler(q=False):
     include_vtidetails = bool(int(request["config"].get("include_vtidetails")))
     include_static_to_ids = True
 
-    #print("include_analysisid: %s  include_imphash_ssdeep: %s  include_extracted_files: %s  include_analysisdetails: %s  include_vtidetails: %s" % ( include_analysisid, include_imphash_ssdeep, include_extracted_files, include_analysisdetails, include_vtidetails))
+    # print("include_analysisid: %s  include_imphash_ssdeep: %s  include_extracted_files: %s  include_analysisdetails: %s  include_vtidetails: %s" % ( include_analysisid, include_imphash_ssdeep, include_extracted_files, include_analysisdetails, include_vtidetails))
 
     sample_id = int(request["config"].get("sample_id"))
 
@@ -183,6 +182,7 @@ def vmrayDownloadAnalysis(api, analysis_id):
 def vmrayVti(vti):
     '''VMRay Threat Identifier (VTI) rules that matched for this analysis'''
 
+
     if vti:
         r = {'results': []}
         for rule in vti:
@@ -214,7 +214,7 @@ def vmrayExtractedfiles(extracted_files):
                 comment = ""
 
             if "norm_filename" in file:
-                attr_filename_c = file["norm_filename"].rsplit("\\",1)
+                attr_filename_c = file["norm_filename"].rsplit("\\", 1)
                 if len(attr_filename_c) > 1:
                     attr_filename = attr_filename_c[len(attr_filename_c) - 1]
                 else:
@@ -223,15 +223,15 @@ def vmrayExtractedfiles(extracted_files):
                 attr_filename = "vmray_sample"
 
             if "md5_hash" in file and file["md5_hash"] is not None:
-                r['results'].append({'types': ["filename|md5"], 'values': '{}|{}'.format(attr_filename,file["md5_hash"]), 'comment': comment, 'categories': ['Payload delivery', 'Artifacts dropped'], 'to_ids': include_static_to_ids})
+                r['results'].append({'types': ["filename|md5"], 'values': '{}|{}'.format(attr_filename, file["md5_hash"]), 'comment': comment, 'categories': ['Payload delivery', 'Artifacts dropped'], 'to_ids': include_static_to_ids})
             if include_imphash_ssdeep and "imp_hash" in file and file["imp_hash"] is not None:
-                r['results'].append({'types': ["filename|imphash"], 'values': '{}|{}'.format(attr_filename,file["imp_hash"]), 'comment': comment, 'categories': ['Payload delivery', 'Artifacts dropped'], 'to_ids': include_static_to_ids})
+                r['results'].append({'types': ["filename|imphash"], 'values': '{}|{}'.format(attr_filename, file["imp_hash"]), 'comment': comment, 'categories': ['Payload delivery', 'Artifacts dropped'], 'to_ids': include_static_to_ids})
             if "sha1_hash" in file and file["sha1_hash"] is not None:
-                r['results'].append({'types': ["filename|sha1"], 'values': '{}|{}'.format(attr_filename,file["sha1_hash"]), 'comment': comment, 'categories': ['Payload delivery', 'Artifacts dropped'], 'to_ids': include_static_to_ids})
+                r['results'].append({'types': ["filename|sha1"], 'values': '{}|{}'.format(attr_filename, file["sha1_hash"]), 'comment': comment, 'categories': ['Payload delivery', 'Artifacts dropped'], 'to_ids': include_static_to_ids})
             if "sha256_hash" in file and file["sha256_hash"] is not None:
-                r['results'].append({'types': ["filename|sha256"], 'values': '{}|{}'.format(attr_filename,file["sha256_hash"]), 'comment': comment, 'categories': ['Payload delivery', 'Artifacts dropped'], 'to_ids': include_static_to_ids})
+                r['results'].append({'types': ["filename|sha256"], 'values': '{}|{}'.format(attr_filename, file["sha256_hash"]), 'comment': comment, 'categories': ['Payload delivery', 'Artifacts dropped'], 'to_ids': include_static_to_ids})
             if include_imphash_ssdeep and "ssdeep_hash" in file and file["ssdeep_hash"] is not None:
-                r['results'].append({'types': ["filename|ssdeep"], 'values': '{}|{}'.format(attr_filename,file["ssdeep_hash"]), 'comment': comment, 'categories': ['Payload delivery', 'Artifacts dropped'], 'to_ids': include_static_to_ids})
+                r['results'].append({'types': ["filename|ssdeep"], 'values': '{}|{}'.format(attr_filename, file["ssdeep_hash"]), 'comment': comment, 'categories': ['Payload delivery', 'Artifacts dropped'], 'to_ids': include_static_to_ids})
 
         return r
 
@@ -275,7 +275,7 @@ def vmrayAnalysisDetails(details, analysis_id):
         return r
 
     else:
-        return false
+        return False
 
 
 def vmrayArtifacts(patterns):
@@ -299,7 +299,7 @@ def vmrayArtifacts(patterns):
             if pattern == "files":
                 for el in patterns[pattern]:
                     filename_values = el["filename"]
-                    attr_filename_c = filename_values.rsplit("\\",1)
+                    attr_filename_c = filename_values.rsplit("\\", 1)
                     if len(attr_filename_c) > 1:
                         attr_filename = attr_filename_c[len(attr_filename_c) - 1]
                     else:
@@ -313,15 +313,15 @@ def vmrayArtifacts(patterns):
                     if "hashes" in el:
                         for hash in el["hashes"]:
                             if "md5_hash" in hash and hash["md5_hash"] is not None:
-                                r['results'].append({'types': ["filename|md5"], 'values': '{}|{}'.format(attr_filename,hash["md5_hash"]), 'comment': comment, 'categories': ['Payload delivery', 'Artifacts dropped'], 'to_ids': include_static_to_ids})
+                                r['results'].append({'types': ["filename|md5"], 'values': '{}|{}'.format(attr_filename, hash["md5_hash"]), 'comment': comment, 'categories': ['Payload delivery', 'Artifacts dropped'], 'to_ids': include_static_to_ids})
                             if include_imphash_ssdeep and "imp_hash" in hash and hash["imp_hash"] is not None:
-                                r['results'].append({'types': ["filename|imphash"], 'values': '{}|{}'.format(attr_filename,hash["imp_hash"]), 'comment': comment, 'categories': ['Payload delivery', 'Artifacts dropped'], 'to_ids': include_static_to_ids})
+                                r['results'].append({'types': ["filename|imphash"], 'values': '{}|{}'.format(attr_filename, hash["imp_hash"]), 'comment': comment, 'categories': ['Payload delivery', 'Artifacts dropped'], 'to_ids': include_static_to_ids})
                             if "sha1_hash" in hash and hash["sha1_hash"] is not None:
-                                r['results'].append({'types': ["filename|sha1"], 'values': '{}|{}'.format(attr_filename,hash["sha1_hash"]), 'comment': comment, 'categories': ['Payload delivery', 'Artifacts dropped'], 'to_ids': include_static_to_ids})
+                                r['results'].append({'types': ["filename|sha1"], 'values': '{}|{}'.format(attr_filename, hash["sha1_hash"]), 'comment': comment, 'categories': ['Payload delivery', 'Artifacts dropped'], 'to_ids': include_static_to_ids})
                             if "sha256_hash" in hash and hash["sha256_hash"] is not None:
-                                r['results'].append({'types': ["filename|sha256"], 'values': '{}|{}'.format(attr_filename,hash["sha256_hash"]), 'comment': comment, 'categories': ['Payload delivery', 'Artifacts dropped'], 'to_ids': include_static_to_ids})
+                                r['results'].append({'types': ["filename|sha256"], 'values': '{}|{}'.format(attr_filename, hash["sha256_hash"]), 'comment': comment, 'categories': ['Payload delivery', 'Artifacts dropped'], 'to_ids': include_static_to_ids})
                             if include_imphash_ssdeep and "ssdeep_hash" in hash and hash["ssdeep_hash"] is not None:
-                                r['results'].append({'types': ["filename|ssdeep"], 'values': '{}|{}'.format(attr_filename,hash["ssdeep_hash"]), 'comment': comment, 'categories': ['Payload delivery', 'Artifacts dropped'], 'to_ids': include_static_to_ids})
+                                r['results'].append({'types': ["filename|ssdeep"], 'values': '{}|{}'.format(attr_filename, hash["ssdeep_hash"]), 'comment': comment, 'categories': ['Payload delivery', 'Artifacts dropped'], 'to_ids': include_static_to_ids})
             if pattern == "ips":
                 for el in patterns[pattern]:
                     values = el["ip_address"]
@@ -374,7 +374,7 @@ def vmrayArtifacts(patterns):
         return y
 
     else:
-        return false
+        return False
 
 
 def vmrayCleanup(x):
