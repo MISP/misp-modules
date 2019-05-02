@@ -134,7 +134,7 @@ def vmrayProcess(vmraydata):
                 r['results'].append({'types': 'md5', 'values': submissions['submission_sample_md5']})
                 r['results'].append({'types': 'sha1', 'values': submissions['submission_sample_sha1']})
                 r['results'].append({'types': 'sha256', 'values': submissions['submission_sample_sha256']})
-                r['results'].append({'types': 'text', 'values': 'VMRay Sample ID: %s' % submissions['submission_sample_id'], 'tags': 'workflow:state="incomplete"' })
+                r['results'].append({'types': 'text', 'values': 'VMRay Sample ID: %s' % submissions['submission_sample_id'], 'tags': 'workflow:state="incomplete"'})
                 r['results'].append({'types': 'text', 'values': 'VMRay Submission ID: %s' % submissions['submission_id']})
                 r['results'].append({'types': 'text', 'values': 'VMRay Submission Sample IP: %s' % submissions['submission_ip_ip']})
                 r['results'].append({'types': 'link', 'values': submissions['submission_webif_url']})
@@ -162,4 +162,3 @@ def vmraySubmit(api, args):
     ''' Submit the sample to VMRay'''
     vmraydata = api.call("POST", "/rest/sample/submit", args)
     return vmraydata
-
