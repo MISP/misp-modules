@@ -26,8 +26,8 @@ duplicatedFields = {'mispType': {'mispComment': 'comment'},
 attributesFields = ['type', 'value', 'category', 'to_ids', 'comment', 'distribution']
 misp_standard_csv_header = ['uuid', 'event_id', 'category', 'type', 'value', 'comment', 'to_ids', 'date',
                             'object_relation', 'attribute_tag', 'object_uuid', 'object_name', 'object_meta_category']
-misp_context_additional_fields = ['event_info','event_member_org','event_source_org','event_distribution',
-                                  'event_threat_level_id','event_analysis','event_date','event_tag']
+misp_context_additional_fields = ['event_info', 'event_member_org', 'event_source_org', 'event_distribution',
+                                  'event_threat_level_id', 'event_analysis', 'event_date', 'event_tag']
 misp_extended_csv_header = misp_standard_csv_header + misp_context_additional_fields
 delimiters = [',', ';', '|', '/', '\t', '    ']
 
@@ -84,7 +84,8 @@ class CsvParser():
                     return_data.append(line)
             # find which delimiter is used
             self.delimiter = self.find_delimiter()
-            if self.fields_number == 0: self.header = return_data[0].split(self.delimiter)
+            if self.fields_number == 0:
+                self.header = return_data[0].split(self.delimiter)
         self.data = return_data[1:] if self.has_header else return_data
 
     def parse_delimiter(self, line):
@@ -112,10 +113,11 @@ class CsvParser():
             attribute = {}
             try:
                 try:
-                    a_uuid,_,a_category,a_type,value,comment,to_ids,_,relation,o_uuid,o_name,o_category = line[:header_length]
+                    a_uuid, _, a_category, a_type, value, comment, to_ids, _, relation, o_uuid, o_name, o_category = line[:header_length]
                 except ValueError:
-                    a_uuid,_,a_category,a_type,value,comment,to_ids,_,relation,tag,o_uuid,o_name,o_category = line[:header_length]
-                    if tag: attribute['tags'] = tag
+                    a_uuid, _, a_category, a_type, value, comment, to_ids, _, relation, tag, o_uuid, o_name, o_category = line[:header_length]
+                    if tag:
+                        attribute['tags'] = tag
             except ValueError:
                 continue
             for t, v in zip(attribute_fields, [a_uuid, a_category, a_type, value, comment]):
@@ -123,13 +125,13 @@ class CsvParser():
             attribute['to_ids'] = True if to_ids == '1' else False
             if relation:
                 attribute["object_relation"] = relation.replace('"', '')
-                object_index = tuple(o.replace('"', '') for o in (o_uuid,o_name,o_category))
+                object_index = tuple(o.replace('"', '') for o in (o_uuid, o_name, o_category))
                 objects[object_index].append(attribute)
             else:
                 l_attributes.append(attribute)
         for keys, attributes in objects.items():
             misp_object = {}
-            for t, v in zip(['uuid','name','meta-category'], keys):
+            for t, v in zip(['uuid', 'name', 'meta-category'], keys):
                 misp_object[t] = v
             misp_object['Attribute'] = attributes
             l_objects.append(misp_object)
