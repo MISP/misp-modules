@@ -14,10 +14,10 @@ moduleinfo = {'version': '0.1', 'author': 'Christian Studer',
 moduleconfig = []
 userConfig = {'header': {
     'type': 'String',
-    'message': 'Define the header of the csv file, with types (included in MISP attribute types or attribute fields) separated by commas.\nFor fields that do not match these types, please use space or simply nothing between commas.\nFor instance: ip-src,domain, ,timestamp'},
+    'message': 'Define the header of the csv file, with types (included in MISP attribute types or attribute fields) separated by commas.\nFor fields that do not match these types or that you want to skip, please use space or simply nothing between commas.\nFor instance: ip-src,domain, ,timestamp'},
     'has_header': {
         'type': 'Boolean',
-        'message': 'Tick this box ONLY if there is a header line, NOT COMMENTED, in the file (which will be skipped atm).'
+        'message': 'Tick this box ONLY if there is a header line, NOT COMMENTED, and all the fields of this header are respecting the recommendations above.'
 }}
 mispattributes = {'userConfig': userConfig, 'inputSource': ['file'], 'format': 'misp_standard'}
 
