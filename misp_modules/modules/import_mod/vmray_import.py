@@ -127,9 +127,14 @@ def handler(q=False):
                     misperrors['error'] = "No vti_results returned or jobs not finished"
                     return misperrors
             else:
+                if "result" in data:
+                    if data["result"] == "ok":
+                        return vmray_results
+
+                # Fallback
                 misperrors['error'] = "Unable to fetch sample id %u" % (sample_id)
                 return misperrors
-        except Exception as e: # noqa
+        except Exception as e:  # noqa
             misperrors['error'] = "Unable to access VMRay API : %s" % (e)
             return misperrors
     else:
@@ -173,7 +178,7 @@ def vmrayDownloadAnalysis(api, analysis_id):
         try:
             data = api.call("GET", "/rest/analysis/%u/archive/logs/summary.json" % (analysis_id), raw_data=True)
             return json.loads(data.read().decode())
-        except Exception as e: # noqa
+        except Exception as e:  # noqa
             misperrors['error'] = "Unable to download summary.json for analysis %s" % (analysis_id)
             return misperrors
     else:
@@ -337,7 +342,7 @@ def vmrayArtifacts(patterns):
                 for el in patterns[pattern]:
                     values = el["mutex_name"]
                     types = ["mutex"]
-                    if "sources" in el:
+                    if "operations" in el:
                         sources = el["operations"]
                         comment = "Operations: " + ", ".join(str(x) for x in sources)
                     else:
@@ -348,18 +353,21 @@ def vmrayArtifacts(patterns):
                 for el in patterns[pattern]:
                     values = el["reg_key_name"]
                     types = ["regkey"]
-                    if "sources" in el:
+                    include_static_to_ids_tmp = include_static_to_ids
+                    if "operations" in el:
                         sources = el["operations"]
+                        if sources == ["access"]:
+                            include_static_to_ids_tmp = False
                         comment = "Operations: " + ", ".join(str(x) for x in sources)
                     else:
                         comment = ""
 
-                    r['results'].append({'types': types, 'values': values, 'comment': comment, 'to_ids': include_static_to_ids})
+                    r['results'].append({'types': types, 'values': values, 'comment': comment, 'to_ids': include_static_to_ids_tmp})
             if pattern == "urls":
                 for el in patterns[pattern]:
                     values = el["url"]
                     types = ["url"]
-                    if "sources" in el:
+                    if "operations" in el:
                         sources = el["operations"]
                         comment = "Operations: " + ", ".join(str(x) for x in sources)
                     else:
