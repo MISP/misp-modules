@@ -53,6 +53,13 @@ class CsvParser():
                 self.has_delimiter = True
                 self.fields_number, self.delimiter, self.header = self.get_delimiter_from_header(data[0])
                 self.data = data
+            descFilename = os.path.join(pymisp_path[0], 'data/describeTypes.json')
+            with open(descFilename, 'r') as f:
+                self.MispTypes = json.loads(f.read())['result'].get('types')
+            for h in self.header:
+                if not (h in self.MispTypes or h in misp_extended_csv_header):
+                    misperrors['error'] = 'Wrong header field: {}. Please use a header value that can be recognized by MISP (or alternatively skip it using a whitespace).'.format(h)
+                    return misperrors
 
     def get_delimiter_from_header(self, data):
         delimiters_count = {}
@@ -162,16 +169,13 @@ class CsvParser():
         self.finalize_results()
 
     def findMispTypes(self):
-        descFilename = os.path.join(pymisp_path[0], 'data/describeTypes.json')
-        with open(descFilename, 'r') as f:
-            MispTypes = json.loads(f.read())['result'].get('types')
         list2pop = []
         misp = []
         head = []
         for h in reversed(self.header):
             n = self.header.index(h)
             # fields that are misp attribute types
-            if h in MispTypes:
+            if h in self.MispTypes:
                 list2pop.append(n)
                 misp.append(h)
             # handle confusions between misp attribute types and attribute fields
