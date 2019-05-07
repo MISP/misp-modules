@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from collections import defaultdict
 from pymisp import MISPEvent, MISPObject
 from pymisp import __path__ as pymisp_path
 import csv
@@ -7,7 +6,6 @@ import io
 import json
 import os
 import base64
-import pymisp
 
 misperrors = {'error': 'Error'}
 moduleinfo = {'version': '0.1', 'author': 'Christian Studer',
@@ -196,7 +194,7 @@ class CsvParser():
         return list2pop, misp, list(reversed(head))
 
     def finalize_results(self):
-        event=json.loads(self.misp_event.to_json())['Event']
+        event = json.loads(self.misp_event.to_json())['Event']
         self.results = {key: event[key] for key in ('Attribute', 'Object') if (key in event and event[key])}
 
 
