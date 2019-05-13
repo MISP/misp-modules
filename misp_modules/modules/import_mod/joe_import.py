@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from collections import defaultdict
 from pymisp import MISPEvent, MISPObject
 import json
 import base64
@@ -38,10 +39,20 @@ class JoeParser():
     def __init__(self, data):
         self.data = data
         self.misp_event = MISPEvent()
+        self.references = defaultdict(list)
 
     def parse_joe(self):
         self.parse_fileinfo()
+        if self.references:
+            self.build_references()
         self.finalize_results()
+
+    def build_references(self):
+        for misp_object in self.misp_event.objects:
+            object_uuid = misp_object.uuid
+            if object_uuid in self.references:
+                for reference in self.references[object_uuid]:
+                    misp_object.add_reference(reference['idref'], reference['relationship'])
 
     def parse_fileinfo(self):
         fileinfo = self.data['fileinfo']
@@ -54,6 +65,7 @@ class JoeParser():
         pe_object = MISPObject('pe')
         file_object.add_reference(pe_object.uuid, 'included-in')
         self.misp_event.add_object(**file_object)
+        self.fileinfo_uuid = file_object.uuid
         peinfo = fileinfo['pe']
         for field, mapping in pe_object_fields.items():
             attribute_type, object_relation = mapping
@@ -67,10 +79,6 @@ class JoeParser():
             pe_object.add_attribute(pe_object_mapping[name], **{'type': 'text', 'value': feature['value']})
         sections_number = len(peinfo['sections']['section'])
         pe_object.add_attribute('number-sections', **{'type': 'counter', 'value': sections_number})
-        for section in peinfo['sections']['section']:
-            section_object = self.parse_pe_section(section)
-            pe_object.add_reference(section_object.uuid, 'included-in')
-            self.misp_event.add_object(**section_object)
         signerinfo_object = MISPObject('authenticode-signerinfo')
         pe_object.add_reference(signerinfo_object.uuid, 'signed-by')
         self.misp_event.add_object(**pe_object)
@@ -80,6 +88,10 @@ class JoeParser():
             attribute_type, object_relation = mapping
             signerinfo_object.add_attribute(object_relation, **{'type': attribute_type, 'value': signatureinfo[feature]})
         self.misp_event.add_object(**signerinfo_object)
+        for section in peinfo['sections']['section']:
+            section_object = self.parse_pe_section(section)
+            self.references[pe_object.uuid].append({'idref': section_object.uuid, 'relationship': 'included-in'})
+            self.misp_event.add_object(**section_object)
 
     def parse_pe_section(self, section):
         section_object = MISPObject('pe-section')
