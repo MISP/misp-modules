@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from collections import defaultdict
+from datetime import datetime
 from pymisp import MISPEvent, MISPObject
 import json
 import base64
@@ -25,6 +26,9 @@ pe_object_mapping = {'CompanyName': 'company-name', 'FileDescription': 'file-des
                      'LegalCopyright': 'legal-copyright', 'OriginalFilename': 'original-filename',
                      'ProductName': 'product-filename', 'ProductVersion': 'product-version',
                      'Translation': 'lang-id'}
+process_object_fields = {'cmdline': 'command-line', 'name': 'name',
+                         'parentpid': 'parent-pid', 'pid': 'pid',
+                         'path': 'current-directory'}
 section_object_mapping = {'characteristics': ('text', 'characteristic'),
                           'entropy': ('float', 'entropy'),
                           'name': ('text', 'name'), 'rawaddr': ('hex', 'offset'),
@@ -43,6 +47,7 @@ class JoeParser():
 
     def parse_joe(self):
         self.parse_fileinfo()
+        self.parse_behavior()
         if self.references:
             self.build_references()
         self.finalize_results()
@@ -53,6 +58,24 @@ class JoeParser():
             if object_uuid in self.references:
                 for reference in self.references[object_uuid]:
                     misp_object.add_reference(reference['idref'], reference['relationship'])
+
+    def parse_behavior(self):
+        self.parse_behavior_system()
+        self.parse_behavior_network()
+
+    def parse_behavior_network(self):
+        network = self.data['behavior']['network']
+
+    def parse_behavior_system(self):
+        processes = self.data['behavior']['system']['processes']['process'][0]
+        general = processes['general']
+        process_object = MISPObject('process')
+        for feature, relation in process_object_fields.items():
+            process_object.add_attribute(relation, **{'type': 'text', 'value': general[feature]})
+        start_time = datetime.strptime('{} {}'.format(general['date'], general['time']), '%d/%m/%Y %H:%M:%S')
+        process_object.add_attribute('start-time', **{'type': 'datetime', 'value': start_time})
+        self.misp_event.add_object(**process_object)
+        self.references[self.fileinfo_uuid].append({'idref': process_object.uuid, 'relationship': 'calls'})
 
     def parse_fileinfo(self):
         fileinfo = self.data['fileinfo']
