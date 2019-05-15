@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from collections import defaultdict
 from datetime import datetime
-from pymisp import MISPEvent, MISPObject
+from pymisp import MISPAttribute, MISPEvent, MISPObject
 import json
 import base64
 
@@ -29,6 +29,8 @@ pe_object_mapping = {'CompanyName': 'company-name', 'FileDescription': 'file-des
 process_object_fields = {'cmdline': 'command-line', 'name': 'name',
                          'parentpid': 'parent-pid', 'pid': 'pid',
                          'path': 'current-directory'}
+process_references_mapping = {'fileCreated': 'creates', 'fileDeleted': 'deletes',
+                              'fileMoved': 'moves', 'fileRead': 'reads', 'fileWritten': 'writes'}
 section_object_mapping = {'characteristics': ('text', 'characteristic'),
                           'entropy': ('float', 'entropy'),
                           'name': ('text', 'name'), 'rawaddr': ('hex', 'offset'),
@@ -67,15 +69,22 @@ class JoeParser():
         network = self.data['behavior']['network']
 
     def parse_behavior_system(self):
-        processes = self.data['behavior']['system']['processes']['process'][0]
-        general = processes['general']
-        process_object = MISPObject('process')
-        for feature, relation in process_object_fields.items():
-            process_object.add_attribute(relation, **{'type': 'text', 'value': general[feature]})
-        start_time = datetime.strptime('{} {}'.format(general['date'], general['time']), '%d/%m/%Y %H:%M:%S')
-        process_object.add_attribute('start-time', **{'type': 'datetime', 'value': start_time})
-        self.misp_event.add_object(**process_object)
-        self.references[self.fileinfo_uuid].append({'idref': process_object.uuid, 'relationship': 'calls'})
+        for process in self.data['behavior']['system']['processes']['process']:
+            general = process['general']
+            process_object = MISPObject('process')
+            for feature, relation in process_object_fields.items():
+                process_object.add_attribute(relation, **{'type': 'text', 'value': general[feature]})
+            start_time = datetime.strptime('{} {}'.format(general['date'], general['time']), '%d/%m/%Y %H:%M:%S')
+            process_object.add_attribute('start-time', **{'type': 'datetime', 'value': start_time})
+            for feature, files in process['fileactivities'].items():
+                if files:
+                    for call in files['call']:
+                        file_attribute = MISPAttribute()
+                        file_attribute.from_dict(**{'type': 'filename', 'value': call['path']})
+                        process_object.add_reference(file_attribute.uuid, process_references_mapping[feature])
+                        self.misp_event.add_attribute(**file_attribute)
+            self.misp_event.add_object(**process_object)
+            self.references[self.fileinfo_uuid].append({'idref': process_object.uuid, 'relationship': 'calls'})
 
     def parse_fileinfo(self):
         fileinfo = self.data['fileinfo']
