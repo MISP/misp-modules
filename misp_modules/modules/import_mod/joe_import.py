@@ -85,21 +85,25 @@ class JoeParser():
         for field, mapping in file_object_mapping.items():
             attribute_type, object_relation = mapping
             file_object.add_attribute(object_relation, **{'type': attribute_type, 'value': fileinfo[field]})
+        self.fileinfo_uuid = file_object.uuid
+        if not fileinfo.get('pe'):
+            self.misp_event.add_object(**file_object)
+            return
+        peinfo = fileinfo['pe']
         pe_object = MISPObject('pe')
         file_object.add_reference(pe_object.uuid, 'included-in')
         self.misp_event.add_object(**file_object)
-        self.fileinfo_uuid = file_object.uuid
-        peinfo = fileinfo['pe']
         for field, mapping in pe_object_fields.items():
             attribute_type, object_relation = mapping
             pe_object.add_attribute(object_relation, **{'type': attribute_type, 'value': peinfo[field]})
         pe_object.add_attribute('compilation-timestamp', **{'type': 'datetime', 'value': int(peinfo['timestamp'].split()[0], 16)})
         program_name = fileinfo['filename']
-        for feature in peinfo['versions']['version']:
-            name = feature['name']
-            if name == 'InternalName':
-                program_name = feature['value']
-            pe_object.add_attribute(pe_object_mapping[name], **{'type': 'text', 'value': feature['value']})
+        if peinfo['versions']:
+            for feature in peinfo['versions']['version']:
+                name = feature['name']
+                if name == 'InternalName':
+                    program_name = feature['value']
+                pe_object.add_attribute(pe_object_mapping[name], **{'type': 'text', 'value': feature['value']})
         sections_number = len(peinfo['sections']['section'])
         pe_object.add_attribute('number-sections', **{'type': 'counter', 'value': sections_number})
         signerinfo_object = MISPObject('authenticode-signerinfo')
@@ -107,9 +111,10 @@ class JoeParser():
         self.misp_event.add_object(**pe_object)
         signerinfo_object.add_attribute('program-name', **{'type': 'text', 'value': program_name})
         signatureinfo = peinfo['signature']
-        for feature, mapping in signerinfo_object_mapping.items():
-            attribute_type, object_relation = mapping
-            signerinfo_object.add_attribute(object_relation, **{'type': attribute_type, 'value': signatureinfo[feature]})
+        if signatureinfo['signed']:
+            for feature, mapping in signerinfo_object_mapping.items():
+                attribute_type, object_relation = mapping
+                signerinfo_object.add_attribute(object_relation, **{'type': attribute_type, 'value': signatureinfo[feature]})
         self.misp_event.add_object(**signerinfo_object)
         for section in peinfo['sections']['section']:
             section_object = self.parse_pe_section(section)
