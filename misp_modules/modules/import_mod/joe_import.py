@@ -136,7 +136,6 @@ def handler(q=False):
     if not data:
         return json.dumps({'success': 0})
     joe_data = json.loads(data)['analysis']
-    print(type(joe_data))
     joe_parser = JoeParser(joe_data)
     joe_parser.parse_joe()
     return {'results': joe_parser.results}
