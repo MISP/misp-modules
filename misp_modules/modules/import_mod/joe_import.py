@@ -19,6 +19,8 @@ file_object_fields = ['filename', 'md5', 'sha1', 'sha256', 'sha512', 'ssdeep']
 file_object_mapping = {'entropy': ('float', 'entropy'),
                        'filesize': ('size-in-bytes', 'size-in-bytes'),
                        'filetype': ('mime-type', 'mimetype')}
+file_references_mapping = {'fileCreated': 'creates', 'fileDeleted': 'deletes',
+                           'fileMoved': 'moves', 'fileRead': 'reads', 'fileWritten': 'writes'}
 pe_object_fields = {'entrypoint': ('text', 'entrypoint-address'),
                     'imphash': ('imphash', 'imphash')}
 pe_object_mapping = {'CompanyName': 'company-name', 'FileDescription': 'file-description',
@@ -29,8 +31,6 @@ pe_object_mapping = {'CompanyName': 'company-name', 'FileDescription': 'file-des
 process_object_fields = {'cmdline': 'command-line', 'name': 'name',
                          'parentpid': 'parent-pid', 'pid': 'pid',
                          'path': 'current-directory'}
-process_references_mapping = {'fileCreated': 'creates', 'fileDeleted': 'deletes',
-                              'fileMoved': 'moves', 'fileRead': 'reads', 'fileWritten': 'writes'}
 section_object_mapping = {'characteristics': ('text', 'characteristic'),
                           'entropy': ('float', 'entropy'),
                           'name': ('text', 'name'), 'rawaddr': ('hex', 'offset'),
@@ -49,10 +49,13 @@ class JoeParser():
         self.data = data
         self.misp_event = MISPEvent()
         self.references = defaultdict(list)
+        self.attributes = defaultdict(lambda: defaultdict(set))
 
     def parse_joe(self):
         self.parse_fileinfo()
         self.parse_behavior()
+        if self.attributes:
+            self.handle_attributes()
         if self.references:
             self.build_references()
         self.finalize_results()
@@ -63,6 +66,14 @@ class JoeParser():
             if object_uuid in self.references:
                 for reference in self.references[object_uuid]:
                     misp_object.add_reference(reference['idref'], reference['relationship'])
+
+    def handle_attributes(self):
+        for attribute_type, attribute in self.attributes.items():
+            for attribute_value, references in attribute.items():
+                attribute_uuid = self.create_attribute(attribute_type, attribute_value)
+                for reference in references:
+                    source_uuid, relationship = reference
+                    self.references[source_uuid].append({'idref': attribute_uuid, 'relationship': relationship})
 
     def parse_behavior(self):
         self.parse_behavior_system()
@@ -92,8 +103,7 @@ class JoeParser():
         for feature, files in fileactivities.items():
             if files:
                 for call in files['call']:
-                    file_uuid = self.create_attribute(call, 'filename')
-                    self.references[process_uuid].append({'idref': file_uuid, 'relationship': process_references_mapping[feature]})
+                    self.attributes['filename'][call['path']].add((process_uuid, file_references_mapping[feature]))
 
     def parse_fileinfo(self):
         fileinfo = self.data['fileinfo']
@@ -149,8 +159,7 @@ class JoeParser():
     def parse_registryactivities(self, process_uuid, registryactivities):
         if registryactivities['keyCreated']:
             for call in registryactivities['keyCreated']['call']:
-                regkey_uuid = self.create_attribute(call, 'regkey')
-                self.references[process_uuid].append({'idref': regkey_uuid, 'relationship': 'creates'})
+                self.attributes['regkey'][call['path']].add((process_uuid, 'creates'))
         for feature, relationship_type in registry_references_mapping.items():
             if registryactivities[feature]:
                 for call in registryactivities[feature]['call']:
@@ -162,9 +171,9 @@ class JoeParser():
                     self.misp_event.add_object(**registry_key)
                     self.references[process_uuid].append({'idref': registry_key.uuid, 'relationship': relationship_type})
 
-    def create_attribute(self, field, attribute_type):
+    def create_attribute(self, attribute_type, attribute_value):
         attribute = MISPAttribute()
-        attribute.from_dict(**{'type': attribute_type, 'value': field['path']})
+        attribute.from_dict(**{'type': attribute_type, 'value': attribute_value})
         self.misp_event.add_attribute(**attribute)
         return attribute.uuid
 
