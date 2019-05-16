@@ -37,6 +37,9 @@ section_object_mapping = {'characteristics': ('text', 'characteristic'),
                           'rawsize': ('size-in-bytes', 'size-in-bytes'),
                           'virtaddr': ('hex', 'virtual_address'),
                           'virtsize': ('size-in-bytes', 'virtual_size')}
+registry_references_mapping = {'keyValueCreated': 'creates', 'keyValueModified': 'modifies'}
+regkey_object_mapping = {'name': ('text', 'name'), 'newdata': ('text', 'data'),
+                         'path': ('regkey', 'key')}
 signerinfo_object_mapping = {'sigissuer': ('text', 'issuer'),
                              'version': ('text', 'version')}
 
@@ -69,22 +72,28 @@ class JoeParser():
         network = self.data['behavior']['network']
 
     def parse_behavior_system(self):
-        for process in self.data['behavior']['system']['processes']['process']:
-            general = process['general']
-            process_object = MISPObject('process')
-            for feature, relation in process_object_fields.items():
-                process_object.add_attribute(relation, **{'type': 'text', 'value': general[feature]})
-            start_time = datetime.strptime('{} {}'.format(general['date'], general['time']), '%d/%m/%Y %H:%M:%S')
-            process_object.add_attribute('start-time', **{'type': 'datetime', 'value': start_time})
-            for feature, files in process['fileactivities'].items():
-                if files:
-                    for call in files['call']:
-                        file_attribute = MISPAttribute()
-                        file_attribute.from_dict(**{'type': 'filename', 'value': call['path']})
-                        process_object.add_reference(file_attribute.uuid, process_references_mapping[feature])
-                        self.misp_event.add_attribute(**file_attribute)
-            self.misp_event.add_object(**process_object)
-            self.references[self.fileinfo_uuid].append({'idref': process_object.uuid, 'relationship': 'calls'})
+        system = self.data['behavior']['system']
+        if system.get('processes'):
+            process_activities = {'fileactivities': self.parse_fileactivities,
+                                  'registryactivities': self.parse_registryactivities}
+            for process in system['processes']['process']:
+                general = process['general']
+                process_object = MISPObject('process')
+                for feature, relation in process_object_fields.items():
+                    process_object.add_attribute(relation, **{'type': 'text', 'value': general[feature]})
+                start_time = datetime.strptime('{} {}'.format(general['date'], general['time']), '%d/%m/%Y %H:%M:%S')
+                process_object.add_attribute('start-time', **{'type': 'datetime', 'value': start_time})
+                self.misp_event.add_object(**process_object)
+                for field, to_call in process_activities.items():
+                    to_call(process_object.uuid, process[field])
+                self.references[self.fileinfo_uuid].append({'idref': process_object.uuid, 'relationship': 'calls'})
+
+    def parse_fileactivities(self, process_uuid, fileactivities):
+        for feature, files in fileactivities.items():
+            if files:
+                for call in files['call']:
+                    file_uuid = self.create_attribute(call, 'filename')
+                    self.references[process_uuid].append({'idref': file_uuid, 'relationship': process_references_mapping[feature]})
 
     def parse_fileinfo(self):
         fileinfo = self.data['fileinfo']
@@ -136,6 +145,28 @@ class JoeParser():
             attribute_type, object_relation = mapping
             section_object.add_attribute(object_relation, **{'type': attribute_type, 'value': section[feature]})
         return section_object
+
+    def parse_registryactivities(self, process_uuid, registryactivities):
+        if registryactivities['keyCreated']:
+            for call in registryactivities['keyCreated']['call']:
+                regkey_uuid = self.create_attribute(call, 'regkey')
+                self.references[process_uuid].append({'idref': regkey_uuid, 'relationship': 'creates'})
+        for feature, relationship_type in registry_references_mapping.items():
+            if registryactivities[feature]:
+                for call in registryactivities[feature]['call']:
+                    registry_key = MISPObject('registry-key')
+                    for field, mapping in regkey_object_mapping.items():
+                        attribute_type, object_relation = mapping
+                        registry_key.add_attribute(object_relation, **{'type': attribute_type, 'value': call[field]})
+                    registry_key.add_attribute('data-type', **{'type': 'text', 'value': 'REG_{}'.format(call['type'].upper())})
+                    self.misp_event.add_object(**registry_key)
+                    self.references[process_uuid].append({'idref': registry_key.uuid, 'relationship': relationship_type})
+
+    def create_attribute(self, field, attribute_type):
+        attribute = MISPAttribute()
+        attribute.from_dict(**{'type': attribute_type, 'value': field['path']})
+        self.misp_event.add_attribute(**attribute)
+        return attribute.uuid
 
     def finalize_results(self):
         event = json.loads(self.misp_event.to_json())['Event']
