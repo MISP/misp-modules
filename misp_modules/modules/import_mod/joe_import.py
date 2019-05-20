@@ -155,16 +155,18 @@ class JoeParser():
                 pe_object.add_attribute(pe_object_mapping[name], **{'type': 'text', 'value': feature['value']})
         sections_number = len(peinfo['sections']['section'])
         pe_object.add_attribute('number-sections', **{'type': 'counter', 'value': sections_number})
-        signerinfo_object = MISPObject('authenticode-signerinfo')
-        pe_object.add_reference(signerinfo_object.uuid, 'signed-by')
-        self.misp_event.add_object(**pe_object)
-        signerinfo_object.add_attribute('program-name', **{'type': 'text', 'value': program_name})
         signatureinfo = peinfo['signature']
         if signatureinfo['signed']:
+            signerinfo_object = MISPObject('authenticode-signerinfo')
+            pe_object.add_reference(signerinfo_object.uuid, 'signed-by')
+            self.misp_event.add_object(**pe_object)
+            signerinfo_object.add_attribute('program-name', **{'type': 'text', 'value': program_name})
             for feature, mapping in signerinfo_object_mapping.items():
                 attribute_type, object_relation = mapping
                 signerinfo_object.add_attribute(object_relation, **{'type': attribute_type, 'value': signatureinfo[feature]})
-        self.misp_event.add_object(**signerinfo_object)
+            self.misp_event.add_object(**signerinfo_object)
+        else:
+            self.misp_event.add_object(**pe_object)
         for section in peinfo['sections']['section']:
             section_object = self.parse_pe_section(section)
             self.references[pe_object.uuid].append({'idref': section_object.uuid, 'relationship': 'included-in'})
