@@ -21,6 +21,7 @@ file_object_mapping = {'entropy': ('float', 'entropy'),
                        'filetype': ('mime-type', 'mimetype')}
 file_references_mapping = {'fileCreated': 'creates', 'fileDeleted': 'deletes',
                            'fileMoved': 'moves', 'fileRead': 'reads', 'fileWritten': 'writes'}
+network_behavior_fields = ('srcip', 'dstip', 'srcport', 'dstport')
 network_connection_object_mapping = {'srcip': ('ip-src', 'ip-src'), 'dstip': ('ip-dst', 'ip-dst'),
                                      'srcport': ('port', 'src-port'), 'dstport': ('port', 'dst-port')}
 pe_object_fields = {'entrypoint': ('text', 'entrypoint-address'),
@@ -33,6 +34,8 @@ pe_object_mapping = {'CompanyName': 'company-name', 'FileDescription': 'file-des
 process_object_fields = {'cmdline': 'command-line', 'name': 'name',
                          'parentpid': 'parent-pid', 'pid': 'pid',
                          'path': 'current-directory'}
+protocols = {'tcp': 4, 'udp': 4, 'icmp': 3,
+             'http': 7, 'https': 7, 'ftp': 7}
 section_object_mapping = {'characteristics': ('text', 'characteristic'),
                           'entropy': ('float', 'entropy'),
                           'name': ('text', 'name'), 'rawaddr': ('hex', 'offset'),
@@ -83,23 +86,31 @@ class JoeParser():
 
     def parse_behavior_network(self):
         network = self.data['behavior']['network']
-        protocols = {'tcp': 4, 'udp': 4, 'icmp': 3,
-                     'http': 7, 'https': 7, 'ftp': 7}
-        fields = ('srcip', 'dstip', 'srcport', 'dstport')
+        connections = defaultdict(lambda: defaultdict(set))
         for protocol, layer in protocols.items():
             if network.get(protocol):
-                connections = defaultdict(list)
                 for packet in network[protocol]['packet']:
-                    timestamp = self.parse_timestamp(packet['timestamp'])
-                    connections[tuple(packet[field] for field in fields)].append(datetime.strptime(timestamp, '%B %d, %Y %H:%M:%S.%f'))
-                for connection, timestamps in connections.items():
+                    timestamp = datetime.strptime(self.parse_timestamp(packet['timestamp']), '%B %d, %Y %H:%M:%S.%f')
+                    connections[tuple(packet[field] for field in network_behavior_fields)][protocol].add(timestamp)
+        for connection, data in connections.items():
+            attributes = self.prefetch_attributes_data(connection)
+            if len(data.keys()) == len(set(protocols[protocol] for protocol in data.keys())):
+                network_connection_object = MISPObject('network-connection')
+                for object_relation, attribute in attributes.items():
+                    network_connection_object.add_attribute(object_relation, **attribute)
+                network_connection_object.add_attribute('first-packet-seen',
+                                                        **{'type': 'datetime', 'value': min(tuple(min(timestamp) for timestamp in data.values()))})
+                for protocol in data.keys():
+                    network_connection_object.add_attribute('layer{}-protocol'.format(protocols[protocol]), **{'type': 'text', 'value': protocol})
+                self.misp_event.add_object(**network_connection_object)
+                self.references[self.fileinfo_uuid].append({'idref': network_connection_object.uuid, 'relationship': 'initiates'})
+            else:
+                for protocol, timestamps in data.items():
                     network_connection_object = MISPObject('network-connection')
-                    for field, value in zip(fields, connection):
-                        attribute_type, object_relation = network_connection_object_mapping[field]
-                        network_connection_object.add_attribute(object_relation, **{'type': attribute_type, 'value': value})
+                    for object_relation, attribute in attributes.items():
+                        network_connection_object.add_attribute(object_relation, **attribute)
                     network_connection_object.add_attribute('first-packet-seen', **{'type': 'datetime', 'value': min(timestamps)})
-                    network_connection_object.add_attribute('layer{}-protocol'.format(layer),
-                                                            **{'type': 'text', 'value': protocol})
+                    network_connection_object.add_attribute('layer{}-protocol'.format(protocols[protocol]), **{'type': 'text', 'value': protocol})
                     self.misp_event.add_object(**network_connection_object)
                     self.references[self.fileinfo_uuid].append({'idref': network_connection_object.uuid, 'relationship': 'initiates'})
 
@@ -209,6 +220,14 @@ class JoeParser():
         timestamp = timestamp.split(':')
         timestamp[-1] = str(round(float(timestamp[-1].split(' ')[0]), 6))
         return ':'.join(timestamp)
+
+    @staticmethod
+    def prefetch_attributes_data(connection):
+        attributes = {}
+        for field, value in zip(network_behavior_fields, connection):
+            attribute_type, object_relation = network_connection_object_mapping[field]
+            attributes[object_relation] = {'type': attribute_type, 'value': value}
+        return attributes
 
 
 def handler(q=False):
