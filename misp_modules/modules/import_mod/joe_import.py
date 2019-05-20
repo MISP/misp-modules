@@ -91,7 +91,7 @@ class JoeParser():
                 connections = defaultdict(list)
                 for packet in network[protocol]['packet']:
                     timestamp = self.parse_timestamp(packet['timestamp'])
-                    connections[(packet[field] for field in fields)].append(datetime.strptime(timestamp, '%B %d, %Y %H:%M:%S.%f'))
+                    connections[tuple(packet[field] for field in fields)].append(datetime.strptime(timestamp, '%B %d, %Y %H:%M:%S.%f'))
                 for connection, timestamps in connections.items():
                     network_connection_object = MISPObject('network-connection')
                     for field, value in zip(fields, connection):
