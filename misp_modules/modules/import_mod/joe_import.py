@@ -15,6 +15,11 @@ moduleinfo = {'version': '0.1', 'author': 'Christian Studer',
 
 moduleconfig = []
 
+dropped_file_mapping = {'@entropy': ('float', 'entropy'),
+                        '@file': ('filename', 'filename'),
+                        '@size': ('size-in-bytes', 'size-in-bytes'),
+                        '@type': ('mime-type', 'mimetype')}
+dropped_hash_mapping = {'MD5': 'md5', 'SHA': 'sha1', 'SHA-256': 'sha256', 'SHA-512': 'sha512'}
 file_object_fields = ['filename', 'md5', 'sha1', 'sha256', 'sha512', 'ssdeep']
 file_object_mapping = {'entropy': ('float', 'entropy'),
                        'filesize': ('size-in-bytes', 'size-in-bytes'),
@@ -58,7 +63,9 @@ class JoeParser():
 
     def parse_joe(self):
         self.parse_fileinfo()
-        self.parse_behavior()
+        self.parse_system_behavior()
+        self.parse_network_behavior()
+        self.parse_dropped_files()
         if self.attributes:
             self.handle_attributes()
         if self.references:
@@ -80,11 +87,22 @@ class JoeParser():
                     source_uuid, relationship = reference
                     self.references[source_uuid].append({'idref': attribute_uuid, 'relationship': relationship})
 
-    def parse_behavior(self):
-        self.parse_behavior_system()
-        self.parse_behavior_network()
+    def parse_dropped_files(self):
+        droppedinfo = self.data['droppedinfo']
+        if droppedinfo:
+            for droppedfile in droppedinfo['hash']:
+                file_object = MISPObject('file')
+                for key, mapping in dropped_file_mapping.items():
+                    attribute_type, object_relation = mapping
+                    file_object.add_attribute(object_relation, **{'type': attribute_type, 'value': droppedfile[key]})
+                if droppedfile['@malicious'] == 'true':
+                    file_object.add_attribute('state', **{'type': 'text', 'value': 'Malicious'})
+                for h in droppedfile['value']:
+                    hash_type = dropped_hash_mapping[h['@algo']]
+                    file_object.add_attribute(hash_type, **{'type': hash_type, 'value': h['$']})
+                self.misp_event.add_object(**file_object)
 
-    def parse_behavior_network(self):
+    def parse_network_behavior(self):
         network = self.data['behavior']['network']
         connections = defaultdict(lambda: defaultdict(set))
         for protocol, layer in protocols.items():
@@ -114,7 +132,7 @@ class JoeParser():
                     self.misp_event.add_object(**network_connection_object)
                     self.references[self.fileinfo_uuid].append({'idref': network_connection_object.uuid, 'relationship': 'initiates'})
 
-    def parse_behavior_system(self):
+    def parse_system_behavior(self):
         system = self.data['behavior']['system']
         if system.get('processes'):
             process_activities = {'fileactivities': self.parse_fileactivities,
