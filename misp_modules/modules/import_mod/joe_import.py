@@ -15,6 +15,7 @@ moduleinfo = {'version': '0.1', 'author': 'Christian Studer',
 
 moduleconfig = []
 
+domain_object_mapping = {'@ip': ('ip-dst', 'ip'), '@name': ('domain', 'domain')}
 dropped_file_mapping = {'@entropy': ('float', 'entropy'),
                         '@file': ('filename', 'filename'),
                         '@size': ('size-in-bytes', 'size-in-bytes'),
@@ -66,6 +67,7 @@ class JoeParser():
         self.parse_fileinfo()
         self.parse_system_behavior()
         self.parse_network_behavior()
+        self.parse_network_interactions()
         self.parse_dropped_files()
         if self.attributes:
             self.handle_attributes()
@@ -206,6 +208,47 @@ class JoeParser():
             section_object = self.parse_pe_section(section)
             self.references[pe_object.uuid].append({'idref': section_object.uuid, 'relationship': 'included-in'})
             self.misp_event.add_object(**section_object)
+
+    def parse_network_interactions(self):
+        domaininfo = self.data['domaininfo']
+        if domaininfo:
+            for domain in domaininfo['domain']:
+                domain_object = MISPObject('domain-ip')
+                for key, mapping in domain_object_mapping.items():
+                    attribute_type, object_relation = mapping
+                    domain_object.add_attribute(object_relation, **{'type': attribute_type, 'value': domain[key]})
+                self.misp_event.add_object(**domain_object)
+                self.references[self.process_references[(int(domain['@targetid']), domain['@currentpath'])]].append({
+                    'idref': domain_object.uuid,
+                    'relationship': 'contacts'
+                })
+        ipinfo = self.data['ipinfo']
+        if ipinfo:
+            for ip in ipinfo['ip']:
+                attribute = MISPAttribute()
+                attribute.from_dict(**{'type': 'ip-dst', 'value': ip['@ip']})
+                self.misp_event.add_attribute(**attribute)
+                self.references[self.process_references[(int(ip['@targetid']), ip['@currentpath'])]].append({
+                    'idref': attribute.uuid,
+                    'relationship': 'contacts'
+                })
+        urlinfo = self.data['urlinfo']
+        if urlinfo:
+            for url in urlinfo['url']:
+                target_id = int(url['@targetid'])
+                current_path = url['@currentpath']
+                attribute = MISPAttribute()
+                attribute_dict = {'type': 'url', 'value': url['@name']}
+                if target_id != -1 and current_path != 'unknown':
+                    self.references[self.process_references[(target_id, current_path)]].append({
+                        'idref': attribute.uuid,
+                        'relationship': 'contacts'
+                    })
+                else:
+                    attribute_dict['comment'] = 'From Memory - Enriched via the joe_import module'
+                attribute.from_dict(**attribute_dict)
+                self.misp_event.add_attribute(**attribute)
+
 
     def parse_pe_section(self, section):
         section_object = MISPObject('pe-section')
