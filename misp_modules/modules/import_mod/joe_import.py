@@ -60,6 +60,7 @@ class JoeParser():
         self.misp_event = MISPEvent()
         self.references = defaultdict(list)
         self.attributes = defaultdict(lambda: defaultdict(set))
+        self.process_references = {}
 
     def parse_joe(self):
         self.parse_fileinfo()
@@ -101,6 +102,10 @@ class JoeParser():
                     hash_type = dropped_hash_mapping[h['@algo']]
                     file_object.add_attribute(hash_type, **{'type': hash_type, 'value': h['$']})
                 self.misp_event.add_object(**file_object)
+                self.references[self.process_references[(int(droppedfile['@targetid']), droppedfile['@process'])]].append({
+                    'idref': file_object.uuid,
+                    'relationship': 'drops'
+                })
 
     def parse_network_behavior(self):
         network = self.data['behavior']['network']
@@ -148,6 +153,7 @@ class JoeParser():
                 for field, to_call in process_activities.items():
                     to_call(process_object.uuid, process[field])
                 self.references[self.fileinfo_uuid].append({'idref': process_object.uuid, 'relationship': 'calls'})
+                self.process_references[(general['targetid'], general['path'])] = process_object.uuid
 
     def parse_fileactivities(self, process_uuid, fileactivities):
         for feature, files in fileactivities.items():
