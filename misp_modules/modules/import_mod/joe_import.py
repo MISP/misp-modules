@@ -258,7 +258,6 @@ class JoeParser():
                 attribute.from_dict(**attribute_dict)
                 self.misp_event.add_attribute(**attribute)
 
-
     def parse_pe_section(self, section):
         section_object = MISPObject('pe-section')
         for feature, mapping in section_object_mapping.items():
