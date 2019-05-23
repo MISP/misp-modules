@@ -73,6 +73,7 @@ class JoeParser():
             self.handle_attributes()
         if self.references:
             self.build_references()
+        self.parse_mitre_attack()
         self.finalize_results()
 
     def build_references(self):
@@ -108,6 +109,14 @@ class JoeParser():
                     'idref': file_object.uuid,
                     'relationship': 'drops'
                 })
+
+    def parse_mitre_attack(self):
+        mitreattack = self.data['mitreattack']
+        if mitreattack:
+            for tactic in mitreattack['tactic']:
+                if tactic.get('technique'):
+                    for technique in tactic['technique']:
+                        self.misp_event.add_tag('misp-galaxy:mitre-attack-pattern="{} - {}"'.format(technique['name'], technique['id']))
 
     def parse_network_behavior(self):
         network = self.data['behavior']['network']
