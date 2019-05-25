@@ -40,6 +40,7 @@ For more information: [Extending MISP with Python modules](https://www.circl.lu/
 * [intel471](misp_modules/modules/expansion/intel471.py) - an expansion module to get info from [Intel471](https://intel471.com).
 * [IPASN](misp_modules/modules/expansion/ipasn.py) - a hover and expansion to get the BGP ASN of an IP address.
 * [iprep](misp_modules/modules/expansion/iprep.py) - an expansion module to get IP reputation from packetmail.net.
+* [Joe Sandbox](misp_modules/modules/expansion/joesandbox_submit.py) - Submit files and URLs to Joe Sandbox.
 * [macaddress.io](misp_modules/modules/expansion/macaddress_io.py) - a hover module to retrieve vendor details and other information regarding a given MAC address or an OUI from [MAC address Vendor Lookup](https://macaddress.io). See [integration tutorial here](https://macaddress.io/integrations/MISP-module).
 * [macvendors](misp_modules/modules/expansion/macvendors.py) - a hover module to retrieve mac vendor information.
 * [ocr-enrich](misp_modules/modules/expansion/ocr-enrich.py) - an enrichment module to get OCRized data from images into MISP.
