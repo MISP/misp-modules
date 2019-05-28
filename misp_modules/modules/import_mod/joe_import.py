@@ -64,11 +64,16 @@ class JoeParser():
         self.process_references = {}
 
     def parse_joe(self):
-        self.parse_fileinfo()
+        if self.analysis_type() == "file":
+            self.parse_fileinfo()
+        else:
+            self.parse_url_analysis()
+
         self.parse_system_behavior()
         self.parse_network_behavior()
         self.parse_network_interactions()
         self.parse_dropped_files()
+
         if self.attributes:
             self.handle_attributes()
         if self.references:
@@ -137,7 +142,7 @@ class JoeParser():
                 for protocol in data.keys():
                     network_connection_object.add_attribute('layer{}-protocol'.format(protocols[protocol]), **{'type': 'text', 'value': protocol})
                 self.misp_event.add_object(**network_connection_object)
-                self.references[self.fileinfo_uuid].append({'idref': network_connection_object.uuid, 'relationship': 'initiates'})
+                self.references[self.analysisinfo_uuid].append({'idref': network_connection_object.uuid, 'relationship': 'initiates'})
             else:
                 for protocol, timestamps in data.items():
                     network_connection_object = MISPObject('network-connection')
@@ -146,7 +151,7 @@ class JoeParser():
                     network_connection_object.add_attribute('first-packet-seen', **{'type': 'datetime', 'value': min(timestamps)})
                     network_connection_object.add_attribute('layer{}-protocol'.format(protocols[protocol]), **{'type': 'text', 'value': protocol})
                     self.misp_event.add_object(**network_connection_object)
-                    self.references[self.fileinfo_uuid].append({'idref': network_connection_object.uuid, 'relationship': 'initiates'})
+                    self.references[self.analysisinfo_uuid].append({'idref': network_connection_object.uuid, 'relationship': 'initiates'})
 
     def parse_system_behavior(self):
         system = self.data['behavior']['system']
@@ -163,24 +168,49 @@ class JoeParser():
                 self.misp_event.add_object(**process_object)
                 for field, to_call in process_activities.items():
                     to_call(process_object.uuid, process[field])
-                self.references[self.fileinfo_uuid].append({'idref': process_object.uuid, 'relationship': 'calls'})
+                self.references[self.analysisinfo_uuid].append({'idref': process_object.uuid, 'relationship': 'calls'})
                 self.process_references[(general['targetid'], general['path'])] = process_object.uuid
 
     def parse_fileactivities(self, process_uuid, fileactivities):
         for feature, files in fileactivities.items():
+            # ignore unknown features
+            if feature not in file_references_mapping:
+                continue
+
             if files:
                 for call in files['call']:
                     self.attributes['filename'][call['path']].add((process_uuid, file_references_mapping[feature]))
 
+    def analysis_type(self):
+        generalinfo = self.data['generalinfo']
+
+        if generalinfo['target']['sample']:
+            return "file"
+        elif generalinfo['target']['url']:
+            return "url"
+        else:
+            raise Exception("Unknown analysis type")
+
+    def parse_url_analysis(self):
+        generalinfo = self.data["generalinfo"]
+
+        url_object = MISPObject("url")
+        self.analysisinfo_uuid = url_object.uuid
+
+        url_object.add_attribute("url", generalinfo["target"]["url"])
+        self.misp_event.add_object(**url_object)
+
     def parse_fileinfo(self):
         fileinfo = self.data['fileinfo']
+
         file_object = MISPObject('file')
+        self.analysisinfo_uuid = file_object.uuid
+
         for field in file_object_fields:
             file_object.add_attribute(field, **{'type': field, 'value': fileinfo[field]})
         for field, mapping in file_object_mapping.items():
             attribute_type, object_relation = mapping
             file_object.add_attribute(object_relation, **{'type': attribute_type, 'value': fileinfo[field]})
-        self.fileinfo_uuid = file_object.uuid
         if not fileinfo.get('pe'):
             self.misp_event.add_object(**file_object)
             return
@@ -198,7 +228,8 @@ class JoeParser():
                 name = feature['name']
                 if name == 'InternalName':
                     program_name = feature['value']
-                pe_object.add_attribute(pe_object_mapping[name], **{'type': 'text', 'value': feature['value']})
+                if name in pe_object_mapping:
+                    pe_object.add_attribute(pe_object_mapping[name], **{'type': 'text', 'value': feature['value']})
         sections_number = len(peinfo['sections']['section'])
         pe_object.add_attribute('number-sections', **{'type': 'counter', 'value': sections_number})
         signatureinfo = peinfo['signature']
