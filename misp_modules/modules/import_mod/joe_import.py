@@ -168,6 +168,10 @@ class JoeParser():
 
     def parse_fileactivities(self, process_uuid, fileactivities):
         for feature, files in fileactivities.items():
+            # ignore unknown features
+            if feature not in file_references_mapping:
+                continue
+
             if files:
                 for call in files['call']:
                     self.attributes['filename'][call['path']].add((process_uuid, file_references_mapping[feature]))
@@ -198,7 +202,8 @@ class JoeParser():
                 name = feature['name']
                 if name == 'InternalName':
                     program_name = feature['value']
-                pe_object.add_attribute(pe_object_mapping[name], **{'type': 'text', 'value': feature['value']})
+                if name in pe_object_mapping:
+                    pe_object.add_attribute(pe_object_mapping[name], **{'type': 'text', 'value': feature['value']})
         sections_number = len(peinfo['sections']['section'])
         pe_object.add_attribute('number-sections', **{'type': 'counter', 'value': sections_number})
         signatureinfo = peinfo['signature']
