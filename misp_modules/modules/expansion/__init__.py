@@ -10,4 +10,4 @@ __all__ = ['cuckoo_submit', 'vmray_submit', 'bgpranking', 'circl_passivedns', 'c
            'sigma_queries', 'dbl_spamhaus', 'vulners', 'yara_query', 'macaddress_io',
            'intel471', 'backscatter_io', 'btc_scam_check', 'hibp', 'greynoise', 'macvendors',
            'qrcode', 'ocr-enrich', 'pdf-enrich', 'docx-enrich', 'xlsx-enrich', 'pptx-enrich',
-           'ods-enrich', 'odt-enrich', 'urlhaus']
+           'ods-enrich', 'odt-enrich', 'joesandbox_submit', 'urlhaus']

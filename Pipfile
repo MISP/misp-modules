@@ -55,6 +55,7 @@ pdftotext = "*"
 lxml = "*"
 xlrd = "*"
 idna-ssl = {markers="python_version < '3.7'"}
+jbxapi = "*"
 
 [requires]
 python_version = "3"
