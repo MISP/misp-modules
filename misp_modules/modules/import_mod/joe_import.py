@@ -24,9 +24,9 @@ def handler(q=False):
     data = base64.b64decode(q.get('data')).decode('utf-8')
     if not data:
         return json.dumps({'success': 0})
-    joe_data = json.loads(data)['analysis']
-    joe_parser = JoeParser(joe_data)
-    joe_parser.parse_joe()
+    joe_parser = JoeParser()
+    joe_parser.parse_data(json.loads(data)['analysis'])
+    joe_parser.finalize_results()
     return {'results': joe_parser.results}
 
 

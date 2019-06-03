@@ -46,14 +46,14 @@ signerinfo_object_mapping = {'sigissuer': ('text', 'issuer'),
 
 
 class JoeParser():
-    def __init__(self, data):
-        self.data = data
+    def __init__(self):
         self.misp_event = MISPEvent()
         self.references = defaultdict(list)
         self.attributes = defaultdict(lambda: defaultdict(set))
         self.process_references = {}
 
-    def parse_joe(self):
+    def parse_data(self, data):
+        self.data = data
         if self.analysis_type() == "file":
             self.parse_fileinfo()
         else:
@@ -66,8 +66,6 @@ class JoeParser():
 
         if self.attributes:
             self.handle_attributes()
-        if self.references:
-            self.build_references()
         self.parse_mitre_attack()
         self.finalize_results()
 
@@ -119,7 +117,7 @@ class JoeParser():
         for protocol, layer in protocols.items():
             if network.get(protocol):
                 for packet in network[protocol]['packet']:
-                    timestamp = datetime.strptime(self.parse_timestamp(packet['timestamp']), '%B %d, %Y %H:%M:%S.%f')
+                    timestamp = datetime.strptime(self.parse_timestamp(packet['timestamp']), '%b %d, %Y %H:%M:%S.%f')
                     connections[tuple(packet[field] for field in network_behavior_fields)][protocol].add(timestamp)
         for connection, data in connections.items():
             attributes = self.prefetch_attributes_data(connection)
@@ -308,6 +306,8 @@ class JoeParser():
         return attribute.uuid
 
     def finalize_results(self):
+        if self.references:
+            self.build_references()
         event = json.loads(self.misp_event.to_json())['Event']
         self.results = {key: event[key] for key in ('Attribute', 'Object') if (key in event and event[key])}
 
