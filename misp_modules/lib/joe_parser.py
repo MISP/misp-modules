@@ -241,25 +241,28 @@ class JoeParser():
         domaininfo = self.data['domaininfo']
         if domaininfo:
             for domain in domaininfo['domain']:
-                domain_object = MISPObject('domain-ip')
-                for key, mapping in domain_object_mapping.items():
-                    attribute_type, object_relation = mapping
-                    domain_object.add_attribute(object_relation, **{'type': attribute_type, 'value': domain[key]})
-                self.misp_event.add_object(**domain_object)
-                self.references[self.process_references[(int(domain['@targetid']), domain['@currentpath'])]].append({
-                    'idref': domain_object.uuid,
-                    'relationship': 'contacts'
-                })
+                if domain['@ip'] != 'unknown':
+                    domain_object = MISPObject('domain-ip')
+                    for key, mapping in domain_object_mapping.items():
+                        attribute_type, object_relation = mapping
+                        domain_object.add_attribute(object_relation,
+                                                    **{'type': attribute_type, 'value': domain[key]})
+                    self.misp_event.add_object(**domain_object)
+                    reference = {'idref': domain_object.uuid, 'relationship': 'contacts'}
+                    self.add_process_reference(domain['@targetid'], domain['@currentpath'], reference)
+                else:
+                    attribute = MISPAttribute()
+                    attribute.from_dict(**{'type': 'domain', 'value': domain['@name']})
+                    reference = {'idref': attribute.uuid, 'relationship': 'contacts'}
+                    self.add_process_reference(domain['@targetid'], domain['@currentpath'], reference)
         ipinfo = self.data['ipinfo']
         if ipinfo:
             for ip in ipinfo['ip']:
                 attribute = MISPAttribute()
                 attribute.from_dict(**{'type': 'ip-dst', 'value': ip['@ip']})
                 self.misp_event.add_attribute(**attribute)
-                self.references[self.process_references[(int(ip['@targetid']), ip['@currentpath'])]].append({
-                    'idref': attribute.uuid,
-                    'relationship': 'contacts'
-                })
+                reference = {'idref': attribute.uuid, 'relationship': 'contacts'}
+                self.add_process_reference(ip['@targetid'], ip['@currentpath'], reference)
         urlinfo = self.data['urlinfo']
         if urlinfo:
             for url in urlinfo['url']:
@@ -298,6 +301,12 @@ class JoeParser():
                     registry_key.add_attribute('data-type', **{'type': 'text', 'value': 'REG_{}'.format(call['type'].upper())})
                     self.misp_event.add_object(**registry_key)
                     self.references[process_uuid].append({'idref': registry_key.uuid, 'relationship': relationship_type})
+
+    def add_process_reference(self, target, currentpath, reference):
+        try:
+            self.references[self.process_references[(int(target), currentpath)]].append(reference)
+        except KeyError:
+            self.references[self.analysisinfo_uuid].append(reference)
 
     def create_attribute(self, attribute_type, attribute_value):
         attribute = MISPAttribute()
