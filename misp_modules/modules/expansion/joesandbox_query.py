@@ -39,7 +39,7 @@ def handler(q=False):
         return {'error': 'No API key provided'}
     try:
         accept_tac = _parse_bool(request['config'].get('accept-tac'), 'accept-tac')
-    except _parseError as e:
+    except _ParseError as e:
         return {'error': str(e)}
     attribute = request['attribute']
     joe = jbxapi.JoeSandbox(apiurl=apiurl, apikey=apikey, user_agent='MISP joesandbox_analysis', accept_tac=accept_tac)
