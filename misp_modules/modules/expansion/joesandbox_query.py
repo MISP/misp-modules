@@ -1,9 +1,6 @@
 # -*- coding: utf-8 -*-
 import jbxapi
 import json
-import os
-import sys
-sys.path.append('{}/lib'.format('/'.join((os.path.realpath(__file__)).split('/')[:-3])))
 from joe_parser import JoeParser
 
 misperrors = {'error': 'Error'}
@@ -57,6 +54,7 @@ def handler(q=False):
 
 def introspection():
     return mispattributes
+
 
 def version():
     moduleinfo['config'] = moduleconfig

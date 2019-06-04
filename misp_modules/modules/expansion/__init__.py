@@ -1,4 +1,7 @@
 from . import _vmray  # noqa
+import os
+import sys
+sys.path.append('{}/lib'.format('/'.join((os.path.realpath(__file__)).split('/')[:-3])))
 
 __all__ = ['cuckoo_submit', 'vmray_submit', 'bgpranking', 'circl_passivedns', 'circl_passivessl',
            'countrycode', 'cve', 'dns', 'btc_steroids', 'domaintools', 'eupi',

@@ -1,9 +1,6 @@
 # -*- coding: utf-8 -*-
 import base64
 import json
-import os
-import sys
-sys.path.append('{}/lib'.format('/'.join((os.path.realpath(__file__)).split('/')[:-3])))
 from joe_parser import JoeParser
 
 misperrors = {'error': 'Error'}
