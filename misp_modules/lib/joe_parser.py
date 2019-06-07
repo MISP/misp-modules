@@ -67,7 +67,6 @@ class JoeParser():
         if self.attributes:
             self.handle_attributes()
         self.parse_mitre_attack()
-        self.finalize_results()
 
     def build_references(self):
         for misp_object in self.misp_event.objects:
