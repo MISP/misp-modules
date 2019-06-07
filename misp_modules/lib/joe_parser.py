@@ -317,7 +317,7 @@ class JoeParser():
         if self.references:
             self.build_references()
         event = json.loads(self.misp_event.to_json())['Event']
-        self.results = {key: event[key] for key in ('Attribute', 'Object') if (key in event and event[key])}
+        self.results = {key: event[key] for key in ('Attribute', 'Object', 'Tag', 'Galaxy') if (key in event and event[key])}
 
     @staticmethod
     def parse_timestamp(timestamp):
