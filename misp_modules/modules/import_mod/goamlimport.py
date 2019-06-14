@@ -9,7 +9,8 @@ moduleinfo = {'version': 1, 'author': 'Christian Studer',
               'description': 'Import from GoAML',
               'module-type': ['import']}
 moduleconfig = []
-mispattributes = {'inputSource': ['file'], 'output': ['MISP objects']}
+mispattributes = {'inputSource': ['file'], 'output': ['MISP objects'],
+                  'format': 'misp_standard'}
 
 t_from_objects = {'nodes': ['from_person', 'from_account', 'from_entity'],
                   'leaves': ['from_funds_code', 'from_country']}
@@ -164,7 +165,7 @@ def handler(q=False):
         misperrors['error'] = "Impossible to read XML data"
         return misperrors
     aml_parser.parse_xml()
-    r = {'results': [obj.to_json() for obj in aml_parser.misp_event.objects]}
+    r = {'results': {'Object': [obj.to_json() for obj in aml_parser.misp_event.objects]}}
     return r
 
 

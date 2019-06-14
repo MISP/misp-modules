@@ -1,4 +1,7 @@
 from . import _vmray  # noqa
+import os
+import sys
+sys.path.append('{}/lib'.format('/'.join((os.path.realpath(__file__)).split('/')[:-3])))
 
 __all__ = ['cuckoo_submit', 'vmray_submit', 'bgpranking', 'circl_passivedns', 'circl_passivessl',
            'countrycode', 'cve', 'dns', 'btc_steroids', 'domaintools', 'eupi',
@@ -10,4 +13,4 @@ __all__ = ['cuckoo_submit', 'vmray_submit', 'bgpranking', 'circl_passivedns', 'c
            'sigma_queries', 'dbl_spamhaus', 'vulners', 'yara_query', 'macaddress_io',
            'intel471', 'backscatter_io', 'btc_scam_check', 'hibp', 'greynoise', 'macvendors',
            'qrcode', 'ocr-enrich', 'pdf-enrich', 'docx-enrich', 'xlsx-enrich', 'pptx-enrich',
-           'ods-enrich', 'odt-enrich', 'joesandbox_submit']
+           'ods-enrich', 'odt-enrich', 'joesandbox_submit', 'joesandbox_query', 'urlhaus']

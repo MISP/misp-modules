@@ -40,7 +40,8 @@ For more information: [Extending MISP with Python modules](https://www.circl.lu/
 * [intel471](misp_modules/modules/expansion/intel471.py) - an expansion module to get info from [Intel471](https://intel471.com).
 * [IPASN](misp_modules/modules/expansion/ipasn.py) - a hover and expansion to get the BGP ASN of an IP address.
 * [iprep](misp_modules/modules/expansion/iprep.py) - an expansion module to get IP reputation from packetmail.net.
-* [Joe Sandbox](misp_modules/modules/expansion/joesandbox_submit.py) - Submit files and URLs to Joe Sandbox.
+* [Joe Sandbox submit](misp_modules/modules/expansion/joesandbox_submit.py) - Submit files and URLs to Joe Sandbox.
+* [Joe Sandbox query](misp_modules/modules/expansion/joesandbox_query.py) - Query Joe Sandbox with the link of an analysis and get the parsed data.
 * [macaddress.io](misp_modules/modules/expansion/macaddress_io.py) - a hover module to retrieve vendor details and other information regarding a given MAC address or an OUI from [MAC address Vendor Lookup](https://macaddress.io). See [integration tutorial here](https://macaddress.io/integrations/MISP-module).
 * [macvendors](misp_modules/modules/expansion/macvendors.py) - a hover module to retrieve mac vendor information.
 * [ocr-enrich](misp_modules/modules/expansion/ocr-enrich.py) - an enrichment module to get OCRized data from images into MISP.
@@ -63,6 +64,7 @@ For more information: [Extending MISP with Python modules](https://www.circl.lu/
 * [STIX2 pattern syntax validator](misp_modules/modules/expansion/stix2_pattern_syntax_validator.py) - a module to check a STIX2 pattern syntax.
 * [ThreatCrowd](misp_modules/modules/expansion/threatcrowd.py) - an expansion module for [ThreatCrowd](https://www.threatcrowd.org/).
 * [threatminer](misp_modules/modules/expansion/threatminer.py) - an expansion module to expand from [ThreatMiner](https://www.threatminer.org/).
+* [urlhaus](misp_modules/modules/expansion/urlhaus.py) - Query urlhaus to get additional data about a domain, hash, hostname, ip or url.
 * [urlscan](misp_modules/modules/expansion/urlscan.py) - an expansion module to query [urlscan.io](https://urlscan.io).
 * [virustotal](misp_modules/modules/expansion/virustotal.py) - an expansion module to pull known resolutions and malware samples related with an IP/Domain from virusTotal (this modules require a VirusTotal private API key)
 * [VMray](misp_modules/modules/expansion/vmray_submit.py) - a module to submit a sample to VMray.
@@ -92,7 +94,8 @@ For more information: [Extending MISP with Python modules](https://www.circl.lu/
 * [CSV import](misp_modules/modules/import_mod/csvimport.py) Customizable CSV import module.
 * [Cuckoo JSON](misp_modules/modules/import_mod/cuckooimport.py) Cuckoo JSON import.
 * [Email Import](misp_modules/modules/import_mod/email_import.py) Email import module for MISP to import basic metadata.
-* [GoAML import](misp_modules/modules/import_mod/) Module to import [GoAML](http://goaml.unodc.org/goaml/en/index.html) XML format.
+* [GoAML import](misp_modules/modules/import_mod/goamlimport.py) Module to import [GoAML](http://goaml.unodc.org/goaml/en/index.html) XML format.
+* [Joe Sandbox import](misp_modules/modules/import_mod/joe_import.py) Parse data from a Joe Sandbox json report.
 * [OCR](misp_modules/modules/import_mod/ocr.py) Optical Character Recognition (OCR) module for MISP to import attributes from images, scan or faxes.
 * [OpenIOC](misp_modules/modules/import_mod/openiocimport.py) OpenIOC import based on PyMISP library.
 * [ThreatAnalyzer](misp_modules/modules/import_mod/threatanalyzer_import.py) - An import module to process ThreatAnalyzer archive.zip/analysis.json sandbox exports.
