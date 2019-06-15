@@ -1,4 +1,3 @@
-import sys
 import io
 import json
 try:
@@ -36,7 +35,7 @@ def handler(q=False):
             if result:
                 results.append(result)
                 targets.append(t)
-        except Exception as e:
+        except Exception:
             continue
     d_result = {t: r.strip() for t, r in zip(targets, results)}
     return {'results': [{'types': mispattributes['output'], 'values': d_result}]}
