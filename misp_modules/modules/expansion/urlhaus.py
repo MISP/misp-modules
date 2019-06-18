@@ -79,7 +79,8 @@ class PayloadQuery(URLhaus):
             file_object.add_reference(attribute.uuid, 'retrieved-from')
             if url[_filename_]:
                 file_object.add_attribute(_filename_, **{'type': _filename_, 'value': url[_filename_]})
-        self.misp_event.add_object(**file_object)
+        if any((file_object.attributes, file_object.references)):
+            self.misp_event.add_object(**file_object)
 
 
 class UrlQuery(URLhaus):
@@ -106,7 +107,8 @@ class UrlQuery(URLhaus):
                     vt_object = self._create_vt_object(payload['virustotal'])
                     file_object.add_reference(vt_object.uuid, 'analyzed-with')
                     self.misp_event.add_object(**vt_object)
-                self.misp_event.add_object(**file_object)
+                if any((file_object.attributes, file_object.references)):
+                    self.misp_event.add_object(**file_object)
 
 
 _misp_type_mapping = {'url': UrlQuery, 'md5': PayloadQuery, 'sha256': PayloadQuery,
