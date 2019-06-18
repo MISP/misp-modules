@@ -124,7 +124,7 @@ As of this writing, the official RHEL repositories only contain Ruby 2.0.0 and R
 ~~~~bash
 sudo yum install rh-ruby22
 sudo yum install openjpeg-devel
-sudo yum install rubygem-rouge rubygem-asciidoctor zbar-devel opencv-devel
+sudo yum install rubygem-rouge rubygem-asciidoctor zbar-devel opencv-devel gcc-c++ pkgconfig poppler-cpp-devel python-devel redhat-rpm-config
 cd /var/www/MISP
 git clone https://github.com/MISP/misp-modules.git
 cd misp-modules
