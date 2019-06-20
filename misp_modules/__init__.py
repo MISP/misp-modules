@@ -115,10 +115,11 @@ def load_package_helpers():
 
 
 def load_modules(mod_dir):
-    sys.path.append(mod_dir)
+    enabled_mod_dir = mod_dir + os.sep + "enabled"
+    sys.path.append(enabled_mod_dir)
     mhandlers = {}
     modules = []
-    for root, dirnames, filenames in os.walk(mod_dir):
+    for root, dirnames, filenames in os.walk(enabled_mod_dir):
         if os.path.basename(root) == '__pycache__':
             continue
         if os.path.basename(root).startswith("."):
@@ -129,7 +130,8 @@ def load_modules(mod_dir):
             if filename == '__init__.py':
                 continue
             modulename = filename.split(".")[0]
-            moduletype = os.path.split(mod_dir)[1]
+            moduletype = os.path.split(root)[1]
+
             try:
                 mhandlers[modulename] = importlib.import_module(os.path.basename(root) + '.' + modulename)
             except Exception as e:
