@@ -1,0 +1,1 @@
+../../available/expansion/stix2_pattern_syntax_validator.py
