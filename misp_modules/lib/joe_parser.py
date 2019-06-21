@@ -61,6 +61,7 @@ class JoeParser():
 
         self.parse_system_behavior()
         self.parse_network_behavior()
+        self.parse_screenshot()
         self.parse_network_interactions()
         self.parse_dropped_files()
 
@@ -139,6 +140,12 @@ class JoeParser():
                     network_connection_object.add_attribute('layer{}-protocol'.format(protocols[protocol]), **{'type': 'text', 'value': protocol})
                     self.misp_event.add_object(**network_connection_object)
                     self.references[self.analysisinfo_uuid].append({'idref': network_connection_object.uuid, 'relationship': 'initiates'})
+
+    def parse_screenshot(self):
+        screenshotdata = self.data['behavior']['screenshotdata']['interesting']['$']
+        attribute = {'type': 'attachment', 'value': 'screenshot.jpg',
+                     'data': screenshotdata, 'disable_correlation': True}
+        self.misp_event.add_attribute(**attribute)
 
     def parse_system_behavior(self):
         system = self.data['behavior']['system']
