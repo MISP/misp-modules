@@ -1,6 +1,6 @@
 {
     "description": "Module to access GreyNoise.io API",
-    "logo": "greynoise.png",
+    "logo": "logos/greynoise.png",
     "requirements": [],
     "input": "An IP address.",
     "output": "Additional information about the IP fetched from Greynoise API.",
