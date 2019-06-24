@@ -1,0 +1,9 @@
+{
+    "description": "Module to extract freetext from a .odt document.",
+    "logo": "logos/odt.png",
+    "requirements": ["ODT reader python library."],
+    "input": "Attachment attribute containing a .odt document.",
+    "output": "Text and freetext parsed from the document.",
+    "references": [],
+    "features": "The module reads the text contained in a .odt document. The result is passed to the freetext import parser so IoCs can be extracted out of it."
+}

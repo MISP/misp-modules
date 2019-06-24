@@ -1,0 +1,9 @@
+{
+    "description": "Module to extract freetext from a PDF document.",
+    "logo": "logos/pdf.jpg",
+    "requirements": ["pdftotext: Python library to extract text from PDF."],
+    "input": "Attachment attribute containing a PDF document.",
+    "output": "Text and freetext parsed from the document.",
+    "references": [],
+    "features": "The module reads the text contained in a PDF document. The result is passed to the freetext import parser so IoCs can be extracted out of it."
+}

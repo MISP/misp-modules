@@ -1,0 +1,9 @@
+{
+    "description": "Module to access haveibeenpwned.com API.",
+    "logo": "logos/hibp.png",
+    "requirements": [],
+    "input": "An email address",
+    "output": "Additional information about the email address.",
+    "references": ["https://haveibeenpwned.com/"],
+    "features": "The module takes an email address as input and queries haveibeenpwned.com API to find additional information about it. This additional information actually tells if any account using the email address has already been compromised in a data breach."
+}

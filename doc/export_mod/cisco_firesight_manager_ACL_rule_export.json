@@ -1,0 +1,9 @@
+{
+    "description": "Module to export malicious network activity attributes to Cisco fireSIGHT manager block rules.",
+    "logo": "logos/cisco.png",
+    "requirements": ["Firesight manager console credentials"],
+    "input": "Network activity attributes (IPs, URLs).",
+    "output": "Cisco fireSIGHT manager block rules.",
+    "references": [],
+    "features": "The module goes through the attributes to find all the network activity ones in order to create block rules for the Cisco fireSIGHT manager."
+}

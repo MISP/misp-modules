@@ -1,0 +1,9 @@
+{
+    "description": "Module to extract freetext from a .pptx document.",
+    "logo": "logos/pptx.png",
+    "requirements": ["pptx: Python library to read PowerPoint files."],
+    "input": "Attachment attribute containing a .pptx document.",
+    "output": "Text and freetext parsed from the document.",
+    "references": [],
+    "features": "The module reads the text contained in a .pptx document. The result is passed to the freetext import parser so IoCs can be extracted out of it."
+}

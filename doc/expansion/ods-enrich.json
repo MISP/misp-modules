@@ -1,0 +1,10 @@
+{
+    "description": "Module to extract freetext from a .ods document.",
+    "logo": "logos/ods.png",
+    "requirements": ["ezodf: Python package to create/manipulate OpenDocumentFormat files.",
+                     "pandas_ods_reader: Python library to read in ODS files."],
+    "input": "Attachment attribute containing a .ods document.",
+    "output": "Text and freetext parsed from the document.",
+    "references": [],
+    "features": "The module reads the text contained in a .ods document. The result is passed to the freetext import parser so IoCs can be extracted out of it."
+}

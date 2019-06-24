@@ -253,6 +253,22 @@ A simple DNS expansion service to resolve IP address from domain MISP attributes
 
 -----
 
+#### [docx-enrich](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/docx-enrich.py)
+
+<img src=logos/docx.png height=60>
+
+Module to extract freetext from a .docx document.
+- **features**:
+>The module reads the text contained in a .docx document. The result is passed to the freetext import parser so IoCs can be extracted out of it.
+- **input**:
+>Attachment attribute containing a .docx document.
+- **output**:
+>Text and freetext parsed from the document.
+- **requirements**:
+>docx python library
+
+-----
+
 #### [domaintools](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/domaintools.py)
 
 <img src=logos/domaintools.png height=60>
@@ -348,6 +364,22 @@ Module to query a local copy of Maxmind's Geolite database.
 
 -----
 
+#### [greynoise](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/greynoise.py)
+
+<img src=logos/greynoise.png height=60>
+
+Module to access GreyNoise.io API
+- **features**:
+>The module takes an IP address as input and queries Greynoise for some additional information about it. The result is returned as text.
+- **input**:
+>An IP address.
+- **output**:
+>Additional information about the IP fetched from Greynoise API.
+- **references**:
+>https://greynoise.io/, https://github.com/GreyNoise-Intelligence/api.greynoise.io
+
+-----
+
 #### [hashdd](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/hashdd.py)
 
 A hover module to check hashes against hashdd.com including NSLR dataset.
@@ -359,6 +391,22 @@ A hover module to check hashes against hashdd.com including NSLR dataset.
 >Text describing the known level of the hash in the hashdd databases.
 - **references**:
 >https://hashdd.com/
+
+-----
+
+#### [hibp](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/hibp.py)
+
+<img src=logos/hibp.png height=60>
+
+Module to access haveibeenpwned.com API.
+- **features**:
+>The module takes an email address as input and queries haveibeenpwned.com API to find additional information about it. This additional information actually tells if any account using the email address has already been compromised in a data breach.
+- **input**:
+>An email address
+- **output**:
+>Additional information about the email address.
+- **references**:
+>https://haveibeenpwned.com/
 
 -----
 
@@ -483,6 +531,68 @@ MISP hover module for macaddress.io
 
 -----
 
+#### [macvendors](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/macvendors.py)
+
+<img src=logos/macvendors.png height=60>
+
+Module to access Macvendors API.
+- **features**:
+>The module takes a MAC address as input and queries macvendors.com for some information about it. The API returns the name of the vendor related to the address.
+- **input**:
+>A MAC address.
+- **output**:
+>Additional information about the MAC address.
+- **references**:
+>https://macvendors.com/, https://macvendors.com/api
+
+-----
+
+#### [ocr-enrich](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/ocr-enrich.py)
+
+Module to process some optical character recognition on pictures.
+- **features**:
+>The module takes an attachment attributes as input and process some optical character recognition on it. The text found is then passed to the Freetext importer to extract potential IoCs.
+- **input**:
+>A picture attachment.
+- **output**:
+>Text and freetext fetched from the input picture.
+- **requirements**:
+>cv2: The OpenCV python library.
+
+-----
+
+#### [ods-enrich](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/ods-enrich.py)
+
+<img src=logos/ods.png height=60>
+
+Module to extract freetext from a .ods document.
+- **features**:
+>The module reads the text contained in a .ods document. The result is passed to the freetext import parser so IoCs can be extracted out of it.
+- **input**:
+>Attachment attribute containing a .ods document.
+- **output**:
+>Text and freetext parsed from the document.
+- **requirements**:
+>ezodf: Python package to create/manipulate OpenDocumentFormat files., pandas_ods_reader: Python library to read in ODS files.
+
+-----
+
+#### [odt-enrich](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/odt-enrich.py)
+
+<img src=logos/odt.png height=60>
+
+Module to extract freetext from a .odt document.
+- **features**:
+>The module reads the text contained in a .odt document. The result is passed to the freetext import parser so IoCs can be extracted out of it.
+- **input**:
+>Attachment attribute containing a .odt document.
+- **output**:
+>Text and freetext parsed from the document.
+- **requirements**:
+>ODT reader python library.
+
+-----
+
 #### [onyphe](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/onyphe.py)
 
 <img src=logos/onyphe.jpg height=60>
@@ -603,6 +713,52 @@ Module to get information from AlienVault OTX.
 >https://www.passivetotal.org/register
 - **requirements**:
 >Passivetotal python library, An access to the PassiveTotal API (apikey)
+
+-----
+
+#### [pdf-enrich](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/pdf-enrich.py)
+
+<img src=logos/pdf.jpg height=60>
+
+Module to extract freetext from a PDF document.
+- **features**:
+>The module reads the text contained in a PDF document. The result is passed to the freetext import parser so IoCs can be extracted out of it.
+- **input**:
+>Attachment attribute containing a PDF document.
+- **output**:
+>Text and freetext parsed from the document.
+- **requirements**:
+>pdftotext: Python library to extract text from PDF.
+
+-----
+
+#### [pptx-enrich](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/pptx-enrich.py)
+
+<img src=logos/pptx.png height=60>
+
+Module to extract freetext from a .pptx document.
+- **features**:
+>The module reads the text contained in a .pptx document. The result is passed to the freetext import parser so IoCs can be extracted out of it.
+- **input**:
+>Attachment attribute containing a .pptx document.
+- **output**:
+>Text and freetext parsed from the document.
+- **requirements**:
+>pptx: Python library to read PowerPoint files.
+
+-----
+
+#### [qrcode](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/qrcode.py)
+
+Module to decode QR codes.
+- **features**:
+>The module reads the QR code and returns the related address, which can be an URL or a bitcoin address.
+- **input**:
+>A QR code stored as attachment attribute.
+- **output**:
+>The URL or bitcoin address the QR code is pointing to.
+- **requirements**:
+>cv2: The OpenCV python library., pyzbar: Python library to read QR codes.
 
 -----
 
@@ -1029,6 +1185,22 @@ An expansion module for IBM X-Force Exchange.
 
 -----
 
+#### [xlsx-enrich](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/xlsx-enrich.py)
+
+<img src=logos/xlsx.png height=60>
+
+Module to extract freetext from a .xlsx document.
+- **features**:
+>The module reads the text contained in a .xlsx document. The result is passed to the freetext import parser so IoCs can be extracted out of it.
+- **input**:
+>Attachment attribute containing a .xlsx document.
+- **output**:
+>Text and freetext parsed from the document.
+- **requirements**:
+>pandas: Python library to perform data analysis, time series and statistics.
+
+-----
+
 #### [yara_query](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/yara_query.py)
 
 <img src=logos/yara.png height=60>
@@ -1080,6 +1252,22 @@ Module to export a MISP event in CEF format.
 >Common Event Format file
 - **references**:
 >https://community.softwaregrp.com/t5/ArcSight-Connectors/ArcSight-Common-Event-Format-CEF-Guide/ta-p/1589306?attachment-id=65537
+
+-----
+
+#### [cisco_firesight_manager_ACL_rule_export](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/export_mod/cisco_firesight_manager_ACL_rule_export.py)
+
+<img src=logos/cisco.png height=60>
+
+Module to export malicious network activity attributes to Cisco fireSIGHT manager block rules.
+- **features**:
+>The module goes through the attributes to find all the network activity ones in order to create block rules for the Cisco fireSIGHT manager.
+- **input**:
+>Network activity attributes (IPs, URLs).
+- **output**:
+>Cisco fireSIGHT manager block rules.
+- **requirements**:
+>Firesight manager console credentials
 
 -----
 

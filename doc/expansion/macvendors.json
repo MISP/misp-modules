@@ -1,0 +1,9 @@
+{
+    "description": "Module to access Macvendors API.",
+    "logo": "logos/macvendors.png",
+    "requirements": [],
+    "input": "A MAC address.",
+    "output": "Additional information about the MAC address.",
+    "references": ["https://macvendors.com/", "https://macvendors.com/api"],
+    "features": "The module takes a MAC address as input and queries macvendors.com for some information about it. The API returns the name of the vendor related to the address."
+}
