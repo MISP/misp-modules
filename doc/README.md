@@ -414,6 +414,52 @@ Module to query IPRep data for IP addresses.
 
 -----
 
+#### [joesandbox_query](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/joesandbox_query.py)
+
+<img src=logos/joesandbox.png height=60>
+
+Query Joe Sandbox API with a submission url to get the json report and extract its data that is parsed and converted into MISP attributes and objects.
+
+This url can by the way come from the result of the [joesandbox_submit expansion module](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/joesandbox_submit.py).
+- **features**:
+>Module using the new format of modules able to return attributes and objects.
+>
+>The module returns the same results as the import module [joe_import](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/import_mod/joe_import.py) taking directly the json report as input.
+>
+>Even if the introspection will allow all kinds of links to call this module, obviously only the ones presenting a sample or url submission in the Joe Sandbox API will return results.
+>
+>To make it work you will need to fill the 'apikey' configuration with your Joe Sandbox API key and provide a valid link as input.
+- **input**:
+>Link of a Joe Sandbox sample or url submission.
+- **output**:
+>MISP attributes & objects parsed from the analysis report.
+- **references**:
+>https://www.joesecurity.org, https://www.joesandbox.com/
+- **requirements**:
+>jbxapi: Joe Sandbox API python3 library
+
+-----
+
+#### [joesandbox_submit](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/joesandbox_submit.py)
+
+<img src=logos/joesandbox.png height=60>
+
+A module to submit files or URLs to Joe Sandbox for an advanced analysis, and return the link of the submission.
+- **features**:
+>The module requires a Joe Sandbox API key to submit files or URL, and returns the link of the submitted analysis.
+>
+>It is then possible, when the analysis is completed, to query the Joe Sandbox API to get the data related to the analysis, using the [joesandbox_query module](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/joesandbox_query.py) directly on this submission link.
+- **input**:
+>Sample, url (or domain) to submit to Joe Sandbox for an advanced analysis.
+- **output**:
+>Link of the data in input submitted to Joe Sandbox.
+- **references**:
+>https://www.joesecurity.org, https://www.joesandbox.com/
+- **requirements**:
+>jbxapi: Joe Sandbox API python3 library
+
+-----
+
 #### [macaddress_io](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/macaddress_io.py)
 
 <img src=logos/macaddress_io.png height=60>
@@ -795,6 +841,24 @@ Module to get information from ThreatMiner.
 >- link
 - **references**:
 >https://www.threatminer.org/
+
+-----
+
+#### [urlhaus](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/urlhaus.py)
+
+<img src=logos/urlhaus.png height=60>
+
+Query of the URLhaus API to get additional information about the input attribute.
+- **features**:
+>Module using the new format of modules able to return attributes and objects.
+>
+>The module takes one of the attribute type specified as input, and query the URLhaus API with it. If any result is returned by the API, attributes and objects are created accordingly.
+- **input**:
+>A domain, hostname, url, ip, md5 or sha256 attribute.
+- **output**:
+>MISP attributes & objects fetched from the result of the URLhaus API query.
+- **references**:
+>https://urlhaus.abuse.ch/
 
 -----
 
@@ -1228,6 +1292,26 @@ Module to import MISP objects about financial transactions from GoAML files.
 >http://goaml.unodc.org/
 - **requirements**:
 >PyMISP
+
+-----
+
+#### [joeimport](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/import_mod/joeimport.py)
+
+<img src=logos/joesandbox.png height=60>
+
+A module to import data from a Joe Sandbox analysis json report.
+- **features**:
+>Module using the new format of modules able to return attributes and objects.
+>
+>The module returns the same results as the expansion module [joesandbox_query](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/joesandbox_query.py) using the submission link of the analysis to get the json report.
+>
+>
+- **input**:
+>Json report of a Joe Sandbox analysis.
+- **output**:
+>MISP attributes & objects parsed from the analysis report.
+- **references**:
+>https://www.joesecurity.org, https://www.joesandbox.com/
 
 -----
 

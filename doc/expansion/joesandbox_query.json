@@ -1,0 +1,9 @@
+{
+    "description": "Query Joe Sandbox API with a submission url to get the json report and extract its data that is parsed and converted into MISP attributes and objects.\n\nThis url can by the way come from the result of the [joesandbox_submit expansion module](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/joesandbox_submit.py).",
+    "logo": "logos/joesandbox.png",
+    "requirements": ["jbxapi: Joe Sandbox API python3 library"],
+    "input": "Link of a Joe Sandbox sample or url submission.",
+    "output": "MISP attributes & objects parsed from the analysis report.",
+    "references": ["https://www.joesecurity.org", "https://www.joesandbox.com/"],
+    "features": "Module using the new format of modules able to return attributes and objects.\n\nThe module returns the same results as the import module [joe_import](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/import_mod/joe_import.py) taking directly the json report as input.\n\nEven if the introspection will allow all kinds of links to call this module, obviously only the ones presenting a sample or url submission in the Joe Sandbox API will return results.\n\nTo make it work you will need to fill the 'apikey' configuration with your Joe Sandbox API key and provide a valid link as input."
+}
