@@ -1483,7 +1483,7 @@ Module to import MISP objects about financial transactions from GoAML files.
 
 -----
 
-#### [joeimport](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/import_mod/joeimport.py)
+#### [joe_import](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/import_mod/joe_import.py)
 
 <img src=logos/joesandbox.png height=60>
 
