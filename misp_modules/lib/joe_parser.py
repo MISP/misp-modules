@@ -259,6 +259,7 @@ class JoeParser():
                 else:
                     attribute = MISPAttribute()
                     attribute.from_dict(**{'type': 'domain', 'value': domain['@name']})
+                    self.misp_event.add_attribute(**attribute)
                     reference = {'idref': attribute.uuid, 'relationship': 'contacts'}
                     self.add_process_reference(domain['@targetid'], domain['@currentpath'], reference)
         ipinfo = self.data['ipinfo']
