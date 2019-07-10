@@ -1,4 +1,4 @@
-from pymisp import MISPAttribute, MISPEvent, MISPObject
+from pymisp import MISPEvent, MISPObject
 import json
 import requests
 
