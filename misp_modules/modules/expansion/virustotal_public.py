@@ -7,7 +7,7 @@ mispattributes = {'input': ['hostname', 'domain', "ip-src", "ip-dst", "md5", "sh
                   'format': 'misp_standard'}
 moduleinfo = {'version': '1', 'author': 'Christian Studer',
               'description': 'Get information from virustotal public API v2.',
-              'module_type': ['expansion', 'hover']}
+              'module-type': ['expansion', 'hover']}
 
 moduleconfig = ['apikey']
 
@@ -27,15 +27,21 @@ class VirusTotalParser():
         results = {key: event[key] for key in ('Attribute', 'Object') if (key in event and event[key])}
         return {'results': results}
 
-    def parse_detected_urls(detected_urls):
+    def parse_detected_urls(self, detected_urls):
         for url in detected_urls:
-            self.misp_event.add_attribute('url', url)
+            value = url['url'] if isinstance(url, dict) else url
+            self.misp_event.add_attribute('url', value)
 
     def parse_resolutions(self, resolutions, subdomains=None):
         domain_ip_object = MISPObject('domain-ip')
-        domain_ip_object.add_attribute('ip', type='ip-dst', value=self.attribute.value)
+        if self.attribute.type == 'domain':
+            domain_ip_object.add_attribute('domain', type='domain', value=self.attribute.value)
+            attribute_type, relation, key = ('ip-dst', 'ip', 'ip_address')
+        else:
+            domain_ip_object.add_attribute('ip', type='ip-dst', value=self.attribute.value)
+            attribute_type, relation, key = ('domain', 'domain', 'hostname')
         for resolution in resolutions:
-            domain_ip_object.add_attribute('domain', type='domain', value=resolution['hostname'])
+            domain_ip_object.add_attribute(relation, type=attribute_type, value=resolution[key])
         if subdomains:
             for subdomain in subdomains:
                 attribute = MISPAttribute()
@@ -48,7 +54,7 @@ class VirusTotalParser():
         vt_object = MISPObject('virustotal-report')
         vt_object.add_attribute('permalink', type='link', value=query_result['permalink'])
         detection_ratio = '{}/{}'.format(query_result['positives'], query_result['total'])
-        vt_object.add_object('detection-ratio', type='text', value=detection_ratio)
+        vt_object.add_attribute('detection-ratio', type='text', value=detection_ratio)
         self.misp_event.add_object(**vt_object)
 
     def query_result(self, query_type):
@@ -67,9 +73,11 @@ class DomainQuery(VirusTotalParser):
         whois = 'whois'
         for feature in ('undetected_referrer_samples', 'detected_referrer_samples'):
             for sample in query_result[feature]:
-                self.misp_event.add_attribute(has_type, sample[hash_type])
+                self.misp_event.add_attribute(hash_type, sample[hash_type])
         if query_result.get(whois):
-            self.misp_event.add_attribute(whois, query_result[whois])
+            whois_object = MISPObject(whois)
+            whois_object.add_attribute('text', type='text', value=query_result[whois])
+            self.misp_event.add_object(**whois_object)
         self.parse_resolutions(query_result['resolutions'], query_result['subdomains'])
         self.parse_detected_urls(query_result['detected_urls'])
         for domain in query_result['domain_siblings']:
@@ -85,11 +93,11 @@ class HashQuery(VirusTotalParser):
     def parse_report(self, query_result):
         file_attributes = []
         for hash_type in ('md5', 'sha1', 'sha256'):
-            if query_request.get(hash_type):
+            if query_result.get(hash_type):
                 file_attributes.append({'type': hash_type, 'object_relation': hash_type,
-                                        'value': query_request[hash_type]})
+                                        'value': query_result[hash_type]})
         if file_attributes:
-            file_object = MISPOBject('file')
+            file_object = MISPObject('file')
             for attribute in file_attributes:
                 file_object.add_attribute(**attribute)
             self.misp_event.add_object(**file_object)
@@ -105,13 +113,13 @@ class IpQuery(VirusTotalParser):
     def parse_report(self, query_result):
         if query_result.get('asn'):
             asn_mapping = {'network': ('ip-src', 'subnet-announced'),
-                           'country': {'text', 'country'}}
+                           'country': ('text', 'country')}
             asn_object = MISPObject('asn')
             asn_object.add_attribute('asn', type='AS', value=query_result['asn'])
             for key, value in asn_mapping.items():
-                if query.get(key):
-                    attribute_type, relation = asn_mapping[key]
-                    asn_object.add_attribute(relation, type=attribute_type, value=value)
+                if query_result.get(key):
+                    attribute_type, relation = value
+                    asn_object.add_attribute(relation, type=attribute_type, value=query_result[key])
             self.misp_event.add_object(**asn_object)
         self.parse_detected_urls(query_result['detected_urls'])
         if query_result.get('resolutions'):
