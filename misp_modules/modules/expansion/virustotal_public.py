@@ -27,10 +27,11 @@ class VirusTotalParser():
         results = {key: event[key] for key in ('Attribute', 'Object') if (key in event and event[key])}
         return {'results': results}
 
-    def parse_detected_urls(self, detected_urls):
-        for url in detected_urls:
-            value = url['url'] if isinstance(url, dict) else url
-            self.misp_event.add_attribute('url', value)
+    def parse_urls(self, query_result):
+        for feature in ('detected_urls', 'undetected_urls'):
+            for url in query_result[feature]:
+                value = url['url'] if isinstance(url, dict) else url
+                self.misp_event.add_attribute('url', value)
 
     def parse_resolutions(self, resolutions, subdomains=None):
         domain_ip_object = MISPObject('domain-ip')
@@ -79,7 +80,7 @@ class DomainQuery(VirusTotalParser):
             whois_object.add_attribute('text', type='text', value=query_result[whois])
             self.misp_event.add_object(**whois_object)
         self.parse_resolutions(query_result['resolutions'], query_result['subdomains'])
-        self.parse_detected_urls(query_result['detected_urls'])
+        self.parse_urls(query_result)
         for domain in query_result['domain_siblings']:
             self.misp_event.add_attribute('domain', domain)
 
@@ -121,7 +122,7 @@ class IpQuery(VirusTotalParser):
                     attribute_type, relation = value
                     asn_object.add_attribute(relation, type=attribute_type, value=query_result[key])
             self.misp_event.add_object(**asn_object)
-        self.parse_detected_urls(query_result['detected_urls'])
+        self.parse_urls(query_result)
         if query_result.get('resolutions'):
             self.parse_resolutions(query_result['resolutions'])
 
