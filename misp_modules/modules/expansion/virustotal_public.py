@@ -79,10 +79,15 @@ class DomainQuery(VirusTotalParser):
             whois_object = MISPObject(whois)
             whois_object.add_attribute('text', type='text', value=query_result[whois])
             self.misp_event.add_object(**whois_object)
+        siblings = (self.parse_siblings(domain) for domain in query_result['domain_siblings'])
         self.parse_resolutions(query_result['resolutions'], query_result['subdomains'])
         self.parse_urls(query_result)
-        for domain in query_result['domain_siblings']:
-            self.misp_event.add_attribute('domain', domain)
+
+    def parse_siblings(domain):
+        attribute = MISPAttribute()
+        attribute.from_dict(dict(type='domain', value=domain))
+        self.misp_event.add_attribute(**attribute)
+        return attribute.uuid
 
 
 class HashQuery(VirusTotalParser):
