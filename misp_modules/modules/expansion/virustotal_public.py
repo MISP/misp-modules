@@ -33,7 +33,7 @@ class VirusTotalParser():
                 value = url['url'] if isinstance(url, dict) else url
                 self.misp_event.add_attribute('url', value)
 
-    def parse_resolutions(self, resolutions, subdomains=None):
+    def parse_resolutions(self, resolutions, subdomains=None, uuids=None):
         domain_ip_object = MISPObject('domain-ip')
         if self.attribute.type == 'domain':
             domain_ip_object.add_attribute('domain', type='domain', value=self.attribute.value)
@@ -49,6 +49,9 @@ class VirusTotalParser():
                 attribute.from_dict(**dict(type='domain', value=subdomain))
                 self.misp_event.add_attribute(**attribute)
                 domain_ip_object.add_reference(attribute.uuid, 'subdomain')
+        if uuids:
+            for uuid in uuids:
+                domain_ip_object.add_reference(uuid, 'sibling-of')
         self.misp_event.add_object(**domain_ip_object)
 
     def parse_vt_object(self, query_result):
@@ -80,7 +83,7 @@ class DomainQuery(VirusTotalParser):
             whois_object.add_attribute('text', type='text', value=query_result[whois])
             self.misp_event.add_object(**whois_object)
         siblings = (self.parse_siblings(domain) for domain in query_result['domain_siblings'])
-        self.parse_resolutions(query_result['resolutions'], query_result['subdomains'])
+        self.parse_resolutions(query_result['resolutions'], query_result['subdomains'], siblings)
         self.parse_urls(query_result)
 
     def parse_siblings(domain):
