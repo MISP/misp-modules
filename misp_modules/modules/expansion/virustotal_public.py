@@ -75,9 +75,10 @@ class DomainQuery(VirusTotalParser):
     def parse_report(self, query_result):
         hash_type = 'sha256'
         whois = 'whois'
-        for feature in ('undetected_referrer_samples', 'detected_referrer_samples'):
-            for sample in query_result[feature]:
-                self.misp_event.add_attribute(hash_type, sample[hash_type])
+        for feature_type in ('referrer', 'dowloaded'):
+            for feature in ('undetected_{}_samples', 'detected_{}_samples'):
+                for sample in query_result[feature.format(feature_type)]:
+                    self.misp_event.add_attribute(hash_type, sample[hash_type])
         if query_result.get(whois):
             whois_object = MISPObject(whois)
             whois_object.add_attribute('text', type='text', value=query_result[whois])
