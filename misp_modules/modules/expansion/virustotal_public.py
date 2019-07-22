@@ -31,7 +31,7 @@ class VirusTotalParser():
         for feature in ('detected_urls', 'undetected_urls'):
             if feature in query_result:
                 for url in query_result[feature]:
-                    value = url['url'] if isinstance(url, dict) else url
+                    value = url['url'] if isinstance(url, dict) else url[0]
                     self.misp_event.add_attribute('url', value)
 
     def parse_resolutions(self, resolutions, subdomains=None, uuids=None):
