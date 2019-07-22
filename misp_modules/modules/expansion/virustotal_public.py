@@ -78,7 +78,7 @@ class DomainQuery(VirusTotalParser):
         whois = 'whois'
         for feature_type in ('referrer', 'downloaded', 'communicating'):
             for feature in ('undetected_{}_samples', 'detected_{}_samples'):
-                for sample in query_result[feature.format(feature_type)]:
+                for sample in query_result.get(feature.format(feature_type), []):
                     self.misp_event.add_attribute(hash_type, sample[hash_type])
         if query_result.get(whois):
             whois_object = MISPObject(whois)
