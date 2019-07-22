@@ -29,9 +29,10 @@ class VirusTotalParser():
 
     def parse_urls(self, query_result):
         for feature in ('detected_urls', 'undetected_urls'):
-            for url in query_result[feature]:
-                value = url['url'] if isinstance(url, dict) else url
-                self.misp_event.add_attribute('url', value)
+            if feature in query_result:
+                for url in query_result[feature]:
+                    value = url['url'] if isinstance(url, dict) else url
+                    self.misp_event.add_attribute('url', value)
 
     def parse_resolutions(self, resolutions, subdomains=None, uuids=None):
         domain_ip_object = MISPObject('domain-ip')
@@ -87,9 +88,9 @@ class DomainQuery(VirusTotalParser):
         self.parse_resolutions(query_result['resolutions'], query_result['subdomains'], siblings)
         self.parse_urls(query_result)
 
-    def parse_siblings(domain):
+    def parse_siblings(self, domain):
         attribute = MISPAttribute()
-        attribute.from_dict(dict(type='domain', value=domain))
+        attribute.from_dict(**dict(type='domain', value=domain))
         self.misp_event.add_attribute(**attribute)
         return attribute.uuid
 
