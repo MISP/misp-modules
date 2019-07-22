@@ -62,7 +62,7 @@ class VirusTotalParser():
         vt_object.add_attribute('detection-ratio', type='text', value=detection_ratio)
         self.misp_event.add_object(**vt_object)
 
-    def query_result(self, query_type):
+    def get_query_result(self, query_type):
         params = {query_type: self.attribute.value, 'apikey': self.apikey}
         return requests.get(self.base_url, params=params)
 
@@ -174,7 +174,7 @@ def handler(q=False):
     attribute = request['attribute']
     query_type, to_call = misp_type_mapping[attribute['type']]
     parser = to_call(request['config']['apikey'], attribute)
-    query_result = parser.query_result(query_type)
+    query_result = parser.get_query_result(query_type)
     status_code = query_result.status_code
     if status_code == 200:
         parser.parse_report(query_result.json())
