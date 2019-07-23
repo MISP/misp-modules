@@ -1042,21 +1042,45 @@ An expansion module to query urlscan.io.
 
 <img src=logos/virustotal.png height=60>
 
-Module to get information from virustotal.
+Module to get advanced information from virustotal.
 - **features**:
->This module takes a MISP attribute as input and queries the VirusTotal API with it, in order to get additional data on the  input attribute.
+>New format of modules able to return attributes and objects.
 >
->Multiple recursive requests on the API can then be processed on some attributes found in the first request. A limit can be set to restrict the number of values to query again, and at the same time the number of request submitted to the API.
+>A module to take a MISP attribute as input and query the VirusTotal API to get additional data about it.
 >
->This limit is important because the default user VirusTotal apikey only allows to process a certain nunmber of queries per minute. As a consequence it is recommended to have a larger number of requests or a private apikey.
+>Compared to the [standard VirusTotal expansion module](https://github.com/MISP/misp-modules/blob/master/misp_modules/modules/expansion/virustotal.py), this module is made for advanced parsing of VirusTotal report, with a recursive analysis of the elements found after the first request.
 >
->Data is then mapped into MISP attributes.
+>Thus, it requires a higher request rate limit to avoid the API to return a 204 error (Request rate limit exceeded), and the data parsed from the different requests are returned as MISP attributes and objects, with the corresponding relations between each one of them.
 - **input**:
 >A domain, hash (md5, sha1, sha256 or sha512), hostname or IP address attribute.
 - **output**:
->MISP attributes mapped from the rersult of the query on VirusTotal API.
+>MISP attributes and objects resulting from the parsing of the VirusTotal report concerning the input attribute.
 - **references**:
->https://www.virustotal.com/
+>https://www.virustotal.com/, https://developers.virustotal.com/reference
+- **requirements**:
+>An access to the VirusTotal API (apikey), with a high request rate limit.
+
+-----
+
+#### [virustotal_public](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/virustotal_public.py)
+
+<img src=logos/virustotal.png height=60>
+
+Module to get information from VirusTotal.
+- **features**:
+>New format of modules able to return attributes and objects.
+>
+>A module to take a MISP attribute as input and query the VirusTotal API to get additional data about it.
+>
+>Compared to the [more advanced VirusTotal expansion module](https://github.com/MISP/misp-modules/blob/master/misp_modules/modules/expansion/virustotal.py), this module is made for VirusTotal users who have a low request rate limit.
+>
+>Thus, it only queries the API once and returns the results that is parsed into MISP attributes and objects.
+- **input**:
+>A domain, hostname, ip, url or hash (md5, sha1, sha256 or sha512) attribute.
+- **output**:
+>MISP attributes and objects resulting from the parsing of the VirusTotal report concerning the input attribute.
+- **references**:
+>https://www.virustotal.com, https://developers.virustotal.com/reference
 - **requirements**:
 >An access to the VirusTotal API (apikey)
 
