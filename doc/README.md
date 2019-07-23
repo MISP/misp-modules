@@ -1048,7 +1048,7 @@ Module to get advanced information from virustotal.
 >
 >A module to take a MISP attribute as input and query the VirusTotal API to get additional data about it.
 >
->Compared to the [standard VirusTotal expansion module](https://github.com/MISP/misp-modules/blob/master/misp_modules/modules/expansion/virustotal.py), this module is made for advanced parsing of VirusTotal report, with a recursive analysis of the elements found after the first request.
+>Compared to the [standard VirusTotal expansion module](https://github.com/MISP/misp-modules/blob/master/misp_modules/modules/expansion/virustotal_public.py), this module is made for advanced parsing of VirusTotal report, with a recursive analysis of the elements found after the first request.
 >
 >Thus, it requires a higher request rate limit to avoid the API to return a 204 error (Request rate limit exceeded), and the data parsed from the different requests are returned as MISP attributes and objects, with the corresponding relations between each one of them.
 - **input**:
