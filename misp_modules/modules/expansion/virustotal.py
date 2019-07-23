@@ -15,6 +15,8 @@ moduleinfo = {'version': '4', 'author': 'Hannah Ward',
 moduleconfig = ["apikey"]
 
 
+# TODO: Parse the report with a private API key to be able to get more advanced results from a query with 'allinfo' set to True
+
 class VirusTotalParser(object):
     def __init__(self, apikey):
         self.apikey = apikey
