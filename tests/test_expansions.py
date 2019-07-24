@@ -37,7 +37,7 @@ class TestExpansions(unittest.TestCase):
     def test_haveibeenpwned(self):
         query = {"module": "hibp", "email-src": "info@circl.lu"}
         response = self.misp_modules_post(query)
-        self.assertEqual(self.get_values(response), 'OK (Not Found)')
+        self.assertEqual(self.get_values(response), 'OK (Not Found)', response)
 
     def test_greynoise(self):
         query = {"module": "greynoise", "ip-dst": "1.1.1.1"}
