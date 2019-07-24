@@ -74,7 +74,7 @@ class JoeParser():
             object_uuid = misp_object.uuid
             if object_uuid in self.references:
                 for reference in self.references[object_uuid]:
-                    misp_object.add_reference(reference['idref'], reference['relationship'])
+                    misp_object.add_reference(**reference)
 
     def handle_attributes(self):
         for attribute_type, attribute in self.attributes.items():
@@ -82,7 +82,8 @@ class JoeParser():
                 attribute_uuid = self.create_attribute(attribute_type, attribute_value)
                 for reference in references:
                     source_uuid, relationship = reference
-                    self.references[source_uuid].append({'idref': attribute_uuid, 'relationship': relationship})
+                    self.references[source_uuid].append(dict(referenced_uuid=attribute_uuid,
+                                                             relationship_type=relationship))
 
     def parse_dropped_files(self):
         droppedinfo = self.data['droppedinfo']
@@ -99,8 +100,8 @@ class JoeParser():
                     file_object.add_attribute(hash_type, **{'type': hash_type, 'value': h['$']})
                 self.misp_event.add_object(**file_object)
                 self.references[self.process_references[(int(droppedfile['@targetid']), droppedfile['@process'])]].append({
-                    'idref': file_object.uuid,
-                    'relationship': 'drops'
+                    'referenced_uuid': file_object.uuid,
+                    'relationship_type': 'drops'
                 })
 
     def parse_mitre_attack(self):
@@ -130,7 +131,8 @@ class JoeParser():
                 for protocol in data.keys():
                     network_connection_object.add_attribute('layer{}-protocol'.format(protocols[protocol]), **{'type': 'text', 'value': protocol})
                 self.misp_event.add_object(**network_connection_object)
-                self.references[self.analysisinfo_uuid].append({'idref': network_connection_object.uuid, 'relationship': 'initiates'})
+                self.references[self.analysisinfo_uuid].append(dict(referenced_uuid=network_connection_object.uuid,
+                                                                    relationship_type='initiates'))
             else:
                 for protocol, timestamps in data.items():
                     network_connection_object = MISPObject('network-connection')
@@ -139,7 +141,8 @@ class JoeParser():
                     network_connection_object.add_attribute('first-packet-seen', **{'type': 'datetime', 'value': min(timestamps)})
                     network_connection_object.add_attribute('layer{}-protocol'.format(protocols[protocol]), **{'type': 'text', 'value': protocol})
                     self.misp_event.add_object(**network_connection_object)
-                    self.references[self.analysisinfo_uuid].append({'idref': network_connection_object.uuid, 'relationship': 'initiates'})
+                    self.references[self.analysisinfo_uuid].append(dict(referenced_uuid=network_connection_object.uuid,
+                                                                        relationship_type='initiates'))
 
     def parse_screenshot(self):
         screenshotdata = self.data['behavior']['screenshotdata']['interesting']['$']
@@ -162,7 +165,8 @@ class JoeParser():
                 self.misp_event.add_object(**process_object)
                 for field, to_call in process_activities.items():
                     to_call(process_object.uuid, process[field])
-                self.references[self.analysisinfo_uuid].append({'idref': process_object.uuid, 'relationship': 'calls'})
+                self.references[self.analysisinfo_uuid].append(dict(referenced_uuid=process_object.uuid,
+                                                                    relationship_type='calls'))
                 self.process_references[(general['targetid'], general['path'])] = process_object.uuid
 
     def parse_fileactivities(self, process_uuid, fileactivities):
@@ -240,7 +244,8 @@ class JoeParser():
             self.misp_event.add_object(**pe_object)
         for section in peinfo['sections']['section']:
             section_object = self.parse_pe_section(section)
-            self.references[pe_object.uuid].append({'idref': section_object.uuid, 'relationship': 'included-in'})
+            self.references[pe_object.uuid].append(dict(referenced_uuid=section_object.uuid,
+                                                        relationship_type='included-in'))
             self.misp_event.add_object(**section_object)
 
     def parse_network_interactions(self):
@@ -254,13 +259,13 @@ class JoeParser():
                         domain_object.add_attribute(object_relation,
                                                     **{'type': attribute_type, 'value': domain[key]})
                     self.misp_event.add_object(**domain_object)
-                    reference = {'idref': domain_object.uuid, 'relationship': 'contacts'}
+                    reference = dict(referenced_uuid=domain_object.uuid, relationship_type='contacts')
                     self.add_process_reference(domain['@targetid'], domain['@currentpath'], reference)
                 else:
                     attribute = MISPAttribute()
                     attribute.from_dict(**{'type': 'domain', 'value': domain['@name']})
                     self.misp_event.add_attribute(**attribute)
-                    reference = {'idref': attribute.uuid, 'relationship': 'contacts'}
+                    reference = dict(referenced_uuid=attribute.uuid, relationship_type='contacts')
                     self.add_process_reference(domain['@targetid'], domain['@currentpath'], reference)
         ipinfo = self.data['ipinfo']
         if ipinfo:
@@ -268,7 +273,7 @@ class JoeParser():
                 attribute = MISPAttribute()
                 attribute.from_dict(**{'type': 'ip-dst', 'value': ip['@ip']})
                 self.misp_event.add_attribute(**attribute)
-                reference = {'idref': attribute.uuid, 'relationship': 'contacts'}
+                reference = dict(referenced_uuid=attribute.uuid, relationship_type='contacts')
                 self.add_process_reference(ip['@targetid'], ip['@currentpath'], reference)
         urlinfo = self.data['urlinfo']
         if urlinfo:
@@ -279,8 +284,8 @@ class JoeParser():
                 attribute_dict = {'type': 'url', 'value': url['@name']}
                 if target_id != -1 and current_path != 'unknown':
                     self.references[self.process_references[(target_id, current_path)]].append({
-                        'idref': attribute.uuid,
-                        'relationship': 'contacts'
+                        'referenced_uuid': attribute.uuid,
+                        'relationship_type': 'contacts'
                     })
                 else:
                     attribute_dict['comment'] = 'From Memory - Enriched via the joe_import module'
@@ -298,7 +303,7 @@ class JoeParser():
         if registryactivities['keyCreated']:
             for call in registryactivities['keyCreated']['call']:
                 self.attributes['regkey'][call['path']].add((process_uuid, 'creates'))
-        for feature, relationship_type in registry_references_mapping.items():
+        for feature, relationship in registry_references_mapping.items():
             if registryactivities[feature]:
                 for call in registryactivities[feature]['call']:
                     registry_key = MISPObject('registry-key')
@@ -307,7 +312,8 @@ class JoeParser():
                         registry_key.add_attribute(object_relation, **{'type': attribute_type, 'value': call[field]})
                     registry_key.add_attribute('data-type', **{'type': 'text', 'value': 'REG_{}'.format(call['type'].upper())})
                     self.misp_event.add_object(**registry_key)
-                    self.references[process_uuid].append({'idref': registry_key.uuid, 'relationship': relationship_type})
+                    self.references[process_uuid].append(dict(referenced_uuid=registry_key.uuid,
+                                                              relationship_type=relationship))
 
     def add_process_reference(self, target, currentpath, reference):
         try:
