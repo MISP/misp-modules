@@ -212,11 +212,12 @@ class JoeParser():
             file_object.add_attribute(object_relation, **{'type': attribute_type, 'value': fileinfo[field]})
         try:
             to_call = arch_type_mapping[self.data['generalinfo']['arch']]
-            getattr(self, to_call)(fileinfo[to_call.split('_')[-1]], file_object)
+            getattr(self, to_call)(fileinfo, file_object)
         except KeyError:
             self.misp_event.add_object(**file_object)
 
-    def parse_apk(self, apkinfo, fileobject):
+    def parse_apk(self, fileinfo, file_object):
+        apkinfo = fileinfo['apk']
         self.misp_event.add_object(**file_object)
         permission_lists = defaultdict(list)
         for permission in apkinfo['requiredpermissions']['permission']:
@@ -232,7 +233,8 @@ class JoeParser():
             self.references[file_object.uuid].append(dict(referenced_uuid=permission_object.uuid,
                                                           relationship_type='grants'))
 
-    def parse_pe(self, peinfo, file_object):
+    def parse_pe(self, fileinfo, file_object):
+        peinfo = fileinfo['pe']
         pe_object = MISPObject('pe')
         file_object.add_reference(pe_object.uuid, 'included-in')
         self.misp_event.add_object(**file_object)
