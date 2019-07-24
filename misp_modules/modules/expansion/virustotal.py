@@ -40,7 +40,7 @@ class VirusTotalParser(object):
         return {'results': results}
 
     ################################################################################
-    ####                         Main parsing functions                         ####
+    ####                         Main parsing functions                         #### # noqa
     ################################################################################
 
     def parse_domain(self, domain, recurse=False):
@@ -123,7 +123,7 @@ class VirusTotalParser(object):
         return status_code
 
     ################################################################################
-    ####                      Additional parsing functions                      ####
+    ####                      Additional parsing functions                      #### # noqa
     ################################################################################
 
     def parse_related_urls(self, query_result, recurse, uuid=None):

@@ -4,6 +4,7 @@
 import unittest
 import requests
 from urllib.parse import urljoin
+import json
 
 
 class TestExpansions(unittest.TestCase):
@@ -17,7 +18,11 @@ class TestExpansions(unittest.TestCase):
         return requests.post(urljoin(self.url, "query"), json=query)
 
     def get_values(self, response):
-        return response.json()['results'][0]['values']
+        data = response.json()
+        if not isinstance(data, dict):
+            print(json.dumps(data, indent=2))
+            return data
+        return data['results'][0]['values']
 
     def test_cve(self):
         query = {"module": "cve", "vulnerability": "CVE-2010-3333"}
@@ -37,7 +42,10 @@ class TestExpansions(unittest.TestCase):
     def test_haveibeenpwned(self):
         query = {"module": "hibp", "email-src": "info@circl.lu"}
         response = self.misp_modules_post(query)
-        self.assertEqual(self.get_values(response), 'OK (Not Found)')
+        to_check = self.get_values(response)
+        if to_check == "haveibeenpwned.com API not accessible (HTTP 403)":
+            self.skipTest(f"haveibeenpwned blocks travis IPs: {response}")
+        self.assertEqual(to_check, 'OK (Not Found)', response)
 
     def test_greynoise(self):
         query = {"module": "greynoise", "ip-dst": "1.1.1.1"}
