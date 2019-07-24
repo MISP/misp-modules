@@ -19,8 +19,8 @@ class TestExpansions(unittest.TestCase):
 
     def get_values(self, response):
         data = response.json()
-        print(json.dumps(data, indent=2))
         if not isinstance(data, dict):
+            print(json.dumps(data, indent=2))
             return data
         return data['results'][0]['values']
 
@@ -42,9 +42,10 @@ class TestExpansions(unittest.TestCase):
     def test_haveibeenpwned(self):
         query = {"module": "hibp", "email-src": "info@circl.lu"}
         response = self.misp_modules_post(query)
-        if response == "haveibeenpwned.com API not accessible (HTTP 403)":
+        to_check = self.get_values(response)
+        if to_check == "haveibeenpwned.com API not accessible (HTTP 403)":
             self.skipTest(f"haveibeenpwned blocks travis IPs: {response}")
-        self.assertEqual(self.get_values(response), 'OK (Not Found)', response)
+        self.assertEqual(to_check, 'OK (Not Found)', response)
 
     def test_greynoise(self):
         query = {"module": "greynoise", "ip-dst": "1.1.1.1"}
