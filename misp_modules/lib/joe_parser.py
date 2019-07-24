@@ -236,7 +236,7 @@ class JoeParser():
     def parse_pe(self, fileinfo, file_object):
         peinfo = fileinfo['pe']
         pe_object = MISPObject('pe')
-        file_object.add_reference(pe_object.uuid, 'included-in')
+        file_object.add_reference(pe_object.uuid, 'includes')
         self.misp_event.add_object(**file_object)
         for field, mapping in pe_object_fields.items():
             attribute_type, object_relation = mapping
@@ -267,7 +267,7 @@ class JoeParser():
         for section in peinfo['sections']['section']:
             section_object = self.parse_pe_section(section)
             self.references[pe_object.uuid].append(dict(referenced_uuid=section_object.uuid,
-                                                        relationship_type='included-in'))
+                                                        relationship_type='includes'))
             self.misp_event.add_object(**section_object)
 
     def parse_pe_section(self, section):
