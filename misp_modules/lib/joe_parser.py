@@ -5,6 +5,7 @@ from pymisp import MISPAttribute, MISPEvent, MISPObject
 import json
 
 
+arch_type_mapping = {'ANDROID': 'parse_apk', 'WINDOWS': 'parse_pe'}
 domain_object_mapping = {'@ip': ('ip-dst', 'ip'), '@name': ('domain', 'domain')}
 dropped_file_mapping = {'@entropy': ('float', 'entropy'),
                         '@file': ('filename', 'filename'),
@@ -27,17 +28,17 @@ pe_object_mapping = {'CompanyName': 'company-name', 'FileDescription': 'file-des
                      'LegalCopyright': 'legal-copyright', 'OriginalFilename': 'original-filename',
                      'ProductName': 'product-filename', 'ProductVersion': 'product-version',
                      'Translation': 'lang-id'}
+pe_section_object_mapping = {'characteristics': ('text', 'characteristic'),
+                             'entropy': ('float', 'entropy'),
+                             'name': ('text', 'name'), 'rawaddr': ('hex', 'offset'),
+                             'rawsize': ('size-in-bytes', 'size-in-bytes'),
+                             'virtaddr': ('hex', 'virtual_address'),
+                             'virtsize': ('size-in-bytes', 'virtual_size')}
 process_object_fields = {'cmdline': 'command-line', 'name': 'name',
                          'parentpid': 'parent-pid', 'pid': 'pid',
                          'path': 'current-directory'}
 protocols = {'tcp': 4, 'udp': 4, 'icmp': 3,
              'http': 7, 'https': 7, 'ftp': 7}
-section_object_mapping = {'characteristics': ('text', 'characteristic'),
-                          'entropy': ('float', 'entropy'),
-                          'name': ('text', 'name'), 'rawaddr': ('hex', 'offset'),
-                          'rawsize': ('size-in-bytes', 'size-in-bytes'),
-                          'virtaddr': ('hex', 'virtual_address'),
-                          'virtsize': ('size-in-bytes', 'virtual_size')}
 registry_references_mapping = {'keyValueCreated': 'creates', 'keyValueModified': 'modifies'}
 regkey_object_mapping = {'name': ('text', 'name'), 'newdata': ('text', 'data'),
                          'path': ('regkey', 'key')}
@@ -209,10 +210,29 @@ class JoeParser():
         for field, mapping in file_object_mapping.items():
             attribute_type, object_relation = mapping
             file_object.add_attribute(object_relation, **{'type': attribute_type, 'value': fileinfo[field]})
-        if not fileinfo.get('pe'):
+        try:
+            to_call = arch_type_mapping[self.data['generalinfo']['arch']]
+            getattr(self, to_call)(fileinfo[to_call.split('_')[-1]], file_object)
+        except KeyError:
             self.misp_event.add_object(**file_object)
-            return
-        peinfo = fileinfo['pe']
+
+    def parse_apk(self, apkinfo, fileobject):
+        self.misp_event.add_object(**file_object)
+        permission_lists = defaultdict(list)
+        for permission in apkinfo['requiredpermissions']['permission']:
+            permission = permission['@name'].split('.')
+            permission_lists[' '.join(permission[:-1])].append(permission[-1])
+        attribute_type = 'text'
+        for comment, permissions in permission_lists.items():
+            permission_object = MISPObject('android-permission')
+            permission_object.add_attribute('comment', **dict(type=attribute_type, value=comment))
+            for permission in permissions:
+                permission_object.add_attribute('permission', **dict(type=attribute_type, value=permission))
+            self.misp_event.add_object(**permission_object)
+            self.references[file_object.uuid].append(dict(referenced_uuid=permission_object.uuid,
+                                                          relationship_type='grants'))
+
+    def parse_pe(self, peinfo, file_object):
         pe_object = MISPObject('pe')
         file_object.add_reference(pe_object.uuid, 'included-in')
         self.misp_event.add_object(**file_object)
@@ -247,6 +267,14 @@ class JoeParser():
             self.references[pe_object.uuid].append(dict(referenced_uuid=section_object.uuid,
                                                         relationship_type='included-in'))
             self.misp_event.add_object(**section_object)
+
+    def parse_pe_section(self, section):
+        section_object = MISPObject('pe-section')
+        for feature, mapping in pe_section_object_mapping.items():
+            if section.get(feature):
+                attribute_type, object_relation = mapping
+                section_object.add_attribute(object_relation, **{'type': attribute_type, 'value': section[feature]})
+        return section_object
 
     def parse_network_interactions(self):
         domaininfo = self.data['domaininfo']
@@ -291,13 +319,6 @@ class JoeParser():
                     attribute_dict['comment'] = 'From Memory - Enriched via the joe_import module'
                 attribute.from_dict(**attribute_dict)
                 self.misp_event.add_attribute(**attribute)
-
-    def parse_pe_section(self, section):
-        section_object = MISPObject('pe-section')
-        for feature, mapping in section_object_mapping.items():
-            attribute_type, object_relation = mapping
-            section_object.add_attribute(object_relation, **{'type': attribute_type, 'value': section[feature]})
-        return section_object
 
     def parse_registryactivities(self, process_uuid, registryactivities):
         if registryactivities['keyCreated']:
