@@ -4,6 +4,7 @@
 import unittest
 import requests
 from urllib.parse import urljoin
+import json
 
 
 class TestExpansions(unittest.TestCase):
@@ -17,7 +18,9 @@ class TestExpansions(unittest.TestCase):
         return requests.post(urljoin(self.url, "query"), json=query)
 
     def get_values(self, response):
-        return response.json()['results'][0]['values']
+        data = response.json()
+        print(json.dumps(data, indent=2))
+        return data['results'][0]['values']
 
     def test_cve(self):
         query = {"module": "cve", "vulnerability": "CVE-2010-3333"}
