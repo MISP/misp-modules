@@ -281,7 +281,11 @@ class JoeParser():
                                                              relationship_type=relationship))
 
     def parse_pe(self, fileinfo, file_object):
-        peinfo = fileinfo['pe']
+        try:
+            peinfo = fileinfo['pe']
+        except KeyError:
+            self.misp_event.add_object(**file_object)
+            return
         pe_object = MISPObject('pe')
         relationship = 'includes'
         file_object.add_reference(pe_object.uuid, relationship)
