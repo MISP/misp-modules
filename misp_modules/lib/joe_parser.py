@@ -217,10 +217,11 @@ class JoeParser():
         for field, mapping in file_object_mapping.items():
             attribute_type, object_relation = mapping
             file_object.add_attribute(object_relation, **{'type': attribute_type, 'value': fileinfo[field]})
-        try:
-            to_call = arch_type_mapping[self.data['generalinfo']['arch']]
+        arch = self.data['generalinfo']['arch']
+        if arch in arch_type_mapping:
+            to_call = arch_type_mapping[arch]
             getattr(self, to_call)(fileinfo, file_object)
-        except KeyError:
+        else:
             self.misp_event.add_object(**file_object)
 
     def parse_apk(self, fileinfo, file_object):
