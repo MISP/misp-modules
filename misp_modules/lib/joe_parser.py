@@ -5,13 +5,17 @@ from pymisp import MISPAttribute, MISPEvent, MISPObject
 import json
 
 
-arch_type_mapping = {'ANDROID': 'parse_apk', 'WINDOWS': 'parse_pe'}
+arch_type_mapping = {'ANDROID': 'parse_apk', 'LINUX': 'parse_elf', 'WINDOWS': 'parse_pe'}
 domain_object_mapping = {'@ip': ('ip-dst', 'ip'), '@name': ('domain', 'domain')}
 dropped_file_mapping = {'@entropy': ('float', 'entropy'),
                         '@file': ('filename', 'filename'),
                         '@size': ('size-in-bytes', 'size-in-bytes'),
                         '@type': ('mime-type', 'mimetype')}
 dropped_hash_mapping = {'MD5': 'md5', 'SHA': 'sha1', 'SHA-256': 'sha256', 'SHA-512': 'sha512'}
+elf_object_mapping = {'epaddr': 'entrypoint-address', 'machine': 'arch', 'osabi': 'os_abi'}
+elf_section_flags_mapping = {'A': 'ALLOC', 'I': 'INFO_LINK', 'M': 'MERGE',
+                             'S': 'STRINGS', 'T': 'TLS', 'W': 'WRITE',
+                             'X': 'EXECINSTR'}
 file_object_fields = ['filename', 'md5', 'sha1', 'sha256', 'sha512', 'ssdeep']
 file_object_mapping = {'entropy': ('float', 'entropy'),
                        'filesize': ('size-in-bytes', 'size-in-bytes'),
@@ -236,10 +240,50 @@ class JoeParser():
             self.references[file_object.uuid].append(dict(referenced_uuid=permission_object.uuid,
                                                           relationship_type='grants'))
 
+    def parse_elf(self, fileinfo, file_object):
+        elfinfo = fileinfo['elf']
+        self.misp_event.add_object(**file_object)
+        attribute_type = 'text'
+        relationship = 'includes'
+        size = 'size-in-bytes'
+        for fileinfo in elfinfo['file']:
+            elf_object = MISPObject('elf')
+            self.references[file_object.uuid].append(dict(referenced_uuid=elf_object.uuid,
+                                                          relationship_type=relationship))
+            elf = fileinfo['main'][0]['header'][0]
+            if elf.get('type'):
+                # Haven't seen anything but EXEC yet in the files I tested
+                attribute_value = "EXECUTABLE" if elf['type'] == "EXEC (Executable file)" else elf['type']
+                elf_object.add_attribute('type', **dict(type=attribute_type, value=attribute_value))
+            for feature, relation in elf_object_mapping.items():
+                if elf.get(feature):
+                    elf_object.add_attribute(relation, **dict(type=attribute_type, value=elf[feature]))
+            sections_number = len(fileinfo['sections']['section'])
+            elf_object.add_attribute('number-sections', **{'type': 'counter', 'value': sections_number})
+            self.misp_event.add_object(**elf_object)
+            for section in fileinfo['sections']['section']:
+                section_object = MISPObject('elf-section')
+                for feature in ('name', 'type'):
+                    if section.get(feature):
+                        section_object.add_attribute(feature, **dict(type=attribute_type, value=section[feature]))
+                if section.get('size'):
+                    section_object.add_attribute(size, **dict(type=size, value=int(section['size'], 16)))
+                for flag in section['flagsdesc']:
+                    try:
+                        attribute_value = elf_section_flags_mapping[flag]
+                        section_object.add_attribute('flag', **dict(type=attribute_type, value=attribute_value))
+                    except KeyError:
+                        print(f'Unknown elf section flag: {flag}')
+                        continue
+                self.misp_event.add_object(**section_object)
+                self.references[elf_object.uuid].append(dict(referenced_uuid=section_object.uuid,
+                                                             relationship_type=relationship))
+
     def parse_pe(self, fileinfo, file_object):
         peinfo = fileinfo['pe']
         pe_object = MISPObject('pe')
-        file_object.add_reference(pe_object.uuid, 'includes')
+        relationship = 'includes'
+        file_object.add_reference(pe_object.uuid, relationship)
         self.misp_event.add_object(**file_object)
         for field, mapping in pe_object_fields.items():
             attribute_type, object_relation = mapping
@@ -270,7 +314,7 @@ class JoeParser():
         for section in peinfo['sections']['section']:
             section_object = self.parse_pe_section(section)
             self.references[pe_object.uuid].append(dict(referenced_uuid=section_object.uuid,
-                                                        relationship_type='includes'))
+                                                        relationship_type=relationship))
             self.misp_event.add_object(**section_object)
 
     def parse_pe_section(self, section):
