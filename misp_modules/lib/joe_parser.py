@@ -167,7 +167,8 @@ class JoeParser():
                 process_object.add_attribute('start-time', **{'type': 'datetime', 'value': start_time})
                 self.misp_event.add_object(**process_object)
                 for field, to_call in process_activities.items():
-                    to_call(process_object.uuid, process[field])
+                    if process.get(field):
+                        to_call(process_object.uuid, process[field])
                 self.references[self.analysisinfo_uuid].append(dict(referenced_uuid=process_object.uuid,
                                                                     relationship_type='calls'))
                 self.process_references[(general['targetid'], general['path'])] = process_object.uuid
