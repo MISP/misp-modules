@@ -146,10 +146,12 @@ class JoeParser():
                                                                         relationship_type='initiates'))
 
     def parse_screenshot(self):
-        screenshotdata = self.data['behavior']['screenshotdata']['interesting']['$']
-        attribute = {'type': 'attachment', 'value': 'screenshot.jpg',
-                     'data': screenshotdata, 'disable_correlation': True}
-        self.misp_event.add_attribute(**attribute)
+        screenshotdata = self.data['behavior']['screenshotdata']
+        if screenshotdata:
+            screenshotdata = screenshotdata['interesting']['$']
+            attribute = {'type': 'attachment', 'value': 'screenshot.jpg',
+                         'data': screenshotdata, 'disable_correlation': True}
+            self.misp_event.add_attribute(**attribute)
 
     def parse_system_behavior(self):
         system = self.data['behavior']['system']
