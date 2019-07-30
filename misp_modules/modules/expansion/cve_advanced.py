@@ -4,7 +4,9 @@ import requests
 
 misperrors = {'error': 'Error'}
 mispattributes = {'input': ['vulnerability'], 'format': 'misp_standard'}
-moduleinfo = {'version': '1', 'author': 'Christian Studer', 'description': 'An expansion module to enrich a CVE attribute with the vulnerability information.', 'module-type': ['expansion', 'hover']}
+moduleinfo = {'version': '1', 'author': 'Christian Studer',
+              'description': 'An expansion module to enrich a CVE attribute with the vulnerability information.',
+              'module-type': ['expansion', 'hover']}
 moduleconfig = []
 cveapi_url = 'https://cve.circl.lu/api/cve/'
 
@@ -17,7 +19,7 @@ class VulnerabilityParser():
             'id': ('text', 'id'), 'summary': ('text', 'summary'),
             'vulnerable_configuration_cpe_2_2': ('text', 'vulnerable_configuration'),
             'Modified': ('datetime', 'modified'), 'Published': ('datetime', 'published'),
-            'references': ('link', 'references'), 'cvss': ('float', 'cvss')}
+            'references': ('link', 'references'), 'cvss': ('float', 'cvss-score')}
 
     def get_result(self):
         event = json.loads(self.misp_event.to_json())['Event']
