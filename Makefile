@@ -13,7 +13,7 @@ generate_docs: prepare_docs
 	docker run --rm -it -v $(PWD):/docs squidfunk/mkdocs-material build
 
 ci_generate_docs: prepare_docs
-	mkdocs gh-deploy
+	mkdocs build
 
 test_docs: prepare_docs
 	docker run --rm -it -p 8000:8000 -v $(PWD):/docs squidfunk/mkdocs-material
