@@ -13,6 +13,8 @@ python:
 install:
     - pip install pipenv
     - pipenv install --dev
+    # MKDOCS
+    - pip install -r docs/REQUIREMENTS.txt
 
 script:
     - pipenv run coverage run -m --parallel-mode --source=misp_modules misp_modules.__init__  -l 127.0.0.1 &
@@ -28,6 +30,8 @@ script:
     - pipenv run nosetests --with-coverage --cover-package=misp_modules
     - kill -s INT $pid
     - pipenv run flake8 --ignore=E501,W503 misp_modules
+    # MKDOCS
+    - make ci_generate_docs
 
 after_success:
     - pipenv run coverage combine .coverage*
