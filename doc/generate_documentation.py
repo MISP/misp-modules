@@ -30,7 +30,7 @@ def generate_doc(root_path):
                     value = ', '.join(value) if isinstance(value, list) else '{}'.format(value.replace('\n', '\n>'))
                     markdown.append('- **{}**:\n>{}\n'.format(field, value))
             markdown.append('\n-----\n')
-    with open('documentation.md', 'w') as w:
+    with open('README.md', 'w') as w:
         w.write(''.join(markdown))
 
 def generate_docs_for_mkdocs(root_path):

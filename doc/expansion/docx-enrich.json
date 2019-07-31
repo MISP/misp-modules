@@ -1,0 +1,9 @@
+{
+    "description": "Module to extract freetext from a .docx document.",
+    "logo": "logos/docx.png",
+    "requirements": ["docx python library"],
+    "input": "Attachment attribute containing a .docx document.",
+    "output": "Text and freetext parsed from the document.",
+    "references": [],
+    "features": "The module reads the text contained in a .docx document. The result is passed to the freetext import parser so IoCs can be extracted out of it."
+}

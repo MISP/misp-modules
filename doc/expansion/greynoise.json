@@ -1,0 +1,9 @@
+{
+    "description": "Module to access GreyNoise.io API",
+    "logo": "logos/greynoise.png",
+    "requirements": [],
+    "input": "An IP address.",
+    "output": "Additional information about the IP fetched from Greynoise API.",
+    "references": ["https://greynoise.io/", "https://github.com/GreyNoise-Intelligence/api.greynoise.io"],
+    "features": "The module takes an IP address as input and queries Greynoise for some additional information about it. The result is returned as text."
+}

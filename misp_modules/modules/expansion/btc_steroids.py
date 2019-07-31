@@ -1,4 +1,3 @@
-import sys
 import json
 import requests
 import time
@@ -91,6 +90,7 @@ def mprint(input):
 def handler(q=False):
     global result_text
     global conversion_rates
+    result_text = ""
     # start_time = time.time()
     # now = time.time()
     if q is False:
@@ -105,7 +105,6 @@ def handler(q=False):
         btc = request['btc']
     else:
         return False
-
     mprint("\nAddress:\t" + btc)
     try:
         req = requests.get(blockchain_all.format(btc, "&limit=50"))
@@ -113,8 +112,18 @@ def handler(q=False):
     except Exception:
         # print(e)
         print(req.text)
-        result_text = ""
-        sys.exit(1)
+        result_text = "Not a valid BTC address"
+        r = {
+            'results': [
+                {
+                    'types': ['text'],
+                    'values':[
+                        str(result_text)
+                    ]
+                }
+            ]
+        }
+        return r
 
     n_tx = jreq['n_tx']
     balance = float(jreq['final_balance'] / 100000000)

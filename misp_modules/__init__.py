@@ -55,7 +55,7 @@ log = logging.getLogger('misp-modules')
 
 
 def handle_signal(sig, frame):
-    IOLoop.instance().add_callback(IOLoop.instance().stop)
+    IOLoop.instance().add_callback_from_signal(IOLoop.instance().stop)
 
 
 def init_logger(level=False):
@@ -210,37 +210,59 @@ class QueryModule(tornado.web.RequestHandler):
             self.finish()
 
 
+def _launch_from_current_dir():
+    log.info('Launch MISP modules server from current directory.')
+    os.chdir(os.path.dirname(__file__))
+    modulesdir = 'modules'
+    helpersdir = 'helpers'
+    load_helpers(helpersdir=helpersdir)
+    return load_modules(modulesdir)
+
+
 def main():
     global mhandlers
     global loaded_modules
     signal.signal(signal.SIGINT, handle_signal)
     signal.signal(signal.SIGTERM, handle_signal)
-    argParser = argparse.ArgumentParser(description='misp-modules server')
+    argParser = argparse.ArgumentParser(description='misp-modules server', formatter_class=argparse.RawTextHelpFormatter)
     argParser.add_argument('-t', default=False, action='store_true', help='Test mode')
     argParser.add_argument('-s', default=False, action='store_true', help='Run a system install (package installed via pip)')
     argParser.add_argument('-d', default=False, action='store_true', help='Enable debugging')
     argParser.add_argument('-p', default=6666, help='misp-modules TCP port (default 6666)')
     argParser.add_argument('-l', default='localhost', help='misp-modules listen address (default localhost)')
     argParser.add_argument('-m', default=[], action='append', help='Register a custom module')
+    argParser.add_argument('--devel', default=False, action='store_true', help='''Start in development mode, enable debug, start only the module(s) listed in -m.\nExample: -m misp_modules.modules.expansion.bgpranking''')
     args = argParser.parse_args()
     port = args.p
     listen = args.l
-    log = init_logger(level=args.d)
-    if args.s:
-        log.info('Launch MISP modules server from package.')
-        load_package_helpers()
-        mhandlers, loaded_modules = load_package_modules()
+    if args.devel:
+        log = init_logger(level=True)
+        log.info('Launch MISP modules server in developement mode. Enable debug, load a list of modules is -m is used.')
+        if args.m:
+            mhandlers = {}
+            modules = []
+            for module in args.m:
+                splitted = module.split(".")
+                modulename = splitted[-1]
+                moduletype = splitted[2]
+                mhandlers[modulename] = importlib.import_module(module)
+                mhandlers['type:' + modulename] = moduletype
+                modules.append(modulename)
+                log.info('MISP modules {0} imported'.format(modulename))
+        else:
+            mhandlers, loaded_modules = _launch_from_current_dir()
     else:
-        log.info('Launch MISP modules server from current directory.')
-        os.chdir(os.path.dirname(__file__))
-        modulesdir = 'modules'
-        helpersdir = 'helpers'
-        load_helpers(helpersdir=helpersdir)
-        mhandlers, loaded_modules = load_modules(modulesdir)
+        log = init_logger(level=args.d)
+        if args.s:
+            log.info('Launch MISP modules server from package.')
+            load_package_helpers()
+            mhandlers, loaded_modules = load_package_modules()
+        else:
+            mhandlers, loaded_modules = _launch_from_current_dir()
 
-    for module in args.m:
-        mispmod = importlib.import_module(module)
-        mispmod.register(mhandlers, loaded_modules)
+        for module in args.m:
+            mispmod = importlib.import_module(module)
+            mispmod.register(mhandlers, loaded_modules)
 
     service = [(r'/modules', ListModules), (r'/query', QueryModule)]
 
@@ -266,8 +288,11 @@ def main():
     if args.t:
         log.info('MISP modules started in test-mode, quitting immediately.')
         sys.exit()
-    IOLoop.instance().start()
-    IOLoop.instance().stop()
+    try:
+        IOLoop.instance().start()
+    finally:
+        IOLoop.instance().stop()
+
     return 0
 
 

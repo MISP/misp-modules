@@ -1,9 +1,9 @@
 {
-    "description": "Module to get information from virustotal.",
+    "description": "Module to get advanced information from virustotal.",
     "logo": "logos/virustotal.png",
-    "requirements": ["An access to the VirusTotal API (apikey)"],
+    "requirements": ["An access to the VirusTotal API (apikey), with a high request rate limit."],
     "input": "A domain, hash (md5, sha1, sha256 or sha512), hostname or IP address attribute.",
-    "output": "MISP attributes mapped from the rersult of the query on VirusTotal API.",
-    "references": ["https://www.virustotal.com/"],
-    "features": "This module takes a MISP attribute as input and queries the VirusTotal API with it, in order to get additional data on the  input attribute.\n\nMultiple recursive requests on the API can then be processed on some attributes found in the first request. A limit can be set to restrict the number of values to query again, and at the same time the number of request submitted to the API.\n\nThis limit is important because the default user VirusTotal apikey only allows to process a certain nunmber of queries per minute. As a consequence it is recommended to have a larger number of requests or a private apikey.\n\nData is then mapped into MISP attributes."
+    "output": "MISP attributes and objects resulting from the parsing of the VirusTotal report concerning the input attribute.",
+    "references": ["https://www.virustotal.com/", "https://developers.virustotal.com/reference"],
+    "features": "New format of modules able to return attributes and objects.\n\nA module to take a MISP attribute as input and query the VirusTotal API to get additional data about it.\n\nCompared to the [standard VirusTotal expansion module](https://github.com/MISP/misp-modules/blob/master/misp_modules/modules/expansion/virustotal_public.py), this module is made for advanced parsing of VirusTotal report, with a recursive analysis of the elements found after the first request.\n\nThus, it requires a higher request rate limit to avoid the API to return a 204 error (Request rate limit exceeded), and the data parsed from the different requests are returned as MISP attributes and objects, with the corresponding relations between each one of them."
 }

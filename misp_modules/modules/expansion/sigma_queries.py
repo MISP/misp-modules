@@ -1,10 +1,8 @@
-import sys
 import io
 import json
 try:
     from sigma.parser.collection import SigmaCollectionParser
     from sigma.configuration import SigmaConfiguration
-    from sigma.backends.base import BackendOptions
     from sigma.backends.discovery import getBackend
 except ImportError:
     print("sigma or yaml is missing, use 'pip3 install sigmatools' to install it.")
@@ -25,24 +23,20 @@ def handler(q=False):
         misperrors['error'] = 'Sigma rule missing'
         return misperrors
     config = SigmaConfiguration()
-    backend_options = BackendOptions(None)
     f = io.TextIOWrapper(io.BytesIO(request.get('sigma').encode()), encoding='utf-8')
-    parser = SigmaCollectionParser(f, config, None)
+    parser = SigmaCollectionParser(f, config)
     targets = []
-    old_stdout = sys.stdout
-    result = io.StringIO()
-    sys.stdout = result
+    results = []
     for t in sigma_targets:
-        backend = getBackend(t)(config, backend_options, None)
+        backend = getBackend(t)(config, {'rulecomment': False})
         try:
             parser.generate(backend)
-            backend.finalize()
-            print("#NEXT")
-            targets.append(t)
+            result = backend.finalize()
+            if result:
+                results.append(result)
+                targets.append(t)
         except Exception:
             continue
-    sys.stdout = old_stdout
-    results = result.getvalue()[:-5].split('#NEXT')
     d_result = {t: r.strip() for t, r in zip(targets, results)}
     return {'results': [{'types': mispattributes['output'], 'values': d_result}]}
 

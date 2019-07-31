@@ -1,0 +1,8 @@
+{
+    "description": "Module to process some optical character recognition on pictures.",
+    "requirements": ["cv2: The OpenCV python library."],
+    "input": "A picture attachment.",
+    "output": "Text and freetext fetched from the input picture.",
+    "references": [],
+    "features": "The module takes an attachment attributes as input and process some optical character recognition on it. The text found is then passed to the Freetext importer to extract potential IoCs."
+}
