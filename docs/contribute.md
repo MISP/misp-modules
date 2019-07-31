@@ -322,7 +322,7 @@ In order to provide documentation about some modules that require specific input
 - **input** - description of the format of data used in input
 - **output** - description of the format given as the result of the module execution
 
-
+In addition to the modul documentation please add your module to [docs/index.md](https://github.com/MISP/misp-modules/tree/master/docs/index.md).
 
 
 
