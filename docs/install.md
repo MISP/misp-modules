@@ -35,14 +35,14 @@ sudo sed -i -e '$i \sudo -u www-data /var/www/MISP/venv/bin/misp-modules -l 127.
 
 ~~~~bash
 # Start Redis
-docker run --rm -d --container_name misp-redis redis:alpine
+docker run --rm -d --name=misp-redis redis:alpine
 docker run \
-    --rm -d --container_name misp-modules \
+    --rm -d --name=misp-modules \
     -e REDIS_BACKEND=misp-redis \
     -e REDIS_PORT="6379" \
     -e REDIS_PW="" \
     -e REDIS_DATABASE="245" \
-    -e MISP_MODULES_DEBUG: "false" \
+    -e MISP_MODULES_DEBUG="false" \
     dcso/misp-dockerized-redis
 ~~~~
 
