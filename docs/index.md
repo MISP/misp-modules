@@ -3,7 +3,7 @@
 [![Build Status](https://travis-ci.org/MISP/misp-modules.svg?branch=master)](https://travis-ci.org/MISP/misp-modules)
 [![Coverage Status](https://coveralls.io/repos/github/MISP/misp-modules/badge.svg?branch=master)](https://coveralls.io/github/MISP/misp-modules?branch=master)
 [![codecov](https://codecov.io/gh/MISP/misp-modules/branch/master/graph/badge.svg)](https://codecov.io/gh/MISP/misp-modules)
-[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2F8ear%2Fmisp-modules.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2F8ear%2Fmisp-modules?ref=badge_shield)
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%MISP%2Fmisp-modules.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2FMISP%2Fmisp-modules?ref=badge_shield)
 
 MISP modules are autonomous modules that can be used for expansion and other services in [MISP](https://github.com/MISP/MISP).
 
@@ -113,6 +113,6 @@ For further information please see [Contribute](contribute/).
 
 
 ## Licenses
-[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%misp%2Fmisp-modules.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Fmisp%2Fmisp-modules?ref=badge_large)
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%MISP%2Fmisp-modules.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2FMISP%2Fmisp-modules?ref=badge_large)
 
 For further Information see also the [license file](license/).
