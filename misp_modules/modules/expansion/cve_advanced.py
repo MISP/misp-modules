@@ -77,7 +77,7 @@ class VulnerabilityParser():
 
     def __parse_weakness(self, vulnerability_uuid):
         attribute_type = 'text'
-        cwe_string, cwe_id  = self.vulnerability['cwe'].split('-')
+        cwe_string, cwe_id = self.vulnerability['cwe'].split('-')
         cwes = requests.get(cveapi_url.replace('/cve/', '/cwe'))
         if cwes.status_code == 200:
             for cwe in cwes.json():
