@@ -14,7 +14,7 @@ without modifying core components. The API is available via a simple REST API wh
 
 MISP modules support is included in MISP starting from version `2.4.28`.
 
-For more information: [Extending MISP with Python modules](https://www.circl.lu/assets/files/misp-training/switch2016/2-misp-modules.pdf) slides from MISP training.
+For more information: [Extending MISP with Python modules](https://www.circl.lu/assets/files/misp-training/latest/7-misp-modules.pdf) slides from MISP training.
 
 
 ## Documentation
