@@ -5,3 +5,9 @@ __pycache__
 build/
 dist/
 misp_modules.egg-info/
+
+# For MKDOCS
+docs/expansion*
+docs/import_mod*
+docs/export_mod*
+site*

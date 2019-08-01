@@ -14,6 +14,8 @@ install:
     - sudo apt-get install libzbar0 libzbar-dev libpoppler-cpp-dev
     - pip install pipenv
     - pipenv install --dev
+    # MKDOCS
+    - pip install -r docs/REQUIREMENTS.txt
 
 script:
     - pipenv run coverage run -m --parallel-mode --source=misp_modules misp_modules.__init__  -l 127.0.0.1 &
@@ -33,3 +35,14 @@ script:
 after_success:
     - pipenv run coverage combine .coverage*
     - pipenv run codecov
+    # MKDOCS
+    - make ci_generate_docs
+
+deploy:
+  provider: pages
+  local-dir: site
+  skip-cleanup: true
+  github-token: $GITHUB_TOKEN  # Set in the settings page of your repository, as a secure variable
+  keep-history: true
+  on:
+    branch: master
