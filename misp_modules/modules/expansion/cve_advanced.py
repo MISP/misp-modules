@@ -1,3 +1,4 @@
+from collections import defaultdict
 from pymisp import MISPEvent, MISPObject
 import json
 import requests
@@ -26,6 +27,8 @@ class VulnerabilityParser():
                                  'status': 'status', 'weaknessabs': 'weakness-abs'}
 
     def get_result(self):
+        if self.references:
+            self.__build_references()
         event = json.loads(self.misp_event.to_json())['Event']
         results = {key: event[key] for key in ('Attribute', 'Object') if (key in event and event[key])}
         return {'results': results}
@@ -51,6 +54,14 @@ class VulnerabilityParser():
         if 'capec' in self.vulnerability:
             self.__parse_capec(vulnerability_object.uuid)
 
+    def __build_references(self):
+        for object_uuid, references in self.references.items():
+            for misp_object in self.misp_event.objects:
+                if misp_object.uuid == object_uuid:
+                    for reference in references:
+                        misp_object.add_reference(**reference)
+                    break
+
     def __parse_capec(self, vulnerability_uuid):
         attribute_type = 'text'
         for capec in self.vulnerability['capec']:
@@ -61,6 +72,8 @@ class VulnerabilityParser():
                 attribute = dict(type='weakness', value="CWE-{}".format(related_weakness))
                 capec_object.add_attribute('related-weakness', **attribute)
             self.misp_event.add_object(**capec_object)
+            self.references[vulnerability_uuid].append(dict(referenced_uuid=capec_object.uuid,
+                                                            relationship_type='targeted-by'))
 
     def __parse_weakness(self, vulnerability_uuid):
         attribute_type = 'text'
@@ -75,6 +88,8 @@ class VulnerabilityParser():
                         if cwe.get(feature):
                             weakness_object.add_attribute(relation, **dict(type=attribute_type, value=cwe[feature]))
                     self.misp_event.add_object(**weakness_object)
+                    self.references[vulnerability_uuid].append(dict(referenced_uuid=weakness_object.uuid,
+                                                                    relationship_type='weakened-by'))
                     break
 
 
