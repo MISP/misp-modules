@@ -15,11 +15,14 @@ class VulnerabilityParser():
     def __init__(self, vulnerability):
         self.vulnerability = vulnerability
         self.misp_event = MISPEvent()
+        self.references = defaultdict(list)
         self.vulnerability_mapping = {
             'id': ('text', 'id'), 'summary': ('text', 'summary'),
             'vulnerable_configuration_cpe_2_2': ('text', 'vulnerable_configuration'),
             'Modified': ('datetime', 'modified'), 'Published': ('datetime', 'published'),
             'references': ('link', 'references'), 'cvss': ('float', 'cvss-score')}
+        self.weakness_mapping = {'name': 'name', 'description_summary': 'description',
+                                 'status': 'status', 'weaknessabs': 'weakness-abs'}
 
     def get_result(self):
         event = json.loads(self.misp_event.to_json())['Event']
@@ -42,6 +45,23 @@ class VulnerabilityParser():
                 for value in self.vulnerability[feature]:
                     vulnerability_object.add_attribute(relation, **{'type': attribute_type, 'value': value})
         self.misp_event.add_object(**vulnerability_object)
+        if 'cwe' in self.vulnerability:
+            self.parse_weakness(vulnerability_object.uuid)
+
+    def parse_weakness(self, vulnerability_uuid):
+        attribute_type = 'text'
+        cwe_string, cwe_id  = self.vulnerability['cwe'].split('-')
+        cwes = requests.get(cveapi_url.replace('/cve/', '/cwe'))
+        if cwes.status_code == 200:
+            for cwe in cwes.json():
+                if cwe['id'] == cwe_id:
+                    weakness_object = MISPObject('weakness')
+                    weakness_object.add_attribute('id', **dict(type=attribute_type, value='-'.join([cwe_string, cwe_id])))
+                    for feature, relation in self.weakness_mapping.items():
+                        if cwe.get(feature):
+                            weakness_object.add_attribute(relation, **dict(type=attribute_type, value=cwe[feature]))
+                    self.misp_event.add_object(**weakness_object)
+                    break
 
 
 def handler(q=False):
