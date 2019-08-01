@@ -36,7 +36,7 @@ after_success:
     - pipenv run coverage combine .coverage*
     - pipenv run codecov
     # MKDOCS
-    - make ci_generate_docs
+    #    - make ci_generate_docs
 
 deploy:
   provider: pages
