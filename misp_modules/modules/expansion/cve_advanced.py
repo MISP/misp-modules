@@ -65,7 +65,7 @@ class VulnerabilityParser():
     def __parse_capec(self, vulnerability_uuid):
         attribute_type = 'text'
         for capec in self.vulnerability['capec']:
-            capec_object = MISPObject('capec')
+            capec_object = MISPObject('attack-pattern')
             for feature in self.capec_features:
                 capec_object.add_attribute(feature, **dict(type=attribute_type, value=capec[feature]))
             for related_weakness in capec['related_weakness']:
