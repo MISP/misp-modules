@@ -13,9 +13,11 @@ cveapi_url = 'https://cve.circl.lu/api/cve/'
 
 
 class VulnerabilityParser():
-    def __init__(self, vulnerability):
+    def __init__(self, attribute, vulnerability):
+        self.attribute = attribute
         self.vulnerability = vulnerability
         self.misp_event = MISPEvent()
+        self.misp_event.add_attribute(**attribute)
         self.references = defaultdict(list)
         self.capec_features = ('id', 'name', 'summary', 'prerequisites', 'solutions')
         self.vulnerability_mapping = {
@@ -48,6 +50,7 @@ class VulnerabilityParser():
                 attribute_type, relation = self.vulnerability_mapping[feature]
                 for value in self.vulnerability[feature]:
                     vulnerability_object.add_attribute(relation, **{'type': attribute_type, 'value': value})
+        vulnerability_object.add_reference(self.attribute['uuid'], 'related-to')
         self.misp_event.add_object(**vulnerability_object)
         if 'cwe' in self.vulnerability:
             self.__parse_weakness(vulnerability_object.uuid)
@@ -110,7 +113,7 @@ def handler(q=False):
     else:
         misperrors['error'] = 'cve.circl.lu API not accessible'
         return misperrors['error']
-    parser = VulnerabilityParser(vulnerability)
+    parser = VulnerabilityParser(attribute, vulnerability)
     parser.parse_vulnerability_information()
     return parser.get_result()
 
