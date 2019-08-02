@@ -12,6 +12,10 @@ prepare_docs:
 generate_docs: prepare_docs
 	docker run --rm -it -v $(PWD):/docs squidfunk/mkdocs-material build
 
+# https://www.mkdocs.org/user-guide/deploying-your-docs/
+deploy:
+	docker run --rm -it -v $(PWD):/docs -v /home/$(whoami)/.docker:/root/.docker:ro squidfunk/mkdocs-material gh-deploy
+
 ci_generate_docs: prepare_docs
 	mkdocs build
 
