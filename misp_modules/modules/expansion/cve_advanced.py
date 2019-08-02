@@ -1,3 +1,4 @@
+from collections import defaultdict
 from pymisp import MISPEvent, MISPObject
 import json
 import requests
@@ -15,13 +16,19 @@ class VulnerabilityParser():
     def __init__(self, vulnerability):
         self.vulnerability = vulnerability
         self.misp_event = MISPEvent()
+        self.references = defaultdict(list)
+        self.capec_features = ('id', 'name', 'summary', 'prerequisites', 'solutions')
         self.vulnerability_mapping = {
             'id': ('text', 'id'), 'summary': ('text', 'summary'),
             'vulnerable_configuration_cpe_2_2': ('text', 'vulnerable_configuration'),
             'Modified': ('datetime', 'modified'), 'Published': ('datetime', 'published'),
             'references': ('link', 'references'), 'cvss': ('float', 'cvss-score')}
+        self.weakness_mapping = {'name': 'name', 'description_summary': 'description',
+                                 'status': 'status', 'weaknessabs': 'weakness-abs'}
 
     def get_result(self):
+        if self.references:
+            self.__build_references()
         event = json.loads(self.misp_event.to_json())['Event']
         results = {key: event[key] for key in ('Attribute', 'Object') if (key in event and event[key])}
         return {'results': results}
@@ -42,6 +49,48 @@ class VulnerabilityParser():
                 for value in self.vulnerability[feature]:
                     vulnerability_object.add_attribute(relation, **{'type': attribute_type, 'value': value})
         self.misp_event.add_object(**vulnerability_object)
+        if 'cwe' in self.vulnerability:
+            self.__parse_weakness(vulnerability_object.uuid)
+        if 'capec' in self.vulnerability:
+            self.__parse_capec(vulnerability_object.uuid)
+
+    def __build_references(self):
+        for object_uuid, references in self.references.items():
+            for misp_object in self.misp_event.objects:
+                if misp_object.uuid == object_uuid:
+                    for reference in references:
+                        misp_object.add_reference(**reference)
+                    break
+
+    def __parse_capec(self, vulnerability_uuid):
+        attribute_type = 'text'
+        for capec in self.vulnerability['capec']:
+            capec_object = MISPObject('capec')
+            for feature in self.capec_features:
+                capec_object.add_attribute(feature, **dict(type=attribute_type, value=capec[feature]))
+            for related_weakness in capec['related_weakness']:
+                attribute = dict(type='weakness', value="CWE-{}".format(related_weakness))
+                capec_object.add_attribute('related-weakness', **attribute)
+            self.misp_event.add_object(**capec_object)
+            self.references[vulnerability_uuid].append(dict(referenced_uuid=capec_object.uuid,
+                                                            relationship_type='targeted-by'))
+
+    def __parse_weakness(self, vulnerability_uuid):
+        attribute_type = 'text'
+        cwe_string, cwe_id = self.vulnerability['cwe'].split('-')
+        cwes = requests.get(cveapi_url.replace('/cve/', '/cwe'))
+        if cwes.status_code == 200:
+            for cwe in cwes.json():
+                if cwe['id'] == cwe_id:
+                    weakness_object = MISPObject('weakness')
+                    weakness_object.add_attribute('id', **dict(type=attribute_type, value='-'.join([cwe_string, cwe_id])))
+                    for feature, relation in self.weakness_mapping.items():
+                        if cwe.get(feature):
+                            weakness_object.add_attribute(relation, **dict(type=attribute_type, value=cwe[feature]))
+                    self.misp_event.add_object(**weakness_object)
+                    self.references[vulnerability_uuid].append(dict(referenced_uuid=weakness_object.uuid,
+                                                                    relationship_type='weakened-by'))
+                    break
 
 
 def handler(q=False):
