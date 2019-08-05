@@ -31,7 +31,7 @@ class VulnerabilityParser():
     def get_result(self):
         if self.references:
             self.__build_references()
-        event = json.loads(self.misp_event.to_json())['Event']
+        event = json.loads(self.misp_event.to_json())
         results = {key: event[key] for key in ('Attribute', 'Object') if (key in event and event[key])}
         return {'results': results}
 
