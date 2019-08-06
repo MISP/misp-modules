@@ -52,7 +52,7 @@ class VulnerabilityParser():
                     vulnerability_object.add_attribute(relation, **{'type': attribute_type, 'value': value})
         vulnerability_object.add_reference(self.attribute['uuid'], 'related-to')
         self.misp_event.add_object(**vulnerability_object)
-        if 'cwe' in self.vulnerability:
+        if 'cwe' in self.vulnerability and self.vulnerability['cwe'] != 'Unknown':
             self.__parse_weakness(vulnerability_object.uuid)
         if 'capec' in self.vulnerability:
             self.__parse_capec(vulnerability_object.uuid)
