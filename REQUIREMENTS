@@ -3,7 +3,7 @@
 -e git+https://github.com/D4-project/BGP-Ranking.git/@429cea9c0787876820984a2df4e982449a84c10e#egg=pybgpranking&subdirectory=client
 -e git+https://github.com/D4-project/IPASN-History.git/@47cd0f2658ab172fce42126ff3a1dbcddfb0b5fb#egg=pyipasnhistory&subdirectory=client
 -e git+https://github.com/MISP/PyIntel471.git@0df8d51f1c1425de66714b3a5a45edb69b8cc2fc#egg=pyintel471
--e git+https://github.com/MISP/PyMISP.git@583fb6592495ea358aad47a8a1ec92d43c13348a#egg=pymisp
+-e git+https://github.com/MISP/PyMISP.git@3ad351380055f0a655ed529b9c79b242a9227b84#egg=pymisp
 -e git+https://github.com/Rafiot/uwhoisd.git@411572840eba4c72dc321c549b36a54ed5cea9de#egg=uwhois&subdirectory=client
 -e git+https://github.com/cartertemm/ODTReader.git/@49d6938693f6faa3ff09998f86dba551ae3a996b#egg=odtreader
 -e git+https://github.com/sebdraven/pydnstrails@48c1f740025c51289f43a24863d1845ff12fd21a#egg=pydnstrails
