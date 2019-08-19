@@ -43,7 +43,7 @@ class TestExpansions(unittest.TestCase):
         query = {"module": "hibp", "email-src": "info@circl.lu"}
         response = self.misp_modules_post(query)
         to_check = self.get_values(response)
-        if to_check == "haveibeenpwned.com API not accessible (HTTP 403)":
+        if to_check == "haveibeenpwned.com API not accessible (HTTP 401)":
             self.skipTest(f"haveibeenpwned blocks travis IPs: {response}")
         self.assertEqual(to_check, 'OK (Not Found)', response)
 
