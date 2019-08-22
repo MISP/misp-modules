@@ -3,6 +3,7 @@ import base64
 import io
 import logging
 import posixpath
+import stat
 import tarfile
 import zipfile
 from pymisp import MISPEvent, MISPObject, MISPAttribute
@@ -241,6 +242,10 @@ class CuckooParser():
             self.files = {
                 info.filename: z.open(info)
                 for info in z.filelist
+                # only extract the regular files and dirs, we don't
+                # want any symbolic link
+                if stat.S_ISREG(info.external_attr >> 16)
+                or stat.S_ISDIR(info.external_attr >> 16)
             }
         else:
             # the archive was probably downloaded from the API
@@ -249,6 +254,9 @@ class CuckooParser():
             self.files = {
                 info.name: f.extractfile(info)
                 for info in f.getmembers()
+                # only extract the regular files and dirs, we don't
+                # want any symbolic link
+                if info.isreg() or info.isdir()
             }
 
         # We want to keep the order of the keys of sub-dicts in the report,
