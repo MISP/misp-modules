@@ -1,7 +1,21 @@
 ## How to install and start MISP modules (in a Python virtualenv)?
 
+Required Packages to install:
+{!apt_package.list!}
+
 ~~~~bash
-sudo apt-get install python3-dev python3-pip libpq5 libjpeg-dev tesseract-ocr libpoppler-cpp-dev imagemagick virtualenv libopencv-dev zbar-tools libzbar0 libzbar-dev libfuzzy-dev
+sudo apt-get install -y \
+                git \
+                libpq5 \
+                libjpeg-dev \
+                tesseract-ocr \
+                libpoppler-cpp-dev \
+                imagemagick virtualenv \
+                libopencv-dev \
+                zbar-tools \
+                libzbar0 \
+                libzbar-dev \
+                libfuzzy-dev
 # With virtualenv: sudo -u www-data virtualenv -p python3 /var/www/MISP/venv
 cd /usr/local/src/
 sudo git clone https://github.com/MISP/misp-modules.git
@@ -17,10 +31,10 @@ pip install -I -r REQUIREMENTS
 pip install .
 # END without virtualenv
 
-# To start after reboot: 
-sudo sed -i -e '$i \sudo -u www-data /var/www/MISP/venv/bin/misp-modules -l 127.0.0.1 -s > /tmp/misp-modules_rc.local.log &\n' /etc/rc.local
-
-# Start the Module:
+# Start misp-modules as a service
+sudo cp etc/systemd/system/misp-modules.service /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable --now misp-modules
 /var/www/MISP/venv/bin/misp-modules -l 127.0.0.1 -s & #to start the modules
 ~~~~
 
@@ -67,6 +81,14 @@ systemctl enable --now misp-modules
 ~~~~
 
 ## How to use an MISP modules Docker container
+
+### Docker build
+
+~~~~bash
+docker build -t misp-modules \
+    --build-arg BUILD_DATE=$(date -u +"%Y-%m-%d") \
+  docker/
+~~~~
 
 ### Docker run
 
