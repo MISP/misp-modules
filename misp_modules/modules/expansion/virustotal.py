@@ -35,7 +35,7 @@ class VirusTotalParser(object):
         return self.input_types_mapping[self.attribute.type](self.attribute.value, recurse=True)
 
     def get_result(self):
-        event = json.loads(self.misp_event.to_json())['Event']
+        event = json.loads(self.misp_event.to_json())
         results = {key: event[key] for key in ('Attribute', 'Object') if (key in event and event[key])}
         return {'results': results}
 

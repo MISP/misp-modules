@@ -194,7 +194,7 @@ class CsvParser():
         return list2pop, misp, list(reversed(head))
 
     def finalize_results(self):
-        event = json.loads(self.misp_event.to_json())['Event']
+        event = json.loads(self.misp_event.to_json())
         self.results = {key: event[key] for key in ('Attribute', 'Object') if (key in event and event[key])}
 
 
