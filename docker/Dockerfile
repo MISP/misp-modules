@@ -56,7 +56,7 @@ RUN set -eu \
                 tesseract-ocr \
                 libpoppler-cpp-dev \
                 imagemagick \
-                virtualenv \
+                # virtualenv \
                 # libopencv-dev \
                 zbar-tools \
                 libzbar0 \
