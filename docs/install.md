@@ -1,31 +1,37 @@
 ## How to install and start MISP modules (in a Python virtualenv)?
 
 ~~~~bash
+SUDO_WWW="sudo -u www-data"
+
 sudo apt-get install -y \
-                git \
-                libpq5 \
-                libjpeg-dev \
-                tesseract-ocr \
-                libpoppler-cpp-dev \
-                imagemagick virtualenv \
-                libopencv-dev \
-                zbar-tools \
-                libzbar0 \
-                libzbar-dev \
-                libfuzzy-dev
-# With virtualenv: sudo -u www-data virtualenv -p python3 /var/www/MISP/venv
+  git \
+  libpq5 \
+  libjpeg-dev \
+  tesseract-ocr \
+  libpoppler-cpp-dev \
+  imagemagick virtualenv \
+  libopencv-dev \
+  zbar-tools \
+  libzbar0 \
+  libzbar-dev \
+  libfuzzy-dev
+
+# BEGIN with virtualenv:   
+$SUDO_WWW virtualenv -p python3 /var/www/MISP/venv
+# END with virtualenv
+
 cd /usr/local/src/
 sudo git clone https://github.com/MISP/misp-modules.git
 cd misp-modules
 
 # BEGIN with virtualenv: 
-sudo -u www-data /var/www/MISP/venv/bin/pip install -I -r REQUIREMENTS
-sudo -u www-data /var/www/MISP/venv/bin/pip install .
+$SUDO_WWW  /var/www/MISP/venv/bin/pip install -I -r REQUIREMENTS
+$SUDO_WWW  /var/www/MISP/venv/bin/pip install .
 # END with virtualenv
 
 # BEGIN without virtualenv: 
-pip install -I -r REQUIREMENTS
-pip install .
+sudo pip install -I -r REQUIREMENTS
+sudo pip install .
 # END without virtualenv
 
 # Start misp-modules as a service
@@ -40,6 +46,7 @@ sudo systemctl enable --now misp-modules
 As of this writing, the official RHEL repositories only contain Ruby 2.0.0 and Ruby 2.1 or higher is required. As such, this guide installs Ruby 2.2 from the SCL repository.
 
 ~~~~bash
+SUDO_WWW="sudo -u apache"
 sudo yum install \
   rh-ruby22 \
   openjpeg-devel \
@@ -52,13 +59,12 @@ sudo yum install \
   poppler-cpp-devel \
   python-devel \
   redhat-rpm-config
-
 cd /usr/local/src/
-git clone https://github.com/MISP/misp-modules.git
+sudo git clone https://github.com/MISP/misp-modules.git
 cd misp-modules
-sudo -u apache /usr/bin/scl enable rh-python36 "virtualenv -p python3 /var/www/MISP/venv"
-sudo -u apache /var/www/MISP/venv/bin/pip install -U -I -r REQUIREMENTS
-sudo -u apache /var/www/MISP/venv/bin/pip install -U .
+$SUDO_WWW /usr/bin/scl enable rh-python36 "virtualenv -p python3 /var/www/MISP/venv"
+$SUDO_WWW /var/www/MISP/venv/bin/pip install -U -I -r REQUIREMENTS
+$SUDO_WWW /var/www/MISP/venv/bin/pip install -U .
 ~~~~
 
 Create the service file /etc/systemd/system/misp-modules.service :
@@ -120,6 +126,12 @@ services:
   misp-modules:
     # https://hub.docker.com/r/dcso/misp-dockerized-misp-modules
     image: dcso/misp-dockerized-misp-modules:3
+    
+    # Local image:
+    #image: misp-modules
+    #build:
+    #  context: docker/
+    
     environment:
       # Redis
       REDIS_BACKEND: misp-redis
