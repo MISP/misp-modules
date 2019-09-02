@@ -14,7 +14,8 @@ RUN set -eu \
                 libjpeg-dev \
                 tesseract-ocr \
                 libpoppler-cpp-dev \
-                imagemagick virtualenv \
+                imagemagick \
+                virtualenv \
                 libopencv-dev \
                 zbar-tools \
                 libzbar0 \
@@ -32,12 +33,11 @@ RUN set -eu \
         ;cd ${WORKDIR} \
         ;${VENV_DIR}/venv/bin/pip3 install -I -r REQUIREMENTS --no-cache-dir \
         ;${VENV_DIR}/venv/bin/pip3 install . --no-cache-dir \
-        ;chown -R nobody ${VENV_DIR} \
-        ;rm -rf ${WORKDIR} \
         ;
 
 #########################################
-
+# Start Final Docker Image
+#
 FROM python:3.7-slim-buster AS final
 
 ENV DEBIAN_FRONTEND noninteractive 
@@ -52,15 +52,16 @@ RUN set -eu \
         ;apt-get install -y \
                 curl \
                 libpq5 \
-                libjpeg-dev \
+                # libjpeg-dev \
                 tesseract-ocr \
                 libpoppler-cpp-dev \
-                imagemagick virtualenv \
-                libopencv-dev \
+                imagemagick \
+                virtualenv \
+                # libopencv-dev \
                 zbar-tools \
                 libzbar0 \
-                libzbar-dev \
-                libfuzzy-dev \
+                # libzbar-dev \
+                # libfuzzy-dev \
         ;apt-get -y autoremove \
         ;apt-get -y clean \
         ;rm -rf /var/lib/apt/lists/* \
