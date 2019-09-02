@@ -1,29 +1,15 @@
-## How to install and start MISP modules in a Python virtualenv?
+## How to install and start MISP modules (in a Python virtualenv)?
 
 ~~~~bash
-sudo apt-get install python3-dev python3-pip libpq5 libjpeg-dev tesseract-ocr imagemagick
-sudo -u www-data virtualenv -p python3 /var/www/MISP/venv
+sudo apt-get install python3-dev python3-pip libpq5 libjpeg-dev tesseract-ocr imagemagick ruby-pygments.rb
+# With virtualenv: sudo -u www-data virtualenv -p python3 /var/www/MISP/venv
 cd /usr/local/src/
 sudo git clone https://github.com/MISP/misp-modules.git
 cd misp-modules
-sudo -u www-data /var/www/MISP/venv/bin/pip install -I -r REQUIREMENTS
-sudo -u www-data /var/www/MISP/venv/bin/pip install .
-sudo apt install ruby-pygments.rb -y
-sudo gem install asciidoctor-pdf --pre
-sudo sed -i -e '$i \sudo -u www-data /var/www/MISP/venv/bin/misp-modules -l 127.0.0.1 -s > /tmp/misp-modules_rc.local.log &\n' /etc/rc.local
-/var/www/MISP/venv/bin/misp-modules -l 127.0.0.1 -s & #to start the modules
-~~~~
-
-## How to install and start MISP modules?
-
-~~~~bash
-sudo apt-get install python3-dev python3-pip libpq5 libjpeg-dev tesseract-ocr imagemagick
-cd /usr/local/src/
-sudo git clone https://github.com/MISP/misp-modules.git
-cd misp-modules
-sudo pip3 install -I -r REQUIREMENTS
-sudo pip3 install -I .
-sudo apt install ruby-pygments.rb -y
+# With virtualenv: sudo -u www-data /var/www/MISP/venv/bin/pip install -I -r REQUIREMENTS
+# With virtualenv: sudo -u www-data /var/www/MISP/venv/bin/pip install .
+# Without virtualenv: pip install -I -r REQUIREMENTS
+# Without virtualenv: pip install .
 sudo gem install asciidoctor-pdf --pre
 sudo sed -i -e '$i \sudo -u www-data /var/www/MISP/venv/bin/misp-modules -l 127.0.0.1 -s > /tmp/misp-modules_rc.local.log &\n' /etc/rc.local
 /var/www/MISP/venv/bin/misp-modules -l 127.0.0.1 -s & #to start the modules
@@ -36,6 +22,7 @@ sudo sed -i -e '$i \sudo -u www-data /var/www/MISP/venv/bin/misp-modules -l 127.
 ~~~~bash
 # Start Redis
 docker run --rm -d --name=misp-redis redis:alpine
+# Start MISP-modules
 docker run \
     --rm -d --name=misp-modules \
     -e REDIS_BACKEND=misp-redis \
@@ -43,7 +30,7 @@ docker run \
     -e REDIS_PW="" \
     -e REDIS_DATABASE="245" \
     -e MISP_MODULES_DEBUG="false" \
-    dcso/misp-dockerized-redis
+    dcso/misp-dockerized-misp-modules
 ~~~~
 
 ### Docker-compose
