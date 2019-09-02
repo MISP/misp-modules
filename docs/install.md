@@ -1,8 +1,5 @@
 ## How to install and start MISP modules (in a Python virtualenv)?
 
-Required Packages to install:
-{!apt_package.list!}
-
 ~~~~bash
 sudo apt-get install -y \
                 git \
@@ -43,10 +40,20 @@ sudo systemctl enable --now misp-modules
 As of this writing, the official RHEL repositories only contain Ruby 2.0.0 and Ruby 2.1 or higher is required. As such, this guide installs Ruby 2.2 from the SCL repository.
 
 ~~~~bash
-sudo yum install rh-ruby22
-sudo yum install openjpeg-devel
-sudo yum install rubygem-rouge rubygem-asciidoctor zbar-devel opencv-devel gcc-c++ pkgconfig poppler-cpp-devel python-devel redhat-rpm-config
-cd /var/www/MISP
+sudo yum install \
+  rh-ruby22 \
+  openjpeg-devel \
+  rubygem-rouge \
+  rubygem-asciidoctor \
+  zbar-devel \
+  opencv-devel \
+  gcc-c++ \
+  pkgconfig \
+  poppler-cpp-devel \
+  python-devel \
+  redhat-rpm-config
+
+cd /usr/local/src/
 git clone https://github.com/MISP/misp-modules.git
 cd misp-modules
 sudo -u apache /usr/bin/scl enable rh-python36 "virtualenv -p python3 /var/www/MISP/venv"
