@@ -11,7 +11,7 @@ DEBUG=""
 
 # Functions
 echo (){
-    command echo -e "$STARTMSG $*"
+    command echo "$STARTMSG $*"
 }
 
 # Environment Variables
