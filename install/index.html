@@ -323,15 +323,15 @@
     <ul class="md-nav__list" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#how-to-install-and-start-misp-modules-in-a-python-virtualenv" title="How to install and start MISP modules in a Python virtualenv?" class="md-nav__link">
-    How to install and start MISP modules in a Python virtualenv?
+  <a href="#how-to-install-and-start-misp-modules-in-a-python-virtualenv" title="How to install and start MISP modules (in a Python virtualenv)?" class="md-nav__link">
+    How to install and start MISP modules (in a Python virtualenv)?
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#how-to-install-and-start-misp-modules" title="How to install and start MISP modules?" class="md-nav__link">
-    How to install and start MISP modules?
+  <a href="#how-to-install-and-start-misp-modules-on-rhel-based-distributions" title="How to install and start MISP modules on RHEL-based distributions ?" class="md-nav__link">
+    How to install and start MISP modules on RHEL-based distributions ?
   </a>
   
 </li>
@@ -343,6 +343,13 @@
   
     <nav class="md-nav">
       <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#docker-build" title="Docker build" class="md-nav__link">
+    Docker build
+  </a>
+  
+</li>
         
           <li class="md-nav__item">
   <a href="#docker-run" title="Docker run" class="md-nav__link">
@@ -448,15 +455,15 @@
     <ul class="md-nav__list" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#how-to-install-and-start-misp-modules-in-a-python-virtualenv" title="How to install and start MISP modules in a Python virtualenv?" class="md-nav__link">
-    How to install and start MISP modules in a Python virtualenv?
+  <a href="#how-to-install-and-start-misp-modules-in-a-python-virtualenv" title="How to install and start MISP modules (in a Python virtualenv)?" class="md-nav__link">
+    How to install and start MISP modules (in a Python virtualenv)?
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#how-to-install-and-start-misp-modules" title="How to install and start MISP modules?" class="md-nav__link">
-    How to install and start MISP modules?
+  <a href="#how-to-install-and-start-misp-modules-on-rhel-based-distributions" title="How to install and start MISP modules on RHEL-based distributions ?" class="md-nav__link">
+    How to install and start MISP modules on RHEL-based distributions ?
   </a>
   
 </li>
@@ -468,6 +475,13 @@
   
     <nav class="md-nav">
       <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#docker-build" title="Docker build" class="md-nav__link">
+    Docker build
+  </a>
+  
+</li>
         
           <li class="md-nav__item">
   <a href="#docker-run" title="Docker run" class="md-nav__link">
@@ -514,37 +528,103 @@
                 
                   <h1>Install Guides</h1>
                 
-                <h2 id="how-to-install-and-start-misp-modules-in-a-python-virtualenv">How to install and start MISP modules in a Python virtualenv?<a class="headerlink" href="#how-to-install-and-start-misp-modules-in-a-python-virtualenv" title="Permanent link">&para;</a></h2>
-<div class="codehilite"><pre><span></span>sudo apt-get install python3-dev python3-pip libpq5 libjpeg-dev tesseract-ocr imagemagick
-sudo -u www-data virtualenv -p python3 /var/www/MISP/venv
+                <h2 id="how-to-install-and-start-misp-modules-in-a-python-virtualenv">How to install and start MISP modules (in a Python virtualenv)?<a class="headerlink" href="#how-to-install-and-start-misp-modules-in-a-python-virtualenv" title="Permanent link">&para;</a></h2>
+<div class="codehilite"><pre><span></span><span class="nv">SUDO_WWW</span><span class="o">=</span><span class="s2">&quot;sudo -u www-data&quot;</span>
+
+sudo apt-get install -y <span class="se">\</span>
+  git <span class="se">\</span>
+  libpq5 <span class="se">\</span>
+  libjpeg-dev <span class="se">\</span>
+  tesseract-ocr <span class="se">\</span>
+  libpoppler-cpp-dev <span class="se">\</span>
+  imagemagick virtualenv <span class="se">\</span>
+  libopencv-dev <span class="se">\</span>
+  zbar-tools <span class="se">\</span>
+  libzbar0 <span class="se">\</span>
+  libzbar-dev <span class="se">\</span>
+  libfuzzy-dev
+
+<span class="c1"># BEGIN with virtualenv:   </span>
+<span class="nv">$SUDO_WWW</span> virtualenv -p python3 /var/www/MISP/venv
+<span class="c1"># END with virtualenv</span>
+
 <span class="nb">cd</span> /usr/local/src/
 sudo git clone https://github.com/MISP/misp-modules.git
 <span class="nb">cd</span> misp-modules
-sudo -u www-data /var/www/MISP/venv/bin/pip install -I -r REQUIREMENTS
-sudo -u www-data /var/www/MISP/venv/bin/pip install .
-sudo apt install ruby-pygments.rb -y
-sudo gem install asciidoctor-pdf --pre
-sudo sed -i -e <span class="s1">&#39;$i \sudo -u www-data /var/www/MISP/venv/bin/misp-modules -l 127.0.0.1 -s &gt; /tmp/misp-modules_rc.local.log &amp;\n&#39;</span> /etc/rc.local
+
+<span class="c1"># BEGIN with virtualenv: </span>
+<span class="nv">$SUDO_WWW</span>  /var/www/MISP/venv/bin/pip install -I -r REQUIREMENTS
+<span class="nv">$SUDO_WWW</span>  /var/www/MISP/venv/bin/pip install .
+<span class="c1"># END with virtualenv</span>
+
+<span class="c1"># BEGIN without virtualenv: </span>
+sudo pip install -I -r REQUIREMENTS
+sudo pip install .
+<span class="c1"># END without virtualenv</span>
+
+<span class="c1"># Start misp-modules as a service</span>
+sudo cp etc/systemd/system/misp-modules.service /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl <span class="nb">enable</span> --now misp-modules
 /var/www/MISP/venv/bin/misp-modules -l <span class="m">127</span>.0.0.1 -s <span class="p">&amp;</span> <span class="c1">#to start the modules</span>
 </pre></div>
 
-<h2 id="how-to-install-and-start-misp-modules">How to install and start MISP modules?<a class="headerlink" href="#how-to-install-and-start-misp-modules" title="Permanent link">&para;</a></h2>
-<div class="codehilite"><pre><span></span>sudo apt-get install python3-dev python3-pip libpq5 libjpeg-dev tesseract-ocr imagemagick
+<h2 id="how-to-install-and-start-misp-modules-on-rhel-based-distributions">How to install and start MISP modules on RHEL-based distributions ?<a class="headerlink" href="#how-to-install-and-start-misp-modules-on-rhel-based-distributions" title="Permanent link">&para;</a></h2>
+<p>As of this writing, the official RHEL repositories only contain Ruby 2.0.0 and Ruby 2.1 or higher is required. As such, this guide installs Ruby 2.2 from the SCL repository.</p>
+<div class="codehilite"><pre><span></span><span class="nv">SUDO_WWW</span><span class="o">=</span><span class="s2">&quot;sudo -u apache&quot;</span>
+sudo yum install <span class="se">\</span>
+  rh-ruby22 <span class="se">\</span>
+  openjpeg-devel <span class="se">\</span>
+  rubygem-rouge <span class="se">\</span>
+  rubygem-asciidoctor <span class="se">\</span>
+  zbar-devel <span class="se">\</span>
+  opencv-devel <span class="se">\</span>
+  gcc-c++ <span class="se">\</span>
+  pkgconfig <span class="se">\</span>
+  poppler-cpp-devel <span class="se">\</span>
+  python-devel <span class="se">\</span>
+  redhat-rpm-config
 <span class="nb">cd</span> /usr/local/src/
 sudo git clone https://github.com/MISP/misp-modules.git
 <span class="nb">cd</span> misp-modules
-sudo pip3 install -I -r REQUIREMENTS
-sudo pip3 install -I .
-sudo apt install ruby-pygments.rb -y
-sudo gem install asciidoctor-pdf --pre
-sudo sed -i -e <span class="s1">&#39;$i \sudo -u www-data /var/www/MISP/venv/bin/misp-modules -l 127.0.0.1 -s &gt; /tmp/misp-modules_rc.local.log &amp;\n&#39;</span> /etc/rc.local
-/var/www/MISP/venv/bin/misp-modules -l <span class="m">127</span>.0.0.1 -s <span class="p">&amp;</span> <span class="c1">#to start the modules</span>
+<span class="nv">$SUDO_WWW</span> /usr/bin/scl <span class="nb">enable</span> rh-python36 <span class="s2">&quot;virtualenv -p python3 /var/www/MISP/venv&quot;</span>
+<span class="nv">$SUDO_WWW</span> /var/www/MISP/venv/bin/pip install -U -I -r REQUIREMENTS
+<span class="nv">$SUDO_WWW</span> /var/www/MISP/venv/bin/pip install -U .
+</pre></div>
+
+<p>Create the service file /etc/systemd/system/misp-modules.service :</p>
+<div class="codehilite"><pre><span></span><span class="nb">echo</span> <span class="s2">&quot;[Unit]</span>
+<span class="s2">Description=MISP&#39;s modules</span>
+<span class="s2">After=misp-workers.service</span>
+
+<span class="s2">[Service]</span>
+<span class="s2">Type=simple</span>
+<span class="s2">User=apache</span>
+<span class="s2">Group=apache</span>
+<span class="s2">ExecStart=/usr/bin/scl enable rh-python36 rh-ruby22  &#39;/var/www/MISP/venv/bin/misp-modules –l 127.0.0.1 –s&#39;</span>
+<span class="s2">Restart=always</span>
+<span class="s2">RestartSec=10</span>
+
+<span class="s2">[Install]</span>
+<span class="s2">WantedBy=multi-user.target&quot;</span> <span class="p">|</span> sudo tee /etc/systemd/system/misp-modules.service
+</pre></div>
+
+<p>The After=misp-workers.service must be changed or removed if you have not created a misp-workers service. Then, enable the misp-modules service and start it:</p>
+<div class="codehilite"><pre><span></span>systemctl daemon-reload
+systemctl <span class="nb">enable</span> --now misp-modules
 </pre></div>
 
 <h2 id="how-to-use-an-misp-modules-docker-container">How to use an MISP modules Docker container<a class="headerlink" href="#how-to-use-an-misp-modules-docker-container" title="Permanent link">&para;</a></h2>
+<h3 id="docker-build">Docker build<a class="headerlink" href="#docker-build" title="Permanent link">&para;</a></h3>
+<div class="codehilite"><pre><span></span>docker build -t misp-modules <span class="se">\</span>
+    --build-arg <span class="nv">BUILD_DATE</span><span class="o">=</span><span class="k">$(</span>date -u +<span class="s2">&quot;%Y-%m-%d&quot;</span><span class="k">)</span> <span class="se">\</span>
+  docker/
+</pre></div>
+
 <h3 id="docker-run">Docker run<a class="headerlink" href="#docker-run" title="Permanent link">&para;</a></h3>
 <div class="codehilite"><pre><span></span><span class="c1"># Start Redis</span>
 docker run --rm -d --name<span class="o">=</span>misp-redis redis:alpine
+<span class="c1"># Start MISP-modules</span>
 docker run <span class="se">\</span>
     --rm -d --name<span class="o">=</span>misp-modules <span class="se">\</span>
     -e <span class="nv">REDIS_BACKEND</span><span class="o">=</span>misp-redis <span class="se">\</span>
@@ -552,7 +632,7 @@ docker run <span class="se">\</span>
     -e <span class="nv">REDIS_PW</span><span class="o">=</span><span class="s2">&quot;&quot;</span> <span class="se">\</span>
     -e <span class="nv">REDIS_DATABASE</span><span class="o">=</span><span class="s2">&quot;245&quot;</span> <span class="se">\</span>
     -e <span class="nv">MISP_MODULES_DEBUG</span><span class="o">=</span><span class="s2">&quot;false&quot;</span> <span class="se">\</span>
-    dcso/misp-dockerized-redis
+    dcso/misp-dockerized-misp-modules
 </pre></div>
 
 <h3 id="docker-compose">Docker-compose<a class="headerlink" href="#docker-compose" title="Permanent link">&para;</a></h3>
@@ -560,6 +640,12 @@ docker run <span class="se">\</span>
   misp-modules:
     # https://hub.docker.com/r/dcso/misp-dockerized-misp-modules
     image: dcso/misp-dockerized-misp-modules:3
+
+    # Local image:
+    #image: misp-modules
+    #build:
+    #  context: docker/
+
     environment:
       # Redis
       REDIS_BACKEND: misp-redis
