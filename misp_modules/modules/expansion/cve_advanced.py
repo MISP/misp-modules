@@ -8,14 +8,15 @@ mispattributes = {'input': ['vulnerability'], 'format': 'misp_standard'}
 moduleinfo = {'version': '1', 'author': 'Christian Studer',
               'description': 'An expansion module to enrich a CVE attribute with the vulnerability information.',
               'module-type': ['expansion', 'hover']}
-moduleconfig = []
+moduleconfig = ["custom_API"]
 cveapi_url = 'https://cve.circl.lu/api/cve/'
 
 
 class VulnerabilityParser():
-    def __init__(self, attribute, vulnerability):
+    def __init__(self, attribute, vulnerability, api_url):
         self.attribute = attribute
         self.vulnerability = vulnerability
+        self.api_url = api_url
         self.misp_event = MISPEvent()
         self.misp_event.add_attribute(**attribute)
         self.references = defaultdict(list)
@@ -81,7 +82,7 @@ class VulnerabilityParser():
     def __parse_weakness(self, vulnerability_uuid):
         attribute_type = 'text'
         cwe_string, cwe_id = self.vulnerability['cwe'].split('-')
-        cwes = requests.get(cveapi_url.replace('/cve/', '/cwe'))
+        cwes = requests.get(self.api_url.replace('/cve/', '/cwe'))
         if cwes.status_code == 200:
             for cwe in cwes.json():
                 if cwe['id'] == cwe_id:
@@ -96,6 +97,10 @@ class VulnerabilityParser():
                     break
 
 
+def check_url(url):
+    return "{}/".format(url) if not url.endswith('/') else url
+
+
 def handler(q=False):
     if q is False:
         return False
@@ -104,7 +109,8 @@ def handler(q=False):
     if attribute.get('type') != 'vulnerability':
         misperrors['error'] = 'Vulnerability id missing.'
         return misperrors
-    r = requests.get("{}{}".format(cveapi_url, attribute['value']))
+    api_url = check_url(request['config']['custom_API']) if request['config'].get('custom_API') else cveapi_url
+    r = requests.get("{}{}".format(api_url, attribute['value']))
     if r.status_code == 200:
         vulnerability = r.json()
         if not vulnerability:
@@ -113,7 +119,7 @@ def handler(q=False):
     else:
         misperrors['error'] = 'cve.circl.lu API not accessible'
         return misperrors['error']
-    parser = VulnerabilityParser(attribute, vulnerability)
+    parser = VulnerabilityParser(attribute, vulnerability, api_url)
     parser.parse_vulnerability_information()
     return parser.get_result()
 
