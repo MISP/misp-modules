@@ -1,41 +1,114 @@
-## How to install and start MISP modules in a Python virtualenv?
+## How to install and start MISP modules (in a Python virtualenv)?
 
 ~~~~bash
-sudo apt-get install python3-dev python3-pip libpq5 libjpeg-dev tesseract-ocr imagemagick
-sudo -u www-data virtualenv -p python3 /var/www/MISP/venv
+SUDO_WWW="sudo -u www-data"
+
+sudo apt-get install -y \
+  git \
+  libpq5 \
+  libjpeg-dev \
+  tesseract-ocr \
+  libpoppler-cpp-dev \
+  imagemagick virtualenv \
+  libopencv-dev \
+  zbar-tools \
+  libzbar0 \
+  libzbar-dev \
+  libfuzzy-dev
+
+# BEGIN with virtualenv:   
+$SUDO_WWW virtualenv -p python3 /var/www/MISP/venv
+# END with virtualenv
+
 cd /usr/local/src/
 sudo git clone https://github.com/MISP/misp-modules.git
 cd misp-modules
-sudo -u www-data /var/www/MISP/venv/bin/pip install -I -r REQUIREMENTS
-sudo -u www-data /var/www/MISP/venv/bin/pip install .
-sudo apt install ruby-pygments.rb -y
-sudo gem install asciidoctor-pdf --pre
-sudo sed -i -e '$i \sudo -u www-data /var/www/MISP/venv/bin/misp-modules -l 127.0.0.1 -s > /tmp/misp-modules_rc.local.log &\n' /etc/rc.local
+
+# BEGIN with virtualenv: 
+$SUDO_WWW  /var/www/MISP/venv/bin/pip install -I -r REQUIREMENTS
+$SUDO_WWW  /var/www/MISP/venv/bin/pip install .
+# END with virtualenv
+
+# BEGIN without virtualenv: 
+sudo pip install -I -r REQUIREMENTS
+sudo pip install .
+# END without virtualenv
+
+# Start misp-modules as a service
+sudo cp etc/systemd/system/misp-modules.service /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable --now misp-modules
 /var/www/MISP/venv/bin/misp-modules -l 127.0.0.1 -s & #to start the modules
 ~~~~
 
-## How to install and start MISP modules?
+## How to install and start MISP modules on RHEL-based distributions ?
+
+As of this writing, the official RHEL repositories only contain Ruby 2.0.0 and Ruby 2.1 or higher is required. As such, this guide installs Ruby 2.2 from the SCL repository.
 
 ~~~~bash
-sudo apt-get install python3-dev python3-pip libpq5 libjpeg-dev tesseract-ocr imagemagick
+SUDO_WWW="sudo -u apache"
+sudo yum install \
+  rh-ruby22 \
+  openjpeg-devel \
+  rubygem-rouge \
+  rubygem-asciidoctor \
+  zbar-devel \
+  opencv-devel \
+  gcc-c++ \
+  pkgconfig \
+  poppler-cpp-devel \
+  python-devel \
+  redhat-rpm-config
 cd /usr/local/src/
 sudo git clone https://github.com/MISP/misp-modules.git
 cd misp-modules
-sudo pip3 install -I -r REQUIREMENTS
-sudo pip3 install -I .
-sudo apt install ruby-pygments.rb -y
-sudo gem install asciidoctor-pdf --pre
-sudo sed -i -e '$i \sudo -u www-data /var/www/MISP/venv/bin/misp-modules -l 127.0.0.1 -s > /tmp/misp-modules_rc.local.log &\n' /etc/rc.local
-/var/www/MISP/venv/bin/misp-modules -l 127.0.0.1 -s & #to start the modules
+$SUDO_WWW /usr/bin/scl enable rh-python36 "virtualenv -p python3 /var/www/MISP/venv"
+$SUDO_WWW /var/www/MISP/venv/bin/pip install -U -I -r REQUIREMENTS
+$SUDO_WWW /var/www/MISP/venv/bin/pip install -U .
+~~~~
+
+Create the service file /etc/systemd/system/misp-modules.service :
+
+~~~~bash
+echo "[Unit]
+Description=MISP's modules
+After=misp-workers.service
+
+[Service]
+Type=simple
+User=apache
+Group=apache
+ExecStart=/usr/bin/scl enable rh-python36 rh-ruby22  '/var/www/MISP/venv/bin/misp-modules –l 127.0.0.1 –s'
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target" | sudo tee /etc/systemd/system/misp-modules.service
+~~~~
+
+The After=misp-workers.service must be changed or removed if you have not created a misp-workers service. Then, enable the misp-modules service and start it:
+
+~~~~bash
+systemctl daemon-reload
+systemctl enable --now misp-modules
 ~~~~
 
 ## How to use an MISP modules Docker container
+
+### Docker build
+
+~~~~bash
+docker build -t misp-modules \
+    --build-arg BUILD_DATE=$(date -u +"%Y-%m-%d") \
+  docker/
+~~~~
 
 ### Docker run
 
 ~~~~bash
 # Start Redis
 docker run --rm -d --name=misp-redis redis:alpine
+# Start MISP-modules
 docker run \
     --rm -d --name=misp-modules \
     -e REDIS_BACKEND=misp-redis \
@@ -43,7 +116,7 @@ docker run \
     -e REDIS_PW="" \
     -e REDIS_DATABASE="245" \
     -e MISP_MODULES_DEBUG="false" \
-    dcso/misp-dockerized-redis
+    dcso/misp-dockerized-misp-modules
 ~~~~
 
 ### Docker-compose
@@ -53,6 +126,12 @@ services:
   misp-modules:
     # https://hub.docker.com/r/dcso/misp-dockerized-misp-modules
     image: dcso/misp-dockerized-misp-modules:3
+    
+    # Local image:
+    #image: misp-modules
+    #build:
+    #  context: docker/
+    
     environment:
       # Redis
       REDIS_BACKEND: misp-redis

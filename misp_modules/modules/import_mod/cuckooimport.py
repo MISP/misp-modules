@@ -1,9 +1,11 @@
 import json
 import base64
-import tarfile
+import io
 import logging
 import posixpath
-from io import BytesIO, BufferedReader
+import stat
+import tarfile
+import zipfile
 from pymisp import MISPEvent, MISPObject, MISPAttribute
 from pymisp.tools import make_binary_objects
 from collections import OrderedDict
@@ -12,10 +14,14 @@ log = logging.getLogger(__name__)
 
 misperrors = {'error': 'Error'}
 
-moduleinfo = {'version': '1.0',
-              'author': 'Pierre-Jean Grenier',
-              'description': 'Cuckoo archive import',
-              'module-type': ['import']}
+moduleinfo = {
+    'version': '1.1',
+    'author': 'Pierre-Jean Grenier',
+    'description': "Import a Cuckoo archive (zipfile or bzip2 tarball), "
+                   "either downloaded manually or exported from the "
+                   "API (/tasks/report/{task_id}/all).",
+    'module-type': ['import'],
+}
 
 moduleconfig = []
 
@@ -202,13 +208,21 @@ class CuckooParser():
         self.files = None
         self.malware_binary = None
         self.report = None
-        self.config = {key: int(on) for key, on in config.items()}
+        self.config = {
+            # if an option is missing (we receive None as a value),
+            # fall back to the default specified in the options
+            key: int(
+                on if on is not None
+                else self.options[key]["userConfig"]["checked"] == 'true'
+            )
+            for key, on in config.items()
+        }
 
     def get_file(self, relative_filepath):
-        """Return a BufferedReader for the corresponding relative_filepath
-        in the Cuckoo archive. If not found, return an empty BufferedReader
+        """Return an io.BufferedIOBase for the corresponding relative_filepath
+        in the Cuckoo archive. If not found, return an empty io.BufferedReader
         to avoid fatal errors."""
-        blackhole = BufferedReader(open('/dev/null', 'rb'))
+        blackhole = io.BufferedReader(open('/dev/null', 'rb'))
         res = self.files.get(relative_filepath, blackhole)
         if res == blackhole:
             log.debug(f"Did not find file {relative_filepath}, "
@@ -220,12 +234,30 @@ class CuckooParser():
         # archive_encoded is base 64 encoded content
         # we extract the info about each file but do not retrieve
         # it automatically, as it may take too much space in memory
-        buf_io = BytesIO(base64.b64decode(archive_encoded))
-        f = tarfile.open(fileobj=buf_io, mode='r:bz2')
-        self.files = {
-            info.name: f.extractfile(info)
-            for info in f.getmembers()
-        }
+        buf_io = io.BytesIO(base64.b64decode(archive_encoded))
+        if zipfile.is_zipfile(buf_io):
+            # the archive was probably downloaded from the WebUI
+            buf_io.seek(0)  # don't forget this not to read an empty buffer
+            z = zipfile.ZipFile(buf_io, 'r')
+            self.files = {
+                info.filename: z.open(info)
+                for info in z.filelist
+                # only extract the regular files and dirs, we don't
+                # want any symbolic link
+                if stat.S_ISREG(info.external_attr >> 16)
+                or stat.S_ISDIR(info.external_attr >> 16)
+            }
+        else:
+            # the archive was probably downloaded from the API
+            buf_io.seek(0)  # don't forget this not to read an empty buffer
+            f = tarfile.open(fileobj=buf_io, mode='r:bz2')
+            self.files = {
+                info.name: f.extractfile(info)
+                for info in f.getmembers()
+                # only extract the regular files and dirs, we don't
+                # want any symbolic link
+                if info.isreg() or info.isdir()
+            }
 
         # We want to keep the order of the keys of sub-dicts in the report,
         # eg. the signatures have marks with unknown keys such as
@@ -280,7 +312,7 @@ class CuckooParser():
             log.debug("Sample is a file, uploading it")
             self.read_malware()
             file_o, bin_type_o, bin_section_li = make_binary_objects(
-                pseudofile=BytesIO(self.malware_binary),
+                pseudofile=io.BytesIO(self.malware_binary),
                 filename=target["file"]["name"],
             )
 
@@ -548,7 +580,7 @@ class CuckooParser():
             filename = posixpath.basename(path)
 
         dropped_file = self.get_file(path)
-        dropped_binary = BytesIO(dropped_file.read())
+        dropped_binary = io.BytesIO(dropped_file.read())
         # create ad hoc objects
         file_o, bin_type_o, bin_section_li = make_binary_objects(
             pseudofile=dropped_binary, filename=filename,
