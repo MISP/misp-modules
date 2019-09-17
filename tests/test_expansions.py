@@ -25,7 +25,7 @@ class TestExpansions(unittest.TestCase):
         return data['results'][0]['values']
 
     def test_cve(self):
-        query = {"module": "cve", "vulnerability": "CVE-2010-3333"}
+        query = {"module": "cve", "vulnerability": "CVE-2010-3333", "config": {"custom_API": "https://cve.circl.lu/api/cve/"}}
         response = self.misp_modules_post(query)
         self.assertTrue(self.get_values(response).startswith("Stack-based buffer overflow in Microsoft Office XP SP3, Office 2003 SP3"))
 
