@@ -117,7 +117,7 @@ def handler(q=False):
             misperrors['error'] = 'Non existing CVE'
             return misperrors['error']
     else:
-        misperrors['error'] = 'cve.circl.lu API not accessible'
+        misperrors['error'] = 'API not accessible'
         return misperrors['error']
     parser = VulnerabilityParser(attribute, vulnerability, api_url)
     parser.parse_vulnerability_information()
