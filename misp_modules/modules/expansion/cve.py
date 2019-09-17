@@ -7,8 +7,10 @@ moduleinfo = {'version': '0.3', 'author': 'Alexandre Dulaunoy', 'description': '
 moduleconfig = ["custom_API"]
 cveapi_url = 'https://cve.circl.lu/api/cve/'
 
+
 def check_url(url):
     return "{}/".format(url) if not url.endswith('/') else url
+
 
 def handler(q=False):
     if q is False:
