@@ -26,15 +26,11 @@ userConfig = {
 }
 mispattributes = {'userConfig': userConfig, 'inputSource': ['file'], 'format': 'misp_standard'}
 
-duplicatedFields = {'mispType': {'mispComment': 'comment'},
-                    'attrField': {'attrComment': 'comment'}}
-attributesFields = ['type', 'value', 'category', 'to_ids', 'comment', 'distribution']
 misp_standard_csv_header = ['uuid', 'event_id', 'category', 'type', 'value', 'comment', 'to_ids', 'date',
                             'object_relation', 'attribute_tag', 'object_uuid', 'object_name', 'object_meta_category']
 misp_context_additional_fields = ['event_info', 'event_member_org', 'event_source_org', 'event_distribution',
                                   'event_threat_level_id', 'event_analysis', 'event_date', 'event_tag']
 misp_extended_csv_header = misp_standard_csv_header + misp_context_additional_fields
-delimiters = [',', ';', '|', '/', '\t', '    ']
 
 
 class CsvParser():
