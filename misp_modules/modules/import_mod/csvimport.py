@@ -145,7 +145,7 @@ class CsvParser():
         for line in self.data:
             a_uuid, _, category, _type, value, comment, ids, timestamp, relation, tag, o_uuid, name, _ = line[:self.fields_number]
             attribute = {t: v.strip('"') for t, v in zip(attribute_fields, (a_uuid, category, _type, value, comment, ids, timestamp))}
-            attribute['to_ids'] = True if to_ids == '1' else False
+            attribute['to_ids'] = True if attribute['to_ids'] == '1' else False
             if tag:
                 attribute['Tag'] = [{'name': t.strip()} for t in tag.split(',')]
             if relation:
