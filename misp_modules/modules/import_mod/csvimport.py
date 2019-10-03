@@ -85,8 +85,8 @@ class CsvParser():
         return {'success': 1}
 
     ################################################################################
-    ####                   Parsing csv data with MISP fields,                   ####
-    ####                          but a custom header                           ####
+    #                      Parsing csv data with MISP fields,                      #
+    #                             but a custom header                              #
     ################################################################################
 
     def __build_misp_event(self, attribute_indexes, object_indexes):
@@ -116,9 +116,9 @@ class CsvParser():
                 self.misp_event.add_attribute(**attribute)
 
     ################################################################################
-    ####            Parsing csv data containing fields that are not             ####
-    ####               MISP attributes or objects standard fields               ####
-    ####                 (but should be MISP attribute types!!)                 ####
+    #               Parsing csv data containing fields that are not                #
+    #                  MISP attributes or objects standard fields                  #
+    #                    (but should be MISP attribute types!!)                    #
     ################################################################################
 
     def __parse_external_csv(self, attribute_indexes, types_indexes):
@@ -139,7 +139,7 @@ class CsvParser():
                     self.misp_event.add_attribute(**{'type': self.header[index], 'value': line[index]})
 
     ################################################################################
-    ####                    Parsing standard MISP csv format                    ####
+    #                       Parsing standard MISP csv format                       #
     ################################################################################
 
     def __parse_misp_csv(self):
@@ -162,7 +162,7 @@ class CsvParser():
             self.misp_event.add_object(**misp_object)
 
     ################################################################################
-    ####                           Utility functions                            ####
+    #                              Utility functions                               #
     ################################################################################
 
     def __create_attribute_with_ids(self, line, indexes):
