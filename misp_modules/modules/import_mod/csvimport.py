@@ -125,7 +125,10 @@ class CsvParser():
         score = self.__get_score()
         if attribute_indexes:
             for line in self.data:
-                base_attribute = self.__score_mapping[score](line, attribute_indexes)
+                try:
+                    base_attribute = self.__score_mapping[score](line, attribute_indexes)
+                except IndexError:
+                    continue
                 for index in types_indexes:
                     attribute = {'type': self.header[index], 'value': line[index]}
                     attribute.update(base_attribute)
@@ -203,11 +206,11 @@ def __any_mandatory_misp_field(header):
 
 
 def __special_parsing(data, delimiter):
-    return list(line.split(delimiter) for line in csv.reader(io.TextIOWrapper(io.BytesIO(data.encode()), encoding='utf-8')))
+    return list(line.split(delimiter) for line in csv.reader(io.TextIOWrapper(io.BytesIO(data.encode()), encoding='utf-8')) if line and not line.startswith('#'))
 
 
 def __standard_parsing(data):
-    return list(line for line in csv.reader(io.TextIOWrapper(io.BytesIO(data.encode()), encoding='utf-8')))
+    return list(line for line in csv.reader(io.TextIOWrapper(io.BytesIO(data.encode()), encoding='utf-8')) if line and not line[0].startswith('#'))
 
 
 def handler(q=False):
