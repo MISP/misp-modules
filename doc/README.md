@@ -1444,11 +1444,10 @@ Module to export a structured CSV file for uploading to ThreatConnect.
 Module to import MISP attributes from a csv file.
 - **features**:
 >In order to parse data from a csv file, a header is required to let the module know which column is matching with known attribute fields / MISP types.
->This header is part of the configuration of the module and should be filled out in MISP plugin settings, each field separated by COMMAS. Fields that do not match with any type known in MISP can be ignored in import, using a space or simply nothing between two separators (example: 'ip-src, , comment, ').
->There is also one type that is confused and can be either a MISP attribute type or an attribute field: 'comment'. In this case, using 'attrComment' specifies that the attribute field 'comment' should be considered, otherwise it will be considered as the MISP attribute type.
 >
->For each MISP attribute type, an attribute is created.
->Attribute fields that are imported are the following: value, type, category, to-ids, distribution, comment, tag.
+>This header either comes from the csv file itself or is part of the configuration of the module and should be filled out in MISP plugin settings, each field separated by COMMAS. Fields that do not match with any type known in MISP or are not MISP attribute fields should be ignored in import, using a space or simply nothing between two separators (example: 'ip-src, , comment, ').
+>
+>If the csv file already contains a header that does not start by a '#', you should tick the checkbox 'has_header' to avoid importing it and have potential issues. You can also redefine the header even if it is already contained in the file, by following the rules for headers explained earlier. One reason why you would redefine a header is for instance when you want to skip some fields, or some fields are not valid types.
 - **input**:
 >CSV format file.
 - **output**:
