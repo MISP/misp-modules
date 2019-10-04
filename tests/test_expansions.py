@@ -32,17 +32,17 @@ class TestExpansions(unittest.TestCase):
 
     def test_btc_steroids(self):
         query = {"module": "btc_steroids", "btc": "1ES14c7qLb5CYhLMUekctxLgc1FV2Ti9DA"}
-        reponse = self.misp_modules_post(query)
+        response = self.misp_modules_post(query)
         self.assertTrue(self.get_values(response)[0].startswith('\n\nAddress:\t1ES14c7qLb5CYhLMUekctxLgc1FV2Ti9DA\nBalance:\t0.0000000000 BTC (+0.0005355700 BTC / -0.0005355700 BTC)'))
 
     def test_btc_scam_check(self):
         query = {"module": "btc_scam_check", "btc": "1ES14c7qLb5CYhLMUekctxLgc1FV2Ti9DA"}
-        response = slef.misp_modules_post(query)
+        response = self.misp_modules_post(query)
         self.assertEqual(self.get_values(response), '1es14c7qlb5cyhlmuekctxlgc1fv2ti9da fraudolent bitcoin address')
 
     def test_countrycode(self):
         query = {"module": "countrycode", "domain": "www.circl.lu"}
-        reponse = self.misp_modules_post(query)
+        response = self.misp_modules_post(query)
         self.assertEqual(self.get_values(response), ['Luxembourg'])
 
     def test_cve(self):
@@ -51,9 +51,9 @@ class TestExpansions(unittest.TestCase):
         self.assertTrue(self.get_values(response).startswith("Stack-based buffer overflow in Microsoft Office XP SP3, Office 2003 SP3"))
 
     def test_dbl_spamhaus(self):
-        query = {"module": "dbl_spamhaus", "domain": "language.wikaba.com"}
+        query = {"module": "dbl_spamhaus", "domain": "totalmateria.net"}
         response = self.misp_modules_post(query)
-        self.assertEqual(self.get_values(response), 'language.wikaba.com - abused legit malware')
+        self.assertEqual(self.get_values(response), 'totalmateria.net - spam domain')
 
     def test_dns(self):
         query = {"module": "dns", "hostname": "www.circl.lu", "config": {"nameserver": "8.8.8.8"}}
