@@ -24,7 +24,7 @@ def handler(q=False):
     data = {'ip': ip}
     r = requests.post(greynoise_api_url, data=data, headers={'user-agent': default_user_agent})  # Real request
     if r.status_code == 200:  # OK (record found)
-        response = json.loads(r.text)
+        response = r.text
         if response:
             return {'results': [{'types': mispattributes['output'], 'values': response}]}
     elif r.status_code == 404:  # Not found (not an error)
