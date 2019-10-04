@@ -53,7 +53,7 @@ class TestExpansions(unittest.TestCase):
     def test_dbl_spamhaus(self):
         query = {"module": "dbl_spamhaus", "domain": "totalmateria.net"}
         response = self.misp_modules_post(query)
-        self.assertEqual(self.get_values(response), 'totalmateria.net - spam domain')
+        self.assertTrue(self.get_values(response).startswith('None of DNS query names exist: totalmateria.net.dbl.spamhaus.org.'))
 
     def test_dns(self):
         query = {"module": "dns", "hostname": "www.circl.lu", "config": {"nameserver": "8.8.8.8"}}
