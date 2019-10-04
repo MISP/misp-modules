@@ -24,6 +24,11 @@ class TestExpansions(unittest.TestCase):
             return data
         return data['results'][0]['values']
 
+    def test_bgpranking(self):
+        query = {"module": "bgpranking", "AS": "13335"}
+        response = self.misp_modules_post(query)
+        self.assertEqual(self.get_values(response)['response']['asn_description'], 'CLOUDFLARENET - Cloudflare, Inc., US')
+
     def test_btc_steroids(self):
         query = {"module": "btc_steroids", "btc": "1ES14c7qLb5CYhLMUekctxLgc1FV2Ti9DA"}
         reponse = self.misp_modules_post(query)
@@ -54,11 +59,6 @@ class TestExpansions(unittest.TestCase):
         response = self.misp_modules_post(query)
         self.assertEqual(self.get_values(response), ['149.13.33.14'])
 
-    def test_macvendors(self):
-        query = {"module": "macvendors", "mac-address": "FC-A1-3E-2A-1C-33"}
-        response = self.misp_modules_post(query)
-        self.assertEqual(self.get_values(response), 'Samsung Electronics Co.,Ltd')
-
     def test_haveibeenpwned(self):
         query = {"module": "hibp", "email-src": "info@circl.lu"}
         response = self.misp_modules_post(query)
@@ -79,7 +79,17 @@ class TestExpansions(unittest.TestCase):
         entry = self.get_values(response)['response'][key]['asn']
         self.assertEqual(entry, '13335')
 
-    def test_bgpranking(self):
-        query = {"module": "bgpranking", "AS": "13335"}
+    def test_macvendors(self):
+        query = {"module": "macvendors", "mac-address": "FC-A1-3E-2A-1C-33"}
         response = self.misp_modules_post(query)
-        self.assertEqual(self.get_values(response)['response']['asn_description'], 'CLOUDFLARENET - Cloudflare, Inc., US')
+        self.assertEqual(self.get_values(response), 'Samsung Electronics Co.,Ltd')
+
+    def test_rbl(self):
+        query = {"module": "rbl", "ip-src": "8.8.8.8"}
+        response = self.misp_modules_post(auery)
+        self.assertTrue(self.get_values(response).startswith('8.8.8.8.query.senderbase.org: "0-0=1|1=GOOGLE'))
+
+    def test_reversedns(self):
+        query = {"module": "reversedns", "ip-src": "8.8.8.8"}
+        response = self.misp_modules_post(query)
+        self.assertEqual(self.get_values(response), ['dns.google.'])
