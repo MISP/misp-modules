@@ -13,6 +13,7 @@ class TestExpansions(unittest.TestCase):
         self.maxDiff = None
         self.headers = {'Content-Type': 'application/json'}
         self.url = "http://127.0.0.1:6666/"
+        self.sigma_rule = "title: Antivirus Web Shell Detection\r\ndescription: Detects a highly relevant Antivirus alert that reports a web shell\r\ndate: 2018/09/09\r\nmodified: 2019/10/04\r\nauthor: Florian Roth\r\nreferences:\r\n    - https://www.nextron-systems.com/2018/09/08/antivirus-event-analysis-cheat-sheet-v1-4/\r\ntags:\r\n    - attack.persistence\r\n    - attack.t1100\r\nlogsource:\r\n    product: antivirus\r\ndetection:\r\n    selection:\r\n        Signature: \r\n            - \"PHP/Backdoor*\"\r\n            - \"JSP/Backdoor*\"\r\n            - \"ASP/Backdoor*\"\r\n            - \"Backdoor.PHP*\"\r\n            - \"Backdoor.JSP*\"\r\n            - \"Backdoor.ASP*\"\r\n            - \"*Webshell*\"\r\n    condition: selection\r\nfields:\r\n    - FileName\r\n    - User\r\nfalsepositives:\r\n    - Unlikely\r\nlevel: critical"
 
     def misp_modules_post(self, query):
         return requests.post(urljoin(self.url, "query"), json=query)
@@ -86,10 +87,20 @@ class TestExpansions(unittest.TestCase):
 
     def test_rbl(self):
         query = {"module": "rbl", "ip-src": "8.8.8.8"}
-        response = self.misp_modules_post(auery)
+        response = self.misp_modules_post(query)
         self.assertTrue(self.get_values(response).startswith('8.8.8.8.query.senderbase.org: "0-0=1|1=GOOGLE'))
 
     def test_reversedns(self):
         query = {"module": "reversedns", "ip-src": "8.8.8.8"}
         response = self.misp_modules_post(query)
         self.assertEqual(self.get_values(response), ['dns.google.'])
+
+    def test_sigma_queries(self):
+        query = {"module": "sigma_queries", "sigma": self.sigma_rule}
+        response = self.misp_modules_post(query)
+        self.assertTrue(self.get_values(response)['kibana'].startswith('[\n  {\n    "_id": "Antivirus-Web-Shell-Detection"'))
+
+    def test_sigma_syntax(self):
+        query = {"module": "sigma_syntax_validator", "sigma": self.sigma_rule}
+        response = self.misp_modules_post(query)
+        self.assertTrue(self.get_values(response).startswith('Syntax valid:'))
