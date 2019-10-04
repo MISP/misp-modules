@@ -70,7 +70,7 @@ class TestExpansions(unittest.TestCase):
     def test_greynoise(self):
         query = {"module": "greynoise", "ip-dst": "1.1.1.1"}
         response = self.misp_modules_post(query)
-        self.assertEqual(self.get_values(response)['status'], 'ok')
+        self.assertTrue(self.get_values(response).strartswith('{"ip":"1.1.1.1","status":"ok"')
 
     def test_ipasn(self):
         query = {"module": "ipasn", "ip-dst": "1.1.1.1"}
