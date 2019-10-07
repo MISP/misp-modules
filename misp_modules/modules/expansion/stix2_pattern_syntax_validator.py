@@ -6,7 +6,7 @@ except ImportError:
 
 misperrors = {'error': 'Error'}
 mispattributes = {'input': ['stix2-pattern'], 'output': ['text']}
-moduleinfo = {'version': '0.1', 'author': 'Christian Studer', 'module-type': ['expansion', 'hover'],
+moduleinfo = {'version': '0.1', 'author': 'Christian Studer', 'module-type': ['hover'],
               'description': 'An expansion hover module to perform a syntax check on stix2 patterns.'}
 moduleconfig = []
 
@@ -20,7 +20,7 @@ def handler(q=False):
         return misperrors
     pattern = request.get('stix2-pattern')
     syntax_errors = []
-    for p in pattern[2:-2].split(' AND '):
+    for p in pattern[1:-1].split(' AND '):
         syntax_validator = run_validator("[{}]".format(p))
         if syntax_validator:
             for error in syntax_validator:
