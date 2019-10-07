@@ -104,3 +104,23 @@ class TestExpansions(unittest.TestCase):
         query = {"module": "sigma_syntax_validator", "sigma": self.sigma_rule}
         response = self.misp_modules_post(query)
         self.assertTrue(self.get_values(response).startswith('Syntax valid:'))
+
+    def test_stix2_pattern_validator(self):
+        query = {"module": "stix2_pattern_syntax_validator", "stix2-pattern": "[ipv4-addr:value = '8.8.8.8']"}
+        response = self.misp_modules_post(query)
+        self.assertEqual(self.get_values(response), 'Syntax valid')
+
+    def test_wikidata(self):
+        query = {"module": "wiki", "text": "Google"}
+        response = self.misp_modules_post(query)
+        self.assertEqual(self.get_values(response), 'http://www.wikidata.org/entity/Q95')
+
+    def test_yara_query(self):
+        query = {"module": "yara_query", "md5": "b2a5abfeef9e36964281a31e17b57c97"}
+        response = self.misp_modules_post(query)
+        self.assertEqual(self.get_values(response), 'import "hash"\r\nrule MD5 {\r\n\tcondition:\r\n\t\thash.md5(0, filesize) == "b2a5abfeef9e36964281a31e17b57c97"\r\n}')
+
+    def test_yara_validator(self):
+        query = {"module": "yara_syntax_validator", "yara": 'import "hash"\r\nrule MD5 {\r\n\tcondition:\r\n\t\thash.md5(0, filesize) == "b2a5abfeef9e36964281a31e17b57c97"\r\n}'}
+        response = self.misp_modules_post(query)
+        self.assertEqual(self.get_values(response), 'Syntax valid')
