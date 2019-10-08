@@ -49,8 +49,10 @@ def handler(q=False):
     try:
         query_result = resolver.query(query, 'A')[0]
         result = "{} - {}".format(requested_value, dbl_mapping[str(query_result)])
-    except Exception as e:
-        result = str(e)
+    except dns.resolver.NXDOMAIN as e:
+        result = e.msg
+    except Exception:
+        return {'error': 'Not able to reach dbl.spamhaus.org or something went wrong'}
     return {'results': [{'types': mispattributes.get('output'), 'values': result}]}
 
 
