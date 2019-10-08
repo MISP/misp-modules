@@ -100,6 +100,8 @@ def handler(q=False):
         except Exception:
             continue
     result = "\n".join(["{}: {}".format(l, "  -  ".join(i)) for l, i in zip(listed, info)])
+    if not result:
+        return {'error': 'No data found by querying known RBLs'}
     return {'results': [{'types': mispattributes.get('output'), 'values': result}]}
 
 
