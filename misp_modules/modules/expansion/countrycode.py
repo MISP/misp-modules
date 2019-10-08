@@ -20,13 +20,22 @@ common_tlds = {"com": "Commercial (Worldwide)",
                "gov": "Government (USA)"
                }
 
-codes = False
+
+def parse_country_code(extension):
+    # Retrieve a json full of country info
+    try:
+        codes = requests.get("http://www.geognos.com/api/en/countries/info/all.json").json()
+    except Exception:
+        return "http://www.geognos.com/api/en/countries/info/all.json not reachable"
+    if not codes.get('StatusMsg') or not codes["StatusMsg"] == "OK":
+        return 'Not able to get the countrycode references from http://www.geognos.com/api/en/countries/info/all.json'
+    for country in codes['Results'].values():
+        if country['CountryCodes']['tld'] == extension:
+            return country['Name']
+    return "Unknown"
 
 
 def handler(q=False):
-    global codes
-    if not codes:
-        codes = requests.get("http://www.geognos.com/api/en/countries/info/all.json").json()
     if q is False:
         return False
     request = json.loads(q)
@@ -36,18 +45,7 @@ def handler(q=False):
     ext = domain.split(".")[-1]
 
     # Check if it's a common, non country one
-    if ext in common_tlds.keys():
-        val = common_tlds[ext]
-    else:
-        # Retrieve a json full of country info
-        if not codes["StatusMsg"] == "OK":
-            val = "Unknown"
-        else:
-            # Find our code based on TLD
-            codes = codes["Results"]
-            for code in codes.keys():
-                if codes[code]["CountryCodes"]["tld"] == ext:
-                    val = codes[code]["Name"]
+    val = common_tlds[ext] if ext in common_tlds.keys() else parse_country_code(ext)
     r = {'results': [{'types': ['text'], 'values':[val]}]}
     return r
 
