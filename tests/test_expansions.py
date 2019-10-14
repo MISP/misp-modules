@@ -45,7 +45,7 @@ class TestExpansions(unittest.TestCase):
     def test_btc_scam_check(self):
         query = {"module": "btc_scam_check", "btc": "1ES14c7qLb5CYhLMUekctxLgc1FV2Ti9DA"}
         response = self.misp_modules_post(query)
-        self.assertEqual(self.get_values(response), '1es14c7qlb5cyhlmuekctxlgc1fv2ti9da fraudolent bitcoin address')
+        self.assertEqual(self.get_values(response), '1es14c7qlb5cyhlmuekctxlgc1fv2ti9da fraudulent bitcoin address')
 
     def test_countrycode(self):
         query = {"module": "countrycode", "domain": "www.circl.lu"}
