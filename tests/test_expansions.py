@@ -18,7 +18,7 @@ class TestExpansions(unittest.TestCase):
     def misp_modules_post(self, query):
         return requests.post(urljoin(self.url, "query"), json=query)
 
-    def get_errors(self, reponse):
+    def get_errors(self, response):
         data = response.json()
         if not isinstance(data, dict):
             print(json.dumps(data, indent=2))
@@ -136,6 +136,8 @@ class TestExpansions(unittest.TestCase):
         response = self.misp_modules_post(query)
         try:
             self.assertEqual(self.get_values(response), 'http://www.wikidata.org/entity/Q95')
+        except KeyError:
+            self.assertEqual(self.get_errors(response), 'Something went wrong, look in the server logs for details')
         except Exception:
             self.assertEqual(self.get_values(response), 'No additional data found on Wikidata')
 
