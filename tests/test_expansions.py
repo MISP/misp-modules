@@ -18,6 +18,13 @@ class TestExpansions(unittest.TestCase):
     def misp_modules_post(self, query):
         return requests.post(urljoin(self.url, "query"), json=query)
 
+    def get_data(self, response):
+        data = response.json()
+        if not isinstance(data, dict):
+            print(json.dumps(data, indent=2))
+            return data
+        return data['results'][0]['data']
+
     def get_errors(self, response):
         data = response.json()
         if not isinstance(data, dict):
@@ -103,6 +110,16 @@ class TestExpansions(unittest.TestCase):
         response = self.misp_modules_post(query)
         self.assertEqual(self.get_values(response), 'Samsung Electronics Co.,Ltd')
 
+    def test_otx(self):
+        query_types = ('domain', 'ip-src', 'md5')
+        query_values = ('circl.lu', '8.8.8.8', '616eff3e9a7575ae73821b4668d2801c')
+        results = ('149.13.33.14', 'ffc2595aefa80b61621023252b5f0ccb22b6e31d7f1640913cd8ff74ddbd8b41',
+                   '8.8.8.8')
+        for query_type, query_value, result in zip(query_types, query_values, results):
+            query = {"module": "otx", query_type: query_value, "config": {"apikey": "1"}}
+            response = self.misp_modules_post(query)
+            self.assertTrue(self.get_values(response), [result])
+
     def test_rbl(self):
         query = {"module": "rbl", "ip-src": "8.8.8.8"}
         response = self.misp_modules_post(query)
@@ -126,10 +143,26 @@ class TestExpansions(unittest.TestCase):
         response = self.misp_modules_post(query)
         self.assertTrue(self.get_values(response).startswith('Syntax valid:'))
 
+    def test_sourcecache(self):
+        input_value = "https://www.misp-project.org/feeds/"
+        query = {"module": "sourcecache", "link": input_value}
+        response = self.misp_modules_post(query)
+        self.assertEqual(self.get_values(response), input_value)
+        self.assertTrue(self.get_data(response).startswith('PCFET0NUWVBFIEhUTUw+CjwhLS0KCUFyY2FuYSBieSBIVE1MN'))
+
     def test_stix2_pattern_validator(self):
         query = {"module": "stix2_pattern_syntax_validator", "stix2-pattern": "[ipv4-addr:value = '8.8.8.8']"}
         response = self.misp_modules_post(query)
         self.assertEqual(self.get_values(response), 'Syntax valid')
+
+    def test_threatcrowd(self):
+        query_types = ('domain', 'ip-src', 'md5', 'whois-registrant-email')
+        query_values = ('circl.lu', '149.13.33.4', '616eff3e9a7575ae73821b4668d2801c', 'hostmaster@eurodns.com')
+        results = ('149.13.33.14', 'cve.circl.lu', 'devilreturns.com', 'navabi.lu')
+        for query_type, query_value, result in zip(query_types, query_values, results):
+            query = {"module": "threatcrowd", query_type: query_value}
+            response = self.misp_modules_post(query)
+            self.assertTrue(self.get_values(response), [result])
 
     def test_wikidata(self):
         query = {"module": "wiki", "text": "Google"}
