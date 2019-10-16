@@ -164,6 +164,15 @@ class TestExpansions(unittest.TestCase):
             response = self.misp_modules_post(query)
             self.assertTrue(self.get_values(response), [result])
 
+    def test_threatminer(self):
+        query_types = ('domain', 'ip-src', 'md5')
+        query_values = ('circl.lu', '149.13.33.4', 'b538dbc6160ef54f755a540e06dc27cd980fc4a12005e90b3627febb44a1a90f')
+        results = ('149.13.33.14', 'f6ecb9d5c21defb1f622364a30cb8274f817a1a2', 'http://www.circl.lu')
+        for query_type, query_value, result in zip(query_types, query_values, results):
+            query = {"module": "threatminer", query_type: query_value}
+            response = self.misp_modules_post(query)
+            self.assertTrue(self.get_values(response), [result])
+
     def test_wikidata(self):
         query = {"module": "wiki", "text": "Google"}
         response = self.misp_modules_post(query)
