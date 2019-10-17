@@ -4,7 +4,9 @@
 import unittest
 import requests
 from urllib.parse import urljoin
+from base64 import b64encode
 import json
+import os
 
 
 class TestExpansions(unittest.TestCase):
@@ -85,6 +87,14 @@ class TestExpansions(unittest.TestCase):
         response = self.misp_modules_post(query)
         self.assertEqual(self.get_values(response), ['149.13.33.14'])
 
+    def test_docx(self):
+        filename = 'test.docx'
+        with open(f'tests/test_files/{filename}', 'rb') as f:
+            encoded = b64encode(f.read()).decode()
+        query = {"module": "docx-enrich", "attachment": filename, "data": encoded}
+        response = self.misp_modules_post(query)
+        self.assertEqual(self.get_values(response), '\nThis is an basic test docx file. ')
+
     def test_haveibeenpwned(self):
         query = {"module": "hibp", "email-src": "info@circl.lu"}
         response = self.misp_modules_post(query)
@@ -96,7 +106,9 @@ class TestExpansions(unittest.TestCase):
     def test_greynoise(self):
         query = {"module": "greynoise", "ip-dst": "1.1.1.1"}
         response = self.misp_modules_post(query)
-        self.assertTrue(self.get_values(response).startswith('{"ip":"1.1.1.1","status":"ok"'))
+        value = self.get_values(response)
+        if value != 'GreyNoise API not accessible (HTTP 429)':
+            self.assertTrue(value.startswith('{"ip":"1.1.1.1","status":"ok"'))
 
     def test_ipasn(self):
         query = {"module": "ipasn", "ip-dst": "1.1.1.1"}
@@ -109,6 +121,30 @@ class TestExpansions(unittest.TestCase):
         query = {"module": "macvendors", "mac-address": "FC-A1-3E-2A-1C-33"}
         response = self.misp_modules_post(query)
         self.assertEqual(self.get_values(response), 'Samsung Electronics Co.,Ltd')
+
+    def test_ocr(self):
+        filename = 'misp-logo.png'
+        with open(f'tests/test_files/{filename}', 'rb') as f:
+            encoded = b64encode(f.read()).decode()
+        query = {"module": "ocr-enrich", "attachment": filename, "data": encoded}
+        response = self.misp_modules_post(query)
+        self.assertEqual(self.get_values(response), 'Threat Sharing')
+
+    def test_ods(self):
+        filename = 'test.ods'
+        with open(f'tests/test_files/{filename}', 'rb') as f:
+            encoded = b64encode(f.read()).decode()
+        query = {"module": "ods-enrich", "attachment": filename, "data": encoded}
+        response = self.misp_modules_post(query)
+        self.assertEqual(self.get_values(response), '\n   column_0\n0  ods test')
+
+    def test_odt(self):
+        filename = 'test.odt'
+        with open(f'tests/test_files/{filename}', 'rb') as f:
+            encoded = b64encode(f.read()).decode()
+        query = {"module": "odt-enrich", "attachment": filename, "data": encoded}
+        response = self.misp_modules_post(query)
+        self.assertEqual(self.get_values(response), 'odt test')
 
     def test_otx(self):
         query_types = ('domain', 'ip-src', 'md5')
@@ -123,6 +159,22 @@ class TestExpansions(unittest.TestCase):
             except KeyError:
                 # Empty results, which in this case comes from a connection error
                 continue
+
+    def test_pdf(self):
+        filename = 'test.pdf'
+        with open(f'tests/test_files/{filename}', 'rb') as f:
+            encoded = b64encode(f.read()).decode()
+        query = {"module": "pdf-enrich", "attachment": filename, "data": encoded}
+        response = self.misp_modules_post(query)
+        self.assertEqual(self.get_values(response), 'Pdf test')
+
+    def test_pptx(self):
+        filename = 'test.pptx'
+        with open(f'tests/test_files/{filename}', 'rb') as f:
+            encoded = b64encode(f.read()).decode()
+        query = {"module": "pptx-enrich", "attachment": filename, "data": encoded}
+        response = self.misp_modules_post(query)
+        self.assertEqual(self.get_values(response), '\npptx test\n')
 
     def test_rbl(self):
         query = {"module": "rbl", "ip-src": "8.8.8.8"}
@@ -186,6 +238,14 @@ class TestExpansions(unittest.TestCase):
             self.assertEqual(self.get_errors(response), 'Something went wrong, look in the server logs for details')
         except Exception:
             self.assertEqual(self.get_values(response), 'No additional data found on Wikidata')
+
+    def test_xlsx(self):
+        filename = 'test.xlsx'
+        with open(f'tests/test_files/{filename}', 'rb') as f:
+            encoded = b64encode(f.read()).decode()
+        query = {"module": "xlsx-enrich", "attachment": filename, "data": encoded}
+        response = self.misp_modules_post(query)
+        self.assertEqual(self.get_values(response), '      header\n0  xlsx test')
 
     def test_yara_query(self):
         query = {"module": "yara_query", "md5": "b2a5abfeef9e36964281a31e17b57c97"}
