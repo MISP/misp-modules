@@ -13,14 +13,15 @@ moduleinfo = {'version': '1', 'author': 'KX499',
               'description': 'Get information from ThreatMiner',
               'module-type': ['expansion']}
 
+
 class ThreatMiner():
     def __init__(self):
         self.results = defaultdict(set)
         self.comment = '{}: Threatminer - {}'
         self.types_mapping = {'domain': '_get_domain', 'hostname': '_get_domain',
-                                'ip-dst': '_get_ip', 'ip-src': '_get_ip',
-                                'md5': '_get_hash', 'sha1': '_get_hash',
-                                'sha256': '_get_hash', 'sha512': '_get_hash'}
+                              'ip-dst': '_get_ip', 'ip-src': '_get_ip',
+                              'md5': '_get_hash', 'sha1': '_get_hash',
+                              'sha256': '_get_hash', 'sha512': '_get_hash'}
 
     @property
     def parsed_results(self):
