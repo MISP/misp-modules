@@ -26,10 +26,11 @@ class ThreatMiner():
     def parsed_results(self):
         to_return = []
         for key, values in self.results.items():
-            input_value, comment = key[:2]
-            types = [k for k in key[2:]]
-            to_return.append({'types': types, 'values': list(values),
-                              'comment': self.comment.format(input_value, comment)})
+            if values:
+                input_value, comment = key[:2]
+                types = [k for k in key[2:]]
+                to_return.append({'types': types, 'values': list(values),
+                                  'comment': self.comment.format(input_value, comment)})
         return to_return
 
     def parse_query(self, request):
@@ -82,7 +83,7 @@ class ThreatMiner():
         self.results[(q, comment, 'domain')].update({result for result in results if isinstance(result, str)})
 
     def _add_filename(self, results, q, comment):
-        self.results[(q, comment, 'filename')].update({result['filename'] for result in results if result.get('file_name')})
+        self.results[(q, comment, 'filename')].update({result['file_name'] for result in results if result.get('file_name')})
 
     def _add_hash(self, results, q, comment):
         self.results[(q, comment, 'sha256')].update({result for result in results if isinstance(result, str)})
@@ -118,7 +119,7 @@ class ThreatMiner():
                 self.results[(q, comment, 'whois-registrant-email')].update({email for em_type, email in emails.items() if em_type == 'registrant' and email})
 
     def _add_x509(self, results, q, comment):
-        self.results[(q, 'x509-fingerprint-sha1')].update({result for result in results if isinstance(result, str)})
+        self.results[(q, comment, 'x509-fingerprint-sha1')].update({result for result in results if isinstance(result, str)})
 
 
 def handler(q=False):
