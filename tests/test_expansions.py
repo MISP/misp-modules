@@ -6,7 +6,6 @@ import requests
 from urllib.parse import urljoin
 from base64 import b64encode
 import json
-import os
 
 
 class TestExpansions(unittest.TestCase):
