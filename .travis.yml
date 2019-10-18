@@ -14,7 +14,7 @@ before_install:
     - docker build -t misp-modules --build-arg BUILD_DATE=$(date -u +"%Y-%m-%d") docker/
 
 install:
-    - sudo apt-get install libzbar0 libzbar-dev libpoppler-cpp-dev
+    - sudo apt-get install libzbar0 libzbar-dev libpoppler-cpp-dev tesseract-ocr
     - pip install pipenv
     - pipenv install --dev
 
