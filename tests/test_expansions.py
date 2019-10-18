@@ -92,7 +92,7 @@ class TestExpansions(unittest.TestCase):
         filename = 'test.docx'
         with open(f'{self.dirname}/test_files/{filename}', 'rb') as f:
             encoded = b64encode(f.read()).decode()
-        query = {"module": "docx-enrich", "attachment": filename, "data": encoded}
+        query = {"module": "docx_enrich", "attachment": filename, "data": encoded}
         response = self.misp_modules_post(query)
         self.assertEqual(self.get_values(response), '\nThis is an basic test docx file. ')
 
@@ -127,7 +127,7 @@ class TestExpansions(unittest.TestCase):
         filename = 'misp-logo.png'
         with open(f'{self.dirname}/test_files/{filename}', 'rb') as f:
             encoded = b64encode(f.read()).decode()
-        query = {"module": "ocr-enrich", "attachment": filename, "data": encoded}
+        query = {"module": "ocr_enrich", "attachment": filename, "data": encoded}
         response = self.misp_modules_post(query)
         self.assertEqual(self.get_values(response), 'Threat Sharing')
 
@@ -135,7 +135,7 @@ class TestExpansions(unittest.TestCase):
         filename = 'test.ods'
         with open(f'{self.dirname}/test_files/{filename}', 'rb') as f:
             encoded = b64encode(f.read()).decode()
-        query = {"module": "ods-enrich", "attachment": filename, "data": encoded}
+        query = {"module": "ods_enrich", "attachment": filename, "data": encoded}
         response = self.misp_modules_post(query)
         self.assertEqual(self.get_values(response), '\n   column_0\n0  ods test')
 
@@ -143,7 +143,7 @@ class TestExpansions(unittest.TestCase):
         filename = 'test.odt'
         with open(f'{self.dirname}/test_files/{filename}', 'rb') as f:
             encoded = b64encode(f.read()).decode()
-        query = {"module": "odt-enrich", "attachment": filename, "data": encoded}
+        query = {"module": "odt_enrich", "attachment": filename, "data": encoded}
         response = self.misp_modules_post(query)
         self.assertEqual(self.get_values(response), 'odt test')
 
@@ -165,7 +165,7 @@ class TestExpansions(unittest.TestCase):
         filename = 'test.pdf'
         with open(f'{self.dirname}/test_files/{filename}', 'rb') as f:
             encoded = b64encode(f.read()).decode()
-        query = {"module": "pdf-enrich", "attachment": filename, "data": encoded}
+        query = {"module": "pdf_enrich", "attachment": filename, "data": encoded}
         response = self.misp_modules_post(query)
         self.assertEqual(self.get_values(response), 'Pdf test')
 
@@ -173,7 +173,7 @@ class TestExpansions(unittest.TestCase):
         filename = 'test.pptx'
         with open(f'{self.dirname}/test_files/{filename}', 'rb') as f:
             encoded = b64encode(f.read()).decode()
-        query = {"module": "pptx-enrich", "attachment": filename, "data": encoded}
+        query = {"module": "pptx_enrich", "attachment": filename, "data": encoded}
         response = self.misp_modules_post(query)
         self.assertEqual(self.get_values(response), '\npptx test\n')
 
@@ -244,7 +244,7 @@ class TestExpansions(unittest.TestCase):
         filename = 'test.xlsx'
         with open(f'{self.dirname}/test_files/{filename}', 'rb') as f:
             encoded = b64encode(f.read()).decode()
-        query = {"module": "xlsx-enrich", "attachment": filename, "data": encoded}
+        query = {"module": "xlsx_enrich", "attachment": filename, "data": encoded}
         response = self.misp_modules_post(query)
         self.assertEqual(self.get_values(response), '      header\n0  xlsx test')
 

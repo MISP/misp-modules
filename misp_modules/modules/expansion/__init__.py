@@ -12,6 +12,6 @@ __all__ = ['cuckoo_submit', 'vmray_submit', 'bgpranking', 'circl_passivedns', 'c
            'xforceexchange', 'sigma_syntax_validator', 'stix2_pattern_syntax_validator',
            'sigma_queries', 'dbl_spamhaus', 'vulners', 'yara_query', 'macaddress_io',
            'intel471', 'backscatter_io', 'btc_scam_check', 'hibp', 'greynoise', 'macvendors',
-           'qrcode', 'ocr-enrich', 'pdf-enrich', 'docx-enrich', 'xlsx-enrich', 'pptx-enrich',
-           'ods-enrich', 'odt-enrich', 'joesandbox_submit', 'joesandbox_query', 'urlhaus',
+           'qrcode', 'ocr_enrich', 'pdf_enrich', 'docx_enrich', 'xlsx_enrich', 'pptx_enrich',
+           'ods_enrich', 'odt_enrich', 'joesandbox_submit', 'joesandbox_query', 'urlhaus',
            'virustotal_public']
