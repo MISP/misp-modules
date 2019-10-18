@@ -6,6 +6,7 @@ import requests
 from urllib.parse import urljoin
 from base64 import b64encode
 import json
+import os
 
 
 class TestExpansions(unittest.TestCase):
@@ -14,6 +15,7 @@ class TestExpansions(unittest.TestCase):
         self.maxDiff = None
         self.headers = {'Content-Type': 'application/json'}
         self.url = "http://127.0.0.1:6666/"
+        self.dirname = os.path.dirname(os.path.realpath(__file__))
         self.sigma_rule = "title: Antivirus Web Shell Detection\r\ndescription: Detects a highly relevant Antivirus alert that reports a web shell\r\ndate: 2018/09/09\r\nmodified: 2019/10/04\r\nauthor: Florian Roth\r\nreferences:\r\n    - https://www.nextron-systems.com/2018/09/08/antivirus-event-analysis-cheat-sheet-v1-4/\r\ntags:\r\n    - attack.persistence\r\n    - attack.t1100\r\nlogsource:\r\n    product: antivirus\r\ndetection:\r\n    selection:\r\n        Signature: \r\n            - \"PHP/Backdoor*\"\r\n            - \"JSP/Backdoor*\"\r\n            - \"ASP/Backdoor*\"\r\n            - \"Backdoor.PHP*\"\r\n            - \"Backdoor.JSP*\"\r\n            - \"Backdoor.ASP*\"\r\n            - \"*Webshell*\"\r\n    condition: selection\r\nfields:\r\n    - FileName\r\n    - User\r\nfalsepositives:\r\n    - Unlikely\r\nlevel: critical"
 
     def misp_modules_post(self, query):
@@ -88,7 +90,7 @@ class TestExpansions(unittest.TestCase):
 
     def test_docx(self):
         filename = 'test.docx'
-        with open(f'tests/test_files/{filename}', 'rb') as f:
+        with open(f'{self.dirname}/test_files/{filename}', 'rb') as f:
             encoded = b64encode(f.read()).decode()
         query = {"module": "docx-enrich", "attachment": filename, "data": encoded}
         response = self.misp_modules_post(query)
@@ -123,7 +125,7 @@ class TestExpansions(unittest.TestCase):
 
     def test_ocr(self):
         filename = 'misp-logo.png'
-        with open(f'tests/test_files/{filename}', 'rb') as f:
+        with open(f'{self.dirname}/test_files/{filename}', 'rb') as f:
             encoded = b64encode(f.read()).decode()
         query = {"module": "ocr-enrich", "attachment": filename, "data": encoded}
         response = self.misp_modules_post(query)
@@ -131,7 +133,7 @@ class TestExpansions(unittest.TestCase):
 
     def test_ods(self):
         filename = 'test.ods'
-        with open(f'tests/test_files/{filename}', 'rb') as f:
+        with open(f'{self.dirname}/test_files/{filename}', 'rb') as f:
             encoded = b64encode(f.read()).decode()
         query = {"module": "ods-enrich", "attachment": filename, "data": encoded}
         response = self.misp_modules_post(query)
@@ -139,7 +141,7 @@ class TestExpansions(unittest.TestCase):
 
     def test_odt(self):
         filename = 'test.odt'
-        with open(f'tests/test_files/{filename}', 'rb') as f:
+        with open(f'{self.dirname}/test_files/{filename}', 'rb') as f:
             encoded = b64encode(f.read()).decode()
         query = {"module": "odt-enrich", "attachment": filename, "data": encoded}
         response = self.misp_modules_post(query)
@@ -161,7 +163,7 @@ class TestExpansions(unittest.TestCase):
 
     def test_pdf(self):
         filename = 'test.pdf'
-        with open(f'tests/test_files/{filename}', 'rb') as f:
+        with open(f'{self.dirname}/test_files/{filename}', 'rb') as f:
             encoded = b64encode(f.read()).decode()
         query = {"module": "pdf-enrich", "attachment": filename, "data": encoded}
         response = self.misp_modules_post(query)
@@ -169,7 +171,7 @@ class TestExpansions(unittest.TestCase):
 
     def test_pptx(self):
         filename = 'test.pptx'
-        with open(f'tests/test_files/{filename}', 'rb') as f:
+        with open(f'{self.dirname}/test_files/{filename}', 'rb') as f:
             encoded = b64encode(f.read()).decode()
         query = {"module": "pptx-enrich", "attachment": filename, "data": encoded}
         response = self.misp_modules_post(query)
@@ -240,7 +242,7 @@ class TestExpansions(unittest.TestCase):
 
     def test_xlsx(self):
         filename = 'test.xlsx'
-        with open(f'tests/test_files/{filename}', 'rb') as f:
+        with open(f'{self.dirname}/test_files/{filename}', 'rb') as f:
             encoded = b64encode(f.read()).decode()
         query = {"module": "xlsx-enrich", "attachment": filename, "data": encoded}
         response = self.misp_modules_post(query)
