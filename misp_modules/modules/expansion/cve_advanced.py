@@ -23,6 +23,7 @@ class VulnerabilityParser():
         self.capec_features = ('id', 'name', 'summary', 'prerequisites', 'solutions')
         self.vulnerability_mapping = {
             'id': ('text', 'id'), 'summary': ('text', 'summary'),
+            'vulnerable_configuration': ('text', 'vulnerable_configuration'),
             'vulnerable_configuration_cpe_2_2': ('text', 'vulnerable_configuration'),
             'Modified': ('datetime', 'modified'), 'Published': ('datetime', 'published'),
             'references': ('link', 'references'), 'cvss': ('float', 'cvss-score')}
@@ -46,14 +47,16 @@ class VulnerabilityParser():
         if 'Published' in self.vulnerability:
             vulnerability_object.add_attribute('published', **{'type': 'datetime', 'value': self.vulnerability['Published']})
             vulnerability_object.add_attribute('state', **{'type': 'text', 'value': 'Published'})
-        for feature in ('references', 'vulnerable_configuration_cpe_2_2'):
+        for feature in ('references', 'vulnerable_configuration', 'vulnerable_configuration_cpe_2_2'):
             if feature in self.vulnerability:
                 attribute_type, relation = self.vulnerability_mapping[feature]
                 for value in self.vulnerability[feature]:
+                    if isinstance(value, dict):
+                        value = value['title']
                     vulnerability_object.add_attribute(relation, **{'type': attribute_type, 'value': value})
         vulnerability_object.add_reference(self.attribute['uuid'], 'related-to')
         self.misp_event.add_object(**vulnerability_object)
-        if 'cwe' in self.vulnerability and self.vulnerability['cwe'] != 'Unknown':
+        if 'cwe' in self.vulnerability and self.vulnerability['cwe'] not in ('Unknown', 'NVD-CWE-noinfo'):
             self.__parse_weakness(vulnerability_object.uuid)
         if 'capec' in self.vulnerability:
             self.__parse_capec(vulnerability_object.uuid)
