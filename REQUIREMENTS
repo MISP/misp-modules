@@ -9,6 +9,7 @@
 -e git+https://github.com/sebdraven/pydnstrails@48c1f740025c51289f43a24863d1845ff12fd21a#egg=pydnstrails
 -e git+https://github.com/sebdraven/pyonyphe@cbb0168d5cb28a9f71f7ab3773164a7039ccdb12#egg=pyonyphe
 aiohttp==3.4.4
+apiosintDS==1.8.1
 antlr4-python3-runtime==4.7.2 ; python_version >= '3'
 async-timeout==3.0.1
 attrs==19.1.0
