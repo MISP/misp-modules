@@ -1,5 +1,5 @@
 import json
-import pygeoip
+import geoip2.database
 import sys
 import os
 import logging
@@ -17,15 +17,15 @@ misperrors = {'error': 'Error'}
 mispattributes = {'input': ['ip-src', 'ip-dst', 'domain|ip'], 'output': ['freetext']}
 
 # possible module-types: 'expansion', 'hover' or both
-moduleinfo = {'version': '0.1', 'author': 'Andreas Muehlemann',
-              'description': 'Query a local copy of Maxminds Geolite database',
+moduleinfo = {'version': '0.2', 'author': 'Andreas Muehlemann',
+              'description': 'Query a local copy of Maxminds Geolite database, updated for MMDB format',
               'module-type': ['expansion', 'hover']}
 
 try:
-    # get current db from http://geolite.maxmind.com/download/geoip/database/GeoLiteCountry/GeoIP.dat.gz
+    # get current db from https://geolite.maxmind.com/download/geoip/database/GeoLite2-Country.tar.gz
     config = configparser.ConfigParser()
     config.read(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'geoip_country.cfg'))
-    gi = pygeoip.GeoIP(config.get('GEOIP', 'database'))
+    gi = geoip2.database.Reader(config.get('GEOIP', 'database'))
     enabled = True
 except Exception:
     enabled = False
@@ -48,7 +48,7 @@ def handler(q=False):
     log.debug(toquery)
 
     try:
-        answer = gi.country_code_by_addr(toquery)
+        answer = (gi.country(toquery)).country.iso_code
     except Exception:
         misperrors['error'] = "GeoIP resolving error"
         return misperrors
