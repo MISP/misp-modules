@@ -22,6 +22,14 @@ class TestExpansions(unittest.TestCase):
         return requests.post(urljoin(self.url, "query"), json=query)
 
     @staticmethod
+    def get_attribute(reponse):
+        data = response.json()
+        if not isinstance(data, dict):
+            print(json.dumps(data, indent=2))
+            return data
+        return data['results']['Attribute'][0]['type']
+
+    @staticmethod
     def get_data(response):
         data = response.json()
         if not isinstance(data, dict):
@@ -36,6 +44,14 @@ class TestExpansions(unittest.TestCase):
             print(json.dumps(data, indent=2))
             return data
         return data['error']
+
+    @staticmethod
+    def get_object(response):
+        data = response.json()
+        if not isinstance(data, dict):
+            print(json.dumps(data, indent=2))
+            return data
+        return data['results']['Object'][0]['name']
 
     @staticmethod
     def get_values(response):
@@ -74,6 +90,18 @@ class TestExpansions(unittest.TestCase):
         query = {"module": "cve", "vulnerability": "CVE-2010-3333", "config": {"custom_API": "https://cve.circl.lu/api/cve/"}}
         response = self.misp_modules_post(query)
         self.assertTrue(self.get_values(response).startswith("Stack-based buffer overflow in Microsoft Office XP SP3, Office 2003 SP3"))
+
+    def test_cve_advanced(self):
+        query = {"module": "cve_advanced",
+                 "attribute": {"type": "vulnerability",
+                               "value": "CVE-2010-3333",
+                               "uuid": "ea89a33b-4ab7-4515-9f02-922a0bee333d"},
+                 "config": {}}
+        response = self.misp_modules_post(query)
+        try:
+            self.assertEqual(self.get_object(response), 'vulnerability')
+        except Exception:
+            print(self.get_errors(response))
 
     def test_dbl_spamhaus(self):
         query = {"module": "dbl_spamhaus", "domain": "totalmateria.net"}
