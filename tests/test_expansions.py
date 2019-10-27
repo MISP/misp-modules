@@ -21,21 +21,24 @@ class TestExpansions(unittest.TestCase):
     def misp_modules_post(self, query):
         return requests.post(urljoin(self.url, "query"), json=query)
 
-    def get_data(self, response):
+    @staticmethod
+    def get_data(response):
         data = response.json()
         if not isinstance(data, dict):
             print(json.dumps(data, indent=2))
             return data
         return data['results'][0]['data']
 
-    def get_errors(self, response):
+    @staticmethod
+    def get_errors(response):
         data = response.json()
         if not isinstance(data, dict):
             print(json.dumps(data, indent=2))
             return data
         return data['error']
 
-    def get_values(self, response):
+    @staticmethod
+    def get_values(response):
         data = response.json()
         if not isinstance(data, dict):
             print(json.dumps(data, indent=2))
