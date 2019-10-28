@@ -16,7 +16,7 @@ mispattributes = {'input': ['ip-src', 'ip-dst', 'domain|ip'], 'output': ['freete
 moduleconfig = ['local_geolite_db']
 # possible module-types: 'expansion', 'hover' or both
 moduleinfo = {'version': '0.2', 'author': 'Andreas Muehlemann',
-              'description': 'Query a local copy of Maxminds Geolite database',
+              'description': 'Query a local copy of Maxminds Geolite database, updated for MMDB format',
               'module-type': ['expansion', 'hover']}
 
 
