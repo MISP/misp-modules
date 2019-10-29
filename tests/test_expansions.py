@@ -17,6 +17,11 @@ class TestExpansions(unittest.TestCase):
         self.url = "http://127.0.0.1:6666/"
         self.dirname = os.path.dirname(os.path.realpath(__file__))
         self.sigma_rule = "title: Antivirus Web Shell Detection\r\ndescription: Detects a highly relevant Antivirus alert that reports a web shell\r\ndate: 2018/09/09\r\nmodified: 2019/10/04\r\nauthor: Florian Roth\r\nreferences:\r\n    - https://www.nextron-systems.com/2018/09/08/antivirus-event-analysis-cheat-sheet-v1-4/\r\ntags:\r\n    - attack.persistence\r\n    - attack.t1100\r\nlogsource:\r\n    product: antivirus\r\ndetection:\r\n    selection:\r\n        Signature: \r\n            - \"PHP/Backdoor*\"\r\n            - \"JSP/Backdoor*\"\r\n            - \"ASP/Backdoor*\"\r\n            - \"Backdoor.PHP*\"\r\n            - \"Backdoor.JSP*\"\r\n            - \"Backdoor.ASP*\"\r\n            - \"*Webshell*\"\r\n    condition: selection\r\nfields:\r\n    - FileName\r\n    - User\r\nfalsepositives:\r\n    - Unlikely\r\nlevel: critical"
+        try:
+            with open(f'{self.dirname}/expansion_configs.json', 'rb') as f:
+                self.configs = json.loads(f.read().decode())
+        except FileNotFoundError:
+            self.configs = {}
 
     def misp_modules_post(self, query):
         return requests.post(urljoin(self.url, "query"), json=query)
@@ -64,6 +69,11 @@ class TestExpansions(unittest.TestCase):
             if values:
                 return values[0] if isinstance(values, list) else values
         return data['results'][0]['values']
+
+    def test_apiosintds(self):
+        query = {'module': 'apiosintds', 'ip-dst': '185.255.79.90'}
+        response = self.misp_modules_post(query)
+        self.assertTrue(self.get_values(response).startswith('185.255.79.90 IS listed by OSINT.digitalside.it.'))
 
     def test_bgpranking(self):
         query = {"module": "bgpranking", "AS": "13335"}
@@ -131,6 +141,24 @@ class TestExpansions(unittest.TestCase):
         response = self.misp_modules_post(query)
         self.assertEqual(self.get_values(response), '\nThis is an basic test docx file. ')
 
+    def test_farsight_passivedns(self):
+        module_name = 'farsight_passivedns'
+        if module_name in self.configs:
+            query_types = ('domain', 'ip-src')
+            query_values = ('google.com', '8.8.8.8')
+            results = ('mail.casadostemperos.com.br', 'outmail.wphf.at')
+            for query_type, query_value, result in zip(query_types, query_values, results):
+                query = {"module": module_name, query_type: query_value, 'config': self.configs[module_name]}
+                response = self.misp_modules_post(query)
+                try:
+                    self.assertIn(result, self.get_values(response))
+                except Exception:
+                    self.assertTrue(self.get_errors(response).startwith('Something went wrong'))
+        else:
+            query = {"module": module_name, "ip-src": "8.8.8.8"}
+            response = self.misp_modules_post(query)
+            self.assertEqual(self.get_errors(response), 'Farsight DNSDB apikey is missing')
+
     def test_haveibeenpwned(self):
         query = {"module": "hibp", "email-src": "info@circl.lu"}
         response = self.misp_modules_post(query)
@@ -152,6 +180,17 @@ class TestExpansions(unittest.TestCase):
         key = list(self.get_values(response)['response'].keys())[0]
         entry = self.get_values(response)['response'][key]['asn']
         self.assertEqual(entry, '13335')
+
+    def test_macaddess_io(self):
+        module_name = 'macaddress_io'
+        query = {"module": module_name, "mac-address": "44:38:39:ff:ef:57"}
+        if module_name in self.configs:
+            query["config"] = self.configs[module_name]
+            response = self.misp_modules_post(query)
+            self.assertEqual(self.get_values(response)['Valid MAC address'], 'True')
+        else:
+            response = self.misp_modules_post(query)
+            self.assertEqual(self.get_errors(response), 'Authorization required')
 
     def test_macvendors(self):
         query = {"module": "macvendors", "mac-address": "FC-A1-3E-2A-1C-33"}
@@ -181,6 +220,34 @@ class TestExpansions(unittest.TestCase):
         query = {"module": "odt_enrich", "attachment": filename, "data": encoded}
         response = self.misp_modules_post(query)
         self.assertEqual(self.get_values(response), 'odt test')
+
+    def test_onyphe(self):
+        module_name = "onyphe"
+        query = {"module": module_name, "ip-src": "8.8.8.8"}
+        if module_name in self.configs:
+            query["config"] = self.configs[module_name]
+            response = self.misp_modules_post(query)
+            try:
+                self.assertTrue(self.get_values(response).startswith('https://pastebin.com/raw/'))
+            except Exception:
+                self.assertEqual(self.get_errors(response), 'no more credits')
+        else:
+            response = self.misp_modules_post(query)
+            self.assertEqual(self.get_errors(response), 'Onyphe authentication is missing')
+
+    def test_onyphe_full(self):
+        module_name = "onyphe_full"
+        query = {"module": module_name, "ip-src": "8.8.8.8"}
+        if module_name in self.configs:
+            query["config"] = self.configs[module_name]
+            response = self.misp_modules_post(query)
+            try:
+                self.assertEqual(self.get_values(response), '37.7510,-97.8220')
+            except Exception:
+                self.assertTrue(self.get_errors(response).startswith('Error '))
+        else:
+            response = self.misp_modules_post(query)
+            self.assertEqual(self.get_errors(response), 'Onyphe authentication is missing')
 
     def test_otx(self):
         query_types = ('domain', 'ip-src', 'md5')
