@@ -25,6 +25,7 @@ moduleinfo = {'version': '0.1', 'author': 'Davide Baglieri aka davidonzo',
 
 moduleconfig = ['import_related_hashes', 'cache', 'cache_directory']
 
+
 def handler(q=False):
     if q is False:
         return False
@@ -85,7 +86,7 @@ def handler(q=False):
                 misperrors['error'] = ErrorMSG
                 return misperrors
         else:
-            log.debug("Cache option is set to "+request['config'].get('cache')+". You are not using the internal cache system and this is NOT recommended!")
+            log.debug("Cache option is set to " + request['config'].get('cache') + ". You are not using the internal cache system and this is NOT recommended!")
             log.debug("Please, consider to turn on the cache setting it to 'Yes' and specifing a writable directory for the cache directory option.")
     try:
         response = apiosintDS.request(entities=tosubmit, cache=submitcache, cachedirectory=submitcache_directory, verbose=True)
@@ -96,6 +97,7 @@ def handler(q=False):
         log.debug(str(e))
         misperrors['error'] = str(e)
     return r
+
 
 def apiosintParser(response, import_related_hashes):
     ret = []
@@ -133,8 +135,10 @@ def apiosintParser(response, import_related_hashes):
                 ret.append({"types": ["text"], "values": [comment]})
     return ret
 
+
 def introspection():
     return mispattributes
+
 
 def version():
     moduleinfo['config'] = moduleconfig
