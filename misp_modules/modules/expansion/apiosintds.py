@@ -70,11 +70,15 @@ def handler(q=False):
     r = {"results": []}
 
     if request.get('config'):
-        if request['config'].get('cache').lower() == "yes":
+        if request['config'].get('cache') and request['config']['cache'].lower() == "yes":
             submitcache = True
-            if len(request['config'].get('cache_directory').strip()) > 0:
-                if os.access(request['config'].get('cache_directory'), os.W_OK):
-                    submitcache_directory = request['config'].get('cache_directory')
+        if request['config'].get('import_related_hashes') and request['config']['import_related_hashes'].lower() == "yes":
+            import_related_hashes = True
+        if submitcache:
+            cache_directory = request['config'].get('cache_directory')
+            if cache_directory and len(cache_directory) > 0:
+                if os.access(cache_directory, os.W_OK):
+                    submitcache_directory = cache_directory
                 else:
                     ErrorMSG = "Cache directory is not writable. Please fix it before."
                     log.debug(str(ErrorMSG))
@@ -86,12 +90,10 @@ def handler(q=False):
                 misperrors['error'] = ErrorMSG
                 return misperrors
         else:
-            log.debug("Cache option is set to " + request['config'].get('cache') + ". You are not using the internal cache system and this is NOT recommended!")
+            log.debug("Cache option is set to " + str(submitcache) + ". You are not using the internal cache system and this is NOT recommended!")
             log.debug("Please, consider to turn on the cache setting it to 'Yes' and specifing a writable directory for the cache directory option.")
     try:
         response = apiosintDS.request(entities=tosubmit, cache=submitcache, cachedirectory=submitcache_directory, verbose=True)
-        if request['config'].get('import_related_hashes').lower() == "yes":
-            import_related_hashes = True
         r["results"] += reversed(apiosintParser(response, import_related_hashes))
     except Exception as e:
         log.debug(str(e))
