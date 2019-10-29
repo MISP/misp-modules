@@ -71,12 +71,12 @@ def handler(q=False):
                 event_type = event_types[fieldmap[attribute["type"]]]
                 if event_type not in queryDict.keys():
                     queryDict[event_type] = {}
-                queryDict[event_type][fieldmap[attribute["type"]]] = attribute["value"]
+                queryDict[event_type][attribute["value"]] = fieldmap[attribute["type"]]
     
     for query in queryDict.keys():
-        response.write("{} where\n")
-        for field in queryDict[query].keys():
-            response.write("\t{} == \"{}\"\n")
+        response.write("{} where\n".format(query))
+        for value in queryDict[query].keys():
+            response.write("\t{} == \"{}\"\n".format(queryDict[query][value], value))
 
     return {"response": [], "data": str(base64.b64encode(bytes(response.getvalue(), 'utf-8')), 'utf-8')}
 
