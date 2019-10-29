@@ -62,7 +62,7 @@ def handler(q=False):
 
     if attrType:
         eqlType = fieldmap[attrType]
-        event_type = event_type[eqlType]
+        event_type = event_types[eqlType]
         fullEql = "{} where {} == \"{}\"".format(event_type, eqlType, request[attrType])
     else:
         misperrors['error'] = "Unsupported attributes type"
