@@ -59,6 +59,10 @@ class TestExpansions(unittest.TestCase):
         if not isinstance(data, dict):
             print(json.dumps(data, indent=2))
             return data
+        for result in data['results']:
+            values = result['values']
+            if values:
+                return values[0] if isinstance(values, list) else values
         return data['results'][0]['values']
 
     def test_bgpranking(self):
@@ -69,7 +73,7 @@ class TestExpansions(unittest.TestCase):
     def test_btc_steroids(self):
         query = {"module": "btc_steroids", "btc": "1ES14c7qLb5CYhLMUekctxLgc1FV2Ti9DA"}
         response = self.misp_modules_post(query)
-        self.assertTrue(self.get_values(response)[0].startswith('\n\nAddress:\t1ES14c7qLb5CYhLMUekctxLgc1FV2Ti9DA\nBalance:\t0.0000000000 BTC (+0.0005355700 BTC / -0.0005355700 BTC)'))
+        self.assertTrue(self.get_values(response).startswith('\n\nAddress:\t1ES14c7qLb5CYhLMUekctxLgc1FV2Ti9DA\nBalance:\t0.0000000000 BTC (+0.0005355700 BTC / -0.0005355700 BTC)'))
 
     def test_btc_scam_check(self):
         query = {"module": "btc_scam_check", "btc": "1ES14c7qLb5CYhLMUekctxLgc1FV2Ti9DA"}
@@ -80,7 +84,7 @@ class TestExpansions(unittest.TestCase):
         query = {"module": "countrycode", "domain": "www.circl.lu"}
         response = self.misp_modules_post(query)
         try:
-            self.assertEqual(self.get_values(response), ['Luxembourg'])
+            self.assertEqual(self.get_values(response), 'Luxembourg')
         except Exception:
             results = ('http://www.geognos.com/api/en/countries/info/all.json not reachable', 'Unknown',
                        'Not able to get the countrycode references from http://www.geognos.com/api/en/countries/info/all.json')
@@ -89,7 +93,7 @@ class TestExpansions(unittest.TestCase):
     def test_cve(self):
         query = {"module": "cve", "vulnerability": "CVE-2010-3333", "config": {"custom_API": "https://cve.circl.lu/api/cve/"}}
         response = self.misp_modules_post(query)
-        self.assertTrue(self.get_values(response).startswith("Stack-based buffer overflow in Microsoft Office XP SP3, Office 2003 SP3"))
+        self.assertTrue(self.get_values(response).startswith("Unspecified vulnerability in Oracle Sun Java System Access Manager"))
 
     def test_cve_advanced(self):
         query = {"module": "cve_advanced",
@@ -117,7 +121,7 @@ class TestExpansions(unittest.TestCase):
     def test_dns(self):
         query = {"module": "dns", "hostname": "www.circl.lu", "config": {"nameserver": "8.8.8.8"}}
         response = self.misp_modules_post(query)
-        self.assertEqual(self.get_values(response), ['149.13.33.14'])
+        self.assertEqual(self.get_values(response), '149.13.33.14')
 
     def test_docx(self):
         filename = 'test.docx'
@@ -181,13 +185,14 @@ class TestExpansions(unittest.TestCase):
     def test_otx(self):
         query_types = ('domain', 'ip-src', 'md5')
         query_values = ('circl.lu', '8.8.8.8', '616eff3e9a7575ae73821b4668d2801c')
-        results = ('149.13.33.14', 'ffc2595aefa80b61621023252b5f0ccb22b6e31d7f1640913cd8ff74ddbd8b41',
+        results = (('149.13.33.14', '149.13.33.17'),
+                   'ffc2595aefa80b61621023252b5f0ccb22b6e31d7f1640913cd8ff74ddbd8b41',
                    '8.8.8.8')
         for query_type, query_value, result in zip(query_types, query_values, results):
             query = {"module": "otx", query_type: query_value, "config": {"apikey": "1"}}
             response = self.misp_modules_post(query)
             try:
-                self.assertTrue(self.get_values(response), [result])
+                self.assertIn(self.get_values(response), result)
             except KeyError:
                 # Empty results, which in this case comes from a connection error
                 continue
@@ -219,7 +224,7 @@ class TestExpansions(unittest.TestCase):
     def test_reversedns(self):
         query = {"module": "reversedns", "ip-src": "8.8.8.8"}
         response = self.misp_modules_post(query)
-        self.assertEqual(self.get_values(response), ['dns.google.'])
+        self.assertEqual(self.get_values(response), 'dns.google.')
 
     def test_sigma_queries(self):
         query = {"module": "sigma_queries", "sigma": self.sigma_rule}
@@ -250,7 +255,7 @@ class TestExpansions(unittest.TestCase):
         for query_type, query_value, result in zip(query_types, query_values, results):
             query = {"module": "threatcrowd", query_type: query_value}
             response = self.misp_modules_post(query)
-            self.assertTrue(self.get_values(response), [result])
+            self.assertTrue(self.get_values(response), result)
 
     def test_threatminer(self):
         query_types = ('domain', 'ip-src', 'md5')
@@ -259,7 +264,7 @@ class TestExpansions(unittest.TestCase):
         for query_type, query_value, result in zip(query_types, query_values, results):
             query = {"module": "threatminer", query_type: query_value}
             response = self.misp_modules_post(query)
-            self.assertTrue(self.get_values(response)[0], result)
+            self.assertTrue(self.get_values(response), result)
 
     def test_wikidata(self):
         query = {"module": "wiki", "text": "Google"}
