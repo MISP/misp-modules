@@ -16,10 +16,6 @@ moduleinfo = {
     "module-type": ["export"]
 }
 
-# config fields expected from the MISP administrator
-#   Default_Source: The source of the data. Typically this won't be changed from the default
-moduleconfig = ["Default_Source"]
-
 # Map of MISP fields => ThreatConnect fields
 fieldmap = {
 #    "domain": "Host",
@@ -72,11 +68,14 @@ def handler(q=False):
                 if event_type not in queryDict.keys():
                     queryDict[event_type] = {}
                 queryDict[event_type][attribute["value"]] = fieldmap[attribute["type"]]
-    
+    i = 0
     for query in queryDict.keys():
         response.write("{} where\n".format(query))
         for value in queryDict[query].keys():
-            response.write("\t{} == \"{}\"\n".format(queryDict[query][value], value))
+            if i != 0:
+                response.write(" or\n")
+            response.write("\t{} == \"{}\"".format(queryDict[query][value], value))
+            i += 1
 
     return {"response": [], "data": str(base64.b64encode(bytes(response.getvalue(), 'utf-8')), 'utf-8')}
 
@@ -104,5 +103,5 @@ def version():
     Output
         moduleinfo: metadata output containing all potential configuration values
     """
-    moduleinfo["config"] = moduleconfig
+#    moduleinfo["config"] = moduleconfig
     return moduleinfo
