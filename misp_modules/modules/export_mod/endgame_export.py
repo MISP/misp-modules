@@ -75,7 +75,7 @@ def handler(q=False):
     
     for query in queryDict.keys():
         response.write("{} where\n")
-        for field in query.keys():
+        for field in queryDict[query].keys():
             response.write("\t{} == \"{}\"\n")
 
     return {"response": [], "data": str(base64.b64encode(bytes(response.getvalue(), 'utf-8')), 'utf-8')}
