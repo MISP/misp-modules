@@ -101,14 +101,14 @@ class TestExpansions(unittest.TestCase):
             self.assertIn(self.get_values(response), results)
 
     def test_cve(self):
-        query = {"module": "cve", "vulnerability": "CVE-2010-3333", "config": {"custom_API": "https://cve.circl.lu/api/cve/"}}
+        query = {"module": "cve", "vulnerability": "CVE-2010-4444", "config": {"custom_API": "https://cve.circl.lu/api/cve/"}}
         response = self.misp_modules_post(query)
         self.assertTrue(self.get_values(response).startswith("Unspecified vulnerability in Oracle Sun Java System Access Manager"))
 
     def test_cve_advanced(self):
         query = {"module": "cve_advanced",
                  "attribute": {"type": "vulnerability",
-                               "value": "CVE-2010-3333",
+                               "value": "CVE-2010-4444",
                                "uuid": "ea89a33b-4ab7-4515-9f02-922a0bee333d"},
                  "config": {}}
         response = self.misp_modules_post(query)
