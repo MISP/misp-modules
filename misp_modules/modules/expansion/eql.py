@@ -56,23 +56,19 @@ def handler(q=False):
     config = request.get("config", {"Default_Source": ""})
     logging.info("Setting config to: %s", config)
 
-    # start parsing MISP data
-    queryDict = {}
-    for event in request["data"]:
-        for attribute in event["Attribute"]:
-            if attribute["type"] in mispattributes["input"]:
-                logging.debug("Adding %s to EQL query", attribute["value"])
-                event_type = event_types[fieldmap[attribute["type"]]]
-                if event_type not in queryDict.keys():
-                    queryDict[event_type] = {}
-                queryDict[event_type][attribute["value"]] = fieldmap[attribute["type"]]
-    
+    for supportedType in fieldmap.keys():
+        if request.get(supportedType):
+            attrType = supportedType
+
+    if attrType:
+        eqlType = fieldmap[attrType]
+        event_type = event_type[eqlType]
+        fullEql = "{} where {} == \"{}\"".format(event_type, eqlType, request[attrType])
+    else:
+        misperrors['error'] = "Unsupported attributes type"
+        return misperrors
+
     response = []
-    fullEql = ""
-    for query in queryDict.keys():
-        fullEql += "{} where\n".format(query)
-        for value in queryDict[query].keys():
-            fullEql += "\t{} == \"{}\"\n".format(queryDict[query][value], value)
     response.append({'types': ['comment'], 'categories': ['External analysis'], 'values': fullEql, 'comment': "Event EQL queries"})
     return {'results': response}
 
