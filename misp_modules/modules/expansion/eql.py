@@ -1,9 +1,6 @@
 """
 Export module for converting MISP events into Endgame EQL queries
 """
-import base64
-import csv
-import io
 import json
 import logging
 
@@ -16,16 +13,10 @@ moduleinfo = {
     "module-type": ["expansion"]
 }
 
-# Map of MISP fields => ThreatConnect fields
+# Map of MISP fields => Endgame fields
 fieldmap = {
-#    "domain": "Host",
-#    "domain|ip": "Host|Address",
-#    "hostname": "hostname",
     "ip-src": "source_address",
     "ip-dst": "destination_address",
-#    "ip-src|port": "Address",
-#    "ip-dst|port": "Address",
-#    "url": "URL",
     "filename": "file_name"
 }
 
@@ -80,13 +71,6 @@ def introspection():
     Output
         Dictionary of supported MISP attributes
     """
-#    modulesetup = {
-#        "responseType": "application/txt",
-#        "outputFileExtension": "txt",
-#        "userConfig": {},
-#        "inputSource": []
-#    }
-#    return modulesetup
     return mispattributes
 
 
@@ -97,5 +81,4 @@ def version():
     Output
         moduleinfo: metadata output containing all potential configuration values
     """
-    #moduleinfo["config"] = moduleconfig
     return moduleinfo

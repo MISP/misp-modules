@@ -2,7 +2,6 @@
 Export module for converting MISP events into Endgame EQL queries
 """
 import base64
-import csv
 import io
 import json
 import logging
