@@ -22,7 +22,7 @@ moduleinfo = {
 moduleconfig = ['apikey']
 misperrors = {'error': 'Error'}
 mispattributes = {
-    'input': ['hostname', 'domain', 'url'],
+    'input': ['hostname', 'domain', 'ip-src', 'ip-dst', 'url'],
     'output': ['hostname', 'domain', 'ip-src', 'ip-dst', 'url', 'text', 'link', 'hash']
 }
 
