@@ -24,7 +24,7 @@ def handler(q=False):
 
         request = json.loads(q)
 
-        if not request.get('config') and not (request['config'].get('apikey')):
+        if not request.get('config') or not request['config'].get('apikey'):
             misperrors['error'] = 'Onyphe authentication is missing'
             return misperrors
 
