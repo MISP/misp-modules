@@ -31,9 +31,8 @@ def handler(q=False):
     else:
         return False
 
-    if request['config'].get('api_key'):
+    if request.get('config') and request['config'].get('api_key'):
         api_key = request['config'].get('api_key')
-
     else:
         misperrors['error'] = 'Authorization required'
         return misperrors
