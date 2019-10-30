@@ -27,8 +27,8 @@ def handler(q=False):
         misperrors['error'] = "Unsupported attributes type"
         return misperrors
 
-    if not request.get('config') and not (request['config'].get('apikey')):
-        misperrors['error'] = 'shodan authentication is missing'
+    if not request.get('config') or not request['config'].get('apikey'):
+        misperrors['error'] = 'Shodan authentication is missing'
         return misperrors
     api = shodan.Shodan(request['config'].get('apikey'))
 

@@ -31,10 +31,9 @@ def handler(q=False):
     if q is False:
         return False
     request = json.loads(q)
-    if (request.get('config')):
-        if (request['config'].get('apikey') is None):
-            misperrors['error'] = 'urlscan apikey is missing'
-            return misperrors
+    if not request.get('config') or not request['config'].get('apikey'):
+        misperrors['error'] = 'Urlscan apikey is missing'
+        return misperrors
     client = urlscanAPI(request['config']['apikey'])
 
     r = {'results': []}

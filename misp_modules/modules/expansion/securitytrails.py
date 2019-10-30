@@ -37,14 +37,15 @@ def handler(q=False):
 
         request = json.loads(q)
 
-        if not request.get('config') and not (request['config'].get('apikey')):
-            misperrors['error'] = 'DNS authentication is missing'
+        if not request.get('config') or not (request['config'].get('apikey')):
+            misperrors['error'] = 'SecurityTrails authentication is missing'
             return misperrors
 
         api = DnsTrails(request['config'].get('apikey'))
 
         if not api:
-            misperrors['error'] = 'Onyphe Error instance api'
+            misperrors['error'] = 'SecurityTrails Error instance api'
+            return misperrors
         if request.get('ip-src'):
             ip = request['ip-src']
             return handle_ip(api, ip, misperrors)
