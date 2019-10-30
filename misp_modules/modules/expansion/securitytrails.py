@@ -93,9 +93,6 @@ def handle_domain(api, domain, misperrors):
     if status_ok:
         if r:
             result_filtered['results'].extend(r)
-    else:
-        misperrors['error'] = misperrors['error'] + ' Error whois result'
-        return misperrors
 
     time.sleep(1)
     r, status_ok = expand_history_ipv4_ipv6(api, domain)
