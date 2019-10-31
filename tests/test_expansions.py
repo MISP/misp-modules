@@ -294,6 +294,14 @@ class TestExpansions(unittest.TestCase):
         response = self.misp_modules_post(query)
         self.assertEqual(self.get_values(response), '\npptx test\n')
 
+    def test_qrcode(self):
+        filename = 'qrcode.jpeg'
+        with open(f'{self.dirname}/test_files/{filename}', 'rb') as f:
+            encoded = b64encode(f.read()).decode()
+        query = {"module": "qrcode", "attachment": filename, "data": encoded}
+        response = self.misp_modules_post(query)
+        self.assertEqual(self.get_values(response), '1GXZ6v7FZzYBEnoRaG77SJxhu7QkvQmFuh')
+
     def test_rbl(self):
         query = {"module": "rbl", "ip-src": "8.8.8.8"}
         response = self.misp_modules_post(query)
