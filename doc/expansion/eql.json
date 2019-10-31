@@ -1,0 +1,8 @@
+{
+    "description": "EQL query generation for a MISP attribute.",
+    "requirements": [],
+    "features": "This module adds a new attribute to a MISP event containing an EQL query for a network or file attribute.",
+    "references": [],
+    "input": "MISP Event attributes",
+    "output": "Event attribute containing EQL for a network or file attribute."
+  }

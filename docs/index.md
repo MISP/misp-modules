@@ -35,6 +35,7 @@ For more information: [Extending MISP with Python modules](https://www.circl.lu/
 * [docx-enrich](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/docx-enrich.py) - an enrichment module to get text out of Word document into MISP (using free-text parser).
 * [DomainTools](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/domaintools.py) - a hover and expansion module to get information from [DomainTools](http://www.domaintools.com/) whois.
 * [EUPI](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/eupi.py) - a hover and expansion module to get information about an URL from the [Phishing Initiative project](https://phishing-initiative.eu/?lang=en).
+* [EQL](misp_modules/modules/expansion/eql.py) - an expansion module to generate event query language (EQL) from an attribute. [Event Query Language](https://eql.readthedocs.io/en/latest/)
 * [Farsight DNSDB Passive DNS](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/farsight_passivedns.py) - a hover and expansion module to expand hostname and IP addresses with passive DNS information.
 * [GeoIP](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/geoip_country.py) - a hover and expansion module to get GeoIP information from geolite/maxmind.
 * [Greynoise](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/greynoise.py) - a hover to get information from greynoise.
@@ -87,6 +88,7 @@ For more information: [Extending MISP with Python modules](https://www.circl.lu/
 * [Cisco FireSight Manager ACL rule](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/export_mod/cisco_firesight_manager_ACL_rule_export.py) module to export as rule for the Cisco FireSight manager ACL.
 * [GoAML export](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/export_mod/goamlexport.py) module to export in [GoAML format](http://goaml.unodc.org/goaml/en/index.html).
 * [Lite Export](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/export_mod/liteexport.py) module to export a lite event.
+* [Mass EQL Export](misp_modules/modules/export_mod/mass_eql_export.py) module to export applicable attributes from an event to a mass EQL query.
 * [PDF export](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/export_mod/pdfexport.py) module to export an event in PDF.
 * [Nexthink query format](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/export_mod/nexthinkexport.py) module to export in Nexthink query format.
 * [osquery](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/export_mod/osqueryexport.py) module to export in [osquery](https://osquery.io/) query format.
