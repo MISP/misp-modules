@@ -466,6 +466,17 @@ class TestExpansions(unittest.TestCase):
             response = self.misp_modules_post(query)
             self.assertEqual(self.get_errors(response), "A VirusTotal api key is required for this module.")
 
+    def test_vulners(self):
+        module_name = "vulners"
+        query = {"module": module_name, "vulnerability": "CVE-2010-3333"}
+        if module_name in self.configs:
+            query['config'] = self.configs[module_name]
+            response = self.misp_modules_post(query)
+            self.assertTrue(self.get_values(response).endswith('"RTF Stack Buffer Overflow Vulnerability."'))
+        else:
+            response = self.misp_modules_post(query)
+            self.assertEqual(self.get_errors(response), "A Vulners api key is required for this module.")
+
     def test_wikidata(self):
         query = {"module": "wiki", "text": "Google"}
         response = self.misp_modules_post(query)
