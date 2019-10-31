@@ -447,7 +447,7 @@ class TestExpansions(unittest.TestCase):
         query_values = ('circl.lu', '149.13.33.14',
                         'a04ac6d98ad989312783d4fe3456c53730b212c79a426fb215708b6c6daa3de3',
                         'http://194.169.88.56:49151/.i')
-        results = ('whois', 'asn', 'file', 'virustotal-report')
+        results = ('domain-ip', 'asn', 'virustotal-report', 'virustotal-report')
         if module_name in self.configs:
             for query_type, query_value, result in zip(query_types, query_values, results):
                 query = {"module": module_name,
