@@ -27,7 +27,7 @@ class TestExpansions(unittest.TestCase):
         return requests.post(urljoin(self.url, "query"), json=query)
 
     @staticmethod
-    def get_attribute(reponse):
+    def get_attribute(response):
         data = response.json()
         if not isinstance(data, dict):
             print(json.dumps(data, indent=2))
