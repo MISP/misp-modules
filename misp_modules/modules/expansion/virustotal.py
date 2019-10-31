@@ -172,12 +172,13 @@ class VirusTotalParser(object):
         return attribute.uuid
 
     def parse_vt_object(self, query_result):
-        vt_object = MISPObject('virustotal-report')
-        vt_object.add_attribute('permalink', type='link', value=query_result['permalink'])
-        detection_ratio = '{}/{}'.format(query_result['positives'], query_result['total'])
-        vt_object.add_attribute('detection-ratio', type='text', value=detection_ratio)
-        self.misp_event.add_object(**vt_object)
-        return vt_object.uuid
+        if query_result['response_code'] == 1:
+            vt_object = MISPObject('virustotal-report')
+            vt_object.add_attribute('permalink', type='link', value=query_result['permalink'])
+            detection_ratio = '{}/{}'.format(query_result['positives'], query_result['total'])
+            vt_object.add_attribute('detection-ratio', type='text', value=detection_ratio)
+            self.misp_event.add_object(**vt_object)
+            return vt_object.uuid
 
 
 def parse_error(status_code):

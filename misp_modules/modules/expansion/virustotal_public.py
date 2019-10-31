@@ -56,11 +56,12 @@ class VirusTotalParser():
         self.misp_event.add_object(**domain_ip_object)
 
     def parse_vt_object(self, query_result):
-        vt_object = MISPObject('virustotal-report')
-        vt_object.add_attribute('permalink', type='link', value=query_result['permalink'])
-        detection_ratio = '{}/{}'.format(query_result['positives'], query_result['total'])
-        vt_object.add_attribute('detection-ratio', type='text', value=detection_ratio)
-        self.misp_event.add_object(**vt_object)
+        if query_result['response_code'] == 1:
+            vt_object = MISPObject('virustotal-report')
+            vt_object.add_attribute('permalink', type='link', value=query_result['permalink'])
+            detection_ratio = '{}/{}'.format(query_result['positives'], query_result['total'])
+            vt_object.add_attribute('detection-ratio', type='text', value=detection_ratio)
+            self.misp_event.add_object(**vt_object)
 
     def get_query_result(self, query_type):
         params = {query_type: self.attribute.value, 'apikey': self.apikey}
