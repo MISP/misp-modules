@@ -151,7 +151,11 @@ def expand_domain_info(api, misperror, domain):
     servers_mx = []
     soa_hostnames = []
 
-    results = api.domain(domain)
+    try:
+        results = api.domain(domain)
+    except APIError as e:
+        misperrors['error'] = e.value
+        return [], False
 
     if results:
         status_ok = True
