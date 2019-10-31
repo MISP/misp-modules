@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "27f2f4b2d71e59a134b4039f79a71677746f0f8cebec51a73c3936d9923dc92e"
+            "sha256": "e31638147f27ca5c90e27ebecdeb871f027feb37ede229b4296da35094a9516f"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -49,6 +49,20 @@
             ],
             "markers": "python_version >= '3'",
             "version": "==4.7.2"
+        },
+        "apiosintds": {
+            "hashes": [
+                "sha256:9a92f3fdb265f49046a871338419709f784b8ed82b249435c3c40e47d2ab4bcf"
+            ],
+            "index": "pypi",
+            "version": "==1.8.2"
+        },
+        "argparse": {
+            "hashes": [
+                "sha256:62b089a55be1d8949cd2bc7e0df0bddb9e028faefc8c32038cc84862aefdd6e4",
+                "sha256:c31647edb69fd3d465a847ea3157d37bed1f95f19760b11a47aa91c04b666314"
+            ],
+            "version": "==1.4.0"
         },
         "async-timeout": {
             "hashes": [
@@ -123,6 +137,13 @@
             ],
             "version": "==0.4.1"
         },
+        "decorator": {
+            "hashes": [
+                "sha256:54c38050039232e1db4ad7375cfce6748d7b41c29e95a081c8a6d2c30364a2ce",
+                "sha256:5d19b92a3c8f7f101c8dd86afd86b0f061a8ce4540ab8cd401fa2542756bce6d"
+            ],
+            "version": "==4.4.1"
+        },
         "deprecated": {
             "hashes": [
                 "sha256:a515c4cf75061552e0284d123c3066fbbe398952c87333a92b8fc3dd8e4f9cc1",
@@ -167,9 +188,9 @@
         },
         "future": {
             "hashes": [
-                "sha256:858e38522e8fd0d3ce8f0c1feaf0603358e366d5403209674c7b617fa0c24093"
+                "sha256:b1bead90b70cf6ec3f0710ae53a525360fa360d306a86583adc6bf83a4db537d"
             ],
-            "version": "==0.18.1"
+            "version": "==0.18.2"
         },
         "geoip2": {
             "hashes": [
@@ -572,7 +593,7 @@
         "pymisp": {
             "editable": true,
             "git": "https://github.com/MISP/PyMISP.git",
-            "ref": "3e8c36dc2f34b5d812a6b6d1bd1a619f01286657"
+            "ref": "87fd06a8893feafaffd461d6d611be4d02e5a4a2"
         },
         "pyonyphe": {
             "editable": true,
@@ -693,32 +714,37 @@
         },
         "reportlab": {
             "hashes": [
-                "sha256:044d5ae40e1540e4ebdabb4b807bebabfc29351f423b5ace9452ba1558412f3c",
-                "sha256:20dd16472c871948f0e60a50487929b37810e143320f25d339c93bbf0739af63",
-                "sha256:2b05e607fd9b24767a30bfb40a72388a05ccd51dda5208151bc39ed51b4959f6",
-                "sha256:33516fb7b15a180f5cb41b9c21245180c470d5de07c42af14684eecc53dedca1",
-                "sha256:3e2d2ea8ac3d63c918a2b40476c2745704d0364abe2b9c844c75992132a5eac7",
-                "sha256:3ef2dfd030d030f0c0ee9fcdbbe13044ed7497b6e8a41515e6fda7529d5dd3a9",
-                "sha256:46b042cb8c839fb5a9951dc4e6555c976f5daf0a89ad9333d3d944f14a71e4a1",
-                "sha256:4a0c603cd056563af5104ab4fb016538f0a66a53975291b48f27149fb783c840",
-                "sha256:5540792fd8eb1515b38d21ef3d84ca4f8d4b959079f015cbcb43ec10dde77689",
-                "sha256:55fe512159f6820f30fcd3500db1b4223bccd4840fa102c5c7b4a4f28a543363",
-                "sha256:60a3a41e2f59a6a02b1e38628885441334d055ec766bb785817f32944d2f6eab",
-                "sha256:6549611e0e88442fd83cbab2a8b01041dff7ae5c22c08b349b3832a8bad3b6bd",
-                "sha256:66f296d9420f6a2395399632e59545384a4f2173716ed595263342dbce8e8e3a",
-                "sha256:784f185fbbff0063577e7c3392caf1aaf27d25548d086329b43b9804bd476304",
-                "sha256:8cdcb85df200e49501cd9aa864743c7fc51d4e55571e57eb2ead9cf5c134e3ff",
-                "sha256:8f52916965d4d6f3befda9ea0ced856c0c11f30f9829dd7cccf22823c3ae0e99",
-                "sha256:be6b38189356cf89a227805a230c7240cda659523d58b2409336599dd4c45425",
-                "sha256:c08b60ae0670dbf344e03ea3cabd5c6040040e30b98c51958428a8ac3aa03dfa",
-                "sha256:c80388b8d2e656801dbf73ca291df2592f13240acf90e146a288c4244aab90fe",
-                "sha256:f25870bf8f1dc7b9a78627dd5913c6901a397794c546b1b4702ace1fb477a5e3",
-                "sha256:f269bd6bd31835e8e6bc1e202d85dc3dccd443e58041e06603ef374890dda0d7",
-                "sha256:f3e992c74135cf8fe48a06dfd008a644e8251f816dd6f1a2c8e12e261cae6da2",
-                "sha256:fa85c5551ccec02dee2b4d5ea22fb73dcba1285fe26611042a53b31ddae3cdde"
+                "sha256:149f0eeb4ea716441638b05fd6d3667d32f1463f3eac50b63e100a73a5533cdd",
+                "sha256:1aa9a2e1a87749db265b592ad25e498b39f70fce9f53a012cdf69f74259b6e43",
+                "sha256:1f5ce489adb2db2862249492e6367539cfa65b781cb06dcf13363dc52219be7e",
+                "sha256:23b28ba1784a6c52a926c075abd9f396d03670e71934b24db5ff684f8b870e0f",
+                "sha256:3d3de0f4facdd7e3c56ecbc55733a958b86c35a8e7ba6066c7b1ba383e282f58",
+                "sha256:484d346b8f463ba2ddaf6d365c6ac5971cd062528b6d5ba68cac02b9435366c5",
+                "sha256:4da2467def21f2e20720b21f6c18e7f7866720a955c716b990e94e3979fe913f",
+                "sha256:5ebdf22daee7d8e630134d94f477fe6abd65a65449d4eec682a7b458b5249604",
+                "sha256:655a1b68be18a73fec5233fb5d81f726b4db32269e487aecf5b6853cca926d86",
+                "sha256:6c535a304888dafe50c2c24d4924aeefc11e0542488ee6965f6133d415e86bbc",
+                "sha256:7560ef655ac6448bb257fd34bfdfb8d546f9c7c0900ed8963fb8509f75e8ca80",
+                "sha256:7a1c2fa3e6310dbe47efee2020dc0f25be7a75ff09a8fedc4a87d4397f3810c1",
+                "sha256:817c344b9aa53b5bfc2f58ff82111a1e85ca4c8b68d1add088b547360a6ebcfa",
+                "sha256:81d950e398d6758aeaeeb267aa1a62940735414c980f77dd0a270cef1782a43d",
+                "sha256:83ef44936ef4e9c432d62bc2b72ec8d772b87af319d123e827a72e9b6884c851",
+                "sha256:9f975adc2c7a236403f0bc91d7a3916e644e47b1f1e3990325f15e73b83581ec",
+                "sha256:a5ca59e2b7e70a856de6db9dadd3e11a1b3b471c999585284d5c1d479c01cf5d",
+                "sha256:ad2cf5a673c05fae9e91e987994b95205c13c5fa55d7393cf8b06f9de6f92990",
+                "sha256:b8c3d76276372f87b7c8ff22065dbc072cca5ffb06ba0267edc298df7acf942d",
+                "sha256:b93f7f908e916d9413dd8c04da1ccb3977e446803f59078424decdc0de449133",
+                "sha256:c0ecd0af92c759edec0d24ba92f4a18c28d4a19229ae7c8249f94e82f3d76288",
+                "sha256:c9e38eefc90a02c072a87a627ff66b2d67c23f6f82274d2aa7fb28e644e8f409",
+                "sha256:ca2a1592d2e181a04372d0276ee847308ea206dfe7c86fe94769e7ac126e6e85",
+                "sha256:ce1dfc9beec83e66250ca3afaf5ddf6b9a3ce70a30a9526dec7c6bec3266baf1",
+                "sha256:d3550c90751132b26b72a78954905974f33b1237335fbe0d8be957f9636c376a",
+                "sha256:e35a574f4e5ec0fdd5dc354e74ec143d853abd7f76db435ffe2a57d0161a22eb",
+                "sha256:ee5cafca6ef1a38fef8cbf3140dd2198ad1ee82331530b546039216ef94f93cb",
+                "sha256:fa1c969176cb3594a785c6818bcb943ebd49453791f702380b13a35fa23b385a"
             ],
             "index": "pypi",
-            "version": "==3.5.31"
+            "version": "==3.5.32"
         },
         "requests": {
             "hashes": [
@@ -823,6 +849,12 @@
             "git": "https://github.com/Rafiot/uwhoisd.git",
             "ref": "411572840eba4c72dc321c549b36a54ed5cea9de",
             "subdirectory": "client"
+        },
+        "validators": {
+            "hashes": [
+                "sha256:f0ac832212e3ee2e9b10e156f19b106888cf1429c291fbc5297aae87685014ae"
+            ],
+            "version": "==0.14.0"
         },
         "vulners": {
             "hashes": [
@@ -986,11 +1018,11 @@
         },
         "flake8": {
             "hashes": [
-                "sha256:19241c1cbc971b9962473e4438a2ca19749a7dd002dd1a946eaba171b4114548",
-                "sha256:8e9dfa3cecb2400b3738a42c54c3043e821682b9c840b0448c0503f781130696"
+                "sha256:45681a117ecc81e870cbf1262835ae4af5e7a8b08e40b944a8a6e6b895914cfb",
+                "sha256:49356e766643ad15072a789a20915d3c91dc89fd313ccd71802303fd67e4deca"
             ],
             "index": "pypi",
-            "version": "==3.7.8"
+            "version": "==3.7.9"
         },
         "idna": {
             "hashes": [
