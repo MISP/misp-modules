@@ -1,0 +1,8 @@
+{
+    "description": "On demand query API for OSINT.digitalside.it project.",
+    "requirements": ["The apiosintDS python library to query the OSINT.digitalside.it API."],
+    "input": "A domain, ip, url or hash attribute.",
+    "output": "Hashes and urls resulting from the query to OSINT.digitalside.it",
+    "references": ["https://osint.digitalside.it/#About"],
+    "features": "The module simply queries the API of OSINT.digitalside.it with a domain, ip, url or hash attribute.\n\nThe result of the query is then parsed to extract additional hashes or urls. A module parameters also allows to parse the hashes related to the urls.\n\nFurthermore, it is possible to cache the urls and hashes collected over the last 7 days by OSINT.digitalside.it"
+}

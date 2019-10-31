@@ -2,6 +2,26 @@
 
 ## Expansion Modules
 
+#### [apiosintds](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/apiosintds.py)
+
+On demand query API for OSINT.digitalside.it project.
+- **features**:
+>The module simply queries the API of OSINT.digitalside.it with a domain, ip, url or hash attribute.
+>
+>The result of the query is then parsed to extract additional hashes or urls. A module parameters also allows to parse the hashes related to the urls.
+>
+>Furthermore, it is possible to cache the urls and hashes collected over the last 7 days by OSINT.digitalside.it
+- **input**:
+>A domain, ip, url or hash attribute.
+- **output**:
+>Hashes and urls resulting from the query to OSINT.digitalside.it
+- **references**:
+>https://osint.digitalside.it/#About
+- **requirements**:
+>The apiosintDS python library to query the OSINT.digitalside.it API.
+
+-----
+
 #### [backscatter_io](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/backscatter_io.py)
 
 <img src=logos/backscatter_io.png height=60>
@@ -303,6 +323,22 @@ DomainTools MISP expansion module.
 >https://www.domaintools.com/
 - **requirements**:
 >Domaintools python library, A Domaintools API access (username & apikey)
+
+-----
+
+#### [eql](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/eql.py)
+
+<img src=logos/eql.png height=60>
+
+Generates EQL queries from attributes
+- **features**:
+>The module simply generates EQL rules out of the input attribute.
+- **input**:
+>A filename or ip attribute.
+- **output**:
+>The EQL query generated from the input attribute.
+- **references**:
+>https://eql.readthedocs.io/en/latest/
 
 -----
 
