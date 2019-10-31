@@ -125,16 +125,14 @@ def process_ssl_details(instance, query):
     """Process details for a specific certificate."""
     log.debug("SSL Details: starting")
     values = list()
-    _ = instance.get_ssl_certificate_details(query=query)
-    err = _has_error(_)
+    details = instance.get_ssl_certificate_details(query=query)
+    err = _has_error(details)
     if err:
         raise Exception("We hit an error, time to bail!")
-
-    for key, value in _.items():
-        if not value:
-            continue
-        values.append(value)
-    txt = [{'types': ['ssl-cert-attributes'], 'values': list(set(values))}]
+    if details.get('message') and details['message'].startswith('quota_exceeded'):
+        raise Exception("API quota exceeded.")
+    values = {value for value in details.values() if value}
+    txt = [{'types': ['ssl-cert-attributes'], 'values': list(values)}]
     log.debug("SSL Details: ending")
 
     return txt
@@ -151,12 +149,13 @@ def process_ssl_history(instance, query):
     }
 
     hits = {'ip': list(), 'sha1': list(), 'domain': list()}
-    _ = instance.get_ssl_certificate_history(query=query)
-    err = _has_error(_)
+    history = instance.get_ssl_certificate_history(query=query)
+    err = _has_error(history)
     if err:
         raise Exception("We hit an error, time to bail!")
-
-    for item in _.get('results', []):
+    if history.get('message') and history['message'].startswith('quota_exceeded'):
+        raise Exception("API quota exceeded.")
+    for item in history.get('results', []):
         hits['ip'] += item.get('ipAddresses', [])
         hits['sha1'].append(item['sha1'])
         hits['domain'] += item.get('domains', [])
@@ -175,21 +174,22 @@ def process_whois_details(instance, query):
     """Process the detail from the WHOIS record."""
     log.debug("WHOIS Details: starting")
     tmp = list()
-    _ = instance.get_whois_details(query=query, compact_record=True)
-    err = _has_error(_)
+    details = instance.get_whois_details(query=query, compact_record=True)
+    err = _has_error(details)
     if err:
         raise Exception("We hit an error, time to bail!")
-
-    if _.get('contactEmail', None):
-        tmp.append({'types': ['whois-registrant-email'], 'values': [_.get('contactEmail')]})
-    phones = _['compact']['telephone']['raw']
+    if details.get('message') and details['message'].startswith('quota_exceeded'):
+        raise Exception("API quota exceeded.")
+    if details.get('contactEmail', None):
+        tmp.append({'types': ['whois-registrant-email'], 'values': [details.get('contactEmail')]})
+    phones = details['compact']['telephone']['raw']
     tmp.append({'types': ['whois-registrant-phone'], 'values': phones})
-    names = _['compact']['name']['raw']
+    names = details['compact']['name']['raw']
     tmp.append({'types': ['whois-registrant-name'], 'values': names})
-    if _.get('registrar', None):
-        tmp.append({'types': ['whois-registrar'], 'values': [_.get('registrar')]})
-    if _.get('registered', None):
-        tmp.append({'types': ['whois-creation-date'], 'values': [_.get('registered')]})
+    if details.get('registrar', None):
+        tmp.append({'types': ['whois-registrar'], 'values': [details.get('registrar')]})
+    if details.get('registered', None):
+        tmp.append({'types': ['whois-creation-date'], 'values': [details.get('registered')]})
     log.debug("WHOIS Details: ending")
 
     return tmp
@@ -206,12 +206,13 @@ def process_whois_search(instance, query, qtype):
         field_type = 'name'
 
     domains = list()
-    _ = instance.search_whois_by_field(field=field_type, query=query)
-    err = _has_error(_)
+    search = instance.search_whois_by_field(field=field_type, query=query)
+    err = _has_error(search)
     if err:
         raise Exception("We hit an error, time to bail!")
-
-    for item in _.get('results', []):
+    if search.get('message') and search['message'].startswith('quota_exceeded'):
+        raise Exception("API quota exceeded.")
+    for item in search.get('results', []):
         domain = item.get('domain', None)
         if not domain:
             continue
@@ -227,15 +228,16 @@ def process_passive_dns(instance, query):
     """Process passive DNS data."""
     log.debug("Passive DNS: starting")
     tmp = list()
-    _ = instance.get_unique_resolutions(query=query)
-    err = _has_error(_)
+    pdns = instance.get_unique_resolutions(query=query)
+    err = _has_error(pdns)
     if err:
         raise Exception("We hit an error, time to bail!")
-
+    if pdns.get('message') and pdns['message'].startswith('quota_exceeded'):
+        raise Exception("API quota exceeded.")
     if is_ip(query):
-        tmp = [{'types': ['domain', 'hostname'], 'values': _.get('results', [])}]
+        tmp = [{'types': ['domain', 'hostname'], 'values': pdns.get('results', [])}]
     else:
-        tmp = [{'types': ['ip-src', 'ip-dst'], 'values': _.get('results', [])}]
+        tmp = [{'types': ['ip-src', 'ip-dst'], 'values': pdns.get('results', [])}]
     log.debug("Passive DNS: ending")
 
     return tmp
@@ -245,12 +247,13 @@ def process_osint(instance, query):
     """Process OSINT links."""
     log.debug("OSINT: starting")
     urls = list()
-    _ = instance.get_osint(query=query)
-    err = _has_error(_)
+    osint = instance.get_osint(query=query)
+    err = _has_error(osint)
     if err:
         raise Exception("We hit an error, time to bail!")
-
-    for item in _.get('results', []):
+    if osint.get('message') and osint['message'].startswith('quota_exceeded'):
+        raise Exception("API quota exceeded.")
+    for item in osint.get('results', []):
         urls.append(item['sourceUrl'])
 
     tmp = [{'types': ['link'], 'values': urls}]
@@ -263,12 +266,13 @@ def process_malware(instance, query):
     """Process malware samples."""
     log.debug("Malware: starting")
     content = {'hashes': list(), 'urls': list()}
-    _ = instance.get_malware(query=query)
-    err = _has_error(_)
+    malware = instance.get_malware(query=query)
+    err = _has_error(malware)
     if err:
         raise Exception("We hit an error, time to bail!")
-
-    for item in _.get('results', []):
+    if malware.get('message') and malware['message'].startswith('quota_exceeded'):
+        raise Exception("API quota exceeded.")
+    for item in malware.get('results', []):
         content['hashes'].append(item['sample'])
         content['urls'].append(item['sourceUrl'])
 
@@ -331,7 +335,8 @@ def handler(q=False):
             output['results'] += results
         else:
             log.error("Unsupported query pattern issued.")
-    except Exception:
+    except Exception as e:
+        misperrors['error'] = e.__str__()
         return misperrors
 
     return output
