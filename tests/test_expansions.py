@@ -490,6 +490,29 @@ class TestExpansions(unittest.TestCase):
         except Exception:
             self.assertEqual(self.get_values(response), 'No additional data found on Wikidata')
 
+    def test_xforceexchange(self):
+        module_name = "xforceexchange"
+        query_types = ('domain', 'ip-src', 'md5', 'url', 'vulnerability')
+        query_values = ('mediaget.com', '61.255.239.86', '474b9ccf5ab9d72ca8a333889bbb34f0',
+                        'mediaget.com', 'CVE-2014-2601')
+        results = ('domain-ip', 'domain-ip', 'url', 'domain-ip', 'vulnerability')
+        if module_name in self.configs:
+            for query_type, query_value, result in zip(query_types, query_values, results):
+                query = {"module": module_name,
+                         "attribute": {"type": query_type,
+                                       "value": query_value,
+                                       "uuid": "ea89a33b-4ab7-4515-9f02-922a0bee333d"},
+                         "config": self.configs[module_name]}
+                response = self.misp_modules_post(query)
+                self.assertEqual(self.get_object(response), result)
+        else:
+            query = {"module": module_name,
+                     "attribute": {"type": query_types[0],
+                                   "value": query_values[0],
+                                   "uuid": "ea89a33b-4ab7-4515-9f02-922a0bee333d"}}
+            response = self.misp_modules_post(query)
+            self.assertEqual(self.get_errors(response), "An API authentication is required (key and password).")
+
     def test_xlsx(self):
         filename = 'test.xlsx'
         with open(f'{self.dirname}/test_files/{filename}', 'rb') as f:
