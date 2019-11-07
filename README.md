@@ -33,9 +33,8 @@ For more information: [Extending MISP with Python modules](https://www.misp-proj
 * [DNS](misp_modules/modules/expansion/dns.py) - a simple module to resolve MISP attributes like hostname and domain to expand IP addresses attributes.
 * [docx-enrich](misp_modules/modules/expansion/docx_enrich.py) - an enrichment module to get text out of Word document into MISP (using free-text parser).
 * [DomainTools](misp_modules/modules/expansion/domaintools.py) - a hover and expansion module to get information from [DomainTools](http://www.domaintools.com/) whois.
-* [EQL](misp_modules/modules/expansion/eql.py) - an expansion module to generate EQL queries from attributes.
-* [EUPI](misp_modules/modules/expansion/eupi.py) - a hover and expansion module to get information about an URL from the [Phishing Initiative project](https://phishing-initiative.eu/?lang=en).
 * [EQL](misp_modules/modules/expansion/eql.py) - an expansion module to generate event query language (EQL) from an attribute. [Event Query Language](https://eql.readthedocs.io/en/latest/)
+* [EUPI](misp_modules/modules/expansion/eupi.py) - a hover and expansion module to get information about an URL from the [Phishing Initiative project](https://phishing-initiative.eu/?lang=en).
 * [Farsight DNSDB Passive DNS](misp_modules/modules/expansion/farsight_passivedns.py) - a hover and expansion module to expand hostname and IP addresses with passive DNS information.
 * [GeoIP](misp_modules/modules/expansion/geoip_country.py) - a hover and expansion module to get GeoIP information from geolite/maxmind.
 * [Greynoise](misp_modules/modules/expansion/greynoise.py) - a hover to get information from greynoise.
