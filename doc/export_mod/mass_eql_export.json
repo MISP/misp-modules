@@ -1,0 +1,8 @@
+{
+    "description": "Mass EQL query export for a MISP event.",
+    "requirements": [],
+    "features": "This module produces EQL queries for all relevant attributes in a MISP event.",
+    "references": [],
+    "input": "MISP Event attributes",
+    "output": "Text file containing one or more EQL queries"
+  }

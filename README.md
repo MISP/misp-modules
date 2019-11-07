@@ -35,6 +35,7 @@ For more information: [Extending MISP with Python modules](https://www.misp-proj
 * [DomainTools](misp_modules/modules/expansion/domaintools.py) - a hover and expansion module to get information from [DomainTools](http://www.domaintools.com/) whois.
 * [EQL](misp_modules/modules/expansion/eql.py) - an expansion module to generate EQL queries from attributes.
 * [EUPI](misp_modules/modules/expansion/eupi.py) - a hover and expansion module to get information about an URL from the [Phishing Initiative project](https://phishing-initiative.eu/?lang=en).
+* [EQL](misp_modules/modules/expansion/eql.py) - an expansion module to generate event query language (EQL) from an attribute. [Event Query Language](https://eql.readthedocs.io/en/latest/)
 * [Farsight DNSDB Passive DNS](misp_modules/modules/expansion/farsight_passivedns.py) - a hover and expansion module to expand hostname and IP addresses with passive DNS information.
 * [GeoIP](misp_modules/modules/expansion/geoip_country.py) - a hover and expansion module to get GeoIP information from geolite/maxmind.
 * [Greynoise](misp_modules/modules/expansion/greynoise.py) - a hover to get information from greynoise.
@@ -88,6 +89,7 @@ For more information: [Extending MISP with Python modules](https://www.misp-proj
 * [GoAML export](misp_modules/modules/export_mod/goamlexport.py) module to export in [GoAML format](http://goaml.unodc.org/goaml/en/index.html).
 * [Lite Export](misp_modules/modules/export_mod/liteexport.py) module to export a lite event.
 * [PDF export](misp_modules/modules/export_mod/pdfexport.py) module to export an event in PDF.
+* [Mass EQL Export](misp_modules/modules/export_mod/mass_eql_export.py) module to export applicable attributes from an event to a mass EQL query. 
 * [Nexthink query format](misp_modules/modules/export_mod/nexthinkexport.py) module to export in Nexthink query format.
 * [osquery](misp_modules/modules/export_mod/osqueryexport.py) module to export in [osquery](https://osquery.io/) query format.
 * [ThreatConnect](misp_modules/modules/export_mod/threat_connect_export.py) module to export in ThreatConnect CSV format.
