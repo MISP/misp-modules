@@ -330,13 +330,13 @@ DomainTools MISP expansion module.
 
 <img src=logos/eql.png height=60>
 
-Generates EQL queries from attributes
+EQL query generation for a MISP attribute.
 - **features**:
->The module simply generates EQL rules out of the input attribute.
+>This module adds a new attribute to a MISP event containing an EQL query for a network or file attribute.
 - **input**:
 >A filename or ip attribute.
 - **output**:
->The EQL query generated from the input attribute.
+>Attribute containing EQL for a network or file attribute.
 - **references**:
 >https://eql.readthedocs.io/en/latest/
 
@@ -1375,6 +1375,22 @@ Lite export of a MISP event.
 >MISP Event attributes
 - **output**:
 >Lite MISP Event
+
+-----
+
+#### [mass_eql_export](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/export_mod/mass_eql_export.py)
+
+<img src=logos/eql.png height=60>
+
+Mass EQL query export for a MISP event.
+- **features**:
+>This module produces EQL queries for all relevant attributes in a MISP event.
+- **input**:
+>MISP Event attributes
+- **output**:
+>Text file containing one or more EQL queries
+- **references**:
+>https://eql.readthedocs.io/en/latest/
 
 -----
 
