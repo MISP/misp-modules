@@ -105,7 +105,7 @@ class XforceExchange():
 
     def _parse_dns(self, value):
         dns_result = self._api_call(f'{self.base_url}/resolve/{value}')
-        if dns_result and dns_result['Passive'].get('records'):
+        if dns_result.get('Passive') and dns_result['Passive'].get('records'):
             itype, ftype, value = self._fetch_types(dns_result['Passive']['query'])
             misp_object = MISPObject('domain-ip')
             misp_object.add_attribute(itype, value)
