@@ -12,14 +12,13 @@ moduleinfo = {'version': '4', 'author': 'Hannah Ward',
               'module-type': ['expansion']}
 
 # config fields that your code expects from the site admin
-moduleconfig = ["apikey"]
+moduleconfig = ["apikey", "event_limit"]
 
-
-# TODO: Parse the report with a private API key to be able to get more advanced results from a query with 'allinfo' set to True
 
 class VirusTotalParser(object):
-    def __init__(self, apikey):
+    def __init__(self, apikey, limit):
         self.apikey = apikey
+        self.limit = limit
         self.base_url = "https://www.virustotal.com/vtapi/v2/{}/report"
         self.misp_event = MISPEvent()
         self.parsed_objects = {}
@@ -57,7 +56,7 @@ class VirusTotalParser(object):
         uuid = self.parse_resolutions(req['resolutions'], req['subdomains'], siblings)
         for feature_type, relationship in feature_types.items():
             for feature in ('undetected_{}_samples', 'detected_{}_samples'):
-                for sample in req.get(feature.format(feature_type), []):
+                for sample in req.get(feature.format(feature_type), [])[:self.limit]:
                     status_code = self.parse_hash(sample[hash_type], False, uuid, relationship)
                     if status_code != 200:
                         return status_code
@@ -197,7 +196,10 @@ def handler(q=False):
     if not request.get('config') or not request['config'].get('apikey'):
         misperrors['error'] = "A VirusTotal api key is required for this module."
         return misperrors
-    parser = VirusTotalParser(request['config']['apikey'])
+    event_limit = request['config'].get('event_limit')
+    if not isinstance(event_limit, int):
+        event_limit = 5
+    parser = VirusTotalParser(request['config']['apikey'], event_limit)
     attribute = request['attribute']
     status = parser.query_api(attribute)
     if status != 200:
