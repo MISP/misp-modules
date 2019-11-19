@@ -11,6 +11,7 @@
 aiohttp==3.4.4
 apiosintDS==1.8.1
 antlr4-python3-runtime==4.7.2 ; python_version >= '3'
+assemblyline_client
 async-timeout==3.0.1
 attrs==19.1.0
 backscatter==0.2.4

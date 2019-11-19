@@ -58,6 +58,7 @@ idna-ssl = {markers = "python_version < '3.7'"}
 jbxapi = "*"
 geoip2 = "*"
 apiosintDS = "*"
+assemblyline_client = "*"
 
 [requires]
 python_version = "3"
