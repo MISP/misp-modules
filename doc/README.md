@@ -32,7 +32,7 @@ A module to submit samples and URLs to AssemblyLine for advanced analysis, and r
 >
 >If the sample or url is correctly submitted, you get then the link of the submission.
 - **input**:
->Sample, url (or domain) to submit to AssemblyLine.
+>Sample, or url to submit to AssemblyLine.
 - **output**:
 >Link of the report generated in AssemblyLine.
 - **references**:
