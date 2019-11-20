@@ -22,6 +22,26 @@ On demand query API for OSINT.digitalside.it project.
 
 -----
 
+#### [assemblyline_submit](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/assemblyline_submit.py)
+
+<img src=logos/assemblyline.png height=60>
+
+A module to submit samples and URLs to AssemblyLine for advanced analysis, and return the link of the submission.
+- **features**:
+>The module requires the address of the AssemblyLine server you want to query as well as your credentials in this instance. Credentials include the user-ID and an API key or the password associated to the user-ID.
+>
+>If the sample or url is correctly submitted, you get then the link of the submission.
+- **input**:
+>Sample, url (or domain) to submit to AssemblyLine.
+- **output**:
+>Link of the report generated in AssemblyLine.
+- **references**:
+>https://www.cyber.gc.ca/en/assemblyline
+- **requirements**:
+>assemblyline_client: Python library to query the AssemblyLine rest API.
+
+-----
+
 #### [backscatter_io](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/backscatter_io.py)
 
 <img src=logos/backscatter_io.png height=60>
@@ -536,7 +556,7 @@ A module to submit files or URLs to Joe Sandbox for an advanced analysis, and re
 - **input**:
 >Sample, url (or domain) to submit to Joe Sandbox for an advanced analysis.
 - **output**:
->Link of the data in input submitted to Joe Sandbox.
+>Link of the report generated in Joe Sandbox.
 - **references**:
 >https://www.joesecurity.org, https://www.joesandbox.com/
 - **requirements**:
