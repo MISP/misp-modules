@@ -25,6 +25,7 @@ def parse_config(apiurl, user_id, config):
             error['error'] = f'Error while initiating a connection with AssemblyLine: {e.__str__()}'
     return error
 
+
 def submit_content(client, filename, data):
     try:
         return client.submit(fname=filename, contents=data.encode())
