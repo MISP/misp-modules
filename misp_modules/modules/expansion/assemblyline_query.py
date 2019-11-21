@@ -3,7 +3,6 @@ import json
 from assemblyline_client import Client, ClientError
 from collections import defaultdict
 from pymisp import MISPAttribute, MISPEvent, MISPObject
-from urllib.parse import urljoin
 
 misperrors = {'error': 'Error'}
 mispattributes = {'input': ['link'], 'format': 'misp_standard'}
@@ -154,6 +153,7 @@ def handler(q=False):
     assemblyline_parser = AssemblyLineParser()
     assemblyline_parser.get_submission(request['attribute'], client)
     return assemblyline_parser.finalize_results()
+
 
 def introspection():
     return mispattributes
