@@ -19,6 +19,7 @@ For more information: [Extending MISP with Python modules](https://www.misp-proj
 
 * [apiosintDS](misp_modules/modules/expansion/apiosintds.py) - a hover and expansion module to query the OSINT.digitalside.it API.
 * [AssemblyLine submit](misp_modules/modules/expansion/assemblyline_submit.py) - an expansion module to submit samples and urls to AssemblyLine.
+* [AssemblyLine query](misp_modules/modules/expansion/assemblyline_query.py) - an expansion module to query AssemblyLine and parse the full submission report.
 * [Backscatter.io](misp_modules/modules/expansion/backscatter_io.py) - a hover and expansion module to expand an IP address with mass-scanning observations.
 * [BGP Ranking](misp_modules/modules/expansion/bgpranking.py) - a hover and expansion module to expand an AS number with the ASN description, its history, and position in BGP Ranking.
 * [BTC scam check](misp_modules/modules/expansion/btc_scam_check.py) - An expansion hover module to instantly check if a BTC address has been abused.

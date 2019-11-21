@@ -22,13 +22,35 @@ On demand query API for OSINT.digitalside.it project.
 
 -----
 
+#### [assemblyline_query](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/assemblyline_query.py)
+
+<img src=logos/assemblyline.png height=60>
+
+A module tu query the AssemblyLine API with a submission ID to get the submission report and parse it.
+- **features**:
+>The module requires the address of the AssemblyLine server you want to query as well as your credentials used for this instance. Credentials include the used-ID and an API key or the password associated to the user-ID.
+>
+>The submission ID extracted from the submission link is then used to query AssemblyLine and get the full submission report. This report is parsed to extract file objects and the associated IPs, domains or URLs the files are connecting to.
+>
+>Some more data may be parsed in the future.
+- **input**:
+>Link of an AssemblyLine submission report.
+- **output**:
+>MISP attributes & objects parsed from the AssemblyLine submission.
+- **references**:
+>https://www.cyber.cg.ca/en/assemblyline
+- **requirements**:
+>assemblyline_client: Python library to query the AssemblyLine rest API.
+
+-----
+
 #### [assemblyline_submit](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/assemblyline_submit.py)
 
 <img src=logos/assemblyline.png height=60>
 
 A module to submit samples and URLs to AssemblyLine for advanced analysis, and return the link of the submission.
 - **features**:
->The module requires the address of the AssemblyLine server you want to query as well as your credentials in this instance. Credentials include the user-ID and an API key or the password associated to the user-ID.
+>The module requires the address of the AssemblyLine server you want to query as well as your credentials used for this instance. Credentials include the user-ID and an API key or the password associated to the user-ID.
 >
 >If the sample or url is correctly submitted, you get then the link of the submission.
 - **input**:

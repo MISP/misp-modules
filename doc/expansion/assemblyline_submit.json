@@ -5,5 +5,5 @@
     "input": "Sample, or url to submit to AssemblyLine.",
     "output": "Link of the report generated in AssemblyLine.",
     "references": ["https://www.cyber.gc.ca/en/assemblyline"],
-    "features": "The module requires the address of the AssemblyLine server you want to query as well as your credentials in this instance. Credentials include the user-ID and an API key or the password associated to the user-ID.\n\nIf the sample or url is correctly submitted, you get then the link of the submission."
+    "features": "The module requires the address of the AssemblyLine server you want to query as well as your credentials used for this instance. Credentials include the user-ID and an API key or the password associated to the user-ID.\n\nIf the sample or url is correctly submitted, you get then the link of the submission."
 }
