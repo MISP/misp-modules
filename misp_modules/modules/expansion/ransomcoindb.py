@@ -1,6 +1,5 @@
 import json
 from _ransomcoindb import ransomcoindb
-import pprint
 
 copyright = """
   Copyright 2019 (C) by Aaron Kaplan <aaron@lo-res.org>, all rights reserved.
@@ -15,7 +14,7 @@ debug=False
 misperrors = {'error': 'Error'}
 # mispattributes = {'input': ['sha1', 'sha256', 'md5', 'btc', 'xmr', 'dash' ], 'output': ['btc', 'sha1', 'sha256', 'md5', 'freetext']}
 mispattributes = {'input': ['sha1', 'sha256', 'md5', 'btc'], 'output': ['btc', 'sha1', 'sha256', 'md5', 'freetext']}
-moduleinfo = {'version': __version__, 'author': 'Aaron Kaplan', 'description': 'Module to access the ransomcoinDB (ransomcoindb.metadata.li)', 'module-type': ['expansion', 'hover']}
+moduleinfo = {'version': __version__, 'author': 'Aaron Kaplan', 'description': 'Module to access the ransomcoinDB (see https://ransomcoindb.concinnity-risks.com)', 'module-type': ['expansion', 'hover']}
 moduleconfig = ['api-key']
 
 
@@ -32,7 +31,7 @@ def handler(q=False):
     """ the "q" query coming in should look something like this:
         {'config': {'api-key': '<api key here>'},
          'md5': 'md5 or sha1 or sha256 or btc',
-         'module': 'metadatali_ransomcoindb',
+         'module': 'ransomcoindb',
          'persistent': 1}
     """
 
