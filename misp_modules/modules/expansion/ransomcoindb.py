@@ -14,7 +14,7 @@ debug=False
 misperrors = {'error': 'Error'}
 # mispattributes = {'input': ['sha1', 'sha256', 'md5', 'btc', 'xmr', 'dash' ], 'output': ['btc', 'sha1', 'sha256', 'md5', 'freetext']}
 mispattributes = {'input': ['sha1', 'sha256', 'md5', 'btc'], 'output': ['btc', 'sha1', 'sha256', 'md5', 'freetext']}
-moduleinfo = {'version': __version__, 'author': 'Aaron Kaplan', 'description': 'Module to access the ransomcoinDB (see https://ransomcoindb.metadata.li)', 'module-type': ['expansion', 'hover']}
+moduleinfo = {'version': __version__, 'author': 'Aaron Kaplan', 'description': 'Module to access the ransomcoinDB (see https://ransomcoindb.concinnity-risks.com)', 'module-type': ['expansion', 'hover']}
 moduleconfig = ['api-key']
 
 

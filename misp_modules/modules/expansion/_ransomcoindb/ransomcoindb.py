@@ -13,7 +13,7 @@ copyright = """
 __version__ = 0.1
 
 
-baseurl = "https://ransomcoindb.metadata.li/api/v1/"
+baseurl = "https://ransomcoindb.concinnity-risks.com/api/v1/"
 urls = {'BTC': {'btc'   : baseurl + 'bin2btc/',
                 'md5'   : baseurl + 'bin2btc/md5/',
                 'sha1'  : baseurl + 'bin2btc/sha1/',
