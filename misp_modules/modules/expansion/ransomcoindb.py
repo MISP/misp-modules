@@ -1,5 +1,5 @@
 import json
-from _ransomcoindb import ransomcoindb
+from ._ransomcoindb import ransomcoindb
 
 copyright = """
   Copyright 2019 (C) by Aaron Kaplan <aaron@lo-res.org>, all rights reserved.
