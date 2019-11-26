@@ -14,16 +14,16 @@ __version__ = 0.1
 
 
 baseurl = "https://ransomcoindb.concinnity-risks.com/api/v1/"
-user_agent = "ransomcoindb client via python-requests/%s"  % requests.__version__
+user_agent = "ransomcoindb client via python-requests/%s" % requests.__version__
 
-urls = {'BTC': {'btc'   : baseurl + 'bin2btc/',
-                'md5'   : baseurl + 'bin2btc/md5/',
-                'sha1'  : baseurl + 'bin2btc/sha1/',
+urls = {'BTC': {'btc': baseurl + 'bin2btc/',
+                'md5': baseurl + 'bin2btc/md5/',
+                'sha1': baseurl + 'bin2btc/sha1/',
                 'sha256': baseurl + 'bin2btc/sha256/',
                 },
-        'XMR': {'xmr'   : baseurl + 'bin2crypto/XMR/',
-                'md5'   : baseurl + 'bin2crypto/XMR/md5/',
-                'sha1'  : baseurl + 'bin2crypto/XMR/sha1/',
+        'XMR': {'xmr': baseurl + 'bin2crypto/XMR/',
+                'md5': baseurl + 'bin2crypto/XMR/md5/',
+                'sha1': baseurl + 'bin2crypto/XMR/sha1/',
                 'sha256': baseurl + 'bin2crypto/XMR/sha256/',
                 }
         }

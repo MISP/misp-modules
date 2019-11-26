@@ -1,5 +1,6 @@
 import json
 from ._ransomcoindb import ransomcoindb
+from pymisp import MISPObject
 
 copyright = """
   Copyright 2019 (C) by Aaron Kaplan <aaron@lo-res.org>, all rights reserved.
@@ -9,11 +10,11 @@ copyright = """
 __version__ = 0.1
 
 
-debug=False
+debug = False
 
 misperrors = {'error': 'Error'}
 # mispattributes = {'input': ['sha1', 'sha256', 'md5', 'btc', 'xmr', 'dash' ], 'output': ['btc', 'sha1', 'sha256', 'md5', 'freetext']}
-mispattributes = {'input': ['sha1', 'sha256', 'md5', 'btc'], 'output': ['btc', 'sha1', 'sha256', 'md5', 'freetext']}
+mispattributes = {'input': ['sha1', 'sha256', 'md5', 'btc'], 'output': ['btc', 'sha1', 'sha256', 'md5', 'freetext'], 'format': 'misp_standard'}
 moduleinfo = {'version': __version__, 'author': 'Aaron Kaplan', 'description': 'Module to access the ransomcoinDB (see https://ransomcoindb.concinnity-risks.com)', 'module-type': ['expansion', 'hover']}
 moduleconfig = ['api-key']
 
@@ -34,21 +35,23 @@ def handler(q=False):
          'module': 'ransomcoindb',
          'persistent': 1}
     """
-
-    for key in ['md5', 'sha1', 'sha256', 'btc']:        # later: xmr, dash
-        if key in q:
-            answer = ransomcoindb.get_data_by('BTC', key, q[key], api_key)
-            """ The results data type should be:
-              r =  { 'results': [ {'types': 'md5', 'values': [ a list of all md5s or all binaries related to this btc address ]  } ] }
-            """
-            if key in ['md5', 'sha1', 'sha256']:
-                r['results'].append({'types': 'btc', 'values': [ a['btc'] for a in answer ]})
-            elif key == 'btc':
-                # better: create a MISP object
-                r['results'].append({ 'types': 'sha1', 'values': [ a['sha1'] for a in answer ]})
-                r['results'].append({ 'types': 'md5', 'values': [ a['md5'] for a in answer ]})
-                r['results'].append({ 'types': 'sha256', 'values': [ a['sha256'] for a in answer ]})
-
+    attribute = q['attribute']
+    answer = ransomcoindb.get_data_by('BTC', attribute['type'], attribute['value'], api_key)
+    """ The results data type should be:
+      r =  { 'results': [ {'types': 'md5', 'values': [ a list of all md5s or all binaries related to this btc address ]  } ] }
+    """
+    if attribute['type'] in ['md5', 'sha1', 'sha256']:
+        r['results'].append({'types': 'btc', 'values': [a['btc'] for a in answer]})
+    elif attribute['type'] == 'btc':
+        # better: create a MISP object
+        files = []
+        for a in answer:
+            obj = MISPObject('file')
+            obj.add_attribute('md5', a['md5'])
+            obj.add_attribute('sha1', a['sha1'])
+            obj.add_attribute('sha256', a['sha256'])
+            files.append(obj)
+        r['results'] = {'Object': [json.loads(f.to_json()) for f in files]}
     return r
 
 
