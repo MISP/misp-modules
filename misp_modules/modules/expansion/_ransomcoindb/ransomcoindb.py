@@ -3,7 +3,7 @@
 import requests
 import logging
 import os
-import pprint
+# import pprint
 
 copyright = """
   Copyright 2019 (C) by Aaron Kaplan <aaron@lo-res.org>, all rights reserved.
@@ -14,6 +14,8 @@ __version__ = 0.1
 
 
 baseurl = "https://ransomcoindb.concinnity-risks.com/api/v1/"
+user_agent = "ransomcoindb client via python-requests/%s"  % requests.__version__
+
 urls = {'BTC': {'btc'   : baseurl + 'bin2btc/',
                 'md5'   : baseurl + 'bin2btc/md5/',
                 'sha1'  : baseurl + 'bin2btc/sha1/',
@@ -34,9 +36,11 @@ def get_data_by(coin: str, key: str, value: str, api_key: str):
     See below for examples.
     """
 
-    pprint.pprint("api-key: %s" % api_key)
+    # pprint.pprint("api-key: %s" % api_key)
 
     headers = {'x-api-key': api_key, 'content-type': 'application/json'}
+    headers.update({'User-Agent': user_agent})
+
     # check first if valid:
     valid_coins = ['BTC', 'XMR']
     valid_keys = ['btc', 'md5', 'sha1', 'sha256']
