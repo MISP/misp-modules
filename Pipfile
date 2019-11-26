@@ -11,7 +11,7 @@ flake8 = "*"
 
 [packages]
 dnspython = "*"
-requests = "*"
+requests = {extras = ["security"],version = "*"}
 urlarchiver = "*"
 passivetotal = "*"
 pypdns = "*"

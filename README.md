@@ -22,6 +22,7 @@ For more information: [Extending MISP with Python modules](https://www.misp-proj
 * [AssemblyLine query](misp_modules/modules/expansion/assemblyline_query.py) - an expansion module to query AssemblyLine and parse the full submission report.
 * [Backscatter.io](misp_modules/modules/expansion/backscatter_io.py) - a hover and expansion module to expand an IP address with mass-scanning observations.
 * [BGP Ranking](misp_modules/modules/expansion/bgpranking.py) - a hover and expansion module to expand an AS number with the ASN description, its history, and position in BGP Ranking.
+* [RansomcoinDB check](misp_modules/modules/expansion/ransomcoindb.py) - An expansion hover module to query the [ransomcoinDB](https://ransomcoindb.concinnity-risks.com): it contains mapping between BTC addresses and malware hashes. Enrich MISP by querying for BTC -> hash or hash -> BTC addresses.
 * [BTC scam check](misp_modules/modules/expansion/btc_scam_check.py) - An expansion hover module to instantly check if a BTC address has been abused.
 * [BTC transactions](misp_modules/modules/expansion/btc_steroids.py) - An expansion hover module to get a blockchain balance and the transactions from a BTC address in MISP.
 * [CIRCL Passive DNS](misp_modules/modules/expansion/circl_passivedns.py) - a hover and expansion module to expand hostname and IP addresses with passive DNS information.
