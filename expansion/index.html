@@ -291,6 +291,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#assemblyline_query" title="assemblyline_query" class="md-nav__link">
+    assemblyline_query
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#assemblyline_submit" title="assemblyline_submit" class="md-nav__link">
     assemblyline_submit
   </a>
@@ -475,6 +482,20 @@
         <li class="md-nav__item">
   <a href="#joesandbox_submit" title="joesandbox_submit" class="md-nav__link">
     joesandbox_submit
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lastline_query" title="lastline_query" class="md-nav__link">
+    lastline_query
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lastline_submit" title="lastline_submit" class="md-nav__link">
+    lastline_submit
   </a>
   
 </li>
@@ -850,6 +871,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#assemblyline_query" title="assemblyline_query" class="md-nav__link">
+    assemblyline_query
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#assemblyline_submit" title="assemblyline_submit" class="md-nav__link">
     assemblyline_submit
   </a>
@@ -1034,6 +1062,20 @@
         <li class="md-nav__item">
   <a href="#joesandbox_submit" title="joesandbox_submit" class="md-nav__link">
     joesandbox_submit
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lastline_query" title="lastline_query" class="md-nav__link">
+    lastline_query
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lastline_submit" title="lastline_submit" class="md-nav__link">
+    lastline_submit
   </a>
   
 </li>
@@ -1319,12 +1361,30 @@ Hashes and urls resulting from the query to OSINT.digitalside.it
 The apiosintDS python library to query the OSINT.digitalside.it API.</p>
 </blockquote>
 <hr />
+<h4 id="assemblyline_query"><a href="https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/assemblyline_query.py">assemblyline_query</a><a class="headerlink" href="#assemblyline_query" title="Permanent link">&para;</a></h4>
+<p><img src=logos/assemblyline.png height=60></p>
+<p>A module tu query the AssemblyLine API with a submission ID to get the submission report and parse it.
+- <strong>features</strong>:</p>
+<blockquote>
+<p>The module requires the address of the AssemblyLine server you want to query as well as your credentials used for this instance. Credentials include the used-ID and an API key or the password associated to the user-ID.</p>
+<p>The submission ID extracted from the submission link is then used to query AssemblyLine and get the full submission report. This report is parsed to extract file objects and the associated IPs, domains or URLs the files are connecting to.</p>
+<p>Some more data may be parsed in the future.
+- <strong>input</strong>:
+Link of an AssemblyLine submission report.
+- <strong>output</strong>:
+MISP attributes &amp; objects parsed from the AssemblyLine submission.
+- <strong>references</strong>:
+<a href="https://www.cyber.cg.ca/en/assemblyline">https://www.cyber.cg.ca/en/assemblyline</a>
+- <strong>requirements</strong>:
+assemblyline_client: Python library to query the AssemblyLine rest API.</p>
+</blockquote>
+<hr />
 <h4 id="assemblyline_submit"><a href="https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/assemblyline_submit.py">assemblyline_submit</a><a class="headerlink" href="#assemblyline_submit" title="Permanent link">&para;</a></h4>
 <p><img src=logos/assemblyline.png height=60></p>
 <p>A module to submit samples and URLs to AssemblyLine for advanced analysis, and return the link of the submission.
 - <strong>features</strong>:</p>
 <blockquote>
-<p>The module requires the address of the AssemblyLine server you want to query as well as your credentials in this instance. Credentials include the user-ID and an API key or the password associated to the user-ID.</p>
+<p>The module requires the address of the AssemblyLine server you want to query as well as your credentials used for this instance. Credentials include the user-ID and an API key or the password associated to the user-ID.</p>
 <p>If the sample or url is correctly submitted, you get then the link of the submission.
 - <strong>input</strong>:
 Sample, or url to submit to AssemblyLine.
@@ -1793,6 +1853,37 @@ Link of the report generated in Joe Sandbox.
 <a href="https://www.joesecurity.org">https://www.joesecurity.org</a>, <a href="https://www.joesandbox.com/">https://www.joesandbox.com/</a>
 - <strong>requirements</strong>:
 jbxapi: Joe Sandbox API python3 library</p>
+</blockquote>
+<hr />
+<h4 id="lastline_query"><a href="https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/lastline_query.py">lastline_query</a><a class="headerlink" href="#lastline_query" title="Permanent link">&para;</a></h4>
+<p><img src=logos/lastline.png height=60></p>
+<p>Query Lastline with an analysis link and parse the report into MISP attributes and objects.
+The analysis link can also be retrieved from the output of the <a href="https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/lastline_submit.py">lastline_submit</a> expansion module.
+- <strong>features</strong>:</p>
+<blockquote>
+<p>The module uses the new format and it is able to return MISP attributes and objects.
+The module returns the same results as the <a href="https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/import_mod/lastline_import.py">lastline_import</a> import module.
+- <strong>input</strong>:
+Link to a Lastline analysis.
+- <strong>output</strong>:
+MISP attributes and objects parsed from the analysis report.
+- <strong>references</strong>:
+<a href="https://www.lastline.com">https://www.lastline.com</a></p>
+</blockquote>
+<hr />
+<h4 id="lastline_submit"><a href="https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/lastline_submit.py">lastline_submit</a><a class="headerlink" href="#lastline_submit" title="Permanent link">&para;</a></h4>
+<p><img src=logos/lastline.png height=60></p>
+<p>Module to submit a file or URL to Lastline.
+- <strong>features</strong>:</p>
+<blockquote>
+<p>The module requires a Lastline API key and token (or username and password).
+When the analysis is completed, it is possible to import the generated report by feeding the analysis link to the <a href="https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/lastline_query.py">lastline_query</a> module.
+- <strong>input</strong>:
+File or URL to submit to Lastline.
+- <strong>output</strong>:
+Link to the report generated by Lastline.
+- <strong>references</strong>:
+<a href="https://www.lastline.com">https://www.lastline.com</a></p>
 </blockquote>
 <hr />
 <h4 id="macaddress_io"><a href="https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/macaddress_io.py">macaddress_io</a><a class="headerlink" href="#macaddress_io" title="Permanent link">&para;</a></h4>
