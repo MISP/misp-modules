@@ -1,1 +1,1 @@
-all = ['joe_parser']
+all = ['joe_parser', 'lastline_api']
