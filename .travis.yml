@@ -23,7 +23,7 @@ install:
     - cmake .. && make
     - sudo make install
     - popd
-    - ldconfig
+    - sudo ldconfig
     - cd faup/src/lib/bindings/python
     - pip install .
     - popd
