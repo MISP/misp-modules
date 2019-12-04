@@ -57,7 +57,7 @@ class TestModules(unittest.TestCase):
             assert("mrxcls.sys" in values)
             assert("mdmcpq3.PNF" in values)
 
-    @unittest.skip()
+    @unittest.skip("Need Rewrite")
     def test_email_headers(self):
         query = {"module": "email_import"}
         query["config"] = {"unzip_attachments": None,
@@ -106,7 +106,7 @@ class TestModules(unittest.TestCase):
         self.assertEqual(types['email-reply-to'], 1)
         self.assertIn("<CI7DgL-A6dm92s7gf4-88g@E_0x238G4K2H08H9SDwsw8b6LwuA@mail.example.com>", values)
 
-    @unittest.skip()
+    @unittest.skip("Need Rewrite")
     def test_email_attachment_basic(self):
         query = {"module": "email_import"}
         query["config"] = {"unzip_attachments": None,
@@ -131,7 +131,7 @@ class TestModules(unittest.TestCase):
                 attch_data = base64.b64decode(i["data"])
                 self.assertEqual(attch_data, b'X5O!P%@AP[4\\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-')
 
-    @unittest.skip()
+    @unittest.skip("Need Rewrite")
     def test_email_attachment_unpack(self):
         query = {"module": "email_import"}
         query["config"] = {"unzip_attachments": "true",
@@ -163,7 +163,7 @@ class TestModules(unittest.TestCase):
                                  b'X5O!P%@AP[4\\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-')
 
 
-    @unittest.skip()
+    @unittest.skip("Need Rewrite")
     def test_email_dont_unpack_compressed_doc_attachments(self):
         """Ensures that compressed
         """
@@ -197,7 +197,7 @@ class TestModules(unittest.TestCase):
                 self.assertEqual(filesum.hexdigest(),
                                  '098da5381a90d4a51e6b844c18a0fecf2e364813c2f8b317cfdc51c21f2506a5')
 
-    @unittest.skip()
+    @unittest.skip("Need Rewrite")
     def test_email_attachment_unpack_with_password(self):
         query = {"module": "email_import"}
         query["config"] = {"unzip_attachments": "true",
@@ -226,7 +226,7 @@ class TestModules(unittest.TestCase):
                 self.assertEqual(attch_data,
                                  b'X5O!P%@AP[4\\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-')
 
-    @unittest.skip()
+    @unittest.skip("Need Rewrite")
     def test_email_attachment_password_in_body(self):
         query = {"module": "email_import"}
         query["config"] = {"unzip_attachments": "true",
@@ -250,7 +250,7 @@ class TestModules(unittest.TestCase):
                 self.assertEqual(attch_data,
                                  'X5O!P%@AP[4\\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-')
 
-    @unittest.skip()
+    @unittest.skip("Need Rewrite")
     def test_email_attachment_password_in_body_quotes(self):
         query = {"module": "email_import"}
         query["config"] = {"unzip_attachments": "true",
@@ -279,7 +279,7 @@ class TestModules(unittest.TestCase):
                 self.assertEqual(attch_data,
                                  'X5O!P%@AP[4\\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-')
 
-    @unittest.skip()
+    @unittest.skip("Need Rewrite")
     def test_email_attachment_password_in_html_body(self):
         query = {"module": "email_import"}
         query["config"] = {"unzip_attachments": "true",
@@ -320,7 +320,7 @@ class TestModules(unittest.TestCase):
                 self.assertEqual(attch_data,
                                  'X5O!P%@AP[4\\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-')
 
-    @unittest.skip()
+    @unittest.skip("Need Rewrite")
     def test_email_body_encoding(self):
         query = {"module":"email_import"}
         query["config"] = {"unzip_attachments": None,
@@ -341,7 +341,7 @@ class TestModules(unittest.TestCase):
                 self.assertIn('results', response, "No server results found.")
 
 
-    @unittest.skip()
+    @unittest.skip("Need Rewrite")
     def test_email_header_proper_encoding(self):
         query = {"module":"email_import"}
         query["config"] = {"unzip_attachments": None,
@@ -406,7 +406,7 @@ class TestModules(unittest.TestCase):
 
                 self.assertIn("<CI7DgL-A6dm92s7gf4-88g@E_0x238G4K2H08H9SDwsw8b6LwuA@mail.example.com>", values)
 
-    @unittest.skip()
+    @unittest.skip("Need Rewrite")
     def test_email_header_malformed_encoding(self):
         query = {"module":"email_import"}
         query["config"] = {"unzip_attachments": None,
@@ -474,7 +474,7 @@ class TestModules(unittest.TestCase):
 
                 self.assertIn("<CI7DgL-A6dm92s7gf4-88g@E_0x238G4K2H08H9SDwsw8b6LwuA@mail.example.com>", values)
 
-    @unittest.skip()
+    @unittest.skip("Need Rewrite")
     def test_email_header_CJK_encoding(self):
         query = {"module":"email_import"}
         query["config"] = {"unzip_attachments": None,
@@ -502,7 +502,7 @@ class TestModules(unittest.TestCase):
                 self.assertNotEqual(RFC_format, i['values'], RFC_encoding_error)
                 self.assertEqual(japanese_charset, i['values'], "Subject not properly decoded")
 
-    @unittest.skip()
+    @unittest.skip("Need Rewrite")
     def test_email_malformed_header_CJK_encoding(self):
         query = {"module":"email_import"}
         query["config"] = {"unzip_attachments": None,
@@ -533,7 +533,7 @@ class TestModules(unittest.TestCase):
                 self.assertNotEqual(RFC_format, i['values'], RFC_encoding_error)
                 self.assertEqual(japanese_charset, i['values'], "Subject not properly decoded")
 
-    @unittest.skip()
+    @unittest.skip("Need Rewrite")
     def test_email_malformed_header_emoji_encoding(self):
         query = {"module":"email_import"}
         query["config"] = {"unzip_attachments": None,
@@ -564,7 +564,7 @@ class TestModules(unittest.TestCase):
                 self.assertNotEqual(RFC_format, i['values'], RFC_encoding_error)
                 self.assertEqual(emoji_string, i['values'], "Subject not properly decoded")
 
-    @unittest.skip()
+    @unittest.skip("Need Rewrite")
     def test_email_attachment_emoji_filename(self):
         query = {"module": "email_import"}
         query["config"] = {"unzip_attachments": None,
@@ -592,7 +592,7 @@ class TestModules(unittest.TestCase):
                 self.assertEqual(attch_data, b'X5O!P%@AP[4\\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-')
 
 
-    @unittest.skip()
+    @unittest.skip("Need Rewrite")
     def test_email_attachment_password_in_subject(self):
         query = {"module": "email_import"}
         query["config"] = {"unzip_attachments": "true",
@@ -623,7 +623,7 @@ class TestModules(unittest.TestCase):
                 self.assertEqual(attch_data,
                                  'X5O!P%@AP[4\\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-')
 
-    @unittest.skip()
+    @unittest.skip("Need Rewrite")
     def test_email_extract_html_body_urls(self):
         query = {"module": "email_import"}
         query["config"] = {"unzip_attachments": None,
