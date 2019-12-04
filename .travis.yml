@@ -17,6 +17,16 @@ install:
     - sudo apt-get install libzbar0 libzbar-dev libpoppler-cpp-dev tesseract-ocr
     - pip install pipenv
     - pipenv install --dev
+    # install pyfaup
+    - git clone https://github.com/stricaud/faup.git
+    - pushd faup/build
+    - cmake .. && make
+    - sudo make install
+    - popd
+    - ldconfig
+    - cd faup/src/lib/bindings/python
+    - pip install .
+    - popd
 
 script:
     - pipenv run coverage run -m --parallel-mode --source=misp_modules misp_modules.__init__  -l 127.0.0.1 &
