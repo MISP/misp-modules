@@ -24,7 +24,7 @@ install:
     - sudo make install
     - popd
     - sudo ldconfig
-    - cd faup/src/lib/bindings/python
+    - pushd faup/src/lib/bindings/python
     - pip install .
     - popd
 
