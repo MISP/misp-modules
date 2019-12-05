@@ -111,19 +111,20 @@ def handler(q=False):
 
     mail_body = email_object.email.get_body(preferencelist=('html', 'plain'))
     if extract_urls:
-        charset = mail_body.get_content_charset()
-        if mail_body.get_content_type() == 'text/html':
-            url_parser = HTMLURLParser()
-            url_parser.feed(mail_body.get_payload(decode=True).decode(charset, errors='ignore'))
-            urls = url_parser.urls
-        else:
-            urls = re.findall(r'https?://(?:[-\w.]|(?:%[\da-fA-F]{2}))+', mail_body.get_payload(decode=True).decode(charset, errors='ignore'))
-        for url in urls:
-            if not url:
-                continue
-            url_object = URLObject(url, standalone=False)
-            file_objects.append(url_object)
-            email_object.add_reference(url_object.uuid, 'includes', 'URL in email body')
+        if mail_body:
+            charset = mail_body.get_content_charset()
+            if mail_body.get_content_type() == 'text/html':
+                url_parser = HTMLURLParser()
+                url_parser.feed(mail_body.get_payload(decode=True).decode(charset, errors='ignore'))
+                urls = url_parser.urls
+            else:
+                urls = re.findall(r'https?://(?:[-\w.]|(?:%[\da-fA-F]{2}))+', mail_body.get_payload(decode=True).decode(charset, errors='ignore'))
+            for url in urls:
+                if not url:
+                    continue
+                url_object = URLObject(url, standalone=False)
+                file_objects.append(url_object)
+                email_object.add_reference(url_object.uuid, 'includes', 'URL in email body')
 
     objects = [email_object.to_json()]
     if file_objects:
@@ -213,18 +214,23 @@ def get_zip_passwords(message):
     body = []
     for part in message.walk():
         charset = part.get_content_charset()
+        if not charset:
+            charset = "utf-8"
         if part.get_content_type() == 'text/plain':
             body.append(part.get_payload(decode=True).decode(charset, errors='ignore'))
         elif part.get_content_type() == 'text/html':
             html_parser = HTMLTextParser()
-            html_parser.feed(part.get_payload(decode=True).decode(charset, errors='ignore'))
-            for text in html_parser.text_data:
-                body.append(text)
+            payload = part.get_payload(decode=True)
+            if payload:
+                html_parser.feed(payload.decode(charset, errors='ignore'))
+                for text in html_parser.text_data:
+                    body.append(text)
     raw_text = "\n".join(body).strip()
 
     # Add subject to text corpus to parse
-    subject = " " + message.get('Subject')
-    raw_text += subject
+    if "Subject" in message:
+        subject = " " + message.get('Subject')
+        raw_text += subject
 
     # Grab any strings that are marked off by special chars
     marking_chars = [["\'", "\'"], ['"', '"'], ['[', ']'], ['(', ')']]
