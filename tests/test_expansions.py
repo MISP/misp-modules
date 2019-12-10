@@ -255,7 +255,7 @@ class TestExpansions(unittest.TestCase):
     def test_otx(self):
         query_types = ('domain', 'ip-src', 'md5')
         query_values = ('circl.lu', '8.8.8.8', '616eff3e9a7575ae73821b4668d2801c')
-        results = (('149.13.33.14', '149.13.33.17'),
+        results = (('149.13.33.14', '149.13.33.17', '6f9814ba70e68c3bce16d253e8d8f86e04a21a2b4172a0f7631040096ba2c47a'),
                    'ffc2595aefa80b61621023252b5f0ccb22b6e31d7f1640913cd8ff74ddbd8b41',
                    '8.8.8.8')
         for query_type, query_value, result in zip(query_types, query_values, results):
