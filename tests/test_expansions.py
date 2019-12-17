@@ -93,6 +93,40 @@ class TestExpansions(unittest.TestCase):
         response = self.misp_modules_post(query)
         self.assertEqual(self.get_values(response), '1es14c7qlb5cyhlmuekctxlgc1fv2ti9da fraudolent bitcoin address')
 
+    def test_circl_passivedns(self):
+        module_name = "circl_passivedns"
+        query = {"module": module_name,
+                 "attribute": {"type": "domain",
+                               "value": "circl.lu",
+                               "uuid": "ea89a33b-4ab7-4515-9f02-922a0bee333d"},
+                 "config": {}}
+        if module_name in self.configs:
+            query['config'] = self.configs[module_name]
+            response = self.misp_modules_post(query)
+            try:
+                self.assertEqual(self.get_object(response), 'passive-dns')
+            except Exception:
+                self.assertTrue(self.get_errors(response).startswith('There is an authentication error'))
+        else:
+            self.assertTrue(self.get_errors(response).startswith('CIRCL Passive DNS authentication is incomplete'))
+
+    def test_circl_passivessl(self):
+        module_name = "circl_passivessl"
+        query = {"module": module_name,
+                 "attribute": {"type": "",
+                               "value": "",
+                               "uuid": ""},
+                 "config": {}}
+        if module_name in self.configs:
+            query['config'] = self.configs[module_name]
+            response = self.misp_modules_post(query)
+            try:
+                self.assertEqual(self.get_object(response), 'x509')
+            except Exception:
+                self.assertTrue(self.get_errors(response).startswith('There is an authentication error'))
+        else:
+            self.assertTrue(self.get_errors(response).startswith('CIRCL Passive SSL authentication is incomplete'))
+
     def test_countrycode(self):
         query = {"module": "countrycode", "domain": "www.circl.lu"}
         response = self.misp_modules_post(query)
