@@ -108,6 +108,7 @@ class TestExpansions(unittest.TestCase):
             except Exception:
                 self.assertTrue(self.get_errors(response).startswith('There is an authentication error'))
         else:
+            response = self.misp_modules_post(query)
             self.assertTrue(self.get_errors(response).startswith('CIRCL Passive DNS authentication is incomplete'))
 
     def test_circl_passivessl(self):
@@ -125,6 +126,7 @@ class TestExpansions(unittest.TestCase):
             except Exception:
                 self.assertTrue(self.get_errors(response).startswith('There is an authentication error'))
         else:
+            response = self.misp_modules_post(query)
             self.assertTrue(self.get_errors(response).startswith('CIRCL Passive SSL authentication is incomplete'))
 
     def test_countrycode(self):
