@@ -21,7 +21,7 @@ class PassiveDNSParser():
         if hasattr(self, 'result'):
             return self.result
         event = json.loads(self.misp_event.to_json())
-        results = {key:event[key] for key in ('Attribute', 'Object')}
+        results = {key: event[key] for key in ('Attribute', 'Object')}
         return {'results': results}
 
     def parse(self, value):

@@ -37,8 +37,6 @@ class PassiveSSLParser():
         except Exception:
             self.result = {'error': 'There is an authentication error, please make sure you supply correct credentials.'}
             return
-        cert_hash = 'x509-fingerprint-sha1'
-        cert_type = 'pem'
         for ip_address, certificates in results.items():
             ip_uuid = self._handle_ip_attribute(ip_address)
             for certificate in certificates['certificates']:
@@ -46,7 +44,7 @@ class PassiveSSLParser():
 
     def _handle_certificate(self, certificate, ip_uuid):
         x509 = MISPObject('x509')
-        x509.add_attribute(self.cert_hash, type=self.cert_hash, value = certificate)
+        x509.add_attribute(self.cert_hash, type=self.cert_hash, value=certificate)
         cert_details = self.pssl.fetch_cert(certificate)
         info = cert_details['info']
         for feature, mapping in self.mapping.items():
