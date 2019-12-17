@@ -3,7 +3,7 @@
 -e git+https://github.com/D4-project/BGP-Ranking.git/@fd9c0e03af9b61d4bf0b67ac73c7208a55178a54#egg=pybgpranking&subdirectory=client
 -e git+https://github.com/D4-project/IPASN-History.git/@fc5e48608afc113e101ca6421bf693b7b9753f9e#egg=pyipasnhistory&subdirectory=client
 -e git+https://github.com/MISP/PyIntel471.git@0df8d51f1c1425de66714b3a5a45edb69b8cc2fc#egg=pyintel471
--e git+https://github.com/MISP/PyMISP.git@36cc79ffb686430e02b382dfef85c29a5e27c39d#egg=pymisp
+-e git+https://github.com/MISP/PyMISP.git@a26a8e450b14d48bb0c8ef46b32bff2f1eadc514#egg=pymisp[fileobjects,openioc,virustotal,pdfexport]
 -e git+https://github.com/Rafiot/uwhoisd.git@411572840eba4c72dc321c549b36a54ed5cea9de#egg=uwhois&subdirectory=client
 -e git+https://github.com/cartertemm/ODTReader.git/@49d6938693f6faa3ff09998f86dba551ae3a996b#egg=odtreader
 -e git+https://github.com/sebdraven/pydnstrails@48c1f740025c51289f43a24863d1845ff12fd21a#egg=pydnstrails
@@ -37,15 +37,16 @@ geoip2==2.9.0
 httplib2==0.14.0
 idna-ssl==1.1.0 ; python_version < '3.7'
 idna==2.8
-importlib-metadata==1.2.0 ; python_version < '3.8'
+importlib-metadata==1.3.0 ; python_version < '3.8'
 isodate==0.6.0
 jbxapi==3.4.0
 jsonschema==3.2.0
+lief==0.10.1
 lxml==4.4.2
 maclookup==1.0.3
 maxminddb==1.5.1
 more-itertools==8.0.2
-multidict==4.6.1
+multidict==4.7.1
 np==1.0.2
 numpy==1.17.4
 oauth2==1.9.0.post1
@@ -60,6 +61,7 @@ psutil==5.6.7
 pycparser==2.19
 pycryptodome==3.9.4
 pycryptodomex==3.9.4
+pydeep==0.4
 pyeupi==1.0
 pygeoip==0.3.2
 pyopenssl==19.1.0
@@ -70,6 +72,7 @@ pyrsistent==0.15.6
 pytesseract==0.3.0
 python-dateutil==2.8.1
 python-docx==0.8.10
+python-magic==0.4.15
 python-pptx==0.6.18
 python-utils==2.3.0
 pytz==2019.3
@@ -81,7 +84,7 @@ redis==3.3.11
 reportlab==3.5.32
 requests-cache==0.5.2
 requests[security]==2.22.0
-shodan==1.20.0
+shodan==1.21.0
 sigmatools==0.15.0
 six==1.13.0
 socketio-client==0.5.6

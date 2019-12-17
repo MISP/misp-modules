@@ -18,7 +18,7 @@ pypdns = "*"
 pypssl = "*"
 pyeupi = "*"
 uwhois = {editable = true,git = "https://github.com/Rafiot/uwhoisd.git",ref = "testing",subdirectory = "client"}
-pymisp = {editable = true,git = "https://github.com/MISP/PyMISP.git"}
+pymisp = {editable = true,extras = ["fileobjects,openioc,virustotal,pdfexport"],git = "https://github.com/MISP/PyMISP.git"}
 pyonyphe = {editable = true,git = "https://github.com/sebdraven/pyonyphe"}
 pydnstrails = {editable = true,git = "https://github.com/sebdraven/pydnstrails"}
 pytesseract = "*"
