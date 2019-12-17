@@ -138,13 +138,13 @@ An expansion hover module to get a blockchain balance from a BTC address in MISP
 
 Module to access CIRCL Passive DNS.
 - **features**:
->This module takes a hostname, domain or ip-address (ip-src or ip-dst) attribute as input, and queries the CIRCL Passive DNS REST API to get and display information about this input.
+>This module takes a hostname, domain or ip-address (ip-src or ip-dst) attribute as input, and queries the CIRCL Passive DNS REST API to get the asssociated passive dns entries and return them as MISP objects.
 >
 >To make it work a username and a password are thus required to authenticate to the CIRCL Passive DNS API.
 - **input**:
 >Hostname, domain, or ip-address attribute.
 - **ouput**:
->Text describing passive DNS information related to the input attribute.
+>Passive DNS objects related to the input attribute.
 - **references**:
 >https://www.circl.lu/services/passive-dns/, https://datatracker.ietf.org/doc/draft-dulaunoy-dnsop-passive-dns-cof/
 - **requirements**:
@@ -158,13 +158,13 @@ Module to access CIRCL Passive DNS.
 
 Modules to access CIRCL Passive SSL.
 - **features**:
->This module takes an ip-address (ip-src or ip-dst) attribute as input, and queries the CIRCL Passive SSL REST API to get and display information about this input.
+>This module takes an ip-address (ip-src or ip-dst) attribute as input, and queries the CIRCL Passive SSL REST API to gather the related certificates and return the corresponding MISP objects.
 >
->To make it work a username and a password are thus required to authenticate to the CIRCL Passive SSL API.
+>To make it work a username and a password are required to authenticate to the CIRCL Passive SSL API.
 - **input**:
->Ip-address attribute.
+>IP address attribute.
 - **output**:
->Text describing passive SSL information related to the input attribute.
+>x509 certificate objects seen by the IP address(es).
 - **references**:
 >https://www.circl.lu/services/passive-ssl/
 - **requirements**:
