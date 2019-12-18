@@ -117,9 +117,9 @@ class TestExpansions(unittest.TestCase):
     def test_circl_passivessl(self):
         module_name = "circl_passivessl"
         query = {"module": module_name,
-                 "attribute": {"type": "",
-                               "value": "",
-                               "uuid": ""},
+                 "attribute": {"type": "ip-dst",
+                               "value": "149.13.33.14",
+                               "uuid": "ea89a33b-4ab7-4515-9f02-922a0bee333d"},
                  "config": {}}
         if module_name in self.configs:
             query['config'] = self.configs[module_name]
