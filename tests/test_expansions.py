@@ -78,6 +78,24 @@ class TestExpansions(unittest.TestCase):
         except AssertionError:
             self.assertTrue(self.get_values(response).startswith('185.255.79.90 IS NOT listed by OSINT.digitalside.it.'))
 
+    def test_apivoid(self):
+        module_name = "apivoid"
+        query = {"module": module_name,
+                 "attribute": {"type": "domain",
+                               "value": "circl.lu",
+                               "uuid": "ea89a33b-4ab7-4515-9f02-922a0bee333d"},
+                 "config": {}}
+        if module_name in self.configs:
+            query['config'] = self.configs[module_name]
+            response = self.misp_modules_post(query)
+            try:
+                self.assertEqual(self.get_object(response), 'dns-record')
+            except Exception:
+                self.assertTrue(self.get_errors(response).startswith('You do not have enough APIVoid credits'))
+        else:
+            response = self.misp_modules_post(query)
+            self.assertEqual(self.get_errors(response), 'An API key for APIVoid is required.')
+
     def test_bgpranking(self):
         query = {"module": "bgpranking", "AS": "13335"}
         response = self.misp_modules_post(query)
