@@ -14,6 +14,6 @@ __all__ = ['cuckoo_submit', 'vmray_submit', 'bgpranking', 'circl_passivedns', 'c
            'intel471', 'backscatter_io', 'btc_scam_check', 'hibp', 'greynoise', 'macvendors',
            'qrcode', 'ocr_enrich', 'pdf_enrich', 'docx_enrich', 'xlsx_enrich', 'pptx_enrich',
            'ods_enrich', 'odt_enrich', 'joesandbox_submit', 'joesandbox_query', 'urlhaus',
-           'virustotal_public', 'apiosintds', 'urlscan', 'securitytrails',
+           'virustotal_public', 'apiosintds', 'urlscan', 'securitytrails', 'apivoid',
            'assemblyline_submit', 'assemblyline_query', 'ransomcoindb',
            'lastline_query', 'lastline_submit']
