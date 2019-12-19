@@ -22,6 +22,26 @@ On demand query API for OSINT.digitalside.it project.
 
 -----
 
+#### [apivoid](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/apivoid.py)
+
+<img src=logos/apivoid.png height=60>
+
+Module to query APIVoid with some domain attributes.
+- **features**:
+>This module takes a domain name and queries API Void to get the related DNS records and the SSL certificates. It returns then those pieces of data as MISP objects that can be added to the event.
+>
+>To make it work, a valid API key and enough credits to proceed 2 queries (0.06 + 0.07 credits) are required.
+- **input**:
+>A domain attribute.
+- **output**:
+>DNS records and SSL certificates related to the domain.
+- **references**:
+>https://www.apivoid.com/
+- **requirements**:
+>A valid APIVoid API key with enough credits to proceed 2 queries
+
+-----
+
 #### [assemblyline_query](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/assemblyline_query.py)
 
 <img src=logos/assemblyline.png height=60>

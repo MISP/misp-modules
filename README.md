@@ -18,6 +18,7 @@ For more information: [Extending MISP with Python modules](https://www.misp-proj
 ### Expansion modules
 
 * [apiosintDS](misp_modules/modules/expansion/apiosintds.py) - a hover and expansion module to query the OSINT.digitalside.it API.
+* [API Void](misp_modules/modules/expansion/apivoid.py) - an expansion and hover module to query API Void with a domain attribute.
 * [AssemblyLine submit](misp_modules/modules/expansion/assemblyline_submit.py) - an expansion module to submit samples and urls to AssemblyLine.
 * [AssemblyLine query](misp_modules/modules/expansion/assemblyline_query.py) - an expansion module to query AssemblyLine and parse the full submission report.
 * [Backscatter.io](misp_modules/modules/expansion/backscatter_io.py) - a hover and expansion module to expand an IP address with mass-scanning observations.
