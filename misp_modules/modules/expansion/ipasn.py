@@ -28,7 +28,7 @@ def handler(q=False):
     if not values:
         misperrors['error'] = 'Unable to find the history of this IP'
         return misperrors
-    return {'results': [{'types': mispattributes['output'], 'values': values}]}
+    return {'results': [{'types': mispattributes['output'], 'values': [str(values)]}]}
 
 
 def introspection():
