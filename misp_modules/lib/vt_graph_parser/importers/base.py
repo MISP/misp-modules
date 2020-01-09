@@ -5,7 +5,7 @@ This module provides a common method to import graph from misp attributes.
 
 
 import vt_graph_api
-from lib.vt_graph_parser.helpers.rules import MispEventRule
+from lib.vt_graph_parser.helpers.rules import MispEventInitialRule
 
 
 def import_misp_graph(
