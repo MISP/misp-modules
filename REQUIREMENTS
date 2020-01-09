@@ -106,3 +106,4 @@ xlsxwriter==1.2.6
 yara-python==3.8.1
 yarl==1.4.2
 zipp==0.6.0
+vt-graph-api

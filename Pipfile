@@ -59,6 +59,7 @@ jbxapi = "*"
 geoip2 = "*"
 apiosintDS = "*"
 assemblyline_client = "*"
+vt-graph-api = "*"
 
 [requires]
 python_version = "3"
