@@ -5,16 +5,16 @@ This module provides custom errors for data importers.
 
 
 class GraphImportError(Exception):
-  pass
+    pass
 
 
 class InvalidFileFormatError(Exception):
-  pass
+    pass
 
 
 class MispEventNotFoundError(Exception):
-  pass
+    pass
 
 
 class ServerError(Exception):
-  pass
+    pass
