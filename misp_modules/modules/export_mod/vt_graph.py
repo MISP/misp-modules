@@ -3,7 +3,7 @@
 
 import base64
 import json
-from lib.vt_graph_parser import from_pymisp_response
+from vt_graph_parser.importers.pymisp_response import from_pymisp_response
 
 
 misperrors = {

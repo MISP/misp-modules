@@ -5,8 +5,8 @@ response payload giving by MISP API directly.
 """
 
 
-from lib.vt_graph_parser.helpers.parsers import parse_pymisp_response
-from lib.vt_graph_parser.importers.base import import_misp_graph
+from vt_graph_parser.helpers.parsers import parse_pymisp_response
+from vt_graph_parser.importers.base import import_misp_graph
 
 
 def from_pymisp_response(

@@ -4,7 +4,7 @@ This module provides parsers for MISP inputs.
 """
 
 
-from lib.vt_graph_parser.helpers.wrappers import MispAttribute
+from vt_graph_parser.helpers.wrappers import MispAttribute
 
 
 MISP_INPUT_ATTR = [
