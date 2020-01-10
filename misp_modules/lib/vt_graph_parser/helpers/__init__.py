@@ -4,4 +4,4 @@ This modules provides functions and attributes to help MISP importers.
 """
 
 
-all = ["parsers", "rules", "wrappers"]
+__all__ = ["parsers", "rules", "wrappers"]
