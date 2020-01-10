@@ -237,9 +237,7 @@ class TestExpansions(unittest.TestCase):
     def test_ipasn(self):
         query = {"module": "ipasn", "ip-dst": "1.1.1.1"}
         response = self.misp_modules_post(query)
-        key = list(self.get_values(response)['response'].keys())[0]
-        entry = self.get_values(response)['response'][key]['asn']
-        self.assertEqual(entry, '13335')
+        self.assertEqual(self.get_object(response), 'asn')
 
     def test_macaddess_io(self):
         module_name = 'macaddress_io'
