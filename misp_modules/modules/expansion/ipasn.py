@@ -6,7 +6,7 @@ from pymisp import MISPAttribute, MISPEvent, MISPObject
 
 misperrors = {'error': 'Error'}
 mispattributes = {'input': ['ip-src', 'ip-dst'], 'format': 'misp_standard'}
-moduleinfo = {'version': '0.1', 'author': 'Raphaël Vinot',
+moduleinfo = {'version': '0.2', 'author': 'Raphaël Vinot',
               'description': 'Query an IP ASN history service (https://github.com/CIRCL/IP-ASN-history.git)',
               'module-type': ['expansion', 'hover']}
 

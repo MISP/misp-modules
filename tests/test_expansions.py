@@ -235,7 +235,10 @@ class TestExpansions(unittest.TestCase):
             self.assertTrue(value.startswith('{"ip":"1.1.1.1","status":"ok"'))
 
     def test_ipasn(self):
-        query = {"module": "ipasn", "ip-dst": "1.1.1.1"}
+        query = {"module": "ipasn",
+                 "attribute": {"type": "ip-src",
+                               "value": "149.13.33.14",
+                               "uuid": "ea89a33b-4ab7-4515-9f02-922a0bee333d"}}
         response = self.misp_modules_post(query)
         self.assertEqual(self.get_object(response), 'asn')
 
