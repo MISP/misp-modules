@@ -89,27 +89,28 @@ For more information: [Extending MISP with Python modules](https://www.misp-proj
 
 ### Export modules
 
-* [CEF](misp_modules/modules/export_mod/cef_export.py) module to export Common Event Format (CEF).
-* [Cisco FireSight Manager ACL rule](misp_modules/modules/export_mod/cisco_firesight_manager_ACL_rule_export.py) module to export as rule for the Cisco FireSight manager ACL.
-* [GoAML export](misp_modules/modules/export_mod/goamlexport.py) module to export in [GoAML format](http://goaml.unodc.org/goaml/en/index.html).
-* [Lite Export](misp_modules/modules/export_mod/liteexport.py) module to export a lite event.
-* [PDF export](misp_modules/modules/export_mod/pdfexport.py) module to export an event in PDF.
-* [Mass EQL Export](misp_modules/modules/export_mod/mass_eql_export.py) module to export applicable attributes from an event to a mass EQL query. 
-* [Nexthink query format](misp_modules/modules/export_mod/nexthinkexport.py) module to export in Nexthink query format.
-* [osquery](misp_modules/modules/export_mod/osqueryexport.py) module to export in [osquery](https://osquery.io/) query format.
-* [ThreatConnect](misp_modules/modules/export_mod/threat_connect_export.py) module to export in ThreatConnect CSV format.
-* [ThreatStream](misp_modules/modules/export_mod/threatStream_misp_export.py) module to export in ThreatStream format.
+* [CEF](misp_modules/modules/export_mod/cef_export.py) - module to export Common Event Format (CEF).
+* [Cisco FireSight Manager ACL rule](misp_modules/modules/export_mod/cisco_firesight_manager_ACL_rule_export.py) - module to export as rule for the Cisco FireSight manager ACL.
+* [GoAML export](misp_modules/modules/export_mod/goamlexport.py) - module to export in [GoAML format](http://goaml.unodc.org/goaml/en/index.html).
+* [Lite Export](misp_modules/modules/export_mod/liteexport.py) - module to export a lite event.
+* [PDF export](misp_modules/modules/export_mod/pdfexport.py) - module to export an event in PDF.
+* [Mass EQL Export](misp_modules/modules/export_mod/mass_eql_export.py) - module to export applicable attributes from an event to a mass EQL query.
+* [Nexthink query format](misp_modules/modules/export_mod/nexthinkexport.py) - module to export in Nexthink query format.
+* [osquery](misp_modules/modules/export_mod/osqueryexport.py) - module to export in [osquery](https://osquery.io/) query format.
+* [ThreatConnect](misp_modules/modules/export_mod/threat_connect_export.py) - module to export in ThreatConnect CSV format.
+* [ThreatStream](misp_modules/modules/export_mod/threatStream_misp_export.py) - module to export in ThreatStream format.
+* [VirusTotal Graph](misp_modules/modules/export_mod/vt_graph.py) - Module to create a VirusTotal graph out of an event.
 
 ### Import modules
 
-* [CSV import](misp_modules/modules/import_mod/csvimport.py) Customizable CSV import module.
-* [Cuckoo JSON](misp_modules/modules/import_mod/cuckooimport.py) Cuckoo JSON import.
-* [Email Import](misp_modules/modules/import_mod/email_import.py) Email import module for MISP to import basic metadata.
-* [GoAML import](misp_modules/modules/import_mod/goamlimport.py) Module to import [GoAML](http://goaml.unodc.org/goaml/en/index.html) XML format.
-* [Joe Sandbox import](misp_modules/modules/import_mod/joe_import.py) Parse data from a Joe Sandbox json report.
-* [Lastline import](misp_modules/modules/import_mod/lastline_import.py) Module to import Lastline analysis reports.
-* [OCR](misp_modules/modules/import_mod/ocr.py) Optical Character Recognition (OCR) module for MISP to import attributes from images, scan or faxes.
-* [OpenIOC](misp_modules/modules/import_mod/openiocimport.py) OpenIOC import based on PyMISP library.
+* [CSV import](misp_modules/modules/import_mod/csvimport.py) - Customizable CSV import module.
+* [Cuckoo JSON](misp_modules/modules/import_mod/cuckooimport.py) - Cuckoo JSON import.
+* [Email Import](misp_modules/modules/import_mod/email_import.py) - Email import module for MISP to import basic metadata.
+* [GoAML import](misp_modules/modules/import_mod/goamlimport.py) - Module to import [GoAML](http://goaml.unodc.org/goaml/en/index.html) XML format.
+* [Joe Sandbox import](misp_modules/modules/import_mod/joe_import.py) - Parse data from a Joe Sandbox json report.
+* [Lastline import](misp_modules/modules/import_mod/lastline_import.py) - Module to import Lastline analysis reports.
+* [OCR](misp_modules/modules/import_mod/ocr.py) - Optical Character Recognition (OCR) module for MISP to import attributes from images, scan or faxes.
+* [OpenIOC](misp_modules/modules/import_mod/openiocimport.py) - OpenIOC import based on PyMISP library.
 * [ThreatAnalyzer](misp_modules/modules/import_mod/threatanalyzer_import.py) - An import module to process ThreatAnalyzer archive.zip/analysis.json sandbox exports.
 * [VMRay](misp_modules/modules/import_mod/vmray_import.py) - An import module to process VMRay export.
 

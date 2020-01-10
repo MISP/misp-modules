@@ -532,11 +532,11 @@ Module to access intelmqs eventdb.
 
 Module to query an IP ASN history service (https://github.com/D4-project/IPASN-History).
 - **features**:
->This module takes an IP address attribute as input and queries the CIRCL IPASN service to get additional information about the input.
+>This module takes an IP address attribute as input and queries the CIRCL IPASN service. The result of the query is the latest asn related to the IP address, that is returned as a MISP object.
 - **input**:
 >An IP address MISP attribute.
 - **output**:
->Text describing additional information about the input after a query on the IPASN-history database.
+>Asn object(s) objects related to the IP address used as input.
 - **references**:
 >https://github.com/D4-project/IPASN-History
 - **requirements**:
@@ -1583,6 +1583,26 @@ Module to export a structured CSV file for uploading to ThreatConnect.
 >https://www.threatconnect.com
 - **requirements**:
 >csv
+
+-----
+
+#### [vt_graph](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/export_mod/vt_graph.py)
+
+<img src=logos/virustotal.png height=60>
+
+This module is used to create a VirusTotal Graph from a MISP event.
+- **features**:
+>The module takes the MISP event as input and queries the VirusTotal Graph API to create a new graph out of the event.
+>
+>Once the graph is ready, we get the url of it, which is returned so we can view it on VirusTotal.
+- **input**:
+>A MISP event.
+- **output**:
+>Link of the VirusTotal Graph created for the event.
+- **references**:
+>https://www.virustotal.com/gui/graph-overview
+- **requirements**:
+>vt_graph_api, the python library to query the VirusTotal graph API
 
 -----
 
