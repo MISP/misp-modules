@@ -85,8 +85,9 @@ class DomainQuery(VirusTotalParser):
             whois_object = MISPObject(whois)
             whois_object.add_attribute('text', type='text', value=query_result[whois])
             self.misp_event.add_object(**whois_object)
-        siblings = (self.parse_siblings(domain) for domain in query_result['domain_siblings'])
-        self.parse_resolutions(query_result['resolutions'], query_result['subdomains'], siblings)
+		if 'domain_siblings' in query_result['domain_siblings']:
+        	siblings = (self.parse_siblings(domain) for domain in query_result['domain_siblings'])
+        	self.parse_resolutions(query_result['resolutions'], query_result['subdomains'], siblings)
         self.parse_urls(query_result)
 
     def parse_siblings(self, domain):
