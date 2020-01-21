@@ -613,6 +613,7 @@ A module to submit files or URLs to Joe Sandbox for an advanced analysis, and re
 Query Lastline with an analysis link and parse the report into MISP attributes and objects.
 The analysis link can also be retrieved from the output of the [lastline_submit](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/lastline_submit.py) expansion module.
 - **features**:
+>The module requires a Lastline Portal `username` and `password`.
 >The module uses the new format and it is able to return MISP attributes and objects.
 >The module returns the same results as the [lastline_import](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/import_mod/lastline_import.py) import module.
 - **input**:
@@ -630,7 +631,7 @@ The analysis link can also be retrieved from the output of the [lastline_submit]
 
 Module to submit a file or URL to Lastline.
 - **features**:
->The module requires a Lastline API key and token (or username and password).
+>The module requires a Lastline Analysis `api_token` and `key`.
 >When the analysis is completed, it is possible to import the generated report by feeding the analysis link to the [lastline_query](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/lastline_query.py) module.
 - **input**:
 >File or URL to submit to Lastline.
@@ -1701,6 +1702,7 @@ A module to import data from a Joe Sandbox analysis json report.
 
 Module to import and parse reports from Lastline analysis links.
 - **features**:
+>The module requires a Lastline Portal `username` and `password`.
 >The module uses the new format and it is able to return MISP attributes and objects.
 >The module returns the same results as the [lastline_query](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/lastline_query.py) expansion module.
 - **input**:
