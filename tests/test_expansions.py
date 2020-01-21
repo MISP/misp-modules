@@ -99,7 +99,7 @@ class TestExpansions(unittest.TestCase):
     def test_bgpranking(self):
         query = {"module": "bgpranking", "AS": "13335"}
         response = self.misp_modules_post(query)
-        self.assertEqual(self.get_values(response)['response']['asn_description'], 'CLOUDFLARENET - Cloudflare, Inc., US')
+        self.assertEqual(self.get_values(response)['response']['asn_description'], 'CLOUDFLARENET, US')
 
     def test_btc_steroids(self):
         query = {"module": "btc_steroids", "btc": "1ES14c7qLb5CYhLMUekctxLgc1FV2Ti9DA"}
