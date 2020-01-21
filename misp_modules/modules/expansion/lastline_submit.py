@@ -33,13 +33,9 @@ moduleinfo = {
 }
 
 moduleconfig = [
-    "api_url",
-    "api_key",
+    "url",
     "api_token",
-    "username",
-    "password",
-    # Module options
-    "bypass_cache",
+    "key",
 ]
 
 
@@ -75,31 +71,31 @@ def handler(q=False):
 
     # Parse the init parameters
     try:
-        auth_data = lastline_api.LastlineCommunityHTTPClient.get_login_params_from_request(request)
-        api_url = request.get("config", {}).get("api_url", lastline_api.DEFAULT_LASTLINE_API)
+        config = request.get("config", {})
+        auth_data = lastline_api.LastlineAbstractClient.get_login_params_from_dict(config)
+        api_url = config.get("url", lastline_api.DEFAULT_LL_ANALYSIS_API_URL)
     except Exception as e:
         misperrors["error"] = "Error parsing configuration: {}".format(e)
         return misperrors
 
     # Parse the call parameters
     try:
-        bypass_cache = request.get("config", {}).get("bypass_cache", False)
-        call_args = {"bypass_cache": __str_to_bool(bypass_cache)}
+        call_args = {}
         if "url" in request:
             # URLs are text strings
-            api_method = lastline_api.LastlineCommunityAPIClient.submit_url
+            api_method = lastline_api.AnalysisClient.submit_url
             call_args["url"] = request.get("url")
         else:
             data = request.get("data")
             # Malware samples are zip-encrypted and then base64 encoded
             if "malware-sample" in request:
-                api_method = lastline_api.LastlineCommunityAPIClient.submit_file
+                api_method = lastline_api.AnalysisClient.submit_file
                 call_args["file_data"] = __unzip(base64.b64decode(data), DEFAULT_ZIP_PASSWORD)
                 call_args["file_name"] = request.get("malware-sample").split("|", 1)[0]
                 call_args["password"] = DEFAULT_ZIP_PASSWORD
             # Attachments are just base64 encoded
             elif "attachment" in request:
-                api_method = lastline_api.LastlineCommunityAPIClient.submit_file
+                api_method = lastline_api.AnalysisClient.submit_file
                 call_args["file_data"] = base64.b64decode(data)
                 call_args["file_name"] = request.get("attachment")
 
@@ -112,7 +108,7 @@ def handler(q=False):
 
     # Make the API call
     try:
-        api_client = lastline_api.LastlineCommunityAPIClient(api_url, auth_data)
+        api_client = lastline_api.AnalysisClient(api_url, auth_data)
         response = api_method(api_client, **call_args)
         task_uuid = response.get("task_uuid")
         if not task_uuid:
@@ -127,7 +123,7 @@ def handler(q=False):
         return misperrors
 
     # Assemble and return
-    analysis_link = lastline_api.get_analysis_link(api_url, task_uuid)
+    analysis_link = lastline_api.get_task_link(task_uuid, analysis_url=api_url)
 
     return {
         "results": [
@@ -152,12 +148,12 @@ if __name__ == "__main__":
     args = parser.parse_args()
     c = configparser.ConfigParser()
     c.read(args.config_file)
-    a = lastline_api.LastlineCommunityHTTPClient.get_login_params_from_conf(c, args.section_name)
+    a = lastline_api.LastlineAbstractClient.get_login_params_from_conf(c, args.section_name)
 
     j = json.dumps(
         {
             "config": a,
-            "url": "https://www.google.com",
+            "url": "https://www.google.exe.com",
         }
     )
     print(json.dumps(handler(j), indent=4, sort_keys=True))
