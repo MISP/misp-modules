@@ -9,7 +9,7 @@ userConfig = {
         "type": "Boolean",
         "message": "Import PE Information",
     },
-    "Mitre Att&ck" : {
+    "Mitre Att&ck": {
         "type": "Boolean",
         "message": "Import Mitre Att&ck techniques",
     },
