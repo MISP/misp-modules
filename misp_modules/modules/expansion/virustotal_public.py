@@ -3,10 +3,10 @@ import json
 import requests
 
 misperrors = {'error': 'Error'}
-mispattributes = {'input': ['hostname', 'domain', "ip-src", "ip-dst", "md5", "sha1", "sha256", "sha512", "url"],
+mispattributes = {'input': ['hostname', 'domain', "ip-src", "ip-dst", "md5", "sha1", "sha256", "url"],
                   'format': 'misp_standard'}
 moduleinfo = {'version': '1', 'author': 'Christian Studer',
-              'description': 'Get information from virustotal public API v2.',
+              'description': 'Get information from VirusTotal public API v2.',
               'module-type': ['expansion', 'hover']}
 
 moduleconfig = ['apikey']
@@ -155,7 +155,7 @@ ip = ('ip', IpQuery)
 file = ('resource', HashQuery)
 misp_type_mapping = {'domain': domain, 'hostname': domain, 'ip-src': ip,
                      'ip-dst': ip, 'md5': file, 'sha1': file, 'sha256': file,
-                     'sha512': file, 'url': ('resource', UrlQuery)}
+                     'url': ('resource', UrlQuery)}
 
 
 def parse_error(status_code):
