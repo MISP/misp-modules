@@ -19,6 +19,7 @@ moduleinfo = {'version': '0.1', 'author': 'GlennHD',
               'description': 'Query a local copy of the Maxmind Geolite City database (MMDB format)',
               'module-type': ['expansion', 'hover']}
 
+
 def handler(q=False):
     if q is False:
         return False
