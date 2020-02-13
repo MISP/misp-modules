@@ -6,7 +6,7 @@ sys.path.append('{}/lib'.format('/'.join((os.path.realpath(__file__)).split('/')
 __all__ = ['cuckoo_submit', 'vmray_submit', 'bgpranking', 'circl_passivedns', 'circl_passivessl',
            'countrycode', 'cve', 'cve_advanced', 'dns', 'btc_steroids', 'domaintools', 'eupi', 'eql',
            'farsight_passivedns', 'ipasn', 'passivetotal', 'sourcecache', 'virustotal',
-           'whois', 'shodan', 'reversedns', 'geoip_country', 'wiki', 'iprep',
+           'whois', 'shodan', 'reversedns', 'geoip_asn', 'geoip_city', 'geoip_country', 'wiki', 'iprep',
            'threatminer', 'otx', 'threatcrowd', 'vulndb', 'crowdstrike_falcon',
            'yara_syntax_validator', 'hashdd', 'onyphe', 'onyphe_full', 'rbl',
            'xforceexchange', 'sigma_syntax_validator', 'stix2_pattern_syntax_validator',
