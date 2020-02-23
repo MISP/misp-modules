@@ -21,6 +21,7 @@ RUN set -eu \
                 libzbar0 \
                 libzbar-dev \
                 libfuzzy-dev \
+                cmake \
         ;apt-get -y autoremove \
         ;apt-get -y clean \
         ;rm -rf /var/lib/apt/lists/* \
