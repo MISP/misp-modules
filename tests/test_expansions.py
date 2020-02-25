@@ -363,6 +363,15 @@ class TestExpansions(unittest.TestCase):
         response = self.misp_modules_post(query)
         self.assertEqual(self.get_values(response), '1GXZ6v7FZzYBEnoRaG77SJxhu7QkvQmFuh')
 
+    def test_ransomcoindb(self):
+        query = {"module": "ransomcoindb",
+                 "attributes": {"type": "btc",
+                                "value": "1ES14c7qLb5CYhLMUekctxLgc1FV2Ti9DA",
+                                "uuid": "ea89a33b-4ab7-4515-9f02-922a0bee333d"}}
+        if 'ransomcoindb' not in self.configs:
+            response = self.misp_modules_post(query)
+            self.assertEqual(self.get_errors(response), "Ransomcoindb API key is missing")
+
     def test_rbl(self):
         query = {"module": "rbl", "ip-src": "8.8.8.8"}
         response = self.misp_modules_post(query)
