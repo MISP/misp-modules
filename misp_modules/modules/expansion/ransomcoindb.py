@@ -26,6 +26,8 @@ def handler(q=False):
         return False
 
     q = json.loads(q)
+    if "config" not in q or "api-key" not in q["config"]:
+        return {"error": "Ransomcoindb API key is missing"}
     api_key = q["config"]["api-key"]
     r = {"results": []}
 
