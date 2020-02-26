@@ -1,5 +1,4 @@
 import json
-import requests
 try:
     from google import google
 except ImportError:
