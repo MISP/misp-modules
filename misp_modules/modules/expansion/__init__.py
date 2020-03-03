@@ -16,4 +16,4 @@ __all__ = ['cuckoo_submit', 'vmray_submit', 'bgpranking', 'circl_passivedns', 'c
            'ods_enrich', 'odt_enrich', 'joesandbox_submit', 'joesandbox_query', 'urlhaus',
            'virustotal_public', 'apiosintds', 'urlscan', 'securitytrails', 'apivoid',
            'assemblyline_submit', 'assemblyline_query', 'ransomcoindb',
-           'lastline_query', 'lastline_submit']
+           'lastline_query', 'lastline_submit', 'sophoslabs_intelix']
