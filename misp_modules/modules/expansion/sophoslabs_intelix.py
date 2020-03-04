@@ -99,20 +99,19 @@ class SophosLabsApi():
 def handler(q=False):
     if q is False:
         return False
-    request = json.loads(q)
-    if request['config']['client_id'] is None or request['config']['client_secret'] is None:
+    j = json.loads(q)
+    if not j.get('config') or not j['config'].get('client_id') or not j['config'].get('client_secret'):
         misperrors['error'] = "Missing client_id or client_secret value for SOPHOSLabs Intelix. \
-            It's free to Sign Up here https://aws.amazon.com/marketplace/pp/B07SLZPMCS."
+            It's free to sign up here https://aws.amazon.com/marketplace/pp/B07SLZPMCS."
         return misperrors
-    else:
-        client = SophosLabsApi(request['config']['client_id'], request['config']['client_secret'])
-        if request['attribute']['type'] == "sha256":
-            client.hash_lookup(request['attribute']['value1'])
-        if request['attribute']['type'] in ['ip-dst', 'ip-src', 'ip']:
-            client.ip_lookup(request["attribute"]["value1"])
-        if request['attribute']['type'] in ['uri', 'url', 'domain', 'hostname']:
-            client.url_lookup(request["attribute"]["value1"])
-        return client.get_result()
+    client = SophosLabsApi(j['config']['client_id'], j['config']['client_secret'])
+    if j['attribute']['type'] == "sha256":
+        client.hash_lookup(j['attribute']['value1'])
+    if j['attribute']['type'] in ['ip-dst', 'ip-src', 'ip']:
+        client.ip_lookup(j["attribute"]["value1"])
+    if j['attribute']['type'] in ['uri', 'url', 'domain', 'hostname']:
+        client.url_lookup(j["attribute"]["value1"])
+    return client.get_result()
 
 
 def introspection():
