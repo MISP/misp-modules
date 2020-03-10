@@ -18,16 +18,17 @@ misp_types_in = ['sha256', 'ip', 'ip-src', 'ip-dst', 'uri', 'url', 'domain', 'ho
 mispattributes = {'input': misp_types_in,
                   'format': 'misp_standard'}
 
+
 class SophosLabsApi():
     def __init__(self, client_id, client_secret):
         self.misp_event = MISPEvent()
         self.client_id = client_id
-        self.client_secret= client_secret
+        self.client_secret = client_secret
         self.authToken = f"{self.client_id}:{self.client_secret}"
         self.baseurl = 'de.api.labs.sophos.com'
         d = {'grant_type': 'client_credentials'}
-        h = {'Authorization': f"Basic {base64.b64encode(self.authToken.encode('UTF-8')).decode('ascii')}",\
-                        'Content-Type': 'application/x-www-form-urlencoded'}
+        h = {'Authorization': f"Basic {base64.b64encode(self.authToken.encode('UTF-8')).decode('ascii')}",
+             'Content-Type': 'application/x-www-form-urlencoded'}
         r = requests.post('https://api.labs.sophos.com/oauth2/token', headers=h, data=d)
         if r.status_code == 200:
             j = json.loads(r.text)
@@ -83,12 +84,12 @@ class SophosLabsApi():
                 sophos_object.add_attribute('URL Categorisation', type='text', value=j['productivityCategory'])
             else:
                 sophos_object.add_attribute('URL Categorisation', type='text', value='No category assocaited with IoC')
-            
+
             if 'riskLevel' in j:
                 sophos_object.add_attribute('URL Risk Level', type='text', value=j['riskLevel'])
             else:
                 sophos_object.add_attribute('URL Risk Level', type='text', value='No risk level associated with IoC')
-                        
+
             if 'securityCategory' in j:
                 sophos_object.add_attribute('URL Security Category', type='text', value=j['securityCategory'])
             else:
@@ -121,4 +122,3 @@ def introspection():
 def version():
     moduleinfo['config'] = moduleconfig
     return moduleinfo
-
