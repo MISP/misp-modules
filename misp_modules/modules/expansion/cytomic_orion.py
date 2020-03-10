@@ -7,10 +7,10 @@ An expansion module to enrich attributes in MISP and share indicators of comprom
 
 '''
 
-from pymisp import MISPAttribute, MISPEvent, MISPObject, MISPTag
+from pymisp import MISPAttribute, MISPEvent, MISPObject
 import json
 import requests
-import re
+import sys
 
 misperrors = {'error': 'Error'}
 mispattributes = {'input': ['md5'], 'format': 'misp_standard'}
@@ -34,7 +34,7 @@ class CytomicParser():
         if self.config_object:
             self.token = self.get_token()
         else:
-            return {'error': 'Missing configuration'}
+            sys.exit('Missing configuration')
 
     def get_token(self):
         try:
@@ -108,10 +108,10 @@ class CytomicParser():
                 result_query_endpoint_machines = requests.get(query_endpoint_machines, headers=api_call_headers, verify=False)
                 json_result_query_endpoint_machines = json.loads(result_query_endpoint_machines.text)
 
-                if json_result_query_endpoint_machines and len(json_result_query_endpoint_machines) > 0:
+                if query_machines and json_result_query_endpoint_machines and len(json_result_query_endpoint_machines) > 0:
                     for machine in json_result_query_endpoint_machines:
 
-                        if machine['muid'] and query_machine_info:
+                        if query_machine_info and machine['muid']:
                             query_endpoint_machines_client = endpoint_machines_client.format(muid=machine['muid'])
                             result_endpoint_machines_client = requests.get(query_endpoint_machines_client, headers=api_call_headers, verify=False)
                             json_result_endpoint_machines_client = json.loads(result_endpoint_machines_client.text)
