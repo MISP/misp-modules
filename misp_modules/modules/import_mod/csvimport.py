@@ -256,7 +256,11 @@ def handler(q=False):
         return False
     request = json.loads(q)
     if request.get('data'):
-        data = base64.b64decode(request['data']).decode('utf-8')
+        try:
+          data = base64.b64decode(request['data']).decode('utf-8')
+        except UnicodeDecodeError:
+          misperrors['error'] = "Input is not valid UTF-8"
+          return misperrors
     else:
         misperrors['error'] = "Unsupported attributes type"
         return misperrors
