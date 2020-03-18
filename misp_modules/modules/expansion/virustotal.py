@@ -3,12 +3,12 @@ import json
 import requests
 
 misperrors = {'error': 'Error'}
-mispattributes = {'input': ['hostname', 'domain', "ip-src", "ip-dst", "md5", "sha1", "sha256", "sha512", "url"],
+mispattributes = {'input': ['hostname', 'domain', "ip-src", "ip-dst", "md5", "sha1", "sha256", "url"],
                   'format': 'misp_standard'}
 
 # possible module-types: 'expansion', 'hover' or both
 moduleinfo = {'version': '4', 'author': 'Hannah Ward',
-              'description': 'Get information from virustotal',
+              'description': 'Get information from VirusTotal',
               'module-type': ['expansion']}
 
 # config fields that your code expects from the site admin
@@ -25,8 +25,7 @@ class VirusTotalParser(object):
         self.input_types_mapping = {'ip-src': self.parse_ip, 'ip-dst': self.parse_ip,
                                     'domain': self.parse_domain, 'hostname': self.parse_domain,
                                     'md5': self.parse_hash, 'sha1': self.parse_hash,
-                                    'sha256': self.parse_hash, 'sha512': self.parse_hash,
-                                    'url': self.parse_url}
+                                    'sha256': self.parse_hash, 'url': self.parse_url}
 
     def query_api(self, attribute):
         self.attribute = MISPAttribute()

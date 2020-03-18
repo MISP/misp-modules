@@ -3,7 +3,7 @@ import geoip2.database
 import sys
 import logging
 
-log = logging.getLogger('geoip_country')
+log = logging.getLogger('geoip_city')
 log.setLevel(logging.DEBUG)
 ch = logging.StreamHandler(sys.stdout)
 ch.setLevel(logging.DEBUG)
@@ -15,8 +15,8 @@ misperrors = {'error': 'Error'}
 mispattributes = {'input': ['ip-src', 'ip-dst', 'domain|ip'], 'output': ['freetext']}
 moduleconfig = ['local_geolite_db']
 # possible module-types: 'expansion', 'hover' or both
-moduleinfo = {'version': '0.2', 'author': 'Andreas Muehlemann',
-              'description': 'Query a local copy of Maxminds Geolite database, updated for MMDB format',
+moduleinfo = {'version': '0.1', 'author': 'GlennHD',
+              'description': 'Query a local copy of the Maxmind Geolite City database (MMDB format)',
               'module-type': ['expansion', 'hover']}
 
 
@@ -44,12 +44,14 @@ def handler(q=False):
         return {'error': f'Unable to locate the GeoLite database you specified ({path_to_geolite}).'}
     log.debug(toquery)
     try:
-        answer = reader.country(toquery)
+        answer = reader.city(toquery)
+        stringmap = 'Continent=' + str(answer.continent.name) + ', Country=' + str(answer.country.name) + ', Subdivision=' + str(answer.subdivisions.most_specific.name) + ', City=' + str(answer.city.name)
+
     except Exception as e:
         misperrors['error'] = f"GeoIP resolving error: {e}"
         return misperrors
 
-    r = {'results': [{'types': mispattributes['output'], 'values': [answer.country.iso_code]}]}
+    r = {'results': [{'types': mispattributes['output'], 'values': stringmap}]}
 
     return r
 

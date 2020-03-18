@@ -99,7 +99,7 @@ class TestExpansions(unittest.TestCase):
     def test_bgpranking(self):
         query = {"module": "bgpranking", "AS": "13335"}
         response = self.misp_modules_post(query)
-        self.assertEqual(self.get_values(response)['response']['asn_description'], 'CLOUDFLARENET - Cloudflare, Inc., US')
+        self.assertEqual(self.get_values(response)['response']['asn_description'], 'CLOUDFLARENET, US')
 
     def test_btc_steroids(self):
         query = {"module": "btc_steroids", "btc": "1ES14c7qLb5CYhLMUekctxLgc1FV2Ti9DA"}
@@ -235,11 +235,12 @@ class TestExpansions(unittest.TestCase):
             self.assertTrue(value.startswith('{"ip":"1.1.1.1","status":"ok"'))
 
     def test_ipasn(self):
-        query = {"module": "ipasn", "ip-dst": "1.1.1.1"}
+        query = {"module": "ipasn",
+                 "attribute": {"type": "ip-src",
+                               "value": "149.13.33.14",
+                               "uuid": "ea89a33b-4ab7-4515-9f02-922a0bee333d"}}
         response = self.misp_modules_post(query)
-        key = list(self.get_values(response)['response'].keys())[0]
-        entry = self.get_values(response)['response'][key]['asn']
-        self.assertEqual(entry, '13335')
+        self.assertEqual(self.get_object(response), 'asn')
 
     def test_macaddess_io(self):
         module_name = 'macaddress_io'
@@ -361,6 +362,15 @@ class TestExpansions(unittest.TestCase):
         query = {"module": "qrcode", "attachment": filename, "data": encoded}
         response = self.misp_modules_post(query)
         self.assertEqual(self.get_values(response), '1GXZ6v7FZzYBEnoRaG77SJxhu7QkvQmFuh')
+
+    def test_ransomcoindb(self):
+        query = {"module": "ransomcoindb",
+                 "attributes": {"type": "btc",
+                                "value": "1ES14c7qLb5CYhLMUekctxLgc1FV2Ti9DA",
+                                "uuid": "ea89a33b-4ab7-4515-9f02-922a0bee333d"}}
+        if 'ransomcoindb' not in self.configs:
+            response = self.misp_modules_post(query)
+            self.assertEqual(self.get_errors(response), "Ransomcoindb API key is missing")
 
     def test_rbl(self):
         query = {"module": "rbl", "ip-src": "8.8.8.8"}

@@ -51,11 +51,14 @@ signerinfo_object_mapping = {'sigissuer': ('text', 'issuer'),
 
 
 class JoeParser():
-    def __init__(self):
+    def __init__(self, config):
         self.misp_event = MISPEvent()
         self.references = defaultdict(list)
         self.attributes = defaultdict(lambda: defaultdict(set))
         self.process_references = {}
+
+        self.import_pe = config["import_pe"]
+        self.create_mitre_attack = config["mitre_attack"]
 
     def parse_data(self, data):
         self.data = data
@@ -72,7 +75,9 @@ class JoeParser():
 
         if self.attributes:
             self.handle_attributes()
-        self.parse_mitre_attack()
+
+        if self.create_mitre_attack:
+            self.parse_mitre_attack()
 
     def build_references(self):
         for misp_object in self.misp_event.objects:
@@ -97,12 +102,12 @@ class JoeParser():
                 file_object = MISPObject('file')
                 for key, mapping in dropped_file_mapping.items():
                     attribute_type, object_relation = mapping
-                    file_object.add_attribute(object_relation, **{'type': attribute_type, 'value': droppedfile[key]})
+                    file_object.add_attribute(object_relation, **{'type': attribute_type, 'value': droppedfile[key], 'to_ids': False})
                 if droppedfile['@malicious'] == 'true':
-                    file_object.add_attribute('state', **{'type': 'text', 'value': 'Malicious'})
+                    file_object.add_attribute('state', **{'type': 'text', 'value': 'Malicious', 'to_ids': False})
                 for h in droppedfile['value']:
                     hash_type = dropped_hash_mapping[h['@algo']]
-                    file_object.add_attribute(hash_type, **{'type': hash_type, 'value': h['$']})
+                    file_object.add_attribute(hash_type, **{'type': hash_type, 'value': h['$'], 'to_ids': False})
                 self.misp_event.add_object(**file_object)
                 self.references[self.process_references[(int(droppedfile['@targetid']), droppedfile['@process'])]].append({
                     'referenced_uuid': file_object.uuid,
@@ -132,9 +137,12 @@ class JoeParser():
                 for object_relation, attribute in attributes.items():
                     network_connection_object.add_attribute(object_relation, **attribute)
                 network_connection_object.add_attribute('first-packet-seen',
-                                                        **{'type': 'datetime', 'value': min(tuple(min(timestamp) for timestamp in data.values()))})
+                                                        **{'type': 'datetime',
+                                                           'value': min(tuple(min(timestamp) for timestamp in data.values())),
+                                                           'to_ids': False})
                 for protocol in data.keys():
-                    network_connection_object.add_attribute('layer{}-protocol'.format(protocols[protocol]), **{'type': 'text', 'value': protocol})
+                    network_connection_object.add_attribute('layer{}-protocol'.format(protocols[protocol]),
+                                                            **{'type': 'text', 'value': protocol, 'to_ids': False})
                 self.misp_event.add_object(**network_connection_object)
                 self.references[self.analysisinfo_uuid].append(dict(referenced_uuid=network_connection_object.uuid,
                                                                     relationship_type='initiates'))
@@ -143,8 +151,8 @@ class JoeParser():
                     network_connection_object = MISPObject('network-connection')
                     for object_relation, attribute in attributes.items():
                         network_connection_object.add_attribute(object_relation, **attribute)
-                    network_connection_object.add_attribute('first-packet-seen', **{'type': 'datetime', 'value': min(timestamps)})
-                    network_connection_object.add_attribute('layer{}-protocol'.format(protocols[protocol]), **{'type': 'text', 'value': protocol})
+                    network_connection_object.add_attribute('first-packet-seen', **{'type': 'datetime', 'value': min(timestamps), 'to_ids': False})
+                    network_connection_object.add_attribute('layer{}-protocol'.format(protocols[protocol]), **{'type': 'text', 'value': protocol, 'to_ids': False})
                     self.misp_event.add_object(**network_connection_object)
                     self.references[self.analysisinfo_uuid].append(dict(referenced_uuid=network_connection_object.uuid,
                                                                         relationship_type='initiates'))
@@ -154,7 +162,8 @@ class JoeParser():
         if screenshotdata:
             screenshotdata = screenshotdata['interesting']['$']
             attribute = {'type': 'attachment', 'value': 'screenshot.jpg',
-                         'data': screenshotdata, 'disable_correlation': True}
+                         'data': screenshotdata, 'disable_correlation': True,
+                         'to_ids': False}
             self.misp_event.add_attribute(**attribute)
 
     def parse_system_behavior(self):
@@ -166,9 +175,9 @@ class JoeParser():
                 general = process['general']
                 process_object = MISPObject('process')
                 for feature, relation in process_object_fields.items():
-                    process_object.add_attribute(relation, **{'type': 'text', 'value': general[feature]})
+                    process_object.add_attribute(relation, **{'type': 'text', 'value': general[feature], 'to_ids': False})
                 start_time = datetime.strptime('{} {}'.format(general['date'], general['time']), '%d/%m/%Y %H:%M:%S')
-                process_object.add_attribute('start-time', **{'type': 'datetime', 'value': start_time})
+                process_object.add_attribute('start-time', **{'type': 'datetime', 'value': start_time, 'to_ids': False})
                 self.misp_event.add_object(**process_object)
                 for field, to_call in process_activities.items():
                     if process.get(field):
@@ -203,7 +212,7 @@ class JoeParser():
         url_object = MISPObject("url")
         self.analysisinfo_uuid = url_object.uuid
 
-        url_object.add_attribute("url", generalinfo["target"]["url"])
+        url_object.add_attribute("url", generalinfo["target"]["url"], to_ids=False)
         self.misp_event.add_object(**url_object)
 
     def parse_fileinfo(self):
@@ -213,10 +222,10 @@ class JoeParser():
         self.analysisinfo_uuid = file_object.uuid
 
         for field in file_object_fields:
-            file_object.add_attribute(field, **{'type': field, 'value': fileinfo[field]})
+            file_object.add_attribute(field, **{'type': field, 'value': fileinfo[field], 'to_ids': False})
         for field, mapping in file_object_mapping.items():
             attribute_type, object_relation = mapping
-            file_object.add_attribute(object_relation, **{'type': attribute_type, 'value': fileinfo[field]})
+            file_object.add_attribute(object_relation, **{'type': attribute_type, 'value': fileinfo[field], 'to_ids': False})
         arch = self.data['generalinfo']['arch']
         if arch in arch_type_mapping:
             to_call = arch_type_mapping[arch]
@@ -234,9 +243,9 @@ class JoeParser():
         attribute_type = 'text'
         for comment, permissions in permission_lists.items():
             permission_object = MISPObject('android-permission')
-            permission_object.add_attribute('comment', **dict(type=attribute_type, value=comment))
+            permission_object.add_attribute('comment', **dict(type=attribute_type, value=comment, to_ids=False))
             for permission in permissions:
-                permission_object.add_attribute('permission', **dict(type=attribute_type, value=permission))
+                permission_object.add_attribute('permission', **dict(type=attribute_type, value=permission, to_ids=False))
             self.misp_event.add_object(**permission_object)
             self.references[file_object.uuid].append(dict(referenced_uuid=permission_object.uuid,
                                                           relationship_type='grants'))
@@ -255,24 +264,24 @@ class JoeParser():
             if elf.get('type'):
                 # Haven't seen anything but EXEC yet in the files I tested
                 attribute_value = "EXECUTABLE" if elf['type'] == "EXEC (Executable file)" else elf['type']
-                elf_object.add_attribute('type', **dict(type=attribute_type, value=attribute_value))
+                elf_object.add_attribute('type', **dict(type=attribute_type, value=attribute_value, to_ids=False))
             for feature, relation in elf_object_mapping.items():
                 if elf.get(feature):
-                    elf_object.add_attribute(relation, **dict(type=attribute_type, value=elf[feature]))
+                    elf_object.add_attribute(relation, **dict(type=attribute_type, value=elf[feature], to_ids=False))
             sections_number = len(fileinfo['sections']['section'])
-            elf_object.add_attribute('number-sections', **{'type': 'counter', 'value': sections_number})
+            elf_object.add_attribute('number-sections', **{'type': 'counter', 'value': sections_number, 'to_ids': False})
             self.misp_event.add_object(**elf_object)
             for section in fileinfo['sections']['section']:
                 section_object = MISPObject('elf-section')
                 for feature in ('name', 'type'):
                     if section.get(feature):
-                        section_object.add_attribute(feature, **dict(type=attribute_type, value=section[feature]))
+                        section_object.add_attribute(feature, **dict(type=attribute_type, value=section[feature], to_ids=False))
                 if section.get('size'):
-                    section_object.add_attribute(size, **dict(type=size, value=int(section['size'], 16)))
+                    section_object.add_attribute(size, **dict(type=size, value=int(section['size'], 16), to_ids=False))
                 for flag in section['flagsdesc']:
                     try:
                         attribute_value = elf_section_flags_mapping[flag]
-                        section_object.add_attribute('flag', **dict(type=attribute_type, value=attribute_value))
+                        section_object.add_attribute('flag', **dict(type=attribute_type, value=attribute_value, to_ids=False))
                     except KeyError:
                         print(f'Unknown elf section flag: {flag}')
                         continue
@@ -281,6 +290,8 @@ class JoeParser():
                                                              relationship_type=relationship))
 
     def parse_pe(self, fileinfo, file_object):
+        if not self.import_pe:
+            return
         try:
             peinfo = fileinfo['pe']
         except KeyError:
@@ -292,8 +303,8 @@ class JoeParser():
         self.misp_event.add_object(**file_object)
         for field, mapping in pe_object_fields.items():
             attribute_type, object_relation = mapping
-            pe_object.add_attribute(object_relation, **{'type': attribute_type, 'value': peinfo[field]})
-        pe_object.add_attribute('compilation-timestamp', **{'type': 'datetime', 'value': int(peinfo['timestamp'].split()[0], 16)})
+            pe_object.add_attribute(object_relation, **{'type': attribute_type, 'value': peinfo[field], 'to_ids': False})
+        pe_object.add_attribute('compilation-timestamp', **{'type': 'datetime', 'value': int(peinfo['timestamp'].split()[0], 16), 'to_ids': False})
         program_name = fileinfo['filename']
         if peinfo['versions']:
             for feature in peinfo['versions']['version']:
@@ -301,18 +312,18 @@ class JoeParser():
                 if name == 'InternalName':
                     program_name = feature['value']
                 if name in pe_object_mapping:
-                    pe_object.add_attribute(pe_object_mapping[name], **{'type': 'text', 'value': feature['value']})
+                    pe_object.add_attribute(pe_object_mapping[name], **{'type': 'text', 'value': feature['value'], 'to_ids': False})
         sections_number = len(peinfo['sections']['section'])
-        pe_object.add_attribute('number-sections', **{'type': 'counter', 'value': sections_number})
+        pe_object.add_attribute('number-sections', **{'type': 'counter', 'value': sections_number, 'to_ids': False})
         signatureinfo = peinfo['signature']
         if signatureinfo['signed']:
             signerinfo_object = MISPObject('authenticode-signerinfo')
             pe_object.add_reference(signerinfo_object.uuid, 'signed-by')
             self.misp_event.add_object(**pe_object)
-            signerinfo_object.add_attribute('program-name', **{'type': 'text', 'value': program_name})
+            signerinfo_object.add_attribute('program-name', **{'type': 'text', 'value': program_name, 'to_ids': False})
             for feature, mapping in signerinfo_object_mapping.items():
                 attribute_type, object_relation = mapping
-                signerinfo_object.add_attribute(object_relation, **{'type': attribute_type, 'value': signatureinfo[feature]})
+                signerinfo_object.add_attribute(object_relation, **{'type': attribute_type, 'value': signatureinfo[feature], 'to_ids': False})
             self.misp_event.add_object(**signerinfo_object)
         else:
             self.misp_event.add_object(**pe_object)
@@ -327,7 +338,7 @@ class JoeParser():
         for feature, mapping in pe_section_object_mapping.items():
             if section.get(feature):
                 attribute_type, object_relation = mapping
-                section_object.add_attribute(object_relation, **{'type': attribute_type, 'value': section[feature]})
+                section_object.add_attribute(object_relation, **{'type': attribute_type, 'value': section[feature], 'to_ids': False})
         return section_object
 
     def parse_network_interactions(self):
@@ -339,13 +350,13 @@ class JoeParser():
                     for key, mapping in domain_object_mapping.items():
                         attribute_type, object_relation = mapping
                         domain_object.add_attribute(object_relation,
-                                                    **{'type': attribute_type, 'value': domain[key]})
+                                                    **{'type': attribute_type, 'value': domain[key], 'to_ids': False})
                     self.misp_event.add_object(**domain_object)
                     reference = dict(referenced_uuid=domain_object.uuid, relationship_type='contacts')
                     self.add_process_reference(domain['@targetid'], domain['@currentpath'], reference)
                 else:
                     attribute = MISPAttribute()
-                    attribute.from_dict(**{'type': 'domain', 'value': domain['@name']})
+                    attribute.from_dict(**{'type': 'domain', 'value': domain['@name'], 'to_ids': False})
                     self.misp_event.add_attribute(**attribute)
                     reference = dict(referenced_uuid=attribute.uuid, relationship_type='contacts')
                     self.add_process_reference(domain['@targetid'], domain['@currentpath'], reference)
@@ -353,7 +364,7 @@ class JoeParser():
         if ipinfo:
             for ip in ipinfo['ip']:
                 attribute = MISPAttribute()
-                attribute.from_dict(**{'type': 'ip-dst', 'value': ip['@ip']})
+                attribute.from_dict(**{'type': 'ip-dst', 'value': ip['@ip'], 'to_ids': False})
                 self.misp_event.add_attribute(**attribute)
                 reference = dict(referenced_uuid=attribute.uuid, relationship_type='contacts')
                 self.add_process_reference(ip['@targetid'], ip['@currentpath'], reference)
@@ -363,7 +374,7 @@ class JoeParser():
                 target_id = int(url['@targetid'])
                 current_path = url['@currentpath']
                 attribute = MISPAttribute()
-                attribute_dict = {'type': 'url', 'value': url['@name']}
+                attribute_dict = {'type': 'url', 'value': url['@name'], 'to_ids': False}
                 if target_id != -1 and current_path != 'unknown':
                     self.references[self.process_references[(target_id, current_path)]].append({
                         'referenced_uuid': attribute.uuid,
@@ -384,8 +395,8 @@ class JoeParser():
                     registry_key = MISPObject('registry-key')
                     for field, mapping in regkey_object_mapping.items():
                         attribute_type, object_relation = mapping
-                        registry_key.add_attribute(object_relation, **{'type': attribute_type, 'value': call[field]})
-                    registry_key.add_attribute('data-type', **{'type': 'text', 'value': 'REG_{}'.format(call['type'].upper())})
+                        registry_key.add_attribute(object_relation, **{'type': attribute_type, 'value': call[field], 'to_ids': False})
+                    registry_key.add_attribute('data-type', **{'type': 'text', 'value': 'REG_{}'.format(call['type'].upper()), 'to_ids': False})
                     self.misp_event.add_object(**registry_key)
                     self.references[process_uuid].append(dict(referenced_uuid=registry_key.uuid,
                                                               relationship_type=relationship))
@@ -398,7 +409,7 @@ class JoeParser():
 
     def create_attribute(self, attribute_type, attribute_value):
         attribute = MISPAttribute()
-        attribute.from_dict(**{'type': attribute_type, 'value': attribute_value})
+        attribute.from_dict(**{'type': attribute_type, 'value': attribute_value, 'to_ids': False})
         self.misp_event.add_attribute(**attribute)
         return attribute.uuid
 
@@ -419,5 +430,5 @@ class JoeParser():
         attributes = {}
         for field, value in zip(network_behavior_fields, connection):
             attribute_type, object_relation = network_connection_object_mapping[field]
-            attributes[object_relation] = {'type': attribute_type, 'value': value}
+            attributes[object_relation] = {'type': attribute_type, 'value': value, 'to_ids': False}
         return attributes

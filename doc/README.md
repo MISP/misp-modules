@@ -532,11 +532,11 @@ Module to access intelmqs eventdb.
 
 Module to query an IP ASN history service (https://github.com/D4-project/IPASN-History).
 - **features**:
->This module takes an IP address attribute as input and queries the CIRCL IPASN service to get additional information about the input.
+>This module takes an IP address attribute as input and queries the CIRCL IPASN service. The result of the query is the latest asn related to the IP address, that is returned as a MISP object.
 - **input**:
 >An IP address MISP attribute.
 - **output**:
->Text describing additional information about the input after a query on the IPASN-history database.
+>Asn object(s) objects related to the IP address used as input.
 - **references**:
 >https://github.com/D4-project/IPASN-History
 - **requirements**:
@@ -613,6 +613,7 @@ A module to submit files or URLs to Joe Sandbox for an advanced analysis, and re
 Query Lastline with an analysis link and parse the report into MISP attributes and objects.
 The analysis link can also be retrieved from the output of the [lastline_submit](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/lastline_submit.py) expansion module.
 - **features**:
+>The module requires a Lastline Portal `username` and `password`.
 >The module uses the new format and it is able to return MISP attributes and objects.
 >The module returns the same results as the [lastline_import](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/import_mod/lastline_import.py) import module.
 - **input**:
@@ -630,7 +631,7 @@ The analysis link can also be retrieved from the output of the [lastline_submit]
 
 Module to submit a file or URL to Lastline.
 - **features**:
->The module requires a Lastline API key and token (or username and password).
+>The module requires a Lastline Analysis `api_token` and `key`.
 >When the analysis is completed, it is possible to import the generated report by feeding the analysis link to the [lastline_query](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/lastline_query.py) module.
 - **input**:
 >File or URL to submit to Lastline.
@@ -1586,6 +1587,26 @@ Module to export a structured CSV file for uploading to ThreatConnect.
 
 -----
 
+#### [vt_graph](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/export_mod/vt_graph.py)
+
+<img src=logos/virustotal.png height=60>
+
+This module is used to create a VirusTotal Graph from a MISP event.
+- **features**:
+>The module takes the MISP event as input and queries the VirusTotal Graph API to create a new graph out of the event.
+>
+>Once the graph is ready, we get the url of it, which is returned so we can view it on VirusTotal.
+- **input**:
+>A MISP event.
+- **output**:
+>Link of the VirusTotal Graph created for the event.
+- **references**:
+>https://www.virustotal.com/gui/graph-overview
+- **requirements**:
+>vt_graph_api, the python library to query the VirusTotal graph API
+
+-----
+
 ## Import Modules
 
 #### [csvimport](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/import_mod/csvimport.py)
@@ -1681,6 +1702,7 @@ A module to import data from a Joe Sandbox analysis json report.
 
 Module to import and parse reports from Lastline analysis links.
 - **features**:
+>The module requires a Lastline Portal `username` and `password`.
 >The module uses the new format and it is able to return MISP attributes and objects.
 >The module returns the same results as the [lastline_query](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/lastline_query.py) expansion module.
 - **input**:

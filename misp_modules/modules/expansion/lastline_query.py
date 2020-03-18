@@ -27,10 +27,9 @@ moduleinfo = {
 }
 
 moduleconfig = [
-    "api_key",
-    "api_token",
     "username",
     "password",
+    "verify_ssl",
 ]
 
 
@@ -51,24 +50,25 @@ def handler(q=False):
 
     # Parse the init parameters
     try:
-        auth_data = lastline_api.LastlineCommunityHTTPClient.get_login_params_from_request(request)
+        config = request["config"]
+        auth_data = lastline_api.LastlineAbstractClient.get_login_params_from_dict(config)
         analysis_link = request['attribute']['value']
         # The API url changes based on the analysis link host name
-        api_url = lastline_api.get_api_url_from_link(analysis_link)
+        api_url = lastline_api.get_portal_url_from_task_link(analysis_link)
     except Exception as e:
         misperrors["error"] = "Error parsing configuration: {}".format(e)
         return misperrors
 
     # Parse the call parameters
     try:
-        task_uuid = lastline_api.get_uuid_from_link(analysis_link)
+        task_uuid = lastline_api.get_uuid_from_task_link(analysis_link)
     except (KeyError, ValueError) as e:
         misperrors["error"] = "Error processing input parameters: {}".format(e)
         return misperrors
 
     # Make the API calls
     try:
-        api_client = lastline_api.LastlineCommunityAPIClient(api_url, auth_data)
+        api_client = lastline_api.PortalClient(api_url, auth_data, verify_ssl=config.get('verify_ssl', True).lower() in ("true"))
         response = api_client.get_progress(task_uuid)
         if response.get("completed") != 1:
             raise ValueError("Analysis is not finished yet.")
@@ -108,7 +108,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
     c = configparser.ConfigParser()
     c.read(args.config_file)
-    a = lastline_api.LastlineCommunityHTTPClient.get_login_params_from_conf(c, args.section_name)
+    a = lastline_api.LastlineAbstractClient.get_login_params_from_conf(c, args.section_name)
 
     j = json.dumps(
         {

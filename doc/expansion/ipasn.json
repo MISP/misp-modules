@@ -2,7 +2,7 @@
     "description": "Module to query an IP ASN history service (https://github.com/D4-project/IPASN-History).",
     "requirements": ["pyipasnhistory: Python library to access IPASN-history instance"],
     "input": "An IP address MISP attribute.",
-    "output": "Text describing additional information about the input after a query on the IPASN-history database.",
+    "output": "Asn object(s) objects related to the IP address used as input.",
     "references": ["https://github.com/D4-project/IPASN-History"],
-    "features": "This module takes an IP address attribute as input and queries the CIRCL IPASN service to get additional information about the input."
+    "features": "This module takes an IP address attribute as input and queries the CIRCL IPASN service. The result of the query is the latest asn related to the IP address, that is returned as a MISP object."
 }
