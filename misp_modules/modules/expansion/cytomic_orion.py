@@ -154,19 +154,19 @@ def handler(q=False):
         return {'error': 'Missing configuration'}
 
     config_object = {
-            'clientid': request["config"].get("clientid"),
-            'clientsecret': request["config"].get("clientsecret"),
-            'scope': 'orion.api',
-            'password': request["config"].get("password"),
-            'username': request["config"].get("username"),
-            'grant_type': 'password',
-            'token_url': request["config"].get("token_url"),
-            'endpoint_fileinformation': '{api_url}{endpoint}'.format(api_url=request["config"].get("api_url"), endpoint='/forensics/md5/{md5}/info'),
-            'endpoint_machines': '{api_url}{endpoint}'.format(api_url=request["config"].get("api_url"), endpoint='/forensics/md5/{md5}/muids'),
-            'endpoint_machines_client': '{api_url}{endpoint}'.format(api_url=request["config"].get("api_url"), endpoint='/forensics/muid/{muid}/info'),
-            'query_machines': True,
-            'query_machine_info': True
-                }
+        'clientid': request["config"].get("clientid"),
+        'clientsecret': request["config"].get("clientsecret"),
+        'scope': 'orion.api',
+        'password': request["config"].get("password"),
+        'username': request["config"].get("username"),
+        'grant_type': 'password',
+        'token_url': request["config"].get("token_url"),
+        'endpoint_fileinformation': '{api_url}{endpoint}'.format(api_url=request["config"].get("api_url"), endpoint='/forensics/md5/{md5}/info'),
+        'endpoint_machines': '{api_url}{endpoint}'.format(api_url=request["config"].get("api_url"), endpoint='/forensics/md5/{md5}/muids'),
+        'endpoint_machines_client': '{api_url}{endpoint}'.format(api_url=request["config"].get("api_url"), endpoint='/forensics/muid/{muid}/info'),
+        'query_machines': True,
+        'query_machine_info': True
+    }
 
     cytomic_parser = CytomicParser(attribute, config_object)
     cytomic_parser.parse(attribute['value'])
