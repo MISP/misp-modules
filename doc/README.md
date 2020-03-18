@@ -295,6 +295,24 @@ An expansion hover module to expand information about CVE id.
 
 -----
 
+#### [cytomic_orion.py](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/cytomic_orion.py.py)
+
+<img src=logos/cytomic_orion.png height=60>
+
+An expansion module to enrich attributes in MISP by quering the Cytomic Orion API
+- **features**:
+>This module takes an MD5 hash and searches for occurrences of this hash in the Cytomic Orion database. Returns observed files and machines.
+- **input**:
+>MD5, hash of the sample / malware to search for.
+- **output**:
+>MISP objects with sightings of the hash in Cytomic Orion. Includes files and machines.
+- **references**:
+>https://www.vanimpe.eu/2020/03/10/integrating-misp-and-cytomic-orion/, https://www.cytomicmodel.com/solutions/
+- **requirements**:
+>Access (license) to Cytomic Orion
+
+-----
+
 #### [dbl_spamhaus](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/dbl_spamhaus.py)
 
 <img src=logos/spamhaus.jpg height=60>
@@ -678,6 +696,22 @@ Module to access Macvendors API.
 >Additional information about the MAC address.
 - **references**:
 >https://macvendors.com/, https://macvendors.com/api
+
+-----
+
+#### [malwarebazaar](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/malwarebazaar.py)
+
+Query the MALWAREbazaar API to get additional information about the input hash attribute.
+- **features**:
+>The module takes a hash attribute as input and queries MALWAREbazaar's API to fetch additional data about it. The result, if the payload is known on the databases, is at least one file object describing the file the input hash is related to.
+>
+>The module is using the new format of modules able to return object since the result is one or multiple MISP object(s).
+- **input**:
+>A hash attribute (md5, sha1 or sha256).
+- **output**:
+>File object(s) related to the input attribute found on MALWAREbazaar databases.
+- **references**:
+>https://bazaar.abuse.ch/
 
 -----
 
