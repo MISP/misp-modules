@@ -193,13 +193,15 @@ def check_if_present(object, attribute_name, list_objects):
     using attribute_name for the matching
     """
     for o in list_objects:
+        # We first look for a match on the name
         if o['name'] == object['name']:
             for attr in object['Attribute']:
+                # Within the attributes, we look for the one to compare
                 if attr['type'] == attribute_name:
-                    value = attr['value']
-                for attr2 in o['Attribute']:
-                    if attr['type'] == attribute_name and attr['value'] == value:
-                        return True
+                    # Then we check the attributes of the other object and look for a match
+                    for attr2 in o['Attribute']:
+                        if attr2['type'] == attribute_name and attr2['value'] == attr['value']:
+                            return True
 
     return False
 
