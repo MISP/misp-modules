@@ -152,6 +152,22 @@ An expansion hover module to get a blockchain balance from a BTC address in MISP
 
 -----
 
+#### [censys_enrich](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/censys_enrich.py)
+
+An expansion module to enrich attributes in MISP by quering the censys.io API
+- **features**:
+>This module takes an IP, hostname or a certificate fingerprint and attempts to enrich it by querying the Censys API.
+- **input**:
+>IP, domain or certificate fingerprint (md5, sha1 or sha256)
+- **output**:
+>MISP objects retrieved from censys, including open ports, ASN, Location of the IP, x509 details
+- **references**:
+>https://www.censys.io
+- **requirements**:
+>API credentials to censys.io
+
+-----
+
 #### [circl_passivedns](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/circl_passivedns.py)
 
 <img src=logos/passivedns.png height=60>
@@ -292,6 +308,24 @@ An expansion hover module to expand information about CVE id.
 >Text giving information about the CVE related to the Vulnerability.
 - **references**:
 >https://cve.circl.lu/, https://cve.mitre.org/
+
+-----
+
+#### [cytomic_orion](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/cytomic_orion.py)
+
+<img src=logos/cytomic_orion.png height=60>
+
+An expansion module to enrich attributes in MISP by quering the Cytomic Orion API
+- **features**:
+>This module takes an MD5 hash and searches for occurrences of this hash in the Cytomic Orion database. Returns observed files and machines.
+- **input**:
+>MD5, hash of the sample / malware to search for.
+- **output**:
+>MISP objects with sightings of the hash in Cytomic Orion. Includes files and machines.
+- **references**:
+>https://www.vanimpe.eu/2020/03/10/integrating-misp-and-cytomic-orion/, https://www.cytomicmodel.com/solutions/
+- **requirements**:
+>Access (license) to Cytomic Orion
 
 -----
 
