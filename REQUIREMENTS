@@ -18,6 +18,7 @@ attrs==19.3.0
 backscatter==0.2.4
 beautifulsoup4==4.8.2
 blockchain==1.4.4
+censys==0.0.8
 certifi==2019.11.28
 cffi==1.14.0
 chardet==3.0.4
