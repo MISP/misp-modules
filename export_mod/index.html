@@ -372,6 +372,13 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#vt_graph" title="vt_graph" class="md-nav__link">
+    vt_graph
+  </a>
+  
+</li>
+      
       
       
       
@@ -551,6 +558,13 @@
         <li class="md-nav__item">
   <a href="#threat_connect_export" title="threat_connect_export" class="md-nav__link">
     threat_connect_export
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#vt_graph" title="vt_graph" class="md-nav__link">
+    vt_graph
   </a>
   
 </li>
@@ -739,6 +753,23 @@ ThreatConnect CSV format file
 <a href="https://www.threatconnect.com">https://www.threatconnect.com</a>
 - <strong>requirements</strong>:
 csv</p>
+</blockquote>
+<hr />
+<h4 id="vt_graph"><a href="https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/export_mod/vt_graph.py">vt_graph</a><a class="headerlink" href="#vt_graph" title="Permanent link">&para;</a></h4>
+<p><img src=logos/virustotal.png height=60></p>
+<p>This module is used to create a VirusTotal Graph from a MISP event.
+- <strong>features</strong>:</p>
+<blockquote>
+<p>The module takes the MISP event as input and queries the VirusTotal Graph API to create a new graph out of the event.</p>
+<p>Once the graph is ready, we get the url of it, which is returned so we can view it on VirusTotal.
+- <strong>input</strong>:
+A MISP event.
+- <strong>output</strong>:
+Link of the VirusTotal Graph created for the event.
+- <strong>references</strong>:
+<a href="https://www.virustotal.com/gui/graph-overview">https://www.virustotal.com/gui/graph-overview</a>
+- <strong>requirements</strong>:
+vt_graph_api, the python library to query the VirusTotal graph API</p>
 </blockquote>
 <hr />
                 

@@ -340,6 +340,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#censys_enrich" title="censys_enrich" class="md-nav__link">
+    censys_enrich
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#circl_passivedns" title="circl_passivedns" class="md-nav__link">
     circl_passivedns
   </a>
@@ -377,6 +384,13 @@
         <li class="md-nav__item">
   <a href="#cve" title="cve" class="md-nav__link">
     cve
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cytomic_orion" title="cytomic_orion" class="md-nav__link">
+    cytomic_orion
   </a>
   
 </li>
@@ -927,6 +941,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#censys_enrich" title="censys_enrich" class="md-nav__link">
+    censys_enrich
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#circl_passivedns" title="circl_passivedns" class="md-nav__link">
     circl_passivedns
   </a>
@@ -964,6 +985,13 @@
         <li class="md-nav__item">
   <a href="#cve" title="cve" class="md-nav__link">
     cve
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cytomic_orion" title="cytomic_orion" class="md-nav__link">
+    cytomic_orion
   </a>
   
 </li>
@@ -1488,6 +1516,21 @@ dnspython3: dns python library</p>
 Text to describe the blockchain balance and the transactions related to the btc address in input.</p>
 </blockquote>
 <hr />
+<h4 id="censys_enrich"><a href="https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/censys_enrich.py">censys_enrich</a><a class="headerlink" href="#censys_enrich" title="Permanent link">&para;</a></h4>
+<p>An expansion module to enrich attributes in MISP by quering the censys.io API
+- <strong>features</strong>:</p>
+<blockquote>
+<p>This module takes an IP, hostname or a certificate fingerprint and attempts to enrich it by querying the Censys API.
+- <strong>input</strong>:
+IP, domain or certificate fingerprint (md5, sha1 or sha256)
+- <strong>output</strong>:
+MISP objects retrieved from censys, including open ports, ASN, Location of the IP, x509 details
+- <strong>references</strong>:
+<a href="https://www.censys.io">https://www.censys.io</a>
+- <strong>requirements</strong>:
+API credentials to censys.io</p>
+</blockquote>
+<hr />
 <h4 id="circl_passivedns"><a href="https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/circl_passivedns.py">circl_passivedns</a><a class="headerlink" href="#circl_passivedns" title="Permanent link">&para;</a></h4>
 <p><img src=logos/passivedns.png height=60></p>
 <p>Module to access CIRCL Passive DNS.
@@ -1614,6 +1657,22 @@ Vulnerability attribute.
 Text giving information about the CVE related to the Vulnerability.
 - <strong>references</strong>:
 <a href="https://cve.circl.lu/">https://cve.circl.lu/</a>, <a href="https://cve.mitre.org/">https://cve.mitre.org/</a></p>
+</blockquote>
+<hr />
+<h4 id="cytomic_orion"><a href="https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/cytomic_orion.py">cytomic_orion</a><a class="headerlink" href="#cytomic_orion" title="Permanent link">&para;</a></h4>
+<p><img src=logos/cytomic_orion.png height=60></p>
+<p>An expansion module to enrich attributes in MISP by quering the Cytomic Orion API
+- <strong>features</strong>:</p>
+<blockquote>
+<p>This module takes an MD5 hash and searches for occurrences of this hash in the Cytomic Orion database. Returns observed files and machines.
+- <strong>input</strong>:
+MD5, hash of the sample / malware to search for.
+- <strong>output</strong>:
+MISP objects with sightings of the hash in Cytomic Orion. Includes files and machines.
+- <strong>references</strong>:
+<a href="https://www.vanimpe.eu/2020/03/10/integrating-misp-and-cytomic-orion/">https://www.vanimpe.eu/2020/03/10/integrating-misp-and-cytomic-orion/</a>, <a href="https://www.cytomicmodel.com/solutions/">https://www.cytomicmodel.com/solutions/</a>
+- <strong>requirements</strong>:
+Access (license) to Cytomic Orion</p>
 </blockquote>
 <hr />
 <h4 id="dbl_spamhaus"><a href="https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/dbl_spamhaus.py">dbl_spamhaus</a><a class="headerlink" href="#dbl_spamhaus" title="Permanent link">&para;</a></h4>
@@ -1823,11 +1882,11 @@ psycopg2: Python library to support PostgreSQL, An access to the IntelMQ databas
 <p>Module to query an IP ASN history service (<a href="https://github.com/D4-project/IPASN-History">https://github.com/D4-project/IPASN-History</a>).
 - <strong>features</strong>:</p>
 <blockquote>
-<p>This module takes an IP address attribute as input and queries the CIRCL IPASN service to get additional information about the input.
+<p>This module takes an IP address attribute as input and queries the CIRCL IPASN service. The result of the query is the latest asn related to the IP address, that is returned as a MISP object.
 - <strong>input</strong>:
 An IP address MISP attribute.
 - <strong>output</strong>:
-Text describing additional information about the input after a query on the IPASN-history database.
+Asn object(s) objects related to the IP address used as input.
 - <strong>references</strong>:
 <a href="https://github.com/D4-project/IPASN-History">https://github.com/D4-project/IPASN-History</a>
 - <strong>requirements</strong>:
@@ -1892,7 +1951,8 @@ jbxapi: Joe Sandbox API python3 library</p>
 The analysis link can also be retrieved from the output of the <a href="https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/lastline_submit.py">lastline_submit</a> expansion module.
 - <strong>features</strong>:</p>
 <blockquote>
-<p>The module uses the new format and it is able to return MISP attributes and objects.
+<p>The module requires a Lastline Portal <code>username</code> and <code>password</code>.
+The module uses the new format and it is able to return MISP attributes and objects.
 The module returns the same results as the <a href="https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/import_mod/lastline_import.py">lastline_import</a> import module.
 - <strong>input</strong>:
 Link to a Lastline analysis.
@@ -1907,7 +1967,7 @@ MISP attributes and objects parsed from the analysis report.
 <p>Module to submit a file or URL to Lastline.
 - <strong>features</strong>:</p>
 <blockquote>
-<p>The module requires a Lastline API key and token (or username and password).
+<p>The module requires a Lastline Analysis <code>api_token</code> and <code>key</code>.
 When the analysis is completed, it is possible to import the generated report by feeding the analysis link to the <a href="https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/lastline_query.py">lastline_query</a> module.
 - <strong>input</strong>:
 File or URL to submit to Lastline.
