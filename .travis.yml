@@ -9,6 +9,7 @@ python:
     - "3.6"
     - "3.6-dev"
     - "3.7-dev"
+    - "3.8-dev"
 
 before_install:
     - docker build -t misp-modules --build-arg BUILD_DATE=$(date -u +"%Y-%m-%d") docker/
