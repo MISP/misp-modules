@@ -21,8 +21,28 @@ $SUDO_WWW virtualenv -p python3 /var/www/MISP/venv
 # END with virtualenv
 
 cd /usr/local/src/
-sudo git clone https://github.com/MISP/misp-modules.git
-cd misp-modules
+# Ideally you add your user to the staff group and make /usr/local/src group writeable, below follows an example with user misp
+sudo adduser misp staff
+sudo chmod 2775 /usr/local/src
+sudo chown root:staff /usr/local/src
+git clone https://github.com/MISP/misp-modules.git
+git clone git://github.com/stricaud/faup.git faup
+git clone git://github.com/stricaud/gtcaca.git gtcaca
+
+# Install gtcaca/faup
+cd gtcaca
+mkdir -p build
+cd build
+cmake .. && make
+sudo make install
+cd ../../faup
+mkdir -p build
+cd build
+cmake .. && make
+sudo make install
+sudo ldconfig
+
+cd ../../misp-modules
 
 # BEGIN with virtualenv: 
 $SUDO_WWW  /var/www/MISP/venv/bin/pip install -I -r REQUIREMENTS

@@ -73,9 +73,9 @@ def handler(q=False):
     do_not_include_vmrayjobids = request["config"].get("do_not_include_vmrayjobids")
 
     try:
-        shareable = bool(strtobool(shareable))                                # Do we want the sample to be shared?
-        reanalyze = not bool(strtobool(do_not_reanalyze))                     # Always reanalyze the sample?
-        include_vmrayjobids = not bool(strtobool(do_not_include_vmrayjobids)) # Include the references to VMRay job IDs
+        shareable = bool(strtobool(shareable))                                 # Do we want the sample to be shared?
+        reanalyze = not bool(strtobool(do_not_reanalyze))                      # Always reanalyze the sample?
+        include_vmrayjobids = not bool(strtobool(do_not_include_vmrayjobids))  # Include the references to VMRay job IDs
     except ValueError:
         misperrors["error"] = "Error while processing settings. Please double-check your values."
         return misperrors
