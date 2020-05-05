@@ -3,29 +3,31 @@
 -e git+https://github.com/D4-project/BGP-Ranking.git/@fd9c0e03af9b61d4bf0b67ac73c7208a55178a54#egg=pybgpranking&subdirectory=client
 -e git+https://github.com/D4-project/IPASN-History.git/@fc5e48608afc113e101ca6421bf693b7b9753f9e#egg=pyipasnhistory&subdirectory=client
 -e git+https://github.com/MISP/PyIntel471.git@0df8d51f1c1425de66714b3a5a45edb69b8cc2fc#egg=pyintel471
--e git+https://github.com/MISP/PyMISP.git@a26a8e450b14d48bb0c8ef46b32bff2f1eadc514#egg=pymisp[fileobjects,openioc,virustotal,pdfexport]
+-e git+https://github.com/MISP/PyMISP.git@b5b40ae2c5225a4b349c26294cfc012309a61352#egg=pymisp[fileobjects,openioc,virustotal,pdfexport]
 -e git+https://github.com/Rafiot/uwhoisd.git@411572840eba4c72dc321c549b36a54ed5cea9de#egg=uwhois&subdirectory=client
 -e git+https://github.com/cartertemm/ODTReader.git/@49d6938693f6faa3ff09998f86dba551ae3a996b#egg=odtreader
 -e git+https://github.com/sebdraven/pydnstrails@48c1f740025c51289f43a24863d1845ff12fd21a#egg=pydnstrails
--e git+https://github.com/sebdraven/pyonyphe@cbb0168d5cb28a9f71f7ab3773164a7039ccdb12#egg=pyonyphe
+-e git+https://github.com/sebdraven/pyonyphe@1ce15581beebb13e841193a08a2eb6f967855fcb#egg=pyonyphe
+-e git+https://github.com/stricaud/faup.git#egg=pyfaup&subdirectory=src/lib/bindings/python
 aiohttp==3.4.4
-antlr4-python3-runtime==4.7.2 ; python_version >= '3'
+antlr4-python3-runtime==4.8 ; python_version >= '3'
 apiosintds==1.8.3
 argparse==1.4.0
 assemblyline-client==3.7.3
 async-timeout==3.0.1
 attrs==19.3.0
 backscatter==0.2.4
-beautifulsoup4==4.8.1
+beautifulsoup4==4.8.2
 blockchain==1.4.4
+censys==0.0.8
 certifi==2019.11.28
-cffi==1.13.2
+cffi==1.14.0
 chardet==3.0.4
 click-plugins==1.1.1
-click==7.0
+click==7.1.1
 colorama==0.4.3
 cryptography==2.8
-decorator==4.4.1
+decorator==4.4.2
 deprecated==1.2.7
 dnspython==1.16.0
 domaintools-api==0.3.3
@@ -33,77 +35,77 @@ enum-compat==0.0.3
 ez-setup==0.9
 ezodf==0.3.2
 future==0.18.2
-geoip2==2.9.0
-httplib2==0.14.0
+futures==3.1.1
+geoip2==3.0.0
+httplib2==0.17.0
 idna-ssl==1.1.0 ; python_version < '3.7'
-idna==2.8
-importlib-metadata==1.3.0 ; python_version < '3.8'
+idna==2.9
+importlib-metadata==1.6.0 ; python_version < '3.8'
 isodate==0.6.0
 jbxapi==3.4.0
 jsonschema==3.2.0
 lief==0.10.1
-lxml==4.4.2
+lxml==4.5.0
 maclookup==1.0.3
-maxminddb==1.5.1
-more-itertools==8.0.2
-multidict==4.7.1
+maxminddb==1.5.2
+multidict==4.7.5
 np==1.0.2
-numpy==1.17.4
+numpy==1.18.2
 oauth2==1.9.0.post1
-opencv-python==4.1.2.30
+opencv-python==4.2.0.32
 pandas-ods-reader==0.0.7
-pandas==0.25.3
+pandas==1.0.3
 passivetotal==1.0.31
-pdftotext==2.1.2
-pillow==6.2.1
-progressbar2==3.47.0
-psutil==5.6.7
-pycparser==2.19
-pycryptodome==3.9.4
-pycryptodomex==3.9.4
+pdftotext==2.1.4
+pillow==7.0.0
+progressbar2==3.50.1
+psutil==5.7.0
+pycparser==2.20
+pycryptodome==3.9.7
+pycryptodomex==3.9.7
 pydeep==0.4
 pyeupi==1.0
 pygeoip==0.3.2
 pyopenssl==19.1.0
-pyparsing==2.4.5
-pypdns==1.4.1
+pyparsing==2.4.6
+pypdns==1.5.1
 pypssl==2.1
-pyrsistent==0.15.6
-pytesseract==0.3.0
+pyrsistent==0.16.0
+pytesseract==0.3.3
 python-dateutil==2.8.1
 python-docx==0.8.10
 python-magic==0.4.15
 python-pptx==0.6.18
-python-utils==2.3.0
+python-utils==2.4.0
 pytz==2019.3
-pyyaml==5.2
+pyyaml==5.3.1
 pyzbar==0.1.8
 pyzipper==0.3.1 ; python_version >= '3.5'
 rdflib==4.2.2
-redis==3.3.11
-reportlab==3.5.32
+redis==3.4.1
+reportlab==3.5.42
 requests-cache==0.5.2
-requests[security]==2.22.0
-shodan==1.21.0
-sigmatools==0.15.0
-six==1.13.0
+requests[security]==2.23.0
+shodan==1.22.0
+sigmatools==0.16.0
+six==1.14.0
 socketio-client==0.5.6
-soupsieve==1.9.5
-sparqlwrapper==1.8.4
-stix2-patterns==1.2.1
-tabulate==0.8.6
-tornado==6.0.3
+soupsieve==2.0
+sparqlwrapper==1.8.5
+stix2-patterns==1.3.0
+tabulate==0.8.7
+tornado==6.0.4
 url-normalize==1.4.1
 urlarchiver==0.2
-urllib3==1.25.7
+urllib3==1.25.8
 validators==0.14.0
-vulners==1.5.4
-wand==0.5.8
-websocket-client==0.56.0
-wrapt==1.11.2
+vt-graph-api==1.0.1
+vulners==1.5.5
+wand==0.5.9
+websocket-client==0.57.0
+wrapt==1.12.1
 xlrd==1.2.0
-xlsxwriter==1.2.6
+xlsxwriter==1.2.8
 yara-python==3.8.1
 yarl==1.4.2
-zipp==0.6.0
-vt-graph-api
+zipp==3.1.0

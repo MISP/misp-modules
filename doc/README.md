@@ -152,6 +152,22 @@ An expansion hover module to get a blockchain balance from a BTC address in MISP
 
 -----
 
+#### [censys_enrich](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/censys_enrich.py)
+
+An expansion module to enrich attributes in MISP by quering the censys.io API
+- **features**:
+>This module takes an IP, hostname or a certificate fingerprint and attempts to enrich it by querying the Censys API.
+- **input**:
+>IP, domain or certificate fingerprint (md5, sha1 or sha256)
+- **output**:
+>MISP objects retrieved from censys, including open ports, ASN, Location of the IP, x509 details
+- **references**:
+>https://www.censys.io
+- **requirements**:
+>API credentials to censys.io
+
+-----
+
 #### [circl_passivedns](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/circl_passivedns.py)
 
 <img src=logos/passivedns.png height=60>
@@ -295,7 +311,7 @@ An expansion hover module to expand information about CVE id.
 
 -----
 
-#### [cytomic_orion.py](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/cytomic_orion.py.py)
+#### [cytomic_orion](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/cytomic_orion.py)
 
 <img src=logos/cytomic_orion.png height=60>
 
