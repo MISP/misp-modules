@@ -1,0 +1,97 @@
+# For Help: https://www.mkdocs.org/user-guide/configuration/
+# https://squidfunk.github.io/mkdocs-material/getting-started/
+# Requirements: mkdocs >1.x && mkdocs-material && markdown_include
+
+# Project information
+site_name: MISP Modules Documentation
+site_description: MISP Modules Project
+site_author: MISP Project
+site_url: https://www.misp-project.org/
+
+# Repository
+repo_name: 'MISP/misp-modules'
+repo_url: https://github.com/MISP/misp-modules/
+edit_uri: ""
+
+use_directory_urls: true
+
+# Copyright
+copyright: "Copyright &copy; 2019 MISP Project"
+
+# Options
+extra:
+  search:
+    languages: "en"
+  social:
+    - type: globe
+      link: https://www.misp-project.org/
+    - type: github-alt
+      link: https://github.com/MISP
+    - type: twitter
+      link: https://twitter.com/MISPProject
+
+theme:
+  name: material
+  palette:
+    primary: 'white'
+    accent: 'blue'
+  language: en
+  favicon: img/favicon.ico
+  logo: img/misp.png
+
+# Extensions
+markdown_extensions:
+  # - markdown_include.include:
+  #      base_path: docs
+  # mkdcomments is buggy atm, see: https://github.com/ryneeverett/python-markdown-comments/issues/3
+  #- mkdcomments
+  - toc:
+        permalink: "#"
+        baselevel: 2
+        separator: "_"
+  - markdown.extensions.admonition
+  - markdown.extensions.codehilite:
+      guess_lang: false
+  - markdown.extensions.def_list
+  - markdown.extensions.footnotes
+  - markdown.extensions.meta
+  - markdown.extensions.toc:
+      permalink: true
+  - pymdownx.arithmatex
+  - pymdownx.betterem:
+      smart_enable: all
+  - pymdownx.caret
+  - pymdownx.critic
+  - pymdownx.details
+  - pymdownx.emoji:
+      emoji_generator: !!python/name:pymdownx.emoji.to_svg
+  - pymdownx.inlinehilite
+  - pymdownx.magiclink
+  - pymdownx.mark
+  - pymdownx.smartsymbols
+  - pymdownx.superfences
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.tilde
+
+nav:
+    - Home: 'index.md'
+    - Modules:
+      - Expansion Modules: expansion.md
+      - Export Modules: export_mod.md
+      - Import Modules: import_mod.md
+    - Install Guides: install.md
+    - Contribute: contribute.md
+    #   - 'Ubuntu 18.04': 'INSTALL.ubuntu1804.md'
+    #   - 'Kali Linux': 'INSTALL.kali.md'
+    #   - 'RHEL7/CentOS7': 'INSTALL.rhel7.md'
+    #   - 'RHEL8': 'INSTALL.rhel8.md'
+    # - Config Guides:
+    #   - 'Elastic Search Logging': 'CONFIG.elasticsearch-logging.md'
+    #   - 'Amazon S3 attachments': 'CONFIG.s3-attachments.md'
+    #   - 'S/MIME': 'CONFIG.SMIME.md'
+    # - Update MISP: 'UPDATE.md'
+    # - Upgrading MISP: 'UPGRADE.md'
+    - About:
+    #   - 'MISP Release Notes': 'Changelog.md'
+      - 'License': 'license.md'

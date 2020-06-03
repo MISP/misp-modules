@@ -23,11 +23,7 @@ def handler(q=False):
     r = requests.post(hashddapi_url, data={'hash': v})
     if r.status_code == 200:
         state = json.loads(r.text)
-        if state:
-            if state.get(v):
-                summary = state[v]['known_level']
-        else:
-            summary = 'Unknown hash'
+        summary = state[v]['known_level'] if state and state.get(v) else 'Unknown hash'
     else:
         misperrors['error'] = '{} API not accessible'.format(hashddapi_url)
         return misperrors['error']

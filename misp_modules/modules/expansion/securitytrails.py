@@ -37,14 +37,15 @@ def handler(q=False):
 
         request = json.loads(q)
 
-        if not request.get('config') and not (request['config'].get('apikey')):
-            misperrors['error'] = 'DNS authentication is missing'
+        if not request.get('config') or not (request['config'].get('apikey')):
+            misperrors['error'] = 'SecurityTrails authentication is missing'
             return misperrors
 
         api = DnsTrails(request['config'].get('apikey'))
 
         if not api:
-            misperrors['error'] = 'Onyphe Error instance api'
+            misperrors['error'] = 'SecurityTrails Error instance api'
+            return misperrors
         if request.get('ip-src'):
             ip = request['ip-src']
             return handle_ip(api, ip, misperrors)
@@ -92,9 +93,6 @@ def handle_domain(api, domain, misperrors):
     if status_ok:
         if r:
             result_filtered['results'].extend(r)
-    else:
-        misperrors['error'] = misperrors['error'] + ' Error whois result'
-        return misperrors
 
     time.sleep(1)
     r, status_ok = expand_history_ipv4_ipv6(api, domain)
@@ -153,7 +151,11 @@ def expand_domain_info(api, misperror, domain):
     servers_mx = []
     soa_hostnames = []
 
-    results = api.domain(domain)
+    try:
+        results = api.domain(domain)
+    except APIError as e:
+        misperrors['error'] = e.value
+        return [], False
 
     if results:
         status_ok = True

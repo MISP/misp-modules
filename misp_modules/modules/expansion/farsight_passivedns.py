@@ -16,10 +16,9 @@ def handler(q=False):
     if q is False:
         return False
     request = json.loads(q)
-    if (request.get('config')):
-        if (request['config'].get('apikey') is None):
-            misperrors['error'] = 'Farsight DNSDB apikey is missing'
-            return misperrors
+    if not request.get('config') or not request['config'].get('apikey'):
+        misperrors['error'] = 'Farsight DNSDB apikey is missing'
+        return misperrors
     client = DnsdbClient(server, request['config']['apikey'])
     if request.get('hostname'):
         res = lookup_name(client, request['hostname'])

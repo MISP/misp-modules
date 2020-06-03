@@ -26,13 +26,12 @@ def handler(q=False):
     sparql.setQuery(query_string)
     sparql.setReturnFormat(JSON)
     results = sparql.query().convert()
-
     summary = ''
     try:
-        result = results["results"]["bindings"][0]
-        summary = result["item"]["value"]
+        result = results["results"]["bindings"]
+        summary = result[0]["item"]["value"] if result else 'No additional data found on Wikidata'
     except Exception as e:
-        misperrors['error'] = 'wikidata API not accessible' + e
+        misperrors['error'] = 'wikidata API not accessible {}'.format(e)
         return misperrors['error']
 
     r = {'results': [{'types': mispattributes['output'], 'values': summary}]}

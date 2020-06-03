@@ -29,8 +29,8 @@ def handler(q=False):
         misperrors['error'] = "Unsupported attributes type"
         return misperrors
 
-    if not request.get('config') and not (request['config'].get('apikey') and request['config'].et('url')):
-        misperrors['error'] = 'EUPI authentication is missing'
+    if not request.get('config') or (not request['config'].get('server') and not request['config'].get('port')):
+        misperrors['error'] = 'Whois local instance address is missing'
         return misperrors
 
     uwhois = Uwhois(request['config']['server'], int(request['config']['port']))

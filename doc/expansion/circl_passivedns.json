@@ -3,7 +3,7 @@
     "logo": "logos/passivedns.png",
     "requirements": ["pypdns: Passive DNS python library", "A CIRCL passive DNS account with username & password"],
     "input": "Hostname, domain, or ip-address attribute.",
-    "ouput": "Text describing passive DNS information related to the input attribute.",
-    "features": "This module takes a hostname, domain or ip-address (ip-src or ip-dst) attribute as input, and queries the CIRCL Passive DNS REST API to get and display information about this input.\n\nTo make it work a username and a password are thus required to authenticate to the CIRCL Passive DNS API.",
+    "ouput": "Passive DNS objects related to the input attribute.",
+    "features": "This module takes a hostname, domain or ip-address (ip-src or ip-dst) attribute as input, and queries the CIRCL Passive DNS REST API to get the asssociated passive dns entries and return them as MISP objects.\n\nTo make it work a username and a password are thus required to authenticate to the CIRCL Passive DNS API.",
     "references": ["https://www.circl.lu/services/passive-dns/", "https://datatracker.ietf.org/doc/draft-dulaunoy-dnsop-passive-dns-cof/"]
 }

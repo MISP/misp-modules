@@ -21,7 +21,10 @@ def handler(q=False):
     exploit_summary = ''
     vuln_summary = ''
 
-    key = request['config'].get('apikey')
+    if not request.get('config') or not request['config'].get('apikey'):
+        return {'error': "A Vulners api key is required for this module."}
+
+    key = request['config']['apikey']
     vulners_api = vulners.Vulners(api_key=key)
     vulnerability = request.get('vulnerability')
     vulners_document = vulners_api.document(vulnerability)
@@ -44,8 +47,8 @@ def handler(q=False):
         ai_summary += 'Vulners AI Score is ' + str(vulners_ai_score[0]) + " "
 
     if vulners_exploits:
-        exploit_summary += " ||  " + str(len(vulners_exploits[0])) + " Public exploits available:\n  "
-        for exploit in vulners_exploits[0]:
+        exploit_summary += " ||  " + str(len(vulners_exploits)) + " Public exploits available:\n  "
+        for exploit in vulners_exploits:
             exploit_summary += exploit['title'] + " " + exploit['href'] + "\n  "
         exploit_summary += "|| Vulnerability Description:  " + vuln_summary
 

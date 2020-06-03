@@ -1,0 +1,9 @@
+{
+    "description": "Query Lastline with an analysis link and parse the report into MISP attributes and objects.\nThe analysis link can also be retrieved from the output of the [lastline_submit](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/lastline_submit.py) expansion module.",
+    "logo": "logos/lastline.png",
+    "requirements": [],
+    "input": "Link to a Lastline analysis.",
+    "output": "MISP attributes and objects parsed from the analysis report.",
+    "references": ["https://www.lastline.com"],
+    "features": "The module requires a Lastline Portal `username` and `password`.\nThe module uses the new format and it is able to return MISP attributes and objects.\nThe module returns the same results as the [lastline_import](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/import_mod/lastline_import.py) import module."
+}

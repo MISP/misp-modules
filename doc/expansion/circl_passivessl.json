@@ -2,8 +2,8 @@
     "description": "Modules to access CIRCL Passive SSL.",
     "logo": "logos/passivessl.png",
     "requirements": ["pypssl: Passive SSL python library", "A CIRCL passive SSL account with username & password"],
-    "input": "Ip-address attribute.",
-    "output": "Text describing passive SSL information related to the input attribute.",
-    "features": "This module takes an ip-address (ip-src or ip-dst) attribute as input, and queries the CIRCL Passive SSL REST API to get and display information about this input.\n\nTo make it work a username and a password are thus required to authenticate to the CIRCL Passive SSL API.",
+    "input": "IP address attribute.",
+    "output": "x509 certificate objects seen by the IP address(es).",
+    "features": "This module takes an ip-address (ip-src or ip-dst) attribute as input, and queries the CIRCL Passive SSL REST API to gather the related certificates and return the corresponding MISP objects.\n\nTo make it work a username and a password are required to authenticate to the CIRCL Passive SSL API.",
     "references": ["https://www.circl.lu/services/passive-ssl/"]
 }

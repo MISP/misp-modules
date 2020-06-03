@@ -1,0 +1,9 @@
+{
+    "description": "Module to extract freetext from a .xlsx document.",
+    "logo": "logos/xlsx.png",
+    "requirements": ["pandas: Python library to perform data analysis, time series and statistics."],
+    "input": "Attachment attribute containing a .xlsx document.",
+    "output": "Text and freetext parsed from the document.",
+    "references": [],
+    "features": "The module reads the text contained in a .xlsx document. The result is passed to the freetext import parser so IoCs can be extracted out of it."
+}
