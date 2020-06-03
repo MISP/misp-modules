@@ -44,6 +44,10 @@ class PassiveSSLParser():
             self.result = {'error': 'Not found'}
             return
 
+        if 'error' in results:
+            self.result = {'error': results['error']}
+            return
+
         for ip_address, certificates in results.items():
             ip_uuid = self._handle_ip_attribute(ip_address)
             for certificate in certificates['certificates']:
