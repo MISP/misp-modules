@@ -30,6 +30,11 @@ class PassiveDNSParser():
         except Exception:
             self.result = {'error': 'There is an authentication error, please make sure you supply correct credentials.'}
             return
+
+        if not results:
+            self.result = {'error': 'Not found'}
+            return
+
         mapping = {'count': 'counter', 'origin': 'text',
                    'time_first': 'datetime', 'rrtype': 'text',
                    'rrname': 'text', 'rdata': 'text',

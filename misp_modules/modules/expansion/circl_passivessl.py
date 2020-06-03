@@ -37,6 +37,11 @@ class PassiveSSLParser():
         except Exception:
             self.result = {'error': 'There is an authentication error, please make sure you supply correct credentials.'}
             return
+
+        if not results:
+            self.result = {'error': 'Not found'}
+            return
+
         for ip_address, certificates in results.items():
             ip_uuid = self._handle_ip_attribute(ip_address)
             for certificate in certificates['certificates']:
