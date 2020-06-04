@@ -1,0 +1,16 @@
+# https://github.com/sysdiglabs/dockerfile-benchmarker
+# https://github.com/marketplace/actions/sysdig-cis-dockerfile-benchmark
+name: Sysdig CIS Dockerfile Benchmark
+on: [push]
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps: 
+    - name: Checkout
+      uses: actions/checkout@master
+    - name: Sysdig CIS Dockerfile Benchmark
+      uses: sysdiglabs/benchmark-dockerfile@v1.0.0
+      id: cis_dockerfile_benchmark
+      with:
+        disallowedPackages: ''
+        secretPatterns: 'aws_secret,secret,pass'

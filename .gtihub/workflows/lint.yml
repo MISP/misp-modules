@@ -1,0 +1,21 @@
+# https://github.com/marketplace/actions/docker-lint
+name: Lint
+on: [push]
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps: 
+    - name: Checkout
+      uses: actions/checkout@master
+    - name: lint
+      uses: luke142367/Docker-Lint-Action@v1.0.0
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        TARGET: docker/Dockerfile
+    # https://github.com/marketplace/actions/dockerfile-validator
+    - name: Lint 2
+      uses: ghe-actions/dockerfile-validator@v1.4
+      with:
+        dockerfile: 'docker/Dockerfile'
+        lint: 'dockerlint'
+        dockerlabelvalidate: 'yes'
