@@ -72,11 +72,11 @@ RUN set -eu \
         ;
 
 # Entrypoint
-        COPY docker/files/entrypoint.sh /entrypoint.sh
+        COPY ./docker/files/entrypoint.sh /entrypoint.sh
         ENTRYPOINT [ "/entrypoint.sh" ]
 
 # Add Healthcheck Config
-        COPY docker/files/healthcheck.sh /healthcheck.sh
+        COPY ./docker/files/healthcheck.sh /healthcheck.sh
         HEALTHCHECK --interval=1m --timeout=45s --retries=3 CMD ["/healthcheck.sh"]
 
 # Change Workdir
@@ -104,7 +104,6 @@ RUN set -eu \
 # Longterm Environment Variables
 ENV \
         BUILD_DATE=${BUILD_DATE} \
-        NAME=${NAME} \
         PATH=$PATH:${WORKDIR}/venv/bin
 
 # Labels

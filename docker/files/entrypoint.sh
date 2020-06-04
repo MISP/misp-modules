@@ -5,13 +5,13 @@ set -eu
 NC='\033[0m' # No Color
 Light_Green='\033[1;32m' 
 STARTMSG="${Light_Green}[ENTRYPOINT_MISP_MODULES]${NC}"
-VENV_DIR=${VENV_DIR:-"/misp-modules"}
-MISP_MODULES_BINARY="${VENV_DIR}/venv/bin/misp-modules"
+WORKDIR=${WORKDIR:-"/misp-modules"}
+MISP_MODULES_BINARY="${WORKDIR}/venv/bin/misp-modules"
 DEBUG=""
 
 # Functions
 echo (){
-    command echo "$STARTMSG $*"
+    command echo -e "$STARTMSG $*"
 }
 
 # Environment Variables
