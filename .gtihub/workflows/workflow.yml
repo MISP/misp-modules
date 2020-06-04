@@ -1,0 +1,26 @@
+# https://github.com/marketplace/actions/docker-lint
+name: Workflow
+on: [push]
+
+jobs:
+  build-secure-and-push:
+    runs-on: ubuntu-latest
+    env:
+        GITHUB_PASS: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_USER: ${{ github.actor }}
+        REPO: ${{ github.repository }}
+        NAME: misp-modules
+        REGISTRY: docker.pkg.github.com
+        CONTAINER: ${REGISTRY}/${REPO}/${NAME}:${{ github.sha }}
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - run: docker build . -t ${CONTAINER}
+    
+    # Vulnerability scan
+    ## https://github.com/marketplace/actions/container-image-scan
+    - uses: Azure/container-scan@v0
+      with:
+        image-name: ${CONTAINER}
+    
