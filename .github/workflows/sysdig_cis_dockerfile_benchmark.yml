@@ -14,3 +14,4 @@ jobs:
       with:
         disallowedPackages: ''
         secretPatterns: 'aws_secret,secret,pass'
+        directory: ./docker

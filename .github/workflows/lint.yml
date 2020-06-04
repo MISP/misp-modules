@@ -1,5 +1,5 @@
 # https://github.com/marketplace/actions/docker-lint
-name: Lint
+name: luke142367/Docker-Lint-Action@v1.0.0
 on: [push]
 jobs:
   lint:
@@ -12,10 +12,3 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         TARGET: docker/Dockerfile
-    # https://github.com/marketplace/actions/dockerfile-validator
-    - name: Lint 2
-      uses: ghe-actions/dockerfile-validator@v1.4
-      with:
-        dockerfile: 'docker/Dockerfile'
-        lint: 'dockerlint'
-        dockerlabelvalidate: 'yes'

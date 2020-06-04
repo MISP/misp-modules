@@ -1,6 +1,6 @@
 # https://github.com/marketplace/actions/scan-a-pr-for-vulnerable-dependencies
 name: Check Vulnerable Dependencies
-on: [push]
+on: [pull_request]
 
 jobs:
   build:

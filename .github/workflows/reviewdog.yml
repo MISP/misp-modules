@@ -1,7 +1,6 @@
 # https://github.com/marketplace/actions/run-shellcheck-with-reviewdog
 name: reviewdog
-#on: [pull_request]
-on: [push]
+on: [pull_request]
 jobs:
   shellcheck:
     name: runner / shellcheck

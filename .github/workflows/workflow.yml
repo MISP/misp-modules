@@ -11,16 +11,16 @@ jobs:
         REPO: ${{ github.repository }}
         NAME: misp-modules
         REGISTRY: docker.pkg.github.com
-        CONTAINER: ${REGISTRY}/${REPO}/${NAME}:${{ github.sha }}
+        CONTAINER: ${{ REGISTRY }}/${{ REPO }}:${{ github.sha }}
     steps:
     - name: Checkout
       uses: actions/checkout@v2
 
-    - run: docker build . -t ${CONTAINER}
+    - run: docker build . -t ${{ CONTAINER }}
     
     # Vulnerability scan
     ## https://github.com/marketplace/actions/container-image-scan
     - uses: Azure/container-scan@v0
       with:
-        image-name: ${CONTAINER}
+        image-name: ${{ CONTAINER }}
     
