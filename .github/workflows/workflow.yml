@@ -16,11 +16,11 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2
 
-    - run: docker build . -t ${{ CONTAINER }}
+    - run: docker build . -t ${{ REGISTRY }}/${{ REPO }}:${{ github.sha }}
     
     # Vulnerability scan
     ## https://github.com/marketplace/actions/container-image-scan
     - uses: Azure/container-scan@v0
       with:
-        image-name: ${{ CONTAINER }}
+        image-name: ${{ REGISTRY }}/${{ REPO }}:${{ github.sha }}
     

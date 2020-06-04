@@ -1,12 +1,12 @@
-FROM python:3.7-buster AS build
+FROM python:3.7 AS build
 
 ENV DEBIAN_FRONTEND noninteractive
-ENV WORKDIR="/usr/local/src/misp_modules"
-ENV VENV_DIR="/misp_modules"
+#ENV WORKDIR="/usr/local/src/misp_modules"
+ENV WORKDIR="/misp_modules"
 
 # Install Packages for build
 RUN set -eu \
-        ;mkdir -p ${WORKDIR} ${VENV_DIR} \
+        ;mkdir -p ${WORKDIR} \
         ;apt-get update  \
         ;apt-get install -y \
                 git \
@@ -27,30 +27,33 @@ RUN set -eu \
         ;
 
 # Create MISP Modules
+COPY . ${WORKDIR}
+WORKDIR ${WORKDIR}
 RUN set -eu \
-        ;git clone https://github.com/MISP/misp-modules.git ${WORKDIR} \
-        ;virtualenv -p python3 ${VENV_DIR}/venv \
-        ;cd ${WORKDIR} \
-        ;${VENV_DIR}/venv/bin/pip3 install -I -r REQUIREMENTS --no-cache-dir \
-        ;${VENV_DIR}/venv/bin/pip3 install . --no-cache-dir \
+        #;git clone https://github.com/MISP/misp-modules.git ${WORKDIR} \
+        ;virtualenv -p python3 ${WORKDIR}/venv \
+        #;cd ${WORKDIR} \
+        ;${WORKDIR}/venv/bin/pip3 install -I -r REQUIREMENTS --no-cache-dir \
+        ;${WORKDIR}/venv/bin/pip3 install . --no-cache-dir \
         ;
 
 #########################################
 # Start Final Docker Image
 #
-FROM python:3.7-slim-buster AS final
+FROM python:3.7-slim AS final
 
 ENV DEBIAN_FRONTEND noninteractive 
-ENV VENV_DIR="/misp_modules"
+ENV WORKDIR="/misp_modules"
 
 # Copy all builded files from build stage
-COPY --from=build ${VENV_DIR} ${VENV_DIR}
+COPY --from=build ${WORKDIR} ${WORKDIR}
 
 # Install Packages to run it
 RUN set -eu \
         ;apt-get update  \
         ;apt-get install -y \
                 curl \
+                #git \
                 libpq5 \
                 # libjpeg-dev \
                 tesseract-ocr \
@@ -65,21 +68,21 @@ RUN set -eu \
         ;apt-get -y autoremove \
         ;apt-get -y clean \
         ;rm -rf /var/lib/apt/lists/* \
-        ;chown -R nobody ${VENV_DIR} \
+        ;chown -R nobody ${WORKDIR} \
         ;
 
 # Entrypoint
-        COPY files/entrypoint.sh /entrypoint.sh
+        COPY docker/files/entrypoint.sh /entrypoint.sh
         ENTRYPOINT [ "/entrypoint.sh" ]
 
 # Add Healthcheck Config
-        COPY files/healthcheck.sh /healthcheck.sh
+        COPY docker/files/healthcheck.sh /healthcheck.sh
         HEALTHCHECK --interval=1m --timeout=45s --retries=3 CMD ["/healthcheck.sh"]
 
 # Change Workdir
-        WORKDIR ${VENV_DIR}
+        WORKDIR ${WORKDIR}
 
-# Change from root to www-data
+# Change from root to nobody
         USER nobody
 
 # Expose Port
@@ -92,7 +95,7 @@ RUN set -eu \
         ARG GIT_REPO="https://github.com/MISP/misp-modules"
         ARG VCS_REF
         ARG RELEASE_DATE
-        ARG NAME="MISP-dockerized-misp-modules"
+        ARG NAME="MISP-modules"
         ARG DESCRIPTION="This docker container contains MISP modules in an Debian Container."
         ARG DOCUMENTATION="https://misp.github.io/misp-modules/"
         ARG AUTHOR="MISP"
@@ -102,7 +105,7 @@ RUN set -eu \
 ENV \
         BUILD_DATE=${BUILD_DATE} \
         NAME=${NAME} \
-        PATH=$PATH:${VENV_DIR}/venv/bin
+        PATH=$PATH:${WORKDIR}/venv/bin
 
 # Labels
 LABEL org.label-schema.build-date="${BUILD_DATE}" \
