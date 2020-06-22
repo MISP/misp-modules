@@ -33,11 +33,13 @@ class TruSTARParser:
 
     REPORT_BASE_URL = "https://station.trustar.co/constellation/reports/{}"
 
-    CLIENT_METATAG = "TruSTAR-MISP-{}".format(pymisp.__version__)
+    CLIENT_METATAG = "misp-v2"
+    CLIENT_VERSION = "{}".format(pymisp.__version__)
 
     def __init__(self, attribute, config):
         config['enclave_ids'] = config.get('enclave_ids', "").split(',')
         config['client_metatag'] = self.CLIENT_METATAG
+        config['client_version'] = self.CLIENT_VERSION
         self.ts_client = TruStar(config=config)
 
         self.misp_event = MISPEvent()
