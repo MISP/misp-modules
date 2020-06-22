@@ -14,6 +14,8 @@ moduleinfo = {'version': "0.1", 'author': "Jesse Hedden",
 
 moduleconfig = ["user_api_key", "user_api_secret", "enclave_ids"]
 
+MAX_PAGE_SIZE = 100 # Max allowable page size returned from /1.3/indicators/summaries endpoint
+
 
 class TruSTARParser:
     ENTITY_TYPE_MAPPINGS = {
@@ -93,6 +95,12 @@ class TruSTARParser:
                 self.misp_event.add_object(**trustar_obj)
 
     def handler(q=False):
+        """
+        MISP handler function. A user's API key and secret will be retrieved from the MISP
+        request and used to create a TruSTAR API client. If enclave IDs are provided, only
+        those enclaves will be queried for data. Otherwise, all of the enclaves a user has
+        access to will be queried.
+        """
 
         if q is False:
             return False
@@ -106,7 +114,13 @@ class TruSTARParser:
 
         attribute = request['attribute']
         trustar_parser = TruSTARParser(attribute, config)
-        summaries = trustar_parser.ts_client.get_indicator_summaries([attribute['value']], page_size=100)
+
+        try:
+            summaries = trustar_parser.ts_client.get_indicator_summaries([attribute['value']], page_size=MAX_PAGE_SIZE)
+        except Exception as e:
+            misperrors['error'] = "Unable to retrieve TruSTAR summary data: {}".format(e)
+            return misperrors
+
         trustar_parser.parse_indicator_summary(attribute, summaries)
         return trustar_parser.get_results()
 
