@@ -1168,6 +1168,35 @@ Module to get information from ThreatMiner.
 
 -----
 
+#### [trustar_enrich](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/trustar_enrich.py)
+
+<img src=logos/trustar.png height=60>
+
+Module to get enrich indicators with TruSTAR.
+- **features**:
+>This module enriches MISP attributes with scoring and metadata from TruSTAR.
+>
+>The TruSTAR indicator summary is appended to the attributes along with links to any associated reports.
+- **input**:
+>Any of the following MISP attributes:
+>- btc
+>- domain
+>- email-src
+>- filename
+>- hostname
+>- ip-src
+>- ip-dst
+>- md5
+>- sha1
+>- sha256
+>- url
+- **output**:
+>MISP attributes enriched with indicator summary data from the TruSTAR API. Data includes a severity level score and additional source and scoring info.
+- **references**:
+>https://docs.trustar.co/api/v13/indicators/get_indicator_summaries.html
+
+-----
+
 #### [urlhaus](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/urlhaus.py)
 
 <img src=logos/urlhaus.png height=60>
