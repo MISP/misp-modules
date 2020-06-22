@@ -1,4 +1,5 @@
 import json
+import pymisp
 from pymisp import MISPAttribute, MISPEvent, MISPObject
 from trustar import TruStar
 
@@ -32,8 +33,11 @@ class TruSTARParser:
 
     REPORT_BASE_URL = "https://station.trustar.co/constellation/reports/{}"
 
+    CLIENT_METATAG = "TruSTAR-MISP-{}".format(pymisp.__version__)
+
     def __init__(self, attribute, config):
         config['enclave_ids'] = config.get('enclave_ids', "").split(',')
+        config['client_metatag'] = self.CLIENT_METATAG
         self.ts_client = TruStar(config=config)
 
         self.misp_event = MISPEvent()
