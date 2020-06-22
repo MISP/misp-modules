@@ -48,6 +48,9 @@ class TruSTARParser:
         self.misp_event.add_attribute(**self.misp_attribute)
 
     def get_results(self):
+        """
+        Returns the MISP Event enriched with TruSTAR indicator summary data.
+        """
         event = json.loads(self.misp_event.to_json())
         results = {key: event[key] for key in ('Attribute', 'Object') if (key in event and event[key])}
         return {'results': results}
@@ -65,7 +68,14 @@ class TruSTARParser:
 
         return report_links
 
-    def parse_indicator_summary(self, attribute, summaries):
+    def parse_indicator_summary(self, summaries):
+        """
+        Converts a response from the TruSTAR /1.3/indicators/summaries endpoint
+        a MISP trustar_report object and adds the summary data and links as attributes.
+
+        :param summaries: <generator> A TruSTAR Python SDK Page.generator object for generating
+                          indicator summaries pages.
+        """
 
         for summary in summaries:
             trustar_obj = MISPObject('trustar_report')
@@ -96,7 +106,7 @@ class TruSTARParser:
 
         attribute = request['attribute']
         trustar_parser = TruSTARParser(attribute, config)
-        summaries = trustar_parser.ts_client.get_indicator_summaries([attribute['value']])
+        summaries = trustar_parser.ts_client.get_indicator_summaries([attribute['value']], page_size=100)
         trustar_parser.parse_indicator_summary(attribute, summaries)
         return trustar_parser.get_results()
 
