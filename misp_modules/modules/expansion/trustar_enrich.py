@@ -121,7 +121,7 @@ class TruSTARParser:
             misperrors['error'] = "Unable to retrieve TruSTAR summary data: {}".format(e)
             return misperrors
 
-        trustar_parser.parse_indicator_summary(attribute, summaries)
+        trustar_parser.parse_indicator_summary(summaries)
         return trustar_parser.get_results()
 
     def introspection():
