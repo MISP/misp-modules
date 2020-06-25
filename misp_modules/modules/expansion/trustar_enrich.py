@@ -79,14 +79,14 @@ class TruSTARParser:
 
         for summary in summaries:
             trustar_obj = MISPObject('trustar_report')
-            summary_type = summary.type
-            summary_value = summary.value
+            indicator_type = summary.indicator_type
+            indicator_value = summary.value
             if summary_type in self.ENTITY_TYPE_MAPPINGS:
-                trustar_obj.add_attribute(summary_type, attribute_type=self.ENTITY_TYPE_MAPPINGS[summary_type],
-                                          value=summary_value)
+                trustar_obj.add_attribute(indicator_type, attribute_type=self.ENTITY_TYPE_MAPPINGS[indicator_type],
+                                          value=indicator_value)
                 trustar_obj.add_attribute("INDICATOR_SUMMARY", attribute_type="text",
                                           value=json.dumps(summary.to_dict(), sort_keys=True, indent=4))
-                report_links = self.generate_trustar_links(summary_value)
+                report_links = self.generate_trustar_links(indicator_value)
                 for link in report_links:
                     trustar_obj.add_attribute("REPORT_LINK", attribute_type="link", value=link)
                 self.misp_event.add_object(**trustar_obj)
