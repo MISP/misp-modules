@@ -91,40 +91,43 @@ class TruSTARParser:
                     trustar_obj.add_attribute("REPORT_LINK", attribute_type="link", value=link)
                 self.misp_event.add_object(**trustar_obj)
 
-    def handler(q=False):
-        """
-        MISP handler function. A user's API key and secret will be retrieved from the MISP
-        request and used to create a TruSTAR API client. If enclave IDs are provided, only
-        those enclaves will be queried for data. Otherwise, all of the enclaves a user has
-        access to will be queried.
-        """
 
-        if q is False:
-            return False
+def handler(q=False):
+    """
+    MISP handler function. A user's API key and secret will be retrieved from the MISP
+    request and used to create a TruSTAR API client. If enclave IDs are provided, only
+    those enclaves will be queried for data. Otherwise, all of the enclaves a user has
+    access to will be queried.
+    """
 
-        request = json.loads(q)
+    if q is False:
+        return False
 
-        config = request.get('config', {})
-        if not config.get('user_api_key') or not config.get('user_api_secret'):
-            misperrors['error'] = "Your TruSTAR API key and secret are required for indicator enrichment."
-            return misperrors
+    request = json.loads(q)
 
-        attribute = request['attribute']
-        trustar_parser = TruSTARParser(attribute, config)
+    config = request.get('config', {})
+    if not config.get('user_api_key') or not config.get('user_api_secret'):
+        misperrors['error'] = "Your TruSTAR API key and secret are required for indicator enrichment."
+        return misperrors
 
-        try:
-            summaries = list(
-                trustar_parser.ts_client.get_indicator_summaries([attribute['value']], page_size=MAX_PAGE_SIZE))
-        except Exception as e:
-            misperrors['error'] = "Unable to retrieve TruSTAR summary data: {}".format(e)
-            return misperrors
+    attribute = request['attribute']
+    trustar_parser = TruSTARParser(attribute, config)
 
-        trustar_parser.parse_indicator_summary(summaries)
-        return trustar_parser.get_results()
+    try:
+        summaries = list(
+            trustar_parser.ts_client.get_indicator_summaries([attribute['value']], page_size=MAX_PAGE_SIZE))
+    except Exception as e:
+        misperrors['error'] = "Unable to retrieve TruSTAR summary data: {}".format(e)
+        return misperrors
 
-    def introspection():
-        return mispattributes
+    trustar_parser.parse_indicator_summary(summaries)
+    return trustar_parser.get_results()
 
-    def version():
-        moduleinfo['config'] = moduleconfig
-        return moduleinfo
+
+def introspection():
+    return mispattributes
+
+
+def version():
+    moduleinfo['config'] = moduleconfig
+    return moduleinfo
