@@ -39,7 +39,7 @@ class TruSTARParser:
     CLIENT_VERSION = "{}".format(pymisp.__version__)
 
     def __init__(self, attribute, config):
-        config['enclave_ids'] = config.get('enclave_ids', "").split(',')
+        config['enclave_ids'] = config.get('enclave_ids', "").strip().split(',')
         config['client_metatag'] = self.CLIENT_METATAG
         config['client_version'] = self.CLIENT_VERSION
         self.ts_client = TruStar(config=config)
