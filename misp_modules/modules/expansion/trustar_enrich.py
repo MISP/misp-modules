@@ -14,7 +14,7 @@ moduleinfo = {'version': "0.1", 'author': "Jesse Hedden",
 
 moduleconfig = ["user_api_key", "user_api_secret", "enclave_ids"]
 
-MAX_PAGE_SIZE = 100 # Max allowable page size returned from /1.3/indicators/summaries endpoint
+MAX_PAGE_SIZE = 100  # Max allowable page size returned from /1.3/indicators/summaries endpoint
 
 
 class TruSTARParser:
@@ -35,13 +35,11 @@ class TruSTARParser:
 
     REPORT_BASE_URL = "https://station.trustar.co/constellation/reports/{}"
 
-    CLIENT_METATAG = "misp-v2"
-    CLIENT_VERSION = "{}".format(pymisp.__version__)
+    CLIENT_METATAG = "MISP-{}".format(pymisp.__version__)
 
     def __init__(self, attribute, config):
         config['enclave_ids'] = config.get('enclave_ids', "").strip().split(',')
         config['client_metatag'] = self.CLIENT_METATAG
-        config['client_version'] = self.CLIENT_VERSION
         self.ts_client = TruStar(config=config)
 
         self.misp_event = MISPEvent()
@@ -81,14 +79,13 @@ class TruSTARParser:
 
         for summary in summaries:
             trustar_obj = MISPObject('trustar_report')
-            summary_dict = summary.to_dict()
-            summary_type = summary_dict.get('type')
-            summary_value = summary_dict.get('value')
+            summary_type = summary.type
+            summary_value = summary.value
             if summary_type in self.ENTITY_TYPE_MAPPINGS:
                 trustar_obj.add_attribute(summary_type, attribute_type=self.ENTITY_TYPE_MAPPINGS[summary_type],
                                           value=summary_value)
                 trustar_obj.add_attribute("INDICATOR_SUMMARY", attribute_type="text",
-                                          value=json.dumps(summary_dict, sort_keys=True, indent=4))
+                                          value=json.dumps(summary.to_dict(), sort_keys=True, indent=4))
                 report_links = self.generate_trustar_links(summary_value)
                 for link in report_links:
                     trustar_obj.add_attribute("REPORT_LINK", attribute_type="link", value=link)
@@ -116,7 +113,8 @@ class TruSTARParser:
         trustar_parser = TruSTARParser(attribute, config)
 
         try:
-            summaries = trustar_parser.ts_client.get_indicator_summaries([attribute['value']], page_size=MAX_PAGE_SIZE)
+            summaries = list(
+                trustar_parser.ts_client.get_indicator_summaries([attribute['value']], page_size=MAX_PAGE_SIZE))
         except Exception as e:
             misperrors['error'] = "Unable to retrieve TruSTAR summary data: {}".format(e)
             return misperrors
