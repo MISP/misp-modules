@@ -81,7 +81,7 @@ class TruSTARParser:
             trustar_obj = MISPObject('trustar_report')
             indicator_type = summary.indicator_type
             indicator_value = summary.value
-            if summary_type in self.ENTITY_TYPE_MAPPINGS:
+            if indicator_type in self.ENTITY_TYPE_MAPPINGS:
                 trustar_obj.add_attribute(indicator_type, attribute_type=self.ENTITY_TYPE_MAPPINGS[indicator_type],
                                           value=indicator_value)
                 trustar_obj.add_attribute("INDICATOR_SUMMARY", attribute_type="text",
