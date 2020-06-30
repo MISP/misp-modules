@@ -15,5 +15,4 @@ __all__ = [
     'threatanalyzer_import',
     'csvimport',
     'joe_import',
-    'trustar_import',
 ]
