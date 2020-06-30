@@ -2,7 +2,7 @@ import json
 import pypdns
 from pymisp import MISPAttribute, MISPEvent, MISPObject
 
-mispattributes = {'input': ['hostname', 'domain', 'ip-src', 'ip-dst'], 'format': 'misp_standard'}
+mispattributes = {'input': ['hostname', 'domain', 'ip-src', 'ip-dst', 'ip-src|port', 'ip-dst|port'], 'format': 'misp_standard'}
 moduleinfo = {'version': '0.2', 'author': 'Alexandre Dulaunoy',
               'description': 'Module to access CIRCL Passive DNS',
               'module-type': ['expansion', 'hover']}
@@ -24,12 +24,19 @@ class PassiveDNSParser():
         results = {key: event[key] for key in ('Attribute', 'Object')}
         return {'results': results}
 
-    def parse(self, value):
+    def parse(self):
+        value = self.attribute.value.split('|')[0] if '|' in self.attribute.type else self.attribute.value
+
         try:
-            results = self.pdns.query(self.attribute.value)
+            results = self.pdns.query(value)
         except Exception:
             self.result = {'error': 'There is an authentication error, please make sure you supply correct credentials.'}
             return
+
+        if not results:
+            self.result = {'error': 'Not found'}
+            return
+
         mapping = {'count': 'counter', 'origin': 'text',
                    'time_first': 'datetime', 'rrtype': 'text',
                    'rrname': 'text', 'rdata': 'text',
@@ -57,7 +64,7 @@ def handler(q=False):
     if not any(input_type == attribute['type'] for input_type in mispattributes['input']):
         return {'error': 'Unsupported attributes type'}
     pdns_parser = PassiveDNSParser(attribute, authentication)
-    pdns_parser.parse(attribute['value'])
+    pdns_parser.parse()
     return pdns_parser.get_results()
 
 

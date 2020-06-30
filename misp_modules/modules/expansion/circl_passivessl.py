@@ -2,7 +2,7 @@ import json
 import pypssl
 from pymisp import MISPAttribute, MISPEvent, MISPObject
 
-mispattributes = {'input': ['ip-src', 'ip-dst'], 'format': 'misp_standard'}
+mispattributes = {'input': ['ip-src', 'ip-dst', 'ip-src|port', 'ip-dst|port'], 'format': 'misp_standard'}
 moduleinfo = {'version': '0.2', 'author': 'Raphaël Vinot',
               'description': 'Module to access CIRCL Passive SSL',
               'module-type': ['expansion', 'hover']}
@@ -31,12 +31,23 @@ class PassiveSSLParser():
         results = {key: event[key] for key in ('Attribute', 'Object')}
         return {'results': results}
 
-    def parse(self, value):
+    def parse(self):
+        value = self.attribute.value.split('|')[0] if '|' in self.attribute.type else self.attribute.value
+
         try:
-            results = self.pssl.query(self.attribute.value)
+            results = self.pssl.query(value)
         except Exception:
             self.result = {'error': 'There is an authentication error, please make sure you supply correct credentials.'}
             return
+
+        if not results:
+            self.result = {'error': 'Not found'}
+            return
+
+        if 'error' in results:
+            self.result = {'error': results['error']}
+            return
+
         for ip_address, certificates in results.items():
             ip_uuid = self._handle_ip_attribute(ip_address)
             for certificate in certificates['certificates']:
@@ -78,7 +89,7 @@ def handler(q=False):
     if not any(input_type == attribute['type'] for input_type in mispattributes['input']):
         return {'error': 'Unsupported attributes type'}
     pssl_parser = PassiveSSLParser(attribute, authentication)
-    pssl_parser.parse(attribute['value'])
+    pssl_parser.parse()
     return pssl_parser.get_results()
 
 
