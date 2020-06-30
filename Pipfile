@@ -60,6 +60,7 @@ geoip2 = "*"
 apiosintDS = "*"
 assemblyline_client = "*"
 vt-graph-api = "*"
+trustar = "*"
 
 [requires]
 python_version = "3"
