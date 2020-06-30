@@ -95,6 +95,7 @@ sparqlwrapper==1.8.5
 stix2-patterns==1.3.0
 tabulate==0.8.7
 tornado==6.0.4
+trustar==0.3.28
 url-normalize==1.4.1
 urlarchiver==0.2
 urllib3==1.25.8
