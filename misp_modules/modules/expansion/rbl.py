@@ -88,18 +88,18 @@ def handler(q=False):
     else:
         misperrors['error'] = "Unsupported attributes type"
         return misperrors
-    listed = []
-    info = []
+    listeds = []
+    infos = []
     ipRev = '.'.join(ip.split('.')[::-1])
     for rbl in rbls:
         query = '{}.{}'.format(ipRev, rbl)
         try:
             txt = resolver.query(query, 'TXT')
-            listed.append(query)
-            info.append([str(t) for t in txt])
+            listeds.append(query)
+            infos.append([str(t) for t in txt])
         except Exception:
             continue
-    result = "\n".join(["{}: {}".format(l, "  -  ".join(i)) for l, i in zip(listed, info)])
+    result = "\n".join([f"{listed}: {'  -  '.join(info)}" for listed, info in zip(listeds, infos)])
     if not result:
         return {'error': 'No data found by querying known RBLs'}
     return {'results': [{'types': mispattributes.get('output'), 'values': result}]}
