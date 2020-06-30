@@ -1,0 +1,8 @@
+{
+    "description": "Module to get enrich indicators with TruSTAR.",
+    "logo": "logos/trustar.png",
+    "input": "Any of the following MISP attributes:\n- btc\n- domain\n- email-src\n- filename\n- hostname\n- ip-src\n- ip-dst\n- md5\n- sha1\n- sha256\n- url",
+    "output": "MISP attributes enriched with indicator summary data from the TruSTAR API. Data includes a severity level score and additional source and scoring info.",
+    "references": ["https://docs.trustar.co/api/v13/indicators/get_indicator_summaries.html"],
+    "features": "This module enriches MISP attributes with scoring and metadata from TruSTAR.\n\nThe TruSTAR indicator summary is appended to the attributes along with links to any associated reports."
+}
