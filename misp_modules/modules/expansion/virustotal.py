@@ -52,7 +52,7 @@ class VirusTotalParser(object):
                          'downloaded': 'downloaded-from',
                          'referrer': 'referring'}
         siblings = (self.parse_siblings(domain) for domain in req['domain_siblings'])
-        uuid = self.parse_resolutions(req['resolutions'], req['subdomains'], siblings)
+        uuid = self.parse_resolutions(req['resolutions'], req['subdomains'] if 'subdomains' in req else None, siblings)
         for feature_type, relationship in feature_types.items():
             for feature in ('undetected_{}_samples', 'detected_{}_samples'):
                 for sample in req.get(feature.format(feature_type), [])[:self.limit]:
