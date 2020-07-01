@@ -244,7 +244,7 @@ def __any_mandatory_misp_field(header):
 
 
 def __special_parsing(data, delimiter):
-    return  list(tuple(part.strip() for part in line[0].split(delimiter)) for line in csv.reader(io.TextIOWrapper(io.BytesIO(data.encode()), encoding='utf-8')) if line and not line[0].startswith('#'))
+    return list(tuple(part.strip() for part in line[0].split(delimiter)) for line in csv.reader(io.TextIOWrapper(io.BytesIO(data.encode()), encoding='utf-8')) if line and not line[0].startswith('#'))
 
 
 def __standard_parsing(data):
