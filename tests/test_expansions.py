@@ -229,11 +229,24 @@ class TestExpansions(unittest.TestCase):
         self.assertEqual(to_check, 'OK (Not Found)', response)
 
     def test_greynoise(self):
-        query = {"module": "greynoise", "ip-dst": "1.1.1.1"}
-        response = self.misp_modules_post(query)
-        value = self.get_values(response)
-        if value != 'GreyNoise API not accessible (HTTP 429)':
-            self.assertTrue(value.startswith('{"ip":"1.1.1.1","status":"ok"'))
+        module_name = 'greynoise'
+        query = {"module": module_name, "ip-dst": "1.1.1.1"}
+        if module_name in self.configs:
+            query['config'] = self.configs[module_name]
+            response = self.misp_modules_post(query)
+            try:
+                self.assertEqual(self.get_values(response), 'This IP is commonly spoofed in Internet-scan activity')
+            except Exception:
+                self.assertIn(
+                    self.get_errors(reponse),
+                    (
+                        "Unauthorized. Please check your API key.",
+                        "Too many requests. You've hit the rate-limit."
+                    )
+                )
+        else:
+            response = self.misp_modules_post(query)
+            self.assertEqual(self.get_errors(response), 'Missing Greynoise API key.')
 
     def test_ipasn(self):
         query = {"module": "ipasn",
