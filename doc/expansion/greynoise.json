@@ -1,9 +1,9 @@
 {
     "description": "Module to access GreyNoise.io API",
     "logo": "logos/greynoise.png",
-    "requirements": [],
+    "requirements": ["A Greynoise API key."],
     "input": "An IP address.",
     "output": "Additional information about the IP fetched from Greynoise API.",
     "references": ["https://greynoise.io/", "https://github.com/GreyNoise-Intelligence/api.greynoise.io"],
-    "features": "The module takes an IP address as input and queries Greynoise for some additional information about it. The result is returned as text."
+    "features": "The module takes an IP address as input and queries Greynoise for some additional information about it: basically it checks whether a given IP address is “Internet background noise”, or has been observed scanning or attacking devices across the Internet. The result is returned as text."
 }
