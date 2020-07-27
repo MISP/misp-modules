@@ -536,6 +536,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#malwarebazaar" title="malwarebazaar" class="md-nav__link">
+    malwarebazaar
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#ocr-enrich" title="ocr-enrich" class="md-nav__link">
     ocr-enrich
   </a>
@@ -671,6 +678,13 @@
         <li class="md-nav__item">
   <a href="#threatminer" title="threatminer" class="md-nav__link">
     threatminer
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#trustar_enrich" title="trustar_enrich" class="md-nav__link">
+    trustar_enrich
   </a>
   
 </li>
@@ -1137,6 +1151,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#malwarebazaar" title="malwarebazaar" class="md-nav__link">
+    malwarebazaar
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#ocr-enrich" title="ocr-enrich" class="md-nav__link">
     ocr-enrich
   </a>
@@ -1272,6 +1293,13 @@
         <li class="md-nav__item">
   <a href="#threatminer" title="threatminer" class="md-nav__link">
     threatminer
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#trustar_enrich" title="trustar_enrich" class="md-nav__link">
+    trustar_enrich
   </a>
   
 </li>
@@ -2011,6 +2039,20 @@ Additional information about the MAC address.
 <a href="https://macvendors.com/">https://macvendors.com/</a>, <a href="https://macvendors.com/api">https://macvendors.com/api</a></p>
 </blockquote>
 <hr />
+<h4 id="malwarebazaar"><a href="https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/malwarebazaar.py">malwarebazaar</a><a class="headerlink" href="#malwarebazaar" title="Permanent link">&para;</a></h4>
+<p>Query the MALWAREbazaar API to get additional information about the input hash attribute.
+- <strong>features</strong>:</p>
+<blockquote>
+<p>The module takes a hash attribute as input and queries MALWAREbazaar's API to fetch additional data about it. The result, if the payload is known on the databases, is at least one file object describing the file the input hash is related to.</p>
+<p>The module is using the new format of modules able to return object since the result is one or multiple MISP object(s).
+- <strong>input</strong>:
+A hash attribute (md5, sha1 or sha256).
+- <strong>output</strong>:
+File object(s) related to the input attribute found on MALWAREbazaar databases.
+- <strong>references</strong>:
+<a href="https://bazaar.abuse.ch/">https://bazaar.abuse.ch/</a></p>
+</blockquote>
+<hr />
 <h4 id="ocr-enrich"><a href="https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/ocr-enrich.py">ocr-enrich</a><a class="headerlink" href="#ocr-enrich" title="Permanent link">&para;</a></h4>
 <p>Module to process some optical character recognition on pictures.
 - <strong>features</strong>:</p>
@@ -2426,6 +2468,32 @@ MISP attributes mapped from the result of the query on ThreatMiner, included in 
 - link
 - <strong>references</strong>:
 <a href="https://www.threatminer.org/">https://www.threatminer.org/</a></p>
+</blockquote>
+<hr />
+<h4 id="trustar_enrich"><a href="https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/trustar_enrich.py">trustar_enrich</a><a class="headerlink" href="#trustar_enrich" title="Permanent link">&para;</a></h4>
+<p><img src=logos/trustar.png height=60></p>
+<p>Module to get enrich indicators with TruSTAR.
+- <strong>features</strong>:</p>
+<blockquote>
+<p>This module enriches MISP attributes with scoring and metadata from TruSTAR.</p>
+<p>The TruSTAR indicator summary is appended to the attributes along with links to any associated reports.
+- <strong>input</strong>:
+Any of the following MISP attributes:
+- btc
+- domain
+- email-src
+- filename
+- hostname
+- ip-src
+- ip-dst
+- md5
+- sha1
+- sha256
+- url
+- <strong>output</strong>:
+MISP attributes enriched with indicator summary data from the TruSTAR API. Data includes a severity level score and additional source and scoring info.
+- <strong>references</strong>:
+<a href="https://docs.trustar.co/api/v13/indicators/get_indicator_summaries.html">https://docs.trustar.co/api/v13/indicators/get_indicator_summaries.html</a></p>
 </blockquote>
 <hr />
 <h4 id="urlhaus"><a href="https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/urlhaus.py">urlhaus</a><a class="headerlink" href="#urlhaus" title="Permanent link">&para;</a></h4>

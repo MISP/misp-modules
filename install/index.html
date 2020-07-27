@@ -549,8 +549,28 @@ sudo apt-get install -y <span class="se">\</span>
 <span class="c1"># END with virtualenv</span>
 
 <span class="nb">cd</span> /usr/local/src/
-sudo git clone https://github.com/MISP/misp-modules.git
-<span class="nb">cd</span> misp-modules
+<span class="c1"># Ideally you add your user to the staff group and make /usr/local/src group writeable, below follows an example with user misp</span>
+sudo adduser misp staff
+sudo chmod <span class="m">2775</span> /usr/local/src
+sudo chown root:staff /usr/local/src
+git clone https://github.com/MISP/misp-modules.git
+git clone git://github.com/stricaud/faup.git faup
+git clone git://github.com/stricaud/gtcaca.git gtcaca
+
+<span class="c1"># Install gtcaca/faup</span>
+<span class="nb">cd</span> gtcaca
+mkdir -p build
+<span class="nb">cd</span> build
+cmake .. <span class="o">&amp;&amp;</span> make
+sudo make install
+<span class="nb">cd</span> ../../faup
+mkdir -p build
+<span class="nb">cd</span> build
+cmake .. <span class="o">&amp;&amp;</span> make
+sudo make install
+sudo ldconfig
+
+<span class="nb">cd</span> ../../misp-modules
 
 <span class="c1"># BEGIN with virtualenv: </span>
 <span class="nv">$SUDO_WWW</span>  /var/www/MISP/venv/bin/pip install -I -r REQUIREMENTS
