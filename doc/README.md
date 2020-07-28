@@ -970,7 +970,7 @@ Module to check an IPv4 address against known RBLs.
 
 Module to enrich attributes with threat intelligence from Recorded Future.
 - **features**:
->Enrich an attribute to add a custom enrichment object to the event. The object contains a copy of the enriched attribute with added tags presenting risk score and triggered risk rules from Recorded Future. Malware and Threat Actors related to the enriched indicator in Recorded Future will be matched against MISP's galaxy clusters and applied as galaxy tags. The custom enrichment object will also include a list of related indicators from Recorded Future (IP's, domains, hashes, URL's and vulnerabilities) added as additional attributes.
+>Enrich an attribute to add a custom enrichment object to the event. The object contains a copy of the enriched attribute with added tags presenting risk score and triggered risk rules from Recorded Future. Malware and Threat Actors related to the enriched indicator in Recorded Future is matched against MISP's galaxy clusters and applied as galaxy tags. The custom enrichment object also includes a list of related indicators from Recorded Future (IP's, domains, hashes, URL's and vulnerabilities) added as additional attributes.
 - **input**:
 >A MISP attribute of one of the following types: ip, ip-src, ip-dst, domain, hostname, md5, sha1, sha256, uri, url, vulnerability, weakness.
 - **output**:
