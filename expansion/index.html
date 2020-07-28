@@ -620,6 +620,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#recordedfuture" title="recordedfuture" class="md-nav__link">
+    recordedfuture
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#reversedns" title="reversedns" class="md-nav__link">
     reversedns
   </a>
@@ -1230,6 +1237,13 @@
         <li class="md-nav__item">
   <a href="#rbl" title="rbl" class="md-nav__link">
     rbl
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#recordedfuture" title="recordedfuture" class="md-nav__link">
+    recordedfuture
   </a>
   
 </li>
@@ -1853,13 +1867,15 @@ A local copy of Maxmind's Geolite database</p>
 <p>Module to access GreyNoise.io API
 - <strong>features</strong>:</p>
 <blockquote>
-<p>The module takes an IP address as input and queries Greynoise for some additional information about it. The result is returned as text.
+<p>The module takes an IP address as input and queries Greynoise for some additional information about it: basically it checks whether a given IP address is “Internet background noise”, or has been observed scanning or attacking devices across the Internet. The result is returned as text.
 - <strong>input</strong>:
 An IP address.
 - <strong>output</strong>:
 Additional information about the IP fetched from Greynoise API.
 - <strong>references</strong>:
-<a href="https://greynoise.io/">https://greynoise.io/</a>, <a href="https://github.com/GreyNoise-Intelligence/api.greynoise.io">https://github.com/GreyNoise-Intelligence/api.greynoise.io</a></p>
+<a href="https://greynoise.io/">https://greynoise.io/</a>, <a href="https://github.com/GreyNoise-Intelligence/api.greynoise.io">https://github.com/GreyNoise-Intelligence/api.greynoise.io</a>
+- <strong>requirements</strong>:
+A Greynoise API key.</p>
 </blockquote>
 <hr />
 <h4 id="hashdd"><a href="https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/hashdd.py">hashdd</a><a class="headerlink" href="#hashdd" title="Permanent link">&para;</a></h4>
@@ -2272,6 +2288,22 @@ Text with additional data from Real-time Blackhost Lists about the IP address.
 <a href="https://github.com/MISP/misp-modules/blob/8817de476572a10a9c9d03258ec81ca70f3d926d/misp_modules/modules/expansion/rbl.py#L20">RBLs list</a>
 - <strong>requirements</strong>:
 dnspython3: DNS python3 library</p>
+</blockquote>
+<hr />
+<h4 id="recordedfuture"><a href="https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/recordedfuture.py">recordedfuture</a><a class="headerlink" href="#recordedfuture" title="Permanent link">&para;</a></h4>
+<p><img src=logos/recordedfuture.png height=60></p>
+<p>Module to enrich attributes with threat intelligence from Recorded Future.
+- <strong>features</strong>:</p>
+<blockquote>
+<p>Enrich an attribute to add a custom enrichment object to the event. The object contains a copy of the enriched attribute with added tags presenting risk score and triggered risk rules from Recorded Future. Malware and Threat Actors related to the enriched indicator in Recorded Future is matched against MISP's galaxy clusters and applied as galaxy tags. The custom enrichment object also includes a list of related indicators from Recorded Future (IP's, domains, hashes, URL's and vulnerabilities) added as additional attributes.
+- <strong>input</strong>:
+A MISP attribute of one of the following types: ip, ip-src, ip-dst, domain, hostname, md5, sha1, sha256, uri, url, vulnerability, weakness.
+- <strong>output</strong>:
+A MISP object containing a copy of the enriched attribute with added tags from Recorded Future and a list of new attributes related to the enriched attribute.
+- <strong>references</strong>:
+<a href="https://www.recordedfuture.com/">https://www.recordedfuture.com/</a>
+- <strong>requirements</strong>:
+A Recorded Future API token.</p>
 </blockquote>
 <hr />
 <h4 id="reversedns"><a href="https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/reversedns.py">reversedns</a><a class="headerlink" href="#reversedns" title="Permanent link">&para;</a></h4>
