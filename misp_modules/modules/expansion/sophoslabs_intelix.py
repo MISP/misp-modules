@@ -1,7 +1,7 @@
 import json
 import requests
 import base64
-from. import check_input_attribute, checking_error, standard_error_message
+from . import check_input_attribute, checking_error, standard_error_message
 from pymisp import MISPEvent, MISPObject
 from urllib.parse import quote
 

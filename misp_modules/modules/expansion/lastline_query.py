@@ -52,7 +52,7 @@ def handler(q=False):
     try:
         config = request["config"]
         auth_data = lastline_api.LastlineAbstractClient.get_login_params_from_dict(config)
-        if not request.get('attribute') or not request['attribute'].get('value'):
+        if not request.get('attribute') or not check_input_attribute(request['attribute'], requirements=('type', 'value')):
             return {'error': f'{standard_error_message}, {checking_error} that is the link to a Lastline analysis.'}
         analysis_link = request['attribute']['value']
         # The API url changes based on the analysis link host name
