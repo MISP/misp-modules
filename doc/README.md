@@ -966,6 +966,24 @@ Module to check an IPv4 address against known RBLs.
 
 -----
 
+#### [recordedfuture](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/recordedfuture.py)
+
+<img src=logos/recordedfuture.png height=60>
+
+Module to enrich attributes with threat intelligence from Recorded Future.
+- **features**:
+>Enrich an attribute to add a custom enrichment object to the event. The object contains a copy of the enriched attribute with added tags presenting risk score and triggered risk rules from Recorded Future. Malware and Threat Actors related to the enriched indicator in Recorded Future is matched against MISP's galaxy clusters and applied as galaxy tags. The custom enrichment object also includes a list of related indicators from Recorded Future (IP's, domains, hashes, URL's and vulnerabilities) added as additional attributes.
+- **input**:
+>A MISP attribute of one of the following types: ip, ip-src, ip-dst, domain, hostname, md5, sha1, sha256, uri, url, vulnerability, weakness.
+- **output**:
+>A MISP object containing a copy of the enriched attribute with added tags from Recorded Future and a list of new attributes related to the enriched attribute.
+- **references**:
+>https://www.recordedfuture.com/
+- **requirements**:
+>A Recorded Future API token.
+
+-----
+
 #### [reversedns](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/reversedns.py)
 
 Simple Reverse DNS expansion service to resolve reverse DNS from MISP attributes.
