@@ -113,12 +113,18 @@ def handler(q=False):
     if attribute['type'] not in misp_types_in:
         return {'error': 'Unsupported attribute type.'}
     client = SophosLabsApi(j['config']['client_id'], j['config']['client_secret'])
-    if j['attribute']['type'] == "sha256":
-        client.hash_lookup(j['attribute']['value1'])
-    if j['attribute']['type'] in ['ip-dst', 'ip-src', 'ip']:
-        client.ip_lookup(j["attribute"]["value1"])
-    if j['attribute']['type'] in ['uri', 'url', 'domain', 'hostname']:
-        client.url_lookup(j["attribute"]["value1"])
+    mapping = {
+        'sha256': 'hash_lookup',
+        'ip-dst': 'ip_lookup',
+        'ip-src': 'ip_lookup',
+        'ip': 'ip_lookup',
+        'uri': 'url_lookup',
+        'url': 'url_lookup',
+        'domain': 'url_lookup',
+        'hostname': 'url_lookup'
+    }
+    attribute_value = attribute['value'] if 'value' in attribute else attribute['value1']
+    getattr(client, mapping[attribute['type']])(attribute_value)
     return client.get_result()
 
 
