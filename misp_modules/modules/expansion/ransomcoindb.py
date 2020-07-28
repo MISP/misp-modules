@@ -1,4 +1,5 @@
 import json
+from . import check_input_attribute, checking_error, standard_error_message
 from ._ransomcoindb import ransomcoindb
 from pymisp import MISPObject
 
@@ -28,6 +29,10 @@ def handler(q=False):
     q = json.loads(q)
     if "config" not in q or "api-key" not in q["config"]:
         return {"error": "Ransomcoindb API key is missing"}
+    if not q.get('attribute') or not check_input_attribute(attribute, requirements=('type', 'value')):
+        return {'error': f'{standard_error_message}, {checking_error}.'}
+    if q['attribute']['type'] not in mispattributes['input']:
+        return {'error': 'Unsupported attribute type.'}
     api_key = q["config"]["api-key"]
     r = {"results": []}
 

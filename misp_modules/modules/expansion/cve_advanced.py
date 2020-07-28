@@ -1,7 +1,8 @@
-from collections import defaultdict
-from pymisp import MISPEvent, MISPObject
 import json
 import requests
+from . import check_input_attribute, standard_error_message
+from collections import defaultdict
+from pymisp import MISPEvent, MISPObject
 
 misperrors = {'error': 'Error'}
 mispattributes = {'input': ['vulnerability'], 'format': 'misp_standard'}
@@ -108,7 +109,8 @@ def handler(q=False):
     if q is False:
         return False
     request = json.loads(q)
-    attribute = request.get('attribute')
+    if not request.get('attribute') or not check_input_attribute(request['attribute']):
+        return {'error': f'{standard_error_message}, which should contain at least a type, a value and an uuid.'}
     if attribute.get('type') != 'vulnerability':
         misperrors['error'] = 'Vulnerability id missing.'
         return misperrors

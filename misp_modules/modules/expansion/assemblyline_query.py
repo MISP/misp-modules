@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import json
+from . import check_input_attribute, standard_error_message
 from assemblyline_client import Client, ClientError
 from collections import defaultdict
 from pymisp import MISPAttribute, MISPEvent, MISPObject
@@ -139,6 +140,10 @@ def handler(q=False):
     if q is False:
         return False
     request = json.loads(q)
+    if not request.get('attribute') or not check_input_attribute(request['attribute']):
+        return {'error': f'{standard_error_message}, which should contain at least a type, a value and an uuid.'}
+    if request['attribute']['type'] not in mispattributes['input']:
+        return {'error': 'Unsupported attribute type.'}
     if not request.get('config'):
         return {"error": "Missing configuration."}
     if not request['config'].get('apiurl'):

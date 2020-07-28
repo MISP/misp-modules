@@ -1,3 +1,4 @@
+from. import check_input_attribute, checking_error, standard_error_message
 from pymisp import MISPEvent, MISPObject
 import json
 import requests
@@ -105,6 +106,12 @@ def handler(q=False):
         misperrors['error'] = "Missing client_id or client_secret value for SOPHOSLabs Intelix. \
             It's free to sign up here https://aws.amazon.com/marketplace/pp/B07SLZPMCS."
         return misperrors
+    to_check = (('type', 'value'), ('type', 'value1'))
+    if not request.get('attribute') or not any(check_input_attribute(request['attribute'], requirements=check) for check in to_check):
+        return {'error': f'{standard_error_message}, {checking_error}.'}
+    attribute = request['attribute']
+    if attribute['type'] not in misp_types_in:
+        return {'error': 'Unsupported attribute type.'}
     client = SophosLabsApi(j['config']['client_id'], j['config']['client_secret'])
     if j['attribute']['type'] == "sha256":
         client.hash_lookup(j['attribute']['value1'])

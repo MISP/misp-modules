@@ -1,5 +1,6 @@
 import json
 import requests
+from . import check_input_attribute, standard_error_message
 from pymisp import MISPAttribute, MISPEvent, MISPObject
 
 misperrors = {'error': 'Error'}
@@ -74,7 +75,11 @@ def handler(q=False):
     request = json.loads(q)
     if not request.get('config', {}).get('apikey'):
         return {'error': 'An API key for APIVoid is required.'}
-    attribute = request.get('attribute')
+    if not request.get('attribute') or not check_input_attribute(request['attribute']):
+        return {'error': f'{standard_error_message}, which should contain at least a type, a value and an uuid.'}
+    attribute = request['attribute']
+    if attribute['type'] not in mispattributes['input']:
+        return {'error': 'Unsupported attribute type.'}
     apikey = request['config']['apikey']
     apivoid_parser = APIVoidParser(attribute)
     apivoid_parser.parse_domain(apikey)

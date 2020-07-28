@@ -1,6 +1,7 @@
 import json
 import logging
 import requests
+from . import check_input_attribute, checking_error, standard_error_message
 from urllib.parse import quote
 from pymisp import MISPAttribute, MISPEvent, MISPTag, MISPObject
 
@@ -257,6 +258,10 @@ def handler(q=False):
     else:
         misperrors['error'] = 'Missing Recorded Future token.'
         return misperrors
+    if not request.get('attribute') or not check_input_attribute(request['atttribute'], requirements=('type', 'value')):
+        return {'error': f'{standard_error_message}, {checking_error}.'}
+    if request['attribute']['type'] not in mispattributes['input']:
+        return {'error': 'Unsupported attribute type.'}
 
     input_attribute = request.get('attribute')
     rf_enricher = RFEnricher(token, input_attribute)
