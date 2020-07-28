@@ -29,7 +29,7 @@ def handler(q=False):
     q = json.loads(q)
     if "config" not in q or "api-key" not in q["config"]:
         return {"error": "Ransomcoindb API key is missing"}
-    if not q.get('attribute') or not check_input_attribute(attribute, requirements=('type', 'value')):
+    if not q.get('attribute') or not check_input_attribute(q['attribute'], requirements=('type', 'value')):
         return {'error': f'{standard_error_message}, {checking_error}.'}
     if q['attribute']['type'] not in mispattributes['input']:
         return {'error': 'Unsupported attribute type.'}

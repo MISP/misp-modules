@@ -111,6 +111,7 @@ def handler(q=False):
     request = json.loads(q)
     if not request.get('attribute') or not check_input_attribute(request['attribute']):
         return {'error': f'{standard_error_message}, which should contain at least a type, a value and an uuid.'}
+    attribute = request['attribute']
     if attribute.get('type') != 'vulnerability':
         misperrors['error'] = 'Vulnerability id missing.'
         return misperrors

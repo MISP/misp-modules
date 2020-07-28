@@ -1,8 +1,8 @@
-from. import check_input_attribute, checking_error, standard_error_message
-from pymisp import MISPEvent, MISPObject
 import json
 import requests
 import base64
+from. import check_input_attribute, checking_error, standard_error_message
+from pymisp import MISPEvent, MISPObject
 from urllib.parse import quote
 
 moduleinfo = {'version': '1.0',
@@ -107,9 +107,9 @@ def handler(q=False):
             It's free to sign up here https://aws.amazon.com/marketplace/pp/B07SLZPMCS."
         return misperrors
     to_check = (('type', 'value'), ('type', 'value1'))
-    if not request.get('attribute') or not any(check_input_attribute(request['attribute'], requirements=check) for check in to_check):
+    if not j.get('attribute') or not any(check_input_attribute(j['attribute'], requirements=check) for check in to_check):
         return {'error': f'{standard_error_message}, {checking_error}.'}
-    attribute = request['attribute']
+    attribute = j['attribute']
     if attribute['type'] not in misp_types_in:
         return {'error': 'Unsupported attribute type.'}
     client = SophosLabsApi(j['config']['client_id'], j['config']['client_secret'])
