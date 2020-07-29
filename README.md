@@ -78,6 +78,7 @@ For more information: [Extending MISP with Python modules](https://www.misp-proj
 * [STIX2 pattern syntax validator](misp_modules/modules/expansion/stix2_pattern_syntax_validator.py) - a module to check a STIX2 pattern syntax.
 * [ThreatCrowd](misp_modules/modules/expansion/threatcrowd.py) - an expansion module for [ThreatCrowd](https://www.threatcrowd.org/).
 * [threatminer](misp_modules/modules/expansion/threatminer.py) - an expansion module to expand from [ThreatMiner](https://www.threatminer.org/).
+* [TruSTAR Enrich](misp_modules/modules/expansion/trustar_enrich.py) - an expansion module to enrich MISP data with [TruSTAR](https://www.trustar.co/).
 * [urlhaus](misp_modules/modules/expansion/urlhaus.py) - Query urlhaus to get additional data about a domain, hash, hostname, ip or url.
 * [urlscan](misp_modules/modules/expansion/urlscan.py) - an expansion module to query [urlscan.io](https://urlscan.io).
 * [virustotal](misp_modules/modules/expansion/virustotal.py) - an expansion module to query the [VirusTotal](https://www.virustotal.com/gui/home) API with a high request rate limit required. (More details about the API: [here](https://developers.virustotal.com/reference))
