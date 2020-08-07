@@ -258,7 +258,7 @@ def handler(q=False):
     else:
         misperrors['error'] = 'Missing Recorded Future token.'
         return misperrors
-    if not request.get('attribute') or not check_input_attribute(request['atttribute'], requirements=('type', 'value')):
+    if not request.get('attribute') or not check_input_attribute(request['attribute'], requirements=('type', 'value')):
         return {'error': f'{standard_error_message}, {checking_error}.'}
     if request['attribute']['type'] not in mispattributes['input']:
         return {'error': 'Unsupported attribute type.'}
