@@ -85,6 +85,7 @@ class TruSTARParser:
         redundancy.
 
         :param: <OrderedDict> Enrichment data.
+        :return: <list> List of tags.
         """
         if enrichment_report and enrichment_report.get('tags'):
             return [tag.get('name') for tag in enrichment_report.pop('tags')]
