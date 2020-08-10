@@ -57,6 +57,7 @@ For more information: [Extending MISP with Python modules](https://www.misp-proj
 * [Lastline query](misp_modules/modules/expansion/lastline_query.py) - Query Lastline with the link to an analysis and parse the report.
 * [macaddress.io](misp_modules/modules/expansion/macaddress_io.py) - a hover module to retrieve vendor details and other information regarding a given MAC address or an OUI from [MAC address Vendor Lookup](https://macaddress.io). See [integration tutorial here](https://macaddress.io/integrations/MISP-module).
 * [macvendors](misp_modules/modules/expansion/macvendors.py) - a hover module to retrieve mac vendor information.
+* [MALWAREbazaar](misp_modules/modules/expansion/malwarebazaar.py) - an expansion module to query MALWAREbazaar with some payload.
 * [ocr-enrich](misp_modules/modules/expansion/ocr_enrich.py) - an enrichment module to get OCRized data from images into MISP.
 * [ods-enrich](misp_modules/modules/expansion/ods_enrich.py) - an enrichment module to get text out of OpenOffice spreadsheet document into MISP (using free-text parser).
 * [odt-enrich](misp_modules/modules/expansion/odt_enrich.py) - an enrichment module to get text out of OpenOffice document into MISP (using free-text parser).
@@ -68,6 +69,7 @@ For more information: [Extending MISP with Python modules](https://www.misp-proj
 * [pptx-enrich](misp_modules/modules/expansion/pptx_enrich.py) - an enrichment module to get text out of PowerPoint document into MISP (using free-text parser).
 * [qrcode](misp_modules/modules/expansion/qrcode.py) - a module decode QR code, barcode and similar codes from an image and enrich with the decoded values.
 * [rbl](misp_modules/modules/expansion/rbl.py) - a module to get RBL (Real-Time Blackhost List) values from an attribute.
+* [recordedfuture](misp_modules/modules/expansion/recordedfuture.py) - a hover and expansion module for enriching MISP attributes with threat intelligence from Recorded Future.
 * [reversedns](misp_modules/modules/expansion/reversedns.py) - Simple Reverse DNS expansion service to resolve reverse DNS from MISP attributes.
 * [securitytrails](misp_modules/modules/expansion/securitytrails.py) - an expansion module for [securitytrails](https://securitytrails.com/).
 * [shodan](misp_modules/modules/expansion/shodan.py) - a minimal [shodan](https://www.shodan.io/) expansion module.
@@ -78,6 +80,7 @@ For more information: [Extending MISP with Python modules](https://www.misp-proj
 * [STIX2 pattern syntax validator](misp_modules/modules/expansion/stix2_pattern_syntax_validator.py) - a module to check a STIX2 pattern syntax.
 * [ThreatCrowd](misp_modules/modules/expansion/threatcrowd.py) - an expansion module for [ThreatCrowd](https://www.threatcrowd.org/).
 * [threatminer](misp_modules/modules/expansion/threatminer.py) - an expansion module to expand from [ThreatMiner](https://www.threatminer.org/).
+* [TruSTAR Enrich](misp_modules/modules/expansion/trustar_enrich.py) - an expansion module to enrich MISP data with [TruSTAR](https://www.trustar.co/).
 * [urlhaus](misp_modules/modules/expansion/urlhaus.py) - Query urlhaus to get additional data about a domain, hash, hostname, ip or url.
 * [urlscan](misp_modules/modules/expansion/urlscan.py) - an expansion module to query [urlscan.io](https://urlscan.io).
 * [virustotal](misp_modules/modules/expansion/virustotal.py) - an expansion module to query the [VirusTotal](https://www.virustotal.com/gui/home) API with a high request rate limit required. (More details about the API: [here](https://developers.virustotal.com/reference))

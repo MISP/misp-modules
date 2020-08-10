@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import json
+from . import check_input_attribute, standard_error_message
 from pyipasnhistory import IPASNHistory
 from pymisp import MISPAttribute, MISPEvent, MISPObject
 
@@ -34,11 +35,11 @@ def handler(q=False):
     if q is False:
         return False
     request = json.loads(q)
-    if request.get('attribute') and request['attribute'].get('type') in mispattributes['input']:
-        toquery = request['attribute']['value']
-    else:
-        misperrors['error'] = "Unsupported attributes type"
-        return misperrors
+    if not request.get('attribute') or not check_input_attribute(request['attribute']):
+        return {'error': f'{standard_error_message}, which should contain at least a type, a value and an uuid.'}
+    if request['attribute']['type'] not in mispattributes['input']:
+        return {'error': 'Unsupported attribute type.'}
+    toquery = request['attribute']['value']
 
     ipasn = IPASNHistory()
     values = ipasn.query(toquery)

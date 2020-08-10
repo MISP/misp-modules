@@ -2,6 +2,7 @@ import json
 import pymisp
 from base64 import b64encode
 from collections import OrderedDict
+from . import check_input_attribute, checking_error, standard_error_message
 from pymisp import MISPAttribute, MISPEvent, MISPObject
 from trustar import TruStar, Indicator
 from urllib.parse import quote
@@ -183,7 +184,11 @@ def handler(q=False):
         misperrors['error'] = "Your TruSTAR API key and secret are required for indicator enrichment."
         return misperrors
 
+    if not request.get('attribute') or not check_input_attribute(request['attribute'], requirements=('type', 'value')):
+        return {'error': f'{standard_error_message}, {checking_error}.'}
     attribute = request['attribute']
+    if attribute['type'] not in mispattributes['input']:
+        return {'error': 'Unsupported attribute type.'}
     trustar_parser = TruSTARParser(attribute, config)
     metadata = None
     summary = None

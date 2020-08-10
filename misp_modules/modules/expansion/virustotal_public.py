@@ -1,6 +1,7 @@
-from pymisp import MISPAttribute, MISPEvent, MISPObject
 import json
 import requests
+from . import check_input_attribute, standard_error_message
+from pymisp import MISPAttribute, MISPEvent, MISPObject
 
 misperrors = {'error': 'Error'}
 mispattributes = {'input': ['hostname', 'domain', "ip-src", "ip-dst", "md5", "sha1", "sha256", "url"],
@@ -174,7 +175,11 @@ def handler(q=False):
     if not request.get('config') or not request['config'].get('apikey'):
         misperrors['error'] = "A VirusTotal api key is required for this module."
         return misperrors
+    if not request.get('attribute') or not check_input_attribute(request['attribute']):
+        return {'error': f'{standard_error_message}, which should contain at least a type, a value and an uuid.'}
     attribute = request['attribute']
+    if attribute['type'] not in mispattributes['input']:
+        return {'error': 'Unsupported attribute type.'}
     query_type, to_call = misp_type_mapping[attribute['type']]
     parser = to_call(request['config']['apikey'], attribute)
     query_result = parser.get_query_result(query_type)

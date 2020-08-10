@@ -1,6 +1,7 @@
-from pymisp import MISPAttribute, MISPEvent, MISPObject
 import json
 import requests
+from . import check_input_attribute, standard_error_message
+from pymisp import MISPAttribute, MISPEvent, MISPObject
 
 misperrors = {'error': 'Error'}
 mispattributes = {'input': ['hostname', 'domain', "ip-src", "ip-dst", "md5", "sha1", "sha256", "url"],
@@ -52,7 +53,7 @@ class VirusTotalParser(object):
                          'downloaded': 'downloaded-from',
                          'referrer': 'referring'}
         siblings = (self.parse_siblings(domain) for domain in req['domain_siblings'])
-        uuid = self.parse_resolutions(req['resolutions'], req['subdomains'], siblings)
+        uuid = self.parse_resolutions(req['resolutions'], req['subdomains'] if 'subdomains' in req else None, siblings)
         for feature_type, relationship in feature_types.items():
             for feature in ('undetected_{}_samples', 'detected_{}_samples'):
                 for sample in req.get(feature.format(feature_type), [])[:self.limit]:
@@ -195,6 +196,11 @@ def handler(q=False):
     if not request.get('config') or not request['config'].get('apikey'):
         misperrors['error'] = "A VirusTotal api key is required for this module."
         return misperrors
+    if not request.get('attribute') or not check_input_attribute(request['attribute']):
+        return {'error': f'{standard_error_message}, which should contain at least a type, a value and an uuid.'}
+    if request['attribute']['type'] not in mispattributes['input']:
+        return {'error': 'Unsupported attribute type.'}
+
     event_limit = request['config'].get('event_limit')
     if not isinstance(event_limit, int):
         event_limit = 5

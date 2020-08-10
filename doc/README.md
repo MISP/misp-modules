@@ -502,13 +502,15 @@ Module to query a local copy of Maxmind's Geolite database.
 
 Module to access GreyNoise.io API
 - **features**:
->The module takes an IP address as input and queries Greynoise for some additional information about it. The result is returned as text.
+>The module takes an IP address as input and queries Greynoise for some additional information about it: basically it checks whether a given IP address is “Internet background noise”, or has been observed scanning or attacking devices across the Internet. The result is returned as text.
 - **input**:
 >An IP address.
 - **output**:
 >Additional information about the IP fetched from Greynoise API.
 - **references**:
 >https://greynoise.io/, https://github.com/GreyNoise-Intelligence/api.greynoise.io
+- **requirements**:
+>A Greynoise API key.
 
 -----
 
@@ -712,6 +714,22 @@ Module to access Macvendors API.
 >Additional information about the MAC address.
 - **references**:
 >https://macvendors.com/, https://macvendors.com/api
+
+-----
+
+#### [malwarebazaar](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/malwarebazaar.py)
+
+Query the MALWAREbazaar API to get additional information about the input hash attribute.
+- **features**:
+>The module takes a hash attribute as input and queries MALWAREbazaar's API to fetch additional data about it. The result, if the payload is known on the databases, is at least one file object describing the file the input hash is related to.
+>
+>The module is using the new format of modules able to return object since the result is one or multiple MISP object(s).
+- **input**:
+>A hash attribute (md5, sha1 or sha256).
+- **output**:
+>File object(s) related to the input attribute found on MALWAREbazaar databases.
+- **references**:
+>https://bazaar.abuse.ch/
 
 -----
 
@@ -945,6 +963,24 @@ Module to check an IPv4 address against known RBLs.
 >[RBLs list](https://github.com/MISP/misp-modules/blob/8817de476572a10a9c9d03258ec81ca70f3d926d/misp_modules/modules/expansion/rbl.py#L20)
 - **requirements**:
 >dnspython3: DNS python3 library
+
+-----
+
+#### [recordedfuture](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/recordedfuture.py)
+
+<img src=logos/recordedfuture.png height=60>
+
+Module to enrich attributes with threat intelligence from Recorded Future.
+- **features**:
+>Enrich an attribute to add a custom enrichment object to the event. The object contains a copy of the enriched attribute with added tags presenting risk score and triggered risk rules from Recorded Future. Malware and Threat Actors related to the enriched indicator in Recorded Future is matched against MISP's galaxy clusters and applied as galaxy tags. The custom enrichment object also includes a list of related indicators from Recorded Future (IP's, domains, hashes, URL's and vulnerabilities) added as additional attributes.
+- **input**:
+>A MISP attribute of one of the following types: ip, ip-src, ip-dst, domain, hostname, md5, sha1, sha256, uri, url, vulnerability, weakness.
+- **output**:
+>A MISP object containing a copy of the enriched attribute with added tags from Recorded Future and a list of new attributes related to the enriched attribute.
+- **references**:
+>https://www.recordedfuture.com/
+- **requirements**:
+>A Recorded Future API token.
 
 -----
 
