@@ -99,6 +99,7 @@ class TruSTARParser:
         :param metadata: <trustar.Indicator> Indicator metadata report.
         :return: <str> Enrichment report.
         """
+        # Preserve order of fields as they exist in SUMMARY_FIELDS and METADATA_FIELDS
         enrichment_report = OrderedDict()
 
         if summary:
@@ -147,11 +148,13 @@ class TruSTARParser:
                 trustar_obj.add_attribute("REPORT_LINK", attribute_type="link", value=report_link)
                 self.misp_event.add_object(**trustar_obj)
             elif not tags:
+                # If enrichment report is empty and there are no tags, nothing to add to attribute
                 raise Exception("No relevant data found")
 
             if tags:
                 for tag in tags:
                     self.misp_event.add_attribute_tag(tag, indicator)
+
         except Exception as e:
             misperrors['error'] += f" -- Error enriching attribute {indicator} -- {e}"
             raise e
@@ -177,18 +180,18 @@ def handler(q=False):
 
     attribute = request['attribute']
     trustar_parser = TruSTARParser(attribute, config)
+    metadata = None
+    summary = None
 
     try:
         metadata = trustar_parser.ts_client.get_indicators_metadata([Indicator(value=attribute['value'])])[0]
     except Exception as e:
-        metadata = None
         misperrors['error'] += f" -- Could not retrieve indicator metadata from TruSTAR {e}"
 
     try:
         summary = list(
             trustar_parser.ts_client.get_indicator_summaries([attribute['value']], page_size=MAX_PAGE_SIZE))[0]
     except Exception as e:
-        summary = None
         misperrors['error'] += f" -- Unable to retrieve TruSTAR summary data: {e}"
 
     try:
