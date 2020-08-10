@@ -36,6 +36,7 @@ class TruSTARParser:
         'SHA256': "sha256"
     }
 
+    # Relevant fields from each TruSTAR endpoint
     SUMMARY_FIELDS = ["severityLevel", "source", "score", "attributes"]
     METADATA_FIELDS = ["sightings", "first_seen", "last_seen", "tags"]
 
@@ -140,13 +141,16 @@ class TruSTARParser:
             tags = self.extract_tags(enrichment_report)
 
             if enrichment_report:
+                # Create MISP trustar_report object and populate it with enrichment data
                 trustar_obj = MISPObject('trustar_report')
                 trustar_obj.add_attribute(indicator_type, attribute_type=self.ENTITY_TYPE_MAPPINGS[indicator_type],
                                           value=indicator)
                 trustar_obj.add_attribute("INDICATOR_SUMMARY", attribute_type="text",
                                           value=json.dumps(enrichment_report, indent=4))
+
                 report_link = self.generate_trustar_link(indicator_type, indicator)
                 trustar_obj.add_attribute("REPORT_LINK", attribute_type="link", value=report_link)
+
                 self.misp_event.add_object(**trustar_obj)
             elif not tags:
                 # If enrichment report is empty and there are no tags, nothing to add to attribute
