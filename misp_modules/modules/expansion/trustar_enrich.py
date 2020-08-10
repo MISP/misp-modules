@@ -3,7 +3,7 @@ import pymisp
 from base64 import b64encode
 from collections import OrderedDict
 from pymisp import MISPAttribute, MISPEvent, MISPObject
-from trustar import TruStar
+from trustar import TruStar, Indicator
 from urllib.parse import quote
 
 misperrors = {'error': "Error"}
@@ -36,7 +36,7 @@ class TruSTARParser:
         'SHA256': "sha256"
     }
 
-    SUMMARY_FIELDS = ["source", "score", "attributes"]
+    SUMMARY_FIELDS = ["severityLevel", "source", "score", "attributes"]
     METADATA_FIELDS = ["sightings", "first_seen", "last_seen", "tags"]
 
     REPORT_BASE_URL = "https://station.trustar.co/constellation/reports/{}"
@@ -57,64 +57,104 @@ class TruSTARParser:
         """
         Returns the MISP Event enriched with TruSTAR indicator summary data.
         """
-        event = json.loads(self.misp_event.to_json())
-        results = {key: event[key] for key in ('Attribute', 'Object') if (key in event and event[key])}
-        return {'results': results}
+        try:
+            event = json.loads(self.misp_event.to_json())
+            results = {key: event[key] for key in ('Attribute', 'Object') if (key in event and event[key])}
+            return {'results': results}
+        except Exception as e:
+            misperrors['error'] += f" -- Encountered issue serializing enrichment data -- {e}"
+            return misperrors
 
     def generate_trustar_link(self, entity_type, entity_value):
         """
         Generates link to TruSTAR report of entity.
 
+        :param entity_type: <str> Type of entity.
         :param entity_value: <str> Value of entity.
+        :return: <str> Link to indicator report in TruSTAR platform.
         """
         report_id = b64encode(quote(f"{entity_type}|{entity_value}").encode()).decode()
 
         return self.REPORT_BASE_URL.format(report_id)
+
+    @staticmethod
+    def extract_tags(enrichment_report):
+        """
+        Extracts tags from the enrichment report in order to add them
+        to the TruSTAR MISP Object. Removes tags from report to avoid
+        redundancy.
+
+        :param: <OrderedDict> Enrichment data.
+        """
+        if enrichment_report and enrichment_report.get('tags'):
+            return [tag.get('name') for tag in enrichment_report.pop('tags')]
+        return None
 
     def generate_enrichment_report(self, summary, metadata):
         """
         Extracts desired fields from summary and metadata reports and
         generates an enrichment report.
 
-        :param summary: <dict> Indicator summary report.
-        :param metadata: <dict> Indicator metadata report.
+        :param summary: <trustar.IndicatorSummary> Indicator summary report.
+        :param metadata: <trustar.Indicator> Indicator metadata report.
         :return: <str> Enrichment report.
         """
         enrichment_report = OrderedDict()
 
-        for field in self.SUMMARY_FIELDS:
-            enrichment_report[field] = summary.get(field)
+        if summary:
+            summary_dict = summary.to_dict()
+            enrichment_report.update(
+                {field: summary_dict[field] for field in self.SUMMARY_FIELDS if summary_dict.get(field)})
 
-        for field in self.METADATA_FIELDS:
-            enrichment_report[field] = metadata.get(field)
+        if metadata:
+            metadata_dict = metadata.to_dict()
+            enrichment_report.update(
+                {field: metadata_dict[field] for field in self.METADATA_FIELDS if metadata_dict.get(field)})
 
         return enrichment_report
 
-    def parse_indicator_summary(self, summaries, metadata):
+    def parse_indicator_summary(self, indicator, summary, metadata):
         """
-        Converts a response from the TruSTAR /1.3/indicators/summaries endpoint
-        a MISP trustar_report object and adds the summary data and links as attributes.
+        Pulls enrichment data from the TruSTAR /indicators/summaries and /indicators/metadata endpoints
+        and creates a MISP trustar_report.
 
-        :param summaries: <generator> A TruSTAR Python SDK Page.generator object for generating
-                          indicator summaries pages.
+        :param indicator: <str> Value of the attribute
+        :summary: <trustar.IndicatorSummary> Indicator summary response object.
+        :metadata: <trustar.Indicator> Indicator response object.
         """
 
-        for summary in summaries:
-            if summary.indicator_type in self.ENTITY_TYPE_MAPPINGS:
-                indicator_type = summary.indicator_type
-                indicator_value = summary.indicator_value
-                try:
-                    enrichment_report = self.generate_enrichment_report(summary.to_dict(), metadata.to_dict())
-                    trustar_obj = MISPObject('trustar_report')
-                    trustar_obj.add_attribute(indicator_type, attribute_type=self.ENTITY_TYPE_MAPPINGS[indicator_type],
-                                              value=indicator_value)
-                    trustar_obj.add_attribute("INDICATOR_SUMMARY", attribute_type="text",
-                                              value=json.dumps(enrichment_report, indent=4))
-                    report_link = self.generate_trustar_link(indicator_type, indicator_value)
-                    trustar_obj.add_attribute("REPORT_LINK", attribute_type="link", value=report_link)
-                    self.misp_event.add_object(**trustar_obj)
-                except Exception as e:
-                    misperrors['error'] = f"Error enriching data with TruSTAR -- {e}"
+        # Verify that the indicator type is supported by TruSTAR
+        if summary and summary.indicator_type in self.ENTITY_TYPE_MAPPINGS:
+            indicator_type = summary.indicator_type
+        elif metadata and metadata.type in self.ENTITY_TYPE_MAPPINGS:
+            indicator_type = metadata.type
+        else:
+            misperrors['error'] += " -- Attribute not found or not supported"
+            raise Exception
+
+        try:
+            # Extract most relevant fields from indicator summary and metadata responses
+            enrichment_report = self.generate_enrichment_report(summary, metadata)
+            tags = self.extract_tags(enrichment_report)
+
+            if enrichment_report:
+                trustar_obj = MISPObject('trustar_report')
+                trustar_obj.add_attribute(indicator_type, attribute_type=self.ENTITY_TYPE_MAPPINGS[indicator_type],
+                                          value=indicator)
+                trustar_obj.add_attribute("INDICATOR_SUMMARY", attribute_type="text",
+                                          value=json.dumps(enrichment_report, indent=4))
+                report_link = self.generate_trustar_link(indicator_type, indicator)
+                trustar_obj.add_attribute("REPORT_LINK", attribute_type="link", value=report_link)
+                self.misp_event.add_object(**trustar_obj)
+            elif not tags:
+                raise Exception("No relevant data found")
+
+            if tags:
+                for tag in tags:
+                    self.misp_event.add_attribute_tag(tag, indicator)
+        except Exception as e:
+            misperrors['error'] += f" -- Error enriching attribute {indicator} -- {e}"
+            raise e
 
 
 def handler(q=False):
@@ -139,14 +179,23 @@ def handler(q=False):
     trustar_parser = TruSTARParser(attribute, config)
 
     try:
-        metadata = trustar_parser.ts_client.get_indicators_metadata([attribute['value']])
-        summaries = list(
-            trustar_parser.ts_client.get_indicator_summaries([attribute['value']], page_size=MAX_PAGE_SIZE))
+        metadata = trustar_parser.ts_client.get_indicators_metadata([Indicator(value=attribute['value'])])[0]
     except Exception as e:
-        misperrors['error'] = f"Unable to retrieve TruSTAR summary data: {e}"
+        metadata = None
+        misperrors['error'] += f" -- Could not retrieve indicator metadata from TruSTAR {e}"
+
+    try:
+        summary = list(
+            trustar_parser.ts_client.get_indicator_summaries([attribute['value']], page_size=MAX_PAGE_SIZE))[0]
+    except Exception as e:
+        summary = None
+        misperrors['error'] += f" -- Unable to retrieve TruSTAR summary data: {e}"
+
+    try:
+        trustar_parser.parse_indicator_summary(attribute['value'], summary, metadata)
+    except Exception:
         return misperrors
 
-    trustar_parser.parse_indicator_summary(summaries)
     return trustar_parser.get_results()
 
 
