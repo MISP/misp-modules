@@ -175,7 +175,7 @@ class VirusTotalParser(object):
             vt_object = MISPObject('virustotal-report')
             vt_object.add_attribute('permalink', type='link', value=query_result['permalink'])
             detection_ratio = '{}/{}'.format(query_result['positives'], query_result['total'])
-            vt_object.add_attribute('detection-ratio', type='text', value=detection_ratio)
+            vt_object.add_attribute('detection-ratio', type='text', value=detection_ratio, disable_correlation=True)
             self.misp_event.add_object(**vt_object)
             return vt_object.uuid
 
