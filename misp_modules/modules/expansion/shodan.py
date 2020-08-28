@@ -209,6 +209,7 @@ class ShodanParser():
         x509_object.add_reference(self.attribute.uuid, 'identifies')
         self.misp_event.add_object(x509_object)
 
+
 def handler(q=False):
     if q is False:
         return False

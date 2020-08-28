@@ -62,7 +62,7 @@ class RequestHandler:
             response.raise_for_status()
             return response
         except (ConnectTimeout, ProxyError, InvalidURL) as error:
-            msg = f'Error connecting with proxy, please check the Recorded Future app proxy settings.'
+            msg = 'Error connecting with proxy, please check the Recorded Future app proxy settings.'
             LOGGER.error(f'{msg} Error: {error}')
             misperrors['error'] = msg
             raise
