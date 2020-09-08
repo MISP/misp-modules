@@ -97,9 +97,16 @@ class TestExpansions(unittest.TestCase):
             self.assertEqual(self.get_errors(response), 'An API key for APIVoid is required.')
 
     def test_bgpranking(self):
-        query = {"module": "bgpranking", "AS": "13335"}
+        query = {
+            "module": "bgpranking",
+            "attribute": {
+                "type": "AS",
+                "value": "13335",
+                "uuid": "ea89a33b-4ab7-4515-9f02-922a0bee333d"
+            }
+        }
         response = self.misp_modules_post(query)
-        self.assertEqual(self.get_values(response)['response']['asn_description'], 'CLOUDFLARENET, US')
+        self.assertEqual(self.get_object(response), 'asn')
 
     def test_btc_steroids(self):
         query = {"module": "btc_steroids", "btc": "1ES14c7qLb5CYhLMUekctxLgc1FV2Ti9DA"}
