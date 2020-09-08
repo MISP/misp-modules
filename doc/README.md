@@ -108,13 +108,13 @@ Query backscatter.io (https://backscatter.io/).
 
 Query BGP Ranking (https://bgpranking-ng.circl.lu/).
 - **features**:
->The module takes an AS number attribute as input and displays its description and history, and position in BGP Ranking.
+>The module takes an AS number attribute as input and displays its description as well as its ranking position in BGP Ranking for a given day.
 >
 >
 - **input**:
 >Autonomous system number.
 - **output**:
->Text containing a description of the ASN, its history, and the position in BGP Ranking.
+>An asn object with its related bgp-ranking object.
 - **references**:
 >https://github.com/D4-project/BGP-Ranking/
 - **requirements**:
