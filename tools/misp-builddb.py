@@ -152,6 +152,9 @@ def process_org(misp, org, current_org, total_orgs, period):
                 related_events.append( related_event )
         # print("Total %r related events" % ( len(related_events) ) )
 
+
+        # Process Objects Also!
+
         for attribute in result['Event']['Attribute']:
             if attribute['to_ids'] and attribute['type'] in [ 'ip-src', 'ip-dst', 'ip-src|port', 'ip-dst|port', 'url', 'domain', 'domain|ip', 'hostname|ip', 'email-dst', 'email-src', 'sha1', 'md5', 'sha256', 'filename|sha1', 'filename|md5', 'filename|sha256', 'regkey|value', 'regkey' ]:
                 # print("Processing attribute type: %s" % attribute['type'])
@@ -219,6 +222,12 @@ def process_org(misp, org, current_org, total_orgs, period):
                     if str(related_event['Event']['Orgc']['id']) in SKIP_ORG_ID:
                         continue
                     remote_attribute = next((sub for sub in related_event['Event']['Attribute'] if sub['type'] == name1 and sub['value'] == value1), None) 
+                    if not remote_attribute:
+                        for object in event['Event']['Object']:
+                            remote_attribute = next((sub for sub in object['Attribute'] if sub['type'] == name1 and sub['value'] == value1), None) 
+                            if remote_attribute:
+                                break
+
 
                     if remote_attribute:
                         attribute_found = True
@@ -238,6 +247,98 @@ def process_org(misp, org, current_org, total_orgs, period):
                 v = ( ( int(min_timestamp) - int(current_timestamp) ) + period ) / period
                 scrs_ioc_stat += v
 
+        for object in result['Object']:
+          for attribute in object['Attribute']:
+            if attribute['to_ids'] and attribute['type'] in [ 'ip-src', 'ip-dst', 'ip-src|port', 'ip-dst|port', 'url', 'domain', 'domain|ip', 'hostname|ip', 'email-dst', 'email-src', 'sha1', 'md5', 'sha256', 'filename|sha1', 'filename|md5', 'filename|sha256', 'regkey|value', 'regkey' ]:
+                # print("Processing attribute type: %s" % attribute['type'])
+                if '|' in attribute['type']:
+                    (name1, name2) = attribute['type'].split('|')
+                    (value1, value2) = attribute['value'].split('|')
+                    if attribute['type'][0:8] == 'filename':
+                        tmp = value2
+                        value2 = value1
+                        value1 = tmp
+                else:
+                    name1 = attribute['type']
+                    name2 = None
+                    value1 = attribute['value']
+                    value2 = None
+                # print("VAL: ", value1)
+                # print("VAL2: ", value2)
+
+                """
+                Timestamps of last sightings of the IoCs.
+                Number of sightings per IoC. - subbing with first seen
+                Description of threats related to the IoCs.
+                confidence score for the IoCs provided by the intelligence feed itself - subbed since doesnt exist in any of our examples currently (nothing to reference) comment instead
+                """
+
+                n = 0
+                if 'last_seen' in attribute and attribute['last_seen']:
+                    n += 1
+                elif 'first_seen' in attribute and attribute['first_seen']:
+                    n += 1
+
+                for artifact in result['Event']['Attribute']:
+                    if artifact['type'] == 'link':
+                        # print("FOUND LINK")
+                        n += 1
+                        break
+                #if any(artifact['type'] == 'link' in artifact for artifact in result['Event']['Attribute']):
+                #    n += 1
+
+                for artifact in result['Event']['Attribute']:
+                    if artifact['type'] == 'detection-ratio':
+                        # print("FOUND detection-ratio")
+                        n += 1
+                        break
+                #if any(artifact['type'] == 'detection-ratio' in artifact for artifact in result['Event']['Attribute']):
+                #    n += 1
+
+                for artifact in result['Event']['Attribute']:
+                    if artifact['type'] == 'comment':
+                        # print("FOUND comment")
+                        n += 1
+                        break
+                #if any(artifact['type'] == 'comment' in artifact for artifact in result['Event']['Attribute']):
+                #    n += 1
+
+                sces_ioc_stat += ( n / 4)
+
+                ioc_counter += 1
+
+                # for each related event id, lookup if our current attribute val1 and 2 is present
+                current_timestamp = int(get_timestamp_from_attribute(attribute))
+                min_timestamp = None
+                attribute_found = False
+                for related_event in related_events:
+                    if str(related_event['Event']['Orgc']['id']) in SKIP_ORG_ID:
+                        continue
+                    remote_attribute = next((sub for sub in related_event['Event']['Attribute'] if sub['type'] == name1 and sub['value'] == value1), None) 
+                    if not remote_attribute:
+                        for object in event['Event']['Object']:
+                            remote_attribute = next((sub for sub in object['Attribute'] if sub['type'] == name1 and sub['value'] == value1), None) 
+                            if remote_attribute:
+                                break
+
+
+                    if remote_attribute:
+                        attribute_found = True
+                        other_timestamp = get_timestamp_from_attribute(remote_attribute)
+
+                        if other_timestamp:
+                             if not min_timestamp:
+                                 min_timestamp = int(other_timestamp)
+                             else:
+                                 min_timestamp = min( int(other_timestamp), min_timestamp  )
+
+                if len(related_events) == 0 or not attribute_found:
+                    unique_ioc_counter += 1
+
+                if not min_timestamp:
+                    min_timestamp = current_timestamp
+                v = ( ( int(min_timestamp) - int(current_timestamp) ) + period ) / period
+                scrs_ioc_stat += v
         with open("cache/%s.json" % result['Event']['id'], 'w') as f:
             json.dump(result, f)
 
@@ -317,7 +418,7 @@ if __name__ == '__main__':
             os.remove(os.path.join("cache", f))
 
     # no proxy support built in, sorry, add me later
-    misp = init(misp_url, misp_key, args.disablessl, { })
+    misp = init(misp_url, misp_key, not args.disablessl, { })
 
     orgs = misp.organisations(scope='all') # or maybe just 'external'
 

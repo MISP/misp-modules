@@ -157,10 +157,20 @@ def handler(q=False):
         table = weights[org]
         # find our attribute
         attribute = None
+
         for a in event['Event']['Attribute']:
             if a['value'] == input_attribute['value']:
                 attribute = a
                 break
+
+        if not attribute:
+            for object in event['Event']['Object']:
+                for a in object['Attribute']:
+                    if a['value'] == input_attribute['value']:
+                        attribute = a
+                        break
+                if attribute:
+                    break
 
         if not attribute:
             misperrors['error'] = "No attribute found to match, must be a mistake?"
@@ -177,7 +187,8 @@ def handler(q=False):
         time_delta = time_delta ** ( 1 / degrading_line )
 
         score = table['scs'] * max(0, 1.0 - time_delta )
-        # print("Score: ", score)
+        print("Score: ", score)
+        print("Table: ", table['scs'])
 
         total_score += score
         confidence += table['scs']
@@ -190,7 +201,7 @@ def handler(q=False):
                       'values':["Final score: %.2f%%" % final_score]}]}
 
     else:
-        misperrors['error'] = "Unable to find value in MISP"
+        misperrors['error'] = "Unable to find value in MISP for: %s" % input_attribute['value']
         print(misperrors)
         print(json.dumps(results))
         return misperrors
