@@ -125,7 +125,6 @@ def process_org(misp, org, current_org, total_orgs, period):
     scrs_ioc_stat = 0.0
     ioc_counter = 0
     unique_ioc_counter = 0
-    current_org += 1
     log.info("Total %r events for org id %s (%r/%r)" % ( len(results), str(org['Organisation']['id']), current_org, total_orgs))
     for result in results:
 
@@ -147,7 +146,13 @@ def process_org(misp, org, current_org, total_orgs, period):
                         json.dump(related_event, f)
                 else:
                     with open("cache/%s.json" % e['Event']['id'], 'r') as f:
-                        related_event = json.load(f)
+                        try:
+                            related_event = json.load(f)
+                        except:
+                            os.unlink("cache/%s.json" % e['Event']['id'])
+                            related_event = misp.get_event(e['Event']['id'])
+                            with open("cache/%s.json" % e['Event']['id'], 'w') as f:
+                                json.dump(related_event, f)
 
                 related_events.append( related_event )
         # print("Total %r related events" % ( len(related_events) ) )
@@ -223,7 +228,7 @@ def process_org(misp, org, current_org, total_orgs, period):
                         continue
                     remote_attribute = next((sub for sub in related_event['Event']['Attribute'] if sub['type'] == name1 and sub['value'] == value1), None) 
                     if not remote_attribute:
-                        for object in event['Event']['Object']:
+                        for object in related_event['Event']['Object']:
                             remote_attribute = next((sub for sub in object['Attribute'] if sub['type'] == name1 and sub['value'] == value1), None) 
                             if remote_attribute:
                                 break
@@ -247,7 +252,7 @@ def process_org(misp, org, current_org, total_orgs, period):
                 v = ( ( int(min_timestamp) - int(current_timestamp) ) + period ) / period
                 scrs_ioc_stat += v
 
-        for object in result['Object']:
+        for object in result['Event']['Object']:
           for attribute in object['Attribute']:
             if attribute['to_ids'] and attribute['type'] in [ 'ip-src', 'ip-dst', 'ip-src|port', 'ip-dst|port', 'url', 'domain', 'domain|ip', 'hostname|ip', 'email-dst', 'email-src', 'sha1', 'md5', 'sha256', 'filename|sha1', 'filename|md5', 'filename|sha256', 'regkey|value', 'regkey' ]:
                 # print("Processing attribute type: %s" % attribute['type'])
