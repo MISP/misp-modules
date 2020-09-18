@@ -14,7 +14,7 @@ import time
 import logging
 from pymisp import MISPObject
 from pymisp import PyMISP
-from pymisp import MISPEvent
+from pymisp import MISPEvent, MISPTag, MISPAttribute
 from . import check_input_attribute, checking_error, standard_error_message
 import platform
 import os
@@ -67,6 +67,29 @@ def riskscore_color(risk_score: int) -> str:
         return '#FFCE00'
     else:
         return '#CF0A2C'
+
+
+def parse_result(attribute, score):
+    """
+    event = MISPEvent()
+    initial_attribute = MISPAttribute()
+    initial_attribute.from_dict(**attribute)
+    event.add_attribute(**initial_attribute)
+    print(score)
+    tag_name = f'source-confidence:confidence-score="{score}"'
+    tag = MISPTag()
+    tag_properties = {'name': tag_name}
+    tag_properties['colour'] = riskscore_color( int(score) )
+    tag.from_dict(**tag_properties)
+    initial_attribute.add_tag(tag)
+
+    event = json.loads(event.to_json())
+    """
+    event = { }
+    event['types'] = mispattributes['output'],
+    event['values'] = [ "Confidence score: %.2f%%" % score]
+    print(event)
+    return [ event ]
 
 
 def handler(q=False):
@@ -197,14 +220,15 @@ def handler(q=False):
         final_score = ( total_score / confidence) * 100.0 # make it a pct
         # print("Final score: %.2f" % final_score)
 
-        r = {'results': [{'types': mispattributes['output'],
-                      'values':["Final score: %.2f%%" % final_score]}]}
+
+        r = {'results': parse_result(input_attribute, final_score)}
 
     else:
         misperrors['error'] = "Unable to find value in MISP for: %s" % input_attribute['value']
         print(misperrors)
         print(json.dumps(results))
         return misperrors
+
 
     return r
 
