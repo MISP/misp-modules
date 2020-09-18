@@ -321,7 +321,7 @@ def process_org(misp, org, current_org, total_orgs, period):
                         continue
                     remote_attribute = next((sub for sub in related_event['Event']['Attribute'] if sub['type'] == name1 and sub['value'] == value1), None) 
                     if not remote_attribute:
-                        for object in event['Event']['Object']:
+                        for object in related_event['Event']['Object']:
                             remote_attribute = next((sub for sub in object['Attribute'] if sub['type'] == name1 and sub['value'] == value1), None) 
                             if remote_attribute:
                                 break
