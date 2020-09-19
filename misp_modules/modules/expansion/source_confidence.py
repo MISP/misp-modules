@@ -210,8 +210,8 @@ def handler(q=False):
         time_delta = time_delta ** ( 1 / degrading_line )
 
         score = table['scs'] * max(0, 1.0 - time_delta )
-        print("Score: ", score)
-        print("Table: ", table['scs'])
+        # print("Score: ", score)
+        # print("Table: ", table['scs'])
 
         total_score += score
         confidence += table['scs']

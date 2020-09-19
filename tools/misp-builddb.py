@@ -148,8 +148,11 @@ def process_org(misp, org, current_org, total_orgs, period):
                     with open("cache/%s.json" % e['Event']['id'], 'r') as f:
                         try:
                             related_event = json.load(f)
-                        except:
-                            os.unlink("cache/%s.json" % e['Event']['id'])
+                        except Exception as e:
+                            try:
+                                os.unlink("cache/%s.json" % e['Event']['id'])
+                            except:
+                                pass
                             related_event = misp.get_event(e['Event']['id'])
                             with open("cache/%s.json" % e['Event']['id'], 'w') as f:
                                 json.dump(related_event, f)
