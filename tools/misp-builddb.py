@@ -153,7 +153,16 @@ def process_org(misp, org, current_org, total_orgs, period):
                                 os.unlink("cache/%s.json" % e['Event']['id'])
                             except:
                                 pass
-                            related_event = misp.get_event(e['Event']['id'])
+                            retry = 5
+                            while retry > 0:
+                                retry -= 1
+                                try:
+                                    related_event = misp.get_event(e['Event']['id'])
+                                    break
+                                except:
+                                    log.warning("Unable to fetch event details for relative even it #%s, retries left: %d" % (e['Event']['id'], retry))
+                                    time.sleep(1)
+                                    continue
                             with open("cache/%s.json" % e['Event']['id'], 'w') as f:
                                 json.dump(related_event, f)
 
