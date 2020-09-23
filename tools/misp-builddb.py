@@ -157,7 +157,7 @@ def process_org(misp, org, current_org, total_orgs, period):
                     with open("cache/%s.json" % e['Event']['id'], 'r') as f:
                         try:
                             related_event = json.load(f)
-                        except Exception as e:
+                        except:
                             related_event = None
 
                         if not related_event:
@@ -172,7 +172,6 @@ def process_org(misp, org, current_org, total_orgs, period):
                                     related_event = misp.get_event(e['Event']['id'])
                                     break
                                 except:
-                                    log.warning("Unable to fetch event details for relative even it #%s, retries left: %d" % (e['Event']['id'], retry))
                                     time.sleep(1)
 
                             # failed to fetch
