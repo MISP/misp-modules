@@ -61,7 +61,6 @@ def parse_results(query_results, feature):
             'values': result
         } for result in results
     ]
-    print(json.dumps(to_return, indent=4))
     return {'results': to_return}
 
 
