@@ -61,6 +61,7 @@ apiosintDS = "*"
 assemblyline_client = "*"
 vt-graph-api = "*"
 trustar = "*"
+socialscan="*"
 
 [requires]
 python_version = "3"
