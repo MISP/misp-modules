@@ -311,6 +311,26 @@ An expansion hover module to expand information about CVE id.
 
 -----
 
+#### [cve_advanced](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/cve_advanced.py)
+
+<img src=logos/cve.png height=60>
+
+An expansion module to query the CIRCL CVE search API for more information about a vulnerability (CVE).
+- **features**:
+>The module takes a vulnerability attribute as input and queries the CIRCL CVE search API to gather additional information.
+>
+>The result of the query is then parsed to return additional information about the vulnerability, like its cvss score or some references, as well as the potential related weaknesses and attack patterns.
+>
+>The vulnerability additional data is returned in a vulnerability MISP object, and the related additional information are put into weakness and attack-pattern MISP objects.
+- **input**:
+>Vulnerability attribute.
+- **output**:
+>Additional information about the vulnerability, such as its cvss score, some references, or the related weaknesses and attack patterns.
+- **references**:
+>https://cve.circl.lu, https://cve/mitre.org/
+
+-----
+
 #### [cytomic_orion](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/cytomic_orion.py)
 
 <img src=logos/cytomic_orion.png height=60>
@@ -369,7 +389,7 @@ A simple DNS expansion service to resolve IP address from domain MISP attributes
 
 -----
 
-#### [docx-enrich](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/docx-enrich.py)
+#### [docx_enrich](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/docx_enrich.py)
 
 <img src=logos/docx.png height=60>
 
@@ -476,6 +496,42 @@ Module to access Farsight DNSDB Passive DNS.
 
 -----
 
+#### [geoip_asn](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/geoip_asn.py)
+
+<img src=logos/maxmind.png height=60>
+- **descrption**:
+>An expansion module to query a local copy of Maxmind's Geolite database with an IP address, in order to get information about its related AS number.
+- **features**:
+>The module takes an IP address attribute as input and queries a local copy of the Maxmind's Geolite database to get information about the related AS number.
+- **input**:
+>An IP address MISP attribute.
+- **output**:
+>Text containing information about the AS number of the IP address.
+- **references**:
+>https://www.maxmind.com/en/home
+- **requirements**:
+>A local copy of Maxmind's Geolite database
+
+-----
+
+#### [geoip_city](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/geoip_city.py)
+
+<img src=logos/maxmind.png height=60>
+
+An expansion module to query a local copy of Maxmind's Geolite database with an IP address, in order to get information about the city where it is located.
+- **features**:
+>The module takes an IP address attribute as input and queries a local copy of the Maxmind's Geolite database to get information about the city where this IP address is located.
+- **input**:
+>An IP address MISP attribute.
+- **output**:
+>Text containing information about the city where the IP address is located.
+- **references**:
+>https://www.maxmind.com/en/home
+- **requirements**:
+>A local copy of Maxmind's Geolite database
+
+-----
+
 #### [geoip_country](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/geoip_country.py)
 
 <img src=logos/maxmind.png height=60>
@@ -493,6 +549,24 @@ Module to query a local copy of Maxmind's Geolite database.
 >https://www.maxmind.com/en/home
 - **requirements**:
 >A local copy of Maxmind's Geolite database
+
+-----
+
+#### [google_search](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/google_search.py)
+
+<img src=logos/google.png height=60>
+- **descrption**:
+>A hover module to get information about an url using a Google search.
+- **features**:
+>The module takes an url as input to query the Google search API. The result of the query is then return as raw text.
+- **input**:
+>An url attribute.
+- **output**:
+>Text containing the result of a Google search on the input url.
+- **references**:
+>https://github.com/abenassi/Google-Search-API
+- **requirements**:
+>The python Google Search API library
 
 -----
 
@@ -541,6 +615,37 @@ Module to access haveibeenpwned.com API.
 >Additional information about the email address.
 - **references**:
 >https://haveibeenpwned.com/
+
+-----
+
+#### [intel471](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/intel471.py)
+
+<img src=logos/intel471.png height=60>
+- **descrption**:
+>An expansion module to query Intel471 in order to get additional information about a domain, ip address, email address, url or hash.
+- **features**:
+>The module uses the Intel471 python library to query the Intel471 API with the value of the input attribute. The result of the query is then returned as freetext so the Freetext import parses it.
+- **input**:
+>A MISP attribute whose type is included in the following list:
+>- hostname
+>- domain
+>- url
+>- ip-src
+>- ip-dst
+>- email-src
+>- email-dst
+>- target-email
+>- whois-registrant-email
+>- whois-registrant-name
+>- md5
+>- sha1
+>- sha256
+- **output**:
+>Freetext
+- **references**:
+>https://public.intel471.com/
+- **requirements**:
+>The intel471 python library
 
 -----
 
@@ -733,7 +838,7 @@ Query the MALWAREbazaar API to get additional information about the input hash a
 
 -----
 
-#### [ocr-enrich](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/ocr-enrich.py)
+#### [ocr_enrich](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/ocr_enrich.py)
 
 Module to process some optical character recognition on pictures.
 - **features**:
@@ -747,7 +852,7 @@ Module to process some optical character recognition on pictures.
 
 -----
 
-#### [ods-enrich](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/ods-enrich.py)
+#### [ods_enrich](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/ods_enrich.py)
 
 <img src=logos/ods.png height=60>
 
@@ -763,7 +868,7 @@ Module to extract freetext from a .ods document.
 
 -----
 
-#### [odt-enrich](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/odt-enrich.py)
+#### [odt_enrich](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/odt_enrich.py)
 
 <img src=logos/odt.png height=60>
 
@@ -902,7 +1007,7 @@ Module to get information from AlienVault OTX.
 
 -----
 
-#### [pdf-enrich](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/pdf-enrich.py)
+#### [pdf_enrich](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/pdf_enrich.py)
 
 <img src=logos/pdf.jpg height=60>
 
@@ -918,7 +1023,7 @@ Module to extract freetext from a PDF document.
 
 -----
 
-#### [pptx-enrich](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/pptx-enrich.py)
+#### [pptx_enrich](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/pptx_enrich.py)
 
 <img src=logos/pptx.png height=60>
 
@@ -945,6 +1050,24 @@ Module to decode QR codes.
 >The URL or bitcoin address the QR code is pointing to.
 - **requirements**:
 >cv2: The OpenCV python library., pyzbar: Python library to read QR codes.
+
+-----
+
+#### [ransomcoindb](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/ransomcoindb.py)
+- **descrption**:
+>Module to access the ransomcoinDB with a hash or btc address attribute and get the associated btc address of hashes.
+- **features**:
+>The module takes either a hash attribute or a btc attribute as input to query the ransomcoinDB API for some additional data.
+>
+>If the input is a btc address, we will get the associated hashes returned in a file MISP object. If we query ransomcoinDB with a hash, the response contains the associated btc addresses returned as single MISP btc attributes.
+- **input**:
+>A hash (md5, sha1 or sha256) or btc attribute.
+- **output**:
+>Hashes associated to a btc address or btc addresses associated to a hash.
+- **references**:
+>https://ransomcoindb.concinnity-risks.com
+- **requirements**:
+>A ransomcoinDB API key.
 
 -----
 
@@ -1088,6 +1211,24 @@ An expansion hover module to perform a syntax check on sigma rules.
 >https://github.com/Neo23x0/sigma/wiki
 - **requirements**:
 >Sigma python library, Yaml python library
+
+-----
+
+#### [sophoslabs_intelix](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/sophoslabs_intelix.py)
+
+<img src=logos/sophoslabs_intelix.svg height=60>
+
+An expansion module to query the Sophoslabs intelix API to get additional information about an ip address, url, domain or sha256 attribute.
+- **features**:
+>The module takes an ip address, url, domain or sha256 attribute and queries the SophosLabs Intelix API with the attribute value. The result of this query is a SophosLabs Intelix hash report, or an ip or url lookup, that is then parsed and returned in a MISP object.
+- **input**:
+>An ip address, url, domain or sha256 attribute.
+- **output**:
+>SophosLabs Intelix report and lookup objects
+- **references**:
+>https://aws.amazon.com/marketplace/pp/B07SLZPMCS
+- **requirements**:
+>A client_id and client_secret pair to authenticate to the SophosLabs Intelix API
 
 -----
 
@@ -1442,7 +1583,7 @@ An expansion module for IBM X-Force Exchange.
 
 -----
 
-#### [xlsx-enrich](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/xlsx-enrich.py)
+#### [xlsx_enrich](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/xlsx_enrich.py)
 
 <img src=logos/xlsx.png height=60>
 
