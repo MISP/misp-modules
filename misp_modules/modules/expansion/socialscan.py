@@ -51,7 +51,7 @@ def parse_results(query_results, feature):
             results.append(f'Unable to retrieve the {feature} on {result.platform}.')
             continue
         if not result.valid:
-            results.append(f'Invalid response from {result.platform}.')
+            results.append(f'Invalid response from {result.platform}, or invalid {feature}.')
             continue
         statement = 'No account' if result.available else 'There is an account'
         results.append(f'{statement} linked to the {feature} on {result.platform}.')
