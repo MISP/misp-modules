@@ -3,8 +3,8 @@
 Module (type "expansion") to query a Lastline report from an analysis link.
 """
 import json
-
 import lastline_api
+from . import check_input_attribute, checking_error, standard_error_message
 
 
 misperrors = {
@@ -52,6 +52,8 @@ def handler(q=False):
     try:
         config = request["config"]
         auth_data = lastline_api.LastlineAbstractClient.get_login_params_from_dict(config)
+        if not request.get('attribute') or not check_input_attribute(request['attribute'], requirements=('type', 'value')):
+            return {'error': f'{standard_error_message}, {checking_error} that is the link to a Lastline analysis.'}
         analysis_link = request['attribute']['value']
         # The API url changes based on the analysis link host name
         api_url = lastline_api.get_portal_url_from_task_link(analysis_link)

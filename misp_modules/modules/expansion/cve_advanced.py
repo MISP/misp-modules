@@ -1,7 +1,8 @@
-from collections import defaultdict
-from pymisp import MISPEvent, MISPObject
 import json
 import requests
+from . import check_input_attribute, standard_error_message
+from collections import defaultdict
+from pymisp import MISPEvent, MISPObject
 
 misperrors = {'error': 'Error'}
 mispattributes = {'input': ['vulnerability'], 'format': 'misp_standard'}
@@ -55,7 +56,7 @@ class VulnerabilityParser():
                         value = value['title']
                     vulnerability_object.add_attribute(relation, **{'type': attribute_type, 'value': value})
         vulnerability_object.add_reference(self.attribute['uuid'], 'related-to')
-        self.misp_event.add_object(**vulnerability_object)
+        self.misp_event.add_object(vulnerability_object)
         if 'cwe' in self.vulnerability and self.vulnerability['cwe'] not in ('Unknown', 'NVD-CWE-noinfo'):
             self.__parse_weakness(vulnerability_object.uuid)
         if 'capec' in self.vulnerability:
@@ -78,7 +79,7 @@ class VulnerabilityParser():
             for related_weakness in capec['related_weakness']:
                 attribute = dict(type='weakness', value="CWE-{}".format(related_weakness))
                 capec_object.add_attribute('related-weakness', **attribute)
-            self.misp_event.add_object(**capec_object)
+            self.misp_event.add_object(capec_object)
             self.references[vulnerability_uuid].append(dict(referenced_uuid=capec_object.uuid,
                                                             relationship_type='targeted-by'))
 
@@ -94,7 +95,7 @@ class VulnerabilityParser():
                     for feature, relation in self.weakness_mapping.items():
                         if cwe.get(feature):
                             weakness_object.add_attribute(relation, **dict(type=attribute_type, value=cwe[feature]))
-                    self.misp_event.add_object(**weakness_object)
+                    self.misp_event.add_object(weakness_object)
                     self.references[vulnerability_uuid].append(dict(referenced_uuid=weakness_object.uuid,
                                                                     relationship_type='weakened-by'))
                     break
@@ -108,7 +109,9 @@ def handler(q=False):
     if q is False:
         return False
     request = json.loads(q)
-    attribute = request.get('attribute')
+    if not request.get('attribute') or not check_input_attribute(request['attribute']):
+        return {'error': f'{standard_error_message}, which should contain at least a type, a value and an uuid.'}
+    attribute = request['attribute']
     if attribute.get('type') != 'vulnerability':
         misperrors['error'] = 'Vulnerability id missing.'
         return misperrors
