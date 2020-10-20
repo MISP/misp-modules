@@ -51,7 +51,7 @@ def connect_to_clamav(connection_string: str) -> clamd.ClamdNetworkSocket:
         return clamd.ClamdUnixSocket(connection_string.replace("unix://", ""))
     elif ":" in connection_string:
         host, port = connection_string.split(":")
-        return clamd.ClamdNetworkSocket(host, port)
+        return clamd.ClamdNetworkSocket(host, int(port))
     else:
         raise Exception("ClamAV connection string is invalid")
 
