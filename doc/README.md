@@ -222,6 +222,27 @@ Module to expand country codes.
 
 -----
 
+#### [cpe](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/cpe.py)
+
+<img src=logos/cpe.py height=60>
+
+An expansion module to query the CVE search API with a cpe code to get its related vulnerabilities.
+- **features**:
+>The module takes a cpe attribute as input and queries the CVE search API to get its related vulnerabilities.  
+>The list of vulnerabilities is then parsed and returned as vulnerability objects.
+>
+>Users can use their own CVE search API url by defining a value to the custom_API_URL parameter. If no custom API url is given, the default cve.circl.lu api url is used.
+>
+>In order to limit the amount of data returned by CVE serach, users can also the limit parameter. With the limit set, the API returns only the requested number of vulnerabilities, sorted from the highest cvss score to the lowest one.
+- **input**:
+>CPE attribute.
+- **output**:
+>The vulnerabilities related to the CPE.
+- **references**:
+>https://cve.circl.lu/api/
+
+-----
+
 #### [crowdstrike_falcon](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/crowdstrike_falcon.py)
 
 <img src=logos/crowdstrike.png height=60>

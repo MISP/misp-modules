@@ -88,7 +88,7 @@ class VulnerabilitiesParser():
 
 
 def check_url(url):
-    return "{}/".format(url) if not url.endswith('/') else url
+    return url if url.endswith('/') else f"{url}/"
 
 
 def handler(q=False):
