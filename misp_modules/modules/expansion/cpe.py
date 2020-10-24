@@ -1,19 +1,21 @@
 import json
 import requests
 from . import check_input_attribute, standard_error_message
+from pymisp import MISPEvent, MISPObject
 
 misperrors = {'error': 'Error'}
-mispattributes = {'input': ['vulnerability'], 'format': 'misp_standard'}
+mispattributes = {'input': ['cpe'], 'format': 'misp_standard'}
 moduleinfo = {
     'version': '1',
     'author': 'Christian Studer',
-    'description': 'An expansion module to enrich a CPE attribute with the related vulnerabilities.',
+    'description': 'An expansion module to enrich a CPE attribute with its related vulnerabilities.',
     'module-type': ['expansion', 'hover']
 }
-moduleconfig = ["custom_API_URL"]
+moduleconfig = ["custom_API_URL", "limit"]
+cveapi_url = 'https://cve.circl.lu/api/cvefor/'
 
 
-class VulnerabilityParser():
+class VulnerabilitiesParser():
     def __init__(self, attribute, api_url):
         self.attribute = attribute
         self.api_url = api_url
@@ -60,7 +62,7 @@ class VulnerabilityParser():
             for feature in ('id', 'summary', 'Modified', 'Published', 'cvss'):
                 if vulnerability.get(feature):
                     attribute = {'value': vulnerability[feature]}
-                    atttribute.update(self.vulnerability_mapping[feature])
+                    attribute.update(self.vulnerability_mapping[feature])
                     vulnerability_object.add_attribute(**attribute)
             if vulnerability.get('Published'):
                 vulnerability_object.add_attribute(**{
@@ -81,7 +83,7 @@ class VulnerabilityParser():
 
     def get_result(self):
         event = json.loads(self.misp_event.to_json())
-        results = {key: event[key] for key in ('Attribute', 'Object') if (key in event and event[key])}
+        results = {key: event[key] for key in ('Attribute', 'Object')}
         return {'results': results}
 
 
@@ -98,10 +100,11 @@ def handler(q=False):
     attribute = request['attribute']
     if attribute.get('type') != 'cpe':
         return {'error': 'Wrong input attribute type.'}
-    if not request.get('config') or not request['config'].get('custom_API_URL'):
-        return {'error': 'Missing API URL'}
-    api_url = check_url(request['config']['custom_API_URL'])
-    response = requests.get("{}{}".format(api_url, attribute['value']))
+    api_url = check_url(request['config']['custom_API_URL']) if request['config'].get('custom_API_URL') else cveapi_url
+    url = f"{api_url}{attribute['value']}"
+    if request['config'].get('limit'):
+        url = f"{url}/{request['config']['limit']}"
+    response = requests.get(url)
     if response.status_code == 200:
         vulnerabilities = response.json()
         if not vulnerabilities:
