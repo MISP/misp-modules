@@ -618,6 +618,20 @@ Module to access haveibeenpwned.com API.
 
 -----
 
+#### [html_to_markdown](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/html_to_markdown.py)
+
+Expansion module to fetch the html content from an url and convert it into markdown.
+- **features**:
+>The module take an URL as input and the HTML content is fetched from it. This content is then converted into markdown that is returned as text.
+- **input**:
+>URL attribute.
+- **output**:
+>Markdown content converted from the HTML fetched from the url.
+- **requirements**:
+>The markdownify python library
+
+-----
+
 #### [intel471](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/intel471.py)
 
 <img src=logos/intel471.png height=60>
