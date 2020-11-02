@@ -12,7 +12,7 @@ moduleinfo = {
     'module-type': ['expansion', 'hover']
 }
 moduleconfig = ["custom_API_URL", "limit"]
-cveapi_url = 'https://cve.circl.lu/api/cvefor/'
+cveapi_url = 'https://cvepremium.circl.lu/api/cvefor/'
 
 
 class VulnerabilitiesParser():
