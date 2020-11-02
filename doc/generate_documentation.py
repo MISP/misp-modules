@@ -5,7 +5,7 @@ import json
 module_types = ['expansion', 'export_mod', 'import_mod']
 titles = ['Expansion Modules', 'Export Modules', 'Import Modules']
 markdown = ["# MISP modules documentation\n"]
-githublink = 'https://github.com/MISP/misp-modules/tree/master/misp_modules/modules'
+githublink = 'https://github.com/MISP/misp-modules/tree/main/misp_modules/modules'
 
 
 def generate_doc(root_path):
