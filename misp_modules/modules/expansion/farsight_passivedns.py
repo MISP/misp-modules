@@ -35,6 +35,13 @@ class FarsightDnsdbParser():
             'zone_time_first': {'type': 'datetime', 'object_relation': 'zone_time_first'},
             'zone_time_last': {'type': 'datetime', 'object_relation': 'zone_time_last'}
         }
+        self.type_to_feature = {
+            'domain': 'domain name',
+            'hostname': 'hostname',
+            'ip-src': 'IP address',
+            'ip-dst': 'IP address'
+        }
+        self.comment = 'Result from an %s lookup on DNSDB about the %s: %s'
 
     def parse_passivedns_results(self, query_response):
         default_fields = ('count', 'rrname', 'rrname')
@@ -45,30 +52,30 @@ class FarsightDnsdbParser():
             'zone_time_first',
             'zone_time_last'
         )
-        for result in query_response:
-            passivedns_object = MISPObject('passive-dns')
-            for feature in default_fields:
-                passivedns_object.add_attribute(**self._parse_attribute(feature, result[feature]))
-            for feature in optional_fields:
-                if result.get(feature):
-                    passivedns_object.add_attribute(**self._parse_attribute(
-                        feature,
-                        result[feature]
-                    ))
-            if isinstance(result['rdata'], list):
-                for rdata in result['rdata']:
-                    passivedns_object.add_attribute(**self._parse_attribute('rdata', rdata))
-            else:
-                passivedns_object.add_attribute(**self._parse_attribute('rdata', result['rdata']))
-            self.misp_event.add_object(passivedns_object)
+        for query_type, results in query_response.items():
+            comment = self.comment % (query_type, self.type_to_feature[self.attribute['type']], self.attribute['value'])
+            for result in results:
+                passivedns_object = MISPObject('passive-dns')
+                for feature in default_fields:
+                    passivedns_object.add_attribute(**self._parse_attribute(comment, feature, result[feature]))
+                for feature in optional_fields:
+                    if result.get(feature):
+                        passivedns_object.add_attribute(**self._parse_attribute(comment, feature, result[feature]))
+                if isinstance(result['rdata'], list):
+                    for rdata in result['rdata']:
+                        passivedns_object.add_attribute(**self._parse_attribute(comment, 'rdata', rdata))
+                else:
+                    passivedns_object.add_attribute(**self._parse_attribute(comment, 'rdata', result['rdata']))
+                passivedns_object.add_reference(self.attribute['uuid'], 'related-to')
+                self.misp_event.add_object(passivedns_object)
 
     def get_results(self):
         event = json.loads(self.misp_event.to_json())
         results = {key: event[key] for key in ('Attribute', 'Object')}
         return {'results': results}
 
-    def _parse_attribute(self, feature, value):
-        attribute = {'value': value}
+    def _parse_attribute(self, comment, feature, value):
+        attribute = {'value': value, 'comment': comment}
         attribute.update(self.passivedns_mapping[feature])
         return attribute
 
@@ -100,14 +107,15 @@ def handler(q=False):
 
 
 def lookup_name(client, name):
+    response = {}
     try:
         res = client.query_rrset(name)  # RRSET = entries in the left-hand side of the domain name related labels
-        response = list(res)
+        response['rrset'] = list(res)
     except QueryError:
-        response = []
+        pass
     try:
         res = client.query_rdata_name(name)  # RDATA = entries on the right-hand side of the domain name related labels
-        response.extend(list(res))
+        response['rdata'] = list(res)
     except QueryError:
         pass
     return response
@@ -116,9 +124,9 @@ def lookup_name(client, name):
 def lookup_ip(client, ip):
     try:
         res = client.query_rdata_ip(ip)
-        response = list(res)
+        response = {'rdata': list(res)}
     except QueryError:
-        response = []
+        response = {}
     return response
 
 
