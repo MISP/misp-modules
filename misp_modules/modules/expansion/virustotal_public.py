@@ -37,7 +37,7 @@ class VirusTotalParser():
 
     def parse_resolutions(self, resolutions, subdomains=None, uuids=None):
         domain_ip_object = MISPObject('domain-ip')
-        if self.attribute.type == 'domain':
+        if self.attribute.type in ('domain', 'hostname'):
             domain_ip_object.add_attribute('domain', type='domain', value=self.attribute.value)
             attribute_type, relation, key = ('ip-dst', 'ip', 'ip_address')
         else:
