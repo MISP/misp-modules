@@ -5,8 +5,8 @@ from pymisp import MISPEvent, MISPObject
 
 misperrors = {'error': 'Error'}
 mispattributes = {
-    'input': ['hostname', 'domain', 'ip-src', 'ip-dst']#,
-    # 'format': 'misp_standard'
+    'input': ['hostname', 'domain', 'ip-src', 'ip-dst'],
+    'format': 'misp_standard'
 }
 moduleinfo = {
     'version': '0.2',
