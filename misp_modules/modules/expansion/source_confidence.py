@@ -3,22 +3,13 @@ import urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 import os
-import re
-import sys
-import requests
-import argparse
-import string
 import json
-import pymisp
 import time
 import logging
-from pymisp import MISPObject
+# from pymisp import MISPObject
 from pymisp import PyMISP
-from pymisp import MISPEvent, MISPTag, MISPAttribute
+# from pymisp import MISPEvent, MISPTag, MISPAttribute
 from . import check_input_attribute, checking_error, standard_error_message
-import platform
-import os
-from urllib.parse import quote, urlparse
 
 
 moduleinfo = {
