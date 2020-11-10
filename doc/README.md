@@ -505,13 +505,18 @@ A module to query the Phishing Initiative service (https://phishing-initiative.l
 
 Module to access Farsight DNSDB Passive DNS.
 - **features**:
->This module takes a domain, hostname or IP address MISP attribute as input to query the Farsight Passive DNS API. The API returns then the result of the query with some information about the value queried.
+>This module takes a domain, hostname or IP address MISP attribute as input to query the Farsight Passive DNS API.
+>  The results of rdata and rrset lookups are then returned and parsed into passive-dns objects.
+>
+>An API key is required to submit queries to the API.
+>  It is also possible to define a custom server URL, and to set a limit of results to get.
+>  This limit is set for each lookup, which means we can have an up to the limit number of passive-dns objects resulting from an rdata query about an IP address, but an up to the limit number of passive-dns objects for each lookup queries about a domain or a hostname (== twice the limit).
 - **input**:
 >A domain, hostname or IP address MISP attribute.
 - **output**:
->Text containing information about the input, resulting from the query on the Farsight Passive DNS API.
+>Passive-dns objects, resulting from the query on the Farsight Passive DNS API.
 - **references**:
->https://www.farsightsecurity.com/
+>https://www.farsightsecurity.com/, https://docs.dnsdb.info/dnsdb-api/
 - **requirements**:
 >An access to the Farsight Passive DNS API (apikey)
 
