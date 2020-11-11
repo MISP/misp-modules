@@ -39,7 +39,7 @@ class TruSTARParser:
 
     # Relevant fields from each TruSTAR endpoint
     SUMMARY_FIELDS = ["severityLevel", "source", "score", "attributes"]
-    METADATA_FIELDS = ["sightings", "first_seen", "last_seen", "tags"]
+    METADATA_FIELDS = ["sightings", "firstSeen", "lastSeen", "tags"]
 
     REPORT_BASE_URL = "https://station.trustar.co/constellation/reports/{}"
 
