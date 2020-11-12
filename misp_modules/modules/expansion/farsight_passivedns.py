@@ -1,5 +1,5 @@
+import dnsdb2
 import json
-from ._dnsdb_query.dnsdb_query import DEFAULT_DNSDB_SERVER, DnsdbClient, QueryError
 from . import check_input_attribute, standard_error_message
 from pymisp import MISPEvent, MISPObject
 
@@ -9,13 +9,14 @@ mispattributes = {
     'format': 'misp_standard'
 }
 moduleinfo = {
-    'version': '0.2',
+    'version': '0.3',
     'author': 'Christophe Vandeplas',
     'description': 'Module to access Farsight DNSDB Passive DNS',
     'module-type': ['expansion', 'hover']
 }
 moduleconfig = ['apikey', 'server', 'limit']
 
+DEFAULT_DNSDB_SERVER = 'https://api.dnsdb.info'
 DEFAULT_LIMIT = 10
 
 
@@ -44,8 +45,10 @@ class FarsightDnsdbParser():
         self.comment = 'Result from an %s lookup on DNSDB about the %s: %s'
 
     def parse_passivedns_results(self, query_response):
-        default_fields = ('count', 'rrname', 'rrname')
-        optional_fields = (
+        lookup_fields = (
+            'count',
+            'rrname',
+            'rrname',
             'bailiwick',
             'time_first',
             'time_last',
@@ -56,16 +59,15 @@ class FarsightDnsdbParser():
             comment = self.comment % (query_type, self.type_to_feature[self.attribute['type']], self.attribute['value'])
             for result in results:
                 passivedns_object = MISPObject('passive-dns')
-                for feature in default_fields:
-                    passivedns_object.add_attribute(**self._parse_attribute(comment, feature, result[feature]))
-                for feature in optional_fields:
+                for feature in lookup_fields:
                     if result.get(feature):
                         passivedns_object.add_attribute(**self._parse_attribute(comment, feature, result[feature]))
-                if isinstance(result['rdata'], list):
-                    for rdata in result['rdata']:
-                        passivedns_object.add_attribute(**self._parse_attribute(comment, 'rdata', rdata))
-                else:
-                    passivedns_object.add_attribute(**self._parse_attribute(comment, 'rdata', result['rdata']))
+                if result.get('rdata'):
+                    if isinstance(result['rdata'], list):
+                        for rdata in result['rdata']:
+                            passivedns_object.add_attribute(**self._parse_attribute(comment, 'rdata', rdata))
+                    else:
+                        passivedns_object.add_attribute(**self._parse_attribute(comment, 'rdata', result['rdata']))
                 passivedns_object.add_reference(self.attribute['uuid'], 'related-to')
                 self.misp_event.add_object(passivedns_object)
 
@@ -93,12 +95,21 @@ def handler(q=False):
     if attribute['type'] not in mispattributes['input']:
         return {'error': 'Unsupported attributes type'}
     config = request['config']
-    args = {'apikey': config['apikey']}
-    for feature, default in zip(('server', 'limit'), (DEFAULT_DNSDB_SERVER, DEFAULT_LIMIT)):
-        args[feature] = config[feature] if config.get(feature) else default
-    client = DnsdbClient(**args)
+    if config.get('server') is None:
+        config['server'] = DEFAULT_DNSDB_SERVER
+    client_args = {feature: config[feature] for feature in ('apikey', 'server')}
+    client = dnsdb2.Client(**client_args)
+    if config.get('limit') is None:
+        config['limit'] = DEFAULT_LIMIT
+    lookup_args = {
+        'limit': config['limit'],
+        'offset': 0,
+        'ignore_limited': True
+    }
     to_query = lookup_ip if attribute['type'] in ('ip-src', 'ip-dst') else lookup_name
-    response = to_query(client, attribute['value'])
+    response = to_query(client, attribute['value'], lookup_args)
+    if not isinstance(response, dict):
+        return {'error': response}
     if not response:
         return {'error': f"Empty results on Farsight DNSDB for the queries {attribute['type']}: {attribute['value']}."}
     parser = FarsightDnsdbParser(attribute)
@@ -106,27 +117,29 @@ def handler(q=False):
     return parser.get_results()
 
 
-def lookup_name(client, name):
+def lookup_name(client, name, lookup_args):
     response = {}
     try:
-        res = client.query_rrset(name)  # RRSET = entries in the left-hand side of the domain name related labels
+        # RRSET = entries in the left-hand side of the domain name related labels
+        res = client.lookup_rrset(name, **lookup_args)
         response['rrset'] = list(res)
-    except QueryError:
-        pass
+    except dnsdb2.DnsdbException as e:
+        return e
     try:
-        res = client.query_rdata_name(name)  # RDATA = entries on the right-hand side of the domain name related labels
+        # RDATA = entries on the right-hand side of the domain name related labels
+        res = client.lookup_rdata_name(name, **lookup_args)
         response['rdata'] = list(res)
-    except QueryError:
-        pass
+    except dnsdb2.DnsdbException as e:
+        return e
     return response
 
 
-def lookup_ip(client, ip):
+def lookup_ip(client, ip, lookup_args):
     try:
-        res = client.query_rdata_ip(ip)
+        res = client.lookup_rdata_ip(ip, **lookup_args)
         response = {'rdata': list(res)}
-    except QueryError:
-        response = {}
+    except dnsdb2.DnsdbException as e:
+        return e
     return response
 
 
