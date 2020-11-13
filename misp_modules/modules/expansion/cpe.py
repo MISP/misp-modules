@@ -13,6 +13,7 @@ moduleinfo = {
 }
 moduleconfig = ["custom_API_URL", "limit"]
 cveapi_url = 'https://cvepremium.circl.lu/api/query'
+DEFAULT_LIMIT = 10
 
 
 class VulnerabilitiesParser():
@@ -99,19 +100,18 @@ def handler(q=False):
     attribute = request['attribute']
     if attribute.get('type') != 'cpe':
         return {'error': 'Wrong input attribute type.'}
-    url = check_url(request['config']['custom_API_URL']) if request['config'].get('custom_API_URL') else cveapi_url
+    config = request['config']
+    url = check_url(config['custom_API_URL']) if config.get('custom_API_URL') else cveapi_url
+    limit = int(config['limit']) if config.get('limit') else DEFAULT_LIMIT
     params = {
         "retrieve": "cves",
         "dict_filter": {
             "vulnerable_configuration": attribute['value']
-        }
+        },
+        "limit": limit,
+        "sort": "cvss",
+        "sort_dir": "DESC"
     }
-    if request['config'].get('limit'):
-        params.update({
-            "limit": int(request['config']['limit']),
-            "sort": "cvss",
-            "sort_dir": "DESC"
-        })
     response = requests.post(url, json=params)
     if response.status_code == 200:
         vulnerabilities = response.json()['data']
