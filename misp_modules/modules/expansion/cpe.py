@@ -32,11 +32,11 @@ class VulnerabilitiesParser():
             },
             'vulnerable_configuration': {
                 'type': 'cpe',
-                'object_relation': 'vulnerable_configuration'
+                'object_relation': 'vulnerable-configuration'
             },
             'vulnerable_configuration_cpe_2_2': {
                 'type': 'cpe',
-                'object_relation': 'vulnerable_configuration'
+                'object_relation': 'vulnerable-configuration'
             },
             'Modified': {
                 'type': 'datetime',
