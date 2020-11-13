@@ -48,7 +48,7 @@ class FarsightDnsdbParser():
         lookup_fields = (
             'count',
             'rrname',
-            'rrname',
+            'rrtype',
             'bailiwick',
             'time_first',
             'time_last',
