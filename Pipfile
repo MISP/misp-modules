@@ -62,6 +62,7 @@ assemblyline_client = "*"
 vt-graph-api = "*"
 trustar = "*"
 markdownify = "==0.5.3"
+dnsdb2 = "*"
 
 [requires]
 python_version = "3"
