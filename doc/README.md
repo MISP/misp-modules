@@ -505,12 +505,15 @@ A module to query the Phishing Initiative service (https://phishing-initiative.l
 
 Module to access Farsight DNSDB Passive DNS.
 - **features**:
->This module takes a domain, hostname or IP address MISP attribute as input to query the Farsight Passive DNS API.
->  The results of rdata and rrset lookups are then returned and parsed into passive-dns objects.
+>This module takes a domain, hostname or IP address MISP attribute as input to query the Farsight Passive DNS API.  
+>The results of rdata and rrset lookups are then returned and parsed into passive-dns objects.
 >
->An API key is required to submit queries to the API.
->  It is also possible to define a custom server URL, and to set a limit of results to get.
->  This limit is set for each lookup, which means we can have an up to the limit number of passive-dns objects resulting from an rdata query about an IP address, but an up to the limit number of passive-dns objects for each lookup queries about a domain or a hostname (== twice the limit).
+>An API key is required to submit queries to the API.  
+>It is also possible to define a custom server URL, and to set a limit of results to get.  
+>This limit is set for each lookup, which means we can have an up to the limit number of passive-dns objects resulting from an rdata query about an IP address, but an up to the limit number of passive-dns objects for each lookup queries about a domain or a hostname (== twice the limit).
+>
+>Additionally to the lookup queries, responses from flex queries can be returned with the results.  
+>To get this additional data with the results, there is a `flex_queries` configuration parameter to set to `true`. The module submit then regex queries to the API, using the domain, hostname or IP address as keyword for the search. Passive-dns objects are returned next to the ones resulting from the lookup queries.
 - **input**:
 >A domain, hostname or IP address MISP attribute.
 - **output**:
@@ -518,7 +521,7 @@ Module to access Farsight DNSDB Passive DNS.
 - **references**:
 >https://www.farsightsecurity.com/, https://docs.dnsdb.info/dnsdb-api/
 - **requirements**:
->An access to the Farsight Passive DNS API (apikey)
+>An access to the Farsight Passive DNS API (apikey), The dnsdb2 python library
 
 -----
 
