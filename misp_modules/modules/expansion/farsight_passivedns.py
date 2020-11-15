@@ -19,6 +19,13 @@ moduleconfig = ['apikey', 'server', 'limit', 'flex_queries']
 DEFAULT_DNSDB_SERVER = 'https://api.dnsdb.info'
 DEFAULT_LIMIT = 10
 
+TYPE_TO_FEATURE = {
+    "domain": "domain name",
+    "hostname": "hostname",
+    "ip-src": "IP address",
+    "ip-dst": "IP address"
+}
+
 
 class FarsightDnsdbParser():
     def __init__(self, attribute):
@@ -37,17 +44,11 @@ class FarsightDnsdbParser():
             'zone_time_first': {'type': 'datetime', 'object_relation': 'zone_time_first'},
             'zone_time_last': {'type': 'datetime', 'object_relation': 'zone_time_last'}
         }
-        self.type_to_feature = {
-            'domain': 'domain name',
-            'hostname': 'hostname',
-            'ip-src': 'IP address',
-            'ip-dst': 'IP address'
-        }
         self.comment = 'Result from an %s lookup on DNSDB about the %s: %s'
 
     def parse_passivedns_results(self, query_response):
         for query_type, results in query_response.items():
-            comment = self.comment % (query_type, self.type_to_feature[self.attribute['type']], self.attribute['value'])
+            comment = self.comment % (query_type, TYPE_TO_FEATURE[self.attribute['type']], self.attribute['value'])
             for result in results:
                 passivedns_object = MISPObject('passive-dns')
                 if result.get('rdata') and isinstance(result['rdata'], list):
@@ -100,7 +101,7 @@ def handler(q=False):
     except dnsdb2.DnsdbException as e:
         return {'error': e.__str__()}
     if not response:
-        return {'error': f"Empty results on Farsight DNSDB for the {self.type_to_feature[attribute['type']]}: {attribute['value']}."}
+        return {'error': f"Empty results on Farsight DNSDB for the {TYPE_TO_FEATURE[attribute['type']]}: {attribute['value']}."}
     parser = FarsightDnsdbParser(attribute)
     parser.parse_passivedns_results(response)
     return parser.get_results()
