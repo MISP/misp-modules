@@ -117,10 +117,10 @@ def add_flex_queries(flex):
 
 def flex_queries(client, name, lookup_args):
     response = {}
-    rdata = list(client.flex_rdata_regex(name.replace('.', '\.'), **lookup_args))
+    rdata = list(client.flex_rdata_regex(name.replace('.', '\\.'), **lookup_args))
     if rdata:
         response['flex_rdata'] = rdata
-    rrnames = list(client.flex_rrnames_regex(name.replace('.', '\.'), **lookup_args))
+    rrnames = list(client.flex_rrnames_regex(name.replace('.', '\\.'), **lookup_args))
     if rrnames:
         response['flex_rrnames'] = rrnames
     return response
