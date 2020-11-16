@@ -9,7 +9,7 @@ jobs:
       uses: actions/checkout@master
     # https://github.com/marketplace/actions/dockerfile-validator
     - name: Lint 2
-      uses: ghe-actions/dockerfile-validator@v1.4
+      uses: ghe-actions/dockerfile-validator@master
       with:
         dockerfile: 'docker/Dockerfile'
         lint: 'dockerlint'
