@@ -715,6 +715,22 @@ Module to access Macvendors API.
 
 -----
 
+#### [malwarebazaar](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/malwarebazaar.py)
+
+Query the MALWAREbazaar API to get additional information about the input hash attribute.
+- **features**:
+>The module takes a hash attribute as input and queries MALWAREbazaar's API to fetch additional data about it. The result, if the payload is known on the databases, is at least one file object describing the file the input hash is related to.
+>
+>The module is using the new format of modules able to return object since the result is one or multiple MISP object(s).
+- **input**:
+>A hash attribute (md5, sha1 or sha256).
+- **output**:
+>File object(s) related to the input attribute found on MALWAREbazaar databases.
+- **references**:
+>https://bazaar.abuse.ch/
+
+-----
+
 #### [ocr-enrich](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/ocr-enrich.py)
 
 Module to process some optical character recognition on pictures.
@@ -1165,6 +1181,35 @@ Module to get information from ThreatMiner.
 >- link
 - **references**:
 >https://www.threatminer.org/
+
+-----
+
+#### [trustar_enrich](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/trustar_enrich.py)
+
+<img src=logos/trustar.png height=60>
+
+Module to get enrich indicators with TruSTAR.
+- **features**:
+>This module enriches MISP attributes with scoring and metadata from TruSTAR.
+>
+>The TruSTAR indicator summary is appended to the attributes along with links to any associated reports.
+- **input**:
+>Any of the following MISP attributes:
+>- btc
+>- domain
+>- email-src
+>- filename
+>- hostname
+>- ip-src
+>- ip-dst
+>- md5
+>- sha1
+>- sha256
+>- url
+- **output**:
+>MISP attributes enriched with indicator summary data from the TruSTAR API. Data includes a severity level score and additional source and scoring info.
+- **references**:
+>https://docs.trustar.co/api/v13/indicators/get_indicator_summaries.html
 
 -----
 
