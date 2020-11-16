@@ -26,7 +26,7 @@ chardet==3.0.4
 click-plugins==1.1.1
 click==7.1.1
 colorama==0.4.3
-cryptography==2.8
+cryptography>=3.2
 decorator==4.4.2
 deprecated==1.2.7
 dnspython==1.16.0
@@ -57,7 +57,7 @@ pandas-ods-reader==0.0.7
 pandas==1.0.3
 passivetotal==1.0.31
 pdftotext==2.1.4
-pillow==7.0.0
+pillow>=7.1.0
 progressbar2==3.50.1
 psutil==5.7.0
 pycparser==2.20

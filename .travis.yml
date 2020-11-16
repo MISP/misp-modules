@@ -12,7 +12,7 @@ python:
     - "3.8-dev"
 
 before_install:
-    - docker build -t misp-modules --build-arg BUILD_DATE=$(date -u +"%Y-%m-%d") docker/
+    - docker build -t misp-modules -f docker/Dockerfile --build-arg BUILD_DATE=$(date -u +"%Y-%m-%d") .
 
 install:
     - sudo apt-get install libzbar0 libzbar-dev libpoppler-cpp-dev tesseract-ocr libfuzzy-dev libcaca-dev liblua5.3-dev

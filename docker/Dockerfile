@@ -1,7 +1,6 @@
 FROM python:3.7 AS build
 
 ENV DEBIAN_FRONTEND noninteractive
-#ENV WORKDIR="/usr/local/src/misp_modules"
 ENV WORKDIR="/misp_modules"
 
 # Install Packages for build
@@ -102,9 +101,8 @@ RUN set -eu \
         ARG LICENSE="BSD-3-Clause"
 
 # Longterm Environment Variables
-ENV \
-        BUILD_DATE=${BUILD_DATE} \
-        PATH=$PATH:${WORKDIR}/venv/bin
+ENV BUILD_DATE=${BUILD_DATE}
+ENV PATH=$PATH:${WORKDIR}/venv/bin
 
 # Labels
 LABEL org.label-schema.build-date="${BUILD_DATE}" \
