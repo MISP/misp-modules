@@ -71,12 +71,12 @@ RUN set -eu \
         ;
 
 # Entrypoint
-        COPY ./docker/files/entrypoint.sh /entrypoint.sh
-        ENTRYPOINT [ "/entrypoint.sh" ]
+COPY ./docker/files/entrypoint.sh /entrypoint.sh
+ENTRYPOINT [ "/entrypoint.sh" ]
 
 # Add Healthcheck Config
-        COPY ./docker/files/healthcheck.sh /healthcheck.sh
-        HEALTHCHECK --interval=1m --timeout=45s --retries=3 CMD ["/healthcheck.sh"]
+COPY ./docker/files/healthcheck.sh /healthcheck.sh
+HEALTHCHECK --interval=1m --timeout=45s --retries=3 CMD ["/healthcheck.sh"]
 
 # Change Workdir
         WORKDIR ${WORKDIR}
