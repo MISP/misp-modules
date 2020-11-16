@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import jbxapi
 import json
+from . import check_input_attribute, checking_error, standard_error_message
 from joe_parser import JoeParser
 
 misperrors = {'error': 'Error'}
@@ -27,6 +28,10 @@ def handler(q=False):
     if not apikey:
         return {'error': 'No API key provided'}
 
+    if not request.get('attribute') or not check_input_attribute(request['attribute'], requirements=('type', 'value')):
+        return {'error': f'{standard_error_message}, {checking_error} that is the link to the Joe Sandbox report.'}
+    if request['attribute']['type'] != 'link':
+        return {'error': 'Unsupported attribute type.'}
     url = request['attribute']['value']
     if "/submissions/" not in url:
         return {'error': "The URL does not point to a Joe Sandbox analysis."}

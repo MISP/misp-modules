@@ -1,6 +1,7 @@
 import requests
 import json
 import sys
+from . import check_input_attribute, standard_error_message
 from collections import defaultdict
 from pymisp import MISPAttribute, MISPEvent, MISPObject
 from requests.auth import HTTPBasicAuth
@@ -160,6 +161,10 @@ def handler(q=False):
         return misperrors
     key = request["config"]["apikey"]
     password = request['config']['apipassword']
+    if not request.get('attribute') or not check_input_attribute(request['attribute']):
+        return {'error': f'{standard_error_message} which should contain at least a type, a value and an uuid.'}
+    if request['attribute']['type'] not in mispattributes['input']:
+        return {'error': 'Unsupported attribute type.'}
     parser = XforceExchange(request['attribute'], key, password)
     parser.parse()
     return parser.get_result()

@@ -42,7 +42,7 @@ def handler(q=False):
     # request data is always base 64 byte encoded
     data = base64.b64decode(request["data"])
 
-    email_object = EMailObject(pseudofile=BytesIO(data), attach_original_mail=True, standalone=False)
+    email_object = EMailObject(pseudofile=BytesIO(data), attach_original_email=True, standalone=False)
 
     # Check if we were given a configuration
     config = request.get("config", {})

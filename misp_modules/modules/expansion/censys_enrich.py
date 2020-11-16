@@ -3,6 +3,7 @@ import json
 import base64
 import codecs
 from dateutil.parser import isoparse
+from . import check_input_attribute, standard_error_message
 from pymisp import MISPAttribute, MISPEvent, MISPObject
 try:
     import censys.base
@@ -36,11 +37,11 @@ def handler(q=False):
     api_id = request['config']['api_id']
     api_secret = request['config']['api_secret']
 
-    if not request.get('attribute'):
-        return {'error': 'Unsupported input.'}
+    if not request.get('attribute') or not check_input_attribute(request['attribute']):
+        return {'error': f'{standard_error_message}, which should contain at least a type, a value and an uuid.'}
     attribute = request['attribute']
     if not any(input_type == attribute['type'] for input_type in mispattributes['input']):
-        return {'error': 'Unsupported attributes type'}
+        return {'error': 'Unsupported attribute type.'}
 
     attribute = MISPAttribute()
     attribute.from_dict(**request['attribute'])

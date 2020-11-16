@@ -1,5 +1,6 @@
 import json
 import pypssl
+from . import check_input_attribute, standard_error_message
 from pymisp import MISPAttribute, MISPEvent, MISPObject
 
 mispattributes = {'input': ['ip-src', 'ip-dst', 'ip-src|port', 'ip-dst|port'], 'format': 'misp_standard'}
@@ -83,11 +84,11 @@ def handler(q=False):
     if not request['config'].get('username') or not request['config'].get('password'):
         return {'error': 'CIRCL Passive SSL authentication is incomplete, please provide your username and password.'}
     authentication = (request['config']['username'], request['config']['password'])
-    if not request.get('attribute'):
-        return {'error': 'Unsupported input.'}
+    if not request.get('attribute') or not check_input_attribute(request['attribute']):
+        return {'error': f'{standard_error_message}, which should contain at least a type, a value and an uuid.'}
     attribute = request['attribute']
     if not any(input_type == attribute['type'] for input_type in mispattributes['input']):
-        return {'error': 'Unsupported attributes type'}
+        return {'error': 'Unsupported attribute type.'}
     pssl_parser = PassiveSSLParser(attribute, authentication)
     pssl_parser.parse()
     return pssl_parser.get_results()
