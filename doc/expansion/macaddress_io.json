@@ -1,9 +1,0 @@
-{
-    "description": "MISP hover module for macaddress.io",
-    "logo": "logos/macaddress_io.png",
-    "requirements": ["maclookup: macaddress.io python library", "An access to the macaddress.io API (apikey)"],
-    "input": "MAC address MISP attribute.",
-    "output": "Text containing information on the MAC address fetched from a query on macaddress.io.",
-    "references": ["https://macaddress.io/", "https://github.com/CodeLineFi/maclookup-python"],
-    "features": "This module takes a MAC address attribute as input and queries macaddress.io for additional information.\n\nThis information contains data about:\n- MAC address details\n- Vendor details\n- Block details"
-}

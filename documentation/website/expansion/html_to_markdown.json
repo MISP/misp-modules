@@ -1,0 +1,9 @@
+{
+    "description": "Expansion module to fetch the html content from an url and convert it into markdown.",
+    "input": "URL attribute.",
+    "output": "Markdown content converted from the HTML fetched from the url.",
+    "requirements": [
+        "The markdownify python library"
+    ],
+    "features": "The module take an URL as input and the HTML content is fetched from it. This content is then converted into markdown that is returned as text."
+}

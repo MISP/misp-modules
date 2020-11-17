@@ -1,8 +1,0 @@
-{
-    "description": "Module to check an IPv4 address against known RBLs.",
-    "requirements": ["dnspython3: DNS python3 library"],
-    "input": "IP address attribute.",
-    "output": "Text with additional data from Real-time Blackhost Lists about the IP address.",
-    "references": ["[RBLs list](https://github.com/MISP/misp-modules/blob/8817de476572a10a9c9d03258ec81ca70f3d926d/misp_modules/modules/expansion/rbl.py#L20)"],
-    "features": "This module takes an IP address attribute as input and queries multiple know Real-time Blackhost Lists to check if they have already seen this IP address.\n\nWe display then all the information we get from those different sources."
-}
