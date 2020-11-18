@@ -1,5 +1,5 @@
 import json
-from ._dnsdb_query.dnsdb_query import DEFAULT_DNSDB_SERVER, DnsdbClient, QueryError
+from dnsdb2 import DEFAULT_DNSDB_SERVER, Client as DnsdbClient, QueryError
 from . import check_input_attribute, standard_error_message
 from pymisp import MISPEvent, MISPObject
 
@@ -9,7 +9,7 @@ mispattributes = {
     'format': 'misp_standard'
 }
 moduleinfo = {
-    'version': '0.2',
+    'version': '0.3',
     'author': 'Christophe Vandeplas',
     'description': 'Module to access Farsight DNSDB Passive DNS',
     'module-type': ['expansion', 'hover']
@@ -109,12 +109,12 @@ def handler(q=False):
 def lookup_name(client, name):
     response = {}
     try:
-        res = client.query_rrset(name)  # RRSET = entries in the left-hand side of the domain name related labels
+        res = client.lookup_rrset(name, ignore_limited=True)  # RRSET = entries in the left-hand side of the domain name related labels
         response['rrset'] = list(res)
     except QueryError:
         pass
     try:
-        res = client.query_rdata_name(name)  # RDATA = entries on the right-hand side of the domain name related labels
+        res = client.lookup_rdata_name(name, ignore_limited=True)  # RDATA = entries on the right-hand side of the domain name related labels
         response['rdata'] = list(res)
     except QueryError:
         pass
@@ -123,7 +123,7 @@ def lookup_name(client, name):
 
 def lookup_ip(client, ip):
     try:
-        res = client.query_rdata_ip(ip)
+        res = client.lookup_rdata_ip(ip, ignore_limited=True)
         response = {'rdata': list(res)}
     except QueryError:
         response = {}
