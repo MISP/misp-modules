@@ -1281,6 +1281,22 @@ An expansion hover module to perform a syntax check on sigma rules.
 
 -----
 
+#### [socialscan](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/socialscan.py)
+
+A hover module to get information on the availability of an email address or username on some online platforms.
+- **features**:
+>The module takes an email address or username as input and check its availability on some online platforms. The results for each platform are then returned to see if the email address or the username is used, available or if there is an issue with it.
+- **input**:
+>An email address or usename attribute.
+- **output**:
+>Text containing information about the availability of an email address or a username in some online platforms.
+- **references**:
+>https://github.com/iojw/socialscan
+- **requirements**:
+>The socialscan python library
+
+-----
+
 #### [sophoslabs_intelix](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/sophoslabs_intelix.py)
 
 <img src=logos/sophoslabs_intelix.svg height=60>
