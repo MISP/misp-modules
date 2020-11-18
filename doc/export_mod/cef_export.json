@@ -1,8 +1,0 @@
-{
-  "description": "Module to export a MISP event in CEF format.",
-  "requirements": [],
-  "features": "The module takes a MISP event in input, to look every attribute. Each attribute matching with some predefined types is then exported in Common Event Format.\nThus, there is no particular feature concerning MISP Events since any event can be exported. However, 4 configuration parameters recognized by CEF format are required and should be provided by users before exporting data: the device vendor, product and version, as well as the default severity of data.",
-  "references": ["https://community.softwaregrp.com/t5/ArcSight-Connectors/ArcSight-Common-Event-Format-CEF-Guide/ta-p/1589306?attachment-id=65537"],
-  "input": "MISP Event attributes",
-  "output": "Common Event Format file"
-}
