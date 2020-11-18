@@ -1,0 +1,13 @@
+{
+    "description": "Query backscatter.io (https://backscatter.io/).",
+    "requirements": [
+        "backscatter python library"
+    ],
+    "features": "The module takes a source or destination IP address as input and displays the information known by backscatter.io.",
+    "logo": "backscatter_io.png",
+    "references": [
+        "https://pypi.org/project/backscatter/"
+    ],
+    "input": "IP addresses.",
+    "output": "Text containing a history of the IP addresses especially on scanning based on backscatter.io information ."
+}

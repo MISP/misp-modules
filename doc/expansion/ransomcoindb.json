@@ -1,8 +1,0 @@
-{
-    "descrption": "Module to access the ransomcoinDB with a hash or btc address attribute and get the associated btc address of hashes.",
-    "requirements": ["A ransomcoinDB API key."],
-    "input": "A hash (md5, sha1 or sha256) or btc attribute.",
-    "output": "Hashes associated to a btc address or btc addresses associated to a hash.",
-    "references": ["https://ransomcoindb.concinnity-risks.com"],
-    "features": "The module takes either a hash attribute or a btc attribute as input to query the ransomcoinDB API for some additional data.\n\nIf the input is a btc address, we will get the associated hashes returned in a file MISP object. If we query ransomcoinDB with a hash, the response contains the associated btc addresses returned as single MISP btc attributes."
-}
