@@ -8,7 +8,7 @@ import json
 
 misperrors = {"error": "Error"}
 
-types_to_use = ['sha1', 'md5', 'domain', 'ip']
+types_to_use = ['sha1', 'md5', 'domain', 'ip', 'url']
 
 userConfig = {
 
@@ -44,12 +44,17 @@ def handle_ip(value, period):
         where RemoteIP == {value}"""
     return query.replace('\n', ' ')
 
+def handle_url(value, period):
+    query = f"""find in (DeviceAlertEvents, DeviceNetworkEvents)
+        where RemoteUrl startswith {value}"""
+    return query.replace('\n', ' ')
 
 handlers = {
     'sha1': handle_sha1,
     'md5': handle_md5,
     'domain': handle_domain,
-    'ip': handle_ip
+    'ip': handle_ip,
+    'url': handle_url
 }
 
 
