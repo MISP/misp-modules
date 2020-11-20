@@ -1,6 +1,6 @@
 """
 Export module for coverting MISP events into Defender for Endpoint KQL queries.
-Config['Period'] : allows to define period over witch to look for IOC from now (15m, 1d, 2w, 30d, ...)
+Config['Period'] : allows to define period over witch to look for IOC from now
 """
 
 import base64
