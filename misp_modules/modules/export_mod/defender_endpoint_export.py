@@ -26,27 +26,27 @@ moduleinfo = {'version': '1.0', 'author': 'Julien Bachmann, Hacknowledge',
 
 def handle_sha1(value, period):
     query = f"""find in (DeviceAlertEvents, DeviceFileEvents, DeviceImageLoadEvents, DeviceProcessEvents)
-        where SHA1 == {value} or InitiatingProcessSHA1 == {value}"""
+        where SHA1 == '{value}' or InitiatingProcessSHA1 == '{value}'"""
     return query.replace('\n', ' ')
 
 def handle_md5(value, period):
     query = f"""find in (DeviceAlertEvents, DeviceFileEvents, DeviceImageLoadEvents, DeviceProcessEvents)
-        where MD5 == {value} or InitiatingProcessMD5 == {value}"""
+        where MD5 == '{value}' or InitiatingProcessMD5 == '{value}'"""
     return query.replace('\n', ' ')
 
 def handle_domain(value, period):
     query = f"""find in (DeviceAlertEvents, DeviceNetworkEvents)
-        where RemoteUrl contains {value}"""
+        where RemoteUrl contains '{value}'"""
     return query.replace('\n', ' ')
 
 def handle_ip(value, period):
     query = f"""find in (DeviceAlertEvents, DeviceNetworkEvents)
-        where RemoteIP == {value}"""
+        where RemoteIP == '{value}'"""
     return query.replace('\n', ' ')
 
 def handle_url(value, period):
     query = f"""find in (DeviceAlertEvents, DeviceNetworkEvents)
-        where RemoteUrl startswith {value}"""
+        where RemoteUrl startswith '{value}'"""
     return query.replace('\n', ' ')
 
 handlers = {
