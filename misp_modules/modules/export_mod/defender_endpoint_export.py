@@ -61,7 +61,6 @@ handlers = {
 def handler(q=False):
     if q is False:
         return False
-    r = {'results': []}
     request = json.loads(q)
     config = request.get("config", {"Period": ""})
     output = ''
@@ -72,7 +71,6 @@ def handler(q=False):
                 output = output + handlers[attribute['type']](attribute['value'], config['Period']) + '\n'
     r = {"response": [], "data": str(base64.b64encode(bytes(output, 'utf-8')), 'utf-8')}
     return r
-
 
 def introspection():
     modulesetup = {}
