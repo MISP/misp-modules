@@ -64,6 +64,7 @@ trustar = "*"
 markdownify = "==0.5.3"
 socialscan = "*"
 dnsdb2 = "*"
+clamd = "*"
 
 [requires]
 python_version = "3"
