@@ -709,6 +709,7 @@ class Summary(ReportParser):
                 verdict=verdict,
                 is_ioc=is_ioc,
             )
+            yield artifact
 
         registry = artifacts.get("registry", [])
         for reg in registry:
@@ -860,6 +861,7 @@ class SummaryV2(ReportParser):
             artifact = DomainArtifact(
                 domain=domain["domain"],
                 sources=domain["sources"],
+                classifications=classifications,
                 is_ioc=domain["is_ioc"],
                 verdict=domain["verdict"],
             )
@@ -960,6 +962,7 @@ class SummaryV2(ReportParser):
                 classifications=classifications,
                 verdict=verdict,
             )
+            yield artifact
 
         ref_registry_records = artifacts.get("ref_registry_records", [])
         for reg in self._resolve_refs(ref_registry_records):

@@ -1,4 +1,3 @@
-from . import _vmray  # noqa
 import os
 import sys
 
