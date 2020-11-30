@@ -58,16 +58,10 @@ jsonschema==3.2.0
 lief==0.10.1
 lxml==4.6.2
 maclookup==1.0.3
-<<<<<<< HEAD
-markdownify==0.5.3
-maxminddb==2.0.2; python_version >= '3.6'
-multidict==4.7.6; python_version >= '3.5'
-=======
 mail-parser==3.14.0
 markdownify==0.5.3
 maxminddb==2.0.3; python_version >= '3.6'
 multidict==5.0.2; python_version >= '3.5'
->>>>>>> upstream/main
 np==1.0.2
 numpy==1.19.4; python_version >= '3.6'
 oauth2==1.9.0.post1
