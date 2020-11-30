@@ -221,7 +221,7 @@ class TestExpansions(unittest.TestCase):
                 try:
                     self.assertIn(result, self.get_values(response))
                 except Exception:
-                    self.assertTrue(self.get_errors(response).startwith('Something went wrong'))
+                    self.assertTrue(self.get_errors(response).startswith('Something went wrong'))
         else:
             query = {"module": module_name, "ip-src": "8.8.8.8"}
             response = self.misp_modules_post(query)
@@ -285,7 +285,7 @@ class TestExpansions(unittest.TestCase):
             encoded = b64encode(f.read()).decode()
         query = {"module": "ocr_enrich", "attachment": filename, "data": encoded}
         response = self.misp_modules_post(query)
-        self.assertEqual(self.get_values(response), 'Threat Sharing')
+        self.assertEqual(self.get_values(response).strip('\n'), 'Threat Sharing')
 
     def test_ods(self):
         filename = 'test.ods'
@@ -397,7 +397,7 @@ class TestExpansions(unittest.TestCase):
         query = {"module": "rbl", "ip-src": "8.8.8.8"}
         response = self.misp_modules_post(query)
         try:
-            self.assertTrue(self.get_values(response).startswith('8.8.8.8.query.senderbase.org: "0-0=1|1=GOOGLE'))
+            self.assertTrue(self.get_values(response).startswith('8.8.8.8.query.senderbase.org'))
         except Exception:
             self.assertEqual(self.get_errors(response), "No data found by querying known RBLs")
 

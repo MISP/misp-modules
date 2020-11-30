@@ -119,7 +119,10 @@ class DnsdbClient(object):
                     break
                 yield json.loads(line.decode('ascii'))
         except (HTTPError, URLError) as e:
-            raise QueryError(str(e), sys.exc_traceback)
+            try:
+                raise QueryError(str(e), sys.exc_traceback)
+            except AttributeError:
+                raise QueryError(str(e), sys.exc_info)
 
 
 def quote(path):

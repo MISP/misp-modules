@@ -1,9 +1,0 @@
-{
-  "description": "Nexthink NXQL query export module",
-  "requirements": [],
-  "features": "This module export an event as Nexthink NXQL queries that can then be used in your own python3 tool or from wget/powershell",
-  "references": ["https://doc.nexthink.com/Documentation/Nexthink/latest/APIAndIntegrations/IntroducingtheWebAPIV2"],
-  "input": "MISP Event attributes",
-  "output": "Nexthink NXQL queries",
-  "logo": "logos/nexthink.svg"
-}

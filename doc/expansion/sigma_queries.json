@@ -1,9 +1,0 @@
-{
-    "description": "An expansion hover module to display the result of sigma queries.",
-    "logo": "logos/sigma.png",
-    "requirements": ["Sigma python library"],
-    "input": "A Sigma attribute.",
-    "output": "Text displaying results of queries on the Sigma attribute.",
-    "references": ["https://github.com/Neo23x0/sigma/wiki"],
-    "features": "This module takes a Sigma rule attribute as input and tries all the different queries available to convert it into different formats recognized by SIEMs."
-}

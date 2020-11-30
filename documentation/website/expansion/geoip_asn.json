@@ -1,0 +1,13 @@
+{
+    "descrption": "An expansion module to query a local copy of Maxmind's Geolite database with an IP address, in order to get information about its related AS number.",
+    "logo": "maxmind.png",
+    "requirements": [
+        "A local copy of Maxmind's Geolite database"
+    ],
+    "input": "An IP address MISP attribute.",
+    "output": "Text containing information about the AS number of the IP address.",
+    "references": [
+        "https://www.maxmind.com/en/home"
+    ],
+    "features": "The module takes an IP address attribute as input and queries a local copy of the Maxmind's Geolite database to get information about the related AS number."
+}

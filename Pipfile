@@ -11,16 +11,16 @@ flake8 = "*"
 
 [packages]
 dnspython = "*"
-requests = {extras = ["security"],version = "*"}
+requests = { extras = ["security"], version = "*" }
 urlarchiver = "*"
 passivetotal = "*"
 pypdns = "*"
 pypssl = "*"
 pyeupi = "*"
-uwhois = {editable = true,git = "https://github.com/Rafiot/uwhoisd.git",ref = "testing",subdirectory = "client"}
-pymisp = {editable = true,extras = ["fileobjects,openioc,pdfexport"],git = "https://github.com/MISP/PyMISP.git"}
-pyonyphe = {editable = true,git = "https://github.com/sebdraven/pyonyphe"}
-pydnstrails = {editable = true,git = "https://github.com/sebdraven/pydnstrails"}
+uwhois = { editable = true, git = "https://github.com/Rafiot/uwhoisd.git", ref = "testing", subdirectory = "client" }
+pymisp = { editable = true, extras = ["fileobjects,openioc,pdfexport,email"], git = "https://github.com/MISP/PyMISP.git" }
+pyonyphe = { editable = true, git = "https://github.com/sebdraven/pyonyphe" }
+pydnstrails = { editable = true, git = "https://github.com/sebdraven/pydnstrails" }
 pytesseract = "*"
 pygeoip = "*"
 beautifulsoup4 = "*"
@@ -32,20 +32,20 @@ maclookup = "*"
 vulners = "*"
 blockchain = "*"
 reportlab = "*"
-pyintel471 = {editable = true,git = "https://github.com/MISP/PyIntel471.git"}
+pyintel471 = { editable = true, git = "https://github.com/MISP/PyIntel471.git" }
 shodan = "*"
 Pillow = "*"
 Wand = "*"
 SPARQLWrapper = "*"
 domaintools_api = "*"
-misp-modules = {editable = true,path = "."}
-pybgpranking = {editable = true,git = "https://github.com/D4-project/BGP-Ranking.git/",subdirectory = "client"}
-pyipasnhistory = {editable = true,git = "https://github.com/D4-project/IPASN-History.git/",subdirectory = "client"}
+misp-modules = { editable = true, path = "." }
+pybgpranking = { editable = true, git = "https://github.com/D4-project/BGP-Ranking.git/", subdirectory = "client" }
+pyipasnhistory = { editable = true, git = "https://github.com/D4-project/IPASN-History.git/", subdirectory = "client" }
 backscatter = "*"
 pyzbar = "*"
 opencv-python = "*"
 np = "*"
-ODTReader = {editable = true,git = "https://github.com/cartertemm/ODTReader.git/"}
+ODTReader = { editable = true, git = "https://github.com/cartertemm/ODTReader.git/" }
 python-pptx = "*"
 python-docx = "*"
 ezodf = "*"
@@ -54,13 +54,17 @@ pandas_ods_reader = "*"
 pdftotext = "*"
 lxml = "*"
 xlrd = "*"
-idna-ssl = {markers = "python_version < '3.7'"}
+idna-ssl = { markers = "python_version < '3.7'" }
 jbxapi = "*"
 geoip2 = "*"
 apiosintDS = "*"
 assemblyline_client = "*"
 vt-graph-api = "*"
 trustar = "*"
+markdownify = "==0.5.3"
+socialscan = "*"
+dnsdb2 = "*"
+clamd = "*"
 
 [requires]
 python_version = "3"

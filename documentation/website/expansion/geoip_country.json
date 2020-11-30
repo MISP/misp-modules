@@ -1,0 +1,13 @@
+{
+    "description": "Module to query a local copy of Maxmind's Geolite database.",
+    "logo": "maxmind.png",
+    "requirements": [
+        "A local copy of Maxmind's Geolite database"
+    ],
+    "input": "An IP address MISP Attribute.",
+    "output": "Text containing information about the location of the IP address.",
+    "references": [
+        "https://www.maxmind.com/en/home"
+    ],
+    "features": "This module takes an IP address MISP attribute as input and queries a local copy of the Maxmind's Geolite database to get information about the location of this IP address.\n\nPlease note that composite attributes domain|ip are also supported."
+}
