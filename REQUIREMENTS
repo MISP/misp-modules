@@ -10,7 +10,7 @@
 -e git+https://github.com/D4-project/BGP-Ranking.git/@fd9c0e03af9b61d4bf0b67ac73c7208a55178a54#egg=pybgpranking&subdirectory=client
 -e git+https://github.com/D4-project/IPASN-History.git/@fc5e48608afc113e101ca6421bf693b7b9753f9e#egg=pyipasnhistory&subdirectory=client
 -e git+https://github.com/MISP/PyIntel471.git@0df8d51f1c1425de66714b3a5a45edb69b8cc2fc#egg=pyintel471
--e git+https://github.com/MISP/PyMISP.git@fe91e10cedb4660b58dcc0db7833c46a5b0efeb9#egg=pymisp[email,fileobjects,openioc,pdfexport]
+-e git+https://github.com/MISP/PyMISP.git@649e068fd8272977ad5a434759c5db4dad8317e7#egg=pymisp[email,fileobjects,openioc,pdfexport]
 -e git+https://github.com/Rafiot/uwhoisd.git@783bba09b5a6964f25566089826a1be4b13f2a22#egg=uwhois&subdirectory=client
 -e git+https://github.com/cartertemm/ODTReader.git/@49d6938693f6faa3ff09998f86dba551ae3a996b#egg=odtreader
 -e git+https://github.com/sebdraven/pydnstrails@48c1f740025c51289f43a24863d1845ff12fd21a#egg=pydnstrails
@@ -34,7 +34,6 @@ click==7.1.2; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 
 colorama==0.4.4; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4'
 configparser==5.0.1; python_version >= '3.6'
 cryptography==3.2.1
-dataclasses==0.8; python_version < '3.7'
 decorator==4.4.2
 deprecated==1.2.10; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3'
 dnsdb2==1.1.1
@@ -49,8 +48,6 @@ geoip2==4.1.0
 httplib2==0.18.1
 idna-ssl==1.1.0; python_version < '3.7'
 idna==2.10; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3'
-importlib-metadata==3.1.0; python_version < '3.8'
-importlib==1.0.4; python_version < '3.8'
 isodate==0.6.0
 jbxapi==3.14.0
 json-log-formatter==0.3.0
@@ -61,7 +58,7 @@ maclookup==1.0.3
 mail-parser==3.14.0
 markdownify==0.5.3
 maxminddb==2.0.3; python_version >= '3.6'
-multidict==5.0.2; python_version >= '3.5'
+multidict==5.1.0; python_version >= '3.6'
 np==1.0.2
 numpy==1.19.4; python_version >= '3.6'
 oauth2==1.9.0.post1
@@ -79,7 +76,7 @@ pycryptodomex==3.9.9; python_version >= '2.6' and python_version not in '3.0, 3.
 pydeep==0.4
 pyeupi==1.1
 pygeoip==0.3.2
-pyopenssl==19.1.0
+pyopenssl==20.0.0
 pyparsing==2.4.7; python_version >= '2.6' and python_version not in '3.0, 3.1, 3.2, 3.3'
 pypdns==1.5.1
 pypssl==2.1
@@ -88,10 +85,10 @@ pytesseract==0.3.6
 python-baseconv==1.2.2
 python-dateutil==2.8.1; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3'
 python-docx==0.8.10
-python-engineio==3.13.2
+python-engineio==3.14.2
 python-magic==0.4.18
 python-pptx==0.6.18
-python-socketio[client]==4.6.0
+python-socketio[client]==4.6.1
 python-utils==2.4.0
 pytz==2019.3
 pyyaml==5.3.1
@@ -99,7 +96,7 @@ pyzbar==0.1.8
 pyzipper==0.3.3; python_version >= '3.5'
 rdflib==5.0.0
 redis==3.5.3; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4'
-reportlab==3.5.55
+reportlab==3.5.56
 requests-cache==0.5.2
 requests[security]==2.25.0
 shodan==1.24.0
@@ -124,11 +121,10 @@ urllib3==1.26.2; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.
 validators==0.14.0
 vt-graph-api==1.0.1
 vulners==1.5.9
-wand==0.6.4
+wand==0.6.5
 websocket-client==0.57.0
 wrapt==1.12.1
 xlrd==1.2.0
 xlsxwriter==1.3.7
 yara-python==3.8.1
 yarl==1.6.3; python_version >= '3.6'
-zipp==3.4.0; python_version >= '3.6'
