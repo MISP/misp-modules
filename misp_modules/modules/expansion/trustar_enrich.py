@@ -195,12 +195,16 @@ def handler(q=False):
 
     try:
         metadata = trustar_parser.ts_client.get_indicators_metadata([Indicator(value=attribute['value'])])[0]
+    except IndexError:
+        misperrors['error'] += f" -- No metadata found for indicator {attribute['value']}"
     except Exception as e:
         misperrors['error'] += f" -- Could not retrieve indicator metadata from TruSTAR {e}"
 
     try:
         summary = list(
             trustar_parser.ts_client.get_indicator_summaries([attribute['value']], page_size=MAX_PAGE_SIZE))[0]
+    except IndexError:
+        misperrors['error'] += f" -- No summary data found for indicator {attribute['value']}"
     except Exception as e:
         misperrors['error'] += f" -- Unable to retrieve TruSTAR summary data: {e}"
 
