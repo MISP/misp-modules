@@ -1,28 +1,27 @@
 import json
 import base64
-import csv
 
 misperrors = {'error': 'Error'}
 userConfig = {
-               'number1': {
-                 'type': 'Integer',
-                 'regex': '/^[0-4]$/i',
-                 'errorMessage': 'Expected a number in range [0-4]',
-                 'message': 'Column number used for value'
-               },
-               'some_string': {
-                 'type': 'String',
-                 'message': 'A text field'
-               },
-               'boolean_field': {
-                 'type': 'Boolean',
-                 'message': 'Boolean field test'
-               },
-               'comment': {
-                 'type': 'Integer',
-                 'message': 'Column number used for comment'
-               }
-             };
+    'number1': {
+        'type': 'Integer',
+        'regex': '/^[0-4]$/i',
+        'errorMessage': 'Expected a number in range [0-4]',
+        'message': 'Column number used for value'
+    },
+    'some_string': {
+        'type': 'String',
+        'message': 'A text field'
+    },
+    'boolean_field': {
+        'type': 'Boolean',
+        'message': 'Boolean field test'
+    },
+    'comment': {
+        'type': 'Integer',
+        'message': 'Column number used for comment'
+    }
+}
 
 inputSource = ['file', 'paste']
 
@@ -39,8 +38,8 @@ def handler(q=False):
     r = {'results': []}
     request = json.loads(q)
     request["data"] = base64.b64decode(request["data"])
-    fields = ["value", "category", "type", "comment"]
-    r = {"results":[{"values":["192.168.56.1"], "types":["ip-src"], "categories":["Network activity"]}]}
+    # fields = ["value", "category", "type", "comment"]
+    r = {"results": [{"values": ["192.168.56.1"], "types":["ip-src"], "categories": ["Network activity"]}]}
     return r
 
 

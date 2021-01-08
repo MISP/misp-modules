@@ -1,0 +1,9 @@
+{
+    "description": "EQL query generation for a MISP attribute.",
+    "logo": "logos/eql.png",
+    "requirements": [],
+    "input": "A filename or ip attribute.",
+    "output": "Attribute containing EQL for a network or file attribute.",
+    "references": ["https://eql.readthedocs.io/en/latest/"],
+    "features": "This module adds a new attribute to a MISP event containing an EQL query for a network or file attribute."
+}

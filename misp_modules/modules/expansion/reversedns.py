@@ -1,5 +1,5 @@
 import json
-import dns.reversename, dns.resolver
+from dns import reversename, resolver, exception
 
 misperrors = {'error': 'Error'}
 mispattributes = {'input': ['ip-src', 'ip-dst', 'domain|ip'], 'output': ['hostname']}
@@ -11,6 +11,7 @@ moduleinfo = {'version': '0.1', 'author': 'Andreas Muehlemann',
 
 # config fields that your code expects from the site admin
 moduleconfig = ['nameserver']
+
 
 def handler(q=False):
     if q is False:
@@ -26,9 +27,9 @@ def handler(q=False):
         return False
 
     # reverse lookup for ip
-    revname = dns.reversename.from_address(toquery)
+    revname = reversename.from_address(toquery)
 
-    r = dns.resolver.Resolver()
+    r = resolver.Resolver()
     r.timeout = 2
     r.lifetime = 2
 
@@ -42,13 +43,13 @@ def handler(q=False):
 
     try:
         answer = r.query(revname, 'PTR')
-    except dns.resolver.NXDOMAIN:
+    except resolver.NXDOMAIN:
         misperrors['error'] = "NXDOMAIN"
         return misperrors
-    except dns.exception.Timeout:
+    except exception.Timeout:
         misperrors['error'] = "Timeout"
         return misperrors
-    except:
+    except Exception:
         misperrors['error'] = "DNS resolving error"
         return misperrors
 
@@ -56,8 +57,10 @@ def handler(q=False):
                       'values':[str(answer[0])]}]}
     return r
 
+
 def introspection():
     return mispattributes
+
 
 def version():
     moduleinfo['config'] = moduleconfig

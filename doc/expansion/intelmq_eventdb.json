@@ -1,0 +1,9 @@
+{
+    "description": "Module to access intelmqs eventdb.",
+    "logo": "logos/intelmq.png",
+    "requirements": ["psycopg2: Python library to support PostgreSQL", "An access to the IntelMQ database (username, password, hostname and database reference)"],
+    "input": "A hostname, domain, IP address or AS attribute.",
+    "output": "Text giving information about the input using IntelMQ database.",
+    "references": ["https://github.com/certtools/intelmq", "https://intelmq.readthedocs.io/en/latest/Developers-Guide/"],
+    "features": "/!\\ EXPERIMENTAL MODULE, some features may not work /!\\\n\nThis module takes a domain, hostname, IP address or Autonomous system MISP attribute as input to query the IntelMQ database. The result of the query gives then additional information about the input."
+}

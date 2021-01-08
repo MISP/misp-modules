@@ -6,31 +6,51 @@ services:
 cache: pip
 
 python:
-    - "3.4"
-    - "3.5"
-    - "3.5-dev"
     - "3.6"
     - "3.6-dev"
+    - "3.7-dev"
+    - "3.8-dev"
+
+before_install:
+    - docker build -t misp-modules --build-arg BUILD_DATE=$(date -u +"%Y-%m-%d") docker/
 
 install:
-    - pip install -U nose codecov pytest
-    - pip install -U -r REQUIREMENTS
+    - sudo apt-get install libzbar0 libzbar-dev libpoppler-cpp-dev tesseract-ocr libfuzzy-dev libcaca-dev liblua5.3-dev
+    - pip install pipenv
+    - pipenv install --dev
+    # install gtcaca
+    - git clone git://github.com/stricaud/gtcaca.git
+    - mkdir -p gtcaca/build
+    - pushd gtcaca/build
+    - cmake .. && make
+    - sudo make install
+    - popd
+    # install pyfaup
+    - git clone https://github.com/stricaud/faup.git
+    - pushd faup/build
+    - cmake .. && make
+    - sudo make install
+    - popd
+    - sudo ldconfig
+    - pushd faup/src/lib/bindings/python
     - pip install .
+    - popd
 
 script:
-    - coverage run -m --parallel-mode --source=misp_modules misp_modules.__init__  -l 127.0.0.1 &
+    - pipenv run coverage run -m --parallel-mode --source=misp_modules misp_modules.__init__  -l 127.0.0.1 &
     - pid=$!
     - sleep 5
-    - nosetests --with-coverage --cover-package=misp_modules
-    - kill -s INT $pid
+    - pipenv run nosetests --with-coverage --cover-package=misp_modules
+    - kill -s KILL $pid
     - pushd ~/
-    - coverage run -m --parallel-mode --source=misp_modules misp_modules.__init__ -s -l 127.0.0.1 &
+    - pipenv run coverage run -m --parallel-mode --source=misp_modules misp_modules.__init__ -s -l 127.0.0.1 &
     - pid=$!
     - popd
     - sleep 5
-    - nosetests --with-coverage --cover-package=misp_modules
-    - kill -s INT $pid
+    - pipenv run nosetests --with-coverage --cover-package=misp_modules
+    - kill -s KILL $pid
+    - pipenv run flake8 --ignore=E501,W503,E226 misp_modules
 
 after_success:
-    - coverage combine .coverage*
-    - codecov
+    - pipenv run coverage combine .coverage*
+    - pipenv run codecov

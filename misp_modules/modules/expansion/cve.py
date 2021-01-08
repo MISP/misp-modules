@@ -3,9 +3,13 @@ import requests
 
 misperrors = {'error': 'Error'}
 mispattributes = {'input': ['vulnerability'], 'output': ['text']}
-moduleinfo = {'version': '0.2', 'author': 'Alexandre Dulaunoy', 'description': 'An expansion hover module to expand information about CVE id.', 'module-type': ['hover']}
-moduleconfig = []
+moduleinfo = {'version': '0.3', 'author': 'Alexandre Dulaunoy', 'description': 'An expansion hover module to expand information about CVE id.', 'module-type': ['hover']}
+moduleconfig = ["custom_API"]
 cveapi_url = 'https://cve.circl.lu/api/cve/'
+
+
+def check_url(url):
+    return "{}/".format(url) if not url.endswith('/') else url
 
 
 def handler(q=False):
@@ -16,7 +20,8 @@ def handler(q=False):
         misperrors['error'] = 'Vulnerability id missing'
         return misperrors
 
-    r = requests.get(cveapi_url + request.get('vulnerability'))
+    api_url = check_url(request['config']['custom_API']) if request.get('config') and request['config'].get('custom_API') else cveapi_url
+    r = requests.get("{}{}".format(api_url, request.get('vulnerability')))
     if r.status_code == 200:
         vulnerability = json.loads(r.text)
         if vulnerability:
@@ -25,7 +30,7 @@ def handler(q=False):
         else:
             summary = 'Non existing CVE'
     else:
-        misperrors['error'] = 'cve.circl.lu API not accessible'
+        misperrors['error'] = 'API not accessible'
         return misperrors['error']
 
     r = {'results': [{'types': mispattributes['output'], 'values': summary}]}

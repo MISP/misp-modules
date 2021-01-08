@@ -1,13 +1,12 @@
 import json
 import base64
-import csv
 
 misperrors = {'error': 'Error'}
 
 
 userConfig = {
 
-};
+}
 
 moduleconfig = []
 
@@ -28,9 +27,9 @@ def handler(q=False):
     if q is False:
         return False
     r = {'results': []}
-    result = json.loads(q)
-    output = ''; # Insert your magic here!
-    r = {"data":base64.b64encode(output.encode('utf-8')).decode('utf-8')}
+    result = json.loads(q)  # noqa
+    output = ''  # Insert your magic here!
+    r = {"data": base64.b64encode(output.encode('utf-8')).decode('utf-8')}
     return r
 
 

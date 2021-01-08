@@ -1,0 +1,9 @@
+{
+    "description": "Module to decode QR codes.",
+    "requirements": ["cv2: The OpenCV python library.",
+                     "pyzbar: Python library to read QR codes."],
+    "input": "A QR code stored as attachment attribute.",
+    "output": "The URL or bitcoin address the QR code is pointing to.",
+    "references": [],
+    "features": "The module reads the QR code and returns the related address, which can be an URL or a bitcoin address."
+}

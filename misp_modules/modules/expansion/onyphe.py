@@ -1,4 +1,3 @@
-import json
 # -*- coding: utf-8 -*-
 
 import json
@@ -9,7 +8,8 @@ except ImportError:
 
 misperrors = {'error': 'Error'}
 
-mispattributes = {'input': ['ip-src', 'ip-dst', 'hostname', 'domains'], 'output': ['hostname', 'domain', 'ip-src', 'ip-dst','url']}
+mispattributes = {'input': ['ip-src', 'ip-dst', 'hostname', 'domain'],
+                  'output': ['hostname', 'domain', 'ip-src', 'ip-dst', 'url']}
 # possible module-types: 'expansion', 'hover' or both
 moduleinfo = {'version': '1', 'author': 'Sebastien Larinier @sebdraven',
               'description': 'Query on Onyphe',
@@ -24,7 +24,7 @@ def handler(q=False):
 
         request = json.loads(q)
 
-        if not request.get('config') and not (request['config'].get('apikey')):
+        if not request.get('config') or not request['config'].get('apikey'):
             misperrors['error'] = 'Onyphe authentication is missing'
             return misperrors
 
@@ -54,7 +54,7 @@ def handle_expansion(api, ip, misperrors):
         misperrors['error'] = result['message']
         return misperrors
 
-    categories = list(set([item['@category'] for item in result['results']]))
+    # categories = list(set([item['@category'] for item in result['results']]))
 
     result_filtered = {"results": []}
     urls_pasties = []
@@ -65,16 +65,16 @@ def handle_expansion(api, ip, misperrors):
 
     for r in result['results']:
         if r['@category'] == 'pastries':
-            if r['@type'] == 'pastebin':
+            if r['source'] == 'pastebin':
                 urls_pasties.append('https://pastebin.com/raw/%s' % r['key'])
         elif r['@category'] == 'synscan':
             asn_list.append(r['asn'])
             os_target = r['os']
             if os_target != 'Unknown':
                 os_list.append(r['os'])
-        elif r['@category'] == 'resolver' and r['@type'] =='reverse':
+        elif r['@category'] == 'resolver' and r['type'] == 'reverse':
             domains_resolver.append(r['reverse'])
-        elif r['@category'] == 'resolver' and r['@type'] =='forward':
+        elif r['@category'] == 'resolver' and r['type'] == 'forward':
             domains_forward.append(r['forward'])
 
     result_filtered['results'].append({'types': ['url'], 'values': urls_pasties,
@@ -90,7 +90,7 @@ def handle_expansion(api, ip, misperrors):
     result_filtered['results'].append({'types': ['domain'],
                                        'values': list(set(domains_resolver)),
                                        'categories': ['Network activity'],
-                                       'comment': 'resolver to %s' % ip })
+                                       'comment': 'resolver to %s' % ip})
 
     result_filtered['results'].append({'types': ['domain'],
                                        'values': list(set(domains_forward)),

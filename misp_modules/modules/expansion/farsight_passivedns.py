@@ -16,10 +16,9 @@ def handler(q=False):
     if q is False:
         return False
     request = json.loads(q)
-    if (request.get('config')):
-        if (request['config'].get('apikey') is None):
-            misperrors['error'] = 'Farsight DNSDB apikey is missing'
-            return misperrors
+    if not request.get('config') or not request['config'].get('apikey'):
+        misperrors['error'] = 'Farsight DNSDB apikey is missing'
+        return misperrors
     client = DnsdbClient(server, request['config']['apikey'])
     if request.get('hostname'):
         res = lookup_name(client, request['hostname'])
@@ -51,7 +50,7 @@ def lookup_name(client, name):
                 for i in item.get('rdata'):
                     # grab email field and replace first dot by @ to convert to an email address
                     yield(i.split(' ')[1].rstrip('.').replace('.', '@', 1))
-    except QueryError as e:
+    except QueryError:
         pass
 
     try:
@@ -59,7 +58,7 @@ def lookup_name(client, name):
         for item in res:
             if item.get('rrtype') in ['A', 'AAAA', 'CNAME']:
                 yield(item.get('rrname').rstrip('.'))
-    except QueryError as e:
+    except QueryError:
         pass
 
 
@@ -68,7 +67,7 @@ def lookup_ip(client, ip):
         res = client.query_rdata_ip(ip)
         for item in res:
             yield(item['rrname'].rstrip('.'))
-    except QueryError as e:
+    except QueryError:
         pass
 
 

@@ -1,0 +1,9 @@
+{
+    "description": "A module to import data from a Joe Sandbox analysis json report.",
+    "logo": "logos/joesandbox.png",
+    "requirements": [],
+    "input": "Json report of a Joe Sandbox analysis.",
+    "output": "MISP attributes & objects parsed from the analysis report.",
+    "references": ["https://www.joesecurity.org", "https://www.joesandbox.com/"],
+    "features": "Module using the new format of modules able to return attributes and objects.\n\nThe module returns the same results as the expansion module [joesandbox_query](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/joesandbox_query.py) using the submission link of the analysis to get the json report.\n\n"
+}

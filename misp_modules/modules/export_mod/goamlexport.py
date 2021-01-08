@@ -1,4 +1,5 @@
-import json, datetime, base64
+import json
+import base64
 from pymisp import MISPEvent
 from collections import defaultdict, Counter
 
@@ -26,7 +27,7 @@ goAMLmapping = {'bank-account': {'bank-account': 't_account', 'institution-name'
                 'person': {'person': 't_person', 'text': 'comments', 'first-name': 'first_name',
                            'middle-name': 'middle_name', 'last-name': 'last_name', 'title': 'title',
                            'mothers-name': 'mothers_name', 'alias': 'alias', 'date-of-birth': 'birthdate',
-                           'place-of-birth': 'birth_place', 'gender': 'gender','nationality': 'nationality1',
+                           'place-of-birth': 'birth_place', 'gender': 'gender', 'nationality': 'nationality1',
                            'passport-number': 'passport_number', 'passport-country': 'passport_country',
                            'social-security-number': 'ssn', 'identity-card-number': 'id_number'},
                 'geolocation': {'geolocation': 'location', 'city': 'city', 'region': 'state',
@@ -46,6 +47,7 @@ referencesMapping = {'bank-account': {'aml_type': '{}_account', 'bracket': 't_{}
                      'person': {'transaction': {'aml_type': '{}_person', 'bracket': 't_{}'}, 'bank-account': {'aml_type': 't_person', 'bracket': 'signatory'}},
                      'legal-entity': {'transaction': {'aml_type': '{}_entity', 'bracket': 't_{}'}, 'bank-account': {'aml_type': 't_entity'}},
                      'geolocation': {'aml_type': 'address', 'bracket': 'addresses'}}
+
 
 class GoAmlGeneration(object):
     def __init__(self, config):
@@ -67,7 +69,7 @@ class GoAmlGeneration(object):
                 try:
                     report_code.append(obj.get_attributes_by_relation('report-code')[0].value.split(' ')[0])
                     currency_code.append(obj.get_attributes_by_relation('currency-code')[0].value)
-                except:
+                except IndexError:
                     print('report_code or currency_code error')
         self.uuids, self.report_codes, self.currency_codes = uuids, report_code, currency_code
 
@@ -87,9 +89,12 @@ class GoAmlGeneration(object):
         person_to_parse = [person_uuid for person_uuid in self.uuids.get('person') if person_uuid not in self.parsed_uuids.get('person')]
         if len(person_to_parse) == 1:
             self.itterate('person', 'reporting_person', person_to_parse[0], 'header')
-        location_to_parse = [location_uuid for location_uuid in self.uuids.get('geolocation') if location_uuid not in self.parsed_uuids.get('geolocation')]
-        if len(location_to_parse) == 1:
-            self.itterate('geolocation', 'location', location_to_parse[0], 'header')
+        try:
+            location_to_parse = [location_uuid for location_uuid in self.uuids.get('geolocation') if location_uuid not in self.parsed_uuids.get('geolocation')]
+            if len(location_to_parse) == 1:
+                self.itterate('geolocation', 'location', location_to_parse[0], 'header')
+        except TypeError:
+            pass
         self.xml['data'] += "</report>"
 
     def itterate(self, object_type, aml_type, uuid, xml_part):
@@ -182,6 +187,7 @@ class GoAmlGeneration(object):
             self.itterate(next_object_type, next_aml_type, uuid, xml_part)
             self.xml[xml_part] += "</{}>".format(bracket)
 
+
 def handler(q=False):
     if q is False:
         return False
@@ -208,6 +214,7 @@ def handler(q=False):
     exp_doc = "{}{}".format(export_doc.xml.get('header'), export_doc.xml.get('data'))
     return {'response': [], 'data': str(base64.b64encode(bytes(exp_doc, 'utf-8')), 'utf-8')}
 
+
 def introspection():
     modulesetup = {}
     try:
@@ -231,6 +238,7 @@ def introspection():
     except NameError:
         pass
     return modulesetup
+
 
 def version():
     moduleinfo['config'] = moduleconfig

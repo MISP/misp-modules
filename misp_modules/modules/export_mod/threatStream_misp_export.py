@@ -49,9 +49,7 @@ def handler(q=False):
     if q is False or not q:
         return False
 
-    
     request = json.loads(q)
-  
 
     response = io.StringIO()
     writer = csv.DictWriter(response, fieldnames=["value", "itype", "tags"])

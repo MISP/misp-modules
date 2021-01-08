@@ -1,4 +1,3 @@
-import json
 # -*- coding: utf-8 -*-
 
 import json
@@ -10,7 +9,7 @@ except ImportError:
 misperrors = {'error': 'Error'}
 
 mispattributes = {'input': ['ip-src', 'ip-dst', 'hostname', 'domain'],
-                  'output': ['hostname', 'domain', 'ip-src', 'ip-dst','url']}
+                  'output': ['hostname', 'domain', 'ip-src', 'ip-dst', 'url']}
 
 # possible module-types: 'expansion', 'hover' or both
 moduleinfo = {'version': '1', 'author': 'Sebastien Larinier @sebdraven',
@@ -26,7 +25,7 @@ def handler(q=False):
 
         request = json.loads(q)
 
-        if not request.get('config') and not (request['config'].get('apikey')):
+        if not request.get('config') or not request['config'].get('apikey'):
             misperrors['error'] = 'Onyphe authentication is missing'
             return misperrors
 
@@ -38,10 +37,10 @@ def handler(q=False):
         ip = ''
         if request.get('ip-src'):
             ip = request['ip-src']
-            return handle_ip(api ,ip, misperrors)
+            return handle_ip(api, ip, misperrors)
         elif request.get('ip-dst'):
             ip = request['ip-dst']
-            return handle_ip(api,ip,misperrors)
+            return handle_ip(api, ip, misperrors)
         elif request.get('domain'):
             domain = request['domain']
             return handle_domain(api, domain, misperrors)
@@ -91,11 +90,11 @@ def handle_ip(api, ip, misperrors):
     r, status_ok = expand_syscan(api, ip, misperrors)
 
     if status_ok:
-         result_filtered['results'].extend(r)
+        result_filtered['results'].extend(r)
     else:
-         misperrors['error'] = "Error syscan result"
+        misperrors['error'] = "Error syscan result"
 
-    r, status_ok = expand_pastries(api,misperrors,ip=ip)
+    r, status_ok = expand_pastries(api, misperrors, ip=ip)
 
     if status_ok:
         result_filtered['results'].extend(r)
@@ -185,11 +184,11 @@ def expand_syscan(api, ip, misperror):
     return r, status_ok
 
 
-def expand_datascan(api, misperror,**kwargs):
+def expand_datascan(api, misperror, **kwargs):
     status_ok = False
     r = []
-    ip = ''
-    query =''
+    # ip = ''
+    query = ''
     asn_list = []
     geoloc = []
     orgs = []
@@ -311,11 +310,11 @@ def expand_pastries(api, misperror, **kwargs):
         query = kwargs.get('domain')
         result = api.search_pastries('domain:%s' % query)
 
-    if result['status'] =='ok':
+    if result['status'] == 'ok':
         status_ok = True
         for item in result['results']:
             if item['@category'] == 'pastries':
-                if item['@type'] == 'pastebin':
+                if item['source'] == 'pastebin':
                     urls_pasties.append('https://pastebin.com/raw/%s' % item['key'])
 
                     if 'domain' in item:
@@ -328,7 +327,7 @@ def expand_pastries(api, misperror, **kwargs):
         r.append({'types': ['url'],
                   'values': urls_pasties,
                   'categories': ['External analysis'],
-                  'comment':'URLs of pasties where %s has found' % query})
+                  'comment': 'URLs of pasties where %s has found' % query})
         r.append({'types': ['domain'], 'values': list(set(domains)),
                   'categories': ['Network activity'],
                   'comment': 'Domains found in pasties of Onyphe'})
@@ -340,7 +339,7 @@ def expand_pastries(api, misperror, **kwargs):
     return r, status_ok
 
 
-def expand_threatlist(api, misperror,**kwargs):
+def expand_threatlist(api, misperror, **kwargs):
     status_ok = False
     r = []
 
@@ -366,7 +365,8 @@ def expand_threatlist(api, misperror,**kwargs):
                   'comment': '%s is present in threatlist' % query
                   })
 
-    return r,status_ok
+    return r, status_ok
+
 
 def introspection():
     return mispattributes

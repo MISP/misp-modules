@@ -1,196 +1,210 @@
+from pymisp import MISPAttribute, MISPEvent, MISPObject
 import json
 import requests
-from requests import HTTPError
-import base64
 
 misperrors = {'error': 'Error'}
-mispattributes = {'input': ['hostname', 'domain', "ip-src", "ip-dst", "md5", "sha1", "sha256", "sha512"],
-                  'output': ['domain', "ip-src", "ip-dst", "text", "md5", "sha1", "sha256", "sha512", "ssdeep",
-                             "authentihash", "filename"]
-                  }
+mispattributes = {'input': ['hostname', 'domain', "ip-src", "ip-dst", "md5", "sha1", "sha256", "url"],
+                  'format': 'misp_standard'}
 
 # possible module-types: 'expansion', 'hover' or both
-moduleinfo = {'version': '2', 'author': 'Hannah Ward',
-              'description': 'Get information from virustotal',
+moduleinfo = {'version': '4', 'author': 'Hannah Ward',
+              'description': 'Get information from VirusTotal',
               'module-type': ['expansion']}
 
 # config fields that your code expects from the site admin
 moduleconfig = ["apikey", "event_limit"]
-limit = 5  # Default
-comment = '%s: Enriched via VT'
+
+
+class VirusTotalParser(object):
+    def __init__(self, apikey, limit):
+        self.apikey = apikey
+        self.limit = limit
+        self.base_url = "https://www.virustotal.com/vtapi/v2/{}/report"
+        self.misp_event = MISPEvent()
+        self.parsed_objects = {}
+        self.input_types_mapping = {'ip-src': self.parse_ip, 'ip-dst': self.parse_ip,
+                                    'domain': self.parse_domain, 'hostname': self.parse_domain,
+                                    'md5': self.parse_hash, 'sha1': self.parse_hash,
+                                    'sha256': self.parse_hash, 'url': self.parse_url}
+
+    def query_api(self, attribute):
+        self.attribute = MISPAttribute()
+        self.attribute.from_dict(**attribute)
+        return self.input_types_mapping[self.attribute.type](self.attribute.value, recurse=True)
+
+    def get_result(self):
+        event = json.loads(self.misp_event.to_json())
+        results = {key: event[key] for key in ('Attribute', 'Object') if (key in event and event[key])}
+        return {'results': results}
+
+    ################################################################################
+    ####                         Main parsing functions                         #### # noqa
+    ################################################################################
+
+    def parse_domain(self, domain, recurse=False):
+        req = requests.get(self.base_url.format('domain'), params={'apikey': self.apikey, 'domain': domain})
+        if req.status_code != 200:
+            return req.status_code
+        req = req.json()
+        hash_type = 'sha256'
+        whois = 'whois'
+        feature_types = {'communicating': 'communicates-with',
+                         'downloaded': 'downloaded-from',
+                         'referrer': 'referring'}
+        siblings = (self.parse_siblings(domain) for domain in req['domain_siblings'])
+        uuid = self.parse_resolutions(req['resolutions'], req['subdomains'], siblings)
+        for feature_type, relationship in feature_types.items():
+            for feature in ('undetected_{}_samples', 'detected_{}_samples'):
+                for sample in req.get(feature.format(feature_type), [])[:self.limit]:
+                    status_code = self.parse_hash(sample[hash_type], False, uuid, relationship)
+                    if status_code != 200:
+                        return status_code
+        if req.get(whois):
+            whois_object = MISPObject(whois)
+            whois_object.add_attribute('text', type='text', value=req[whois])
+            self.misp_event.add_object(**whois_object)
+        return self.parse_related_urls(req, recurse, uuid)
+
+    def parse_hash(self, sample, recurse=False, uuid=None, relationship=None):
+        req = requests.get(self.base_url.format('file'), params={'apikey': self.apikey, 'resource': sample})
+        status_code = req.status_code
+        if req.status_code == 200:
+            req = req.json()
+            vt_uuid = self.parse_vt_object(req)
+            file_attributes = []
+            for hash_type in ('md5', 'sha1', 'sha256'):
+                if req.get(hash_type):
+                    file_attributes.append({'type': hash_type, 'object_relation': hash_type,
+                                            'value': req[hash_type]})
+            if file_attributes:
+                file_object = MISPObject('file')
+                for attribute in file_attributes:
+                    file_object.add_attribute(**attribute)
+                file_object.add_reference(vt_uuid, 'analyzed-with')
+                if uuid and relationship:
+                    file_object.add_reference(uuid, relationship)
+                self.misp_event.add_object(**file_object)
+        return status_code
+
+    def parse_ip(self, ip, recurse=False):
+        req = requests.get(self.base_url.format('ip-address'), params={'apikey': self.apikey, 'ip': ip})
+        if req.status_code != 200:
+            return req.status_code
+        req = req.json()
+        if req.get('asn'):
+            asn_mapping = {'network': ('ip-src', 'subnet-announced'),
+                           'country': ('text', 'country')}
+            asn_object = MISPObject('asn')
+            asn_object.add_attribute('asn', type='AS', value=req['asn'])
+            for key, value in asn_mapping.items():
+                if req.get(key):
+                    attribute_type, relation = value
+                    asn_object.add_attribute(relation, type=attribute_type, value=req[key])
+            self.misp_event.add_object(**asn_object)
+        uuid = self.parse_resolutions(req['resolutions']) if req.get('resolutions') else None
+        return self.parse_related_urls(req, recurse, uuid)
+
+    def parse_url(self, url, recurse=False, uuid=None):
+        req = requests.get(self.base_url.format('url'), params={'apikey': self.apikey, 'resource': url})
+        status_code = req.status_code
+        if req.status_code == 200:
+            req = req.json()
+            vt_uuid = self.parse_vt_object(req)
+            if not recurse:
+                feature = 'url'
+                url_object = MISPObject(feature)
+                url_object.add_attribute(feature, type=feature, value=url)
+                url_object.add_reference(vt_uuid, 'analyzed-with')
+                if uuid:
+                    url_object.add_reference(uuid, 'hosted-in')
+                self.misp_event.add_object(**url_object)
+        return status_code
+
+    ################################################################################
+    ####                      Additional parsing functions                      #### # noqa
+    ################################################################################
+
+    def parse_related_urls(self, query_result, recurse, uuid=None):
+        if recurse:
+            for feature in ('detected_urls', 'undetected_urls'):
+                if feature in query_result:
+                    for url in query_result[feature]:
+                        value = url['url'] if isinstance(url, dict) else url[0]
+                        status_code = self.parse_url(value, False, uuid)
+                        if status_code != 200:
+                            return status_code
+        else:
+            for feature in ('detected_urls', 'undetected_urls'):
+                if feature in query_result:
+                    for url in query_result[feature]:
+                        value = url['url'] if isinstance(url, dict) else url[0]
+                        self.misp_event.add_attribute('url', value)
+        return 200
+
+    def parse_resolutions(self, resolutions, subdomains=None, uuids=None):
+        domain_ip_object = MISPObject('domain-ip')
+        if self.attribute.type == 'domain':
+            domain_ip_object.add_attribute('domain', type='domain', value=self.attribute.value)
+            attribute_type, relation, key = ('ip-dst', 'ip', 'ip_address')
+        else:
+            domain_ip_object.add_attribute('ip', type='ip-dst', value=self.attribute.value)
+            attribute_type, relation, key = ('domain', 'domain', 'hostname')
+        for resolution in resolutions:
+            domain_ip_object.add_attribute(relation, type=attribute_type, value=resolution[key])
+        if subdomains:
+            for subdomain in subdomains:
+                attribute = MISPAttribute()
+                attribute.from_dict(**dict(type='domain', value=subdomain))
+                self.misp_event.add_attribute(**attribute)
+                domain_ip_object.add_reference(attribute.uuid, 'subdomain')
+        if uuids:
+            for uuid in uuids:
+                domain_ip_object.add_reference(uuid, 'sibling-of')
+        self.misp_event.add_object(**domain_ip_object)
+        return domain_ip_object.uuid
+
+    def parse_siblings(self, domain):
+        attribute = MISPAttribute()
+        attribute.from_dict(**dict(type='domain', value=domain))
+        self.misp_event.add_attribute(**attribute)
+        return attribute.uuid
+
+    def parse_vt_object(self, query_result):
+        if query_result['response_code'] == 1:
+            vt_object = MISPObject('virustotal-report')
+            vt_object.add_attribute('permalink', type='link', value=query_result['permalink'])
+            detection_ratio = '{}/{}'.format(query_result['positives'], query_result['total'])
+            vt_object.add_attribute('detection-ratio', type='text', value=detection_ratio)
+            self.misp_event.add_object(**vt_object)
+            return vt_object.uuid
+
+
+def parse_error(status_code):
+    status_mapping = {204: 'VirusTotal request rate limit exceeded.',
+                      400: 'Incorrect request, please check the arguments.',
+                      403: 'You don\'t have enough privileges to make the request.'}
+    if status_code in status_mapping:
+        return status_mapping[status_code]
+    return "VirusTotal may not be accessible."
 
 
 def handler(q=False):
-    global limit
     if q is False:
         return False
-
-    q = json.loads(q)
-
-    key = q["config"]["apikey"]
-    limit = int(q["config"].get("event_limit", 5))
-
-    r = {"results": []}
-
-    if "ip-src" in q:
-        r["results"] += getIP(q["ip-src"], key)
-    if "ip-dst" in q:
-        r["results"] += getIP(q["ip-dst"], key)
-    if "domain" in q:
-        r["results"] += getDomain(q["domain"], key)
-    if 'hostname' in q:
-        r["results"] += getDomain(q['hostname'], key)
-    if 'md5' in q:
-        r["results"] += getHash(q['md5'], key)
-    if 'sha1' in q:
-        r["results"] += getHash(q['sha1'], key)
-    if 'sha256' in q:
-        r["results"] += getHash(q['sha256'], key)
-    if 'sha512' in q:
-        r["results"] += getHash(q['sha512'], key)
-
-    uniq = []
-    for res in r["results"]:
-        if res not in uniq:
-            uniq.append(res)
-    r["results"] = uniq
-    return r
-
-
-def getHash(hash, key, do_not_recurse=False):
-    req = requests.get("https://www.virustotal.com/vtapi/v2/file/report",
-                       params={"allinfo": 1, "apikey": key, 'resource': hash})
-    try:
-        req.raise_for_status()
-        req = req.json()
-    except HTTPError as e:
-        misperrors['error'] = str(e)
+    request = json.loads(q)
+    if not request.get('config') or not request['config'].get('apikey'):
+        misperrors['error'] = "A VirusTotal api key is required for this module."
         return misperrors
-
-    if req["response_code"] == 0:
-        # Nothing found
-        return []
-
-    return getMoreInfo(req, key)
-
-
-def getIP(ip, key, do_not_recurse=False):
-    global limit
-    toReturn = []
-    req = requests.get("https://www.virustotal.com/vtapi/v2/ip-address/report",
-                       params={"ip": ip, "apikey": key})
-    try:
-        req.raise_for_status()
-        req = req.json()
-    except HTTPError as e:
-        misperrors['error'] = str(e)
+    event_limit = request['config'].get('event_limit')
+    if not isinstance(event_limit, int):
+        event_limit = 5
+    parser = VirusTotalParser(request['config']['apikey'], event_limit)
+    attribute = request['attribute']
+    status = parser.query_api(attribute)
+    if status != 200:
+        misperrors['error'] = parse_error(status)
         return misperrors
-
-    if req["response_code"] == 0:
-        # Nothing found
-        return []
-
-    if "resolutions" in req:
-        for res in req["resolutions"][:limit]:
-            toReturn.append({"types": ["domain"], "values": [res["hostname"]], "comment": comment % ip})
-            # Pivot from here to find all domain info
-            if not do_not_recurse:
-                toReturn += getDomain(res["hostname"], key, True)
-
-    toReturn += getMoreInfo(req, key)
-    return toReturn
-
-
-def getDomain(domain, key, do_not_recurse=False):
-    global limit
-    toReturn = []
-    req = requests.get("https://www.virustotal.com/vtapi/v2/domain/report",
-                       params={"domain": domain, "apikey": key})
-    try:
-        req.raise_for_status()
-        req = req.json()
-    except HTTPError as e:
-        misperrors['error'] = str(e)
-        return misperrors
-
-    if req["response_code"] == 0:
-        # Nothing found
-        return []
-
-    if "resolutions" in req:
-        for res in req["resolutions"][:limit]:
-            toReturn.append({"types": ["ip-dst", "ip-src"], "values": [res["ip_address"]], "comment": comment % domain})
-            # Pivot from here to find all info on IPs
-            if not do_not_recurse:
-                toReturn += getIP(res["ip_address"], key, True)
-    if "subdomains" in req:
-        for subd in req["subdomains"]:
-            toReturn.append({"types": ["domain"], "values": [subd], "comment": comment % domain})
-    toReturn += getMoreInfo(req, key)
-    return toReturn
-
-
-def findAll(data, keys):
-    a = []
-    if isinstance(data, dict):
-        for key in data.keys():
-            if key in keys:
-                a.append(data[key])
-            else:
-                if isinstance(data[key], (dict, list)):
-                    a += findAll(data[key], keys)
-    if isinstance(data, list):
-        for i in data:
-            a += findAll(i, keys)
-
-    return a
-
-
-def getMoreInfo(req, key):
-    global limit
-    r = []
-    # Get all hashes first
-    hashes = []
-    hashes = findAll(req, ["md5", "sha1", "sha256", "sha512"])
-    r.append({"types": ["freetext"], "values": hashes})
-    for hsh in hashes[:limit]:
-        # Search VT for some juicy info
-        try:
-            data = requests.get("http://www.virustotal.com/vtapi/v2/file/report",
-                                params={"allinfo": 1, "apikey": key, "resource": hsh}
-                                ).json()
-        except:
-            continue
-
-        # Go through each key and check if it exists
-        if "submission_names" in data:
-            r.append({'types': ["filename"], "values": data["submission_names"], "comment": comment % hsh})
-
-        if "ssdeep" in data:
-            r.append({'types': ["ssdeep"], "values": [data["ssdeep"]], "comment": comment % hsh})
-
-        if "authentihash" in data:
-            r.append({"types": ["authentihash"], "values": [data["authentihash"]], "comment": comment % hsh})
-
-        if "ITW_urls" in data:
-            r.append({"types": ["url"], "values": data["ITW_urls"], "comment": comment % hsh})
-
-        # Get the malware sample
-        sample = requests.get("https://www.virustotal.com/vtapi/v2/file/download",
-                              params={"hash": hsh, "apikey": key})
-
-        malsample = sample.content
-
-        # It is possible for VT to not give us any submission names
-        if "submission_names" in data:
-            r.append({"types": ["malware-sample"],
-                      "categories": ["Payload delivery"],
-                      "values": data["submission_names"],
-                      "data": str(base64.b64encode(malsample), 'utf-8')
-                      }
-                     )
-
-    return r
+    return parser.get_result()
 
 
 def introspection():

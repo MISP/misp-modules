@@ -1,0 +1,9 @@
+{
+    "description": "A module to submit files or URLs to Joe Sandbox for an advanced analysis, and return the link of the submission.",
+    "logo": "logos/joesandbox.png",
+    "requirements": ["jbxapi: Joe Sandbox API python3 library"],
+    "input": "Sample, url (or domain) to submit to Joe Sandbox for an advanced analysis.",
+    "output": "Link of the report generated in Joe Sandbox.",
+    "references": ["https://www.joesecurity.org", "https://www.joesandbox.com/"],
+    "features": "The module requires a Joe Sandbox API key to submit files or URL, and returns the link of the submitted analysis.\n\nIt is then possible, when the analysis is completed, to query the Joe Sandbox API to get the data related to the analysis, using the [joesandbox_query module](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/joesandbox_query.py) directly on this submission link."
+}

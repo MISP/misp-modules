@@ -47,8 +47,10 @@ options = None
 
 locale.setlocale(locale.LC_ALL, '')
 
+
 class QueryError(Exception):
     pass
+
 
 class DnsdbClient(object):
     def __init__(self, server, apikey, limit=None, http_proxy=None, https_proxy=None):
@@ -81,7 +83,6 @@ class DnsdbClient(object):
         return self._query(path, before, after)
 
     def _query(self, path, before=None, after=None):
-        res = []
         url = '%s/lookup/%s' % (self.server, path)
 
         params = {}
@@ -120,11 +121,14 @@ class DnsdbClient(object):
         except (HTTPError, URLError) as e:
             raise QueryError(str(e), sys.exc_traceback)
 
+
 def quote(path):
     return urllib_quote(path, safe='')
 
+
 def sec_to_text(ts):
     return time.strftime('%Y-%m-%d %H:%M:%S -0000', time.gmtime(ts))
+
 
 def rrset_to_text(m):
     s = StringIO()
@@ -155,8 +159,10 @@ def rrset_to_text(m):
     finally:
         s.close()
 
+
 def rdata_to_text(m):
     return '%s IN %s %s' % (m['rrname'], m['rrtype'], m['rdata'])
+
 
 def parse_config(cfg_files):
     config = {}
@@ -171,6 +177,7 @@ def parse_config(cfg_files):
             config[key] = val
 
     return config
+
 
 def time_parse(s):
     try:
@@ -193,13 +200,14 @@ def time_parse(s):
 
     m = re.match(r'^(?=\d)(?:(\d+)w)?(?:(\d+)d)?(?:(\d+)h)?(?:(\d+)m)?(?:(\d+)s?)?$', s, re.I)
     if m:
-        return -1*(int(m.group(1) or 0)*604800 +
-                int(m.group(2) or 0)*86400+
-                int(m.group(3) or 0)*3600+
-                int(m.group(4) or 0)*60+
-                int(m.group(5) or 0))
+        return -1 * (int(m.group(1) or 0) * 604800
+                     + int(m.group(2) or 0) * 86400
+                     + int(m.group(3) or 0) * 3600
+                     + int(m.group(4) or 0) * 60
+                     + int(m.group(5) or 0))
 
     raise ValueError('Invalid time: "%s"' % s)
+
 
 def epipe_wrapper(func):
     def f(*args, **kwargs):
@@ -211,31 +219,23 @@ def epipe_wrapper(func):
             raise
     return f
 
+
 @epipe_wrapper
 def main():
     global cfg
     global options
 
     parser = optparse.OptionParser(epilog='Time formats are: "%Y-%m-%d", "%Y-%m-%d %H:%M:%S", "%d" (UNIX timestamp), "-%d" (Relative time in seconds), BIND format (e.g. 1w1h, (w)eek, (d)ay, (h)our, (m)inute, (s)econd)')
-    parser.add_option('-c', '--config', dest='config', 
-        help='config file', action='append')
-    parser.add_option('-r', '--rrset', dest='rrset', type='string',
-        help='rrset <ONAME>[/<RRTYPE>[/BAILIWICK]]')
-    parser.add_option('-n', '--rdataname', dest='rdata_name', type='string',
-        help='rdata name <NAME>[/<RRTYPE>]')
-    parser.add_option('-i', '--rdataip', dest='rdata_ip', type='string',
-        help='rdata ip <IPADDRESS|IPRANGE|IPNETWORK>')
-    parser.add_option('-t', '--rrtype', dest='rrtype', type='string',
-        help='rrset or rdata rrtype')
-    parser.add_option('-b', '--bailiwick', dest='bailiwick', type='string',
-        help='rrset bailiwick')
+    parser.add_option('-c', '--config', dest='config', help='config file', action='append')
+    parser.add_option('-r', '--rrset', dest='rrset', type='string', help='rrset <ONAME>[/<RRTYPE>[/BAILIWICK]]')
+    parser.add_option('-n', '--rdataname', dest='rdata_name', type='string', help='rdata name <NAME>[/<RRTYPE>]')
+    parser.add_option('-i', '--rdataip', dest='rdata_ip', type='string', help='rdata ip <IPADDRESS|IPRANGE|IPNETWORK>')
+    parser.add_option('-t', '--rrtype', dest='rrtype', type='string', help='rrset or rdata rrtype')
+    parser.add_option('-b', '--bailiwick', dest='bailiwick', type='string', help='rrset bailiwick')
     parser.add_option('-s', '--sort', dest='sort', type='string', help='sort key')
-    parser.add_option('-R', '--reverse', dest='reverse', action='store_true', default=False,
-        help='reverse sort')
-    parser.add_option('-j', '--json', dest='json', action='store_true', default=False,
-        help='output in JSON format')
-    parser.add_option('-l', '--limit', dest='limit', type='int', default=0,
-        help='limit number of results')
+    parser.add_option('-R', '--reverse', dest='reverse', action='store_true', default=False, help='reverse sort')
+    parser.add_option('-j', '--json', dest='json', action='store_true', default=False, help='output in JSON format')
+    parser.add_option('-l', '--limit', dest='limit', type='int', default=0, help='limit number of results')
 
     parser.add_option('', '--before', dest='before', type='string', help='only output results seen before this time')
     parser.add_option('', '--after', dest='after', type='string', help='only output results seen after this time')
@@ -263,20 +263,20 @@ def main():
         print(str(e), file=sys.stderr)
         sys.exit(1)
 
-    if not 'DNSDB_SERVER' in cfg:
+    if 'DNSDB_SERVER' not in cfg:
         cfg['DNSDB_SERVER'] = DEFAULT_DNSDB_SERVER
-    if not 'HTTP_PROXY' in cfg:
+    if 'HTTP_PROXY' not in cfg:
         cfg['HTTP_PROXY'] = DEFAULT_HTTP_PROXY
-    if not 'HTTPS_PROXY' in cfg:
+    if 'HTTPS_PROXY' not in cfg:
         cfg['HTTPS_PROXY'] = DEFAULT_HTTPS_PROXY
-    if not 'APIKEY' in cfg:
+    if 'APIKEY' not in cfg:
         sys.stderr.write('dnsdb_query: APIKEY not defined in config file\n')
         sys.exit(1)
 
     client = DnsdbClient(cfg['DNSDB_SERVER'], cfg['APIKEY'],
-            limit=options.limit,
-            http_proxy=cfg['HTTP_PROXY'],
-            https_proxy=cfg['HTTPS_PROXY'])
+                         limit=options.limit,
+                         http_proxy=cfg['HTTP_PROXY'],
+                         https_proxy=cfg['HTTPS_PROXY'])
     if options.rrset:
         if options.rrtype or options.bailiwick:
             qargs = (options.rrset, options.rrtype, options.bailiwick)
@@ -307,7 +307,7 @@ def main():
         if options.sort:
             results = list(results)
             if len(results) > 0:
-                if not options.sort in results[0]:
+                if options.sort not in results[0]:
                     sort_keys = results[0].keys()
                     sort_keys.sort()
                     sys.stderr.write('dnsdb_query: invalid sort key "%s". valid sort keys are %s\n' % (options.sort, ', '.join(sort_keys)))
@@ -318,6 +318,7 @@ def main():
     except QueryError as e:
         print(e.message, file=sys.stderr)
         sys.exit(1)
+
 
 if __name__ == '__main__':
     main()

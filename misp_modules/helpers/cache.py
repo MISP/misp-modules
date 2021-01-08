@@ -19,32 +19,34 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import os
+
 import redis
 import hashlib
 
-port = 6379
-hostname = '127.0.0.1'
-db = 5
+port = int(os.getenv("REDIS_PORT")) if os.getenv("REDIS_PORT") else 6379
+hostname = os.getenv("REDIS_BACKEND") or '127.0.0.1'
+db = int(os.getenv("REDIS_DATABASE")) if os.getenv("REDIS_DATABASE") else 0
 
 
 def selftest(enable=True):
     if not enable:
         return False
-    r = redis.StrictRedis(host=hostname, port=port, db=db)
+    r = redis.Redis(host=hostname, port=port, db=db)
     try:
         r.ping()
-    except:
+    except Exception:
         return 'Redis not running or not installed. Helper will be disabled.'
 
 
 def get(modulename=None, query=None, value=None, debug=False):
     if (modulename is None or query is None):
         return False
-    r = redis.StrictRedis(host=hostname, port=port, db=db)
+    r = redis.Redis(host=hostname, port=port, db=db, decode_responses=True)
     h = hashlib.sha1()
     h.update(query.encode('UTF-8'))
     hv = h.hexdigest()
-    key = "m:" + modulename + ":" + hv
+    key = "m:{}:{}".format(modulename, hv)
 
     if not r.exists(key):
         if debug:
@@ -58,9 +60,10 @@ def get(modulename=None, query=None, value=None, debug=False):
 
 
 def flush():
-    r = redis.StrictRedis(host=hostname, port=port, db=db)
+    r = redis.StrictRedis(host=hostname, port=port, db=db, decode_responses=True)
     returncode = r.flushdb()
     return returncode
+
 
 if __name__ == "__main__":
     import sys
@@ -69,7 +72,7 @@ if __name__ == "__main__":
     else:
         print("Selftest ok")
     v = get(modulename="testmodule", query="abcdef", value="barfoo", debug=True)
-    if v == b'barfoo':
+    if v == 'barfoo':
         print("Cache ok")
     v = get(modulename="testmodule", query="abcdef")
     print(v)

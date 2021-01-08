@@ -24,8 +24,8 @@ log.addHandler(ch)
 
 misperrors = {'error': 'Error'}
 mispattributes = {
-        'input': ['vulnerability'], 
-        'output': ['text', 'link', 'cpe']}
+    'input': ['vulnerability'],
+    'output': ['text', 'link', 'cpe']}
 moduleinfo = {'version': '0.1', 'author': 'Koen Van Impe',
               'description': 'Query VulnDB - RiskBasedSecurity.com',
               'module-type': ['expansion', 'hover']}
@@ -61,7 +61,7 @@ def handler(q=False):
     add_dates = True
     add_ext_references = True
 
-    if request["config"].get("discard_dates") is not None  and request["config"].get("discard_dates").lower() == "true":
+    if request["config"].get("discard_dates") is not None and request["config"].get("discard_dates").lower() == "true":
         add_dates = False
     if request["config"].get("discard_external_references") is not None and request["config"].get("discard_external_references").lower() == "true":
         add_ext_references = False
@@ -80,7 +80,7 @@ def handler(q=False):
 
     find_by_cve_url = "%s/api/v1/vulnerabilities/%s/find_by_cve_id%s" % (VULNDB_URL, vulnerability, cpu_vulndb)
     log.debug(find_by_cve_url)
-    
+
     try:
 
         consumer = oauth.Consumer(key=apikey, secret=apisecret)
@@ -116,7 +116,7 @@ def handler(q=False):
                 if t_description:
                     values_text.append(t_description)
                 if manual_notes:
-                    values_text.append("Notes: " + manual_notes)                                        
+                    values_text.append("Notes: " + manual_notes)
                 if keywords:
                     values_text.append("Keywords: " + keywords)
                 if solution:
@@ -130,22 +130,22 @@ def handler(q=False):
                         values_text.append("Solution date: " + solution_date)
                     disclosure_date = results.get('disclosure_date', '') or ''
                     if disclosure_date:
-                        values_text.append("Disclosure date: " + disclosure_date)                    
+                        values_text.append("Disclosure date: " + disclosure_date)
                     discovery_date = results.get('discovery_date', '') or ''
                     if discovery_date:
-                        values_text.append("Discovery date: " + discovery_date)                    
+                        values_text.append("Discovery date: " + discovery_date)
                     exploit_publish_date = results.get('exploit_publish_date', '') or ''
                     if exploit_publish_date:
-                        values_text.append("Exploit published date: " + exploit_publish_date)                    
+                        values_text.append("Exploit published date: " + exploit_publish_date)
                     vendor_informed_date = results.get('vendor_informed_date', '') or ''
                     if vendor_informed_date:
-                        values_text.append("Vendor informed date: " + vendor_informed_date)                    
+                        values_text.append("Vendor informed date: " + vendor_informed_date)
                     vendor_ack_date = results.get('vendor_ack_date', '') or ''
                     if vendor_ack_date:
-                        values_text.append("Vendor acknowledgement date: " + vendor_ack_date)                    
+                        values_text.append("Vendor acknowledgement date: " + vendor_ack_date)
                     third_party_solution_date = results.get('third_party_solution_date', '') or ''
                     if third_party_solution_date:
-                        values_text.append("Third party solution date: " + third_party_solution_date)                    
+                        values_text.append("Third party solution date: " + third_party_solution_date)
 
                 # External references
                 if add_ext_references:
@@ -159,7 +159,7 @@ def handler(q=False):
                             elif reference_type == "News Article":
                                 values_links.append(reference["value"])
                             elif reference_type == "Generic Informational URL":
-                                values_links.append(reference["value"])                               
+                                values_links.append(reference["value"])
                             elif reference_type == "Vendor Specific Advisory URL":
                                 values_links.append(reference["value"])
                             elif reference_type == "Vendor URL":
@@ -183,7 +183,7 @@ def handler(q=False):
                                 values_links.append(reference_link)
                             elif reference_type == "Exploit Database":
                                 reference_link = "https://www.exploit-db.com/exploits/%s" % reference["value"]
-                                values_links.append(reference_link)                                
+                                values_links.append(reference_link)
                             elif reference_type == "Generic Informational URL":
                                 values_links.append(reference["value"])
                             elif reference_type == "Generic Informational URL":
@@ -260,17 +260,17 @@ def handler(q=False):
                         values_text.append(vulnerability_classification)
 
                 # Finished processing the VulnDB reply; set the result for MISP
-                output['results'] += [{'types': 'text', 'values':  values_text }]
-                output['results'] += [{'types': 'link', 'values':  values_links }]
+                output['results'] += [{'types': 'text', 'values': values_text}]
+                output['results'] += [{'types': 'link', 'values': values_links}]
                 if add_cpe:
-                    output['results'] += [{'types': 'cpe', 'values':  values_cpe }]
+                    output['results'] += [{'types': 'cpe', 'values': values_cpe}]
                 return output
         else:
             misperrors["error"] = "No information retrieved from VulnDB."
             return misperrors
-    except:
+    except Exception:
         misperrors["error"] = "Error while fetching information from VulnDB, wrong API keys?"
-        return misperrors        
+        return misperrors
 
 
 def introspection():

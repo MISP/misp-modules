@@ -1,0 +1,9 @@
+{
+    "description": "Module to get information from AlienVault OTX.",
+    "logo": "logos/otx.png",
+    "requirements": ["An access to the OTX API (apikey)"],
+    "input": "A MISP attribute included in the following list:\n- hostname\n- domain\n- ip-src\n- ip-dst\n- md5\n- sha1\n- sha256\n- sha512",
+    "output": "MISP attributes mapped from the result of the query on OTX, included in the following list:\n- domain\n- ip-src\n- ip-dst\n- text\n- md5\n- sha1\n- sha256\n- sha512\n- email",
+    "references": ["https://www.alienvault.com/open-threat-exchange"],
+    "features": "This module takes a MISP attribute as input to query the OTX Alienvault API. The API returns then the result of the query with some types we map into compatible types we add as MISP attributes."
+}

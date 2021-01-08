@@ -1,0 +1,9 @@
+{
+    "description": "Query of the URLhaus API to get additional information about the input attribute.",
+    "logo": "logos/urlhaus.png",
+    "requirements": [],
+    "input": "A domain, hostname, url, ip, md5 or sha256 attribute.",
+    "output": "MISP attributes & objects fetched from the result of the URLhaus API query.",
+    "references": ["https://urlhaus.abuse.ch/"],
+    "features": "Module using the new format of modules able to return attributes and objects.\n\nThe module takes one of the attribute type specified as input, and query the URLhaus API with it. If any result is returned by the API, attributes and objects are created accordingly."
+}
