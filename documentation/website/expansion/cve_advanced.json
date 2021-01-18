@@ -1,0 +1,11 @@
+{
+    "description": "An expansion module to query the CIRCL CVE search API for more information about a vulnerability (CVE).",
+    "logo": "cve.png",
+    "input": "Vulnerability attribute.",
+    "output": "Additional information about the vulnerability, such as its cvss score, some references, or the related weaknesses and attack patterns.",
+    "references": [
+        "https://cve.circl.lu",
+        "https://cve/mitre.org/"
+    ],
+    "features": "The module takes a vulnerability attribute as input and queries the CIRCL CVE search API to gather additional information.\n\nThe result of the query is then parsed to return additional information about the vulnerability, like its cvss score or some references, as well as the potential related weaknesses and attack patterns.\n\nThe vulnerability additional data is returned in a vulnerability MISP object, and the related additional information are put into weakness and attack-pattern MISP objects."
+}
