@@ -1,9 +1,12 @@
-name: Create Release
+name: Git Create Release - actions-ecosystem
 
 on:
   push:
     branches:
       - master
+  pull_request:
+    types:
+      - labeled
 
 jobs:
   release:
@@ -64,4 +67,12 @@ jobs:
           number: ${{ steps.get-merged-pull-request.outputs.number }}
           body: |
             The new version [${{ steps.bump-semver.outputs.new_version }}](https://github.com/${{ github.repository }}/releases/tag/${{ steps.bump-semver.outputs.new_version }}) has been released :tada:
-    
+
+      - uses: actions-ecosystem/action-create-comment@v1
+        if: ${{ steps.bump-semver.outputs.new_version != null }}
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          body: |
+            This PR will update [${{ github.repository }}](https://github.com/${{ github.repository }}) from [${{ steps.get-latest-tag.outputs.tag }}](https://github.com/${{ github.repository }}/releases/tag/${{ steps.get-latest-tag.outputs.tag }}) to ${{ steps.bump-semver.outputs.new_version }} :rocket:
+
+            If this update isn't as you expected, you may want to change or remove the *release label*.
