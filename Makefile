@@ -32,3 +32,13 @@ deploy_docker:
 
 test_docs_docker: prepare_docs
 	docker run --rm -it -p 8000:8000 -v $(PWD):/docs squidfunk/mkdocs-material
+
+build-docker-container:
+	docker build -t misp-module -f docker/Dockerfile .
+
+# Git Commands
+add-remote-url:
+	git remote add base https://github.com/MISP/MISP-modules.git
+update-from-origin:
+	git fetch base
+	git merge base/main
