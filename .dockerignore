@@ -1,0 +1,10 @@
+.github
+documentation
+.gitignore
+.travis.yml
+LICENSE
+Makefile
+mkdocs.yml
+etc
+var
+.git
