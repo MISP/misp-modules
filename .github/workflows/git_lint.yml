@@ -1,0 +1,40 @@
+name: Lint Pull Request Title
+
+on:
+  pull_request:
+    types:
+      - opened
+      - edited
+      - reopened
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions-ecosystem/action-regex-match@v2
+        id: regex-match
+        with:
+          text: ${{ github.event.pull_request.title }}
+          regex: '(?:add|update|fix)\([a-z]+\):\s.+'
+
+      - uses: actions-ecosystem/action-create-comment@v1
+        if: ${{ steps.regex-match.outputs.match == '' }}
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          body: |
+            :warning: The title of this PR is invalid.
+
+            Please make the title match the regex `(?:add|update|fix)\([a-z]+\):\s.+`.
+
+            e.g.) `add(cli): enable --verbose flag`, `fix(api): avoid unexpected error in handler`
+
+      - uses: actions-ecosystem/action-add-labels@v1
+        if: ${{ steps.regex-match.outputs.match == '' }}
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          labels: 'invalid/title'
+
+      - run: exit 1
+        if: ${{ steps.regex-match.outputs.match == '' }}

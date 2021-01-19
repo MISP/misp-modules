@@ -143,6 +143,16 @@ sudo systemctl enable --now misp-modules
 /var/www/MISP/venv/bin/misp-modules -l 127.0.0.1 -s & #to start the modules
 ~~~~
 
+## How to build and start MISP modules as Docker container
+~~~~bash
+MISP_MODULES_CONTAINER_RELEASE_IMAGE=misp-modules
+TAG=latest
+# Build
+docker build -t $MISP_MODULES_CONTAINER_RELEASE_IMAGE:$(git rev-parse HEAD) -t $MISP_MODULES_CONTAINER_RELEASE_IMAGE:$TAG -f docker/Dockerfile .
+# Run
+docker run --rm $MISP_MODULES_CONTAINER_RELEASE_IMAGE:$TAG
+~~~~
+
 ## How to install and start MISP modules on RHEL-based distributions ?
 As of this writing, the official RHEL repositories only contain Ruby 2.0.0 and Ruby 2.1 or higher is required. As such, this guide installs Ruby 2.2 from the [SCL](https://access.redhat.com/documentation/en-us/red_hat_software_collections/3/html/3.2_release_notes/chap-installation#sect-Installation-Subscribe) repository. 
 

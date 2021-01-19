@@ -119,8 +119,9 @@ systemctl enable --now misp-modules
 
 ~~~~bash
 docker build -t misp-modules \
+    -f docker/Dockerfile
     --build-arg BUILD_DATE=$(date -u +"%Y-%m-%d") \
-  docker/
+  .
 ~~~~
 
 ### Docker run
