@@ -946,11 +946,11 @@
                 "pdfexport"
             ],
             "hashes": [
-                "sha256:ccbef2673f992a558a11cfde8dd042c67aadbe71683911a6001da0f9f8242906",
-                "sha256:fcd4245c5fb17f835dbe98d842cdc50fa8aa6e610ee64f666ad5390f77a82737"
+                "sha256:439389a5377a9128018e9e4cc8e7ed9efa45a5efc4e77afbb55310ec7935d197",
+                "sha256:eed98c96b41a5e13ad1147f331ccb66e4fd9284df87528da5c99d759e29309d8"
             ],
             "index": "pypi",
-            "version": "==2.4.137"
+            "version": "==2.4.137.1"
         },
         "pyonyphe": {
             "editable": true,
