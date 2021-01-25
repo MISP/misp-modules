@@ -39,7 +39,7 @@ cryptography==3.3.1
 decorator==4.4.2
 deprecated==1.2.11; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3'
 dnsdb2==1.1.2
-dnspython==2.1.0
+dnspython3==1.15.0
 domaintools-api==0.5.2
 easygui==0.98.1
 ebcdic==1.1.1
