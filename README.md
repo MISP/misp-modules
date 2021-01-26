@@ -147,7 +147,7 @@ sudo systemctl enable --now misp-modules
 As of this writing, the official RHEL repositories only contain Ruby 2.0.0 and Ruby 2.1 or higher is required. As such, this guide installs Ruby 2.2 from the [SCL](https://access.redhat.com/documentation/en-us/red_hat_software_collections/3/html/3.2_release_notes/chap-installation#sect-Installation-Subscribe) repository. 
 
 ~~~~bash
-sudo yum install rh-ruby22
+sudo yum install rh-python36 rh-ruby22
 sudo yum install openjpeg-devel
 sudo yum install rubygem-rouge rubygem-asciidoctor zbar-devel opencv-devel gcc-c++ pkgconfig poppler-cpp-devel python-devel redhat-rpm-config
 cd /var/www/MISP
