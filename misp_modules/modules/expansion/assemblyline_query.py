@@ -11,7 +11,7 @@ mispattributes = {'input': ['link'], 'format': 'misp_standard'}
 moduleinfo = {'version': '1', 'author': 'Christian Studer',
               'description': 'Query AssemblyLine with a report URL to get the parsed data.',
               'module-type': ['expansion']}
-moduleconfig = ["apiurl", "user_id", "apikey", "password"]
+moduleconfig = ["apiurl", "user_id", "apikey", "password", "verifyssl"]
 
 
 class AssemblyLineParser():
@@ -125,7 +125,7 @@ def parse_config(apiurl, user_id, config):
     error = {"error": "Please provide your AssemblyLine API key or Password."}
     if config.get('apikey'):
         try:
-            return Client(apiurl, apikey=(user_id, config['apikey']))
+            return Client(apiurl, apikey=(user_id, config['apikey']), verify=config['verifyssl'])
         except ClientError as e:
             error['error'] = f'Error while initiating a connection with AssemblyLine: {e.__str__()}'
     if config.get('password'):
