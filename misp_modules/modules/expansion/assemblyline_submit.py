@@ -7,7 +7,7 @@ from urllib.parse import urljoin
 
 moduleinfo = {"version": 1, "author": "Christian Studer", "module-type": ["expansion"],
               "description": "Submit files or URLs to AssemblyLine"}
-moduleconfig = ["apiurl", "user_id", "apikey", "password"]
+moduleconfig = ["apiurl", "user_id", "apikey", "password", "verifyssl"]
 mispattributes = {"input": ["attachment", "malware-sample", "url"],
                   "output": ["link"]}
 
