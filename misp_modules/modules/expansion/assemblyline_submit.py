@@ -16,12 +16,12 @@ def parse_config(apiurl, user_id, config):
     error = {"error": "Please provide your AssemblyLine API key or Password."}
     if config.get('apikey'):
         try:
-            return Client(apiurl, apikey=(user_id, config['apikey']))
+            return Client(apiurl, apikey=(user_id, config['apikey']), verify=config['verifyssl'])
         except ClientError as e:
             error['error'] = f'Error while initiating a connection with AssemblyLine: {e.__str__()}'
     if config.get('password'):
         try:
-            return Client(apiurl, auth=(user_id, config['password']))
+            return Client(apiurl, auth=(user_id, config['password']), verify=config['verifyssl'])
         except ClientError as e:
             error['error'] = f'Error while initiating a connection with AssemblyLine: {e.__str__()}'
     return error
