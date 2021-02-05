@@ -34,3 +34,8 @@ def handler(q=False):
         return False
     request = json.loads(q)
     attribute = request['attribute']
+
+
+def version():
+    moduleinfo['config'] = moduleconfig
+    return moduleinfo
