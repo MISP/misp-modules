@@ -8,7 +8,7 @@
 -e git+https://github.com/cartertemm/ODTReader.git/@49d6938693f6faa3ff09998f86dba551ae3a996b#egg=odtreader
 -e git+https://github.com/sebdraven/pydnstrails@48c1f740025c51289f43a24863d1845ff12fd21a#egg=pydnstrails
 -e git+https://github.com/sebdraven/pyonyphe@1ce15581beebb13e841193a08a2eb6f967855fcb#egg=pyonyphe
--e git+https://github.com/stricaud/faup.git#egg=pyfaup&subdirectory=src/lib/bindings/python
+#-e git+https://github.com/stricaud/faup.git#egg=pyfaup&subdirectory=src/lib/bindings/python
 aiohttp==3.4.4
 antlr4-python3-runtime==4.8 ; python_version >= '3'
 apiosintds==1.8.3
@@ -44,7 +44,7 @@ importlib-metadata==1.6.0 ; python_version < '3.8'
 isodate==0.6.0
 jbxapi==3.4.0
 jsonschema==3.2.0
-lief==0.10.1
+
 lxml==4.5.0
 maclookup==1.0.3
 maxminddb==1.5.2
