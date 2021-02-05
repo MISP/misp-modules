@@ -1,7 +1,5 @@
 import json
 
-import json
-
 try:
     import pyeti
 except ImportError:
@@ -30,7 +28,7 @@ class Yeti:
         if obs:
             return obs
 
-    def 
+
 def handler(q=False):
     if q is False:
         return False
