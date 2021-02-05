@@ -39,3 +39,6 @@ def handler(q=False):
 def version():
     moduleinfo['config'] = moduleconfig
     return moduleinfo
+
+def introspection():
+    return mispattributes
