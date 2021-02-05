@@ -1,6 +1,7 @@
 import json
 
 import json
+
 try:
     import pyeti
 except ImportError:
@@ -15,3 +16,23 @@ moduleinfo = {'version': '1', 'author': 'Sebastien Larinier @sebdraven',
               'description': 'Query on yeti',
               'module-type': ['expansion', 'hover']}
 
+moduleconfig = ['apikey', 'url']
+
+
+class Yeti:
+
+    def __init__(self, url, key):
+        self.api = pyeti.YetiApi(url, api_key=key)
+        self.dict = {'Ip': 'ip-src', 'Domain': 'domain', 'Hostname': 'hostname'}
+
+    def search(self, value):
+        obs = self.api.observable_search(value=value)
+        if obs:
+            return obs
+
+    def 
+def handler(q=False):
+    if q is False:
+        return False
+    request = json.loads(q)
+    attribute = request['attribute']
