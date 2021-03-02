@@ -110,21 +110,20 @@ def handler(q=False):
             email_object.add_reference(f_object.uuid, 'includes', 'Email attachment')
 
     mail_body = email_object.email.get_body(preferencelist=('html', 'plain'))
-    if extract_urls:
-        if mail_body:
-            charset = mail_body.get_content_charset()
-            if mail_body.get_content_type() == 'text/html':
-                url_parser = HTMLURLParser()
-                url_parser.feed(mail_body.get_payload(decode=True).decode(charset, errors='ignore'))
-                urls = url_parser.urls
-            else:
-                urls = re.findall(r'https?://(?:[-\w.]|(?:%[\da-fA-F]{2}))+', mail_body.get_payload(decode=True).decode(charset, errors='ignore'))
-            for url in urls:
-                if not url:
-                    continue
-                url_object = URLObject(url, standalone=False)
-                file_objects.append(url_object)
-                email_object.add_reference(url_object.uuid, 'includes', 'URL in email body')
+    if extract_urls and mail_body:
+        charset = mail_body.get_content_charset('utf-8')
+        if mail_body.get_content_type() == 'text/html':
+            url_parser = HTMLURLParser()
+            url_parser.feed(mail_body.get_payload(decode=True).decode(charset, errors='ignore'))
+            urls = url_parser.urls
+        else:
+            urls = re.findall(r'https?://(?:[-\w.]|(?:%[\da-fA-F]{2}))+', mail_body.get_payload(decode=True).decode(charset, errors='ignore'))
+        for url in urls:
+            if not url:
+                continue
+            url_object = URLObject(url, standalone=False)
+            file_objects.append(url_object)
+            email_object.add_reference(url_object.uuid, 'includes', 'URL in email body')
 
     objects = [email_object.to_json()]
     if file_objects:
