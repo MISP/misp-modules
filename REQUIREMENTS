@@ -25,6 +25,7 @@ backscatter==0.2.4
 beautifulsoup4==4.9.3
 bidict==0.21.2; python_version >= '3.6'
 blockchain==1.4.4
+censys==1.26.3
 certifi==2020.12.5
 cffi==1.14.4
 chardet==3.0.4
@@ -73,7 +74,7 @@ olefile==0.46; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2,
 oletools==0.56
 opencv-python==4.5.1.48
 pandas-ods-reader==0.0.7
-pandas==1.2.1
+pandas==1.1.5
 passivetotal==1.0.31
 pcodedmp==1.2.6
 pdftotext==2.1.5
@@ -85,6 +86,7 @@ pycryptodome==3.9.9; python_version >= '2.6' and python_version not in '3.0, 3.1
 pycryptodomex==3.9.9; python_version >= '2.6' and python_version not in '3.0, 3.1, 3.2, 3.3'
 pydeep==0.4
 pyeupi==1.1
+pyfaup==1.2
 pygeoip==0.3.2
 pymisp[email,fileobjects,openioc,pdfexport]==2.4.137.1
 pyopenssl==20.0.1
