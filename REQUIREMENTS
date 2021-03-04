@@ -25,7 +25,7 @@ backscatter==0.2.4
 beautifulsoup4==4.9.3
 bidict==0.21.2; python_version >= '3.6'
 blockchain==1.4.4
-censys==1.26.3
+censys==1.1.1
 certifi==2020.12.5
 cffi==1.14.4
 chardet==3.0.4
