@@ -8,7 +8,8 @@ except ImportError:
 misperrors = {'error': 'Error'}
 
 mispattributes = {'input': ['ip-src', 'ip-dst', 'hostname', 'domain'],
-                  'output': ['hostname', 'domain', 'ip-src', 'ip-dst', 'url']}
+                  'format': 'misp_standard'
+                  }
 # possible module-types: 'expansion', 'hover' or both
 moduleinfo = {'version': '1', 'author': 'Sebastien Larinier @sebdraven',
               'description': 'Query on yeti',
@@ -69,7 +70,7 @@ def handler(q=False):
     yeti_client = None
 
     request = json.loads(q)
-
+    print(request)
     if 'config' in request and 'url' in request['config']:
         yeti_url = request['config']['url']
     if 'config' in request and 'apikey' in request['config']:
