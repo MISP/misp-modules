@@ -82,6 +82,7 @@ def handler(q=False):
 
     if yeti_client:
         obs = yeti_client.search(obs_value)
+        print(obs)
         values = []
         types = []
         to_push = {"results": []}
