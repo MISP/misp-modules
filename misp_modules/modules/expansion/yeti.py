@@ -63,7 +63,7 @@ def handler(q=False):
     if q is False:
         return False
     request = json.loads(q)
-
+    print(request)
     if 'url' in request:
         yeti_url = request['url']
     if 'apikey' in request:
