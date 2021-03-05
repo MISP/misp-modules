@@ -20,7 +20,6 @@ moduleconfig = ['apikey', 'url']
 class Yeti():
 
     def __init__(self, url, key):
-        super(Yeti, self).__init__(url, key)
         self.dict = {'Ip': 'ip-src', 'Domain': 'domain', 'Hostname': 'hostname'}
         self.yeti_client = pyeti.YetiApi(url, key)
     def search(self, value):
@@ -70,7 +69,7 @@ def handler(q=False):
 
     request = json.loads(q)
     print(request)
-    
+
     if 'config' in request and 'url' in request['config']:
         yeti_url = request['config']['url']
     if 'config' in request and 'apikey' in request['config']:
