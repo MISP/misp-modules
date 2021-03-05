@@ -77,11 +77,11 @@ def handler(q=False):
         apikey = request['config']['apikey']
     if apikey and yeti_url:
         yeti_client = Yeti(yeti_url,apikey)
-    if request.get('ip-dst'):
-        obs_value = request['ip-dst']
+    if request.get('attribute'):
+        attribute = request['attribute']
 
     if yeti_client:
-        obs = yeti_client.search(obs_value)
+        obs = yeti_client.search(attribute['value'])
         values = []
         types = []
         to_push = {"results": []}
