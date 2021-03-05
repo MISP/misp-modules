@@ -14,3 +14,6 @@ site*
 
 #pycharm env
 .idea/*
+
+#venv
+venv*
