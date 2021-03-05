@@ -63,6 +63,7 @@ def handler(q=False):
     if q is False:
         return False
     request = json.loads(q)
+    print(request)
     attribute = request['attribute']
     print(attribute)
 
