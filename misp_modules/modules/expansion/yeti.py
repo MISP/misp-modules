@@ -63,9 +63,21 @@ def handler(q=False):
     if q is False:
         return False
     request = json.loads(q)
-    print(request)
-    attribute = request['attribute']
-    print(attribute)
+
+    if 'url' in request:
+        yeti_url = request['url']
+    if 'apikey' in request:
+        apikey = request['apikey']
+    if apikey and yeti_url:
+        yeti_client = Yeti(yeti_url,apikey)
+    if request.get('ip-dst'):
+        obs_value = request['ip-dst']
+
+    if yeti_client:
+        obs=yeti_client.search(obs_value)
+        print(obs)
+    else:
+        misperrors['error'] = 'Yeti Config Error'
 
 
 def version():
