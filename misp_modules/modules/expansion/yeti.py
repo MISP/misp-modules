@@ -21,7 +21,8 @@ class Yeti():
 
     def __init__(self, url, key):
         self.dict = {'Ip': 'ip-src', 'Domain': 'domain', 'Hostname': 'hostname'}
-        self.yeti_client = pyeti.YetiApi(url, key)
+        self.yeti_client = pyeti.YetiApi(url=url, api_key=key)
+        
     def search(self, value):
         obs = self.yeti_client.observable_search(value=value)
         if obs:
