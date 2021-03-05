@@ -31,7 +31,7 @@ class Yeti():
     def get_neighboors(self, obs_id):
         neighboors = self.yeti_client.neighbors_observables(obs_id)
         if neighboors and 'objs' in neighboors:
-            for n in neighboors:
+            for n in neighboors['objs']:
                 yield n
 
     def get_tags(self, value):
@@ -69,7 +69,6 @@ def handler(q=False):
     yeti_client = None
 
     request = json.loads(q)
-    print(request)
 
     if 'config' in request and 'url' in request['config']:
         yeti_url = request['config']['url']
@@ -82,7 +81,6 @@ def handler(q=False):
 
     if yeti_client:
         obs = yeti_client.search(obs_value)
-        print(obs)
         values = []
         types = []
         to_push = {"results": []}
