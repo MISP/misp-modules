@@ -5,6 +5,8 @@ try:
 except ImportError:
     print("pyeti module not installed.")
 
+from pymisp import MISPEvent, MISPObject
+
 misperrors = {'error': 'Error'}
 
 mispattributes = {'input': ['ip-src', 'ip-dst', 'hostname', 'domain'],
@@ -20,9 +22,12 @@ moduleconfig = ['apikey', 'url']
 
 class Yeti():
 
-    def __init__(self, url, key):
+    def __init__(self, url, key,attribute):
         self.dict = {'Ip': 'ip-dst', 'Domain': 'domain', 'Hostname': 'hostname', 'Url': 'url'}
         self.yeti_client = pyeti.YetiApi(url=url, api_key=key)
+        self.attribute = attribute
+        self.misp_event = MISPEvent()
+        self.misp_event.add_attribute(**attribute)
 
     def search(self, value):
         obs = self.yeti_client.observable_search(value=value)
@@ -60,6 +65,28 @@ class Yeti():
         for r in res:
             yield r['name']
 
+    def parse_yeti_result(self):
+        obs = self.search(self.attribute['value'])
+        values = []
+        types = []
+
+        for obs_to_add in self.get_neighboors(obs['id']):
+            object_misp = self.get_object(obs_to_add)
+            self.misp_event.add_object(object_misp)
+
+    def get_result(self):
+        event = json.loads(self.misp_event.to_json())
+        results = {key: event[key] for key in ('Attribute', 'Object')}
+        return results
+
+    def get_object(self,obj_to_add):
+        if (obj_to_add['type'] == 'Ip' and self.attribute in ['hostname','domain']) or\
+                (obj_to_add['type'] in ('Hostname', 'Domain') and self.attribute['type'] in ('ip-src', 'ip-dst')):
+            domain_ip_object = MISPObject('domain-ip')
+            domain_ip_object.add_attribute()
+            domain_ip_object.add_reference(self.attribute['uuid'], 'related_to')
+            return domain_ip_object
+
 def handler(q=False):
     if q is False:
         return False
@@ -70,32 +97,19 @@ def handler(q=False):
     yeti_client = None
 
     request = json.loads(q)
+    attribute = request['attribute']
+    if attribute['type'] not in mispattributes['input']:
+        return {'error': 'Unsupported attributes type'}
     print(request)
     if 'config' in request and 'url' in request['config']:
         yeti_url = request['config']['url']
     if 'config' in request and 'apikey' in request['config']:
         apikey = request['config']['apikey']
     if apikey and yeti_url:
-        yeti_client = Yeti(yeti_url,apikey)
-    if request.get('attribute'):
-        attribute = request['attribute']
+        yeti_client = Yeti(yeti_url, apikey, attribute)
 
     if yeti_client:
-        obs = yeti_client.search(attribute['value'])
-        values = []
-        types = []
-        to_push = {"results": []}
-        for obs_to_add in yeti_client.get_neighboors(obs['id']):
-            print(obs_to_add)
-            values.append(obs_to_add['value'])
-            types.append(yeti_client.dict[obs_to_add['type']])
-        to_push['results'].append(
-            {'types': types,
-             'values': values,
-             'categories': ['Network Activities']
-            }
-        )
-        return to_push
+
     else:
         misperrors['error'] = 'Yeti Config Error'
         return misperrors
