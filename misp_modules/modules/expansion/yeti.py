@@ -86,9 +86,10 @@ def handler(q=False):
         values = []
         types = []
         to_push = {"results": []}
-        for obs in yeti_client.get_neighboors(obs['id']):
-            values.append(obs['value'])
-            types.append(yeti_client.dict[obs['type']])
+        for obs_to_add in yeti_client.get_neighboors(obs['id']):
+            print(obs_to_add)
+            values.append(obs_to_add['value'])
+            types.append(yeti_client.dict[obs_to_add['type']])
         to_push['results'].append(
             {'types': types,
              'values': values,
