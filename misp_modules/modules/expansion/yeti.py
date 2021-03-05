@@ -20,9 +20,9 @@ moduleconfig = ['apikey', 'url']
 class Yeti():
 
     def __init__(self, url, key):
-        self.dict = {'Ip': 'ip-src', 'Domain': 'domain', 'Hostname': 'hostname'}
+        self.dict = {'Ip': 'ip-dst', 'Domain': 'domain', 'Hostname': 'hostname', 'Url': 'url'}
         self.yeti_client = pyeti.YetiApi(url=url, api_key=key)
-        
+
     def search(self, value):
         obs = self.yeti_client.observable_search(value=value)
         if obs:
@@ -81,10 +81,24 @@ def handler(q=False):
         obs_value = request['ip-dst']
 
     if yeti_client:
-        obs= yeti_client.search(obs_value)
-        print(obs)
+        obs = yeti_client.search(obs_value)
+        values = []
+        types = []
+        to_push = {"results": []}
+        for obs in yeti_client.get_neighboors(obs['id']):
+            values.append(obs['value'])
+            types.append(yeti_client.dict[obs['type']])
+        to_push['results'].append(
+            {'types': types,
+             'values': values,
+             'categories': ['Network Activities']
+            }
+        )
+        return to_push
     else:
         misperrors['error'] = 'Yeti Config Error'
+        return misperrors
+
 
 
 def version():
