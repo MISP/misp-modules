@@ -17,19 +17,19 @@ moduleinfo = {'version': '1', 'author': 'Sebastien Larinier @sebdraven',
 moduleconfig = ['apikey', 'url']
 
 
-class Yeti(pyeti.YetiApi):
+class Yeti():
 
     def __init__(self, url, key):
         super(Yeti, self).__init__(url, key)
         self.dict = {'Ip': 'ip-src', 'Domain': 'domain', 'Hostname': 'hostname'}
-
+        self.yeti_client = pyeti.YetiApi(url, key)
     def search(self, value):
-        obs = self.observable_search(value=value)
+        obs = self.yeti_client.observable_search(value=value)
         if obs:
             return obs[0]
 
     def get_neighboors(self, obs_id):
-        neighboors = self.neighbors_observables(obs_id)
+        neighboors = self.yeti_client.neighbors_observables(obs_id)
         if neighboors and 'objs' in neighboors:
             for n in neighboors:
                 yield n
@@ -41,12 +41,12 @@ class Yeti(pyeti.YetiApi):
                 yield t
 
     def get_entity(self, obs_id):
-        companies = self.observable_to_company(obs_id)
-        actors = self.observable_to_actor(obs_id)
-        campaigns = self.observable_to_campaign(obs_id)
-        exploit_kit = self.observable_to_exploitkit(obs_id)
-        exploit = self.observable_to_exploit(obs_id)
-        ind = self.observable_to_indicator(obs_id)
+        companies = self.yeti_client.observable_to_company(obs_id)
+        actors = self.yeti_client.observable_to_actor(obs_id)
+        campaigns = self.yeti_client.observable_to_campaign(obs_id)
+        exploit_kit = self.yeti_client.observable_to_exploitkit(obs_id)
+        exploit = self.yeti_client.observable_to_exploit(obs_id)
+        ind = self.yeti_client.observable_to_indicator(obs_id)
 
         res = []
         res.extend(companies)
@@ -62,10 +62,15 @@ class Yeti(pyeti.YetiApi):
 def handler(q=False):
     if q is False:
         return False
-    request = json.loads(q)
-    print(request)
+
+
     apikey = None
     yeti_url = None
+    yeti_client = None
+
+    request = json.loads(q)
+    print(request)
+    
     if 'config' in request and 'url' in request['config']:
         yeti_url = request['config']['url']
     if 'config' in request and 'apikey' in request['config']:
@@ -76,7 +81,7 @@ def handler(q=False):
         obs_value = request['ip-dst']
 
     if yeti_client:
-        obs=yeti_client.search(obs_value)
+        obs= yeti_client.search(obs_value)
         print(obs)
     else:
         misperrors['error'] = 'Yeti Config Error'
