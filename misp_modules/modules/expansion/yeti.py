@@ -64,10 +64,12 @@ def handler(q=False):
         return False
     request = json.loads(q)
     print(request)
-    if 'url' in request:
-        yeti_url = request['url']
-    if 'apikey' in request:
-        apikey = request['apikey']
+    apikey = None
+    yeti_url = None
+    if 'config' in request and 'url' in request['config']:
+        yeti_url = request['config']['url']
+    if 'config' in request and 'apikey' in request['config']:
+        apikey = request['config']['apikey']
     if apikey and yeti_url:
         yeti_client = Yeti(yeti_url,apikey)
     if request.get('ip-dst'):
