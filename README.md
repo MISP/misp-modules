@@ -131,7 +131,7 @@ For more information: [Extending MISP with Python modules](https://www.misp-proj
 sudo apt-get install python3-dev python3-pip libpq5 libjpeg-dev tesseract-ocr libpoppler-cpp-dev imagemagick virtualenv libopencv-dev zbar-tools libzbar0 libzbar-dev libfuzzy-dev build-essential -y
 sudo -u www-data virtualenv -p python3 /var/www/MISP/venv
 cd /usr/local/src/
-chown -R www-data .
+sudo chown -R www-data: .
 sudo git clone https://github.com/MISP/misp-modules.git
 cd misp-modules
 sudo -u www-data /var/www/MISP/venv/bin/pip install -I -r REQUIREMENTS
