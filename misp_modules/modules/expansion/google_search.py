@@ -1,6 +1,6 @@
 import json
 try:
-    from google import google
+    from googleapi import google
 except ImportError:
     print("GoogleAPI not installed. Command : pip install git+https://github.com/abenassi/Google-Search-API")
 
