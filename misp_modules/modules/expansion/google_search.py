@@ -1,4 +1,6 @@
 import json
+import random
+import time
 try:
     from googleapi import google
 except ImportError:
@@ -9,6 +11,8 @@ mispattributes = {'input': ['url'], 'output': ['text']}
 moduleinfo = {'author': 'Oun & Gindt', 'module-type': ['hover'],
               'description': 'An expansion hover module to expand google search information about an URL'}
 
+def sleep(retry):
+    time.sleep(random.uniform(0, min(40, 0.01 * 2 ** retry)))
 
 def handler(q=False):
     if q is False:
@@ -18,10 +22,16 @@ def handler(q=False):
         return {'error': "Unsupported attributes type"}
     num_page = 1
     res = ""
-    search_results = google.search(request['url'], num_page)
-    for i in range(3):
+    # The googleapi module sets a random useragent. The output depends on the useragent.
+    # It's better to retry 3 times.
+    for retry in range(3):
+        search_results = google.search(request['url'], num_page)
+        if len(search_results) > 0:
+            break
+        sleep(retry)
+    for i, search_result in enumerate(search_results):
         res += "("+str(i+1)+")" + '\t'
-        res += json.dumps(search_results[i].description, ensure_ascii=False)
+        res += json.dumps(search_result.description, ensure_ascii=False)
         res += '\n\n'
     return {'results': [{'types': mispattributes['output'], 'values':res}]}
 
