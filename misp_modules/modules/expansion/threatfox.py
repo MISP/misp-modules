@@ -47,7 +47,7 @@ def handler(q=False):
         result = json.loads(response.text)
         if(result["query_status"] == "ok"):
             confidence_tag = confidence_level_to_tag(result["data"][0]["confidence_level"])
-            ret_val = {'results': [{'types': mispattributes['output'], 'values': [result["data"][0]["threat_type_desc"]], 'tags': [result["data"][0]["malware"], confidence_tag ] }]}
+            ret_val = {'results': [{'types': mispattributes['output'], 'values': [result["data"][0]["threat_type_desc"]], 'tags': [result["data"][0]["malware"], result["data"][0]["malware_printable"], confidence_tag ] }]}
 
     return ret_val
 
