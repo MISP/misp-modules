@@ -4,12 +4,36 @@ from . import check_input_attribute, standard_error_message
 from pymisp import MISPEvent, MISPObject
 
 misperrors = {'error': 'Error'}
+standard_query_input = [
+    'hostname',
+    'domain',
+    'ip-src',
+    'ip-dst'
+]
+flex_query_input = [
+    'btc',
+    'dkim',
+    'email',
+    'email-src',
+    'email-dst',
+    'domain|ip',
+    'hex',
+    'mac-address',
+    'mac-eui-64',
+    'other',
+    'pattern-filename',
+    'target-email',
+    'text',
+    'uri',
+    'url',
+    'whois-registrant-email',
+]
 mispattributes = {
-    'input': ['hostname', 'domain', 'ip-src', 'ip-dst'],
+    'input': standard_query_input + flex_query_input,
     'format': 'misp_standard'
 }
 moduleinfo = {
-    'version': '0.4',
+    'version': '0.5',
     'author': 'Christophe Vandeplas',
     'description': 'Module to access Farsight DNSDB Passive DNS',
     'module-type': ['expansion', 'hover']
@@ -20,11 +44,38 @@ DEFAULT_DNSDB_SERVER = 'https://api.dnsdb.info'
 DEFAULT_LIMIT = 10
 
 TYPE_TO_FEATURE = {
+    "btc": "Bitcoin address",
+    "dkim": "domainkeys identified mail",
     "domain": "domain name",
+    "domain|ip": "domain name / IP address",
+    "hex": "value in hexadecimal format",
     "hostname": "hostname",
-    "ip-src": "IP address",
-    "ip-dst": "IP address"
+    "mac-address": "MAC address",
+    "mac-eui-64": "MAC EUI-64 address",
+    "pattern-filename": "pattern in the name of a file",
+    "target-email": "attack target email",
+    "uri": "Uniform Resource Identifier",
+    "url": "Uniform Resource Locator",
+    "whois-registrant-email": "email of a domain's registrant"
 }
+TYPE_TO_FEATURE.update(
+    dict.fromkeys(
+        ("ip-src", "ip-dst"),
+        "IP address"
+    )
+)
+TYPE_TO_FEATURE.update(
+    dict.fromkeys(
+        ("email", "email-src", "email-dst"),
+        "email address"
+    )
+)
+TYPE_TO_FEATURE.update(
+    dict.fromkeys(
+        ("other", "text"),
+        "text"
+    )
+)
 
 
 class FarsightDnsdbParser():
@@ -44,7 +95,7 @@ class FarsightDnsdbParser():
             'zone_time_first': {'type': 'datetime', 'object_relation': 'zone_time_first'},
             'zone_time_last': {'type': 'datetime', 'object_relation': 'zone_time_last'}
         }
-        self.comment = 'Result from an %s lookup on DNSDB about the %s: %s'
+        self.comment = 'Result from a %s lookup on DNSDB about the %s: %s'
 
     def parse_passivedns_results(self, query_response):
         for query_type, results in query_response.items():
@@ -87,17 +138,9 @@ def handler(q=False):
         config['server'] = DEFAULT_DNSDB_SERVER
     client_args = {feature: config[feature] for feature in ('apikey', 'server')}
     client = dnsdb2.Client(**client_args)
-    flex = add_flex_queries(config.get('flex_queries'))
-    if not config.get('limit'):
-        config['limit'] = DEFAULT_LIMIT
-    lookup_args = {
-        'limit': config['limit'],
-        'offset': 0,
-        'ignore_limited': True
-    }
-    to_query = lookup_ip if attribute['type'] in ('ip-src', 'ip-dst') else lookup_name
+    to_query, args = parse_input(attribute, config)
     try:
-        response = to_query(client, attribute['value'], lookup_args, flex)
+        response = to_query(client, *args)
     except dnsdb2.DnsdbException as e:
         return {'error': e.__str__()}
     if not response:
@@ -105,6 +148,20 @@ def handler(q=False):
     parser = FarsightDnsdbParser(attribute)
     parser.parse_passivedns_results(response)
     return parser.get_results()
+
+
+def parse_input(attribute, config):
+    lookup_args = {
+        'limit': config['limit'] if config.get('limit') else DEFAULT_LIMIT,
+        'offset': 0,
+        'ignore_limited': True
+    }
+    attribute_type = attribute['type']
+    if attribute_type in flex_query_input:
+        return flex_queries, (lookup_args, attribute['value'])
+    flex = add_flex_queries(config.get('flex_queries'))
+    to_query = lookup_ip if 'ip-' in attribute_type else lookup_name
+    return to_query, (lookup_args, attribute['value'], flex)
 
 
 def add_flex_queries(flex):
@@ -115,7 +172,7 @@ def add_flex_queries(flex):
     return False
 
 
-def flex_queries(client, name, lookup_args):
+def flex_queries(client, lookup_args, name):
     response = {}
     rdata = list(client.flex_rdata_regex(name.replace('.', '\\.'), **lookup_args))
     if rdata:
@@ -126,7 +183,7 @@ def flex_queries(client, name, lookup_args):
     return response
 
 
-def lookup_name(client, name, lookup_args, flex):
+def lookup_name(client, lookup_args, name, flex):
     response = {}
     # RRSET = entries in the left-hand side of the domain name related labels
     rrset_response = list(client.lookup_rrset(name, **lookup_args))
@@ -137,17 +194,17 @@ def lookup_name(client, name, lookup_args, flex):
     if rdata_response:
         response['rdata'] = rdata_response
     if flex:
-        response.update(flex_queries(client, name, lookup_args))
+        response.update(flex_queries(client, lookup_args, name))
     return response
 
 
-def lookup_ip(client, ip, lookup_args, flex):
+def lookup_ip(client, lookup_args, ip, flex):
     response = {}
     res = list(client.lookup_rdata_ip(ip, **lookup_args))
     if res:
         response['rdata'] = res
     if flex:
-        response.update(flex_queries(client, ip, lookup_args))
+        response.update(flex_queries(client, lookup_args, ip))
     return response
 
 
