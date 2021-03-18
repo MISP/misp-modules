@@ -3,12 +3,13 @@ import requests
 import json
 
 misperrors = {'error': 'Error'}
-mispattributes = {'input': ['email-dst', 'email-src'],'output': ['text']}
+mispattributes = {'input': ['email-dst', 'email-src'], 'output': ['text']}
 moduleinfo = {'version': '0.2', 'author': 'Corsin Camichel, Aurélien Schwab', 'description': 'Module to access haveibeenpwned.com API (v3).', 'module-type': ['hover']}
 moduleconfig = ['api_key']
 
 haveibeenpwned_api_url = 'https://haveibeenpwned.com/api/v3/breachedaccount/'
-API_KEY = "" # details at https://www.troyhunt.com/authentication-and-the-have-i-been-pwned-api/
+API_KEY = ""  # details at https://www.troyhunt.com/authentication-and-the-have-i-been-pwned-api/
+
 
 def handler(q=False):
     if q is False:
@@ -39,8 +40,10 @@ def handler(q=False):
         misperrors['error'] = 'haveibeenpwned.com API not accessible (HTTP ' + str(r.status_code) + ')'
         return misperrors['error']
 
+
 def introspection():
     return mispattributes
+
 
 def version():
     moduleinfo['config'] = moduleconfig

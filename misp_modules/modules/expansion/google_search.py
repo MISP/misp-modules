@@ -11,8 +11,10 @@ mispattributes = {'input': ['url'], 'output': ['text']}
 moduleinfo = {'author': 'Oun & Gindt', 'module-type': ['hover'],
               'description': 'An expansion hover module to expand google search information about an URL'}
 
+
 def sleep(retry):
     time.sleep(random.uniform(0, min(40, 0.01 * 2 ** retry)))
+
 
 def handler(q=False):
     if q is False:
