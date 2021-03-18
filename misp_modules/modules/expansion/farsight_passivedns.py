@@ -174,12 +174,15 @@ def add_flex_queries(flex):
 
 def flex_queries(client, lookup_args, name):
     response = {}
-    rdata = list(client.flex_rdata_regex(name.replace('.', '\\.'), **lookup_args))
-    if rdata:
-        response['flex_rdata'] = rdata
-    rrnames = list(client.flex_rrnames_regex(name.replace('.', '\\.'), **lookup_args))
-    if rrnames:
-        response['flex_rrnames'] = rrnames
+    name = name.replace('@', '.')
+    for feature in ('rdata', 'rrnames'):
+        to_call = getattr(client, f'flex_{feature}_regex')
+        results = list(to_call(name, **lookup_args))
+        for result in list(to_call(name.replace('.', '\\.'), **lookup_args)):
+            if result not in results:
+                results.append(result)
+        if results:
+            response[f'flex_{feature}'] = results
     return response
 
 
