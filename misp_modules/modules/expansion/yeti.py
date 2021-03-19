@@ -78,7 +78,7 @@ class Yeti():
     def get_result(self):
         event = json.loads(self.misp_event.to_json())
         results = {key: event[key] for key in ('Attribute', 'Object')}
-        print('results '% results)
+        print('results %s'% results)
         return results
 
     def get_object(self, obj_to_add):
