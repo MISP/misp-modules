@@ -96,12 +96,11 @@ class Yeti():
             attr_misp['object_relation'].update({'type': 'text',
                                                  'object_relation': 'ip'})
         elif 'domain' == typ_attribute:
-            attr_misp.update({'type': 'text',
+            attr_misp.update({'type': 'domain',
                               'object_relation': 'domain'})
         elif 'hostname' == typ_attribute:
-            attr_misp.update({'type': 'text',
+            attr_misp.update({'type': 'domain',
                               'object_relation': 'domain'})
-            attr_misp['type'] = 'domain'
         else:
             attr_misp['object_relation'] = None
         print('Attribute %s' % attr_misp)
