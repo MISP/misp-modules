@@ -99,6 +99,7 @@ class Yeti():
             attr_misp['object_relation'] = 'domain'
         else:
             attr_misp['object_relation'] = None
+        print('Attribute %s' % attr_misp)
         return attr_misp
 
 def handler(q=False):
