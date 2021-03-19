@@ -90,13 +90,13 @@ class Yeti():
 
     def __get_attribute(self, obj_yeti):
         typ_attribute = self.misp_mapping[obj_yeti['type']]
-        attr_misp = {'type':typ_attribute, 'value': obj_yeti['value']}
+        attr_misp = {'type':typ_attribute, 'value': obj_yeti['value'],
+                     'object_relation': 'pdns'}
         return attr_misp
 
 def handler(q=False):
     if q is False:
         return False
-
 
     apikey = None
     yeti_url = None
@@ -106,7 +106,7 @@ def handler(q=False):
     attribute = request['attribute']
     if attribute['type'] not in mispattributes['input']:
         return {'error': 'Unsupported attributes type'}
-    print(request)
+
     if 'config' in request and 'url' in request['config']:
         yeti_url = request['config']['url']
     if 'config' in request and 'apikey' in request['config']:
