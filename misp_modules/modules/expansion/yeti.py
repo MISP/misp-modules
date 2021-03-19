@@ -69,7 +69,7 @@ class Yeti():
         obs = self.search(self.attribute['value'])
         values = []
         types = []
-
+        self.misp_event.add_attribute(**self.attribute)
         for obs_to_add in self.get_neighboors(obs['id']):
             object_misp = self.get_object(obs_to_add)
             self.misp_event.add_object(object_misp)
@@ -79,7 +79,7 @@ class Yeti():
         results = {key: event[key] for key in ('Attribute', 'Object')}
         return results
 
-    def get_object(self,obj_to_add):
+    def get_object(self, obj_to_add):
         if (obj_to_add['type'] == 'Ip' and self.attribute in ['hostname','domain']) or\
                 (obj_to_add['type'] in ('Hostname', 'Domain') and self.attribute['type'] in ('ip-src', 'ip-dst')):
             domain_ip_object = MISPObject('domain-ip')
@@ -90,8 +90,13 @@ class Yeti():
 
     def __get_attribute(self, obj_yeti):
         typ_attribute = self.misp_mapping[obj_yeti['type']]
-        attr_misp = {'type':typ_attribute, 'value': obj_yeti['value'],
-                     'object_relation': 'pdns'}
+        attr_misp = {'type':typ_attribute, 'value': obj_yeti['value']}
+        if typ_attribute == 'ip-src' or typ_attribute =='ip-dst':
+            attr_misp['object_relation'] = 'ip'
+        elif 'domain' == typ_attribute:
+            attr_misp['object_relation'] = 'domain'
+        else:
+            attr_misp['object_relation'] = None
         return attr_misp
 
 def handler(q=False):
