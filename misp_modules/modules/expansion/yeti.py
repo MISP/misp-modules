@@ -86,7 +86,7 @@ class Yeti():
             domain_ip_object = MISPObject('domain-ip')
             domain_ip_object.add_attribute(self.__get_relation(obj_to_add),
                                            obj_to_add['value'])
-            domain_ip_object.add_attribute(**self.attribute)
+            
             domain_ip_object.add_reference(self.attribute['uuid'], 'related_to')
 
             return domain_ip_object
