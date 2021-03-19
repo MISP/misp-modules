@@ -73,7 +73,7 @@ class Yeti():
             object_misp = self.get_object(obs_to_add)
             if object_misp:
                 self.misp_event.add_object(object_misp)
-            print(self.misp_event)
+            print(self.misp_event.to_json())
 
     def get_result(self):
         event = json.loads(self.misp_event.to_json())
