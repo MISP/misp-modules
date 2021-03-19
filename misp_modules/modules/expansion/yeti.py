@@ -94,6 +94,7 @@ class Yeti():
     def __get_relation(self, obj_yeti):
         typ_attribute = self.misp_mapping[obj_yeti['type']]
         attr_misp = {'value': obj_yeti['value']}
+        print('att %s' % typ_attribute)
         if typ_attribute == 'ip-src' or typ_attribute == 'ip-dst':
             return 'ip'
         elif 'domain' == typ_attribute:
