@@ -73,6 +73,7 @@ class Yeti():
         for obs_to_add in self.get_neighboors(obs['id']):
             object_misp = self.get_object(obs_to_add)
             self.misp_event.add_object(object_misp)
+            print(self.misp_event)
 
     def get_result(self):
         event = json.loads(self.misp_event.to_json())
@@ -91,7 +92,7 @@ class Yeti():
     def __get_attribute(self, obj_yeti):
         typ_attribute = self.misp_mapping[obj_yeti['type']]
         attr_misp = {'type':typ_attribute, 'value': obj_yeti['value']}
-        if typ_attribute == 'ip-src' or typ_attribute =='ip-dst':
+        if typ_attribute == 'ip-src' or typ_attribute == 'ip-dst':
             attr_misp['object_relation'] = 'ip'
         elif 'domain' == typ_attribute:
             attr_misp['object_relation'] = 'domain'
