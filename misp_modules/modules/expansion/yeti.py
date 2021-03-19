@@ -69,7 +69,6 @@ class Yeti():
         obs = self.search(self.attribute['value'])
         values = []
         types = []
-        self.misp_event.add_attribute(**self.attribute)
         for obs_to_add in self.get_neighboors(obs['id']):
             object_misp = self.get_object(obs_to_add)
             self.misp_event.add_object(object_misp)
@@ -87,7 +86,7 @@ class Yeti():
             domain_ip_object.add_attribute(**self.__get_attribute(obj_to_add))
             domain_ip_object.add_reference(self.attribute['uuid'], 'related_to')
             domain_ip_object.add_attribute(**self.attribute)
-            print(domain_ip_object)
+            print(type(domain_ip_object))
             return domain_ip_object
 
     def __get_attribute(self, obj_yeti):
@@ -104,6 +103,7 @@ class Yeti():
             attr_misp['object_relation'] = None
         print('Attribute %s' % attr_misp)
         return attr_misp
+
 
 def handler(q=False):
     if q is False:
