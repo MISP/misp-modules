@@ -27,7 +27,7 @@ class Yeti():
         self.yeti_client = pyeti.YetiApi(url=url, api_key=key)
         self.attribute = attribute
         self.misp_event = MISPEvent()
-        self.misp_event.add_attribute(**attribute)
+        #self.misp_event.add_attribute(**attribute)
 
     def search(self, value):
         obs = self.yeti_client.observable_search(value=value)
