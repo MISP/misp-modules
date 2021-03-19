@@ -84,23 +84,23 @@ class Yeti():
         if (obj_to_add['type'] == 'Ip' and self.attribute in ['hostname','domain']) or\
                 (obj_to_add['type'] in ('Hostname', 'Domain') and self.attribute['type'] in ('ip-src', 'ip-dst')):
             domain_ip_object = MISPObject('domain-ip')
-            domain_ip_object.add_attribute(**self.__get_attribute(obj_to_add))
-            domain_ip_object.add_reference(self.attribute['uuid'], 'related_to')
+            domain_ip_object.add_attribute(self.__get_relation(obj_to_add),
+                                           obj_to_add['value'])
             domain_ip_object.add_attribute(**self.attribute)
+            domain_ip_object.add_reference(self.attribute['uuid'], 'related_to')
+
             return domain_ip_object
 
-    def __get_attribute(self, obj_yeti):
+    def __get_relation(self, obj_yeti):
         typ_attribute = self.misp_mapping[obj_yeti['type']]
         attr_misp = {'value': obj_yeti['value']}
         if typ_attribute == 'ip-src' or typ_attribute == 'ip-dst':
-            attr_misp['object_relation'].update({'type': 'text',
-                                                 'object_relation': 'ip'})
+            return 'ip'
         elif 'domain' == typ_attribute:
-            attr_misp.update({'type': 'domain',
-                              'object_relation': 'domain'})
+            return 'domain'
         elif 'hostname' == typ_attribute:
-            attr_misp.update({'type': 'domain',
-                              'object_relation': 'domain'})
+            return 'domain'
+
         print('Attribute %s' % attr_misp)
         return attr_misp
 
