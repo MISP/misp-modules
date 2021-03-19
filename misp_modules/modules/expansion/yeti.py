@@ -27,7 +27,7 @@ class Yeti():
         self.yeti_client = pyeti.YetiApi(url=url, api_key=key)
         self.attribute = attribute
         self.misp_event = MISPEvent()
-        #self.misp_event.add_attribute(**attribute)
+        self.misp_event.add_attribute(**attribute)
 
     def search(self, value):
         obs = self.yeti_client.observable_search(value=value)
@@ -126,7 +126,7 @@ def handler(q=False):
 
     if yeti_client:
         yeti_client.parse_yeti_result()
-        return yeti_client.get_result()
+        return {'results': yeti_client.get_result()}
     else:
         misperrors['error'] = 'Yeti Config Error'
         return misperrors
