@@ -87,6 +87,7 @@ class Yeti():
             domain_ip_object.add_attribute(**self.__get_attribute(obj_to_add))
             domain_ip_object.add_reference(self.attribute['uuid'], 'related_to')
             domain_ip_object.add_attribute(**self.attribute)
+            print(domain_ip_object)
             return domain_ip_object
 
     def __get_attribute(self, obj_yeti):
