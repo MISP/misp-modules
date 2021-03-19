@@ -23,7 +23,7 @@ moduleconfig = ['apikey', 'url']
 class Yeti():
 
     def __init__(self, url, key,attribute):
-        self.dict = {'Ip': 'ip-dst', 'Domain': 'domain', 'Hostname': 'hostname', 'Url': 'url'}
+        self.misp_mapping = {'Ip': 'ip-dst', 'Domain': 'domain', 'Hostname': 'hostname', 'Url': 'url'}
         self.yeti_client = pyeti.YetiApi(url=url, api_key=key)
         self.attribute = attribute
         self.misp_event = MISPEvent()
@@ -83,9 +83,15 @@ class Yeti():
         if (obj_to_add['type'] == 'Ip' and self.attribute in ['hostname','domain']) or\
                 (obj_to_add['type'] in ('Hostname', 'Domain') and self.attribute['type'] in ('ip-src', 'ip-dst')):
             domain_ip_object = MISPObject('domain-ip')
-            domain_ip_object.add_attribute()
+            domain_ip_object.add_attribute(**self.__get_attribute(obj_to_add))
             domain_ip_object.add_reference(self.attribute['uuid'], 'related_to')
+            domain_ip_object.add_attribute(**self.attribute)
             return domain_ip_object
+
+    def __get_attribute(self, obj_yeti):
+        typ_attribute = self.misp_mapping[obj_yeti['type']]
+        attr_misp = {'type':typ_attribute, 'value': obj_yeti['value']}
+        return attr_misp
 
 def handler(q=False):
     if q is False:
@@ -109,7 +115,8 @@ def handler(q=False):
         yeti_client = Yeti(yeti_url, apikey, attribute)
 
     if yeti_client:
-
+        yeti_client.parse_yeti_result()
+        return yeti_client.get_result()
     else:
         misperrors['error'] = 'Yeti Config Error'
         return misperrors
