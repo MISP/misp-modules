@@ -4,8 +4,8 @@ import json
 misperrors = {"error": "Error"}
 mispattributes = {"input": ["ip-dst", "ip-src"], "output": ["text"]}
 moduleinfo = {
-    "version": "0.2",
-    "author": "Aurélien Schwab <aurelien.schwab+dev@gmail.com>",
+    "version": "1.0",
+    "author": "Brad Chiappetta <brad@greynoise.io>",
     "description": "Module to access GreyNoise.io API.",
     "module-type": ["hover"],
 }
