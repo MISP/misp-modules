@@ -36,7 +36,7 @@ def handler(q=False):  # noqa: C901
     if request["config"]["api_type"] and request["config"]["api_type"] == "enterprise":
         greynoise_api_url = "https://api.greynoise.io/v2/noise/quick/"
     else:
-        greynoise_api_url = "https://api.dev.greynoise.io/v3/community/"
+        greynoise_api_url = "https://api.greynoise.io/v3/community/"
 
     headers = {
         "Accept": "application/json",
