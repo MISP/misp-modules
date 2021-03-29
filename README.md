@@ -132,7 +132,7 @@ sudo apt-get install python3-dev python3-pip libpq5 libjpeg-dev tesseract-ocr li
 sudo -u www-data virtualenv -p python3 /var/www/MISP/venv
 cd /usr/local/src/
 sudo chown -R www-data: .
-sudo git clone https://github.com/MISP/misp-modules.git
+sudo -u www-data git clone https://github.com/MISP/misp-modules.git
 cd misp-modules
 sudo -u www-data /var/www/MISP/venv/bin/pip install -I -r REQUIREMENTS
 sudo -u www-data /var/www/MISP/venv/bin/pip install .

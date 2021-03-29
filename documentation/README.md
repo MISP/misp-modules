@@ -611,16 +611,17 @@ Module to query a local copy of Maxmind's Geolite database.
 
 Module to access GreyNoise.io API
 - **features**:
->The module takes an IP address as input and queries Greynoise for some additional information about it: basically it checks whether a given IP address is “Internet background noise”, or has been observed scanning or attacking devices across the Internet. The result is returned as text.
+>The module takes an IP address as input and queries GreyNoise for some additional information about it: basically it checks whether a given IP address is “Internet background noise”, or has been observed scanning or attacking devices across the Internet. The result is returned as text.
 - **input**:
 >An IP address.
 - **output**:
->Additional information about the IP fetched from Greynoise API.
+>Additional information about the IP fetched from GreyNoise API.
 - **references**:
 > - https://greynoise.io/
-> - https://github.com/GreyNoise-Intelligence/api.greynoise.io
+> - https://developer.greynoise.io/
 - **requirements**:
->A Greynoise API key.
+> - A GreyNoise API key.
+> - A GreyNoise API Type selection of "community" or "enterprise" based  API key type
 
 -----
 
