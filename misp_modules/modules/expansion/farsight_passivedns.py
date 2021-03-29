@@ -1,6 +1,7 @@
 import dnsdb2
 import json
 from . import check_input_attribute, standard_error_message
+from datetime import datetime
 from pymisp import MISPEvent, MISPObject
 
 misperrors = {'error': 'Error'}
@@ -156,6 +157,11 @@ def parse_input(attribute, config):
         'offset': 0,
         'ignore_limited': True
     }
+    if attribute.get('first_seen'):
+        lookup_args['time_first_after'] = parse_timestamp(attribute['first_seen'])
+    if attribute.get('last_seen'):
+        lookup_args['time_last_before'] = parse_timestamp(attribute['last_seen'])
+    print(lookup_args)
     attribute_type = attribute['type']
     if attribute_type in flex_query_input:
         return flex_queries, (lookup_args, attribute['value'])
@@ -163,6 +169,9 @@ def parse_input(attribute, config):
     to_query = lookup_ip if 'ip-' in attribute_type else lookup_name
     return to_query, (lookup_args, attribute['value'], flex)
 
+def parse_timestamp(str_date):
+    datetime_date = datetime.strptime(str_date, '%Y-%m-%dT%H:%M:%S.%f%z')
+    return str(int(datetime_date.timestamp()))
 
 def add_flex_queries(flex):
     if not flex:
