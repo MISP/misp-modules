@@ -160,8 +160,6 @@ def parse_input(attribute, config):
     }
     if attribute.get('first_seen'):
         lookup_args['time_first_after'] = parse_timestamp(attribute['first_seen'])
-    if attribute.get('last_seen'):
-        lookup_args['time_last_before'] = parse_timestamp(attribute['last_seen'])
     attribute_type = attribute['type']
     if attribute_type in flex_query_input:
         return flex_queries, (lookup_args, attribute['value'])
