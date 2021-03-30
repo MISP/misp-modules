@@ -161,7 +161,6 @@ def parse_input(attribute, config):
         lookup_args['time_first_after'] = parse_timestamp(attribute['first_seen'])
     if attribute.get('last_seen'):
         lookup_args['time_last_before'] = parse_timestamp(attribute['last_seen'])
-    print(lookup_args)
     attribute_type = attribute['type']
     if attribute_type in flex_query_input:
         return flex_queries, (lookup_args, attribute['value'])
@@ -202,7 +201,7 @@ def lookup_name(client, lookup_args, name, flex):
     if rrset_response:
         response['rrset'] = rrset_response
     # RDATA = entries on the right-hand side of the domain name related labels
-    rdata_response = client.lookup_rdata_name(name, **lookup_args)
+    rdata_response = list(client.lookup_rdata_name(name, **lookup_args))
     if rdata_response:
         response['rdata'] = rdata_response
     if flex:
