@@ -155,7 +155,8 @@ def parse_input(attribute, config):
     lookup_args = {
         'limit': config['limit'] if config.get('limit') else DEFAULT_LIMIT,
         'offset': 0,
-        'ignore_limited': True
+        'ignore_limited': True,
+        'humantime': True
     }
     if attribute.get('first_seen'):
         lookup_args['time_first_after'] = parse_timestamp(attribute['first_seen'])
