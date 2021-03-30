@@ -154,7 +154,8 @@ def parse_input(attribute, config):
     lookup_args = {
         'limit': config['limit'] if config.get('limit') else DEFAULT_LIMIT,
         'offset': 0,
-        'ignore_limited': True
+        'ignore_limited': True,
+        'humantime': True
     }
     attribute_type = attribute['type']
     if attribute_type in flex_query_input:
