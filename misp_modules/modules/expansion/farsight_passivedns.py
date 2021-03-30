@@ -193,7 +193,7 @@ def lookup_name(client, lookup_args, name, flex):
     if rrset_response:
         response['rrset'] = rrset_response
     # RDATA = entries on the right-hand side of the domain name related labels
-    rdata_response = client.lookup_rdata_name(name, **lookup_args)
+    rdata_response = list(client.lookup_rdata_name(name, **lookup_args))
     if rdata_response:
         response['rdata'] = rdata_response
     if flex:
