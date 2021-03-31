@@ -108,6 +108,10 @@ class FarsightDnsdbParser():
                         passivedns_object.add_attribute(**self._parse_attribute(comment, 'rdata', rdata))
                 for feature, value in result.items():
                     passivedns_object.add_attribute(**self._parse_attribute(comment, feature, value))
+                if result.get('time_first'):
+                    passivedns_object.first_seen = result['time_first']
+                if result.get('time_last'):
+                    passivedns_object.last_seen = result['time_last']
                 passivedns_object.add_reference(self.attribute['uuid'], 'related-to')
                 self.misp_event.add_object(passivedns_object)
 
