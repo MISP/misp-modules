@@ -510,15 +510,12 @@ A module to query the Phishing Initiative service (https://phishing-initiative.l
 
 Module to access Farsight DNSDB Passive DNS.
 - **features**:
->This module takes a domain, hostname or IP address MISP attribute as input to query the Farsight Passive DNS API.  
->The results of rdata and rrset lookups are then returned and parsed into passive-dns objects.
+>This module takes a domain, hostname or IP address MISP attribute as input to query the Farsight Passive DNS API.
+>  The results of rdata and rrset lookups are then returned and parsed into passive-dns objects.
 >
->An API key is required to submit queries to the API.  
->It is also possible to define a custom server URL, and to set a limit of results to get.  
->This limit is set for each lookup, which means we can have an up to the limit number of passive-dns objects resulting from an rdata query about an IP address, but an up to the limit number of passive-dns objects for each lookup queries about a domain or a hostname (== twice the limit).
->
->Additionally to the lookup queries, responses from flex queries can be returned with the results.  
->To get this additional data with the results, there is a `flex_queries` configuration parameter to set to `true`. The module submit then regex queries to the API, using the domain, hostname or IP address as keyword for the search. Passive-dns objects are returned next to the ones resulting from the lookup queries.
+>An API key is required to submit queries to the API.
+>  It is also possible to define a custom server URL, and to set a limit of results to get.
+>  This limit is set for each lookup, which means we can have an up to the limit number of passive-dns objects resulting from an rdata query about an IP address, but an up to the limit number of passive-dns objects for each lookup queries about a domain or a hostname (== twice the limit).
 - **input**:
 >A domain, hostname or IP address MISP attribute.
 - **output**:
@@ -527,7 +524,7 @@ Module to access Farsight DNSDB Passive DNS.
 > - https://www.farsightsecurity.com/
 > - https://docs.dnsdb.info/dnsdb-api/
 - **requirements**:
->An access to the Farsight Passive DNS API (apikey), The dnsdb2 python library
+>An access to the Farsight Passive DNS API (apikey)
 
 -----
 
@@ -611,17 +608,16 @@ Module to query a local copy of Maxmind's Geolite database.
 
 Module to access GreyNoise.io API
 - **features**:
->The module takes an IP address as input and queries GreyNoise for some additional information about it: basically it checks whether a given IP address is “Internet background noise”, or has been observed scanning or attacking devices across the Internet. The result is returned as text.
+>The module takes an IP address as input and queries Greynoise for some additional information about it: basically it checks whether a given IP address is “Internet background noise”, or has been observed scanning or attacking devices across the Internet. The result is returned as text.
 - **input**:
 >An IP address.
 - **output**:
->Additional information about the IP fetched from GreyNoise API.
+>Additional information about the IP fetched from Greynoise API.
 - **references**:
 > - https://greynoise.io/
-> - https://developer.greynoise.io/
+> - https://github.com/GreyNoise-Intelligence/api.greynoise.io
 - **requirements**:
-> - A GreyNoise API key.
-> - A GreyNoise API Type selection of "community" or "enterprise" based  API key type
+>A Greynoise API key.
 
 -----
 
@@ -1757,6 +1753,22 @@ Module to export malicious network activity attributes to Cisco fireSIGHT manage
 
 -----
 
+#### [defender_endpoint_export](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/defender_endpoint_export.py)
+
+<img src=logos/defender_endpoint.png height=60>
+
+Defender for Endpoint KQL hunting query export module
+- **features**:
+>This module export an event as Defender for Endpoint KQL queries that can then be used in your own python3 or Powershell tool. If you are using Microsoft Sentinel, you can directly connect your MISP instance to Sentinel and then create queries using the `ThreatIntelligenceIndicator` table to match events against imported IOC.
+- **input**:
+>MISP Event attributes
+- **output**:
+>Defender for Endpoint KQL queries
+- **references**:
+>https://docs.microsoft.com/en-us/windows/security/threat-protection/microsoft-defender-atp/advanced-hunting-schema-reference
+
+-----
+
 #### [goamlexport](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/goamlexport.py)
 
 <img src=logos/goAML.jpg height=60>
@@ -1861,7 +1873,7 @@ Simple export of a MISP event to PDF.
 >  'Activate_galaxy_description' is a boolean (True or void) to activate the description of event related galaxies.
 >  'Activate_related_events' is a boolean (True or void) to activate the description of related event. Be aware this might leak information on confidential events linked to the current event !
 >  'Activate_internationalization_fonts' is a boolean (True or void) to activate Noto fonts instead of default fonts (Helvetica). This allows the support of CJK alphabet. Be sure to have followed the procedure to download Noto fonts (~70Mo) in the right place (/tools/pdf_fonts/Noto_TTF), to allow PyMisp to find and use them during PDF generation.
->  'Custom_fonts_path' is a text (path or void) to the TTF file of your choice, to create the PDF with it. Be aware the PDF won't support bold/italic/special style anymore with this option
+>  'Custom_fonts_path' is a text (path or void) to the TTF file of your choice, to create the PDF with it. Be aware the PDF won't support bold/italic/special style anymore with this option 
 - **input**:
 >MISP Event
 - **output**:
