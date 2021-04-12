@@ -199,7 +199,7 @@ class TestExpansions(unittest.TestCase):
     def test_dns(self):
         query = {"module": "dns", "hostname": "www.circl.lu", "config": {"nameserver": "8.8.8.8"}}
         response = self.misp_modules_post(query)
-        self.assertEqual(self.get_values(response), '149.13.33.14')
+        self.assertEqual(self.get_values(response), '185.194.93.14')
 
     def test_docx(self):
         filename = 'test.docx'
