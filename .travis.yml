@@ -38,20 +38,20 @@ install:
     - popd
 
 script:
-    - pipenv run coverage run -m --parallel-mode --source=misp_modules misp_modules.__init__  -l 127.0.0.1 &
+    - coverage run -m --parallel-mode --source=misp_modules misp_modules.__init__  -l 127.0.0.1 &
     - pid=$!
     - sleep 5
-    - pipenv run nosetests --with-coverage --cover-package=misp_modules
+    - nosetests --with-coverage --cover-package=misp_modules
     - kill -s KILL $pid
     - pushd ~/
-    - pipenv run coverage run -m --parallel-mode --source=misp_modules misp_modules.__init__ -s -l 127.0.0.1 &
+    - coverage run -m --parallel-mode --source=misp_modules misp_modules.__init__ -s -l 127.0.0.1 &
     - pid=$!
     - popd
     - sleep 5
-    - pipenv run nosetests --with-coverage --cover-package=misp_modules
+    - nosetests --with-coverage --cover-package=misp_modules
     - kill -s KILL $pid
-    - pipenv run flake8 --ignore=E501,W503,E226 misp_modules
+    - flake8 --ignore=E501,W503,E226 misp_modules
 
 after_success:
-    - pipenv run coverage combine .coverage*
-    - pipenv run codecov
+    - coverage combine .coverage*
+    - codecov
