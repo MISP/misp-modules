@@ -51,6 +51,7 @@ script:
     - sleep 5
     - nosetests --with-coverage --cover-package=misp_modules
     - kill -s KILL $pid
+    - pip install flake8
     - flake8 --ignore=E501,W503,E226 misp_modules
 
 after_success:
