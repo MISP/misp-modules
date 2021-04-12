@@ -38,6 +38,7 @@ install:
     - popd
 
 script:
+    - pip install coverage
     - coverage run -m --parallel-mode --source=misp_modules misp_modules.__init__  -l 127.0.0.1 &
     - pid=$!
     - sleep 5
