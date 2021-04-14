@@ -23,7 +23,7 @@ def handler(q=False):
         misperrors['error'] = "Unsupported attributes type"
         return misperrors
 
-    if (request['config'].get('api_key') is None):
+    if request.get('config') is None or request['config'].get('api_key') is None:
         misperrors['error'] = 'Have I Been Pwned authentication is incomplete (no API key)'
         return misperrors
     else:
@@ -37,7 +37,7 @@ def handler(q=False):
     elif r.status_code == 404:
         return {'results': [{'types': mispattributes['output'], 'values': 'OK (Not Found)'}]}
     else:
-        misperrors['error'] = 'haveibeenpwned.com API not accessible (HTTP ' + str(r.status_code) + ')'
+        misperrors['error'] = f'haveibeenpwned.com API not accessible (HTTP {str(r.status_code)})'
         return misperrors['error']
 
 
