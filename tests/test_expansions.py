@@ -228,12 +228,16 @@ class TestExpansions(unittest.TestCase):
             self.assertEqual(self.get_errors(response), 'Farsight DNSDB apikey is missing')
 
     def test_haveibeenpwned(self):
+        module_name = 'hibp'
         query = {"module": "hibp", "email-src": "info@circl.lu"}
         response = self.misp_modules_post(query)
-        to_check = self.get_values(response)
-        if to_check == "haveibeenpwned.com API not accessible (HTTP 401)":
-            self.skipTest(f"haveibeenpwned blocks travis IPs: {response}")
-        self.assertEqual(to_check, 'OK (Not Found)', response)
+        if module_name in self.configs:
+            to_check = self.get_values(response)
+            if to_check == "haveibeenpwned.com API not accessible (HTTP 401)":
+                self.skipTest(f"haveibeenpwned blocks travis IPs: {response}")
+            self.assertEqual(to_check, 'OK (Not Found)', response)
+        else:
+            self.assertEqual(self.get_errors(response), 'Have I Been Pwned authentication is incomplete (no API key)')
 
     def test_greynoise(self):
         module_name = 'greynoise'
