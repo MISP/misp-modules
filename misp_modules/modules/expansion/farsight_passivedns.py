@@ -171,9 +171,11 @@ def parse_input(attribute, config):
     to_query = lookup_ip if 'ip-' in attribute_type else lookup_name
     return to_query, (lookup_args, attribute['value'], flex)
 
+
 def parse_timestamp(str_date):
     datetime_date = datetime.strptime(str_date, '%Y-%m-%dT%H:%M:%S.%f%z')
     return str(int(datetime_date.timestamp()))
+
 
 def add_flex_queries(flex):
     if not flex:
