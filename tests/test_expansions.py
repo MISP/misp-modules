@@ -348,7 +348,7 @@ class TestExpansions(unittest.TestCase):
 
     def test_passivetotal(self):
         module_name = "passivetotal"
-        query = {"module": module_name, "ip-src": "149.13.33.14", "config": {}}
+        query = {"module": module_name, "ip-src": "185.194.93.14", "config": {}}
         if module_name in self.configs:
             query["config"] = self.configs[module_name]
             response = self.misp_modules_post(query)
