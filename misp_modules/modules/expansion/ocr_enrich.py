@@ -40,7 +40,7 @@ def handler(q=False):
     try:
         decoded = pytesseract.image_to_string(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
         return {
-            'results':[
+            'results': [
                 {
                     'types': ['freetext'],
                     'values': list(filter_decoded(decoded)),
