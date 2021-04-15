@@ -554,9 +554,10 @@ class TestExpansions(unittest.TestCase):
                 except Exception:
                     self.assertEqual(self.get_errors(response), "VirusTotal request rate limit exceeded.")
         else:
-            query = {"module": module_name,
-                     "attribute": {"type": query_types[0],
-                                   "value": query_values[0]}}
+            query = {
+                "module": module_name,
+                "attribute": attributes[0]
+            }
             response = self.misp_modules_post(query)
             self.assertEqual(self.get_errors(response), "A VirusTotal api key is required for this module.")
 
@@ -596,9 +597,10 @@ class TestExpansions(unittest.TestCase):
                 except Exception:
                     self.assertEqual(self.get_errors(response), "VirusTotal request rate limit exceeded.")
         else:
-            query = {"module": module_name,
-                     "attribute": {"type": query_types[0],
-                                   "value": query_values[0]}}
+            query = {
+                "module": module_name,
+                "attribute": attributes[0]
+            }
             response = self.misp_modules_post(query)
             self.assertEqual(self.get_errors(response), "A VirusTotal api key is required for this module.")
 
