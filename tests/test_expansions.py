@@ -357,7 +357,7 @@ class TestExpansions(unittest.TestCase):
             query["config"] = self.configs[module_name]
             response = self.misp_modules_post(query)
             try:
-                self.assertEqual(self.get_values(response), 'circl.lu')
+                self.assertIn('www.circl.lu', response.json()['results'][0]['values'])
             except Exception:
                 self.assertIn(self.get_errors(response), ('We hit an error, time to bail!', 'API quota exceeded.'))
         else:
@@ -401,7 +401,7 @@ class TestExpansions(unittest.TestCase):
         query = {"module": "rbl", "ip-src": "8.8.8.8"}
         response = self.misp_modules_post(query)
         try:
-            self.assertTrue(self.get_values(response).startswith('8.8.8.8.query.senderbase.org'))
+            self.assertTrue(self.get_values(response).startswith('8.8.8.8.bl.spamcannibal.org'))
         except Exception:
             self.assertEqual(self.get_errors(response), "No data found by querying known RBLs")
 
@@ -441,7 +441,7 @@ class TestExpansions(unittest.TestCase):
         if module_name in self.configs:
             query['config'] = self.configs[module_name]
             response = self.misp_modules_post(query)
-            self.assertIn("circl.lu", self.get_values(response))
+            self.assertEqual(self.get_object(response), 'ip-api-address')
         else:
             response = self.misp_modules_post(query)
             self.assertEqual(self.get_errors(response), 'Shodan authentication is missing')
