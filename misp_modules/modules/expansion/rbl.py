@@ -3,9 +3,6 @@ import sys
 
 try:
     import dns.resolver
-    resolver = dns.resolver.Resolver()
-    resolver.timeout = 0.2
-    resolver.lifetime = 0.2
 except ImportError:
     print("dnspython3 is missing, use 'pip install dnspython3' to install it.")
     sys.exit(0)
@@ -15,7 +12,7 @@ mispattributes = {'input': ['ip-src', 'ip-dst'], 'output': ['text']}
 moduleinfo = {'version': '0.2', 'author': 'Christian Studer',
               'description': 'Check an IPv4 address against known RBLs.',
               'module-type': ['expansion', 'hover']}
-moduleconfig = []
+moduleconfig = ['timeout']
 
 rbls = (
     "spam.spamrats.com",
@@ -88,6 +85,13 @@ def handler(q=False):
     else:
         misperrors['error'] = "Unsupported attributes type"
         return misperrors
+    resolver = dns.resolver.Resolver()
+    try:
+        timeout = float(request['config']['timeout'])
+    except (KeyError, ValueError):
+        timeout = 0.4
+    resolver.timeout = timeout
+    resolver.lifetime = timeout
     infos = {}
     ipRev = '.'.join(ip.split('.')[::-1])
     for rbl in rbls:
