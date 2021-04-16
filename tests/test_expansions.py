@@ -115,7 +115,7 @@ class TestExpansions(unittest.TestCase):
             self.assertTrue(self.get_values(response).startswith('\n\nAddress:\t1ES14c7qLb5CYhLMUekctxLgc1FV2Ti9DA\nBalance:\t0.0002126800 BTC (+0.0007482500 BTC / -0.0005355700 BTC)'))
 
         except Exception:
-            self.assertEqual(self.get_values(response), 'Not a valid BTC address, or Balance has changed')
+            self.assertTrue(self.get_values(response).startswith('Not a valid BTC address'))
 
     def test_btc_scam_check(self):
         query = {"module": "btc_scam_check", "btc": "1ES14c7qLb5CYhLMUekctxLgc1FV2Ti9DA"}
