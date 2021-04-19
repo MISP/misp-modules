@@ -1,11 +1,12 @@
 import json
+import logging
 
 try:
     import pyeti
 except ImportError:
     print("pyeti module not installed.")
 
-from pymisp import MISPEvent, MISPObject
+from pymisp import MISPEvent, MISPObject, MISPAttribute
 
 misperrors = {'error': 'Error'}
 
@@ -23,7 +24,8 @@ moduleconfig = ['apikey', 'url']
 class Yeti():
 
     def __init__(self, url, key,attribute):
-        self.misp_mapping = {'Ip': 'ip-dst', 'Domain': 'domain', 'Hostname': 'hostname', 'Url': 'url'}
+        self.misp_mapping = {'Ip': 'ip-dst', 'Domain': 'domain', 'Hostname': 'hostname', 'Url': 'url',
+                             'AutonomousSystem': 'AS'}
         self.yeti_client = pyeti.YetiApi(url=url, api_key=key)
         self.attribute = attribute
         self.misp_event = MISPEvent()
@@ -76,11 +78,26 @@ class Yeti():
             object_misp_url = self.__get_object_url(obs_to_add)
             if object_misp_url:
                 self.misp_event.add_object(object_misp_url)
+            if not object_misp_url and not object_misp_url:
+                attr = self.__get_attribute(obs_to_add)
+                if attr:
+                    self.misp_event.add_attribute(attr.type, attr.value, tags=attr.tags)
 
     def get_result(self):
         event = json.loads(self.misp_event.to_json())
         results = {key: event[key] for key in ('Attribute', 'Object')}
         return results
+
+    def __get_attribute(self, obs_to_add):
+        attr = MISPAttribute()
+        attr.value = obs_to_add['value']
+        try:
+            attr.type = self.misp_mapping[obs_to_add['type']]
+        except KeyError:
+            logging.error('type not found %s' % obs_to_add['type'])
+            return
+        attr.tags.extend([t['name'] for t in obs_to_add['tags']])
+        return attr
 
     def __get_object_domain_ip(self, obj_to_add):
         if (obj_to_add['type'] == 'Ip' and self.attribute['type'] in ['hostname','domain']) or\
