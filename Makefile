@@ -5,9 +5,12 @@
 prepare_docs:
 	cd documentation; python3 generate_documentation.py
 	mkdir -p docs/expansion/logos docs/export_mod/logos docs/import_mod/logos
+	mkdir -p docs/logos
+	cd documentation; cp -R ./logos/*  ../docs/logos
 	cd documentation; cp -R ./logos/* ../docs/expansion/logos
 	cd documentation; cp -R ./logos/* ../docs/export_mod/logos
 	cd documentation; cp -R ./logos/* ../docs/import_mod/logos
+	cp ./documentation/mkdocs/*.md ./docs
 	cp LICENSE ../docs/license.md
 
 install_requirements:
