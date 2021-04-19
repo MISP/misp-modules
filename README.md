@@ -1,17 +1,15 @@
 # MISP modules
 
 [![Build Status](https://travis-ci.org/MISP/misp-modules.svg?branch=main)](https://travis-ci.org/MISP/misp-modules)
-[![Coverage Status](https://coveralls.io/repos/github/MISP/misp-modules/badge.svg?branch=master)](https://coveralls.io/github/MISP/misp-modules?branch=master)
-[![codecov](https://codecov.io/gh/MISP/misp-modules/branch/master/graph/badge.svg)](https://codecov.io/gh/MISP/misp-modules)
+[![Coverage Status](https://coveralls.io/repos/github/MISP/misp-modules/badge.svg?branch=main)](https://coveralls.io/github/MISP/misp-modules?branch=main)
+[![codecov](https://codecov.io/gh/MISP/misp-modules/branch/main/graph/badge.svg)](https://codecov.io/gh/MISP/misp-modules)
 
-MISP modules are autonomous modules that can be used for expansion and other services in [MISP](https://github.com/MISP/MISP).
+MISP modules are autonomous modules that can be used to extend [MISP](https://github.com/MISP/MISP) for new services such as expansion, import and export.
 
 The modules are written in Python 3 following a simple API interface. The objective is to ease the extensions of MISP functionalities
 without modifying core components. The API is available via a simple REST API which is independent from MISP installation or configuration.
 
-MISP modules support is included in MISP starting from version 2.4.28.
-
-For more information: [Extending MISP with Python modules](https://www.misp-project.org/misp-training/3.1-misp-modules.pdf) slides from MISP training.
+For more information: [Extending MISP with Python modules](https://www.misp-project.org/misp-training/3.1-misp-modules.pdf) slides from [MISP training](https://github.com/MISP/misp-training).
 
 ## Existing MISP modules
 
