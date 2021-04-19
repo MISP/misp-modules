@@ -96,7 +96,9 @@ class Yeti():
         except KeyError:
             logging.error('type not found %s' % obs_to_add['type'])
             return
-        attr.tags.extend([t['name'] for t in obs_to_add['tags']])
+
+        for t in obs_to_add['tags']:
+            attr.tags.append(t['name'])
         return attr
 
     def __get_object_domain_ip(self, obj_to_add):
