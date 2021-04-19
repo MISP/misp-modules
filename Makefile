@@ -3,12 +3,12 @@
 .PHONY: prepare_docs generate_docs ci_generate_docs test_docs
 
 prepare_docs:
-	cd doc; python generate_documentation.py
+	cd documentation; python3 generate_documentation.py
 	mkdir -p docs/expansion/logos docs/export_mod/logos docs/import_mod/logos
-	cp -R doc/logos/* docs/expansion/logos
-	cp -R doc/logos/* docs/export_mod/logos
-	cp -R doc/logos/* docs/import_mod/logos
-	cp LICENSE docs/license.md
+	cd documentation; cp -R ./logos/* ../docs/expansion/logos
+	cd documentation; cp -R ./logos/* ../docs/export_mod/logos
+	cd documentation; cp -R ./logos/* ../docs/import_mod/logos
+	cp LICENSE ../docs/license.md
 
 install_requirements:
 	pip install -r docs/REQUIREMENTS.txt
