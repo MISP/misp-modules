@@ -99,7 +99,7 @@ class Yeti():
         if (obj_to_add['type'] == 'Url' and self.attribute['type'] in ['hostname', 'domain', 'ip-src', 'ip-dst']) or (
             obj_to_add['type'] in ('Hostname', 'Domain', 'Ip') and self.attribute['type'] == 'url'
         ):
-            url_object = MISPObject('Url')
+            url_object = MISPObject('url')
             obj_relation = self.__get_relation(obj_to_add)
             if obj_relation:
                 url_object.add_attribute(obj_relation, obj_to_add['value'])
