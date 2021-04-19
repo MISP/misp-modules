@@ -73,9 +73,9 @@ class Yeti():
             object_misp_domain_ip = self.__get_object_domain_ip(obs_to_add)
             if object_misp_domain_ip:
                 self.misp_event.add_object(object_misp_domain_ip)
-            object_misp_url = self.__get_object_url(obs_to_add)
-            if object_misp_url:
-                self.misp_event.add_object(object_misp_url)
+            # object_misp_url = self.__get_object_url(obs_to_add)
+            # if object_misp_url:
+            #     self.misp_event.add_object(object_misp_url)
 
     def get_result(self):
         event = json.loads(self.misp_event.to_json())
