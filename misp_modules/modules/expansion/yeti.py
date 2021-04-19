@@ -84,7 +84,7 @@ class Yeti():
         return results
 
     def __get_object_domain_ip(self, obj_to_add):
-        if (obj_to_add['type'] == 'Ip' and self.attribute in ['hostname','domain']) or\
+        if (obj_to_add['type'] == 'Ip' and self.attribute['type'] in ['hostname','domain']) or\
                 (obj_to_add['type'] in ('Hostname', 'Domain') and self.attribute['type'] in ('ip-src', 'ip-dst')):
             domain_ip_object = MISPObject('domain-ip')
             domain_ip_object.add_attribute(self.__get_relation(obj_to_add),
@@ -96,10 +96,12 @@ class Yeti():
             return domain_ip_object
 
     def __get_object_url(self, obj_to_add):
-        if obj_to_add['type'] == 'Url':
+        if (obj_to_add['type'] == 'Url' and self.attribute['type'] in ['hostname', 'domain', 'ip-src', 'ip-dest']) or (
+            obj_to_add['type'] in ('Hostname', 'Domain', 'Ip') and self.attribute['type'] == 'url'
+        ):
             url_object = MISPObject('Url')
             url_object.add_attribute(self.__get_relation(obj_to_add), obj_to_add['value'])
-            url_object.add_attribute(self.__get_relation(self.attribute, is_yeti_object=False),
+            url_object.add_attribute(self.__get_relation(self.attribute),
                                      self.attribute['value'])
             url_object.add_reference(self.attribute['uuid'], 'related_to')
             return url_object
@@ -116,7 +118,7 @@ class Yeti():
         elif 'hostname' == type_attribute:
             return 'domain'
         elif type_attribute == 'url':
-            return type_attribute
+            return 'Url'
 
 
 def handler(q=False):
