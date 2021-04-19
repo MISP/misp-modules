@@ -103,11 +103,10 @@ class Yeti():
             obj_relation = self.__get_relation(obj_to_add)
             if obj_relation:
                 url_object.add_attribute(obj_relation, obj_to_add['value'])
-            obj_relation = self.__get_relation(self.attribute)
+            obj_relation = self.__get_relation(self.attribute, is_yeti_object=False)
             if obj_relation:
-                url_object.add_attribute(self.__get_relation(self.attribute, is_yeti_object=False),
+                url_object.add_attribute(obj_relation,
                                          self.attribute['value'])
-
             url_object.add_reference(self.attribute['uuid'], 'related_to')
             print(url_object)
             return url_object
