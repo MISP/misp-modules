@@ -310,6 +310,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#defender_endpoint_export" title="defender_endpoint_export" class="md-nav__link">
+    defender_endpoint_export
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#goamlexport" title="goamlexport" class="md-nav__link">
     goamlexport
   </a>
@@ -413,7 +420,7 @@
 
 
   <li class="md-nav__item">
-    <a href="../install.md" title="Install Guides" class="md-nav__link">
+    <a href="../install/" title="Install Guides" class="md-nav__link">
       Install Guides
     </a>
   </li>
@@ -425,7 +432,7 @@
 
 
   <li class="md-nav__item">
-    <a href="../contribute.md" title="Contribute" class="md-nav__link">
+    <a href="../contribute/" title="Contribute" class="md-nav__link">
       Contribute
     </a>
   </li>
@@ -456,7 +463,7 @@
 
 
   <li class="md-nav__item">
-    <a href="../license.md" title="License" class="md-nav__link">
+    <a href="../license/" title="License" class="md-nav__link">
       License
     </a>
   </li>
@@ -495,6 +502,13 @@
         <li class="md-nav__item">
   <a href="#cisco_firesight_manager_acl_rule_export" title="cisco_firesight_manager_ACL_rule_export" class="md-nav__link">
     cisco_firesight_manager_ACL_rule_export
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#defender_endpoint_export" title="defender_endpoint_export" class="md-nav__link">
+    defender_endpoint_export
   </a>
   
 </li>
@@ -588,7 +602,7 @@
                 
                   <h1>Export Modules</h1>
                 
-                <h4 id="cef_export"><a href="https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/export_mod/cef_export.py">cef_export</a><a class="headerlink" href="#cef_export" title="Permanent link">&para;</a></h4>
+                <h4 id="cef_export"><a href="https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/cef_export.py">cef_export</a><a class="headerlink" href="#cef_export" title="Permanent link">&para;</a></h4>
 <p>Module to export a MISP event in CEF format.
 - <strong>features</strong>:</p>
 <blockquote>
@@ -602,8 +616,8 @@ Common Event Format file
 <a href="https://community.softwaregrp.com/t5/ArcSight-Connectors/ArcSight-Common-Event-Format-CEF-Guide/ta-p/1589306?attachment-id=65537">https://community.softwaregrp.com/t5/ArcSight-Connectors/ArcSight-Common-Event-Format-CEF-Guide/ta-p/1589306?attachment-id=65537</a></p>
 </blockquote>
 <hr />
-<h4 id="cisco_firesight_manager_acl_rule_export"><a href="https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/export_mod/cisco_firesight_manager_ACL_rule_export.py">cisco_firesight_manager_ACL_rule_export</a><a class="headerlink" href="#cisco_firesight_manager_acl_rule_export" title="Permanent link">&para;</a></h4>
-<p><img src=logos/cisco.png height=60></p>
+<h4 id="cisco_firesight_manager_acl_rule_export"><a href="https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/cisco_firesight_manager_ACL_rule_export.py">cisco_firesight_manager_ACL_rule_export</a><a class="headerlink" href="#cisco_firesight_manager_acl_rule_export" title="Permanent link">&para;</a></h4>
+<p><img src=../logos/cisco.png height=60></p>
 <p>Module to export malicious network activity attributes to Cisco fireSIGHT manager block rules.
 - <strong>features</strong>:</p>
 <blockquote>
@@ -616,8 +630,22 @@ Cisco fireSIGHT manager block rules.
 Firesight manager console credentials</p>
 </blockquote>
 <hr />
-<h4 id="goamlexport"><a href="https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/export_mod/goamlexport.py">goamlexport</a><a class="headerlink" href="#goamlexport" title="Permanent link">&para;</a></h4>
-<p><img src=logos/goAML.jpg height=60></p>
+<h4 id="defender_endpoint_export"><a href="https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/defender_endpoint_export.py">defender_endpoint_export</a><a class="headerlink" href="#defender_endpoint_export" title="Permanent link">&para;</a></h4>
+<p><img src=../logos/defender_endpoint.png height=60></p>
+<p>Defender for Endpoint KQL hunting query export module
+- <strong>features</strong>:</p>
+<blockquote>
+<p>This module export an event as Defender for Endpoint KQL queries that can then be used in your own python3 or Powershell tool. If you are using Microsoft Sentinel, you can directly connect your MISP instance to Sentinel and then create queries using the <code>ThreatIntelligenceIndicator</code> table to match events against imported IOC.
+- <strong>input</strong>:
+MISP Event attributes
+- <strong>output</strong>:
+Defender for Endpoint KQL queries
+- <strong>references</strong>:
+<a href="https://docs.microsoft.com/en-us/windows/security/threat-protection/microsoft-defender-atp/advanced-hunting-schema-reference">https://docs.microsoft.com/en-us/windows/security/threat-protection/microsoft-defender-atp/advanced-hunting-schema-reference</a></p>
+</blockquote>
+<hr />
+<h4 id="goamlexport"><a href="https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/goamlexport.py">goamlexport</a><a class="headerlink" href="#goamlexport" title="Permanent link">&para;</a></h4>
+<p><img src=../logos/goAML.jpg height=60></p>
 <p>This module is used to export MISP events containing transaction objects into GoAML format.
 - <strong>features</strong>:</p>
 <blockquote>
@@ -644,10 +672,11 @@ GoAML format file, describing financial transactions, with their origin and targ
 - <strong>references</strong>:
 <a href="http://goaml.unodc.org/">http://goaml.unodc.org/</a>
 - <strong>requirements</strong>:
-PyMISP, MISP objects</p>
+- PyMISP
+- MISP objects</p>
 </blockquote>
 <hr />
-<h4 id="liteexport"><a href="https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/export_mod/liteexport.py">liteexport</a><a class="headerlink" href="#liteexport" title="Permanent link">&para;</a></h4>
+<h4 id="liteexport"><a href="https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/liteexport.py">liteexport</a><a class="headerlink" href="#liteexport" title="Permanent link">&para;</a></h4>
 <p>Lite export of a MISP event.
 - <strong>features</strong>:</p>
 <blockquote>
@@ -658,8 +687,8 @@ MISP Event attributes
 Lite MISP Event</p>
 </blockquote>
 <hr />
-<h4 id="mass_eql_export"><a href="https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/export_mod/mass_eql_export.py">mass_eql_export</a><a class="headerlink" href="#mass_eql_export" title="Permanent link">&para;</a></h4>
-<p><img src=logos/eql.png height=60></p>
+<h4 id="mass_eql_export"><a href="https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/mass_eql_export.py">mass_eql_export</a><a class="headerlink" href="#mass_eql_export" title="Permanent link">&para;</a></h4>
+<p><img src=../logos/eql.png height=60></p>
 <p>Mass EQL query export for a MISP event.
 - <strong>features</strong>:</p>
 <blockquote>
@@ -672,8 +701,8 @@ Text file containing one or more EQL queries
 <a href="https://eql.readthedocs.io/en/latest/">https://eql.readthedocs.io/en/latest/</a></p>
 </blockquote>
 <hr />
-<h4 id="nexthinkexport"><a href="https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/export_mod/nexthinkexport.py">nexthinkexport</a><a class="headerlink" href="#nexthinkexport" title="Permanent link">&para;</a></h4>
-<p><img src=logos/nexthink.svg height=60></p>
+<h4 id="nexthinkexport"><a href="https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/nexthinkexport.py">nexthinkexport</a><a class="headerlink" href="#nexthinkexport" title="Permanent link">&para;</a></h4>
+<p><img src=../logos/nexthink.svg height=60></p>
 <p>Nexthink NXQL query export module
 - <strong>features</strong>:</p>
 <blockquote>
@@ -686,8 +715,8 @@ Nexthink NXQL queries
 <a href="https://doc.nexthink.com/Documentation/Nexthink/latest/APIAndIntegrations/IntroducingtheWebAPIV2">https://doc.nexthink.com/Documentation/Nexthink/latest/APIAndIntegrations/IntroducingtheWebAPIV2</a></p>
 </blockquote>
 <hr />
-<h4 id="osqueryexport"><a href="https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/export_mod/osqueryexport.py">osqueryexport</a><a class="headerlink" href="#osqueryexport" title="Permanent link">&para;</a></h4>
-<p><img src=logos/osquery.png height=60></p>
+<h4 id="osqueryexport"><a href="https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/osqueryexport.py">osqueryexport</a><a class="headerlink" href="#osqueryexport" title="Permanent link">&para;</a></h4>
+<p><img src=../logos/osquery.png height=60></p>
 <p>OSQuery export of a MISP event.
 - <strong>features</strong>:</p>
 <blockquote>
@@ -698,7 +727,7 @@ MISP Event attributes
 osquery SQL queries</p>
 </blockquote>
 <hr />
-<h4 id="pdfexport"><a href="https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/export_mod/pdfexport.py">pdfexport</a><a class="headerlink" href="#pdfexport" title="Permanent link">&para;</a></h4>
+<h4 id="pdfexport"><a href="https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/pdfexport.py">pdfexport</a><a class="headerlink" href="#pdfexport" title="Permanent link">&para;</a></h4>
 <p>Simple export of a MISP event to PDF.
 - <strong>features</strong>:</p>
 <blockquote>
@@ -716,14 +745,15 @@ MISP Event in a PDF file.
 - <strong>references</strong>:
 <a href="https://acrobat.adobe.com/us/en/acrobat/about-adobe-pdf.html">https://acrobat.adobe.com/us/en/acrobat/about-adobe-pdf.html</a>
 - <strong>requirements</strong>:
-PyMISP, reportlab</p>
+- PyMISP
+- reportlab</p>
 </blockquote>
 <hr />
-<h4 id="testexport"><a href="https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/export_mod/testexport.py">testexport</a><a class="headerlink" href="#testexport" title="Permanent link">&para;</a></h4>
+<h4 id="testexport"><a href="https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/testexport.py">testexport</a><a class="headerlink" href="#testexport" title="Permanent link">&para;</a></h4>
 <p>Skeleton export module.</p>
 <hr />
-<h4 id="threatstream_misp_export"><a href="https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/export_mod/threatStream_misp_export.py">threatStream_misp_export</a><a class="headerlink" href="#threatstream_misp_export" title="Permanent link">&para;</a></h4>
-<p><img src=logos/threatstream.png height=60></p>
+<h4 id="threatstream_misp_export"><a href="https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/threatStream_misp_export.py">threatStream_misp_export</a><a class="headerlink" href="#threatstream_misp_export" title="Permanent link">&para;</a></h4>
+<p><img src=../logos/threatstream.png height=60></p>
 <p>Module to export a structured CSV file for uploading to threatStream.
 - <strong>features</strong>:</p>
 <blockquote>
@@ -733,13 +763,14 @@ MISP Event attributes
 - <strong>output</strong>:
 ThreatStream CSV format file
 - <strong>references</strong>:
-<a href="https://www.anomali.com/platform/threatstream">https://www.anomali.com/platform/threatstream</a>, <a href="https://github.com/threatstream">https://github.com/threatstream</a>
+- <a href="https://www.anomali.com/platform/threatstream">https://www.anomali.com/platform/threatstream</a>
+- <a href="https://github.com/threatstream">https://github.com/threatstream</a>
 - <strong>requirements</strong>:
 csv</p>
 </blockquote>
 <hr />
-<h4 id="threat_connect_export"><a href="https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/export_mod/threat_connect_export.py">threat_connect_export</a><a class="headerlink" href="#threat_connect_export" title="Permanent link">&para;</a></h4>
-<p><img src=logos/threatconnect.png height=60></p>
+<h4 id="threat_connect_export"><a href="https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/threat_connect_export.py">threat_connect_export</a><a class="headerlink" href="#threat_connect_export" title="Permanent link">&para;</a></h4>
+<p><img src=../logos/threatconnect.png height=60></p>
 <p>Module to export a structured CSV file for uploading to ThreatConnect.
 - <strong>features</strong>:</p>
 <blockquote>
@@ -755,8 +786,8 @@ ThreatConnect CSV format file
 csv</p>
 </blockquote>
 <hr />
-<h4 id="vt_graph"><a href="https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/export_mod/vt_graph.py">vt_graph</a><a class="headerlink" href="#vt_graph" title="Permanent link">&para;</a></h4>
-<p><img src=logos/virustotal.png height=60></p>
+<h4 id="vt_graph"><a href="https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/vt_graph.py">vt_graph</a><a class="headerlink" href="#vt_graph" title="Permanent link">&para;</a></h4>
+<p><img src=../logos/virustotal.png height=60></p>
 <p>This module is used to create a VirusTotal Graph from a MISP event.
 - <strong>features</strong>:</p>
 <blockquote>
