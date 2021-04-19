@@ -81,7 +81,7 @@ class Yeti():
             if not object_misp_url and not object_misp_url:
                 attr = self.__get_attribute(obs_to_add)
                 if attr:
-                    self.misp_event.add_attribute(attr.type, attr.value, tags=['test','toto'])
+                    self.misp_event.add_attribute(attr.type, attr.value)
 
     def get_result(self):
         event = json.loads(self.misp_event.to_json())
