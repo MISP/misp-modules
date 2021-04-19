@@ -11,7 +11,7 @@ prepare_docs:
 	cd documentation; cp -R ./logos/* ../docs/export_mod/logos
 	cd documentation; cp -R ./logos/* ../docs/import_mod/logos
 	cp ./documentation/mkdocs/*.md ./docs
-	cp LICENSE ../docs/license.md
+	cp LICENSE ./docs/license.md
 
 install_requirements:
 	pip install -r docs/REQUIREMENTS.txt
