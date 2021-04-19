@@ -112,6 +112,7 @@ class Yeti():
             type_attribute = self.misp_mapping[obj['type']]
         else:
             type_attribute = obj['type']
+        print(type_attribute)
         if type_attribute == 'ip-src' or type_attribute == 'ip-dst':
             return 'ip'
         elif 'domain' == type_attribute:
