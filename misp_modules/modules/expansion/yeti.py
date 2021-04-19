@@ -96,7 +96,7 @@ class Yeti():
             return domain_ip_object
 
     def __get_object_url(self, obj_to_add):
-        if (obj_to_add['type'] == 'Url' and self.attribute['type'] in ['hostname', 'domain', 'ip-src', 'ip-dest']) or (
+        if (obj_to_add['type'] == 'Url' and self.attribute['type'] in ['hostname', 'domain', 'ip-src', 'ip-dst']) or (
             obj_to_add['type'] in ('Hostname', 'Domain', 'Ip') and self.attribute['type'] == 'url'
         ):
             url_object = MISPObject('Url')
