@@ -116,7 +116,7 @@ class TestExpansions(unittest.TestCase):
             self.assertTrue(self.get_values(response).startswith('\n\nAddress:\t1ES14c7qLb5CYhLMUekctxLgc1FV2Ti9DA\nBalance:\t0.0002126800 BTC (+0.0007482500 BTC / -0.0005355700 BTC)'))
 
         except Exception:
-            self.assertEqual(self.get_values(response), 'Not a valid BTC address, or Balance has changed')
+            self.assertTrue(self.get_values(response).startswith('Not a valid BTC address'))
 
     def test_btc_scam_check(self):
         query = {"module": "btc_scam_check", "btc": "1ES14c7qLb5CYhLMUekctxLgc1FV2Ti9DA"}
@@ -358,7 +358,7 @@ class TestExpansions(unittest.TestCase):
             query["config"] = self.configs[module_name]
             response = self.misp_modules_post(query)
             try:
-                self.assertEqual(self.get_values(response), 'circl.lu')
+                self.assertIn('www.circl.lu', response.json()['results'][0]['values'])
             except Exception:
                 self.assertIn(self.get_errors(response), ('We hit an error, time to bail!', 'API quota exceeded.'))
         else:
@@ -402,7 +402,7 @@ class TestExpansions(unittest.TestCase):
         query = {"module": "rbl", "ip-src": "8.8.8.8"}
         response = self.misp_modules_post(query)
         try:
-            self.assertTrue(self.get_values(response).startswith('8.8.8.8.query.senderbase.org'))
+            self.assertTrue(self.get_values(response).startswith('8.8.8.8.bl.spamcannibal.org'))
         except Exception:
             self.assertEqual(self.get_errors(response), "No data found by querying known RBLs")
 
@@ -431,11 +431,18 @@ class TestExpansions(unittest.TestCase):
 
     def test_shodan(self):
         module_name = "shodan"
-        query = {"module": module_name, "ip-src": "149.13.33.14"}
+        query = {
+            "module": module_name,
+            "attribute": {
+                "uuid": "a21aae0c-7426-4762-9b79-854314d69059",
+                "type": "ip-src",
+                "value": "149.13.33.14"
+            }
+        }
         if module_name in self.configs:
             query['config'] = self.configs[module_name]
             response = self.misp_modules_post(query)
-            self.assertIn("circl.lu", self.get_values(response))
+            self.assertEqual(self.get_object(response), 'ip-api-address')
         else:
             response = self.misp_modules_post(query)
             self.assertEqual(self.get_errors(response), 'Shodan authentication is missing')
@@ -517,16 +524,33 @@ class TestExpansions(unittest.TestCase):
 
     def test_virustotal_public(self):
         module_name = "virustotal_public"
-        query_types = ('domain', 'ip-src', 'sha256', 'url')
-        query_values = ('circl.lu', '149.13.33.14',
-                        'a04ac6d98ad989312783d4fe3456c53730b212c79a426fb215708b6c6daa3de3',
-                        'http://194.169.88.56:49151/.i')
+        attributes = (
+            {
+                "uuid": "ffea0594-355a-42fe-9b98-fad28fd248b3",
+                "type": "domain",
+                "value": "circl.lu"
+            },
+            {
+                "uuid": "1f3f0f2d-5143-4b05-a0f1-8ac82f51a979",
+                "type": "ip-src",
+                "value": "149.13.33.14"
+            },
+            {
+                "uuid": "b4be6652-f4ff-4515-ae63-3f016df37e8f",
+                "type": "sha256",
+                "value": "a04ac6d98ad989312783d4fe3456c53730b212c79a426fb215708b6c6daa3de3"
+            },
+            {
+                "uuid": "6cead544-b683-48cb-b19b-a2561ffa1f51",
+                "type": "url",
+                "value": "http://194.169.88.56:49151/.i"
+            }
+        )
         results = ('whois', 'asn', 'file', 'virustotal-report')
         if module_name in self.configs:
-            for query_type, query_value, result in zip(query_types, query_values, results):
+            for attribute, result in zip(attributes, results):
                 query = {"module": module_name,
-                         "attribute": {"type": query_type,
-                                       "value": query_value},
+                         "attribute": attribute,
                          "config": self.configs[module_name]}
                 response = self.misp_modules_post(query)
                 try:
@@ -534,24 +558,42 @@ class TestExpansions(unittest.TestCase):
                 except Exception:
                     self.assertEqual(self.get_errors(response), "VirusTotal request rate limit exceeded.")
         else:
-            query = {"module": module_name,
-                     "attribute": {"type": query_types[0],
-                                   "value": query_values[0]}}
+            query = {
+                "module": module_name,
+                "attribute": attributes[0]
+            }
             response = self.misp_modules_post(query)
             self.assertEqual(self.get_errors(response), "A VirusTotal api key is required for this module.")
 
     def test_virustotal(self):
         module_name = "virustotal"
-        query_types = ('domain', 'ip-src', 'sha256', 'url')
-        query_values = ('circl.lu', '149.13.33.14',
-                        'a04ac6d98ad989312783d4fe3456c53730b212c79a426fb215708b6c6daa3de3',
-                        'http://194.169.88.56:49151/.i')
+        attributes = (
+            {
+                "uuid": "ffea0594-355a-42fe-9b98-fad28fd248b3",
+                "type": "domain",
+                "value": "circl.lu"
+            },
+            {
+                "uuid": "1f3f0f2d-5143-4b05-a0f1-8ac82f51a979",
+                "type": "ip-src",
+                "value": "149.13.33.14"
+            },
+            {
+                "uuid": "b4be6652-f4ff-4515-ae63-3f016df37e8f",
+                "type": "sha256",
+                "value": "a04ac6d98ad989312783d4fe3456c53730b212c79a426fb215708b6c6daa3de3"
+            },
+            {
+                "uuid": "6cead544-b683-48cb-b19b-a2561ffa1f51",
+                "type": "url",
+                "value": "http://194.169.88.56:49151/.i"
+            }
+        )
         results = ('domain-ip', 'asn', 'virustotal-report', 'virustotal-report')
         if module_name in self.configs:
-            for query_type, query_value, result in zip(query_types, query_values, results):
+            for attribute, result in zip(attributes, results):
                 query = {"module": module_name,
-                         "attribute": {"type": query_type,
-                                       "value": query_value},
+                         "attribute": attribute,
                          "config": self.configs[module_name]}
                 response = self.misp_modules_post(query)
                 try:
@@ -559,9 +601,10 @@ class TestExpansions(unittest.TestCase):
                 except Exception:
                     self.assertEqual(self.get_errors(response), "VirusTotal request rate limit exceeded.")
         else:
-            query = {"module": module_name,
-                     "attribute": {"type": query_types[0],
-                                   "value": query_values[0]}}
+            query = {
+                "module": module_name,
+                "attribute": attributes[0]
+            }
             response = self.misp_modules_post(query)
             self.assertEqual(self.get_errors(response), "A VirusTotal api key is required for this module.")
 
