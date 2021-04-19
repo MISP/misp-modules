@@ -100,9 +100,16 @@ class Yeti():
             obj_to_add['type'] in ('Hostname', 'Domain', 'Ip') and self.attribute['type'] == 'url'
         ):
             url_object = MISPObject('Url')
-            url_object.add_attribute(self.__get_relation(obj_to_add), obj_to_add['value'])
-            url_object.add_attribute(self.__get_relation(self.attribute),
+            obj_relation = self.__get_relation(obj_to_add)
+            if obj_relation:
+                print(obj_relation)
+                url_object.add_attribute(self.__get_relation(obj_to_add), obj_to_add['value'])
+            obj_relation = self.__get_relation(self.attribute)
+            if obj_relation:
+                print(obj_relation)
+                url_object.add_attribute(self.__get_relation(self.attribute),
                                      self.attribute['value'])
+
             url_object.add_reference(self.attribute['uuid'], 'related_to')
             print(url_object)
             return url_object
