@@ -79,27 +79,24 @@ class Yeti():
             if object_misp_url:
                 self.misp_event.add_object(object_misp_url)
             if not object_misp_url and not object_misp_url:
-                attr = self.__get_attribute(obs_to_add)
-                if attr:
-                    self.misp_event.add_attribute(attr.type, attr.value)
-
+                self.__get_attribute(obs_to_add)
+                       
     def get_result(self):
         event = json.loads(self.misp_event.to_json())
         results = {key: event[key] for key in ('Attribute', 'Object')}
         return results
 
     def __get_attribute(self, obs_to_add):
-        attr = MISPAttribute()
-        attr.value = obs_to_add['value']
+
         try:
-            attr.type = self.misp_mapping[obs_to_add['type']]
+            type_attr = self.misp_mapping[obs_to_add['type']]
+            attr = self.misp_event.add_attribute(value=obs_to_add['value'], type=type_attr)
         except KeyError:
             logging.error('type not found %s' % obs_to_add['type'])
             return
 
         for t in obs_to_add['tags']:
-            attr.tags.append(t['name'])
-        return attr
+            self.misp_event.add_attribute_tag(t['name'], attr['uuid'])
 
     def __get_object_domain_ip(self, obj_to_add):
         if (obj_to_add['type'] == 'Ip' and self.attribute['type'] in ['hostname','domain']) or\
