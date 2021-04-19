@@ -80,7 +80,6 @@ class Yeti():
     def get_result(self):
         event = json.loads(self.misp_event.to_json())
         results = {key: event[key] for key in ('Attribute', 'Object')}
-        print('results %s' % results)
         return results
 
     def __get_object_domain_ip(self, obj_to_add):
@@ -108,7 +107,7 @@ class Yeti():
                 url_object.add_attribute(obj_relation,
                                          self.attribute['value'])
             url_object.add_reference(self.attribute['uuid'], 'related_to')
-            print(url_object)
+
             return url_object
 
     def __get_relation(self, obj, is_yeti_object=True):
