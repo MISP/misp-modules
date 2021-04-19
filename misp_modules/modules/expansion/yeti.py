@@ -103,6 +103,7 @@ class Yeti():
             obj_relation = self.__get_relation(obj_to_add)
             if obj_relation:
                 print(obj_relation)
+                print(obj_to_add['value'])
                 url_object.add_attribute('url', obj_to_add['value'])
             obj_relation = self.__get_relation(self.attribute)
             if obj_relation:
