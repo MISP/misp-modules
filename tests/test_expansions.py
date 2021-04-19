@@ -399,6 +399,8 @@ class TestExpansions(unittest.TestCase):
             self.assertEqual(self.get_errors(response), "Ransomcoindb API key is missing")
 
     def test_rbl(self):
+        if LiveCI:
+            return True
         query = {"module": "rbl", "ip-src": "8.8.8.8"}
         response = self.misp_modules_post(query)
         try:
