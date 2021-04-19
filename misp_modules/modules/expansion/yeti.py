@@ -102,12 +102,9 @@ class Yeti():
             url_object = MISPObject('Url')
             obj_relation = self.__get_relation(obj_to_add)
             if obj_relation:
-                print(obj_relation)
-                print(obj_to_add['value'])
                 url_object.add_attribute(obj_relation, obj_to_add['value'])
             obj_relation = self.__get_relation(self.attribute)
             if obj_relation:
-                print(obj_relation)
                 url_object.add_attribute(self.__get_relation(self.attribute),
                                      self.attribute['value'])
 
