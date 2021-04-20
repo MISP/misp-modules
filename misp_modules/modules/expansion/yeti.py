@@ -39,9 +39,9 @@ class Yeti():
     def get_neighboors(self, obs_id):
         neighboors = self.yeti_client.neighbors_observables(obs_id)
         if neighboors and 'objs' in neighboors:
-            links_by_id = {link['dst']['id']: link['description'] for link in neighboors['links']
+            links_by_id = {link['dst']['id']: (link['description'],'dst') for link in neighboors['links']
                            if link['dst']['id'] != obs_id}
-            links_by_id.update({link['src']['id']: link['description'] for link in neighboors['links']
+            links_by_id.update({link['src']['id']: (link['description'], 'src') for link in neighboors['links']
                                 if link['src']['id'] != obs_id})
 
             for n in neighboors['objs']:
@@ -85,11 +85,11 @@ class Yeti():
             if object_misp_url:
                 self.misp_event.add_object(object_misp_url)
                 continue
-            if link == 'NS record':
+            if link[0] == 'NS record' and link[1] == 'dst':
                 object_ns_record = self.__get_object_ns_record(obs_to_add)
                 self.misp_event.add_object(object_ns_record)
                 continue
-            self.__get_attribute(obs_to_add, link)
+            self.__get_attribute(obs_to_add, link[0])
 
     def get_result(self):
         event = json.loads(self.misp_event.to_json())
@@ -115,7 +115,7 @@ class Yeti():
             self.misp_event.add_attribute_tag(t['name'], attr['uuid'])
 
     def __get_object_domain_ip(self, obj_to_add):
-        if (obj_to_add['type'] == 'Ip' and self.attribute['type'] in ['hostname','domain']) or\
+        if (obj_to_add['type'] == 'Ip' and self.attribute['type'] in ['hostname', 'domain']) or\
                 (obj_to_add['type'] in ('Hostname', 'Domain') and self.attribute['type'] in ('ip-src', 'ip-dst')):
             domain_ip_object = MISPObject('domain-ip')
             domain_ip_object.add_attribute(self.__get_relation(obj_to_add),
