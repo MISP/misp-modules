@@ -87,8 +87,9 @@ class Yeti():
                 continue
             if link[0] == 'NS record':
                 object_ns_record = self.__get_object_ns_record(obs_to_add, link[1])
-                self.misp_event.add_object(object_ns_record)
-                continue
+                if object_ns_record:
+                    self.misp_event.add_object(object_ns_record)
+                    continue
             self.__get_attribute(obs_to_add, link[0])
 
     def get_result(self):
@@ -106,7 +107,7 @@ class Yeti():
             else:
                 value = obs_to_add['value']
             attr = self.misp_event.add_attribute(value=value, type=type_attr)
-            attr.comment = '%s of %s' % (link, self.attribute['value'])
+            attr.comment = '%s: %s' % (link, self.attribute['value'])
         except KeyError:
             logging.error('type not found %s' % obs_to_add['type'])
             return
@@ -143,6 +144,8 @@ class Yeti():
             return url_object
 
     def __get_object_ns_record(self, obj_to_add, link):
+        queried_domain = None
+        ns_domain = None
         object_dns_record = MISPObject('dns-record')
         if link == 'dst':
             queried_domain = self.attribute['value']
@@ -150,12 +153,12 @@ class Yeti():
         elif link =='src':
             queried_domain = obj_to_add['value']
             ns_domain = self.attribute['value']
+        if queried_domain and ns_domain:
+            object_dns_record.add_attribute('queried-domain', queried_domain)
+            object_dns_record.add_attribute('ns-record', ns_domain)
+            object_dns_record.add_reference(self.attribute['uuid'], 'related_to')
 
-        object_dns_record.add_attribute('queried-domain', queried_domain)
-        object_dns_record.add_attribute('ns-record', ns_domain)
-        object_dns_record.add_reference(self.attribute['uuid'], 'related_to')
-
-        return object_dns_record
+            return object_dns_record
 
     def __get_relation(self, obj, is_yeti_object=True):
         if is_yeti_object:
