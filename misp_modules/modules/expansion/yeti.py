@@ -91,7 +91,7 @@ class Yeti():
         results = {key: event[key] for key in ('Attribute', 'Object')}
         return results
 
-    def __get_attribute(self, obs_to_add, links):
+    def __get_attribute(self, obs_to_add, link):
 
         try:
             type_attr = self.misp_mapping[obs_to_add['type']]
@@ -101,7 +101,7 @@ class Yeti():
             else:
                 value = obs_to_add['value']
             attr = self.misp_event.add_attribute(value=value, type=type_attr)
-            attr.comment = '%s of %s' % (links[obs_to_add['id']], self.attribute['value'])
+            attr.comment = '%s of %s' % (link, self.attribute['value'])
         except KeyError:
             logging.error('type not found %s' % obs_to_add['type'])
             return
