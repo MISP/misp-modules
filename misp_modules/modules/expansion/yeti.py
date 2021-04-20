@@ -98,6 +98,7 @@ class Yeti():
                 value = obs_to_add['value']
             attr = self.misp_event.add_attribute(value=value, type=type_attr)
             if obs_to_add['id'] in links:
+                print('%s of %s' % (links[obs_to_add['id']], self.attribute['value']))
                 attr.comment = '%s of %s' % (links[obs_to_add['id']], self.attribute['value'])
         except KeyError:
             logging.error('type not found %s' % obs_to_add['type'])
