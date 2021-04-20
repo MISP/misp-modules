@@ -40,9 +40,8 @@ class Yeti():
         neighboors = self.yeti_client.neighbors_observables(obs_id)
         if neighboors and 'objs' in neighboors:
             links_by_id = {link['id']: link['description'] for link in neighboors['links']}
-            print(links_by_id)
             for n in neighboors['objs']:
-                yield n, links_by_id[n['id']]
+                yield n, links_by_id
 
     def get_tags(self, value):
         obs = self.search(value)
@@ -73,7 +72,7 @@ class Yeti():
         obs = self.search(self.attribute['value'])
         values = []
         types = []
-        for obs_to_add, link in self.get_neighboors(obs['id']):
+        for obs_to_add, links in self.get_neighboors(obs['id']):
             object_misp_domain_ip = self.__get_object_domain_ip(obs_to_add)
             if object_misp_domain_ip:
                 self.misp_event.add_object(object_misp_domain_ip)
@@ -81,14 +80,14 @@ class Yeti():
             if object_misp_url:
                 self.misp_event.add_object(object_misp_url)
             if not object_misp_url and not object_misp_url:
-                self.__get_attribute(obs_to_add, link)
+                self.__get_attribute(obs_to_add, links)
 
     def get_result(self):
         event = json.loads(self.misp_event.to_json())
         results = {key: event[key] for key in ('Attribute', 'Object')}
         return results
 
-    def __get_attribute(self, obs_to_add, link):
+    def __get_attribute(self, obs_to_add, links):
 
         try:
             type_attr = self.misp_mapping[obs_to_add['type']]
@@ -98,7 +97,8 @@ class Yeti():
             else:
                 value = obs_to_add['value']
             attr = self.misp_event.add_attribute(value=value, type=type_attr)
-            attr.comment = '%s of %s' % (link, self.attribute['value'])
+            if obs_to_add['id'] in links:
+                attr.comment = '%s of %s' % (links[obs_to_add['id']], self.attribute['value'])
         except KeyError:
             logging.error('type not found %s' % obs_to_add['type'])
             return
