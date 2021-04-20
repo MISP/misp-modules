@@ -145,7 +145,7 @@ class Yeti():
     def __get_object_ns_record(self, obj_to_add):
         object_dns_record = MISPObject('dns-record')
 
-        object_dns_record.add_attribute('queried_domain', self.attribute['value'])
+        object_dns_record.add_attribute('queried-domain', self.attribute['value'])
         object_dns_record.add_attribute('ns-record', obj_to_add['value'])
         object_dns_record.add_reference(self.attribute['uuid'], 'related_to')
 
