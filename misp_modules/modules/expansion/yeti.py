@@ -23,7 +23,7 @@ moduleconfig = ['apikey', 'url']
 
 class Yeti():
 
-    def __init__(self, url, key,attribute):
+    def __init__(self, url, key, attribute):
         self.misp_mapping = {'Ip': 'ip-dst', 'Domain': 'domain', 'Hostname': 'hostname', 'Url': 'url',
                              'AutonomousSystem': 'AS', 'File': 'sha256'}
         self.yeti_client = pyeti.YetiApi(url=url, api_key=key)
@@ -85,7 +85,10 @@ class Yeti():
             if object_misp_url:
                 self.misp_event.add_object(object_misp_url)
                 continue
-
+            if link == 'NS record':
+                object_ns_record = self.__get_object_ns_record(obs_to_add)
+                self.misp_event.add_object(object_ns_record)
+                continue
             self.__get_attribute(obs_to_add, link)
 
     def get_result(self):
@@ -138,6 +141,15 @@ class Yeti():
             url_object.add_reference(self.attribute['uuid'], 'related_to')
 
             return url_object
+
+    def __get_object_ns_record(self, obj_to_add):
+        object_dns_record = MISPObject('dns-record')
+
+        object_dns_record.add_attribute(self.attribute['value'], 'queried_domain')
+        object_dns_record.add_attribute(obj_to_add['value', 'ns-record'])
+        object_dns_record.add_reference(self.attribute['uuid'], 'related_to')
+
+        return object_dns_record
 
     def __get_relation(self, obj, is_yeti_object=True):
         if is_yeti_object:
