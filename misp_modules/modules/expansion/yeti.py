@@ -40,6 +40,7 @@ class Yeti():
         neighboors = self.yeti_client.neighbors_observables(obs_id)
         if neighboors and 'objs' in neighboors:
             links_by_id = {link['dst']['id']: link['description'] for link in neighboors['links']}
+            links_by_id.update({link['src']['id']: link['description'] for link in neighboors['links']})
             for n in neighboors['objs']:
                 yield n, links_by_id[n['id']]
 
