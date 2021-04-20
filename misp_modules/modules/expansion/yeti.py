@@ -41,7 +41,7 @@ class Yeti():
         if neighboors and 'objs' in neighboors:
             links_by_id = {link['id']: link['description'] for link in neighboors['links']}
             for n in neighboors['objs']:
-                yield n, links_by_id
+                yield n, links_by_id[n['id']]
 
     def get_tags(self, value):
         obs = self.search(value)
@@ -72,7 +72,7 @@ class Yeti():
         obs = self.search(self.attribute['value'])
         values = []
         types = []
-        for obs_to_add, links in self.get_neighboors(obs['id']):
+        for obs_to_add, link in self.get_neighboors(obs['id']):
             object_misp_domain_ip = self.__get_object_domain_ip(obs_to_add)
             if object_misp_domain_ip:
                 self.misp_event.add_object(object_misp_domain_ip)
@@ -80,7 +80,7 @@ class Yeti():
             if object_misp_url:
                 self.misp_event.add_object(object_misp_url)
             if not object_misp_url and not object_misp_url:
-                self.__get_attribute(obs_to_add, links)
+                self.__get_attribute(obs_to_add, link)
 
     def get_result(self):
         event = json.loads(self.misp_event.to_json())
@@ -97,8 +97,6 @@ class Yeti():
             else:
                 value = obs_to_add['value']
             attr = self.misp_event.add_attribute(value=value, type=type_attr)
-            print(links)
-            print(obs_to_add['id'])
             if obs_to_add['id'] in links:
                 attr.comment = '%s of %s' % (links[obs_to_add['id']], self.attribute['value'])
         except KeyError:
