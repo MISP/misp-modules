@@ -25,7 +25,7 @@ class Yeti():
 
     def __init__(self, url, key,attribute):
         self.misp_mapping = {'Ip': 'ip-dst', 'Domain': 'domain', 'Hostname': 'hostname', 'Url': 'url',
-                             'AutonomousSystem': 'AS'}
+                             'AutonomousSystem': 'AS', 'File': 'sha256'}
         self.yeti_client = pyeti.YetiApi(url=url, api_key=key)
         self.attribute = attribute
         self.misp_event = MISPEvent()
@@ -80,7 +80,7 @@ class Yeti():
                 self.misp_event.add_object(object_misp_url)
             if not object_misp_url and not object_misp_url:
                 self.__get_attribute(obs_to_add)
-                       
+
     def get_result(self):
         event = json.loads(self.misp_event.to_json())
         results = {key: event[key] for key in ('Attribute', 'Object')}
@@ -90,7 +90,12 @@ class Yeti():
 
         try:
             type_attr = self.misp_mapping[obs_to_add['type']]
-            attr = self.misp_event.add_attribute(value=obs_to_add['value'], type=type_attr)
+            value = None
+            if obs_to_add['type'] == 'File':
+                value = obs_to_add['value'].split(':')[1]
+            else:
+                value = obs_to_add['value']
+            attr = self.misp_event.add_attribute(value=value, type=type_attr)
         except KeyError:
             logging.error('type not found %s' % obs_to_add['type'])
             return
