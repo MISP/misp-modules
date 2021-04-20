@@ -93,7 +93,7 @@ class Yeti():
 
     def get_result(self):
         event = json.loads(self.misp_event.to_json())
-        results = {key: event[key] for key in ('Attribute', 'Object')}
+        results = {key: event[key] for key in ('Attribute', 'Object') if key in event}
         return results
 
     def __get_attribute(self, obs_to_add, link):
