@@ -85,8 +85,8 @@ class Yeti():
             if object_misp_url:
                 self.misp_event.add_object(object_misp_url)
                 continue
-            if link[0] == 'NS record' and link[1] == 'dst':
-                object_ns_record = self.__get_object_ns_record(obs_to_add)
+            if link[0] == 'NS record':
+                object_ns_record = self.__get_object_ns_record(obs_to_add, link[1])
                 self.misp_event.add_object(object_ns_record)
                 continue
             self.__get_attribute(obs_to_add, link[0])
@@ -142,11 +142,17 @@ class Yeti():
 
             return url_object
 
-    def __get_object_ns_record(self, obj_to_add):
+    def __get_object_ns_record(self, obj_to_add, link):
         object_dns_record = MISPObject('dns-record')
+        if link == 'dst':
+            queried_domain = self.attribute['value']
+            ns_domain = obj_to_add['value']
+        elif link =='src':
+            queried_domain = obj_to_add['value']
+            ns_domain = self.attribute['value']
 
-        object_dns_record.add_attribute('queried-domain', self.attribute['value'])
-        object_dns_record.add_attribute('ns-record', obj_to_add['value'])
+        object_dns_record.add_attribute('queried-domain', queried_domain)
+        object_dns_record.add_attribute('ns-record', ns_domain)
         object_dns_record.add_reference(self.attribute['uuid'], 'related_to')
 
         return object_dns_record
