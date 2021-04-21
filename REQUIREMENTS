@@ -44,7 +44,7 @@ importlib-metadata==1.6.0 ; python_version < '3.8'
 isodate==0.6.0
 jbxapi==3.4.0
 jsonschema==3.2.0
-lief==0.10.0
+lief==0.10.1
 lxml==4.5.0
 maclookup==1.0.3
 maxminddb==1.5.2
@@ -107,6 +107,7 @@ websocket-client==0.57.0
 wrapt==1.12.1
 xlrd==1.2.0
 xlsxwriter==1.2.8
+pyeti-python3=1.0
 yara-python==3.8.1
 yarl==1.4.2
 zipp==3.1.0

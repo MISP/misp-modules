@@ -6,7 +6,7 @@ try:
 except ImportError:
     print("pyeti module not installed.")
 
-from pymisp import MISPEvent, MISPObject, MISPAttribute
+from pymisp import MISPEvent, MISPObject
 
 misperrors = {'error': 'Error'}
 
