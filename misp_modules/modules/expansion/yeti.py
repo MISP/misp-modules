@@ -10,7 +10,7 @@ from pymisp import MISPEvent, MISPObject, MISPAttribute
 
 misperrors = {'error': 'Error'}
 
-mispattributes = {'input': ['ip-src', 'ip-dst', 'hostname', 'domain'],
+mispattributes = {'input': ['AS', 'ip-src', 'ip-dst', 'hostname', 'domain', 'sha256', 'sha1', 'md5', 'url'],
                   'format': 'misp_standard'
                   }
 # possible module-types: 'expansion', 'hover' or both
