@@ -47,31 +47,6 @@ class Yeti():
             for n in neighboors['objs']:
                 yield n, links_by_id[n['id']]
 
-    def get_tags(self, value):
-        obs = self.search(value)
-        if obs:
-            for t in obs['tags']:
-                yield t
-
-    def get_entity(self, obs_id):
-        companies = self.yeti_client.observable_to_company(obs_id)
-        actors = self.yeti_client.observable_to_actor(obs_id)
-        campaigns = self.yeti_client.observable_to_campaign(obs_id)
-        exploit_kit = self.yeti_client.observable_to_exploitkit(obs_id)
-        exploit = self.yeti_client.observable_to_exploit(obs_id)
-        ind = self.yeti_client.observable_to_indicator(obs_id)
-
-        res = []
-        res.extend(companies)
-        res.extend(actors)
-        res.extend(campaigns)
-        res.extend(exploit)
-        res.extend(exploit_kit)
-        res.extend(ind)
-
-        for r in res:
-            yield r['name']
-
     def parse_yeti_result(self):
         obs = self.search(self.attribute['value'])
         values = []
