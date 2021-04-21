@@ -39,7 +39,7 @@ class Yeti():
     def get_neighboors(self, obs_id):
         neighboors = self.yeti_client.neighbors_observables(obs_id)
         if neighboors and 'objs' in neighboors:
-            links_by_id = {link['dst']['id']: (link['description'],'dst') for link in neighboors['links']
+            links_by_id = {link['dst']['id']: (link['description'], 'dst') for link in neighboors['links']
                            if link['dst']['id'] != obs_id}
             links_by_id.update({link['src']['id']: (link['description'], 'src') for link in neighboors['links']
                                 if link['src']['id'] != obs_id})
@@ -91,7 +91,7 @@ class Yeti():
             self.misp_event.add_attribute_tag(t['name'], attr['uuid'])
 
     def __get_object_domain_ip(self, obj_to_add):
-        if (obj_to_add['type'] == 'Ip' and self.attribute['type'] in ['hostname', 'domain']) or\
+        if (obj_to_add['type'] == 'Ip' and self.attribute['type'] in ['hostname', 'domain']) or \
                 (obj_to_add['type'] in ('Hostname', 'Domain') and self.attribute['type'] in ('ip-src', 'ip-dst')):
             domain_ip_object = MISPObject('domain-ip')
             domain_ip_object.add_attribute(self.__get_relation(obj_to_add),
@@ -104,7 +104,7 @@ class Yeti():
 
     def __get_object_url(self, obj_to_add):
         if (obj_to_add['type'] == 'Url' and self.attribute['type'] in ['hostname', 'domain', 'ip-src', 'ip-dst']) or (
-            obj_to_add['type'] in ('Hostname', 'Domain', 'Ip') and self.attribute['type'] == 'url'
+                obj_to_add['type'] in ('Hostname', 'Domain', 'Ip') and self.attribute['type'] == 'url'
         ):
             url_object = MISPObject('url')
             obj_relation = self.__get_relation(obj_to_add)
@@ -125,7 +125,7 @@ class Yeti():
         if link == 'dst':
             queried_domain = self.attribute['value']
             ns_domain = obj_to_add['value']
-        elif link =='src':
+        elif link == 'src':
             queried_domain = obj_to_add['value']
             ns_domain = self.attribute['value']
         if queried_domain and ns_domain:
@@ -178,10 +178,10 @@ def handler(q=False):
         return misperrors
 
 
-
 def version():
     moduleinfo['config'] = moduleconfig
     return moduleinfo
+
 
 def introspection():
     return mispattributes
