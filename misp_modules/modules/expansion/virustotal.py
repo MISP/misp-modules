@@ -1,6 +1,7 @@
-from pymisp import MISPAttribute, MISPEvent, MISPObject
 import json
 import requests
+from . import check_input_attribute, standard_error_message
+from pymisp import MISPAttribute, MISPEvent, MISPObject
 
 misperrors = {'error': 'Error'}
 mispattributes = {'input': ['hostname', 'domain', "ip-src", "ip-dst", "md5", "sha1", "sha256", "url"],
@@ -143,7 +144,7 @@ class VirusTotalParser(object):
 
     def parse_resolutions(self, resolutions, subdomains=None, uuids=None):
         domain_ip_object = MISPObject('domain-ip')
-        if self.attribute.type == 'domain':
+        if self.attribute.type in ('domain', 'hostname'):
             domain_ip_object.add_attribute('domain', type='domain', value=self.attribute.value)
             attribute_type, relation, key = ('ip-dst', 'ip', 'ip_address')
         else:
@@ -174,7 +175,7 @@ class VirusTotalParser(object):
             vt_object = MISPObject('virustotal-report')
             vt_object.add_attribute('permalink', type='link', value=query_result['permalink'])
             detection_ratio = '{}/{}'.format(query_result['positives'], query_result['total'])
-            vt_object.add_attribute('detection-ratio', type='text', value=detection_ratio)
+            vt_object.add_attribute('detection-ratio', type='text', value=detection_ratio, disable_correlation=True)
             self.misp_event.add_object(**vt_object)
             return vt_object.uuid
 
@@ -195,6 +196,11 @@ def handler(q=False):
     if not request.get('config') or not request['config'].get('apikey'):
         misperrors['error'] = "A VirusTotal api key is required for this module."
         return misperrors
+    if not request.get('attribute') or not check_input_attribute(request['attribute']):
+        return {'error': f'{standard_error_message}, which should contain at least a type, a value and an uuid.'}
+    if request['attribute']['type'] not in mispattributes['input']:
+        return {'error': 'Unsupported attribute type.'}
+
     event_limit = request['config'].get('event_limit')
     if not isinstance(event_limit, int):
         event_limit = 5

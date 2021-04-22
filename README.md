@@ -1,17 +1,15 @@
 # MISP modules
 
-[![Build Status](https://travis-ci.org/MISP/misp-modules.svg?branch=master)](https://travis-ci.org/MISP/misp-modules)
-[![Coverage Status](https://coveralls.io/repos/github/MISP/misp-modules/badge.svg?branch=master)](https://coveralls.io/github/MISP/misp-modules?branch=master)
-[![codecov](https://codecov.io/gh/MISP/misp-modules/branch/master/graph/badge.svg)](https://codecov.io/gh/MISP/misp-modules)
+[![Build Status](https://travis-ci.org/MISP/misp-modules.svg?branch=main)](https://travis-ci.org/MISP/misp-modules)
+[![Coverage Status](https://coveralls.io/repos/github/MISP/misp-modules/badge.svg?branch=main)](https://coveralls.io/github/MISP/misp-modules?branch=main)
+[![codecov](https://codecov.io/gh/MISP/misp-modules/branch/main/graph/badge.svg)](https://codecov.io/gh/MISP/misp-modules)
 
-MISP modules are autonomous modules that can be used for expansion and other services in [MISP](https://github.com/MISP/MISP).
+MISP modules are autonomous modules that can be used to extend [MISP](https://github.com/MISP/MISP) for new services such as expansion, import and export.
 
 The modules are written in Python 3 following a simple API interface. The objective is to ease the extensions of MISP functionalities
 without modifying core components. The API is available via a simple REST API which is independent from MISP installation or configuration.
 
-MISP modules support is included in MISP starting from version 2.4.28.
-
-For more information: [Extending MISP with Python modules](https://www.misp-project.org/misp-training/3.1-misp-modules.pdf) slides from MISP training.
+For more information: [Extending MISP with Python modules](https://www.misp-project.org/misp-training/3.1-misp-modules.pdf) slides from [MISP training](https://github.com/MISP/misp-training).
 
 ## Existing MISP modules
 
@@ -22,7 +20,7 @@ For more information: [Extending MISP with Python modules](https://www.misp-proj
 * [AssemblyLine submit](misp_modules/modules/expansion/assemblyline_submit.py) - an expansion module to submit samples and urls to AssemblyLine.
 * [AssemblyLine query](misp_modules/modules/expansion/assemblyline_query.py) - an expansion module to query AssemblyLine and parse the full submission report.
 * [Backscatter.io](misp_modules/modules/expansion/backscatter_io.py) - a hover and expansion module to expand an IP address with mass-scanning observations.
-* [BGP Ranking](misp_modules/modules/expansion/bgpranking.py) - a hover and expansion module to expand an AS number with the ASN description, its history, and position in BGP Ranking.
+* [BGP Ranking](misp_modules/modules/expansion/bgpranking.py) - a hover and expansion module to expand an AS number with the ASN description and its ranking and position in BGP Ranking.
 * [RansomcoinDB check](misp_modules/modules/expansion/ransomcoindb.py) - An expansion hover module to query the [ransomcoinDB](https://ransomcoindb.concinnity-risks.com): it contains mapping between BTC addresses and malware hashes. Enrich MISP by querying for BTC -> hash or hash -> BTC addresses.
 * [BTC scam check](misp_modules/modules/expansion/btc_scam_check.py) - An expansion hover module to instantly check if a BTC address has been abused.
 * [BTC transactions](misp_modules/modules/expansion/btc_steroids.py) - An expansion hover module to get a blockchain balance and the transactions from a BTC address in MISP.
@@ -31,6 +29,7 @@ For more information: [Extending MISP with Python modules](https://www.misp-proj
 * [CIRCL Passive SSL](misp_modules/modules/expansion/circl_passivessl.py) - a hover and expansion module to expand IP addresses with the X.509 certificate(s) seen.
 * [countrycode](misp_modules/modules/expansion/countrycode.py) - a hover module to tell you what country a URL belongs to.
 * [CrowdStrike Falcon](misp_modules/modules/expansion/crowdstrike_falcon.py) - an expansion module to expand using CrowdStrike Falcon Intel Indicator API.
+* [CPE](misp_modules/modules/expansion/cpe.py) - An expansion module to query the CVE Search API with a cpe code, to get its related vulnerabilities.
 * [CVE](misp_modules/modules/expansion/cve.py) - a hover module to give more information about a vulnerability (CVE).
 * [CVE advanced](misp_modules/modules/expansion/cve_advanced.py) - An expansion module to query the CIRCL CVE search API for more information about a vulnerability (CVE).
 * [Cuckoo submit](misp_modules/modules/expansion/cuckoo_submit.py) - A hover module to submit malware sample, url, attachment, domain to Cuckoo Sandbox.
@@ -48,6 +47,7 @@ For more information: [Extending MISP with Python modules](https://www.misp-proj
 * [Greynoise](misp_modules/modules/expansion/greynoise.py) - a hover to get information from greynoise.
 * [hashdd](misp_modules/modules/expansion/hashdd.py) - a hover module to check file hashes against [hashdd.com](http://www.hashdd.com) including NSLR dataset.
 * [hibp](misp_modules/modules/expansion/hibp.py) - a hover module to lookup against Have I Been Pwned?
+* [html_to_markdown](misp_modules/modules/expansion/html_to_markdown.py) - Simple HTML to markdown converter
 * [intel471](misp_modules/modules/expansion/intel471.py) - an expansion module to get info from [Intel471](https://intel471.com).
 * [IPASN](misp_modules/modules/expansion/ipasn.py) - a hover and expansion to get the BGP ASN of an IP address.
 * [iprep](misp_modules/modules/expansion/iprep.py) - an expansion module to get IP reputation from packetmail.net.
@@ -75,11 +75,13 @@ For more information: [Extending MISP with Python modules](https://www.misp-proj
 * [shodan](misp_modules/modules/expansion/shodan.py) - a minimal [shodan](https://www.shodan.io/) expansion module.
 * [Sigma queries](misp_modules/modules/expansion/sigma_queries.py) - Experimental expansion module querying a sigma rule to convert it into all the available SIEM signatures.
 * [Sigma syntax validator](misp_modules/modules/expansion/sigma_syntax_validator.py) - Sigma syntax validator.
-* [SophosLabs Intelix](misp_modules/modules/expansion/sophoslabs_intelix.py) - SophosLabs Intelix is an API for Threat Intelligence and Analysis (free tier availible). [SophosLabs](https://aws.amazon.com/marketplace/pp/B07SLZPMCS)
+* [Socialscan](misp_modules/modules/expansion/socialscan.py) - a hover module to check if an email address or a username is used on different online platforms, using the [socialscan](https://github.com/iojw/socialscan) python library
+* [SophosLabs Intelix](misp_modules/modules/expansion/sophoslabs_intelix.py) - SophosLabs Intelix is an API for Threat Intelligence and Analysis (free tier available). [SophosLabs](https://aws.amazon.com/marketplace/pp/B07SLZPMCS)
 * [sourcecache](misp_modules/modules/expansion/sourcecache.py) - a module to cache a specific link from a MISP instance.
 * [STIX2 pattern syntax validator](misp_modules/modules/expansion/stix2_pattern_syntax_validator.py) - a module to check a STIX2 pattern syntax.
 * [ThreatCrowd](misp_modules/modules/expansion/threatcrowd.py) - an expansion module for [ThreatCrowd](https://www.threatcrowd.org/).
 * [threatminer](misp_modules/modules/expansion/threatminer.py) - an expansion module to expand from [ThreatMiner](https://www.threatminer.org/).
+* [TruSTAR Enrich](misp_modules/modules/expansion/trustar_enrich.py) - an expansion module to enrich MISP data with [TruSTAR](https://www.trustar.co/).
 * [urlhaus](misp_modules/modules/expansion/urlhaus.py) - Query urlhaus to get additional data about a domain, hash, hostname, ip or url.
 * [urlscan](misp_modules/modules/expansion/urlscan.py) - an expansion module to query [urlscan.io](https://urlscan.io).
 * [virustotal](misp_modules/modules/expansion/virustotal.py) - an expansion module to query the [VirusTotal](https://www.virustotal.com/gui/home) API with a high request rate limit required. (More details about the API: [here](https://developers.virustotal.com/reference))
@@ -127,8 +129,8 @@ For more information: [Extending MISP with Python modules](https://www.misp-proj
 sudo apt-get install python3-dev python3-pip libpq5 libjpeg-dev tesseract-ocr libpoppler-cpp-dev imagemagick virtualenv libopencv-dev zbar-tools libzbar0 libzbar-dev libfuzzy-dev build-essential -y
 sudo -u www-data virtualenv -p python3 /var/www/MISP/venv
 cd /usr/local/src/
-chown -R www-data .
-sudo git clone https://github.com/MISP/misp-modules.git
+sudo chown -R www-data: .
+sudo -u www-data git clone https://github.com/MISP/misp-modules.git
 cd misp-modules
 sudo -u www-data /var/www/MISP/venv/bin/pip install -I -r REQUIREMENTS
 sudo -u www-data /var/www/MISP/venv/bin/pip install .
@@ -143,7 +145,7 @@ sudo systemctl enable --now misp-modules
 As of this writing, the official RHEL repositories only contain Ruby 2.0.0 and Ruby 2.1 or higher is required. As such, this guide installs Ruby 2.2 from the [SCL](https://access.redhat.com/documentation/en-us/red_hat_software_collections/3/html/3.2_release_notes/chap-installation#sect-Installation-Subscribe) repository. 
 
 ~~~~bash
-sudo yum install rh-ruby22
+sudo yum install rh-python36 rh-ruby22
 sudo yum install openjpeg-devel
 sudo yum install rubygem-rouge rubygem-asciidoctor zbar-devel opencv-devel gcc-c++ pkgconfig poppler-cpp-devel python-devel redhat-rpm-config
 cd /var/www/MISP
@@ -164,7 +166,7 @@ After=misp-workers.service
 Type=simple
 User=apache
 Group=apache
-ExecStart=/usr/bin/scl enable rh-python36 rh-ruby22  '/var/www/MISP/venv/bin/misp-modules –l 127.0.0.1 –s'
+ExecStart=/usr/bin/scl enable rh-python36 rh-ruby22  '/var/www/MISP/venv/bin/misp-modules -l 127.0.0.1 -s'
 Restart=always
 RestartSec=10
 

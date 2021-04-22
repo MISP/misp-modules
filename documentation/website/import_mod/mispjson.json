@@ -1,0 +1,8 @@
+{
+    "description": "Module to import MISP JSON format for merging MISP events.",
+    "requirements": [],
+    "features": "The module simply imports MISP Attributes from an other MISP Event in order to merge events together. There is thus no special feature to make it work.",
+    "references": [],
+    "input": "MISP Event",
+    "output": "MISP Event attributes"
+}

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import json
+from . import check_input_attribute, standard_error_message
 from assemblyline_client import Client, ClientError
 from collections import defaultdict
 from pymisp import MISPAttribute, MISPEvent, MISPObject
@@ -10,7 +11,7 @@ mispattributes = {'input': ['link'], 'format': 'misp_standard'}
 moduleinfo = {'version': '1', 'author': 'Christian Studer',
               'description': 'Query AssemblyLine with a report URL to get the parsed data.',
               'module-type': ['expansion']}
-moduleconfig = ["apiurl", "user_id", "apikey", "password"]
+moduleconfig = ["apiurl", "user_id", "apikey", "password", "verifyssl"]
 
 
 class AssemblyLineParser():
@@ -124,7 +125,7 @@ def parse_config(apiurl, user_id, config):
     error = {"error": "Please provide your AssemblyLine API key or Password."}
     if config.get('apikey'):
         try:
-            return Client(apiurl, apikey=(user_id, config['apikey']))
+            return Client(apiurl, apikey=(user_id, config['apikey']), verify=config['verifyssl'])
         except ClientError as e:
             error['error'] = f'Error while initiating a connection with AssemblyLine: {e.__str__()}'
     if config.get('password'):
@@ -139,6 +140,10 @@ def handler(q=False):
     if q is False:
         return False
     request = json.loads(q)
+    if not request.get('attribute') or not check_input_attribute(request['attribute']):
+        return {'error': f'{standard_error_message}, which should contain at least a type, a value and an uuid.'}
+    if request['attribute']['type'] not in mispattributes['input']:
+        return {'error': 'Unsupported attribute type.'}
     if not request.get('config'):
         return {"error": "Missing configuration."}
     if not request['config'].get('apiurl'):
