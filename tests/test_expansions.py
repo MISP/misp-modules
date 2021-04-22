@@ -474,7 +474,7 @@ class TestExpansions(unittest.TestCase):
         if LiveCI:
             return True
         query_types = ('domain', 'ip-src', 'md5', 'whois-registrant-email')
-        query_values = ('circl.lu', '185.194.93.14', '616eff3e9a7575ae73821b4668d2801c', 'hostmaster@eurodns.com')
+        query_values = ('circl.lu', '149.13.33.14', '616eff3e9a7575ae73821b4668d2801c', 'hostmaster@eurodns.com')
         results = ('149.13.33.4', 'cve.circl.lu', 'devilreturns.com', 'navabi.lu')
         for query_type, query_value, result in zip(query_types, query_values, results):
             query = {"module": "threatcrowd", query_type: query_value}

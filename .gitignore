@@ -11,3 +11,9 @@ docs/expansion*
 docs/import_mod*
 docs/export_mod*
 site*
+
+#pycharm env
+.idea/*
+
+#venv
+venv*
