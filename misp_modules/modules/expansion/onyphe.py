@@ -52,6 +52,15 @@ class OnypheClient:
                     elif type(domain) == str:
                         self.__get_object_domain_ip(domain, 'domain')
 
+                if 'hostname' in r:
+                    hostname = r['hostname']
+                    if type(hostname) == list:
+                        for d in hostname:
+                            self.__get_object_domain_ip(d, 'domain')
+                    elif type(hostname) == str:
+                        self.__get_object_domain_ip(hostname, 'domain')
+
+                
     def __get_object_domain_ip(self, obs, relation):
         objet_domain_ip = MISPObject('domain-ip')
         objet_domain_ip.add_attribute(relation, obs)
