@@ -44,13 +44,13 @@ class OnypheClient:
         results = self.onyphe_client.summary_ip(self.attribute['value'])
         if 'results' in results:
             for r in results['results']:
-                print(r)
-                domain = r['domain']
-                if type(domain) == list:
-                    for d in domain:
-                        self.__get_object_domain_ip(d, 'domain')
-                elif type(domain) == str:
-                    self.__get_object_domain_ip(domain, 'domain')
+                if 'domain' in r:
+                    domain = r['domain']
+                    if type(domain) == list:
+                        for d in domain:
+                            self.__get_object_domain_ip(d, 'domain')
+                    elif type(domain) == str:
+                        self.__get_object_domain_ip(domain, 'domain')
 
     def __get_object_domain_ip(self, obs, relation):
         objet_domain_ip = MISPObject('domain-ip')
