@@ -44,6 +44,7 @@ class OnypheClient:
         results = self.onyphe_client.summary_ip(self.attribute['value'])
         if 'results' in results:
             for r in results['results']:
+                print(r)
                 domain = r['domain']
                 if type(domain) == list:
                     for d in domain:
