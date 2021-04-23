@@ -37,13 +37,11 @@ class OnypheClient:
         return results
 
     def get_query_onyphe(self):
-        print(self.attribute)
-        if self.attribute['type'] == 'ip-src' and self.attribute['type'] == 'ip-dst':
+        if self.attribute['type'] == 'ip-src' or self.attribute['type'] == 'ip-dst':
             self.__summary_ip()
 
     def __summary_ip(self):
         results = self.onyphe_client.summary_ip(self.attribute['value'])
-        print(results)
         if 'results' in results:
             for r in results['results']:
                 domain = r['domain']
