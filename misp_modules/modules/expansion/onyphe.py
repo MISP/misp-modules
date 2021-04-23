@@ -42,10 +42,10 @@ class OnypheClient:
 
     def __summary_ip(self):
         results = self.onyphe_client.summary_ip(self.attribute['value'])
+        print(results)
         if 'results' in results:
             for r in results['results']:
                 domain = r['domain']
-                print(domain)
                 if type(domain) == list:
                     for d in domain:
                         self.__get_object_domain_ip(d, 'domain')
