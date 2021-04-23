@@ -65,7 +65,7 @@ class OnypheClient:
 
         if self.attribute['type'] == 'ip-src':
             return 'ip'
-        elif self.attribute['type'] == 'ip-dest':
+        elif self.attribute['type'] == 'ip-dst':
             return 'ip'
         elif self.attribute['type'] == 'domain':
             return 'domain'
