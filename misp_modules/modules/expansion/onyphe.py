@@ -37,7 +37,8 @@ class OnypheClient:
         return results
 
     def get_query_onyphe(self):
-        if self.attribute['type'] == 'ip-src' and self.attribute['type'] =='ip-dst':
+        print(self.attribute)
+        if self.attribute['type'] == 'ip-src' and self.attribute['type'] == 'ip-dst':
             self.__summary_ip()
 
     def __summary_ip(self):
