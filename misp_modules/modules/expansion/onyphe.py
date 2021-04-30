@@ -60,7 +60,37 @@ class OnypheClient:
                     elif type(hostname) == str:
                         self.__get_object_domain_ip(hostname, 'domain')
 
-                
+                if 'issuer' in r:
+                    issuer = r['issuer']
+                    self.__get_object_certificate(r)
+
+    def __get_object_certificates(self, r):
+        object_certificate = MISPObject('x509')
+        object_certificate.add_attribute('ip', self.attribute['value'])
+        object_certificate.add_attribute('serial-number', r['serial'])
+        object_certificate.add_attribute('x509-fingerprint-sha256', r['fingerprint']['sha256'])
+        object_certificate.add_attribute('x509-fingerprint-sha1', r['fingerprint']['sha1'])
+        object_certificate.add_attribute('x509-fingerprint-md5', r['fingerprint']['md5'])
+        
+        signature = r['signature']['algorithm']
+        value = ''
+        if 'sha256' in signature and 'RSA' in signature:
+            value = 'SHA256_WITH_RSA_ENCRYPTION'
+        elif 'sha1' in signature and 'RSA' in signature:
+            value = 'SHA1_WITH_RSA_ENCRYPTION' 
+        if value:
+            object_certificate.add_attribute('signature_algorithm', value)
+
+        object_certificate.add_attribute('pubkey-info-algorithm',r['publickey']['algorithm'])
+        object_certificate.add_attribute('pubkey-info-exponent',r['publickey']['exponent'])
+        object_certificate.add_attribute('pubkey-info-size',r['publickey']['length'])
+
+        object_certificate.add_attribute('issuer',r['issuer']['commonname'])
+        object_certificate.add_attribute('validity-not-before',r['validity']['notbefore'])
+        object_certificate.add_attribute('validity-not-after',r['validity']['notbefore'])
+        self.misp_event.add_object(object_certificate)
+        
+        pass
     def __get_object_domain_ip(self, obs, relation):
         objet_domain_ip = MISPObject('domain-ip')
         objet_domain_ip.add_attribute(relation, obs)
