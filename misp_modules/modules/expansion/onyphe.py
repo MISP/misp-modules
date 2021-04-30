@@ -80,10 +80,13 @@ class OnypheClient:
             value = 'SHA1_WITH_RSA_ENCRYPTION' 
         if value:
             object_certificate.add_attribute('signature_algorithm', value)
-
+        
         object_certificate.add_attribute('pubkey-info-algorithm',r['publickey']['algorithm'])
-        object_certificate.add_attribute('pubkey-info-exponent',r['publickey']['exponent'])
-        object_certificate.add_attribute('pubkey-info-size',r['publickey']['length'])
+        
+        if 'exponent' in r['publickey']:
+            object_certificate.add_attribute('pubkey-info-exponent',r['publickey']['exponent'])
+        if 'length' in r['publickey']:    
+            object_certificate.add_attribute('pubkey-info-size',r['publickey']['length'])
 
         object_certificate.add_attribute('issuer',r['issuer']['commonname'])
         object_certificate.add_attribute('validity-not-before',r['validity']['notbefore'])
