@@ -91,6 +91,7 @@ class OnypheClient:
         object_certificate.add_attribute('issuer',r['issuer']['commonname'])
         object_certificate.add_attribute('validity-not-before',r['validity']['notbefore'])
         object_certificate.add_attribute('validity-not-after',r['validity']['notbefore'])
+        object_certificate.add_reference(self.attribute['uuid'], 'related-to')
         self.misp_event.add_object(object_certificate)
         
         
