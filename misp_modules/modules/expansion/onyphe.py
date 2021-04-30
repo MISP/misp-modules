@@ -64,7 +64,7 @@ class OnypheClient:
                     issuer = r['issuer']
                     self.__get_object_certificate(r)
 
-    def __get_object_certificates(self, r):
+    def __get_object_certificate(self, r):
         object_certificate = MISPObject('x509')
         object_certificate.add_attribute('ip', self.attribute['value'])
         object_certificate.add_attribute('serial-number', r['serial'])
