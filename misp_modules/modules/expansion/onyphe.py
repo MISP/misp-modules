@@ -100,9 +100,9 @@ class OnypheClient:
         objet_domain_ip.add_attribute(relation, obs)
         relation_attr = self.__get_relation_attribute()
         if relation_attr:
-            objet_domain_ip.add_attribute(relation, self.attribute['value'])
-        objet_domain_ip.add_reference(self.attribute['uuid'], 'related-to')
-        self.misp_event.add_object(objet_domain_ip)
+            objet_domain_ip.add_attribute(relation_attr, self.attribute['value'])
+            objet_domain_ip.add_reference(self.attribute['uuid'], 'related-to')
+            self.misp_event.add_object(objet_domain_ip)
 
     def __get_relation_attribute(self):
 
