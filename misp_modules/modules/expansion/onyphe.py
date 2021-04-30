@@ -90,7 +90,7 @@ class OnypheClient:
         object_certificate.add_attribute('validity-not-after',r['validity']['notbefore'])
         self.misp_event.add_object(object_certificate)
         
-        pass
+        
     def __get_object_domain_ip(self, obs, relation):
         objet_domain_ip = MISPObject('domain-ip')
         objet_domain_ip.add_attribute(relation, obs)
