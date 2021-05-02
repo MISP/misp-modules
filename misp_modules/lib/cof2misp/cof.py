@@ -25,6 +25,16 @@ def is_valid_ip(ip: str) -> bool:
     return True
 
 
+def is_cof_valid_strict(d: dict) -> bool:
+    """Check the COF - do the full JSON schema validation.
+
+    Returns
+    --------
+    True on success, False on validation failure.
+    """
+    return True     # FIXME
+
+
 def is_cof_valid_simple(d: dict) -> bool:
     """Check MANDATORY fields according to COF - simple check, do not do the full JSON schema validation.
 
@@ -61,7 +71,7 @@ def is_cof_valid_simple(d: dict) -> bool:
     return True
 
 
-def validate_cof(d: dict, strict=False) -> bool:
+def validate_cof(d: dict, strict=True) -> bool:
     """Validate an input passive DNS COF (given as dict).
     strict might be set to False in order to loosen the checking.
     With strict==True, a full JSON Schema validation will happen.
@@ -73,6 +83,8 @@ def validate_cof(d: dict, strict=False) -> bool:
     """
     if not strict:
         return is_cof_valid_simple(d)
+    else:
+        return is_cof_valid_strict(d)
 
 
 if __name__ == "__main__":
@@ -94,6 +106,10 @@ if __name__ == "__main__":
         assert retval
         print("line %d is valid: %s" % (i, retval))
         i += 1
+
+    test2 = '{"count": 2, "time_first": 1619556027, "time_last": 1619556034, "rrname": "westernunion.com.ph.unblock-all.com.beta.opera-mini.net.", "rrtype": "A", "bailiwick": "beta.opera-mini.net.", "rdata": ["185.26.181.253"]}'
+    for entry in ndjson.loads(test2):
+        assert validate_cof(entry)
 
     print(80*"=", file=sys.stderr)
     print("Unit Tests DONE", file=sys.stderr)
