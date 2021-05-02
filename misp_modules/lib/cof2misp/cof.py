@@ -89,8 +89,8 @@ if __name__ == "__main__":
 {"count":2560,"rdata":["cpab.circl.lu"],"rrname":"www.circl.lu","rrtype":"CNAME","time_first":"1449584660","time_last":"1617676151"}"""
 
     i = 0
-    for l in ndjson.loads(mock_input):
-        retval = validate_cof(l, strict=False)
+    for entry in ndjson.loads(mock_input):
+        retval = validate_cof(entry, strict=False)
         assert retval
         print("line %d is valid: %s" % (i, retval))
         i += 1
