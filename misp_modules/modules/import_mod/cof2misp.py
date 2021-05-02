@@ -161,12 +161,12 @@ def is_dnsdbflex(data: str) -> bool:
 
     try:
         j = ndjson.loads(data)
-        for l in j:
-            if not set(l.keys()) == {'rrname', 'rrtype'}:
-                return False            # shortcut
+        for line in j:
+            if not set(line.keys()) == {'rrname', 'rrtype'}:
+                return False            # shortcut. We assume it's not if a single line does not conform
         return True
     except Exception as ex:
-        print("oops, this should not have happened. Maybe not an ndjson file?", file=sys.sterr)
+        print("oops, this should not have happened. Maybe not an ndjson file? Reason: %s" % (str(ex),),  file=sys.sterr)
         return False
 
 
