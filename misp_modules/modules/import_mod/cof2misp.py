@@ -22,6 +22,9 @@ from pymisp import MISPObject
 from cof2misp.cof import validate_cof
 
 
+create_specific_attributes = False          # this is for https://github.com/MISP/misp-objects/pull/314
+
+
 misperrors = {'error': 'Error'}
 userConfig = {}
 
@@ -64,7 +67,7 @@ def parse_and_insert_cof(data: str) -> dict:
 
             # validate here (simple validation or full JSON Schema validation)
             if not validate_cof(entry):
-                return {"error": "Could not validate the COF input '%r'" % entry}
+                return {"error": "Could not validate the COF input '%s'" % entry}
 
             # Next, extract some fields
             rrtype = entry['rrtype'].upper()
@@ -81,17 +84,18 @@ def parse_and_insert_cof(data: str) -> dict:
             # handle the combinations of rrtype (domain, ip) on both left and right side
             #
 
-            if rrtype in ['A', 'AAAA', 'A6']:                           # address type
-                # address type
-                o.add_attribute('rrname_domain', value=rrname)
-                for r in rdata:
-                    o.add_attribute('rdata_ip', value=r)
-            elif rrtype in ['CNAME', 'DNAME', 'NS']:                    # both sides are domains
-                o.add_attribute('rrname_domain', value=rrname)
-                for r in rdata:
-                    o.add_attribute('rdata_domain', value=r)
-            elif rrtype in ['SOA']:                                     # left side is a domain, right side is text
-                o.add_attribute('rrname_domain', value=rrname)
+            if create_specific_attributes:
+                if rrtype in ['A', 'AAAA', 'A6']:                           # address type
+                    # address type
+                    o.add_attribute('rrname_domain', value=rrname)
+                    for r in rdata:
+                        o.add_attribute('rdata_ip', value=r)
+                elif rrtype in ['CNAME', 'DNAME', 'NS']:                    # both sides are domains
+                    o.add_attribute('rrname_domain', value=rrname)
+                    for r in rdata:
+                        o.add_attribute('rdata_domain', value=r)
+                elif rrtype in ['SOA']:                                     # left side is a domain, right side is text
+                    o.add_attribute('rrname_domain', value=rrname)
 
             #
             # now do the regular filling up of rrname, rrtype, time_first, etc.
@@ -140,7 +144,7 @@ def parse_and_insert_dnsdbflex(data: str):
     --------
       none
     """
-    pass            # XXX FIXME: need a MISP object for dnsdbflex
+    return {"error": "NOT IMPLEMENTED YET"}            # XXX FIXME: need a MISP object for dnsdbflex
 
 
 def is_dnsdbflex(data: str) -> bool:
@@ -190,7 +194,6 @@ def handler(q=False):
         data = base64.b64decode(request["data"]).decode('utf-8')
         if not data:
             return json.dumps({'success': 0})       # empty file is ok
-
         if is_dnsdbflex(data):
             return parse_and_insert_dnsdbflex(data)
         elif is_cof(data):
