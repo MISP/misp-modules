@@ -65,7 +65,7 @@ def is_cof_valid_simple(d: dict) -> bool:
 
 
 
-def validate_cof(d: dict, strict=True) -> bool:
+def validate_cof(d: dict, strict=False) -> bool:
     """Validate an input passive DNS COF (given as dict).
     strict might be set to False in order to loosen the checking.
     With strict==True, a full JSON Schema validation will happen.
