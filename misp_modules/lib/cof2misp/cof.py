@@ -25,7 +25,6 @@ def is_valid_ip(ip: str) -> bool:
     return True
 
 
-
 def is_cof_valid_simple(d: dict) -> bool:
     """Check MANDATORY fields according to COF - simple check, do not do the full JSON schema validation.
 
@@ -55,14 +54,11 @@ def is_cof_valid_simple(d: dict) -> bool:
     if not isinstance(d['rdata'], str) and not isinstance(d['rdata'], list):
         print("'rdata' is not a list and not a string.", file=sys.stderr)
         return False
-    if not ("time_first" in d and "time_last" in d) or \
-      ("zone_time_first" in d and "zone_time_last" in d):
-        print("We are missing EITHER ('first_seen' and 'last_seen') OR " \
-                "('zone_time_first' and zone_time_last') fields", file=sys.stderr)
+    if not ("time_first" in d and "time_last" in d) or ("zone_time_first" in d and "zone_time_last" in d):
+        print("We are missing EITHER ('first_seen' and 'last_seen') OR ('zone_time_first' and zone_time_last') fields", file=sys.stderr)
         return False
     # currently we don't check the OPTIONAL fields. Sorry... to be done later.
     return True
-
 
 
 def validate_cof(d: dict, strict=False) -> bool:
@@ -96,7 +92,7 @@ if __name__ == "__main__":
     for l in ndjson.loads(mock_input):
         retval = validate_cof(l, strict=False)
         assert retval
-        print("line %d is valid: %s" %(i, retval))
+        print("line %d is valid: %s" % (i, retval))
         i += 1
 
     print(80*"=", file=sys.stderr)
