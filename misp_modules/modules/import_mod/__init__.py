@@ -13,5 +13,6 @@ __all__ = [
     'openiocimport',
     'threatanalyzer_import',
     'csvimport',
+    'cof2misp',
     'joe_import',
 ]
