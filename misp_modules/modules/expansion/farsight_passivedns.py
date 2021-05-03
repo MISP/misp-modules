@@ -103,7 +103,7 @@ class FarsightDnsdbParser():
             comment = self.comment % (query_type, TYPE_TO_FEATURE[self.attribute['type']], self.attribute['value'])
             for result in results:
                 passivedns_object = MISPObject('passive-dns')
-                passivedns_object.distribution = '0'
+                passivedns_object.distribution = '1'
                 if result.get('rdata') and isinstance(result['rdata'], list):
                     for rdata in result.pop('rdata'):
                         passivedns_object.add_attribute(**self._parse_attribute(comment, 'rdata', rdata))
