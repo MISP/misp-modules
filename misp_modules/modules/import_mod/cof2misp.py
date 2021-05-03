@@ -187,9 +187,9 @@ def handler(q=False):
     # Validate it
     # transform into MISP object
     # push to MISP
-    event_id = request['event_id']
+    # event_id = request['event_id']
     # event = misp.get_event(event_id)
-    #print("event_id = %s" % event_id, file=sys.stderr)
+    # print("event_id = %s" % event_id, file=sys.stderr)
     try:
         data = base64.b64decode(request["data"]).decode('utf-8')
         if not data:
