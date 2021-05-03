@@ -85,7 +85,7 @@ class FarsightDnsdbParser():
         self.misp_event = MISPEvent()
         self.misp_event.add_attribute(**attribute)
         self.passivedns_mapping = {
-            'bailiwick': {'type': 'text', 'object_relation': 'bailiwick'},
+            'bailiwick': {'type': 'domain', 'object_relation': 'bailiwick'},
             'count': {'type': 'counter', 'object_relation': 'count'},
             'raw_rdata': {'type': 'text', 'object_relation': 'raw_rdata'},
             'rdata': {'type': 'text', 'object_relation': 'rdata'},
