@@ -148,6 +148,8 @@ def handler(q=False):
         response = to_query(client, *args)
     except dnsdb2.DnsdbException as e:
         return {'error': e.__str__()}
+    except dnsdb2.exceptions.QueryError:
+        return {'error': 'Communication error occurs while executing a query, or the server reports an error due to invalid arguments.'}
     if not response:
         return {'error': f"Empty results on Farsight DNSDB for the {TYPE_TO_FEATURE[attribute['type']]}: {attribute['value']}."}
     parser = FarsightDnsdbParser(attribute)
