@@ -3,9 +3,12 @@
 Takes as input a valid COF file or the output of the dnsdbflex utility
 and creates MISP objects for the input.
 
+Copyright 2021: Farsight Security (https://www.farsightsecurity.com/)
 
-Author: Aaron Kaplan
-License: see LICENSE
+Author: Aaron Kaplan <aaron@lo-res.org>
+
+Released under the Apache 2.0 license.
+See: https://www.apache.org/licenses/LICENSE-2.0.txt
 
 """
 
