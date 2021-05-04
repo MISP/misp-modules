@@ -3,9 +3,12 @@
 Takes as input a valid COF file or the output of the dnsdbflex utility
 and creates MISP objects for the input.
 
+Copyright 2021: Farsight Security (https://www.farsightsecurity.com/)
 
-Author: Aaron Kaplan
-License: see LICENSE
+Author: Aaron Kaplan <aaron@lo-res.org>
+
+Released under the Apache 2.0 license.
+See: https://www.apache.org/licenses/LICENSE-2.0.txt
 
 """
 
@@ -170,7 +173,7 @@ def is_dnsdbflex(data: str) -> bool:
                 return False            # shortcut. We assume it's not if a single line does not conform
         return True
     except Exception as ex:
-        print("oops, this should not have happened. Maybe not an ndjson file? Reason: %s" % (str(ex),), file=sys.sterr)
+        print("oops, this should not have happened. Maybe not an ndjson file? Reason: %s" % (str(ex),), file=sys.stderr)
         return False
 
 
@@ -187,9 +190,9 @@ def handler(q=False):
     # Validate it
     # transform into MISP object
     # push to MISP
-    event_id = request['event_id']
+    # event_id = request['event_id']
     # event = misp.get_event(event_id)
-    print("event_id = %s" % event_id, file=sys.stderr)
+    # print("event_id = %s" % event_id, file=sys.stderr)
     try:
         data = base64.b64decode(request["data"]).decode('utf-8')
         if not data:

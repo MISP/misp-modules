@@ -1,6 +1,13 @@
 """
 Common Output Format for passive DNS library.
 
+Copyright 2021: Farsight Security (https://www.farsightsecurity.com/)
+
+Author: Aaron Kaplan <aaron@lo-res.org>
+
+Released under the Apache 2.0 license.
+See: https://www.apache.org/licenses/LICENSE-2.0.txt
+
 """
 
 import ipaddress
@@ -90,7 +97,7 @@ def validate_cof(d: dict, strict=True) -> bool:
 if __name__ == "__main__":
     # simple, poor man's unit tests.
 
-    print(80*"=", file=sys.stderr)
+    print(80 * "=", file=sys.stderr)
     print("Unit Tests:", file=sys.stderr)
     assert not is_valid_ip("a.2.3.4")
     assert is_valid_ip("99.88.77.6")
@@ -111,5 +118,5 @@ if __name__ == "__main__":
     for entry in ndjson.loads(test2):
         assert validate_cof(entry)
 
-    print(80*"=", file=sys.stderr)
+    print(80 * "=", file=sys.stderr)
     print("Unit Tests DONE", file=sys.stderr)
