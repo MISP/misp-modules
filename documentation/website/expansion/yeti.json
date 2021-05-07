@@ -1,6 +1,6 @@
 {
     "description": "Module to process a query on Yeti.",
-    "logo": "",
+    "logo": "yeti.png",
     "requirements": ["pyeti", "API key "],
     "input": "A domain, hostname,IP, sha256,sha1, md5, url of MISP attribute.",
     "output": "MISP attributes and objects fetched from the Yeti instances.",
