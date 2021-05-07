@@ -46,7 +46,6 @@ class OnypheClient:
             self.__summary_hostname()
 
     def __summary_ip(self):
-        print('ip')
         results = self.onyphe_client.summary_ip(self.attribute['value'])
         if 'results' in results:
             for r in results['results']:
@@ -67,11 +66,9 @@ class OnypheClient:
                         self.__get_object_domain_ip(hostname, 'domain')
 
                 if 'issuer' in r:
-                    issuer = r['issuer']
                     self.__get_object_certificate(r)
 
     def __summary_domain(self):
-        print('domain')
         results = self.onyphe_client.summary_domain(self.attribute['value'])
         if 'results' in results:
             for r in results['results']:
