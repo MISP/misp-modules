@@ -106,7 +106,7 @@ class OnypheClient:
                     if type(r['hostname']) is list:
                         for hostname in r['hostname']:
                             self.misp_event.add_attribute(
-                                'hostname', r['hostname'])
+                                'hostname', hostname)
 
                 if 'ip' in r:
                     if type(r['ip']) is str:
