@@ -81,7 +81,8 @@ def parse_and_insert_cof(data: str) -> dict:
             o = MISPObject(name='passive-dns', standalone=False, comment='created by cof2misp')
 
             # o.add_tag('tlp:amber')                                    # FIXME: we'll want to add a tlp: tag to the object
-            o.add_attribute('bailiwick', value=entry['bailiwick'].rstrip('.'))
+            if 'bailiwick' in entry:
+                o.add_attribute('bailiwick', value=entry['bailiwick'].rstrip('.'))
 
             #
             # handle the combinations of rrtype (domain, ip) on both left and right side
