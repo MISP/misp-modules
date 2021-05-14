@@ -310,6 +310,8 @@ class TestExpansions(unittest.TestCase):
 
     def test_onyphe(self):
         module_name = "onyphe"
+        if LiveCI:
+            return True
         query = {"module": module_name, "ip-src": "8.8.8.8"}
         if module_name in self.configs:
             query["config"] = self.configs[module_name]
@@ -324,6 +326,8 @@ class TestExpansions(unittest.TestCase):
 
     def test_onyphe_full(self):
         module_name = "onyphe_full"
+        if LiveCI:
+            return True
         query = {"module": module_name, "ip-src": "8.8.8.8"}
         if module_name in self.configs:
             query["config"] = self.configs[module_name]
