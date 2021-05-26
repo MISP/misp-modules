@@ -37,7 +37,7 @@ mispattributes = {'inputSource': ['file'], 'output': ['MISP objects'],
                   'format': 'misp_standard'}
 
 
-moduleinfo = {'version': '0.2', 'author': 'Aaron Kaplan',
+moduleinfo = {'version': '0.3', 'author': 'Aaron Kaplan',
               'description': 'Module to import the passive DNS Common Output Format (COF) and merge as a MISP objet into a MISP event.',
               'module-type': ['import']}
 
