@@ -93,6 +93,25 @@ def validate_cof(d: dict, strict=True) -> bool:
     else:
         return is_cof_valid_strict(d)
 
+def validate_dnsdbflex(d: dict, strict=True) -> bool:
+    """
+    Validate if dict d is valid dnsdbflex. It should looks like this:
+    { "rrtype": <str>, "rrname": <str> }
+    """
+    if "rrname" not in d:
+        print("Missing MANDATORY field 'rrname'", file=sys.stderr)
+        return False
+    if not isinstance(d['rrname'], str):
+        print("Type error: 'rrname' is not a JSON string", file=sys.stderr)
+        return False
+    if "rrtype" not in d:
+        print("Missing MANDATORY field 'rrtype'", file=sys.stderr)
+        return False
+    if not isinstance(d['rrtype'], str):
+        print("Type error: 'rrtype' is not a JSON string", file=sys.stderr)
+        return False
+    return True
+
 
 if __name__ == "__main__":
     # simple, poor man's unit tests.
