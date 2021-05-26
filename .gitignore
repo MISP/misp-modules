@@ -17,3 +17,6 @@ site*
 
 #venv
 venv*
+
+#vscode
+.vscode*

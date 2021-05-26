@@ -2,7 +2,7 @@ import dnsdb2
 import json
 from . import check_input_attribute, standard_error_message
 from datetime import datetime
-from pymisp import MISPEvent, MISPObject
+from pymisp import MISPEvent, MISPObject, Distribution
 
 misperrors = {'error': 'Error'}
 standard_query_input = [
@@ -43,7 +43,7 @@ moduleconfig = ['apikey', 'server', 'limit', 'flex_queries']
 
 DEFAULT_DNSDB_SERVER = 'https://api.dnsdb.info'
 DEFAULT_LIMIT = 10
-
+DEFAULT_DISTRIBUTION_SETTING = Distribution.your_organisation_only.value
 TYPE_TO_FEATURE = {
     "btc": "Bitcoin address",
     "dkim": "domainkeys identified mail",
@@ -85,7 +85,7 @@ class FarsightDnsdbParser():
         self.misp_event = MISPEvent()
         self.misp_event.add_attribute(**attribute)
         self.passivedns_mapping = {
-            'bailiwick': {'type': 'text', 'object_relation': 'bailiwick'},
+            'bailiwick': {'type': 'domain', 'object_relation': 'bailiwick'},
             'count': {'type': 'counter', 'object_relation': 'count'},
             'raw_rdata': {'type': 'text', 'object_relation': 'raw_rdata'},
             'rdata': {'type': 'text', 'object_relation': 'rdata'},
@@ -103,6 +103,7 @@ class FarsightDnsdbParser():
             comment = self.comment % (query_type, TYPE_TO_FEATURE[self.attribute['type']], self.attribute['value'])
             for result in results:
                 passivedns_object = MISPObject('passive-dns')
+                passivedns_object.distribution = DEFAULT_DISTRIBUTION_SETTING
                 if result.get('rdata') and isinstance(result['rdata'], list):
                     for rdata in result.pop('rdata'):
                         passivedns_object.add_attribute(**self._parse_attribute(comment, 'rdata', rdata))
@@ -121,7 +122,7 @@ class FarsightDnsdbParser():
         return {'results': results}
 
     def _parse_attribute(self, comment, feature, value):
-        attribute = {'value': value, 'comment': comment}
+        attribute = {'value': value, 'comment': comment, 'distribution': DEFAULT_DISTRIBUTION_SETTING}
         attribute.update(self.passivedns_mapping[feature])
         return attribute
 
@@ -148,6 +149,8 @@ def handler(q=False):
         response = to_query(client, *args)
     except dnsdb2.DnsdbException as e:
         return {'error': e.__str__()}
+    except dnsdb2.exceptions.QueryError:
+        return {'error': 'Communication error occurs while executing a query, or the server reports an error due to invalid arguments.'}
     if not response:
         return {'error': f"Empty results on Farsight DNSDB for the {TYPE_TO_FEATURE[attribute['type']]}: {attribute['value']}."}
     parser = FarsightDnsdbParser(attribute)
