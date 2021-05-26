@@ -22,7 +22,7 @@ import ndjson
 # from pymisp import MISPObject, MISPEvent, PyMISP
 from pymisp import MISPObject
 
-from cof2misp.cof import validate_cof
+from cof2misp.cof import validate_cof, validate_dnsdbflex
 
 
 create_specific_attributes = False          # this is for https://github.com/MISP/misp-objects/pull/314
@@ -147,7 +147,34 @@ def parse_and_insert_dnsdbflex(data: str):
     --------
       none
     """
-    return {"error": "NOT IMPLEMENTED YET"}            # XXX FIXME: need a MISP object for dnsdbflex
+    objects = []
+    try:
+        entries = ndjson.loads(data)
+        for entry in entries:           # iterate over all ndjson lines
+
+            # validate here (simple validation or full JSON Schema validation)
+            if not validate_dnsdbflex(entry):
+                return {"error": "Could not validate the dnsdbflex input '%s'" % entry}
+
+            # Next, extract some fields
+            rrtype = entry['rrtype'].upper()
+            rrname = entry['rrname'].rstrip('.')
+
+            # create a new MISP object, based on the passive-dns object for each nd-JSON line
+            o = MISPObject(name='passive-dns-dnsdbflex', standalone=False, comment='created by cof2misp')
+            o.add_attribute('rrname', value=rrname)
+            o.add_attribute('rrtype', value=rrtype)
+
+            #
+            # add dnsdbflex entry to MISP object
+            #
+            objects.append(o.to_json())
+
+        r = {'results': {'Object': [json.loads(o) for o in objects]}}
+    except Exception as ex:
+        misperrors["error"] = "An error occured during parsing of input: '%s'" % (str(ex),)
+        return misperrors
+    return r
 
 
 def is_dnsdbflex(data: str) -> bool:
