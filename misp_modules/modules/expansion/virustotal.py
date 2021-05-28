@@ -1,5 +1,6 @@
 import json
 import requests
+from urllib.parse import urlparse
 from . import check_input_attribute, standard_error_message
 from pymisp import MISPAttribute, MISPEvent, MISPObject
 
@@ -13,7 +14,7 @@ moduleinfo = {'version': '4', 'author': 'Hannah Ward',
               'module-type': ['expansion']}
 
 # config fields that your code expects from the site admin
-moduleconfig = ["apikey", "event_limit"]
+moduleconfig = ["apikey", "event_limit", 'proxy_host', 'proxy_port', 'proxy_username', 'proxy_password']
 
 
 class VirusTotalParser(object):
@@ -27,6 +28,7 @@ class VirusTotalParser(object):
                                     'domain': self.parse_domain, 'hostname': self.parse_domain,
                                     'md5': self.parse_hash, 'sha1': self.parse_hash,
                                     'sha256': self.parse_hash, 'url': self.parse_url}
+        self.proxies = None
 
     def query_api(self, attribute):
         self.attribute = MISPAttribute()
@@ -43,7 +45,7 @@ class VirusTotalParser(object):
     ################################################################################
 
     def parse_domain(self, domain, recurse=False):
-        req = requests.get(self.base_url.format('domain'), params={'apikey': self.apikey, 'domain': domain})
+        req = requests.get(self.base_url.format('domain'), params={'apikey': self.apikey, 'domain': domain}, proxies=self.proxies)
         if req.status_code != 200:
             return req.status_code
         req = req.json()
@@ -67,7 +69,7 @@ class VirusTotalParser(object):
         return self.parse_related_urls(req, recurse, uuid)
 
     def parse_hash(self, sample, recurse=False, uuid=None, relationship=None):
-        req = requests.get(self.base_url.format('file'), params={'apikey': self.apikey, 'resource': sample})
+        req = requests.get(self.base_url.format('file'), params={'apikey': self.apikey, 'resource': sample}, proxies=self.proxies)
         status_code = req.status_code
         if req.status_code == 200:
             req = req.json()
@@ -88,7 +90,7 @@ class VirusTotalParser(object):
         return status_code
 
     def parse_ip(self, ip, recurse=False):
-        req = requests.get(self.base_url.format('ip-address'), params={'apikey': self.apikey, 'ip': ip})
+        req = requests.get(self.base_url.format('ip-address'), params={'apikey': self.apikey, 'ip': ip}, proxies=self.proxies)
         if req.status_code != 200:
             return req.status_code
         req = req.json()
@@ -106,7 +108,7 @@ class VirusTotalParser(object):
         return self.parse_related_urls(req, recurse, uuid)
 
     def parse_url(self, url, recurse=False, uuid=None):
-        req = requests.get(self.base_url.format('url'), params={'apikey': self.apikey, 'resource': url})
+        req = requests.get(self.base_url.format('url'), params={'apikey': self.apikey, 'resource': url}, proxies=self.proxies)
         status_code = req.status_code
         if req.status_code == 200:
             req = req.json()
@@ -179,6 +181,42 @@ class VirusTotalParser(object):
             self.misp_event.add_object(**vt_object)
             return vt_object.uuid
 
+    def set_proxy_settings(self, config: dict) -> dict:
+        """Returns proxy settings in the requests format.
+        If no proxy settings are set, return None."""
+        proxies = None
+        host = config.get('proxy_host')
+        port = config.get('proxy_port')
+        username = config.get('proxy_username')
+        password = config.get('proxy_password')
+
+        if host:
+            if not port:
+                misperrors['error'] = 'The virustotal_proxy_host config is set, ' \
+                                    'please also set the virustotal_proxy_port.'
+                raise KeyError
+            parsed = urlparse(host)
+            if 'http' in parsed.scheme:
+                scheme = 'http'
+            else:
+                scheme = parsed.scheme
+            netloc = parsed.netloc
+            host = f'{netloc}:{port}'
+
+            if username:
+                if not password:
+                    misperrors['error'] = 'The virustotal_proxy_username config is set, ' \
+                                        'please also set the virustotal_proxy_password.'
+                    raise KeyError
+                auth = f'{username}:{password}'
+                host = auth + '@' + host
+
+            proxies = {
+                'http': f'{scheme}://{host}',
+                'https': f'{scheme}://{host}'
+            }
+        self.proxies=proxies
+        return True
 
 def parse_error(status_code):
     status_mapping = {204: 'VirusTotal request rate limit exceeded.',
@@ -205,6 +243,7 @@ def handler(q=False):
     if not isinstance(event_limit, int):
         event_limit = 5
     parser = VirusTotalParser(request['config']['apikey'], event_limit)
+    parser.set_proxy_settings(request.get('config'))
     attribute = request['attribute']
     status = parser.query_api(attribute)
     if status != 200:

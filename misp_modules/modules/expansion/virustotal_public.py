@@ -1,6 +1,8 @@
 import json
+import logging
 import requests
 from . import check_input_attribute, standard_error_message
+from urllib.parse import urlparse
 from pymisp import MISPAttribute, MISPEvent, MISPObject
 
 misperrors = {'error': 'Error'}
@@ -10,13 +12,16 @@ moduleinfo = {'version': '1', 'author': 'Christian Studer',
               'description': 'Get information from VirusTotal public API v2.',
               'module-type': ['expansion', 'hover']}
 
-moduleconfig = ['apikey']
+moduleconfig = ['apikey', 'proxy_host', 'proxy_port', 'proxy_username', 'proxy_password']
 
+LOGGER = logging.getLogger('virus_total_public')
+LOGGER.setLevel(logging.INFO)
 
 class VirusTotalParser():
     def __init__(self):
         super(VirusTotalParser, self).__init__()
         self.misp_event = MISPEvent()
+        self.proxies = None
 
     def declare_variables(self, apikey, attribute):
         self.attribute = MISPAttribute()
@@ -66,8 +71,44 @@ class VirusTotalParser():
 
     def get_query_result(self, query_type):
         params = {query_type: self.attribute.value, 'apikey': self.apikey}
-        return requests.get(self.base_url, params=params)
+        return requests.get(self.base_url, params=params, proxies=self.proxies)
 
+    def set_proxy_settings(self, config: dict) -> dict:
+        """Returns proxy settings in the requests format.
+        If no proxy settings are set, return None."""
+        proxies = None
+        host = config.get('proxy_host')
+        port = config.get('proxy_port')
+        username = config.get('proxy_username')
+        password = config.get('proxy_password')
+
+        if host:
+            if not port:
+                misperrors['error'] = 'The virustotal_public_proxy_host config is set, ' \
+                                    'please also set the virustotal_public_proxy_port.'
+                raise KeyError
+            parsed = urlparse(host)
+            if 'http' in parsed.scheme:
+                scheme = 'http'
+            else:
+                scheme = parsed.scheme
+            netloc = parsed.netloc
+            host = f'{netloc}:{port}'
+
+            if username:
+                if not password:
+                    misperrors['error'] = 'The virustotal_public_proxy_username config is set, ' \
+                                        'please also set the virustotal_public_proxy_password.'
+                    raise KeyError
+                auth = f'{username}:{password}'
+                host = auth + '@' + host
+
+            proxies = {
+                'http': f'{scheme}://{host}',
+                'https': f'{scheme}://{host}'
+            }
+        self.proxies=proxies
+        return True
 
 class DomainQuery(VirusTotalParser):
     def __init__(self, apikey, attribute):
@@ -182,6 +223,7 @@ def handler(q=False):
         return {'error': 'Unsupported attribute type.'}
     query_type, to_call = misp_type_mapping[attribute['type']]
     parser = to_call(request['config']['apikey'], attribute)
+    parser.set_proxy_settings(request.get('config'))
     query_result = parser.get_query_result(query_type)
     status_code = query_result.status_code
     if status_code == 200:
