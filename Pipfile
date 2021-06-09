@@ -17,7 +17,6 @@ passivetotal = "*"
 pypdns = "*"
 pypssl = "*"
 pyeupi = "*"
-uwhois = { editable = true, git = "https://github.com/Rafiot/uwhoisd.git", ref = "testing", subdirectory = "client" }
 pymisp = { extras = ["fileobjects,openioc,pdfexport,email"], version = "*" }
 pyonyphe = { editable = true, git = "https://github.com/sebdraven/pyonyphe" }
 pydnstrails = { editable = true, git = "https://github.com/sebdraven/pydnstrails" }
