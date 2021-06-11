@@ -5,7 +5,6 @@
 #    pipenv lock --requirements
 #
 
--i https://pypi.org/simple
 -e .
 -e git+https://github.com/D4-project/BGP-Ranking.git/@fd9c0e03af9b61d4bf0b67ac73c7208a55178a54#egg=pybgpranking&subdirectory=client
 -e git+https://github.com/D4-project/IPASN-History.git/@fc5e48608afc113e101ca6421bf693b7b9753f9e#egg=pyipasnhistory&subdirectory=client
