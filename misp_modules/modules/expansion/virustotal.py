@@ -215,8 +215,9 @@ class VirusTotalParser(object):
                 'http': f'{scheme}://{host}',
                 'https': f'{scheme}://{host}'
             }
-        self.proxies=proxies
+        self.proxies = proxies
         return True
+
 
 def parse_error(status_code):
     status_mapping = {204: 'VirusTotal request rate limit exceeded.',
