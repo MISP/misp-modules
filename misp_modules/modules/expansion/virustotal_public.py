@@ -17,6 +17,7 @@ moduleconfig = ['apikey', 'proxy_host', 'proxy_port', 'proxy_username', 'proxy_p
 LOGGER = logging.getLogger('virus_total_public')
 LOGGER.setLevel(logging.INFO)
 
+
 class VirusTotalParser():
     def __init__(self):
         super(VirusTotalParser, self).__init__()
@@ -107,8 +108,9 @@ class VirusTotalParser():
                 'http': f'{scheme}://{host}',
                 'https': f'{scheme}://{host}'
             }
-        self.proxies=proxies
+        self.proxies = proxies
         return True
+
 
 class DomainQuery(VirusTotalParser):
     def __init__(self, apikey, attribute):
