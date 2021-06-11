@@ -110,6 +110,9 @@ class TestExpansions(unittest.TestCase):
         self.assertEqual(self.get_object(response), 'asn')
 
     def test_btc_steroids(self):
+        if LiveCI:
+            return True
+
         query = {"module": "btc_steroids", "btc": "1ES14c7qLb5CYhLMUekctxLgc1FV2Ti9DA"}
         response = self.misp_modules_post(query)
         try:
