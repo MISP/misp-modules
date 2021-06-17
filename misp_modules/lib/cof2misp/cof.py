@@ -125,6 +125,9 @@ if __name__ == "__main__":
     assert is_valid_ip("2a0c:88:77:6::1")
 
     # COF validation
+    print(80 * "=", file = sys.stderr)
+    print("COF unit tests....", file = sys.stderr)
+
     mock_input = """{"count":1909,"rdata":["cpa.circl.lu"],"rrname":"www.circl.lu","rrtype":"CNAME","time_first":"1315586409","time_last":"1449566799"}
 {"count":2560,"rdata":["cpab.circl.lu"],"rrname":"www.circl.lu","rrtype":"CNAME","time_first":"1449584660","time_last":"1617676151"}"""
 
@@ -138,6 +141,25 @@ if __name__ == "__main__":
     test2 = '{"count": 2, "time_first": 1619556027, "time_last": 1619556034, "rrname": "westernunion.com.ph.unblock-all.com.beta.opera-mini.net.", "rrtype": "A", "bailiwick": "beta.opera-mini.net.", "rdata": ["185.26.181.253"]}'
     for entry in ndjson.loads(test2):
         assert validate_cof(entry)
+
+    # dnsdbflex validation
+    print(80 * "=", file = sys.stderr)
+    print("dnsdbflex unit tests....", file = sys.stderr)
+
+    mock_input = """{"rrname":"labs.deep-insights.ai.","rrtype":"A"}
+{"rrname":"www.deep-insights.ca.","rrtype":"CNAME"}
+{"rrname":"mail.deep-insights.ca.","rrtype":"CNAME"}
+{"rrname":"cpanel.deep-insights.ca.","rrtype":"A"}
+{"rrname":"webdisk.deep-insights.ca.","rrtype":"A"}
+{"rrname":"webmail.deep-insights.ca.","rrtype":"A"}"""
+
+    i = 0
+    for entry in ndjson.loads(mock_input):
+        retval = validate_dnsdbflex(entry, strict = False)
+        assert retval
+        print("dnsdbflex line %d is valid: %s" % (i, retval))
+        i += 1
+
 
     print(80 * "=", file = sys.stderr)
     print("Unit Tests DONE", file = sys.stderr)
