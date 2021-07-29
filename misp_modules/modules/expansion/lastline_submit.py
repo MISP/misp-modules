@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 """
+Deprecation notice: this module will be deprecated by December 2021, please use vmware_nsx module.
+
 Module (type "expansion") to submit files and URLs to Lastline for analysis.
 """
 import base64
