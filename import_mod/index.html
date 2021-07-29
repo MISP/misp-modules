@@ -91,7 +91,7 @@
     <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
     <label class="md-overlay" data-md-component="overlay" for="__drawer"></label>
     
-      <a href="#csvimport" tabindex="1" class="md-skip">
+      <a href="#cof2misp" tabindex="1" class="md-skip">
         Skip to content
       </a>
     
@@ -308,6 +308,13 @@
     <ul class="md-nav__list" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#cof2misp" title="cof2misp" class="md-nav__link">
+    cof2misp
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#csvimport" title="csvimport" class="md-nav__link">
     csvimport
   </a>
@@ -479,6 +486,13 @@
     <ul class="md-nav__list" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#cof2misp" title="cof2misp" class="md-nav__link">
+    cof2misp
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#csvimport" title="csvimport" class="md-nav__link">
     csvimport
   </a>
@@ -574,7 +588,22 @@
                 
                   <h1>Import Modules</h1>
                 
-                <h4 id="csvimport"><a href="https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/csvimport.py">csvimport</a><a class="headerlink" href="#csvimport" title="Permanent link">&para;</a></h4>
+                <h4 id="cof2misp"><a href="https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/cof2misp.py">cof2misp</a><a class="headerlink" href="#cof2misp" title="Permanent link">&para;</a></h4>
+<p>Passive DNS Common Output Format (COF) MISP importer
+- <strong>features</strong>:</p>
+<blockquote>
+<p>Takes as input a valid COF file or the output of the dnsdbflex utility and creates MISP objects for the input.
+- <strong>input</strong>:
+Passive DNS output in Common Output Format (COF)
+- <strong>output</strong>:
+MISP objects
+- <strong>references</strong>:
+<a href="https://tools.ietf.org/id/draft-dulaunoy-dnsop-passive-dns-cof-08.html">https://tools.ietf.org/id/draft-dulaunoy-dnsop-passive-dns-cof-08.html</a>
+- <strong>requirements</strong>:
+PyMISP</p>
+</blockquote>
+<hr />
+<h4 id="csvimport"><a href="https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/csvimport.py">csvimport</a><a class="headerlink" href="#csvimport" title="Permanent link">&para;</a></h4>
 <p>Module to import MISP attributes from a csv file.
 - <strong>features</strong>:</p>
 <blockquote>
@@ -653,6 +682,7 @@ MISP attributes &amp; objects parsed from the analysis report.
 <hr />
 <h4 id="lastline_import"><a href="https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/lastline_import.py">lastline_import</a><a class="headerlink" href="#lastline_import" title="Permanent link">&para;</a></h4>
 <p><img src=../logos/lastline.png height=60></p>
+<p>Deprecation notice: this module will be deprecated by December 2021, please use vmware_nsx module.</p>
 <p>Module to import and parse reports from Lastline analysis links.
 - <strong>features</strong>:</p>
 <blockquote>
