@@ -65,6 +65,8 @@ socialscan = "*"
 dnsdb2 = "*"
 clamd = "*"
 aiohttp = ">=3.7.4"
+tau-clients = "*"
+vt-py = ">=0.7.1"
 
 [requires]
 python_version = "3"

@@ -87,6 +87,7 @@ For more information: [Extending MISP with Python modules](https://www.misp-proj
 * [virustotal](misp_modules/modules/expansion/virustotal.py) - an expansion module to query the [VirusTotal](https://www.virustotal.com/gui/home) API with a high request rate limit required. (More details about the API: [here](https://developers.virustotal.com/reference))
 * [virustotal_public](misp_modules/modules/expansion/virustotal_public.py) - an expansion module to query the [VirusTotal](https://www.virustotal.com/gui/home) API with a public key and a low request rate limit. (More details about the API: [here](https://developers.virustotal.com/reference))
 * [VMray](misp_modules/modules/expansion/vmray_submit.py) - a module to submit a sample to VMray.
+* [VMware NSX](misp_modules/modules/expansion/vmware_nsx.py) - a module to enrich a file or URL with VMware NSX Defender.
 * [VulnDB](misp_modules/modules/expansion/vulndb.py) - a module to query [VulnDB](https://www.riskbasedsecurity.com/).
 * [Vulners](misp_modules/modules/expansion/vulners.py) - an expansion module to expand information about CVEs using Vulners API.
 * [whois](misp_modules/modules/expansion/whois.py) - a module to query a local instance of [uwhois](https://github.com/rafiot/uwhoisd).

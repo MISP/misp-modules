@@ -1,5 +1,5 @@
 {
-    "description": "Query Lastline with an analysis link and parse the report into MISP attributes and objects.\nThe analysis link can also be retrieved from the output of the [lastline_submit](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/lastline_submit.py) expansion module.",
+    "description": "Deprecation notice: this module will be deprecated by December 2021, please use vmware_nsx module.\n\nQuery Lastline with an analysis link and parse the report into MISP attributes and objects.\nThe analysis link can also be retrieved from the output of the [lastline_submit](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/lastline_submit.py) expansion module.",
     "logo": "lastline.png",
     "requirements": [],
     "input": "Link to a Lastline analysis.",

@@ -1,5 +1,5 @@
 {
-    "description": "Module to import and parse reports from Lastline analysis links.",
+    "description": "Deprecation notice: this module will be deprecated by December 2021, please use vmware_nsx module.\n\nModule to import and parse reports from Lastline analysis links.",
     "logo": "lastline.png",
     "requirements": [],
     "input": "Link to a Lastline analysis.",
