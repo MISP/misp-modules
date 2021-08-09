@@ -608,16 +608,22 @@ Module to query a local copy of Maxmind's Geolite database.
 
 Module to access GreyNoise.io API
 - **features**:
->The module takes an IP address as input and queries Greynoise for some additional information about it: basically it checks whether a given IP address is “Internet background noise”, or has been observed scanning or attacking devices across the Internet. The result is returned as text.
+> - Query an IP from GreyNoise to see if it is internet background noise or a common business service
+> - Query a CVE from GreyNoise to see the total number of internet scanners looking for the CVE in the last 7 days
+> - Supports Enterprise (Paid) and Community API for IP lookup
+> - CVE Lookup is only supported with an Enterprise API Key
 - **input**:
->An IP address.
+>An IP address or CVE ID.
 - **output**:
->Additional information about the IP fetched from Greynoise API.
+> - For IPs: IP Lookup Details
+> - FOR CVEs: Scanner Count for last 7 days
 - **references**:
 > - https://greynoise.io/
-> - https://github.com/GreyNoise-Intelligence/api.greynoise.io
+> - https://docs.greyniose.io/
+> - https://www.greynoise.io/viz/account/
 - **requirements**:
->A Greynoise API key.
+> - A Greynoise API key.
+> - Selection of API Key type: `enterprise` (for Paid users) or `community` (for Free users)
 
 -----
 
