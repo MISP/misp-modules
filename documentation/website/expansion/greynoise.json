@@ -8,7 +8,7 @@
     "output": "IP Lookup information or CVE scanning profile for past 7 days",
     "references": [
         "https://greynoise.io/",
-        "https://docs.greyniose.io/",
+        "https://docs.greynoise.io/",
         "https://www.greynoise.io/viz/account/"
     ],
     "features": "This module supports: 1) Query an IP from GreyNoise to see if it is internet background noise or a common business service 2) Query a CVE from GreyNoise to see the total number of internet scanners looking for the CVE in the last 7 days."
