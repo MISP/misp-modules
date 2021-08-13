@@ -44,7 +44,7 @@ mispattributes = {
 
 moduleinfo = {
     "version": "0.2",
-    "author": "Jason Zhang",
+    "author": "Jason Zhang, Stefano Ortolani",
     "description": "Enrich a file or URL with VMware NSX Defender",
     "module-type": ["expansion", "hover"],
 }
@@ -111,12 +111,16 @@ class ResultParser:
         # Add HTTP requests from url analyses
         network_dict = result.get("report", {}).get("analysis", {}).get("network", {})
         for request in network_dict.get("requests", []):
-            parsed_uri = parse.urlparse(request["url"])
+            if not request["url"] and not request["ip"]:
+                continue
             o = pymisp.MISPObject(name="http-request")
-            o.add_attribute("host", parsed_uri.netloc)
             o.add_attribute("method", "GET")
-            o.add_attribute("uri", request["url"])
-            o.add_attribute("ip-dst", request["ip"])
+            if request["url"]:
+                parsed_uri = parse.urlparse(request["url"])
+                o.add_attribute("host", parsed_uri.netloc)
+                o.add_attribute("uri", request["url"])
+            if request["ip"]:
+                o.add_attribute("ip-dst", request["ip"])
             misp_event.add_object(o)
 
         # Add network behaviors from files
@@ -129,8 +133,8 @@ class ResultParser:
                 try:
                     if hostname == "wpad" or hostname == "localhost":
                         continue
-                    # Invalid hostname, e.g., hostname: '2.2.0.10.in-addr.arpa.
-                    if hostname[-1] == ".":
+                    # Invalid hostname, e.g., hostname: ZLKKJRPY or 2.2.0.10.in-addr.arpa.
+                    if "." not in hostname or hostname[-1] == ".":
                         continue
                     _ = ipaddress.ip_address(hostname)
                     continue
@@ -183,13 +187,15 @@ class ResultParser:
         misp_event.add_object(o)
 
         # Add behaviors
-        o = pymisp.MISPObject(name="sb-signature")
-        o.add_attribute("software", "VMware NSX Defender")
-        for activity in result.get("malicious_activity", []):
-            a = pymisp.MISPAttribute()
-            a.from_dict(type="text", value=activity)
-            o.add_attribute("signature", **a)
-        misp_event.add_object(o)
+        # Check if its not empty first, as at least one attribute has to be set for sb-signature object
+        if result.get("malicious_activity", []):
+            o = pymisp.MISPObject(name="sb-signature")
+            o.add_attribute("software", "VMware NSX Defender")
+            for activity in result.get("malicious_activity", []):
+                a = pymisp.MISPAttribute()
+                a.from_dict(type="text", value=activity)
+                o.add_attribute("signature", **a)
+            misp_event.add_object(o)
 
         # Add mitre techniques
         for techniques in result.get("activity_to_mitre_techniques", {}).values():
