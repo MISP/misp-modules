@@ -2125,19 +2125,20 @@ The python Google Search API library</p>
 <hr />
 <h4 id="greynoise"><a href="https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/greynoise.py">greynoise</a><a class="headerlink" href="#greynoise" title="Permanent link">&para;</a></h4>
 <p><img src=../logos/greynoise.png height=60></p>
-<p>Module to access GreyNoise.io API
+<p>Module to query IP and CVE information from GreyNoise
 - <strong>features</strong>:</p>
 <blockquote>
-<p>The module takes an IP address as input and queries Greynoise for some additional information about it: basically it checks whether a given IP address is “Internet background noise”, or has been observed scanning or attacking devices across the Internet. The result is returned as text.
+<p>This module supports: 1) Query an IP from GreyNoise to see if it is internet background noise or a common business service 2) Query a CVE from GreyNoise to see the total number of internet scanners looking for the CVE in the last 7 days.
 - <strong>input</strong>:
-An IP address.
+An IP address or CVE ID
 - <strong>output</strong>:
-Additional information about the IP fetched from Greynoise API.
+IP Lookup information or CVE scanning profile for past 7 days
 - <strong>references</strong>:
 - <a href="https://greynoise.io/">https://greynoise.io/</a>
-- <a href="https://github.com/GreyNoise-Intelligence/api.greynoise.io">https://github.com/GreyNoise-Intelligence/api.greynoise.io</a>
+- <a href="https://docs.greyniose.io/">https://docs.greyniose.io/</a>
+- <a href="https://www.greynoise.io/viz/account/">https://www.greynoise.io/viz/account/</a>
 - <strong>requirements</strong>:
-A Greynoise API key.</p>
+A Greynoise API key. Both Enterprise (Paid) and Community (Free) API keys are supported, however Community API users will only be able to perform IP lookups.</p>
 </blockquote>
 <hr />
 <h4 id="hashdd"><a href="https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/hashdd.py">hashdd</a><a class="headerlink" href="#hashdd" title="Permanent link">&para;</a></h4>
