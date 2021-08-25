@@ -1,6 +1,6 @@
 {
     "description": "An expansion module to query the CIRCL hashlookup services to find it if a hash is part of a known set such as NSRL.",
-    "logo": "cve.png",
+    "logo": "circl.png",
     "input": "File hashes (MD5, SHA1)",
     "output": "Object with the filename associated hashes if the hash is part of a known set.",
     "references": [
