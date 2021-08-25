@@ -16,7 +16,7 @@ hashlookup_url = 'https://hashlookup.circl.lu/'
 class HashlookupParser():
     def __init__(self, attribute, hashlookupresult, api_url):
         self.attribute = attribute
-        self.hashlookupresult = hashlookupresult
+        self.hashlookupresult = hashlookupresult 
         self.api_url = api_url
         self.misp_event = MISPEvent()
         self.misp_event.add_attribute(**attribute)
