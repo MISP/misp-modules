@@ -501,6 +501,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#hashlookup" title="hashlookup" class="md-nav__link">
+    hashlookup
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#hibp" title="hibp" class="md-nav__link">
     hibp
   </a>
@@ -1202,6 +1209,13 @@
         <li class="md-nav__item">
   <a href="#hashdd" title="hashdd" class="md-nav__link">
     hashdd
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#hashlookup" title="hashlookup" class="md-nav__link">
+    hashlookup
   </a>
   
 </li>
@@ -2135,7 +2149,7 @@ An IP address or CVE ID
 IP Lookup information or CVE scanning profile for past 7 days
 - <strong>references</strong>:
 - <a href="https://greynoise.io/">https://greynoise.io/</a>
-- <a href="https://docs.greynoise.io/">https://docs.greynoise.io/</a>
+- <a href="https://docs.greyniose.io/">https://docs.greyniose.io/</a>
 - <a href="https://www.greynoise.io/viz/account/">https://www.greynoise.io/viz/account/</a>
 - <strong>requirements</strong>:
 A Greynoise API key. Both Enterprise (Paid) and Community (Free) API keys are supported, however Community API users will only be able to perform IP lookups.</p>
@@ -2152,6 +2166,24 @@ A hash MISP attribute (md5).
 Text describing the known level of the hash in the hashdd databases.
 - <strong>references</strong>:
 <a href="https://hashdd.com/">https://hashdd.com/</a></p>
+</blockquote>
+<hr />
+<h4 id="hashlookup"><a href="https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/hashlookup.py">hashlookup</a><a class="headerlink" href="#hashlookup" title="Permanent link">&para;</a></h4>
+<p><img src=../logos/cve.png height=60></p>
+<p>An expansion module to query the CIRCL hashlookup services to find it if a hash is part of a known set such as NSRL.
+- <strong>features</strong>:</p>
+<blockquote>
+<p>The module takes file hashes as input such as a MD5 or SHA1.
+It queries the public CIRCL.lu hashlookup service and return all the hits if the hashes are known in an existing dataset. The module can be configured with a custom hashlookup url if required.
+The module can be used an hover module but also an expansion model to add related MISP objects.</p>
+<ul>
+<li><strong>input</strong>:
+File hashes (MD5, SHA1)</li>
+<li><strong>output</strong>:
+Object with the filename associated hashes if the hash is part of a known set.</li>
+<li><strong>references</strong>:
+<a href="https://www.circl.lu/services/hashlookup/">https://www.circl.lu/services/hashlookup/</a></li>
+</ul>
 </blockquote>
 <hr />
 <h4 id="hibp"><a href="https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/hibp.py">hibp</a><a class="headerlink" href="#hibp" title="Permanent link">&para;</a></h4>
