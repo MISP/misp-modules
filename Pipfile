@@ -33,7 +33,7 @@ blockchain = "*"
 reportlab = "*"
 pyintel471 = { editable = true, git = "https://github.com/MISP/PyIntel471.git" }
 shodan = "*"
-Pillow = "*"
+Pillow ">=8.2.0"
 Wand = "*"
 SPARQLWrapper = "*"
 domaintools_api = "*"
