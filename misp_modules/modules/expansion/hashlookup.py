@@ -70,17 +70,16 @@ def handler(q=False):
         hashlookupresult = r.json()
         if not hashlookupresult:
             misperrors['error'] = 'Empty result'
-            return misperrors['error']
+            return misperrors
     elif r.status_code == 404:
         misperrors['error'] = 'Non existing hash'
-        return misperrors['error']
+        return misperrors
     else:
         misperrors['error'] = 'API not accessible'
-        return misperrors['error']
+        return misperrors
     parser = HashlookupParser(attribute, hashlookupresult, api_url)
     parser.parse_hashlookup_information()
     result = parser.get_result()
-    print(result)
     return result
 
 
