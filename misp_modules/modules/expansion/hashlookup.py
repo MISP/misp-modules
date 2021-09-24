@@ -33,8 +33,10 @@ class HashlookupParser():
         hashlookup_object = MISPObject('hashlookup')
         hashlookup_object.add_attribute('MD5', **{'type': 'md5', 'value': self.hashlookupresult['MD5']})
         hashlookup_object.add_attribute('SHA-1', **{'type': 'sha1', 'value': self.hashlookupresult['SHA-1']})
-        hashlookup_object.add_attribute('FileName', **{'type': 'filename', 'value': self.hashlookupresult['FileName']})
-        hashlookup_object.add_attribute('FileSize', **{'type': 'size-in-bytes', 'value': self.hashlookupresult['FileSize']})
+        if 'FileName' in self.hashlookupresult:
+            hashlookup_object.add_attribute('FileName', **{'type': 'filename', 'value': self.hashlookupresult['FileName']})
+        if 'FileSize' in self.hashlookupresult:
+            hashlookup_object.add_attribute('FileSize', **{'type': 'size-in-bytes', 'value': self.hashlookupresult['FileSize']})
         hashlookup_object.add_reference(self.attribute['uuid'], 'related-to')
         self.misp_event.add_object(hashlookup_object)
 
