@@ -16,7 +16,7 @@ hashlookup_url = 'https://hashlookup.circl.lu/'
 class HashlookupParser():
     def __init__(self, attribute, hashlookupresult, api_url):
         self.attribute = attribute
-        self.hashlookupresult = hashlookupresult 
+        self.hashlookupresult = hashlookupresult
         self.api_url = api_url
         self.misp_event = MISPEvent()
         self.misp_event.add_attribute(**attribute)
@@ -33,6 +33,8 @@ class HashlookupParser():
         hashlookup_object = MISPObject('hashlookup')
         if 'source' in self.hashlookupresult:
             hashlookup_object.add_attribute('source', **{'type': 'text', 'value': self.hashlookupresult['source']})
+        if 'KnownMalicious' in self.hashlookupresult:
+            hashlookup_object.add_attribute('KnownMalicious', **{'type': 'text', 'value': self.hashlookupresult['KnownMalicious']})
         hashlookup_object.add_attribute('MD5', **{'type': 'md5', 'value': self.hashlookupresult['MD5']})
         hashlookup_object.add_attribute('SHA-1', **{'type': 'sha1', 'value': self.hashlookupresult['SHA-1']})
         if 'SSDEEP' in self.hashlookupresult:
