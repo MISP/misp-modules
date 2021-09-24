@@ -31,8 +31,14 @@ class HashlookupParser():
 
     def parse_hashlookup_information(self):
         hashlookup_object = MISPObject('hashlookup')
+        if 'source' in self.hashlookupresult:
+            hashlookup_object.add_attribute('source', **{'type': 'text', 'value': self.hashlookupresult['source']})
         hashlookup_object.add_attribute('MD5', **{'type': 'md5', 'value': self.hashlookupresult['MD5']})
         hashlookup_object.add_attribute('SHA-1', **{'type': 'sha1', 'value': self.hashlookupresult['SHA-1']})
+        if 'SSDEEP' in self.hashlookupresult:
+            hashlookup_object.add_attribute('SSDEEP', **{'type': 'ssdeep', 'value': self.hashlookupresult['SSDEEP']})
+        if 'TLSH' in self.hashlookupresult:
+            hashlookup_object.add_attribute('TLSH', **{'type': 'tlsh', 'value': self.hashlookupresult['TLSH']})
         if 'FileName' in self.hashlookupresult:
             hashlookup_object.add_attribute('FileName', **{'type': 'filename', 'value': self.hashlookupresult['FileName']})
         if 'FileSize' in self.hashlookupresult:
