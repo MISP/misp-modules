@@ -59,7 +59,7 @@ geoip2 = "*"
 apiosintDS = "*"
 assemblyline_client = "*"
 vt-graph-api = "*"
-trustar = "*"
+trustar = { editable = true, git = "https://github.com/SteveClement/trustar-python.git" }
 markdownify = "==0.5.3"
 socialscan = "*"
 dnsdb2 = "*"
