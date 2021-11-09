@@ -13,6 +13,7 @@
 -e git+https://github.com/cartertemm/ODTReader.git/@49d6938693f6faa3ff09998f86dba551ae3a996b#egg=odtreader
 -e git+https://github.com/sebdraven/pydnstrails@48c1f740025c51289f43a24863d1845ff12fd21a#egg=pydnstrails
 -e git+https://github.com/sebdraven/pyonyphe@1ce15581beebb13e841193a08a2eb6f967855fcb#egg=pyonyphe
+https://github.com/SteveClement/trustar-python.git
 aiohttp==3.7.4.post0
 antlr4-python3-runtime==4.8; python_version >= '3'
 apiosintds==1.8.3
@@ -76,8 +77,8 @@ oauth2==1.9.0.post1
 olefile==0.46; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3'
 oletools==0.56.2
 opencv-python==4.5.3.56
-pandas-ods-reader==0.1.4
-pandas==1.3.4
+pandas-ods-reader==0.1.2
+pandas==1.1.5
 passivetotal==2.5.4
 pcodedmp==1.2.6
 pdftotext==2.2.0
@@ -104,7 +105,7 @@ python-magic==0.4.24
 python-pptx==0.6.19
 python-socketio[client]==5.4.0; python_version >= '3.6'
 python-utils==2.5.6
-pytz==2021.3
+pytz==2019.3
 pyyaml==5.4.1; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4, 3.5'
 pyzbar==0.1.8
 pyzipper==0.3.5; python_version >= '3.5'
@@ -118,7 +119,7 @@ rtfde==0.0.2
 ruamel.yaml.clib==0.2.6; python_version < '3.10' and platform_python_implementation == 'CPython'
 ruamel.yaml==0.17.13; python_version >= '3'
 shodan==1.25.0
-sigmatools==0.20
+sigmatools==0.19.1
 six==1.16.0; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3'
 socialscan==1.4.2
 socketio-client==0.5.7.4
@@ -130,7 +131,6 @@ tau-clients==0.1.3
 tldextract==3.1.0; python_version >= '3.5'
 tornado==6.1; python_version >= '3.5'
 tqdm==4.62.2; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3'
-trustar==0.3.35
 typing-extensions==3.10.0.0
 tzlocal==3.0; python_version >= '3.6'
 unicodecsv==0.14.1
