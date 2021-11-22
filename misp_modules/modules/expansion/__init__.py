@@ -17,7 +17,8 @@ __all__ = ['cuckoo_submit', 'vmray_submit', 'bgpranking', 'circl_passivedns', 'c
            'virustotal_public', 'apiosintds', 'urlscan', 'securitytrails', 'apivoid',
            'assemblyline_submit', 'assemblyline_query', 'ransomcoindb', 'malwarebazaar',
            'lastline_query', 'lastline_submit', 'sophoslabs_intelix', 'cytomic_orion', 'censys_enrich',
-           'trustar_enrich', 'recordedfuture', 'html_to_markdown', 'socialscan', 'passive-ssh']
+           'trustar_enrich', 'recordedfuture', 'html_to_markdown', 'socialscan', 'passive-ssh',
+           'qintel_qsentry']
 
 
 minimum_required_fields = ('type', 'uuid', 'value')
