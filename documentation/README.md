@@ -1142,6 +1142,24 @@ Module to extract freetext from a .pptx document.
 
 -----
 
+#### [qintel_qsentry](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/qintel_qsentry.py)
+
+<img src=logos/qintel.png height=60>
+
+A hover and expansion module which queries Qintel QSentry for ip reputation data
+- **features**:
+>This module takes an ip-address (ip-src or ip-dst) attribute as input, and queries the Qintel QSentry API to retrieve ip reputation data
+- **input**:
+>ip address attribute
+- **ouput**:
+>Objects containing the enriched IP, threat tags, last seen attributes and associated Autonomous System information
+- **references**:
+>https://www.qintel.com/products/qsentry/
+- **requirements**:
+>A Qintel API token
+
+-----
+
 #### [qrcode](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/qrcode.py)
 
 Module to decode QR codes.
