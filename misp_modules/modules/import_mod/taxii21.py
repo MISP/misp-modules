@@ -114,6 +114,25 @@ Config = collections.namedtuple("Config", [
 ])
 
 
+def _pymisp_to_json_serializable(obj):
+    """
+    Work around a possible bug with PyMISP's
+    AbstractMisp.to_dict(json_format=True) method, which doesn't always produce
+    a JSON-serializable value (i.e. a value which is serializable with the
+    default JSON encoder).
+
+    :param obj: A PyMISP object
+    :return: A JSON-serializable version of the object
+    """
+
+    # The workaround creates a JSON string and then parses it back to a
+    # JSON-serializable value.
+    json_ = obj.to_json()
+    json_serializable = json.loads(json_)
+
+    return json_serializable
+
+
 def _normalize_multi_values(value):
     """
     Some TAXII filters may contain multiple values separated by commas,
@@ -288,17 +307,17 @@ def _query_taxii(config):
     )
 
     attributes = [
-        attr.to_dict(json_format=True)
+        _pymisp_to_json_serializable(attr)
         for attr in converter.misp_event.attributes
     ]
 
     objects = [
-        obj.to_dict(json_format=True)
+        _pymisp_to_json_serializable(obj)
         for obj in converter.misp_event.objects
     ]
 
     tags = [
-        tag.to_dict(json_format=True)
+        _pymisp_to_json_serializable(tag)
         for tag in converter.misp_event.tags
     ]
 
