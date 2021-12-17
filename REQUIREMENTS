@@ -14,7 +14,7 @@
 -e git+https://github.com/sebdraven/pydnstrails@48c1f740025c51289f43a24863d1845ff12fd21a#egg=pydnstrails
 -e git+https://github.com/sebdraven/pyonyphe@1ce15581beebb13e841193a08a2eb6f967855fcb#egg=pyonyphe
 git+https://github.com/SteveClement/trustar-python.git
-aiohttp==3.7.4.post0
+aiohttp==3.7.4
 antlr4-python3-runtime==4.8; python_version >= '3'
 apiosintds==1.8.3
 argparse==1.4.0
