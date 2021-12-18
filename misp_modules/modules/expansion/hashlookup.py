@@ -40,7 +40,7 @@ class HashlookupParser():
         # SHA-1 is the default value in hashlookup it must always be present
         hashlookup_object.add_attribute('SHA-1', **{'type': 'sha1', 'value': self.hashlookupresult['SHA-1']})
         if 'SHA-256' in self.hashlookupresult:
-            hashlookup_object.add_attribute('SHA-256', **{'type': 'sha256', 'value': self.hashlookup['SHA-256']})
+            hashlookup_object.add_attribute('SHA-256', **{'type': 'sha256', 'value': self.hashlookupresult['SHA-256']})
         if 'SSDEEP' in self.hashlookupresult:
             hashlookup_object.add_attribute('SSDEEP', **{'type': 'ssdeep', 'value': self.hashlookupresult['SSDEEP']})
         if 'TLSH' in self.hashlookupresult:
