@@ -5,8 +5,8 @@ from collections import defaultdict
 from pymisp import MISPEvent, MISPObject
 
 misperrors = {'error': 'Error'}
-mispattributes = {'input': ['md5', 'sha1'], 'format': 'misp_standard'}
-moduleinfo = {'version': '1', 'author': 'Alexandre Dulaunoy',
+mispattributes = {'input': ['md5', 'sha1', 'sha256'], 'format': 'misp_standard'}
+moduleinfo = {'version': '2', 'author': 'Alexandre Dulaunoy',
               'description': 'An expansion module to enrich a file hash with hashlookup.circl.lu services (NSRL and other sources)',
               'module-type': ['expansion', 'hover']}
 moduleconfig = ["custom_API"]
@@ -35,8 +35,12 @@ class HashlookupParser():
             hashlookup_object.add_attribute('source', **{'type': 'text', 'value': self.hashlookupresult['source']})
         if 'KnownMalicious' in self.hashlookupresult:
             hashlookup_object.add_attribute('KnownMalicious', **{'type': 'text', 'value': self.hashlookupresult['KnownMalicious']})
-        hashlookup_object.add_attribute('MD5', **{'type': 'md5', 'value': self.hashlookupresult['MD5']})
+        if 'MD5' in self.hashlookupresult:
+            hashlookup_object.add_attribute('MD5', **{'type': 'md5', 'value': self.hashlookupresult['MD5']})
+        # SHA-1 is the default value in hashlookup it must always be present
         hashlookup_object.add_attribute('SHA-1', **{'type': 'sha1', 'value': self.hashlookupresult['SHA-1']})
+        if 'SHA-256' in self.hashlookupresult:
+            hashlookup_object.add_attribute('SHA-256', **{'type': 'sha256', 'value': self.hashlookup['SHA-256']})
         if 'SSDEEP' in self.hashlookupresult:
             hashlookup_object.add_attribute('SSDEEP', **{'type': 'ssdeep', 'value': self.hashlookupresult['SSDEEP']})
         if 'TLSH' in self.hashlookupresult:
@@ -71,8 +75,10 @@ def handler(q=False):
         pass
     elif attribute.get('type') == 'sha1':
         pass
+    elif attribute.get('type') == 'sha256':
+        pass
     else:
-        misperrors['error'] = 'md5 or sha1 is missing.'
+        misperrors['error'] = 'md5 or sha1 or sha256 is missing.'
         return misperrors
     api_url = check_url(request['config']['custom_API']) if request['config'].get('custom_API') else hashlookup_url
     r = requests.get("{}/lookup/{}/{}".format(api_url, attribute.get('type'), attribute['value']))
