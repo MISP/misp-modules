@@ -14,7 +14,7 @@
 -e git+https://github.com/sebdraven/pydnstrails@48c1f740025c51289f43a24863d1845ff12fd21a#egg=pydnstrails
 -e git+https://github.com/sebdraven/pyonyphe@1ce15581beebb13e841193a08a2eb6f967855fcb#egg=pyonyphe
 git+https://github.com/SteveClement/trustar-python.git
-aiohttp==3.7.4.post0
+aiohttp==3.7.4
 antlr4-python3-runtime==4.8; python_version >= '3'
 apiosintds==1.8.3
 argparse==1.4.0
@@ -28,7 +28,9 @@ bidict==0.21.2; python_version >= '3.6'
 blockchain==1.4.4
 certifi==2021.5.30
 cffi==1.14.6
-chardet==4.0.0; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4'
+
+#chardet==4.0.0; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4'
+chardet
 charset-normalizer==2.0.4; python_version >= '3'
 clamd==1.0.2
 click-plugins==1.1.1
@@ -64,7 +66,7 @@ json-log-formatter==0.4.0
 jsonschema==3.2.0
 lark-parser==0.11.3
 lief==0.11.5
-lxml==4.6.4
+lxml==4.7.1
 maclookup==1.0.3
 markdownify==0.5.3
 maxminddb==2.0.3; python_version >= '3.6'
@@ -82,7 +84,7 @@ pandas==1.1.5
 passivetotal==2.5.4
 pcodedmp==1.2.6
 pdftotext==2.2.0
-pillow==8.3.1
+pillow==8.3.2
 progressbar2==3.53.1
 psutil==5.8.0; python_version >= '2.6' and python_version not in '3.0, 3.1, 3.2, 3.3'
 pycparser==2.20; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3'
