@@ -253,7 +253,7 @@ class TestExpansions(unittest.TestCase):
                 self.assertEqual(self.get_values(response), 'This IP is commonly spoofed in Internet-scan activity')
             except Exception:
                 self.assertIn(
-                    self.get_errors(reponse),
+                    self.get_errors(response),
                     (
                         "Unauthorized. Please check your API key.",
                         "Too many requests. You've hit the rate-limit."
