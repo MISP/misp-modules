@@ -304,7 +304,7 @@ class TestExpansions(unittest.TestCase):
             encoded = b64encode(f.read()).decode()
         query = {"module": "ods_enrich", "attachment": filename, "data": encoded}
         response = self.misp_modules_post(query)
-        self.assertEqual(self.get_values(response), '\n   column_0\n0  ods test')
+        self.assertEqual(self.get_values(response), '\n   column.0\n0  ods test')
 
     def test_odt(self):
         filename = 'test.odt'
