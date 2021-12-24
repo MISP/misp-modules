@@ -265,6 +265,7 @@ class TestExpansions(unittest.TestCase):
             response = self.misp_modules_post(query)
             self.assertEqual(self.get_errors(response), 'Missing Greynoise API key.')
 
+    @unittest.skip("Service doesn't work")
     def test_ipasn(self):
         query = {"module": "ipasn",
                  "attribute": {"type": "ip-src",
@@ -345,6 +346,7 @@ class TestExpansions(unittest.TestCase):
             response = self.misp_modules_post(query)
             self.assertEqual(self.get_errors(response), 'Onyphe authentication is missing')
 
+    @unittest.skip("Unreliable results")
     def test_otx(self):
         query_types = ('domain', 'ip-src', 'md5')
         query_values = ('circl.lu', '8.8.8.8', '616eff3e9a7575ae73821b4668d2801c')
