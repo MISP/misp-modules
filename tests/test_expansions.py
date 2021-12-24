@@ -65,6 +65,8 @@ class TestExpansions(unittest.TestCase):
         if not isinstance(data, dict):
             print(json.dumps(data, indent=2))
             return data
+        if 'results' not in data:
+            return data
         for result in data['results']:
             values = result['values']
             if values:
