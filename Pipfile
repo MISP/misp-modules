@@ -48,7 +48,7 @@ ODTReader = { editable = true, git = "https://github.com/cartertemm/ODTReader.gi
 python-pptx = "*"
 python-docx = "*"
 ezodf = "*"
-pandas = "*"
+pandas = "==1.3.5"
 pandas_ods_reader = "==0.1.2"
 pdftotext = "*"
 lxml = "*"
