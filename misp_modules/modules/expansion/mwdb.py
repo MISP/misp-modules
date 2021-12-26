@@ -6,7 +6,7 @@ import base64
 import io
 import zipfile
 
-from pymisp import PyMISP, MISPEvent, MISPAttribute
+from pymisp import PyMISP
 from mwdblib import MWDB
 
 misperrors = {'error': 'Error'}
@@ -122,6 +122,8 @@ def handler(q=False):
         if len(misp_attribute_comment) < 1:
             misp_attribute_comment = "MISP attribute {}".format(misp_attribute_uuid)
         file_object.add_comment(misp_attribute_comment)
+        if len(misp_event) > 0:
+            file_object.add_comment("Fetched from event {} - {}".format(misp_event_id, misp_info))
         mwdb_link = request["config"].get("mwdb_url").replace("/api", "/file/") + "{}".format(file_object.md5)
     except Exception:
         misperrors['error'] = "Unable to send sample to MWDB instance"
