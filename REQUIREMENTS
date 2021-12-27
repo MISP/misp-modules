@@ -151,3 +151,4 @@ xlsxwriter==3.0.1; python_version >= '3.4'
 yara-python==3.8.1
 yarl==1.6.3; python_version >= '3.6'
 ndjson==0.3.1
+mwdblib==3.4.1

@@ -1,0 +1,11 @@
+{
+    "description": "Module to push malware samples to a MWDB instance",
+    "requirements": [
+        "* mwdblib installed (pip install mwdblib) ; * (optional) keys.py file to add tags of events/attributes to MWDB * (optional) MWDB attribute created for the link back to MISP (defined in mwdb_misp_attribute)"
+    ],
+    "input": "Attachment or malware sample",
+    "output": "Link attribute that points to the sample at the MWDB instane",
+    "references": [        
+    ],
+    "features": "An expansion module to push malware samples to a MWDB (https://github.com/CERT-Polska/mwdb-core) instance. This module does not push samples to a sandbox. This can be achieved via Karton (connected to the MWDB). Does: * Upload of attachment or malware sample to MWDB * Tags of events and/or attributes are added to MWDB. * Comment of the MISP attribute is added to MWDB. * A link back to the MISP event is added to MWDB via the MWDB attribute.  * A link to the MWDB attribute is added as an enrichted attribute to the MISP event."
+}
