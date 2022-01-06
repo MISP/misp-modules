@@ -27,8 +27,8 @@ beautifulsoup4==4.9.3
 bidict==0.21.2; python_version >= '3.6'
 blockchain==1.4.4
 certifi==2021.5.30
+censys==2.0.9
 cffi==1.14.6
-
 #chardet==4.0.0; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4'
 chardet
 charset-normalizer==2.0.4; python_version >= '3'

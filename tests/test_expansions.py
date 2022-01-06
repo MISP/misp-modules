@@ -215,6 +215,21 @@ class TestExpansions(unittest.TestCase):
         response = self.misp_modules_post(query)
         self.assertEqual(self.get_values(response), '\nThis is an basic test docx file. ')
 
+    def test_censys(self):
+        module_name = "censys_enrich"
+        query = {
+                    "attribute": {"type" : "ip-dst", "value": "8.8.8.8", "uuid": ""},
+		            "module": module_name,
+		            "config": {}
+                 }
+        if module_name in self.configs:
+            query['config'] = self.configs[module_name]
+            response = self.misp_modules_post(query)
+            self.assertEqual(self.get_object(response), 'asn')
+        else:
+            response = self.misp_modules_post(query)
+            self.assertTrue(self.get_errors(response).startswith('Please provide config options'))
+
     def test_farsight_passivedns(self):
         module_name = 'farsight_passivedns'
         if module_name in self.configs:
