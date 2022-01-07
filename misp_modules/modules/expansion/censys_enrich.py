@@ -60,7 +60,6 @@ def handler(q=False):
     attribute = MISPAttribute()
     attribute.from_dict(**request['attribute'])
     # Lists to accomodate multi-types attribute
-    conn = list()
     types = list()
     values = list()
     results = list()
@@ -101,8 +100,8 @@ def handler(q=False):
                 results.append(parse_response(r, attribute))
                 found = True
         except CensysException as e:
-            misperrors['error'] = print("ERROR: param {} / response: {}".format(value, e))
-            return misperrors
+                misperrors['error'] = "ERROR: param {} / response: {}".format(value, e)
+                return misperrors
 
     if not found:
         misperrors['error'] = "Nothing could be found on Censys"
@@ -151,7 +150,7 @@ def parse_response(censys_output, attribute):
                 print("Error !")
         if serv.get('ssh') and serv.get('service_name').lower() == 'ssh':
             try:
-                cert = serv.get('ssh').get('server_host_key').get('fingerprint_sha256')
+                # cert = serv.get('ssh').get('server_host_key').get('fingerprint_sha256')
                 # TODO enable once the type is merged
                 # misp_event.add_attribute(type='hasshserver-sha256', value=cert['fingerprint_sha256'])
             except KeyError:
