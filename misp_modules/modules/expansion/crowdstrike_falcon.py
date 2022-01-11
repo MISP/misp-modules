@@ -1,8 +1,7 @@
 import json
-import requests
 from . import check_input_attribute, standard_error_message
 from falconpy import Intel
-from pymisp import MISPAttribute, MISPEvent, MISPObject
+from pymisp import MISPAttribute, MISPEvent
 
 moduleinfo = {'version': '0.2',
               'author': 'Christophe Vandeplas',
