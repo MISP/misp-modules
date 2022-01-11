@@ -2,5 +2,9 @@
   "censys_enrich": {
     "api_id" : "<api_id>",
     "api_secret": "<api_secret>"
+  },
+  "crowdstrike_falcon": {
+    "api_id" : "<api_id>",
+    "apikey": "<apikey>"
   }
 }

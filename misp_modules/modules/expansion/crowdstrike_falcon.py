@@ -1,42 +1,44 @@
 import json
-import requests
+from . import check_input_attribute, standard_error_message
+from falconpy import Intel
+from pymisp import MISPAttribute, MISPEvent
 
-moduleinfo = {'version': '0.1',
+moduleinfo = {'version': '0.2',
               'author': 'Christophe Vandeplas',
               'description': 'Module to query CrowdStrike Falcon.',
-              'module-type': ['expansion']}
+              'module-type': ['expansion', 'hover']}
 moduleconfig = ['api_id', 'apikey']
 misperrors = {'error': 'Error'}
-misp_types_in = ['domain', 'email-attachment', 'email-dst', 'email-reply-to', 'email-src', 'email-subject',
+misp_type_in = ['domain', 'email-attachment', 'email-dst', 'email-reply-to', 'email-src', 'email-subject',
                  'filename', 'hostname', 'ip', 'ip-src', 'ip-dst', 'md5', 'mutex', 'regkey', 'sha1', 'sha256', 'uri', 'url',
                  'user-agent', 'whois-registrant-email', 'x509-fingerprint-md5']
-mapping_out = {  # mapping between the MISP attributes types and the compatible CrowdStrike indicator types.
-    'domain': {'types': 'hostname', 'to_ids': True},
-    'email_address': {'types': 'email-src', 'to_ids': True},
-    'email_subject': {'types': 'email-subject', 'to_ids': True},
-    'file_name': {'types': 'filename', 'to_ids': True},
-    'hash_md5': {'types': 'md5', 'to_ids': True},
-    'hash_sha1': {'types': 'sha1', 'to_ids': True},
-    'hash_sha256': {'types': 'sha256', 'to_ids': True},
-    'ip_address': {'types': 'ip-dst', 'to_ids': True},
-    'ip_address_block': {'types': 'ip-dst', 'to_ids': True},
-    'mutex_name': {'types': 'mutex', 'to_ids': True},
-    'registry': {'types': 'regkey', 'to_ids': True},
-    'url': {'types': 'url', 'to_ids': True},
-    'user_agent': {'types': 'user-agent', 'to_ids': True},
-    'x509_serial': {'types': 'x509-fingerprint-md5', 'to_ids': True},
+mapping_out = {  # mapping between the MISP attributes type and the compatible CrowdStrike indicator types.
+    'domain': {'type': 'hostname', 'to_ids': True},
+    'email_address': {'type': 'email-src', 'to_ids': True},
+    'email_subject': {'type': 'email-subject', 'to_ids': True},
+    'file_name': {'type': 'filename', 'to_ids': True},
+    'hash_md5': {'type': 'md5', 'to_ids': True},
+    'hash_sha1': {'type': 'sha1', 'to_ids': True},
+    'hash_sha256': {'type': 'sha256', 'to_ids': True},
+    'ip_address': {'type': 'ip-dst', 'to_ids': True},
+    'ip_address_block': {'type': 'ip-dst', 'to_ids': True},
+    'mutex_name': {'type': 'mutex', 'to_ids': True},
+    'registry': {'type': 'regkey', 'to_ids': True},
+    'url': {'type': 'url', 'to_ids': True},
+    'user_agent': {'type': 'user-agent', 'to_ids': True},
+    'x509_serial': {'type': 'x509-fingerprint-md5', 'to_ids': True},
 
-    'actors': {'types': 'threat-actor'},
-    'malware_families': {'types': 'text', 'categories': 'Attribution'}
+    'actors': {'type': 'threat-actor', 'category': 'Attribution'},
+    'malware_families': {'type': 'text', 'category': 'Attribution'}
 }
-misp_types_out = [item['types'] for item in mapping_out.values()]
-mispattributes = {'input': misp_types_in, 'output': misp_types_out}
-
+misp_type_out = [item['type'] for item in mapping_out.values()]
+mispattributes = {'input': misp_type_in, 'format': 'misp_standard'}
 
 def handler(q=False):
     if q is False:
         return False
     request = json.loads(q)
+    #validate CrowdStrike params
     if (request.get('config')):
         if (request['config'].get('apikey') is None):
             misperrors['error'] = 'CrowdStrike apikey is missing'
@@ -44,41 +46,64 @@ def handler(q=False):
         if (request['config'].get('api_id') is None):
             misperrors['error'] = 'CrowdStrike api_id is missing'
             return misperrors
+
+    #validate attribute
+    if not request.get('attribute') or not check_input_attribute(request['attribute']):
+        return {'error': f'{standard_error_message}, which should contain at least a type, a value and an uuid.'}
+    attribute = request.get('attribute')
+    if not any(input_type == attribute.get('type') for input_type in misp_type_in):
+        return {'error': 'Unsupported attribute type.'}
+
     client = CSIntelAPI(request['config']['api_id'], request['config']['apikey'])
 
+    attribute = MISPAttribute()
+    attribute.from_dict(**request.get('attribute') )
     r = {"results": []}
-
     valid_type = False
-    for k in misp_types_in:
-        if request.get(k):
-            # map the MISP typ to the CrowdStrike type
-            for item in lookup_indicator(client, request[k]):
-                r['results'].append(item)
-            valid_type = True
+
+    try:
+        for k in misp_type_in:
+            if attribute.type == k:
+                # map the MISP type to the CrowdStrike type
+                r['results'].append(lookup_indicator(client, attribute))
+                valid_type = True
+    except Exception as e:
+        return {'error': f"{e}"}
 
     if not valid_type:
         misperrors['error'] = "Unsupported attributes type"
         return misperrors
-    return r
+    return {'results': r.get('results').pop()}
 
 
-def lookup_indicator(client, item):
-    result = client.search_indicator(item)
-    for item in result:
-        for relation in item['relations']:
-            if mapping_out.get(relation['type']):
-                r = mapping_out[relation['type']].copy()
-                r['values'] = relation['indicator']
-                yield(r)
-        for actor in item['actors']:
-            r = mapping_out['actors'].copy()
-            r['values'] = actor
-            yield(r)
-        for malware_family in item['malware_families']:
-            r = mapping_out['malware_families'].copy()
-            r['values'] = malware_family
-            yield(r)
+def lookup_indicator(client, ref_attribute):
+    result = client.search_indicator(ref_attribute.value)
+    misp_event = MISPEvent()
+    misp_event.add_attribute(**ref_attribute)
 
+    for item in result.get('resources', []):
+        for relation in item.get('relations'):
+            if mapping_out.get(relation.get('type')):
+                r = mapping_out[relation.get('type')].copy()
+                r['value'] = relation.get('indicator')
+                attribute = MISPAttribute()
+                attribute.from_dict(**r)
+                misp_event.add_attribute(**attribute)
+        for actor in item.get('actors'):
+            r = mapping_out.get('actors').copy()
+            r['value'] = actor
+            attribute = MISPAttribute()
+            attribute.from_dict(**r)
+            misp_event.add_attribute(**attribute)
+        if item.get('malware_families'):
+            r = mapping_out.get('malware_families').copy()
+            r['value'] = f"malware_families: {' | '.join(item.get('malware_families'))}"
+            attribute = MISPAttribute()
+            attribute.from_dict(**r)
+            misp_event.add_attribute(**attribute)
+
+    event = json.loads(misp_event.to_json())
+    return {'Object': event.get('Object', []), 'Attribute': event.get('Attribute', [])}
 
 def introspection():
     return mispattributes
@@ -90,39 +115,25 @@ def version():
 
 
 class CSIntelAPI():
-    def __init__(self, custid=None, custkey=None, perpage=100, page=1, baseurl="https://intelapi.crowdstrike.com/indicator/v2/search/"):
+    def __init__(self, custid=None, custkey=None):
         # customer id and key should be passed when obj is created
-        self.custid = custid
-        self.custkey = custkey
+        self.falcon = Intel(client_id=custid, client_secret=custkey)
 
-        self.baseurl = baseurl
-        self.perpage = perpage
-        self.page = page
-
-    def request(self, query):
-        headers = {'X-CSIX-CUSTID': self.custid,
-                   'X-CSIX-CUSTKEY': self.custkey,
-                   'Content-Type': 'application/json'}
-
-        full_query = self.baseurl + query
-
-        r = requests.get(full_query, headers=headers)
+    def search_indicator(self, query):
+        r = self.falcon.query_indicator_entities(q=query)
         # 400 - bad request
-        if r.status_code == 400:
+        if r.get('status_code') == 400:
             raise Exception('HTTP Error 400 - Bad request.')
 
         # 404 - oh shit
-        if r.status_code == 404:
+        if r.get('status_code') == 404:
             raise Exception('HTTP Error 404 - awww snap.')
 
         # catch all?
-        if r.status_code != 200:
-            raise Exception('HTTP Error: ' + str(r.status_code))
+        if r.get('status_code') != 200:
+            raise Exception('HTTP Error: ' + str(r.get('status_code')))
 
-        if r.text:
-            return r
+        if len(r.get('body').get('errors')):
+            raise Exception('API Error: ' + ' | '.join(r.get('body').get('errors')))
 
-    def search_indicator(self, item):
-        query = 'indicator?match=' + item
-        r = self.request(query)
-        return json.loads(r.text)
+        return r.get('body', {})

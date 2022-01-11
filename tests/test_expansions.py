@@ -511,6 +511,25 @@ class TestExpansions(unittest.TestCase):
             response = self.misp_modules_post(query)
             self.assertTrue(self.get_values(response), result)
 
+    def test_crowdstrike(self):
+        module_name = "crowdstrike_falcon"
+        query = {
+            "attribute": {"type": "sha256", "value": "", "uuid": ""},
+            "module": module_name,
+            "config": {}
+        }
+        if module_name in self.configs:
+            query['config'] = self.configs[module_name]
+            response = self.misp_modules_post(query)
+
+            if self.configs[module_name].get('api_id') == '<api_id>':
+                self.assertTrue(self.get_errors(response).startswith('HTTP Error:'))
+            else:
+                self.assertGreaterEqual(len(response.json().get('results', {}).get('Attribute')), 1)
+        else:
+            response = self.misp_modules_post(query)
+            self.assertTrue(self.get_errors(response).startswith('CrowdStrike apikey is missing'))
+
     def test_threatminer(self):
         if LiveCI:
             return True
