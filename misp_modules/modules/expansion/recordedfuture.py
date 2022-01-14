@@ -242,6 +242,10 @@ class RFEnricher:
     def __init__(self, attribute_props: dict):
         self.event = MISPEvent()
         self.enrichment_object = MISPObject("Recorded Future Enrichment")
+        self.enrichment_object.template_uuid = "cbe0ffda-75e5-4c49-833f-093f057652ba"
+        self.enrichment_object.template_id = "1"
+        self.enrichment_object.description = "Recorded Future Enrichment"
+        setattr(self.enrichment_object, 'meta-category', 'network')
         description = (
             "An object containing the enriched attribute and "
             "related entities from Recorded Future."
