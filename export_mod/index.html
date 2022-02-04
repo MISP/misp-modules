@@ -380,6 +380,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#virustotal_collections" class="md-nav__link">
+    virustotal_collections
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#vt_graph" class="md-nav__link">
     vt_graph
   </a>
@@ -602,6 +609,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#virustotal_collections" class="md-nav__link">
+    virustotal_collections
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#vt_graph" class="md-nav__link">
     vt_graph
   </a>
@@ -805,6 +819,23 @@ ThreatConnect CSV format file
 <a href="https://www.threatconnect.com">https://www.threatconnect.com</a>
 - <strong>requirements</strong>:
 csv</p>
+</blockquote>
+<hr />
+<h4 id="virustotal_collections"><a href="https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/virustotal_collections.py">virustotal_collections</a><a class="headerlink" href="#virustotal_collections" title="Permanent link">&para;</a></h4>
+<p><img src=../logos/virustotal.png height=60></p>
+<p>Creates a VT Collection from an event iocs.
+- <strong>features</strong>:</p>
+<blockquote>
+<p>This export module which takes advantage of a new endpoint in VT APIv3 to create VT Collections from IOCs contained in a MISP event. With this module users will be able to create a collection just using the Download as... button.
+- <strong>input</strong>:
+A domain, hash (md5, sha1, sha256 or sha512), hostname, url or IP address attribute.
+- <strong>output</strong>:
+A VirusTotal collection in VT.
+- <strong>references</strong>:
+- <a href="https://www.virustotal.com/">https://www.virustotal.com/</a>
+- <a href="https://blog.virustotal.com/2021/11/introducing-virustotal-collections.html">https://blog.virustotal.com/2021/11/introducing-virustotal-collections.html</a>
+- <strong>requirements</strong>:
+An access to the VirusTotal API (apikey).</p>
 </blockquote>
 <hr />
 <h4 id="vt_graph"><a href="https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/vt_graph.py">vt_graph</a><a class="headerlink" href="#vt_graph" title="Permanent link">&para;</a></h4>
