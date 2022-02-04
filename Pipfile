@@ -17,9 +17,9 @@ passivetotal = "*"
 pypdns = "*"
 pypssl = "*"
 pyeupi = "*"
-pymisp = { extras = ["fileobjects,openioc,pdfexport,email"], version = "*" }
-pyonyphe = { editable = true, git = "https://github.com/sebdraven/pyonyphe" }
-pydnstrails = { editable = true, git = "https://github.com/sebdraven/pydnstrails" }
+pymisp = { extras = ["fileobjects,openioc,pdfexport,email,url"], version = "*" }
+pyonyphe = { git = "https://github.com/sebdraven/pyonyphe" }
+pydnstrails = { git = "https://github.com/sebdraven/pydnstrails" }
 pytesseract = "*"
 pygeoip = "*"
 beautifulsoup4 = "*"
@@ -31,20 +31,20 @@ maclookup = "*"
 vulners = "*"
 blockchain = "*"
 reportlab = "*"
-pyintel471 = { editable = true, git = "https://github.com/MISP/PyIntel471.git" }
+pyintel471 = { git = "https://github.com/MISP/PyIntel471.git" }
 shodan = "*"
 Pillow = ">=8.2.0"
 Wand = "*"
 SPARQLWrapper = "*"
 domaintools_api = "*"
-misp-modules = { editable = true, path = "." }
-pybgpranking = { editable = true, git = "https://github.com/D4-project/BGP-Ranking.git/", subdirectory = "client" }
-pyipasnhistory = { editable = true, git = "https://github.com/D4-project/IPASN-History.git/", subdirectory = "client" }
+misp-modules = { path = "." }
+pybgpranking = { git = "https://github.com/D4-project/BGP-Ranking.git/", subdirectory = "client", ref = "68de39f6c5196f796055c1ac34504054d688aa59" }
+pyipasnhistory = { git = "https://github.com/D4-project/IPASN-History.git/", subdirectory = "client", ref = "a2853c39265cecdd0c0d16850bd34621c0551b87" }
 backscatter = "*"
 pyzbar = "*"
 opencv-python = "*"
 np = "*"
-ODTReader = { editable = true, git = "https://github.com/cartertemm/ODTReader.git/" }
+ODTReader = { git = "https://github.com/cartertemm/ODTReader.git/" }
 python-pptx = "*"
 python-docx = "*"
 ezodf = "*"
@@ -59,7 +59,7 @@ geoip2 = "*"
 apiosintDS = "*"
 assemblyline_client = "*"
 vt-graph-api = "*"
-trustar = { editable = true, git = "https://github.com/SteveClement/trustar-python.git" }
+trustar = { git = "https://github.com/SteveClement/trustar-python.git" }
 markdownify = "==0.5.3"
 socialscan = "*"
 dnsdb2 = "*"
@@ -67,6 +67,10 @@ clamd = "*"
 aiohttp = ">=3.7.4"
 tau-clients = "*"
 vt-py = ">=0.7.1"
+crowdstrike-falconpy = "0.9.0"
+censys = "2.0.9"
+mwdblib = "3.4.1"
+ndjson = "0.3.1"
 
 [requires]
-python_version = "3.6"
+python_version = "3.7"

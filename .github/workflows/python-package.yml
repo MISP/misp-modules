@@ -46,5 +46,7 @@ jobs:
         # Run server in background
         misp-modules -l 127.0.0.1 -s &
         sleep 5
+        # Check if modules are running
+        curl -sS localhost:6666/modules
         # Run tests
         pytest tests
