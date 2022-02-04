@@ -2045,6 +2045,25 @@ Module to export a structured CSV file for uploading to ThreatConnect.
 
 -----
 
+#### [virustotal_collections](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/virustotal_collections.py)
+
+<img src=logos/virustotal.png height=60>
+
+Creates a VT Collection from an event iocs.
+- **features**:
+>This export module which takes advantage of a new endpoint in VT APIv3 to create VT Collections from IOCs contained in a MISP event. With this module users will be able to create a collection just using the Download as... button.
+- **input**:
+>A domain, hash (md5, sha1, sha256 or sha512), hostname, url or IP address attribute.
+- **output**:
+>A VirusTotal collection in VT.
+- **references**:
+> - https://www.virustotal.com/
+> - https://blog.virustotal.com/2021/11/introducing-virustotal-collections.html
+- **requirements**:
+>An access to the VirusTotal API (apikey).
+
+-----
+
 #### [vt_graph](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/vt_graph.py)
 
 <img src=logos/virustotal.png height=60>
