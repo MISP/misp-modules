@@ -7,9 +7,9 @@ misperrors = {'error': 'Error'}
 mispattributes = {'input': ['ip-src', 'ip-src|port', 'ip-dst', 'ip-dst|port'], 'format': 'misp_standard'}
 moduleinfo = {'version': '1', 'author': 'Jeroen Pinoy',
               'description': "An expansion module to enrich an ip with geolocation information from an mmdb server "
-                             "such as ip.circl.lu",
+                             "such as ip.circl.lu.",
               'module-type': ['expansion', 'hover']}
-moduleconfig = ["custom_API"]
+moduleconfig = ["custom_API", "db_source_filter"]
 mmdblookup_url = 'https://ip.circl.lu/'
 
 
@@ -48,6 +48,21 @@ class MmdbLookupParser():
                                                        result_entry['meta']['build_db'])})
                 mmdblookup_object.add_reference(self.attribute['uuid'], 'related-to')
                 self.misp_event.add_object(mmdblookup_object)
+                if 'AutonomousSystemNumber' in result_entry['country']:
+                    mmdblookup_object_asn = MISPObject('asn')
+                    mmdblookup_object_asn.add_attribute('asn',
+                                                        **{'type': 'text',
+                                                           'value': result_entry['country'][
+                                                               'AutonomousSystemNumber']})
+                    mmdblookup_object_asn.add_attribute('description',
+                                                        **{'type': 'text',
+                                                           'value': 'ASNOrganization: {}. db_source: {}. build_db: {}.'.format(
+                                                               result_entry['country'][
+                                                                   'AutonomousSystemOrganization'],
+                                                               result_entry['meta']['db_source'],
+                                                               result_entry['meta']['build_db'])})
+                    mmdblookup_object_asn.add_reference(self.attribute['uuid'], 'related-to')
+                    self.misp_event.add_object(mmdblookup_object_asn)
 
 
 def check_url(url):
@@ -63,16 +78,12 @@ def handler(q=False):
     attribute = request['attribute']
     if attribute.get('type') == 'ip-src':
         toquery = attribute['value']
-        pass
     elif attribute.get('type') == 'ip-src|port':
         toquery = attribute['value'].split('|')[0]
-        pass
     elif attribute.get('type') == 'ip-dst':
         toquery = attribute['value']
-        pass
     elif attribute.get('type') == 'ip-dst|port':
         toquery = attribute['value'].split('|')[0]
-        pass
     else:
         misperrors['error'] = 'There is no attribute of type ip-src or ip-dst provided as input'
         return misperrors
@@ -84,6 +95,12 @@ def handler(q=False):
         if not mmdblookupresult or len(mmdblookupresult) == 0:
             misperrors['error'] = 'Empty result returned by server'
             return misperrors
+        if 'config' in request and request['config'].get('db_source_filter'):
+            db_source_filter = request['config'].get('db_source_filter')
+            mmdblookupresult = [entry for entry in mmdblookupresult if entry['meta']['db_source'] == db_source_filter]
+            if not mmdblookupresult or len(mmdblookupresult) == 0:
+                misperrors['error'] = 'There was no result with the selected db_source'
+                return misperrors
         # Server might return one or multiple entries which could all be empty, we check if there is at least one
         # non-empty result below
         empty_result = True
