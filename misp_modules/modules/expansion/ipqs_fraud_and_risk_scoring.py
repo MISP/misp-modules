@@ -42,8 +42,8 @@ mispattributes = {
 moduleinfo = {
     'version': '0.1',
     'author': 'David Mackler',
-    'description': 'Query IPQualityScore for IP reputation, Email Validation, Phone Number Validation and Malicious '
-                   'Domain/URL Scanner.',
+    'description': 'Query IPQualityScore for IP reputation, Email Validation, Phone Number Validation,'
+                   'Malicious Domain and Malicious URL Scanner.',
     'module-type': ['expansion', 'hover']
 }
 moduleconfig = ['apikey']
