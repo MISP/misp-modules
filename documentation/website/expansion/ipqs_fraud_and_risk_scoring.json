@@ -1,5 +1,5 @@
 {
-    "description": "IPQualityScore MISP Expansion Module.",
+    "description": "IPQualityScore MISP Expansion Module for IP reputation, Email Validation, Phone Number Validation, Malicious Domain and Malicious URL Scanner.",
     "logo": "ipqualityscore.png",
     "requirements": [
         "A IPQualityScore API Key."
