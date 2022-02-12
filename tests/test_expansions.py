@@ -296,22 +296,14 @@ class TestExpansions(unittest.TestCase):
     def test_ipqs_fraud_and_risk_scoring(self):
         module_name = "ipqs_fraud_and_risk_scoring"
         query = {"module": module_name,
-                 "attribute": {"type": "domain",
+                 "attribute": {"type": "email",
                                "value": "noreply@ipqualityscore.com",
                                "uuid": "ea89a33b-4ab7-4515-9f02-922a0bee333d"},
                  "config": {}}
         if module_name in self.configs:
             query['config'] = self.configs[module_name]
             response = self.misp_modules_post(query)
-            try:
-                self.assertEqual(self.get_object(response), 'IPQS:')
-                except Exception:
-                self.assertIn(
-                    self.get_errors(response),
-                    (
-                        "Invalid or unauthorized key. Please check the API key and try again."
-                    )
-                )
+            self.assertEqual(self.get_values(response), 'noreply@ipqualityscore.com')
         else:
             response = self.misp_modules_post(query)
             self.assertEqual(self.get_errors(response), 'An API key for IPQualityScore is required.')
