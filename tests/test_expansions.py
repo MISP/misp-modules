@@ -306,7 +306,7 @@ class TestExpansions(unittest.TestCase):
             self.assertEqual(self.get_values(response)['message'], 'Success.')
         else:
             response = self.misp_modules_post(query)
-            self.assertEqual(self.get_errors(response), 'Invalid or unauthorized key. Please check the API key and try again.')
+            self.assertEqual(self.get_errors(response), 'IPQualityScore apikey is missing')
 
     def test_macaddess_io(self):
         module_name = 'macaddress_io'
