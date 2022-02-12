@@ -1,0 +1,13 @@
+{
+    "description": "IPQualityScore MISP Expansion Module.",
+    "logo": "ipqualityscore.png",
+    "requirements": [
+        "A IPQualityScore API Key."
+    ],
+    "input": "A MISP attribute of type IP Address(ip-src, ip-dst), Domain(hostname, domain), URL(url, uri), Email Address(email, email-src, email-dst, target-email, whois-registrant-email) and Phone Number(phone-number, whois-registrant-phone).",
+    "output": "IPQualityScore object, resulting from the query on the IPQualityScore API.",
+    "references": [
+        "https://www.ipqualityscore.com/"
+    ],
+    "features": "This Module takes the IP Address, Domain, URL, Email and Phone Number MISP Attributes as input to query the IPQualityScore API.\n The results of the IPQualityScore API are than returned as IPQS Fraud and Risk Scoring Object. \n The object contains a copy of the enriched attribute with added tags presenting the verdict based on fraud score,risk score and other attributes from IPQualityScore."
+}
