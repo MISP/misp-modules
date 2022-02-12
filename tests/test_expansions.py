@@ -304,7 +304,7 @@ class TestExpansions(unittest.TestCase):
             query['config'] = self.configs[module_name]
             response = self.misp_modules_post(query)
             try:
-                self.assertEqual(self.get_object(response), 'IPQS:)
+                self.assertEqual(self.get_object(response), 'IPQS:')
                 except Exception:
                 self.assertIn(
                     self.get_errors(response),
