@@ -130,10 +130,10 @@ class IPQualityScoreParser:
         self.attribute = attribute
         self.misp_event = MISPEvent()
         self.misp_event.add_attribute(**attribute)
-        self.ipqs_object = MISPObject('IPQS Fraud ans Risk Scoring Object')
+        self.ipqs_object = MISPObject('IPQS Fraud and Risk Scoring Object')
         self.ipqs_object.template_uuid = "57d066e6-6d66-42a7-a1ad-e075e39b2b5e"
         self.ipqs_object.template_id = "1"
-        self.ipqs_object.description = "IPQS Fraud ans Risk Scoring Data"
+        self.ipqs_object.description = "IPQS Fraud and Risk Scoring Data"
         setattr(self.ipqs_object, 'meta-category', 'network')
         description = (
             "An object containing the enriched attribute and "
@@ -385,8 +385,8 @@ class IPQualityScoreParser:
                 self.ipqs_object.add_attribute(**parse_attribute(comment, data_item, data_item_value))
                 if ip_data_item == "fraud_score":
                     fraud_score = int(data_item_value)
-                    tag_name = f'IPQS:Fraud Score="{fraud_score}"'
-                    self.add_tag(tag_name)
+                    # tag_name = f'IPQS:Fraud Score="{fraud_score}"'
+                    # self.add_tag(tag_name)
                     self.ip_address_risk_scoring(fraud_score)
 
         self.ipqs_object.add_attribute(
@@ -439,8 +439,8 @@ class IPQualityScoreParser:
                     phishing = data_item_value
                 if url_data_item == "risk_score":
                     risk_score = int(data_item_value)
-                    tag_name = f'IPQS:Risk Score="{risk_score}"'
-                    self.add_tag(tag_name)
+                    #tag_name = f'IPQS:Risk Score="{risk_score}"'
+                    #self.add_tag(tag_name)
 
         self.url_risk_scoring(risk_score, malware, phishing)
         self.ipqs_object.add_attribute(
@@ -497,8 +497,8 @@ class IPQualityScoreParser:
                     valid = data_item_value
                 if email_data_item == "fraud_score":
                     fraud_score = int(data_item_value)
-                    tag_name = f'IPQS:Fraud Score="{fraud_score}"'
-                    self.add_tag(tag_name)
+                    #tag_name = f'IPQS:Fraud Score="{fraud_score}"'
+                    #self.add_tag(tag_name)
 
         self.email_address_risk_scoring(fraud_score, disposable, valid)
         self.ipqs_object.add_attribute(
@@ -544,8 +544,8 @@ class IPQualityScoreParser:
                     valid = data_item_value
                 if phone_data_item == "fraud_score":
                     fraud_score = int(data_item_value)
-                    tag_name = f'IPQS:Fraud Score="{fraud_score}"'
-                    self.add_tag(tag_name)
+                    #tag_name = f'IPQS:Fraud Score="{fraud_score}"'
+                    #self.add_tag(tag_name)
 
         self.phone_address_risk_scoring(fraud_score, valid, active)
         self.ipqs_object.add_attribute(
@@ -632,4 +632,3 @@ def version():
     configurations required of the module. """
     moduleinfo['config'] = moduleconfig
     return moduleinfo
-
