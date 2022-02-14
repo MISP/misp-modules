@@ -22,14 +22,18 @@ import os
 import time
 import io
 import pymisp
-import stix2
-import misp_modules.lib.stix2misp_mapping as stix2misp_mapping
+import stix2misp_mapping
 from collections import defaultdict
 from copy import deepcopy
 from pathlib import Path
-_misp_objects_path = Path(__file__).parent / 'misp-objects' / 'objects'
+_misp_dir = Path(os.path.realpath(__file__)).parents[4]
+_misp_objects_path = _misp_dir / 'app' / 'files' / 'misp-objects' / 'objects'
 _misp_types = pymisp.AbstractMISP().describe_types.get('types')
 from pymisp import MISPEvent, MISPObject, MISPAttribute
+
+_scripts_path = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(_scripts_path / 'cti-python-stix2'))
+import stix2
 
 
 class StixParser():
@@ -471,7 +475,7 @@ class StixFromMISPParser(StixParser):
         if hasattr(galaxy, 'labels'):
             return [label for label in galaxy.labels if label.startswith('misp-galaxy:')]
         try:
-            return self._synonyms_to_tag_names[name]
+            return self._synonyms_to_tag_names[galaxy.name]
         except KeyError:
             print(f'Unknown {galaxy._type} name: {galaxy.name}', file=sys.stderr)
             return [f'misp-galaxy:{galaxy._type}="{galaxy.name}"']
@@ -1097,6 +1101,8 @@ class StixFromMISPParser(StixParser):
         if tags:
             attribute['Tag'] = tags
         attribute.update(self.parse_timeline(stix_object))
+        if hasattr(stix_object, 'description') and stix_object.description:
+            attribute['comment'] = stix_object.description
         if hasattr(stix_object, 'object_marking_refs'):
             self.update_marking_refs(attribute_uuid, stix_object.object_marking_refs)
         return attribute
@@ -1107,6 +1113,8 @@ class StixFromMISPParser(StixParser):
         misp_object = MISPObject('file' if object_type == 'WindowsPEBinaryFile' else object_type,
                                  misp_objects_path_custom=_misp_objects_path)
         misp_object.uuid = stix_object.id.split('--')[1]
+        if hasattr(stix_object, 'description') and stix_object.description:
+            misp_object.comment = stix_object.description
         misp_object.update(self.parse_timeline(stix_object))
         return misp_object, object_type
 
@@ -1984,6 +1992,8 @@ class ExternalStixParser(StixParser):
         misp_object = MISPObject(name if name is not None else stix_object.type,
                                  misp_objects_path_custom=_misp_objects_path)
         misp_object.uuid = stix_object.id.split('--')[1]
+        if hasattr(stix_object, 'description') and stix_object.description:
+            misp_object.comment = stix_object.description
         misp_object.update(self.parse_timeline(stix_object))
         return misp_object
 
@@ -2057,7 +2067,7 @@ def from_misp(stix_objects):
 
 
 def main(args):
-    filename = Path(os.path.dirname(args[0]), args[1])
+    filename = args[1] if args[1][0] == '/' else Path(os.path.dirname(args[0]), args[1])
     with open(filename, 'rt', encoding='utf-8') as f:
         event = stix2.parse(f.read(), allow_custom=True, interoperability=True)
     stix_parser = StixFromMISPParser() if from_misp(event.objects) else ExternalStixParser()
