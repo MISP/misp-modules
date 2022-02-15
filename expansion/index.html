@@ -541,6 +541,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#ipqs_fraud_and_risk_scoring" class="md-nav__link">
+    ipqs_fraud_and_risk_scoring
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#iprep" class="md-nav__link">
     iprep
   </a>
@@ -1297,6 +1304,13 @@
         <li class="md-nav__item">
   <a href="#ipasn" class="md-nav__link">
     ipasn
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ipqs_fraud_and_risk_scoring" class="md-nav__link">
+    ipqs_fraud_and_risk_scoring
   </a>
   
 </li>
@@ -2338,6 +2352,24 @@ Asn object(s) objects related to the IP address used as input.
 <a href="https://github.com/D4-project/IPASN-History">https://github.com/D4-project/IPASN-History</a>
 - <strong>requirements</strong>:
 pyipasnhistory: Python library to access IPASN-history instance</p>
+</blockquote>
+<hr />
+<h4 id="ipqs_fraud_and_risk_scoring"><a href="https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/ipqs_fraud_and_risk_scoring.py">ipqs_fraud_and_risk_scoring</a><a class="headerlink" href="#ipqs_fraud_and_risk_scoring" title="Permanent link">&para;</a></h4>
+<p><img src=../logos/ipqualityscore.png height=60></p>
+<p>IPQualityScore MISP Expansion Module for IP reputation, Email Validation, Phone Number Validation, Malicious Domain and Malicious URL Scanner.
+- <strong>features</strong>:</p>
+<blockquote>
+<p>This Module takes the IP Address, Domain, URL, Email and Phone Number MISP Attributes as input to query the IPQualityScore API.
+The results of the IPQualityScore API are than returned as IPQS Fraud and Risk Scoring Object. 
+The object contains a copy of the enriched attribute with added tags presenting the verdict based on fraud score,risk score and other attributes from IPQualityScore.
+- <strong>input</strong>:
+A MISP attribute of type IP Address(ip-src, ip-dst), Domain(hostname, domain), URL(url, uri), Email Address(email, email-src, email-dst, target-email, whois-registrant-email) and Phone Number(phone-number, whois-registrant-phone).
+- <strong>output</strong>:
+IPQualityScore object, resulting from the query on the IPQualityScore API.
+- <strong>references</strong>:
+<a href="https://www.ipqualityscore.com/">https://www.ipqualityscore.com/</a>
+- <strong>requirements</strong>:
+A IPQualityScore API Key.</p>
 </blockquote>
 <hr />
 <h4 id="iprep"><a href="https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/iprep.py">iprep</a><a class="headerlink" href="#iprep" title="Permanent link">&para;</a></h4>
