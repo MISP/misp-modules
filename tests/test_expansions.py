@@ -293,6 +293,21 @@ class TestExpansions(unittest.TestCase):
         response = self.misp_modules_post(query)
         self.assertEqual(self.get_object(response), 'asn')
 
+    def test_ipqs_fraud_and_risk_scoring(self):
+        module_name = "ipqs_fraud_and_risk_scoring"
+        query = {"module": module_name,
+                 "attribute": {"type": "email",
+                               "value": "noreply@ipqualityscore.com",
+                               "uuid": "ea89a33b-4ab7-4515-9f02-922a0bee333d"},
+                 "config": {}}
+        if module_name in self.configs:
+            query['config'] = self.configs[module_name]
+            response = self.misp_modules_post(query)
+            self.assertEqual(self.get_values(response)['message'], 'Success.')
+        else:
+            response = self.misp_modules_post(query)
+            self.assertEqual(self.get_errors(response), 'IPQualityScore apikey is missing')
+
     def test_macaddess_io(self):
         module_name = 'macaddress_io'
         query = {"module": module_name, "mac-address": "44:38:39:ff:ef:57"}
