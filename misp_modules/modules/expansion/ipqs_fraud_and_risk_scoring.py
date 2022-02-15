@@ -42,7 +42,7 @@ mispattributes = {
 moduleinfo = {
     'version': '0.1',
     'author': 'David Mackler',
-    'description': 'Query IPQualityScore for IP reputation, Email Validation, Phone Number Validation,'
+    'description': 'IPQualityScore MISP Expansion Module for IP reputation, Email Validation, Phone Number Validation,'
                    'Malicious Domain and Malicious URL Scanner.',
     'module-type': ['expansion', 'hover']
 }
@@ -124,9 +124,9 @@ class IPQualityScoreParser:
         self.critical = "CRITICAL"
         self.invalid = "INVALID"
         self.suspicious = "SUSPICIOUS"
-        self.malware = "MALWARE"
-        self.phishing = "PHISHING"
-        self.disposable = "DISPOSABLE"
+        self.malware = "CRITICAL"
+        self.phishing = "CRITICAL"
+        self.disposable = "CRITICAL"
         self.attribute = attribute
         self.misp_event = MISPEvent()
         self.misp_event.add_attribute(**attribute)
@@ -385,8 +385,6 @@ class IPQualityScoreParser:
                 self.ipqs_object.add_attribute(**parse_attribute(comment, data_item, data_item_value))
                 if ip_data_item == "fraud_score":
                     fraud_score = int(data_item_value)
-                    # tag_name = f'IPQS:Fraud Score="{fraud_score}"'
-                    # self.add_tag(tag_name)
                     self.ip_address_risk_scoring(fraud_score)
 
         self.ipqs_object.add_attribute(
@@ -439,8 +437,6 @@ class IPQualityScoreParser:
                     phishing = data_item_value
                 if url_data_item == "risk_score":
                     risk_score = int(data_item_value)
-                    #tag_name = f'IPQS:Risk Score="{risk_score}"'
-                    #self.add_tag(tag_name)
 
         self.url_risk_scoring(risk_score, malware, phishing)
         self.ipqs_object.add_attribute(
@@ -497,8 +493,6 @@ class IPQualityScoreParser:
                     valid = data_item_value
                 if email_data_item == "fraud_score":
                     fraud_score = int(data_item_value)
-                    #tag_name = f'IPQS:Fraud Score="{fraud_score}"'
-                    #self.add_tag(tag_name)
 
         self.email_address_risk_scoring(fraud_score, disposable, valid)
         self.ipqs_object.add_attribute(
@@ -510,10 +504,10 @@ class IPQualityScoreParser:
     def email_address_risk_scoring(self, score, disposable, valid):
         """method to create calculate verdict for Email Address"""
         risk_criticality = ""
-        if valid == "False":
-            risk_criticality = self.invalid
-        elif disposable == "True":
+        if disposable == "True":
             risk_criticality = self.disposable
+        elif valid == "False":
+            risk_criticality = self.invalid
         elif score == 100:
             risk_criticality = self.high
         elif 88 <= score <= 99:
@@ -544,8 +538,7 @@ class IPQualityScoreParser:
                     valid = data_item_value
                 if phone_data_item == "fraud_score":
                     fraud_score = int(data_item_value)
-                    #tag_name = f'IPQS:Fraud Score="{fraud_score}"'
-                    #self.add_tag(tag_name)
+
 
         self.phone_address_risk_scoring(fraud_score, valid, active)
         self.ipqs_object.add_attribute(
