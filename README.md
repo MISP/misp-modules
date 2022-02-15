@@ -58,6 +58,7 @@ For more information: [Extending MISP with Python modules](https://www.misp-proj
 * [macvendors](misp_modules/modules/expansion/macvendors.py) - a hover module to retrieve mac vendor information.
 * [MALWAREbazaar](misp_modules/modules/expansion/malwarebazaar.py) - an expansion module to query MALWAREbazaar with some payload.
 * [McAfee MVISION Insights](misp_modules/modules/expansion/mcafee_insights_enrich.py) - an expansion module enrich IOCs with McAfee MVISION Insights.
+* [Mmdb server lookup](misp_modules/modules/expansion/mmdb_lookup.py) - an expansion module to enrich an ip with geolocation information from an mmdb server such as ip.circl.lu.
 * [ocr-enrich](misp_modules/modules/expansion/ocr_enrich.py) - an enrichment module to get OCRized data from images into MISP.
 * [ods-enrich](misp_modules/modules/expansion/ods_enrich.py) - an enrichment module to get text out of OpenOffice spreadsheet document into MISP (using free-text parser).
 * [odt-enrich](misp_modules/modules/expansion/odt_enrich.py) - an enrichment module to get text out of OpenOffice document into MISP (using free-text parser).
