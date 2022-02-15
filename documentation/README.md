@@ -754,6 +754,26 @@ Module to query an IP ASN history service (https://github.com/D4-project/IPASN-H
 
 -----
 
+#### [ipqs_fraud_and_risk_scoring](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/ipqs_fraud_and_risk_scoring.py)
+
+<img src=logos/ipqualityscore.png height=60>
+
+IPQualityScore MISP Expansion Module for IP reputation, Email Validation, Phone Number Validation, Malicious Domain and Malicious URL Scanner.
+- **features**:
+>This Module takes the IP Address, Domain, URL, Email and Phone Number MISP Attributes as input to query the IPQualityScore API.
+> The results of the IPQualityScore API are than returned as IPQS Fraud and Risk Scoring Object. 
+> The object contains a copy of the enriched attribute with added tags presenting the verdict based on fraud score,risk score and other attributes from IPQualityScore.
+- **input**:
+>A MISP attribute of type IP Address(ip-src, ip-dst), Domain(hostname, domain), URL(url, uri), Email Address(email, email-src, email-dst, target-email, whois-registrant-email) and Phone Number(phone-number, whois-registrant-phone).
+- **output**:
+>IPQualityScore object, resulting from the query on the IPQualityScore API.
+- **references**:
+>https://www.ipqualityscore.com/
+- **requirements**:
+>A IPQualityScore API Key.
+
+-----
+
 #### [iprep](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/iprep.py)
 
 Module to query IPRep data for IP addresses.
