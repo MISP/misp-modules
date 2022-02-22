@@ -6,7 +6,7 @@ from pymisp import MISPEvent, MISPObject
 misperrors = {'error': 'Error'}
 mispattributes = {'input': ['ip-src', 'ip-src|port', 'ip-dst', 'ip-dst|port'], 'format': 'misp_standard'}
 moduleinfo = {'version': '1', 'author': 'Jeroen Pinoy',
-              'description': "An expansion module to enrich an ip with geolocation information from an mmdb server "
+              'description': "An expansion module to enrich an ip with geolocation and asn information from an mmdb server "
                              "such as ip.circl.lu.",
               'module-type': ['expansion', 'hover']}
 moduleconfig = ["custom_API", "db_source_filter"]
