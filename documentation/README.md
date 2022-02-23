@@ -936,6 +936,25 @@ Query the MALWAREbazaar API to get additional information about the input hash a
 
 -----
 
+#### [mmdb_lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/mmdb_lookup.py)
+
+<img src=logos/circl.png height=60>
+
+A hover and expansion module to enrich an ip with geolocation and ASN information from an mmdb server instance, such as CIRCL's ip.circl.lu.
+- **features**:
+>The module takes an IP address related attribute as input.
+> It queries the public CIRCL.lu mmdb-server instance, available at ip.circl.lu, by default. The module can be configured with a custom mmdb server url if required.
+> It is also possible to filter results on 1 db_source by configuring db_source_filter.
+- **input**:
+>An IP address attribute (for example ip-src or ip-src|port).
+- **output**:
+>Geolocation and asn objects.
+- **references**:
+> - https://data.public.lu/fr/datasets/geo-open-ip-address-geolocation-per-country-in-mmdb-format/
+> - https://github.com/adulau/mmdb-server
+
+-----
+
 #### [mwdb](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/mwdb.py)
 
 Module to push malware samples to a MWDB instance
