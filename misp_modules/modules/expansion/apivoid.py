@@ -4,7 +4,7 @@ from . import check_input_attribute, standard_error_message
 from pymisp import MISPAttribute, MISPEvent, MISPObject
 
 misperrors = {'error': 'Error'}
-mispattributes = {'input': ['domain', 'hostname', 'email'], 'format': 'misp_standard'}
+mispattributes = {'input': ['domain', 'hostname', 'email', 'email-src', 'email-dst'], 'format': 'misp_standard'}
 moduleinfo = {'version': '0.2', 'author': 'Christian Studer',
               'description': 'On demand query API for APIVoid.',
               'module-type': ['expansion', 'hover']}
