@@ -17,7 +17,7 @@ jobs:
 
     steps:
     - run: |
-        sudo apt-get install libfuzzy-dev libpoppler-cpp-dev libzbar0 tesseract-ocr
+        sudo apt-get install libpoppler-cpp-dev libzbar0 tesseract-ocr
     - uses: actions/checkout@v2
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v2
