@@ -17,7 +17,7 @@ def handler(q=False):
         misperrors['error'] = 'Query text missing'
         return misperrors
 
-    sparql = SPARQLWrapper(wiki_api_url)
+    sparql = SPARQLWrapper(wiki_api_url, agent='Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.102 Safari/537.36')
     query_string = \
         "SELECT ?item \n" \
         "WHERE { \n" \
@@ -26,7 +26,6 @@ def handler(q=False):
     sparql.setQuery(query_string)
     sparql.setReturnFormat(JSON)
     results = sparql.query().convert()
-    summary = ''
     try:
         result = results["results"]["bindings"]
         summary = result[0]["item"]["value"] if result else 'No additional data found on Wikidata'
