@@ -167,6 +167,8 @@ class JoeParser():
             self.misp_event.add_attribute(**attribute)
 
     def parse_system_behavior(self):
+        if not 'system' in self.data['behavior']:
+            return
         system = self.data['behavior']['system']
         if system.get('processes'):
             process_activities = {'fileactivities': self.parse_fileactivities,
