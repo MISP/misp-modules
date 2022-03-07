@@ -11,7 +11,7 @@ inputSource = ['link']
 moduleinfo = {'version': '0.2', 'author': 'Christian Studer',
               'description': 'Query Joe Sandbox API with a report URL to get the parsed data.',
               'module-type': ['expansion']}
-moduleconfig = ['apiurl', 'apikey', 'import_pe', 'import_mitre_attack']
+moduleconfig = ['apiurl', 'apikey', 'import_executable', 'import_mitre_attack']
 
 
 def handler(q=False):
@@ -21,7 +21,7 @@ def handler(q=False):
     apiurl = request['config'].get('apiurl') or 'https://jbxcloud.joesecurity.org/api'
     apikey = request['config'].get('apikey')
     parser_config = {
-        "import_pe": request["config"].get('import_pe', "false") == "true",
+        "import_pe": request["config"].get('import_executable', "false") == "true",
         "mitre_attack": request["config"].get('import_mitre_attack', "false") == "true",
     }
 
