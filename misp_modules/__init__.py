@@ -41,14 +41,14 @@ try:
     from .modules import *  # noqa
     HAS_PACKAGE_MODULES = True
 except Exception as e:
-    print(e)
+    logging.exception(e)
     HAS_PACKAGE_MODULES = False
 
 try:
     from .helpers import *  # noqa
     HAS_PACKAGE_HELPERS = True
 except Exception as e:
-    print(e)
+    logging.exception(e)
     HAS_PACKAGE_HELPERS = False
 
 log = logging.getLogger('misp-modules')

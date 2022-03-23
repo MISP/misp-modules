@@ -606,18 +606,19 @@ Module to query a local copy of Maxmind's Geolite database.
 
 <img src=logos/greynoise.png height=60>
 
-Module to access GreyNoise.io API
+Module to query IP and CVE information from GreyNoise
 - **features**:
->The module takes an IP address as input and queries Greynoise for some additional information about it: basically it checks whether a given IP address is “Internet background noise”, or has been observed scanning or attacking devices across the Internet. The result is returned as text.
+>This module supports: 1) Query an IP from GreyNoise to see if it is internet background noise or a common business service 2) Query a CVE from GreyNoise to see the total number of internet scanners looking for the CVE in the last 7 days.
 - **input**:
->An IP address.
+>An IP address or CVE ID
 - **output**:
->Additional information about the IP fetched from Greynoise API.
+>IP Lookup information or CVE scanning profile for past 7 days
 - **references**:
 > - https://greynoise.io/
-> - https://github.com/GreyNoise-Intelligence/api.greynoise.io
+> - https://docs.greyniose.io/
+> - https://www.greynoise.io/viz/account/
 - **requirements**:
->A Greynoise API key.
+>A Greynoise API key. Both Enterprise (Paid) and Community (Free) API keys are supported, however Community API users will only be able to perform IP lookups.
 
 -----
 
@@ -632,6 +633,25 @@ A hover module to check hashes against hashdd.com including NSLR dataset.
 >Text describing the known level of the hash in the hashdd databases.
 - **references**:
 >https://hashdd.com/
+
+-----
+
+#### [hashlookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/hashlookup.py)
+
+<img src=logos/circl.png height=60>
+
+An expansion module to query the CIRCL hashlookup services to find it if a hash is part of a known set such as NSRL.
+- **features**:
+>The module takes file hashes as input such as a MD5 or SHA1.
+> It queries the public CIRCL.lu hashlookup service and return all the hits if the hashes are known in an existing dataset. The module can be configured with a custom hashlookup url if required.
+> The module can be used an hover module but also an expansion model to add related MISP objects.
+>
+- **input**:
+>File hashes (MD5, SHA1)
+- **output**:
+>Object with the filename associated hashes if the hash is part of a known set.
+- **references**:
+>https://www.circl.lu/services/hashlookup/
 
 -----
 
@@ -734,6 +754,26 @@ Module to query an IP ASN history service (https://github.com/D4-project/IPASN-H
 
 -----
 
+#### [ipqs_fraud_and_risk_scoring](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/ipqs_fraud_and_risk_scoring.py)
+
+<img src=logos/ipqualityscore.png height=60>
+
+IPQualityScore MISP Expansion Module for IP reputation, Email Validation, Phone Number Validation, Malicious Domain and Malicious URL Scanner.
+- **features**:
+>This Module takes the IP Address, Domain, URL, Email and Phone Number MISP Attributes as input to query the IPQualityScore API.
+> The results of the IPQualityScore API are than returned as IPQS Fraud and Risk Scoring Object. 
+> The object contains a copy of the enriched attribute with added tags presenting the verdict based on fraud score,risk score and other attributes from IPQualityScore.
+- **input**:
+>A MISP attribute of type IP Address(ip-src, ip-dst), Domain(hostname, domain), URL(url, uri), Email Address(email, email-src, email-dst, target-email, whois-registrant-email) and Phone Number(phone-number, whois-registrant-phone).
+- **output**:
+>IPQualityScore object, resulting from the query on the IPQualityScore API.
+- **references**:
+>https://www.ipqualityscore.com/
+- **requirements**:
+>A IPQualityScore API Key.
+
+-----
+
 #### [iprep](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/iprep.py)
 
 Module to query IPRep data for IP addresses.
@@ -802,6 +842,8 @@ A module to submit files or URLs to Joe Sandbox for an advanced analysis, and re
 
 <img src=logos/lastline.png height=60>
 
+Deprecation notice: this module will be deprecated by December 2021, please use vmware_nsx module.
+
 Query Lastline with an analysis link and parse the report into MISP attributes and objects.
 The analysis link can also be retrieved from the output of the [lastline_submit](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/lastline_submit.py) expansion module.
 - **features**:
@@ -820,6 +862,8 @@ The analysis link can also be retrieved from the output of the [lastline_submit]
 #### [lastline_submit](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/lastline_submit.py)
 
 <img src=logos/lastline.png height=60>
+
+Deprecation notice: this module will be deprecated by December 2021, please use vmware_nsx module.
 
 Module to submit a file or URL to Lastline.
 - **features**:
@@ -889,6 +933,39 @@ Query the MALWAREbazaar API to get additional information about the input hash a
 >File object(s) related to the input attribute found on MALWAREbazaar databases.
 - **references**:
 >https://bazaar.abuse.ch/
+
+-----
+
+#### [mmdb_lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/mmdb_lookup.py)
+
+<img src=logos/circl.png height=60>
+
+A hover and expansion module to enrich an ip with geolocation and ASN information from an mmdb server instance, such as CIRCL's ip.circl.lu.
+- **features**:
+>The module takes an IP address related attribute as input.
+> It queries the public CIRCL.lu mmdb-server instance, available at ip.circl.lu, by default. The module can be configured with a custom mmdb server url if required.
+> It is also possible to filter results on 1 db_source by configuring db_source_filter.
+- **input**:
+>An IP address attribute (for example ip-src or ip-src|port).
+- **output**:
+>Geolocation and asn objects.
+- **references**:
+> - https://data.public.lu/fr/datasets/geo-open-ip-address-geolocation-per-country-in-mmdb-format/
+> - https://github.com/adulau/mmdb-server
+
+-----
+
+#### [mwdb](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/mwdb.py)
+
+Module to push malware samples to a MWDB instance
+- **features**:
+>An expansion module to push malware samples to a MWDB (https://github.com/CERT-Polska/mwdb-core) instance. This module does not push samples to a sandbox. This can be achieved via Karton (connected to the MWDB). Does: * Upload of attachment or malware sample to MWDB * Tags of events and/or attributes are added to MWDB. * Comment of the MISP attribute is added to MWDB. * A link back to the MISP event is added to MWDB via the MWDB attribute.  * A link to the MWDB attribute is added as an enrichted attribute to the MISP event.
+- **input**:
+>Attachment or malware sample
+- **output**:
+>Link attribute that points to the sample at the MWDB instane
+- **requirements**:
+>* mwdblib installed (pip install mwdblib) ; * (optional) keys.py file to add tags of events/attributes to MWDB * (optional) MWDB attribute created for the link back to MISP (defined in mwdb_misp_attribute)
 
 -----
 
@@ -1016,6 +1093,25 @@ Module to get information from AlienVault OTX.
 
 -----
 
+#### [passivessh](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/passivessh.py)
+
+<img src=logos/passivessh.png height=60>
+
+An expansion module to query the CIRCL Passive SSH.
+- **features**:
+>The module queries the Passive SSH service from CIRCL.
+> 
+> The module can be used an hover module but also an expansion model to add related MISP objects.
+>
+- **input**:
+>IP addresses or SSH fingerprints
+- **output**:
+>SSH key materials, complementary IP addresses with similar SSH key materials
+- **references**:
+>https://github.com/D4-project/passive-ssh
+
+-----
+
 #### [passivetotal](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/passivetotal.py)
 
 <img src=logos/passivetotal.png height=60>
@@ -1096,6 +1192,24 @@ Module to extract freetext from a .pptx document.
 >Text and freetext parsed from the document.
 - **requirements**:
 >pptx: Python library to read PowerPoint files.
+
+-----
+
+#### [qintel_qsentry](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/qintel_qsentry.py)
+
+<img src=logos/qintel.png height=60>
+
+A hover and expansion module which queries Qintel QSentry for ip reputation data
+- **features**:
+>This module takes an ip-address (ip-src or ip-dst) attribute as input, and queries the Qintel QSentry API to retrieve ip reputation data
+- **input**:
+>ip address attribute
+- **ouput**:
+>Objects containing the enriched IP, threat tags, last seen attributes and associated Autonomous System information
+- **references**:
+>https://www.qintel.com/products/qsentry/
+- **requirements**:
+>A Qintel API token
 
 -----
 
@@ -1567,6 +1681,26 @@ Module to submit a sample to VMRay.
 
 -----
 
+#### [vmware_nsx](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/vmware_nsx.py)
+
+<img src=logos/vmware_nsx.png height=60>
+
+Module to enrich a file or URL with VMware NSX Defender.
+- **features**:
+>This module takes an IoC such as file hash, file attachment, malware-sample or url as input to query VMware NSX Defender.
+>
+>The IoC is then enriched with data from VMware NSX Defender.
+- **input**:
+>File hash, attachment or URL to be enriched with VMware NSX Defender.
+- **output**:
+>Objects and tags generated by VMware NSX Defender.
+- **references**:
+>https://www.vmware.com
+- **requirements**:
+>The module requires a VMware NSX Defender Analysis `api_token` and `key`.
+
+-----
+
 #### [vulndb](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/vulndb.py)
 
 <img src=logos/vulndb.png height=60>
@@ -1717,6 +1851,26 @@ An expansion hover module to perform a syntax check on if yara rules are valid o
 >http://virustotal.github.io/yara/
 - **requirements**:
 >yara_python python library
+
+-----
+
+#### [yeti](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/yeti.py)
+
+<img src=logos/yeti.png height=60>
+
+Module to process a query on Yeti.
+- **features**:
+>This module add context and links between observables using yeti
+- **input**:
+>A domain, hostname,IP, sha256,sha1, md5, url of MISP attribute.
+- **output**:
+>MISP attributes and objects fetched from the Yeti instances.
+- **references**:
+> - https://github.com/yeti-platform/yeti
+> - https://github.com/sebdraven/pyeti
+- **requirements**:
+> - pyeti
+> - API key 
 
 -----
 
@@ -1930,6 +2084,25 @@ Module to export a structured CSV file for uploading to ThreatConnect.
 
 -----
 
+#### [virustotal_collections](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/virustotal_collections.py)
+
+<img src=logos/virustotal.png height=60>
+
+Creates a VT Collection from an event iocs.
+- **features**:
+>This export module which takes advantage of a new endpoint in VT APIv3 to create VT Collections from IOCs contained in a MISP event. With this module users will be able to create a collection just using the Download as... button.
+- **input**:
+>A domain, hash (md5, sha1, sha256 or sha512), hostname, url or IP address attribute.
+- **output**:
+>A VirusTotal collection in VT.
+- **references**:
+> - https://www.virustotal.com/
+> - https://blog.virustotal.com/2021/11/introducing-virustotal-collections.html
+- **requirements**:
+>An access to the VirusTotal API (apikey).
+
+-----
+
 #### [vt_graph](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/vt_graph.py)
 
 <img src=logos/virustotal.png height=60>
@@ -1951,6 +2124,22 @@ This module is used to create a VirusTotal Graph from a MISP event.
 -----
 
 ## Import Modules
+
+#### [cof2misp](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/cof2misp.py)
+
+Passive DNS Common Output Format (COF) MISP importer
+- **features**:
+>Takes as input a valid COF file or the output of the dnsdbflex utility and creates MISP objects for the input.
+- **input**:
+>Passive DNS output in Common Output Format (COF)
+- **output**:
+>MISP objects
+- **references**:
+>https://tools.ietf.org/id/draft-dulaunoy-dnsop-passive-dns-cof-08.html
+- **requirements**:
+>PyMISP
+
+-----
 
 #### [csvimport](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/csvimport.py)
 
@@ -2043,6 +2232,8 @@ A module to import data from a Joe Sandbox analysis json report.
 #### [lastline_import](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/lastline_import.py)
 
 <img src=logos/lastline.png height=60>
+
+Deprecation notice: this module will be deprecated by December 2021, please use vmware_nsx module.
 
 Module to import and parse reports from Lastline analysis links.
 - **features**:

@@ -22,7 +22,7 @@ import ndjson
 # from pymisp import MISPObject, MISPEvent, PyMISP
 from pymisp import MISPObject
 
-from cof2misp.cof import validate_cof
+from cof2misp.cof import validate_cof, validate_dnsdbflex
 
 
 create_specific_attributes = False          # this is for https://github.com/MISP/misp-objects/pull/314
@@ -37,7 +37,7 @@ mispattributes = {'inputSource': ['file'], 'output': ['MISP objects'],
                   'format': 'misp_standard'}
 
 
-moduleinfo = {'version': '0.2', 'author': 'Aaron Kaplan',
+moduleinfo = {'version': '0.3', 'author': 'Aaron Kaplan',
               'description': 'Module to import the passive DNS Common Output Format (COF) and merge as a MISP objet into a MISP event.',
               'module-type': ['import']}
 
@@ -81,7 +81,8 @@ def parse_and_insert_cof(data: str) -> dict:
             o = MISPObject(name='passive-dns', standalone=False, comment='created by cof2misp')
 
             # o.add_tag('tlp:amber')                                    # FIXME: we'll want to add a tlp: tag to the object
-            o.add_attribute('bailiwick', value=entry['bailiwick'].rstrip('.'))
+            if 'bailiwick' in entry:
+                o.add_attribute('bailiwick', value=entry['bailiwick'].rstrip('.'), distribution=0)
 
             #
             # handle the combinations of rrtype (domain, ip) on both left and right side
@@ -90,26 +91,26 @@ def parse_and_insert_cof(data: str) -> dict:
             if create_specific_attributes:
                 if rrtype in ['A', 'AAAA', 'A6']:                           # address type
                     # address type
-                    o.add_attribute('rrname_domain', value=rrname)
+                    o.add_attribute('rrname_domain', value=rrname, distribution=0)
                     for r in rdata:
-                        o.add_attribute('rdata_ip', value=r)
+                        o.add_attribute('rdata_ip', value=r, distribution=0)
                 elif rrtype in ['CNAME', 'DNAME', 'NS']:                    # both sides are domains
-                    o.add_attribute('rrname_domain', value=rrname)
+                    o.add_attribute('rrname_domain', value=rrname, distribution=0)
                     for r in rdata:
-                        o.add_attribute('rdata_domain', value=r)
+                        o.add_attribute('rdata_domain', value=r, distribution=0)
                 elif rrtype in ['SOA']:                                     # left side is a domain, right side is text
-                    o.add_attribute('rrname_domain', value=rrname)
+                    o.add_attribute('rrname_domain', value=rrname, distribution=0)
 
             #
             # now do the regular filling up of rrname, rrtype, time_first, etc.
             #
-            o.add_attribute('rrname', value=rrname)
-            o.add_attribute('rrtype', value=rrtype)
+            o.add_attribute('rrname', value=rrname, distribution=0)
+            o.add_attribute('rrtype', value=rrtype, distribution=0)
             for r in rdata:
-                o.add_attribute('rdata', value=r)
-            o.add_attribute('raw_rdata', value=json.dumps(rdata))       # FIXME: do we need to hex encode it?
-            o.add_attribute('time_first', value=entry['time_first'])
-            o.add_attribute('time_last', value=entry['time_last'])
+                o.add_attribute('rdata', value=r, distribution=0)
+            o.add_attribute('raw_rdata', value=json.dumps(rdata), distribution=0)       # FIXME: do we need to hex encode it?
+            o.add_attribute('time_first', value=entry['time_first'], distribution=0)
+            o.add_attribute('time_last', value=entry['time_last'], distribution=0)
             o.first_seen = entry['time_first']      # is this redundant?
             o.last_seen = entry['time_last']
 
@@ -118,7 +119,7 @@ def parse_and_insert_cof(data: str) -> dict:
             #
             for k in ['count', 'sensor_id', 'origin', 'text', 'time_first_ms', 'time_last_ms', 'zone_time_first', 'zone_time_last']:
                 if k in entry and entry[k]:
-                    o.add_attribute(k, value=entry[k])
+                    o.add_attribute(k, value=entry[k], distribution=0)
 
             #
             # add COF entry to MISP object
@@ -147,7 +148,36 @@ def parse_and_insert_dnsdbflex(data: str):
     --------
       none
     """
-    return {"error": "NOT IMPLEMENTED YET"}            # XXX FIXME: need a MISP object for dnsdbflex
+    objects = []
+    try:
+        entries = ndjson.loads(data)
+        for entry in entries:           # iterate over all ndjson lines
+            # validate here (simple validation or full JSON Schema validation)
+            if not validate_dnsdbflex(entry):
+                return {"error": "Could not validate the dnsdbflex input '%s'" % entry}
+
+            # Next, extract some fields
+            rrtype = entry['rrtype'].upper()
+            rrname = entry['rrname'].rstrip('.')
+
+            # create a new MISP object, based on the passive-dns object for each nd-JSON line
+            try:
+                o = MISPObject(name='passive-dns', standalone=False, distribution=0, comment='DNSDBFLEX import by cof2misp')
+                o.add_attribute('rrtype', value=rrtype, distribution=0, comment='DNSDBFLEX import by cof2misp')
+                o.add_attribute('rrname', value=rrname, distribution=0, comment='DNSDBFLEX import by cof2misp')
+            except Exception as ex:
+                print("could not create object. Reason: %s" % str(ex))
+
+            #
+            # add dnsdbflex entry to MISP object
+            #
+            objects.append(o.to_json())
+
+        r = {'results': {'Object': [json.loads(o) for o in objects]}}
+    except Exception as ex:
+        misperrors["error"] = "An error occured during parsing of input: '%s'" % (str(ex),)
+        return misperrors
+    return r
 
 
 def is_dnsdbflex(data: str) -> bool:

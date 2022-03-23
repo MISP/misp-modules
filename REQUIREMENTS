@@ -6,141 +6,169 @@
 #
 
 -i https://pypi.org/simple
--e .
--e git+https://github.com/D4-project/BGP-Ranking.git/@fd9c0e03af9b61d4bf0b67ac73c7208a55178a54#egg=pybgpranking&subdirectory=client
--e git+https://github.com/D4-project/IPASN-History.git/@fc5e48608afc113e101ca6421bf693b7b9753f9e#egg=pyipasnhistory&subdirectory=client
--e git+https://github.com/MISP/PyIntel471.git@0df8d51f1c1425de66714b3a5a45edb69b8cc2fc#egg=pyintel471
--e git+https://github.com/Rafiot/uwhoisd.git@783bba09b5a6964f25566089826a1be4b13f2a22#egg=uwhois&subdirectory=client
--e git+https://github.com/cartertemm/ODTReader.git/@49d6938693f6faa3ff09998f86dba551ae3a996b#egg=odtreader
--e git+https://github.com/sebdraven/pydnstrails@48c1f740025c51289f43a24863d1845ff12fd21a#egg=pydnstrails
--e git+https://github.com/sebdraven/pyonyphe@1ce15581beebb13e841193a08a2eb6f967855fcb#egg=pyonyphe
-aiohttp==3.7.3; python_version >= '3.6'
+.
+aiohttp==3.8.1
+aiosignal==1.2.0; python_version >= '3.6'
 antlr4-python3-runtime==4.8; python_version >= '3'
 apiosintds==1.8.3
+appdirs==1.4.4
 argparse==1.4.0
-assemblyline-client==4.0.1
-async-timeout==3.0.1; python_full_version >= '3.5.3'
-attrs==20.3.0; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3'
+assemblyline-client==4.2.2
+async-timeout==4.0.2; python_version >= '3.6'
+asynctest==0.13.0; python_version < '3.8'
+attrs==21.4.0; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4'
+backoff==1.11.1; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4'
+backports.zoneinfo==0.2.1; python_version < '3.9'
 backscatter==0.2.4
-beautifulsoup4==4.9.3
-bidict==0.21.2; python_version >= '3.6'
+beautifulsoup4==4.10.0
+bidict==0.21.4; python_version >= '3.6'
 blockchain==1.4.4
-censys==1.1.1
-certifi==2020.12.5
-cffi==1.14.4
-chardet==3.0.4
+censys==2.1.2
+certifi==2021.10.8
+cffi==1.15.0
+chardet==4.0.0
+charset-normalizer==2.0.12; python_version >= '3'
 clamd==1.0.2
 click-plugins==1.1.1
-click==7.1.2; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4'
+click==8.0.4; python_version >= '3.6'
 colorama==0.4.4; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4'
-colorclass==2.2.0
+colorclass==2.2.2; python_version >= '2.6'
+commonmark==0.9.1
 compressed-rtf==1.0.6
-configparser==5.0.1; python_version >= '3.6'
-cryptography==3.3.1
-decorator==4.4.2
-deprecated==1.2.11; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3'
-dnsdb2==1.1.2
-dnspython3==1.15.0
-domaintools-api==0.5.2
-easygui==0.98.1
+configparser==5.2.0; python_version >= '3.6'
+crowdstrike-falconpy==1.0.5
+cryptography==36.0.1; python_version >= '3.6'
+decorator==5.1.1; python_version >= '3.5'
+deprecated==1.2.13; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3'
+dnsdb2==1.1.4
+dnspython==2.2.0
+dnspython3
+domaintools-api==0.6.1
+easygui==0.98.2
 ebcdic==1.1.1
 enum-compat==0.0.3
-extract-msg==0.28.1
-ez-setup==0.9
+extract-msg==0.30.8
 ezodf==0.3.2
+filelock==3.6.0; python_version >= '3.7'
+frozenlist==1.3.0; python_version >= '3.7'
 future==0.18.2; python_version >= '2.6' and python_version not in '3.0, 3.1, 3.2, 3.3'
-futures==3.1.1
-geoip2==4.1.0
-httplib2==0.18.1
+geoip2==4.5.0
+git+https://github.com/D4-project/BGP-Ranking.git/@68de39f6c5196f796055c1ac34504054d688aa59#egg=pybgpranking&subdirectory=client
+git+https://github.com/D4-project/IPASN-History.git/@a2853c39265cecdd0c0d16850bd34621c0551b87#egg=pyipasnhistory&subdirectory=client
+git+https://github.com/MISP/PyIntel471.git@917272fafa8e12102329faca52173e90c5256968#egg=pyintel471
+git+https://github.com/SteveClement/trustar-python.git@6954eae38e0c77eaeef26084b6c5fd033925c1c7#egg=trustar
+git+https://github.com/cartertemm/ODTReader.git/@49d6938693f6faa3ff09998f86dba551ae3a996b#egg=odtreader
+git+https://github.com/sebdraven/pydnstrails@48c1f740025c51289f43a24863d1845ff12fd21a#egg=pydnstrails
+git+https://github.com/sebdraven/pyonyphe@aed008ee5a27e3a5e4afbb3e5cbfc47170108452#egg=pyonyphe
+httplib2==0.20.4; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3'
 idna-ssl==1.1.0; python_version < '3.7'
-idna==2.10; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3'
-imapclient==2.1.0
-isodate==0.6.0
-jbxapi==3.14.0
-json-log-formatter==0.3.0
-jsonschema==3.2.0
-ndjson==0.3.1
-lark-parser==0.11.1
-lief==0.11.0
-lxml==4.6.2
+idna==3.3; python_version >= '3'
+imapclient==2.2.0
+importlib-metadata==4.11.2; python_version < '3.8'
+importlib-resources==5.4.0; python_version < '3.9'
+isodate==0.6.1
+itsdangerous==2.1.0; python_version >= '3.7'
+jbxapi==3.17.2
+jeepney==0.7.1; sys_platform == 'linux'
+json-log-formatter==0.5.1
+jsonschema==4.4.0; python_version >= '3.7'
+keyring==23.5.0; python_version >= '3.7'
+lark-parser==0.12.0
+lief==0.11.5
+lxml==4.8.0
 maclookup==1.0.3
 markdownify==0.5.3
-maxminddb==2.0.3; python_version >= '3.6'
-msoffcrypto-tool==4.11.0
-multidict==5.1.0; python_version >= '3.6'
+maxminddb==2.2.0; python_version >= '3.6'
+more-itertools==8.12.0; python_version >= '3.5'
+msoffcrypto-tool==5.0.0; python_version >= '3' and platform_python_implementation != 'PyPy' or (platform_system != 'Windows' and platform_system != 'Darwin')
+multidict==6.0.2; python_version >= '3.7'
+mwdblib==4.1.0
+ndjson==0.3.1
 np==1.0.2
-numpy==1.19.5; python_version >= '3.6'
+numpy==1.21.5; python_version < '3.10' and platform_machine != 'aarch64' and platform_machine != 'arm64'
 oauth2==1.9.0.post1
 olefile==0.46; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3'
-oletools==0.56
-opencv-python==4.5.1.48
-openpyxl
-pandas-ods-reader==0.0.7
-pandas==1.1.5
-passivetotal==1.0.31
+oletools==0.60
+opencv-python==4.5.5.62
+packaging==21.3; python_version >= '3.6'
+pandas-ods-reader==0.1.2
+pandas==1.3.5
+passivetotal==2.5.8
 pcodedmp==1.2.6
-pdftotext==2.1.5
-pillow==8.1.0
-progressbar2==3.53.1
-psutil==5.8.0; python_version >= '2.6' and python_version not in '3.0, 3.1, 3.2, 3.3'
-pycparser==2.20; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3'
-pycryptodome==3.9.9; python_version >= '2.6' and python_version not in '3.0, 3.1, 3.2, 3.3'
-pycryptodomex==3.9.9; python_version >= '2.6' and python_version not in '3.0, 3.1, 3.2, 3.3'
-pydeep==0.4
+pdftotext==2.2.2
+pillow==9.0.1
+progressbar2==4.0.0; python_version >= '3.7'
+psutil==5.9.0; python_version >= '2.6' and python_version not in '3.0, 3.1, 3.2, 3.3'
+pycparser==2.21
+pycryptodome==3.14.1; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4'
+pycryptodomex==3.14.1; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4'
+pydeep2==0.5.1
 pyeupi==1.1
 pyfaup==1.2
 pygeoip==0.3.2
-pymisp[email,fileobjects,openioc,pdfexport]==2.4.137.1
-pyopenssl==20.0.1
+pygments==2.11.2; python_version >= '3.5'
+pymisp[email,fileobjects,openioc,pdfexport,url]==2.4.155.1
 pyparsing==2.4.7; python_version >= '2.6' and python_version not in '3.0, 3.1, 3.2, 3.3'
-pypdns==1.5.1
-pypssl==2.1
-pyrsistent==0.17.3; python_version >= '3.5'
-pytesseract==0.3.7
+pypdns==1.5.2
+pypssl==2.2
+pyrsistent==0.18.1; python_version >= '3.7'
+pytesseract==0.3.9
 python-baseconv==1.2.2
-python-dateutil==2.8.1; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3'
-python-docx==0.8.10
-python-engineio==4.0.0
-python-magic==0.4.18
-python-pptx==0.6.18
-python-socketio[client]==5.0.4
-python-utils==2.5.2
+python-dateutil==2.8.2; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3'
+python-docx==0.8.11
+python-engineio==4.3.1; python_version >= '3.6'
+python-magic==0.4.25
+python-pptx==0.6.21
+python-socketio[client]==5.5.2; python_version >= '3.6'
+python-utils==3.1.0; python_version >= '3.7'
+pytz-deprecation-shim==0.1.0.post0; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4, 3.5'
 pytz==2019.3
-pyyaml==5.4.1; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4, 3.5'
-pyeti-python3==1.0.0
+pyyaml==6.0; python_version >= '3.6'
 pyzbar==0.1.8
-pyzipper==0.3.4; python_version >= '3.5'
-rdflib==5.0.0
-redis==3.5.3; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4'
-reportlab==3.5.59
-requests-cache==0.5.2
-requests[security]==2.25.1
+pyzipper==0.3.5; python_version >= '3.5'
+rdflib==6.1.1; python_version >= '3.7'
+redis==4.1.4; python_version >= '3.6'
+reportlab==3.6.8
+requests-cache==0.6.4; python_version >= '3.6'
+requests-file==1.5.1
+requests==2.27.1
+rich==11.2.0; python_version < '4.0' and python_full_version >= '3.6.2'
 rtfde==0.0.2
-shodan==1.24.0
-sigmatools==0.18.1
-six==1.15.0; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3'
-socialscan==1.4.1
+secretstorage==3.3.1; sys_platform == 'linux'
+setuptools==60.9.3; python_version >= '3.7'
+shodan==1.27.0
+sigmatools==0.19.1
+simplejson==3.17.6; python_version >= '2.5' and python_version not in '3.0, 3.1, 3.2, 3.3'
+six==1.16.0; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3'
+socialscan==1.4.2
 socketio-client==0.5.7.4
-soupsieve==2.1; python_version >= '3'
+soupsieve==2.3.1; python_version >= '3.6'
 sparqlwrapper==1.8.5
 stix2-patterns==1.3.2
-tabulate==0.8.7
+stix2==3.0.1
+tabulate==0.8.9
+tau-clients==0.2.1
+taxii2-client==2.3.0
+tldextract==3.2.0; python_version >= '3.7'
 tornado==6.1; python_version >= '3.5'
-tqdm==4.56.0; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3'
-trustar==0.3.34
-typing-extensions==3.7.4.3; python_version < '3.8'
-tzlocal==2.1
+tqdm==4.63.0; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3'
+typing-extensions==4.1.1; python_version < '3.8'
+tzdata==2021.5; python_version >= '3.6'
+tzlocal==4.1; python_version >= '3.6'
 unicodecsv==0.14.1
 url-normalize==1.4.3; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4, 3.5'
 urlarchiver==0.2
-urllib3==1.26.2; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4' and python_version < '4.0'
+urllib3==1.26.8; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4' and python_version < '4.0'
 validators==0.14.0
-vt-graph-api==1.0.1
-vulners==1.5.9
-wand==0.6.5
-websocket-client==0.57.0
-wrapt==1.12.1
+vt-graph-api==1.1.3
+vt-py==0.13.1
+vulners==2.0.2
+wand==0.6.7
+websocket-client==1.3.1; python_version >= '3.6'
+wrapt==1.13.3; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4'
 xlrd==2.0.1
-xlsxwriter==1.3.7
+xlsxwriter==3.0.3; python_version >= '3.4'
 yara-python==3.8.1
-yarl==1.6.3; python_version >= '3.6'
+yarl==1.7.2; python_version >= '3.6'
+zipp==3.7.0; python_version >= '3.7'
+
