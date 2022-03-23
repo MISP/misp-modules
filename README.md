@@ -140,7 +140,7 @@ sudo -u www-data /var/www/MISP/venv/bin/pip install .
 sudo cp etc/systemd/system/misp-modules.service /etc/systemd/system/
 sudo systemctl daemon-reload
 sudo systemctl enable --now misp-modules
-/var/www/MISP/venv/bin/misp-modules -l 127.0.0.1 -s & #to start the modules
+/var/www/MISP/venv/bin/misp-modules -l 127.0.0.1 & #to start the modules
 ~~~~
 
 ## How to install and start MISP modules on RHEL-based distributions ?
@@ -168,7 +168,7 @@ After=misp-workers.service
 Type=simple
 User=apache
 Group=apache
-ExecStart=/usr/bin/scl enable rh-python36 rh-ruby22  '/var/www/MISP/venv/bin/misp-modules -l 127.0.0.1 -s'
+ExecStart=/usr/bin/scl enable rh-python36 rh-ruby22  '/var/www/MISP/venv/bin/misp-modules -l 127.0.0.1'
 Restart=always
 RestartSec=10
 
