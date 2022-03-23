@@ -168,7 +168,7 @@ After=misp-workers.service
 Type=simple
 User=apache
 Group=apache
-ExecStart=/usr/bin/scl enable rh-python36 rh-ruby22  '/var/www/MISP/venv/bin/misp-modules -l 127.0.0.1 -s'
+ExecStart=/usr/bin/scl enable rh-python36 rh-ruby22  '/var/www/MISP/venv/bin/misp-modules -l 127.0.0.1'
 Restart=always
 RestartSec=10
 
