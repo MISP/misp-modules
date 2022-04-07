@@ -111,7 +111,7 @@ class JoeParser():
             if network.get(protocol):
                 for packet in network[protocol]['packet']:
                     timestamp = datetime.strptime(self.parse_timestamp(packet['timestamp']), '%b %d, %Y %H:%M:%S.%f')
-                    connections[tuple(packet[field] for field in network_behavior_fields)][protocol].add(timestamp)
+                    connections[tuple(packet.get(field) for field in network_behavior_fields)][protocol].add(timestamp)
         for connection, data in connections.items():
             attributes = self.prefetch_attributes_data(connection)
             if len(data.keys()) == len(set(protocols[protocol] for protocol in data.keys())):
