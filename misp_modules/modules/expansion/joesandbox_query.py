@@ -21,7 +21,7 @@ def handler(q=False):
     apiurl = request['config'].get('apiurl') or 'https://jbxcloud.joesecurity.org/api'
     apikey = request['config'].get('apikey')
     parser_config = {
-        "import_pe": request["config"].get('import_executable', "false") == "true",
+        "import_executable": request["config"].get('import_executable', "false") == "true",
         "mitre_attack": request["config"].get('import_mitre_attack', "false") == "true",
     }
 
