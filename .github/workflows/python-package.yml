@@ -13,10 +13,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.7", "3.8", "3.9"]
+        python-version: ["3.7", "3.8", "3.9", "3.10"]
 
     steps:
-    - run: |
+    - name: Install packages
+      run: |
         sudo apt-get install libpoppler-cpp-dev libzbar0 tesseract-ocr
     - uses: actions/checkout@v2
     - name: Set up Python ${{ matrix.python-version }}
