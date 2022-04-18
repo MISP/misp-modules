@@ -64,11 +64,13 @@ class VirusTotalParser:
     def create_misp_object(self, report: vt.Object) -> MISPObject:
         misp_object = None
         vt_uuid = self.add_vt_report(report)
+
         if report.type == 'file':
             misp_object = MISPObject('file')
-            for hash_type in ('md5', 'sha1', 'sha256'):
-                misp_object.add_attribute(**{'type': hash_type,
-                                             'object_relation': hash_type,
+            for hash_type in ('md5', 'sha1', 'sha256', 'tlsh',
+                              'vhash', 'ssdeep', 'imphash'):
+                misp_object.add_attribute(hash_type,
+                                          **{'type': hash_type,
                                              'value': report.get(hash_type)})
         elif report.type == 'domain':
             misp_object = MISPObject('domain-ip')
@@ -135,8 +137,28 @@ class VirusTotalParser:
         return domain_object.uuid
 
     def parse_hash(self, file_hash: str) -> str:
-        file_report = self.client.get_object(f'files/{file_hash}')
+        file_report = self.client.get_object(f'/files/{file_hash}')
         file_object = self.create_misp_object(file_report)
+
+        # ITW URLS
+        urls_iterator = self.client.iterator(f'/files/{file_report.id}/itw_urls', limit=self.limit)
+        for url in urls_iterator:
+            url_object = self.create_misp_object(url)
+            url_object.add_reference(file_object.uuid, 'downloaded')
+            self.misp_event.add_object(**url_object)
+
+        # COMMUNICATING, DOWNLOADED AND REFERRER FILES
+        for relationship_name, misp_name in [
+            ('contacted_urls', 'communicates-with'),
+            ('contacted_domains', 'communicates-with'),
+            ('contacted_ips', 'communicates-with')
+        ]:
+            files_iterator = self.client.iterator(f'/files/{file_report.id}/{relationship_name}', limit=self.limit)
+            for file in files_iterator:
+                file_object = self.create_misp_object(file)
+                file_object.add_reference(file_object.uuid, misp_name)
+                self.misp_event.add_object(**file_object)
+
         self.misp_event.add_object(**file_object)
         return file_object.uuid
 
@@ -172,6 +194,19 @@ class VirusTotalParser:
         url_id = vt.url_id(url)
         url_report = self.client.get_object(f'/urls/{url_id}')
         url_object = self.create_misp_object(url_report)
+
+        # COMMUNICATING, DOWNLOADED AND REFERRER FILES
+        for relationship_name, misp_name in [
+            ('communicating_files', 'communicates-with'),
+            ('downloaded_files', 'downloaded-from'),
+            ('referrer_files', 'referring')
+        ]:
+            files_iterator = self.client.iterator(f'/urls/{url_report.id}/{relationship_name}', limit=self.limit)
+            for file in files_iterator:
+                file_object = self.create_misp_object(file)
+                file_object.add_reference(url_object.uuid, misp_name)
+                self.misp_event.add_object(**file_object)
+
         self.misp_event.add_object(**url_object)
         return url_object.uuid
 
