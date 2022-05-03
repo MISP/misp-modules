@@ -1,1 +1,1 @@
-__all__ = ['testaction']
+__all__ = ['testaction', 'blockaction', 'writeaction']
