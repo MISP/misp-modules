@@ -127,6 +127,8 @@ For more information: [Extending MISP with Python modules](https://www.misp-proj
 
 ## How to install and start MISP modules in a Python virtualenv? (recommended)
 
+***Be sure to run the latest version of `pip`***. To install the latest version of pip, `pip install --upgrade pip` will do the job.
+
 ~~~~bash
 sudo apt-get install python3-dev python3-pip libpq5 libjpeg-dev tesseract-ocr libpoppler-cpp-dev imagemagick virtualenv libopencv-dev zbar-tools libzbar0 libzbar-dev libfuzzy-dev build-essential -y
 sudo -u www-data virtualenv -p python3 /var/www/MISP/venv
