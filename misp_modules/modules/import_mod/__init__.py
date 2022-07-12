@@ -15,5 +15,6 @@ __all__ = [
     'csvimport',
     'cof2misp',
     'joe_import',
-    'taxii21'
+    'taxii21',
+    'crowdsec'
 ]
