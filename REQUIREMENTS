@@ -71,6 +71,7 @@ jbxapi==3.17.2
 jeepney==0.8.0; sys_platform == 'linux'
 json-log-formatter==0.5.1
 jsonschema<5.0.0, >=4.5.1; python_version >= '3.7'
+Jinja2==3.1.2
 keyring==23.5.0; python_version >= '3.7'
 lark-parser==0.12.0
 lief<0.12.0, >=0.11.5
