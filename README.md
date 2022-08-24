@@ -142,6 +142,7 @@ sudo -u www-data /var/www/MISP/venv/bin/pip install .
 sudo cp etc/systemd/system/misp-modules.service /etc/systemd/system/
 sudo systemctl daemon-reload
 sudo systemctl enable --now misp-modules
+sudo service misp-modules start #or
 /var/www/MISP/venv/bin/misp-modules -l 127.0.0.1 & #to start the modules
 ~~~~
 
