@@ -78,6 +78,7 @@ lxml==4.8.0
 maclookup==1.0.3
 markdownify==0.5.3
 maxminddb==2.2.0; python_version >= '3.6'
+mattermostdriver==7.3.2
 more-itertools==8.12.0; python_version >= '3.5'
 msoffcrypto-tool==5.0.0; python_version >= '3' and platform_python_implementation != 'PyPy' or (platform_system != 'Windows' and platform_system != 'Darwin')
 multidict==6.0.2; python_version >= '3.7'
