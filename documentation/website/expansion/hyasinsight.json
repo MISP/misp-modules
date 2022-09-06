@@ -1,6 +1,6 @@
 {
     "description": "HYAS Insight integration to MISP provides direct, high volume access to HYAS Insight data. It enables investigators and analysts to understand and defend against cyber adversaries and their infrastructure.",
-    "logo": "hyasinsight.png",
+    "logo": "hyas.png",
     "requirements": [
         "A HYAS Insight API Key."
     ],
