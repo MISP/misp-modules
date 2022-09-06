@@ -10,3 +10,4 @@
         "https://www.hyas.com/hyas-insight/"
     ],
     "features": "This Module takes the IP Address, Domain, URL, Email, Phone Number, MD5, SHA1, Sha256, SHA512 MISP Attributes as input to query the HYAS Insight API.\n The results of the HYAS Insight API are than are then returned and parsed into Hyas Insight Objects. \n\nAn API key is required to submit queries to the HYAS Insight API.\n"
+}
