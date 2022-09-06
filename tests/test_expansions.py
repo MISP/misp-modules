@@ -263,6 +263,21 @@ class TestExpansions(unittest.TestCase):
             self.assertEqual(to_check, 'OK (Not Found)', response)
         else:
             self.assertEqual(self.get_errors(response), 'Have I Been Pwned authentication is incomplete (no API key)')
+            
+    def test_hyasinsight(self):
+        module_name = "hyasinsight"
+        query = {"module": module_name,
+                 "attribute": {"type": "phone-number",
+                               "value": "+84853620279",
+                               "uuid": "b698dc2b-94c1-487d-8b65-3114bad5a40c"},
+                 "config": {}}
+        if module_name in self.configs:
+            query['config'] = self.configs[module_name]
+            response = self.misp_modules_post(query)
+            self.assertEqual(self.get_values(response)['domain'], 'tienichphongnet.com')
+        else:
+            response = self.misp_modules_post(query)
+            self.assertEqual(self.get_errors(response), 'HYAS Insight apikey is missing')
 
     def test_greynoise(self):
         module_name = 'greynoise'
@@ -307,6 +322,7 @@ class TestExpansions(unittest.TestCase):
         else:
             response = self.misp_modules_post(query)
             self.assertEqual(self.get_errors(response), 'IPQualityScore apikey is missing')
+
 
     def test_macaddess_io(self):
         module_name = 'macaddress_io'
