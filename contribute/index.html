@@ -15,7 +15,7 @@
         <link rel="canonical" href="https://www.misp-project.org/contribute/">
       
       <link rel="icon" href="../img/favicon.ico">
-      <meta name="generator" content="mkdocs-1.2.3, mkdocs-material-8.1.4">
+      <meta name="generator" content="mkdocs-1.3.1, mkdocs-material-8.1.4">
     
     
       
@@ -373,6 +373,19 @@
   
 </li>
         
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#config-fields-that-your-code-expects-from-the-site-admin" class="md-nav__link">
+    config fields that your code expects from the site admin
+  </a>
+  
+    <nav class="md-nav" aria-label="config fields that your code expects from the site admin">
+      <ul class="md-nav__list">
+        
           <li class="md-nav__item">
   <a href="#handler" class="md-nav__link">
     handler
@@ -394,18 +407,20 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#returning-binary-data" class="md-nav__link">
+    Returning Binary Data
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#module-type" class="md-nav__link">
     Module type
   </a>
   
 </li>
         
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
+          <li class="md-nav__item">
   <a href="#testing-your-modules" class="md-nav__link">
     Testing your modules?
   </a>
@@ -431,18 +446,23 @@
     </nav>
   
 </li>
-      
-        <li class="md-nav__item">
+        
+          <li class="md-nav__item">
   <a href="#documentation" class="md-nav__link">
     Documentation
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
+        
+          <li class="md-nav__item">
   <a href="#tips-for-developers-creating-modules" class="md-nav__link">
     Tips for developers creating modules
   </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -555,6 +575,19 @@
   
 </li>
         
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#config-fields-that-your-code-expects-from-the-site-admin" class="md-nav__link">
+    config fields that your code expects from the site admin
+  </a>
+  
+    <nav class="md-nav" aria-label="config fields that your code expects from the site admin">
+      <ul class="md-nav__list">
+        
           <li class="md-nav__item">
   <a href="#handler" class="md-nav__link">
     handler
@@ -576,18 +609,20 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#returning-binary-data" class="md-nav__link">
+    Returning Binary Data
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#module-type" class="md-nav__link">
     Module type
   </a>
   
 </li>
         
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
+          <li class="md-nav__item">
   <a href="#testing-your-modules" class="md-nav__link">
     Testing your modules?
   </a>
@@ -613,18 +648,23 @@
     </nav>
   
 </li>
-      
-        <li class="md-nav__item">
+        
+          <li class="md-nav__item">
   <a href="#documentation" class="md-nav__link">
     Documentation
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
+        
+          <li class="md-nav__item">
   <a href="#tips-for-developers-creating-modules" class="md-nav__link">
     Tips for developers creating modules
   </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -641,8 +681,6 @@
               
                 
 
-  <h1>Contribute</h1>
-
 <h2 id="how-to-add-your-own-misp-modules">How to add your own MISP modules?<a class="headerlink" href="#how-to-add-your-own-misp-modules" title="Permanent link">&para;</a></h2>
 <p>Create your module in <a href="https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/">misp_modules/modules/expansion/</a>, <a href="https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/export_mod/">misp_modules/modules/export_mod/</a>, or <a href="https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/import_mod/">misp_modules/modules/import_mod/</a>. The module should have at minimum three functions:</p>
 <ul>
@@ -652,95 +690,98 @@
 </ul>
 <p>Don't forget to return an error key and value if an error is raised to propagate it to the MISP user-interface.</p>
 <p>Your module's script name should also be added in the <code>__all__</code> list of <code>&lt;module type folder&gt;/__init__.py</code> in order for it to be loaded.</p>
-<div class="highlight"><pre><span></span><code><span class="o">...</span>
-    <span class="c1"># Checking for required value</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">request</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;ip-src&#39;</span><span class="p">):</span>
-        <span class="c1"># Return an error message</span>
-        <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;error&#39;</span><span class="p">:</span> <span class="s2">&quot;A source IP is required&quot;</span><span class="p">}</span>
-<span class="o">...</span>
-</code></pre></div>
+<p><sub>~</sub>python
+...
+    # Checking for required value
+    if not request.get('ip-src'):
+        # Return an error message
+        return {'error': "A source IP is required"}
+...
+<sub>~</sub></p>
 <h3 id="introspection">introspection<a class="headerlink" href="#introspection" title="Permanent link">&para;</a></h3>
 <p>The function that returns a dict of the supported attributes (input and output) by your expansion module.</p>
-<div class="highlight"><pre><span></span><code><span class="n">mispattributes</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;input&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;link&#39;</span><span class="p">,</span> <span class="s1">&#39;url&#39;</span><span class="p">],</span>
-                  <span class="s1">&#39;output&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;attachment&#39;</span><span class="p">,</span> <span class="s1">&#39;malware-sample&#39;</span><span class="p">]}</span>
-
-<span class="k">def</span> <span class="nf">introspection</span><span class="p">():</span>
-    <span class="k">return</span> <span class="n">mispattributes</span>
-</code></pre></div>
+<p><sub>~</sub>python
+mispattributes = {'input': ['link', 'url'],
+                  'output': ['attachment', 'malware-sample']}</p>
+<p>def introspection():
+    return mispattributes
+<sub>~</sub></p>
 <h3 id="version">version<a class="headerlink" href="#version" title="Permanent link">&para;</a></h3>
 <p>The function that returns a dict with the version and the associated meta-data including potential configurations required of the module.</p>
 <h3 id="additional-configuration-values">Additional Configuration Values<a class="headerlink" href="#additional-configuration-values" title="Permanent link">&para;</a></h3>
 <p>If your module requires additional configuration (to be exposed via the MISP user-interface), you can define those in the moduleconfig value returned by the version function.</p>
-<div class="highlight"><pre><span></span><code><span class="c1"># config fields that your code expects from the site admin</span>
-<span class="n">moduleconfig</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;apikey&quot;</span><span class="p">,</span> <span class="s2">&quot;event_limit&quot;</span><span class="p">]</span>
-
-<span class="k">def</span> <span class="nf">version</span><span class="p">():</span>
-    <span class="n">moduleinfo</span><span class="p">[</span><span class="s1">&#39;config&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">moduleconfig</span>
-    <span class="k">return</span> <span class="n">moduleinfo</span>
-</code></pre></div>
+<p><sub>~</sub>python</p>
+<h1 id="config-fields-that-your-code-expects-from-the-site-admin">config fields that your code expects from the site admin<a class="headerlink" href="#config-fields-that-your-code-expects-from-the-site-admin" title="Permanent link">&para;</a></h1>
+<p>moduleconfig = ["apikey", "event_limit"]</p>
+<p>def version():
+    moduleinfo['config'] = moduleconfig
+    return moduleinfo
+<sub>~</sub></p>
 <p>When you do this a config array is added to the meta-data output containing all the potential configuration values:</p>
-<div class="highlight"><pre><span></span><code>&quot;meta&quot;: {
-      &quot;description&quot;: &quot;PassiveTotal expansion service to expand values with multiple Passive DNS sources&quot;,
-      &quot;config&quot;: [
-        &quot;username&quot;,
-        &quot;password&quot;
+<p><sub>~</sub>
+"meta": {
+      "description": "PassiveTotal expansion service to expand values with multiple Passive DNS sources",
+      "config": [
+        "username",
+        "password"
       ],
-      &quot;module-type&quot;: [
-        &quot;expansion&quot;,
-        &quot;hover&quot;
-      ],
-
-...
-</code></pre></div>
+      "module-type": [
+        "expansion",
+        "hover"
+      ],</p>
+<p>...
+<sub>~</sub></p>
 <p>If you want to use the configuration values set in the web interface they are stored in the key <code>config</code> in the JSON object passed to the handler.</p>
-<div class="highlight"><pre><span></span><code>def handler(q=False):
+<p><sub>~</sub>
+def handler(q=False):</p>
+<div class="codehilite"><pre><span></span><code># Check if we were given a configuration
+config = q.get(&quot;config&quot;, {})
 
-    # Check if we were given a configuration
-    config = q.get(&quot;config&quot;, {})
-
-    # Find out if there is a username field
-    username = config.get(&quot;username&quot;, None)
+# Find out if there is a username field
+username = config.get(&quot;username&quot;, None)
 </code></pre></div>
+
+<p><sub>~</sub></p>
 <h3 id="handler">handler<a class="headerlink" href="#handler" title="Permanent link">&para;</a></h3>
 <p>The function which accepts a JSON document to expand the values and return a dictionary of the expanded values.</p>
-<div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">handler</span><span class="p">(</span><span class="n">q</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-    <span class="s2">&quot;Fully functional rot-13 encoder&quot;</span>
-    <span class="k">if</span> <span class="n">q</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
-        <span class="k">return</span> <span class="kc">False</span>
-    <span class="n">request</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
-    <span class="n">src</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;ip-src&#39;</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">src</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="c1"># Return an error message</span>
-        <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;error&#39;</span><span class="p">:</span> <span class="s2">&quot;A source IP is required&quot;</span><span class="p">}</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;results&#39;</span><span class="p">:</span>
-                <span class="n">codecs</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="s2">&quot;rot-13&quot;</span><span class="p">)}</span>
-</code></pre></div>
+<p><sub>~</sub>python
+def handler(q=False):
+    "Fully functional rot-13 encoder"
+    if q is False:
+        return False
+    request = json.loads(q)
+    src = request.get('ip-src')
+    if src is None:
+        # Return an error message
+        return {'error': "A source IP is required"}
+    else:
+        return {'results':
+                codecs.encode(src, "rot-13")}
+<sub>~</sub></p>
 <h4 id="export-module">export module<a class="headerlink" href="#export-module" title="Permanent link">&para;</a></h4>
 <p>For an export module, the <code>request["data"]</code> object corresponds to a list of events (dictionaries) to handle.</p>
 <p>Iterating over events attributes is performed using their <code>Attribute</code> key.</p>
-<div class="highlight"><pre><span></span><code><span class="o">...</span>
-<span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="n">request</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">]:</span>
-        <span class="k">for</span> <span class="n">attribute</span> <span class="ow">in</span> <span class="n">event</span><span class="p">[</span><span class="s2">&quot;Attribute&quot;</span><span class="p">]:</span>
-          <span class="c1"># do stuff w/ attribute[&#39;type&#39;], attribute[&#39;value&#39;], ...</span>
-<span class="o">...</span>
-
-<span class="c1">### Returning Binary Data</span>
-
-<span class="n">If</span> <span class="n">you</span> <span class="n">want</span> <span class="n">to</span> <span class="k">return</span> <span class="n">a</span> <span class="n">file</span> <span class="ow">or</span> <span class="n">other</span> <span class="n">data</span> <span class="n">you</span> <span class="n">need</span> <span class="n">to</span> <span class="n">add</span> <span class="n">a</span> <span class="n">data</span> <span class="n">attribute</span><span class="o">.</span>
-
-<span class="o">~~~</span><span class="n">python</span>
-<span class="p">{</span><span class="s2">&quot;results&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;values&quot;</span><span class="p">:</span> <span class="s2">&quot;filename.txt&quot;</span><span class="p">,</span>
-             <span class="s2">&quot;types&quot;</span><span class="p">:</span> <span class="s2">&quot;attachment&quot;</span><span class="p">,</span>
-             <span class="s2">&quot;data&quot;</span>  <span class="p">:</span> <span class="n">base64</span><span class="o">.</span><span class="n">b64encode</span><span class="p">(</span><span class="o">&lt;</span><span class="n">ByteIO</span><span class="o">&gt;</span><span class="p">)</span>  <span class="c1"># base64 encode your data first</span>
-             <span class="s2">&quot;comment&quot;</span><span class="p">:</span> <span class="s2">&quot;This is an attachment&quot;</span><span class="p">}}</span>
-</code></pre></div>
+<p><sub>~</sub>python
+...
+for event in request["data"]:
+        for attribute in event["Attribute"]:
+          # do stuff w/ attribute['type'], attribute['value'], ...
+...</p>
+<h3 id="returning-binary-data">Returning Binary Data<a class="headerlink" href="#returning-binary-data" title="Permanent link">&para;</a></h3>
+<p>If you want to return a file or other data you need to add a data attribute.</p>
+<p><sub>~</sub>python
+{"results": {"values": "filename.txt",
+             "types": "attachment",
+             "data"  : base64.b64encode(<ByteIO>)  # base64 encode your data first
+             "comment": "This is an attachment"}}
+<sub>~</sub></p>
 <p>If the binary file is malware you can use 'malware-sample' as the type. If you do this the malware sample will be automatically zipped and password protected ('infected') after being uploaded.</p>
-<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="s2">&quot;results&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;values&quot;</span><span class="p">:</span> <span class="s2">&quot;filename.txt&quot;</span><span class="p">,</span>
-             <span class="s2">&quot;types&quot;</span><span class="p">:</span> <span class="s2">&quot;malware-sample&quot;</span><span class="p">,</span>
-             <span class="s2">&quot;data&quot;</span>  <span class="p">:</span> <span class="n">base64</span><span class="o">.</span><span class="n">b64encode</span><span class="p">(</span><span class="o">&lt;</span><span class="n">ByteIO</span><span class="o">&gt;</span><span class="p">)</span>  <span class="c1"># base64 encode your data first</span>
-             <span class="s2">&quot;comment&quot;</span><span class="p">:</span> <span class="s2">&quot;This is an attachment&quot;</span><span class="p">}}</span>
-</code></pre></div>
+<p><sub>~</sub>python
+{"results": {"values": "filename.txt",
+             "types": "malware-sample",
+             "data"  : base64.b64encode(<ByteIO>)  # base64 encode your data first
+             "comment": "This is an attachment"}}
+<sub>~</sub></p>
 <p><a href="https://github.com/MISP/PyMISP/blob/4f230c9299ad9d2d1c851148c629b61a94f3f117/pymisp/mispevent.py#L185-L200">To learn more about how data attributes are processed you can read the processing code here.</a></p>
 <h3 id="module-type">Module type<a class="headerlink" href="#module-type" title="Permanent link">&para;</a></h3>
 <p>A MISP module can be of four types:</p>
@@ -753,117 +794,122 @@
 <p>module-type is an array where the list of supported types can be added.</p>
 <h2 id="testing-your-modules">Testing your modules?<a class="headerlink" href="#testing-your-modules" title="Permanent link">&para;</a></h2>
 <p>MISP uses the <strong>modules</strong> function to discover the available MISP modules and their supported MISP attributes:</p>
-<div class="highlight"><pre><span></span><code>% curl -s http://127.0.0.1:6666/modules | jq .
+<p><sub>~</sub>
+% curl -s <a href="http://127.0.0.1:6666/modules">http://127.0.0.1:6666/modules</a> | jq .
 [
   {
-    &quot;name&quot;: &quot;passivetotal&quot;,
-    &quot;type&quot;: &quot;expansion&quot;,
-    &quot;mispattributes&quot;: {
-      &quot;input&quot;: [
-        &quot;hostname&quot;,
-        &quot;domain&quot;,
-        &quot;ip-src&quot;,
-        &quot;ip-dst&quot;
+    "name": "passivetotal",
+    "type": "expansion",
+    "mispattributes": {
+      "input": [
+        "hostname",
+        "domain",
+        "ip-src",
+        "ip-dst"
       ],
-      &quot;output&quot;: [
-        &quot;ip-src&quot;,
-        &quot;ip-dst&quot;,
-        &quot;hostname&quot;,
-        &quot;domain&quot;
+      "output": [
+        "ip-src",
+        "ip-dst",
+        "hostname",
+        "domain"
       ]
     },
-    &quot;meta&quot;: {
-      &quot;description&quot;: &quot;PassiveTotal expansion service to expand values with multiple Passive DNS sources&quot;,
-      &quot;config&quot;: [
-        &quot;username&quot;,
-        &quot;password&quot;
+    "meta": {
+      "description": "PassiveTotal expansion service to expand values with multiple Passive DNS sources",
+      "config": [
+        "username",
+        "password"
       ],
-      &quot;author&quot;: &quot;Alexandre Dulaunoy&quot;,
-      &quot;version&quot;: &quot;0.1&quot;
+      "author": "Alexandre Dulaunoy",
+      "version": "0.1"
     }
   },
   {
-    &quot;name&quot;: &quot;sourcecache&quot;,
-    &quot;type&quot;: &quot;expansion&quot;,
-    &quot;mispattributes&quot;: {
-      &quot;input&quot;: [
-        &quot;link&quot;
+    "name": "sourcecache",
+    "type": "expansion",
+    "mispattributes": {
+      "input": [
+        "link"
       ],
-      &quot;output&quot;: [
-        &quot;link&quot;
+      "output": [
+        "link"
       ]
     },
-    &quot;meta&quot;: {
-      &quot;description&quot;: &quot;Module to cache web pages of analysis reports, OSINT sources. The module returns a link of the cached page.&quot;,
-      &quot;author&quot;: &quot;Alexandre Dulaunoy&quot;,
-      &quot;version&quot;: &quot;0.1&quot;
+    "meta": {
+      "description": "Module to cache web pages of analysis reports, OSINT sources. The module returns a link of the cached page.",
+      "author": "Alexandre Dulaunoy",
+      "version": "0.1"
     }
   },
   {
-    &quot;name&quot;: &quot;dns&quot;,
-    &quot;type&quot;: &quot;expansion&quot;,
-    &quot;mispattributes&quot;: {
-      &quot;input&quot;: [
-        &quot;hostname&quot;,
-        &quot;domain&quot;
+    "name": "dns",
+    "type": "expansion",
+    "mispattributes": {
+      "input": [
+        "hostname",
+        "domain"
       ],
-      &quot;output&quot;: [
-        &quot;ip-src&quot;,
-        &quot;ip-dst&quot;
+      "output": [
+        "ip-src",
+        "ip-dst"
       ]
     },
-    &quot;meta&quot;: {
-      &quot;description&quot;: &quot;Simple DNS expansion service to resolve IP address from MISP attributes&quot;,
-      &quot;author&quot;: &quot;Alexandre Dulaunoy&quot;,
-      &quot;version&quot;: &quot;0.1&quot;
+    "meta": {
+      "description": "Simple DNS expansion service to resolve IP address from MISP attributes",
+      "author": "Alexandre Dulaunoy",
+      "version": "0.1"
     }
   }
-]
-</code></pre></div>
+]</p>
+<p><sub>~</sub></p>
 <p>The MISP module service returns the available modules in a JSON array containing each module name along with their supported input attributes.</p>
 <p>Based on this information, a query can be built in a JSON format and saved as body.json:</p>
-<div class="highlight"><pre><span></span><code><span class="p">{</span>
-  <span class="nt">&quot;hostname&quot;</span><span class="p">:</span> <span class="s2">&quot;www.foo.be&quot;</span><span class="p">,</span>
-  <span class="nt">&quot;module&quot;</span><span class="p">:</span> <span class="s2">&quot;dns&quot;</span>
-<span class="p">}</span>
-</code></pre></div>
+<p><sub>~</sub>json
+{
+  "hostname": "<a href="http://www.foo.be">www.foo.be</a>",
+  "module": "dns"
+}
+<sub>~</sub></p>
 <p>Then you can POST this JSON format query towards the MISP object server:</p>
-<div class="highlight"><pre><span></span><code>curl -s http://127.0.0.1:6666/query -H <span class="s2">&quot;Content-Type: application/json&quot;</span> --data @body.json -X POST
-</code></pre></div>
+<p><sub>~</sub>bash
+curl -s <a href="http://127.0.0.1:6666/query">http://127.0.0.1:6666/query</a> -H "Content-Type: application/json" --data @body.json -X POST
+<sub>~</sub></p>
 <p>The module should output the following JSON:</p>
-<div class="highlight"><pre><span></span><code><span class="p">{</span>
-  <span class="nt">&quot;results&quot;</span><span class="p">:</span> <span class="p">[</span>
-    <span class="p">{</span>
-      <span class="nt">&quot;types&quot;</span><span class="p">:</span> <span class="p">[</span>
-        <span class="s2">&quot;ip-src&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;ip-dst&quot;</span>
-      <span class="p">],</span>
-      <span class="nt">&quot;values&quot;</span><span class="p">:</span> <span class="p">[</span>
-        <span class="s2">&quot;188.65.217.78&quot;</span>
-      <span class="p">]</span>
-    <span class="p">}</span>
-  <span class="p">]</span>
-<span class="p">}</span>
-</code></pre></div>
+<p><sub>~</sub>json
+{
+  "results": [
+    {
+      "types": [
+        "ip-src",
+        "ip-dst"
+      ],
+      "values": [
+        "188.65.217.78"
+      ]
+    }
+  ]
+}
+<sub>~</sub></p>
 <p>It is also possible to restrict the category options of the resolved attributes by passing a list of categories along (optional):</p>
-<div class="highlight"><pre><span></span><code><span class="p">{</span>
-  <span class="nt">&quot;results&quot;</span><span class="p">:</span> <span class="p">[</span>
-    <span class="p">{</span>
-      <span class="nt">&quot;types&quot;</span><span class="p">:</span> <span class="p">[</span>
-        <span class="s2">&quot;ip-src&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;ip-dst&quot;</span>
-      <span class="p">],</span>
-      <span class="nt">&quot;values&quot;</span><span class="p">:</span> <span class="p">[</span>
-        <span class="s2">&quot;188.65.217.78&quot;</span>
-      <span class="p">],</span>
-      <span class="nt">&quot;categories&quot;</span><span class="p">:</span> <span class="p">[</span>
-        <span class="s2">&quot;Network activity&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;Payload delivery&quot;</span>
-      <span class="p">]</span>
-    <span class="p">}</span>
-  <span class="p">]</span>
-<span class="p">}</span>
-</code></pre></div>
+<p><sub>~</sub>json
+{
+  "results": [
+    {
+      "types": [
+        "ip-src",
+        "ip-dst"
+      ],
+      "values": [
+        "188.65.217.78"
+      ],
+      "categories": [
+        "Network activity",
+        "Payload delivery"
+      ]
+    }
+  ]
+}
+<sub>~</sub></p>
 <p>For both the type and the category lists, the first item in the list will be the default setting on the interface.</p>
 <h3 id="enable-your-module-in-the-web-interface">Enable your module in the web interface<a class="headerlink" href="#enable-your-module-in-the-web-interface" title="Permanent link">&para;</a></h3>
 <p>For a module to be activated in the MISP web interface it must be enabled in the "Plugin Settings.</p>
@@ -873,15 +919,17 @@
 - Find the name of your plugin's "enabled" value in the Setting Column.
 "Plugin.[MODULE NAME]_enabled"
 - Double click on its "Value" column</p>
-<div class="highlight"><pre><span></span><code>Priority        Setting                         Value   Description                             Error Message
+<p><sub>~</sub>
+Priority        Setting                         Value   Description                             Error Message
 Recommended     Plugin.Import_ocr_enabled       false   Enable or disable the ocr module.       Value not set.
-</code></pre></div>
+<sub>~</sub></p>
 <ul>
 <li>Use the drop-down to set the enabled value to 'true'</li>
 </ul>
-<div class="highlight"><pre><span></span><code>Priority        Setting                         Value   Description                             Error Message
+<p><sub>~</sub>
+Priority        Setting                         Value   Description                             Error Message
 Recommended     Plugin.Import_ocr_enabled       true   Enable or disable the ocr module.       Value not set.
-</code></pre></div>
+<sub>~</sub></p>
 <h3 id="set-any-other-required-settings-for-your-module">Set any other required settings for your module<a class="headerlink" href="#set-any-other-required-settings-for-your-module" title="Permanent link">&para;</a></h3>
 <p>In this same menu set any other plugin settings that are required for testing.</p>
 <h2 id="documentation">Documentation<a class="headerlink" href="#documentation" title="Permanent link">&para;</a></h2>
@@ -906,26 +954,31 @@ Recommended     Plugin.Import_ocr_enabled       true   Enable or disable the ocr
 <li>SSH into the machine (Login info on training page)</li>
 <li>Go into the misp-modules directory</li>
 </ul>
-<div class="highlight"><pre><span></span><code><span class="nb">cd</span> /usr/local/src/misp-modules
-</code></pre></div>
+<p><sub>~</sub>bash
+cd /usr/local/src/misp-modules
+<sub>~</sub></p>
 <p>Set the git repo to your fork and checkout your development branch. If you SSH'ed in as the misp user you will have to use sudo.</p>
-<div class="highlight"><pre><span></span><code>sudo git remote set-url origin https://github.com/YourRepo/misp-modules.git
+<p><sub>~</sub>bash
+sudo git remote set-url origin <a href="https://github.com/YourRepo/misp-modules.git">https://github.com/YourRepo/misp-modules.git</a>
 sudo git pull
 sudo git checkout MyModBranch
-</code></pre></div>
+<sub>~</sub></p>
 <p>Remove the contents of the build directory and re-install misp-modules.</p>
-<div class="highlight"><pre><span></span><code><span class="n">sudo</span> <span class="n">rm</span> <span class="o">-</span><span class="n">fr</span> <span class="n">build</span><span class="o">/*</span>
-<span class="n">sudo</span> <span class="n">pip3</span> <span class="n">install</span> <span class="o">--</span><span class="n">upgrade</span> <span class="o">.</span>
-</code></pre></div>
+<p><sub>~</sub>python
+sudo rm -fr build/*
+sudo pip3 install --upgrade .
+<sub>~</sub></p>
 <p>SSH in with a different terminal and run <code>misp-modules</code> with debugging enabled.</p>
-<div class="highlight"><pre><span></span><code><span class="n">sudo</span> <span class="n">killall</span> <span class="n">misp</span><span class="o">-</span><span class="n">modules</span>
-<span class="n">misp</span><span class="o">-</span><span class="n">modules</span> <span class="o">-</span><span class="n">d</span>
-</code></pre></div>
+<p><sub>~</sub>python
+sudo killall misp-modules
+misp-modules -d
+<sub>~</sub></p>
 <p>In your original terminal you can now run your tests manually and see any errors that arrive</p>
-<div class="highlight"><pre><span></span><code><span class="nb">cd</span> tests/
-curl -s http://127.0.0.1:6666/query -H <span class="s2">&quot;Content-Type: application/json&quot;</span> --data @MY_TEST_FILE.json -X POST
-<span class="nb">cd</span> ../
-</code></pre></div>
+<p><sub>~</sub>bash
+cd tests/
+curl -s <a href="http://127.0.0.1:6666/query">http://127.0.0.1:6666/query</a> -H "Content-Type: application/json" --data @MY_TEST_FILE.json -X POST
+cd ../
+<sub>~</sub></p>
 
               
             </article>
@@ -1017,7 +1070,7 @@ curl -s http://127.0.0.1:6666/query -H <span class="s2">&quot;Content-Type: appl
     <div class="md-dialog" data-md-component="dialog">
       <div class="md-dialog__inner md-typeset"></div>
     </div>
-    <script id="__config" type="application/json">{"base": "..", "features": [], "translations": {"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "search": "../assets/javascripts/workers/search.361d90f1.min.js"}</script>
+    <script id="__config" type="application/json">{"base": "..", "features": [], "search": "../assets/javascripts/workers/search.361d90f1.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}}</script>
     
     
       <script src="../assets/javascripts/bundle.289a2a4b.min.js"></script>

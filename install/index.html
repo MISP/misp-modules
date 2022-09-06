@@ -15,7 +15,7 @@
         <link rel="canonical" href="https://www.misp-project.org/install/">
       
       <link rel="icon" href="../img/favicon.ico">
-      <meta name="generator" content="mkdocs-1.2.3, mkdocs-material-8.1.4">
+      <meta name="generator" content="mkdocs-1.3.1, mkdocs-material-8.1.4">
     
     
       
@@ -337,13 +337,77 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#how-to-install-and-start-misp-modules-on-rhel-based-distributions" class="md-nav__link">
-    How to install and start MISP modules on RHEL-based distributions ?
+  <a href="#begin-with-virtualenv" class="md-nav__link">
+    BEGIN with virtualenv:
   </a>
   
 </li>
       
         <li class="md-nav__item">
+  <a href="#end-with-virtualenv" class="md-nav__link">
+    END with virtualenv
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ideally-you-add-your-user-to-the-staff-group-and-make-usrlocalsrc-group-writeable-below-follows-an-example-with-user-misp" class="md-nav__link">
+    Ideally you add your user to the staff group and make /usr/local/src group writeable, below follows an example with user misp
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#install-gtcacafaup" class="md-nav__link">
+    Install gtcaca/faup
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#begin-with-virtualenv_1" class="md-nav__link">
+    BEGIN with virtualenv:
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#end-with-virtualenv_1" class="md-nav__link">
+    END with virtualenv
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#begin-without-virtualenv" class="md-nav__link">
+    BEGIN without virtualenv:
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#end-without-virtualenv" class="md-nav__link">
+    END without virtualenv
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#start-misp-modules-as-a-service" class="md-nav__link">
+    Start misp-modules as a service
+  </a>
+  
+    <nav class="md-nav" aria-label="Start misp-modules as a service">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#how-to-install-and-start-misp-modules-on-rhel-based-distributions" class="md-nav__link">
+    How to install and start MISP modules on RHEL-based distributions ?
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#how-to-use-an-misp-modules-docker-container" class="md-nav__link">
     How to use an MISP modules Docker container
   </a>
@@ -365,10 +429,8 @@
   
 </li>
         
-          <li class="md-nav__item">
-  <a href="#docker-compose" class="md-nav__link">
-    Docker-compose
-  </a>
+      </ul>
+    </nav>
   
 </li>
         
@@ -378,9 +440,36 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#start-redis" class="md-nav__link">
+    Start Redis
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#start-misp-modules" class="md-nav__link">
+    Start MISP-modules
+  </a>
+  
+    <nav class="md-nav" aria-label="Start MISP-modules">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#docker-compose" class="md-nav__link">
+    Docker-compose
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#install-misp-module-on-an-offline-instance" class="md-nav__link">
     Install misp-module on an offline instance.
   </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -487,13 +576,77 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#how-to-install-and-start-misp-modules-on-rhel-based-distributions" class="md-nav__link">
-    How to install and start MISP modules on RHEL-based distributions ?
+  <a href="#begin-with-virtualenv" class="md-nav__link">
+    BEGIN with virtualenv:
   </a>
   
 </li>
       
         <li class="md-nav__item">
+  <a href="#end-with-virtualenv" class="md-nav__link">
+    END with virtualenv
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ideally-you-add-your-user-to-the-staff-group-and-make-usrlocalsrc-group-writeable-below-follows-an-example-with-user-misp" class="md-nav__link">
+    Ideally you add your user to the staff group and make /usr/local/src group writeable, below follows an example with user misp
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#install-gtcacafaup" class="md-nav__link">
+    Install gtcaca/faup
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#begin-with-virtualenv_1" class="md-nav__link">
+    BEGIN with virtualenv:
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#end-with-virtualenv_1" class="md-nav__link">
+    END with virtualenv
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#begin-without-virtualenv" class="md-nav__link">
+    BEGIN without virtualenv:
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#end-without-virtualenv" class="md-nav__link">
+    END without virtualenv
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#start-misp-modules-as-a-service" class="md-nav__link">
+    Start misp-modules as a service
+  </a>
+  
+    <nav class="md-nav" aria-label="Start misp-modules as a service">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#how-to-install-and-start-misp-modules-on-rhel-based-distributions" class="md-nav__link">
+    How to install and start MISP modules on RHEL-based distributions ?
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#how-to-use-an-misp-modules-docker-container" class="md-nav__link">
     How to use an MISP modules Docker container
   </a>
@@ -515,10 +668,8 @@
   
 </li>
         
-          <li class="md-nav__item">
-  <a href="#docker-compose" class="md-nav__link">
-    Docker-compose
-  </a>
+      </ul>
+    </nav>
   
 </li>
         
@@ -528,9 +679,36 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#start-redis" class="md-nav__link">
+    Start Redis
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#start-misp-modules" class="md-nav__link">
+    Start MISP-modules
+  </a>
+  
+    <nav class="md-nav" aria-label="Start MISP-modules">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#docker-compose" class="md-nav__link">
+    Docker-compose
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#install-misp-module-on-an-offline-instance" class="md-nav__link">
     Install misp-module on an offline instance.
   </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -547,173 +725,171 @@
               
                 
 
-  <h1>Install Guides</h1>
-
 <h2 id="how-to-install-and-start-misp-modules-in-a-python-virtualenv">How to install and start MISP modules (in a Python virtualenv)?<a class="headerlink" href="#how-to-install-and-start-misp-modules-in-a-python-virtualenv" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><span class="nv">SUDO_WWW</span><span class="o">=</span><span class="s2">&quot;sudo -u www-data&quot;</span>
-
-sudo apt-get install -y <span class="se">\</span>
-  git <span class="se">\</span>
-  libpq5 <span class="se">\</span>
-  libjpeg-dev <span class="se">\</span>
-  tesseract-ocr <span class="se">\</span>
-  libpoppler-cpp-dev <span class="se">\</span>
-  imagemagick virtualenv <span class="se">\</span>
-  libopencv-dev <span class="se">\</span>
-  zbar-tools <span class="se">\</span>
-  libzbar0 <span class="se">\</span>
-  libzbar-dev <span class="se">\</span>
-  libfuzzy-dev <span class="se">\</span>
-  libcaca-dev
-
-<span class="c1"># BEGIN with virtualenv:   </span>
-<span class="nv">$SUDO_WWW</span> virtualenv -p python3 /var/www/MISP/venv
-<span class="c1"># END with virtualenv</span>
-
-<span class="nb">cd</span> /usr/local/src/
-<span class="c1"># Ideally you add your user to the staff group and make /usr/local/src group writeable, below follows an example with user misp</span>
-sudo adduser misp staff
-sudo chmod <span class="m">2775</span> /usr/local/src
+<p><sub>~</sub>~bash
+SUDO_WWW="sudo -u www-data"</p>
+<p>sudo apt-get install -y \
+  git \
+  libpq5 \
+  libjpeg-dev \
+  tesseract-ocr \
+  libpoppler-cpp-dev \
+  imagemagick virtualenv \
+  libopencv-dev \
+  zbar-tools \
+  libzbar0 \
+  libzbar-dev \
+  libfuzzy-dev \
+  libcaca-dev</p>
+<h1 id="begin-with-virtualenv">BEGIN with virtualenv:<a class="headerlink" href="#begin-with-virtualenv" title="Permanent link">&para;</a></h1>
+<p>$SUDO_WWW virtualenv -p python3 /var/www/MISP/venv</p>
+<h1 id="end-with-virtualenv">END with virtualenv<a class="headerlink" href="#end-with-virtualenv" title="Permanent link">&para;</a></h1>
+<p>cd /usr/local/src/</p>
+<h1 id="ideally-you-add-your-user-to-the-staff-group-and-make-usrlocalsrc-group-writeable-below-follows-an-example-with-user-misp">Ideally you add your user to the staff group and make /usr/local/src group writeable, below follows an example with user misp<a class="headerlink" href="#ideally-you-add-your-user-to-the-staff-group-and-make-usrlocalsrc-group-writeable-below-follows-an-example-with-user-misp" title="Permanent link">&para;</a></h1>
+<p>sudo adduser misp staff
+sudo chmod 2775 /usr/local/src
 sudo chown root:staff /usr/local/src
-git clone https://github.com/MISP/misp-modules.git
+git clone <a href="https://github.com/MISP/misp-modules.git">https://github.com/MISP/misp-modules.git</a>
 git clone git://github.com/stricaud/faup.git faup
-git clone git://github.com/stricaud/gtcaca.git gtcaca
-
-<span class="c1"># Install gtcaca/faup</span>
-<span class="nb">cd</span> gtcaca
+git clone git://github.com/stricaud/gtcaca.git gtcaca</p>
+<h1 id="install-gtcacafaup">Install gtcaca/faup<a class="headerlink" href="#install-gtcacafaup" title="Permanent link">&para;</a></h1>
+<p>cd gtcaca
 mkdir -p build
-<span class="nb">cd</span> build
-cmake .. <span class="o">&amp;&amp;</span> make
+cd build
+cmake .. &amp;&amp; make
 sudo make install
-<span class="nb">cd</span> ../../faup
+cd ../../faup
 mkdir -p build
-<span class="nb">cd</span> build
-cmake .. <span class="o">&amp;&amp;</span> make
+cd build
+cmake .. &amp;&amp; make
 sudo make install
-sudo ldconfig
-
-<span class="nb">cd</span> ../../misp-modules
-
-<span class="c1"># BEGIN with virtualenv: </span>
-<span class="nv">$SUDO_WWW</span>  /var/www/MISP/venv/bin/pip install -I -r REQUIREMENTS
-<span class="nv">$SUDO_WWW</span>  /var/www/MISP/venv/bin/pip install .
-<span class="c1"># END with virtualenv</span>
-
-<span class="c1"># BEGIN without virtualenv: </span>
-sudo pip install -I -r REQUIREMENTS
-sudo pip install .
-<span class="c1"># END without virtualenv</span>
-
-<span class="c1"># Start misp-modules as a service</span>
-sudo cp etc/systemd/system/misp-modules.service /etc/systemd/system/
+sudo ldconfig</p>
+<p>cd ../../misp-modules</p>
+<h1 id="begin-with-virtualenv_1">BEGIN with virtualenv:<a class="headerlink" href="#begin-with-virtualenv_1" title="Permanent link">&para;</a></h1>
+<p>$SUDO_WWW  /var/www/MISP/venv/bin/pip install -I -r REQUIREMENTS
+$SUDO_WWW  /var/www/MISP/venv/bin/pip install .</p>
+<h1 id="end-with-virtualenv_1">END with virtualenv<a class="headerlink" href="#end-with-virtualenv_1" title="Permanent link">&para;</a></h1>
+<h1 id="begin-without-virtualenv">BEGIN without virtualenv:<a class="headerlink" href="#begin-without-virtualenv" title="Permanent link">&para;</a></h1>
+<p>sudo pip install -I -r REQUIREMENTS
+sudo pip install .</p>
+<h1 id="end-without-virtualenv">END without virtualenv<a class="headerlink" href="#end-without-virtualenv" title="Permanent link">&para;</a></h1>
+<h1 id="start-misp-modules-as-a-service">Start misp-modules as a service<a class="headerlink" href="#start-misp-modules-as-a-service" title="Permanent link">&para;</a></h1>
+<p>sudo cp etc/systemd/system/misp-modules.service /etc/systemd/system/
 sudo systemctl daemon-reload
-sudo systemctl <span class="nb">enable</span> --now misp-modules
-/var/www/MISP/venv/bin/misp-modules -l <span class="m">127</span>.0.0.1 -s <span class="p">&amp;</span> <span class="c1">#to start the modules</span>
-</code></pre></div>
+sudo systemctl enable --now misp-modules
+/var/www/MISP/venv/bin/misp-modules -l 127.0.0.1 -s &amp; #to start the modules
+<sub>~</sub>~</p>
 <h2 id="how-to-install-and-start-misp-modules-on-rhel-based-distributions">How to install and start MISP modules on RHEL-based distributions ?<a class="headerlink" href="#how-to-install-and-start-misp-modules-on-rhel-based-distributions" title="Permanent link">&para;</a></h2>
 <p>As of this writing, the official RHEL repositories only contain Ruby 2.0.0 and Ruby 2.1 or higher is required. As such, this guide installs Ruby 2.2 from the SCL repository.</p>
-<div class="highlight"><pre><span></span><code><span class="nv">SUDO_WWW</span><span class="o">=</span><span class="s2">&quot;sudo -u apache&quot;</span>
-sudo yum install <span class="se">\</span>
-  rh-ruby22 <span class="se">\</span>
-  openjpeg-devel <span class="se">\</span>
-  rubygem-rouge <span class="se">\</span>
-  rubygem-asciidoctor <span class="se">\</span>
-  zbar-devel <span class="se">\</span>
-  opencv-devel <span class="se">\</span>
-  gcc-c++ <span class="se">\</span>
-  pkgconfig <span class="se">\</span>
-  poppler-cpp-devel <span class="se">\</span>
-  python-devel <span class="se">\</span>
+<p><sub>~</sub>~bash
+SUDO_WWW="sudo -u apache"
+sudo yum install \
+  rh-ruby22 \
+  openjpeg-devel \
+  rubygem-rouge \
+  rubygem-asciidoctor \
+  zbar-devel \
+  opencv-devel \
+  gcc-c++ \
+  pkgconfig \
+  poppler-cpp-devel \
+  python-devel \
   redhat-rpm-config
-<span class="nb">cd</span> /usr/local/src/
-sudo git clone https://github.com/MISP/misp-modules.git
-<span class="nb">cd</span> misp-modules
-<span class="nv">$SUDO_WWW</span> /usr/bin/scl <span class="nb">enable</span> rh-python36 <span class="s2">&quot;virtualenv -p python3 /var/www/MISP/venv&quot;</span>
-<span class="nv">$SUDO_WWW</span> /var/www/MISP/venv/bin/pip install -U -I -r REQUIREMENTS
-<span class="nv">$SUDO_WWW</span> /var/www/MISP/venv/bin/pip install -U .
-</code></pre></div>
+cd /usr/local/src/
+sudo git clone <a href="https://github.com/MISP/misp-modules.git">https://github.com/MISP/misp-modules.git</a>
+cd misp-modules
+$SUDO_WWW /usr/bin/scl enable rh-python36 "virtualenv -p python3 /var/www/MISP/venv"
+$SUDO_WWW /var/www/MISP/venv/bin/pip install -U -I -r REQUIREMENTS
+$SUDO_WWW /var/www/MISP/venv/bin/pip install -U .
+<sub>~</sub>~</p>
 <p>Create the service file /etc/systemd/system/misp-modules.service :</p>
-<div class="highlight"><pre><span></span><code><span class="nb">echo</span> <span class="s2">&quot;[Unit]</span>
-<span class="s2">Description=MISP&#39;s modules</span>
-<span class="s2">After=misp-workers.service</span>
-
-<span class="s2">[Service]</span>
-<span class="s2">Type=simple</span>
-<span class="s2">User=apache</span>
-<span class="s2">Group=apache</span>
-<span class="s2">ExecStart=/usr/bin/scl enable rh-python36 rh-ruby22  &#39;/var/www/MISP/venv/bin/misp-modules –l 127.0.0.1 –s&#39;</span>
-<span class="s2">Restart=always</span>
-<span class="s2">RestartSec=10</span>
-
-<span class="s2">[Install]</span>
-<span class="s2">WantedBy=multi-user.target&quot;</span> <span class="p">|</span> sudo tee /etc/systemd/system/misp-modules.service
-</code></pre></div>
+<p><sub>~</sub>~bash
+echo "[Unit]
+Description=MISP's modules
+After=misp-workers.service</p>
+<p>[Service]
+Type=simple
+User=apache
+Group=apache
+ExecStart=/usr/bin/scl enable rh-python36 rh-ruby22  '/var/www/MISP/venv/bin/misp-modules –l 127.0.0.1 –s'
+Restart=always
+RestartSec=10</p>
+<p>[Install]
+WantedBy=multi-user.target" | sudo tee /etc/systemd/system/misp-modules.service
+<sub>~</sub>~</p>
 <p>The After=misp-workers.service must be changed or removed if you have not created a misp-workers service. Then, enable the misp-modules service and start it:</p>
-<div class="highlight"><pre><span></span><code>systemctl daemon-reload
-systemctl <span class="nb">enable</span> --now misp-modules
-</code></pre></div>
+<p><sub>~</sub>~bash
+systemctl daemon-reload
+systemctl enable --now misp-modules
+<sub>~</sub>~</p>
 <h2 id="how-to-use-an-misp-modules-docker-container">How to use an MISP modules Docker container<a class="headerlink" href="#how-to-use-an-misp-modules-docker-container" title="Permanent link">&para;</a></h2>
 <h3 id="docker-build">Docker build<a class="headerlink" href="#docker-build" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code>docker build -t misp-modules <span class="se">\</span>
-    --build-arg <span class="nv">BUILD_DATE</span><span class="o">=</span><span class="k">$(</span>date -u +<span class="s2">&quot;%Y-%m-%d&quot;</span><span class="k">)</span> <span class="se">\</span>
+<p><sub>~</sub>~bash
+docker build -t misp-modules \
+    --build-arg BUILD_DATE=$(date -u +"%Y-%m-%d") \
   docker/
-</code></pre></div>
+<sub>~</sub>~</p>
 <h3 id="docker-run">Docker run<a class="headerlink" href="#docker-run" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span class="c1"># Start Redis</span>
-docker run --rm -d --name<span class="o">=</span>misp-redis redis:alpine
-<span class="c1"># Start MISP-modules</span>
-docker run <span class="se">\</span>
-    --rm -d --name<span class="o">=</span>misp-modules <span class="se">\</span>
-    -e <span class="nv">REDIS_BACKEND</span><span class="o">=</span>misp-redis <span class="se">\</span>
-    -e <span class="nv">REDIS_PORT</span><span class="o">=</span><span class="s2">&quot;6379&quot;</span> <span class="se">\</span>
-    -e <span class="nv">REDIS_PW</span><span class="o">=</span><span class="s2">&quot;&quot;</span> <span class="se">\</span>
-    -e <span class="nv">REDIS_DATABASE</span><span class="o">=</span><span class="s2">&quot;245&quot;</span> <span class="se">\</span>
-    -e <span class="nv">MISP_MODULES_DEBUG</span><span class="o">=</span><span class="s2">&quot;false&quot;</span> <span class="se">\</span>
+<p><sub>~</sub>~bash</p>
+<h1 id="start-redis">Start Redis<a class="headerlink" href="#start-redis" title="Permanent link">&para;</a></h1>
+<p>docker run --rm -d --name=misp-redis redis:alpine</p>
+<h1 id="start-misp-modules">Start MISP-modules<a class="headerlink" href="#start-misp-modules" title="Permanent link">&para;</a></h1>
+<p>docker run \
+    --rm -d --name=misp-modules \
+    -e REDIS_BACKEND=misp-redis \
+    -e REDIS_PORT="6379" \
+    -e REDIS_PW="" \
+    -e REDIS_DATABASE="245" \
+    -e MISP_MODULES_DEBUG="false" \
     dcso/misp-dockerized-misp-modules
-</code></pre></div>
+<sub>~</sub>~</p>
 <h3 id="docker-compose">Docker-compose<a class="headerlink" href="#docker-compose" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code>services:
+<p><sub>~</sub>~yml
+services:
   misp-modules:
-    # https://hub.docker.com/r/dcso/misp-dockerized-misp-modules
-    image: dcso/misp-dockerized-misp-modules:3
+    # <a href="https://hub.docker.com/r/dcso/misp-dockerized-misp-modules">https://hub.docker.com/r/dcso/misp-dockerized-misp-modules</a>
+    image: dcso/misp-dockerized-misp-modules:3</p>
+<div class="codehilite"><pre><span></span><code># Local image:
+#image: misp-modules
+#build:
+#  context: docker/
 
-    # Local image:
-    #image: misp-modules
-    #build:
-    #  context: docker/
-
-    environment:
-      # Redis
-      REDIS_BACKEND: misp-redis
-      REDIS_PORT: &quot;6379&quot;
-      REDIS_DATABASE: &quot;245&quot;
-      # System PROXY (OPTIONAL)
-      http_proxy: 
-      https_proxy: 
-      no_proxy: 0.0.0.0
-      # Timezone (OPTIONAL)
-      TZ: Europe/Berlin
-      # MISP-Modules (OPTIONAL)
-      MISP_MODULES_DEBUG: &quot;false&quot;
-      # Logging options (OPTIONAL)
-      LOG_SYSLOG_ENABLED: &quot;no&quot;
-  misp-redis:
-    # https://hub.docker.com/_/redis or alternative https://hub.docker.com/r/dcso/misp-dockerized-redis/
-    image: redis:alpine
+environment:
+  # Redis
+  REDIS_BACKEND: misp-redis
+  REDIS_PORT: &quot;6379&quot;
+  REDIS_DATABASE: &quot;245&quot;
+  # System PROXY (OPTIONAL)
+  http_proxy: 
+  https_proxy: 
+  no_proxy: 0.0.0.0
+  # Timezone (OPTIONAL)
+  TZ: Europe/Berlin
+  # MISP-Modules (OPTIONAL)
+  MISP_MODULES_DEBUG: &quot;false&quot;
+  # Logging options (OPTIONAL)
+  LOG_SYSLOG_ENABLED: &quot;no&quot;
 </code></pre></div>
+
+<p>misp-redis:
+    # <a href="https://hub.docker.com/_/redis">https://hub.docker.com/_/redis</a> or alternative <a href="https://hub.docker.com/r/dcso/misp-dockerized-redis/">https://hub.docker.com/r/dcso/misp-dockerized-redis/</a>
+    image: redis:alpine
+<sub>~</sub>~</p>
 <h2 id="install-misp-module-on-an-offline-instance">Install misp-module on an offline instance.<a class="headerlink" href="#install-misp-module-on-an-offline-instance" title="Permanent link">&para;</a></h2>
 <p>First, you need to grab all necessary packages for example like this :</p>
 <p>Use pip wheel to create an archive
-<div class="highlight"><pre><span></span><code>mkdir misp-modules-offline
+<sub>~</sub>
+mkdir misp-modules-offline
 pip3 wheel -r REQUIREMENTS shodan --wheel-dir=./misp-modules-offline
 tar -cjvf misp-module-bundeled.tar.bz2 ./misp-modules-offline/*
-</code></pre></div>
+<sub>~</sub>
 On offline machine :
-<div class="highlight"><pre><span></span><code>mkdir misp-modules-bundle
+<sub>~</sub>
+mkdir misp-modules-bundle
 tar xvf misp-module-bundeled.tar.bz2 -C misp-modules-bundle
 cd misp-modules-bundle
 ls -1|while read line; do sudo pip3 install --force-reinstall --ignore-installed --upgrade --no-index --no-deps ${line};done
-</code></pre></div>
+<sub>~</sub>
 Next you can follow standard install procedure.</p>
 
               
@@ -806,7 +982,7 @@ Next you can follow standard install procedure.</p>
     <div class="md-dialog" data-md-component="dialog">
       <div class="md-dialog__inner md-typeset"></div>
     </div>
-    <script id="__config" type="application/json">{"base": "..", "features": [], "translations": {"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "search": "../assets/javascripts/workers/search.361d90f1.min.js"}</script>
+    <script id="__config" type="application/json">{"base": "..", "features": [], "search": "../assets/javascripts/workers/search.361d90f1.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}}</script>
     
     
       <script src="../assets/javascripts/bundle.289a2a4b.min.js"></script>
