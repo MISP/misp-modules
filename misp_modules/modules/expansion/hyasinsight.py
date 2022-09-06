@@ -11,7 +11,7 @@ from requests.exceptions import (
     ConnectTimeout
 )
 from . import check_input_attribute, standard_error_message
-from pymisp import MISPEvent, MISPAttribute, MISPObject, MISPTag, Distribution
+from pymisp import MISPEvent, MISPObject, Distribution
 
 ip_query_input_type = [
     'ip-src',
@@ -393,7 +393,7 @@ class HyasInsightParser:
             'ip_ip',
             'ip_isp_autonomous_system_number',
             'ip_isp_autonomous_system_organization',
-            'ip_isp_ip_address'
+            'ip_isp_ip_address',
             'ip_isp_isp',
             'ip_isp_organization',
             'ipv4',
