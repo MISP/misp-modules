@@ -2,10 +2,10 @@ import json
 import requests
 
 misperrors = {'error': 'Error'}
-mispattributes = {'input': ['md5', 'sha1', 'sha256'], 'output': ['text']}
+mispattributes = {'input': ['md5'], 'output': ['text']}
 moduleinfo = {'version': '0.2', 'author': 'Alexandre Dulaunoy', 'description': 'An expansion module to check hashes against hashdd.com including NSLR dataset.', 'module-type': ['hover']}
 moduleconfig = []
-hashddapi_url = 'https://api.hashdd.com/'
+hashddapi_url = 'https://api.hashdd.com/v1/knownlevel/nsrl/'
 
 
 def handler(q=False):
@@ -20,10 +20,10 @@ def handler(q=False):
     if v is None:
         misperrors['error'] = 'Hash value is missing.'
         return misperrors
-    r = requests.post(hashddapi_url, data={'hash': v})
+    r = requests.get(hashddapi_url + v)
     if r.status_code == 200:
         state = json.loads(r.text)
-        summary = state[v]['known_level'] if state and state.get(v) else 'Unknown hash'
+        summary = state['knownlevel'] if state and state['result'] == "SUCCESS" else state['message']
     else:
         misperrors['error'] = '{} API not accessible'.format(hashddapi_url)
         return misperrors['error']
