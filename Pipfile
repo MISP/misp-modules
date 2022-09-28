@@ -55,7 +55,6 @@ pandas_ods_reader = "==0.1.2"
 pdftotext = "*"
 lxml = "*"
 xlrd = "*"
-idna-ssl = { markers = "python_version < '3.7'" }
 jbxapi = "*"
 geoip2 = "*"
 apiosintDS = "*"
@@ -73,6 +72,9 @@ crowdstrike-falconpy = "0.9.0"
 censys = "2.0.9"
 mwdblib = "3.4.1"
 ndjson = "0.3.1"
+Jinja2 = "3.1.2"
+mattermostdriver = "7.3.2"
+openpyxl = "*"
 
 [requires]
 python_version = "3.7"
