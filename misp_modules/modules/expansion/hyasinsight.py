@@ -107,10 +107,14 @@ SHA512_PARAM = 'sha512'
 HASH_PARAM = 'hash'
 SHA1_PARAM = 'sha1'
 
-HYAS_IP_ENRICHMENT_ENDPOINTS_LIST = [DYNAMIC_DNS_ENDPOINT, PASSIVE_HASH_ENDPOINT, SINKHOLE_ENDPOINT,
-                                     SSL_CERTIFICATE_ENDPOINT, DEVICE_GEO_ENDPOINT, C2ATTRIBUTION_ENDPOINT]
-HYAS_DOMAIN_ENRICHMENT_ENDPOINTS_LIST = [PASSIVE_DNS_ENDPOINT, WHOIS_HISTORIC_ENDPOINT, WHOIS_CURRENT_ENDPOINT,
-                                         C2ATTRIBUTION_ENDPOINT]
+HYAS_IP_ENRICHMENT_ENDPOINTS_LIST = [DYNAMIC_DNS_ENDPOINT, PASSIVE_DNS_ENDPOINT, PASSIVE_HASH_ENDPOINT,
+                                     SINKHOLE_ENDPOINT,
+                                     SSL_CERTIFICATE_ENDPOINT, DEVICE_GEO_ENDPOINT, C2ATTRIBUTION_ENDPOINT,
+                                     MALWARE_RECORDS_ENDPOINT, OPEN_SOURCE_INDICATORS_ENDPOINT]
+HYAS_DOMAIN_ENRICHMENT_ENDPOINTS_LIST = [PASSIVE_DNS_ENDPOINT, DYNAMIC_DNS_ENDPOINT, WHOIS_HISTORIC_ENDPOINT,
+                                         MALWARE_RECORDS_ENDPOINT, WHOIS_CURRENT_ENDPOINT, PASSIVE_HASH_ENDPOINT,
+                                         C2ATTRIBUTION_ENDPOINT, SSL_CERTIFICATE_ENDPOINT,
+                                         OPEN_SOURCE_INDICATORS_ENDPOINT]
 HYAS_EMAIL_ENRICHMENT_ENDPOINTS_LIST = [DYNAMIC_DNS_ENDPOINT, WHOIS_HISTORIC_ENDPOINT, C2ATTRIBUTION_ENDPOINT]
 HYAS_PHONE_ENRICHMENT_ENDPOINTS_LIST = [WHOIS_HISTORIC_ENDPOINT]
 HYAS_SHA1_ENRICHMENT_ENDPOINTS_LIST = [SSL_CERTIFICATE_ENDPOINT, MALWARE_INFORMATION_ENDPOINT,
@@ -222,6 +226,43 @@ def request_body(query_input, query_param, current):
         }
 
 
+def malware_info_lookup_to_markdown(results: Dict) -> list:
+    scan_results = results.get('scan_results', [])
+    out = []
+    if scan_results:
+        for res in scan_results:
+            malware_info_data = {
+                "avscan_score": results.get(
+                    "avscan_score", ''),
+                "md5": results.get("md5", ''),
+                'av_name': res.get(
+                    "av_name", ''),
+                'def_time': res.get(
+                    "def_time", ''),
+                'threat_found': res.get(
+                    'threat_found', ''),
+                'scan_time': results.get("scan_time", ''),
+                'sha1': results.get('sha1', ''),
+                'sha256': results.get('sha256', ''),
+                'sha512': results.get('sha512', '')
+            }
+            out.append(malware_info_data)
+    else:
+        malware_info_data = {
+            "avscan_score": results.get("avscan_score", ''),
+            "md5": results.get("md5", ''),
+            'av_name': '',
+            'def_time': '',
+            'threat_found': '',
+            'scan_time': results.get("scan_time", ''),
+            'sha1': results.get('sha1', ''),
+            'sha256': results.get('sha256', ''),
+            'sha512': results.get('sha512', '')
+        }
+        out.append(malware_info_data)
+    return out
+
+
 class RequestHandler:
     """A class for handling any outbound requests from this module."""
 
@@ -277,7 +318,7 @@ class HyasInsightParser:
         self.c2_attribution_data_items = [
             'actor_ipv4',
             'c2_domain',
-            'c2_ipv4',
+            'c2_ip',
             'c2_url',
             'datetime',
             'email',
@@ -290,7 +331,7 @@ class HyasInsightParser:
         self.c2_attribution_data_items_friendly_names = {
             'actor_ipv4': 'Actor IPv4',
             'c2_domain': 'C2 Domain',
-            'c2_ipv4': 'C2 IPv4',
+            'c2_ip': 'C2 IP',
             'c2_url': 'C2 URL',
             'datetime': 'DateTime',
             'email': 'Email',
@@ -480,6 +521,7 @@ class HyasInsightParser:
         self.sinkhole_data_items = [
             'count',
             'country_name',
+            'country_code',
             'data_port',
             'datetime',
             'ipv4',
@@ -491,6 +533,7 @@ class HyasInsightParser:
         self.sinkhole_data_items_friendly_names = {
             'count': 'Sinkhole Count',
             'country_name': 'IP Address Country',
+            'country_code': 'IP Address Country Code',
             'data_port': 'Data Port',
             'datetime': 'First Seen',
             'ipv4': 'IP Address',
@@ -539,7 +582,7 @@ class HyasInsightParser:
             'ssl_cert_serial_number': 'Certificate Serial Number',
             'ssl_cert_sha1': 'Certificate SHA1',
             'ssl_cert_sha_256': 'Certificate SHA256',
-            'ssl_cert_sig_algo': 'Certificate Signature Algorith',
+            'ssl_cert_sig_algo': 'Certificate Signature Algorithm',
             'ssl_cert_ssl_version': 'SSL Version',
             'ssl_cert_subject_commonName': 'Reciever Subject Name',
             'ssl_cert_subject_countryName': 'Receiver Country Name',
@@ -550,9 +593,11 @@ class HyasInsightParser:
         }
 
         self.whois_historic_data_items = [
+            'abuse_emails',
             'address',
             'city',
             'country',
+            'datetime',
             'domain',
             'domain_2tld',
             'domain_created_datetime',
@@ -560,16 +605,20 @@ class HyasInsightParser:
             'domain_updated_datetime',
             'email',
             'idn_name',
+            'name',
             'nameserver',
+            'organization',
             'phone',
             'privacy_punch',
             'registrar'
         ]
 
         self.whois_historic_data_items_friendly_names = {
+            'abuse_emails': 'Abuse Emails',
             'address': 'Address',
             'city': 'City',
             'country': 'Country',
+            'datetime': 'Datetime',
             'domain': 'Domain',
             'domain_2tld': 'Domain 2tld',
             'domain_created_datetime': 'Domain Created Time',
@@ -577,7 +626,9 @@ class HyasInsightParser:
             'domain_updated_datetime': 'Domain Updated Time',
             'email': 'Email Address',
             'idn_name': 'IDN Name',
+            'name': 'Name',
             'nameserver': 'Nameserver',
+            'organization': 'Organization',
             'phone': 'Phone Info',
             'privacy_punch': 'Privacy Punch',
             'registrar': 'Registrar'
@@ -588,6 +639,7 @@ class HyasInsightParser:
             'address',
             'city',
             'country',
+            'datetime',
             'domain',
             'domain_2tld',
             'domain_created_datetime',
@@ -595,9 +647,11 @@ class HyasInsightParser:
             'domain_updated_datetime',
             'email',
             'idn_name',
+            'name',
             'nameserver',
             'organization',
             'phone',
+            'privacy_punch',
             'registrar',
             'state'
         ]
@@ -607,6 +661,7 @@ class HyasInsightParser:
             'address': 'Address',
             'city': 'City',
             'country': 'Country',
+            'datetime': 'Datetime',
             'domain': 'Domain',
             'domain_2tld': 'Domain 2tld',
             'domain_created_datetime': 'Domain Created Time',
@@ -614,9 +669,11 @@ class HyasInsightParser:
             'domain_updated_datetime': 'Domain Updated Time',
             'email': 'Email Address',
             'idn_name': 'IDN Name',
+            'name': 'Name',
             'nameserver': 'Nameserver',
             'organization': 'Organization',
-            'phone': 'Phone Info',
+            'phone': 'Phone',
+            'privacy_punch': 'Privacy Punch',
             'registrar': 'Registrar',
             'state': 'State'
         }
@@ -661,16 +718,20 @@ class HyasInsightParser:
         elif endpoint == C2ATTRIBUTION_ENDPOINT:
             data_items: List[str] = self.c2_attribution_data_items
             data_items_friendly_names = self.c2_attribution_data_items_friendly_names
+
+        loop = 1
         for result in flatten_json_response:
-            hyas_object = misp_object(endpoint, attribute_value)
-            for data_item in result.keys():
-                if data_item in data_items:
-                    data_item_text = data_items_friendly_names[data_item]
-                    data_item_value = str(result[data_item])
-                    hyas_object.add_attribute(
-                        **parse_attribute(hyas_object.comment, data_item_text, data_item_value))
-            hyas_object.add_reference(self.attribute['uuid'], 'related-to')
-            self.misp_event.add_object(hyas_object)
+            if loop <= 3:
+                hyas_object = misp_object(endpoint, attribute_value)
+                for data_item in result.keys():
+                    if data_item in data_items:
+                        data_item_text = data_items_friendly_names[data_item]
+                        data_item_value = str(result[data_item])
+                        hyas_object.add_attribute(
+                            **parse_attribute(hyas_object.comment, data_item_text, data_item_value))
+                loop = loop + 1
+                hyas_object.add_reference(self.attribute['uuid'], 'related-to')
+                self.misp_event.add_object(hyas_object)
 
     def get_results(self):
         """returns the dictionary object to MISP Instance"""
@@ -716,6 +777,8 @@ def handler(q=False):
                 ip_param = IPV4_PARAM
             elif endpoint == SINKHOLE_ENDPOINT:
                 ip_param = IPV4_PARAM
+            elif endpoint == MALWARE_RECORDS_ENDPOINT:
+                ip_param = IPV4_PARAM
             else:
                 ip_param = IP_PARAM
             enrich_response = request_handler.hyas_lookup(endpoint, ip_param, attribute_value)
@@ -748,50 +811,51 @@ def handler(q=False):
                 has_results = True
                 parser.create_misp_attributes_and_objects(enrich_response, endpoint, attribute_value)
     elif attribute_type in md5_query_input_type:
+        md5_param = MD5_PARAM
         for endpoint in HYAS_MD5_ENRICHMENT_ENDPOINTS_LIST:
             if endpoint == MALWARE_INFORMATION_ENDPOINT:
                 md5_param = HASH_PARAM
-            else:
-                md5_param = MD5_PARAM
             enrich_response = request_handler.hyas_lookup(endpoint, md5_param, attribute_value)
-            if endpoint == MALWARE_INFORMATION_ENDPOINT:
-                if not enrich_response.get("Message"):
-                    enrich_response = enrich_response.get("scan_results")
             if enrich_response:
                 has_results = True
+                if endpoint == MALWARE_INFORMATION_ENDPOINT:
+                    enrich_response = malware_info_lookup_to_markdown(enrich_response)
                 parser.create_misp_attributes_and_objects(enrich_response, endpoint, attribute_value)
     elif attribute_type in sha1_query_input_type:
+        sha1_param = SHA1_PARAM
         for endpoint in HYAS_SHA1_ENRICHMENT_ENDPOINTS_LIST:
-            enrich_response = request_handler.hyas_lookup(endpoint, SHA1_PARAM, attribute_value)
             if endpoint == MALWARE_INFORMATION_ENDPOINT:
-                if not enrich_response.get("Message"):
-                    enrich_response = enrich_response.get("scan_results")
+                sha1_param = HASH_PARAM
+            elif endpoint == SSL_CERTIFICATE_ENDPOINT:
+                sha1_param = HASH_PARAM
+            enrich_response = request_handler.hyas_lookup(endpoint, sha1_param, attribute_value)
+
             if enrich_response:
                 has_results = True
+                if endpoint == MALWARE_INFORMATION_ENDPOINT:
+                    enrich_response = malware_info_lookup_to_markdown(enrich_response)
                 parser.create_misp_attributes_and_objects(enrich_response, endpoint, attribute_value)
     elif attribute_type in sha256_query_input_type:
+        sha256_param = SHA256_PARAM
         for endpoint in HYAS_SHA256_ENRICHMENT_ENDPOINTS_LIST:
             if endpoint == MALWARE_INFORMATION_ENDPOINT:
                 sha256_param = HASH_PARAM
-            else:
-                sha256_param = SHA256_PARAM
             enrich_response = request_handler.hyas_lookup(endpoint, sha256_param, attribute_value)
-            if endpoint == MALWARE_INFORMATION_ENDPOINT:
-                if not enrich_response.get("Message"):
-                    enrich_response = enrich_response.get("scan_results")
             if enrich_response:
                 has_results = True
+                if endpoint == MALWARE_INFORMATION_ENDPOINT:
+                    enrich_response = malware_info_lookup_to_markdown(enrich_response)
                 parser.create_misp_attributes_and_objects(enrich_response, endpoint, attribute_value)
     elif attribute_type in sha512_query_input_type:
+        sha512_param = ''
         for endpoint in HYAS_SHA512_ENRICHMENT_ENDPOINTS_LIST:
             if endpoint == MALWARE_INFORMATION_ENDPOINT:
                 sha512_param = HASH_PARAM
             enrich_response = request_handler.hyas_lookup(endpoint, sha512_param, attribute_value)
-            if endpoint == MALWARE_INFORMATION_ENDPOINT:
-                if not enrich_response.get("Message"):
-                    enrich_response = enrich_response.get("scan_results")
             if enrich_response:
                 has_results = True
+                if endpoint == MALWARE_INFORMATION_ENDPOINT:
+                    enrich_response = malware_info_lookup_to_markdown(enrich_response)
                 parser.create_misp_attributes_and_objects(enrich_response, endpoint, attribute_value)
 
     if has_results:
