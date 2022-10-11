@@ -719,19 +719,16 @@ class HyasInsightParser:
             data_items: List[str] = self.c2_attribution_data_items
             data_items_friendly_names = self.c2_attribution_data_items_friendly_names
 
-        loop = 1
         for result in flatten_json_response:
-            if loop <= 3:
-                hyas_object = misp_object(endpoint, attribute_value)
-                for data_item in result.keys():
-                    if data_item in data_items:
-                        data_item_text = data_items_friendly_names[data_item]
-                        data_item_value = str(result[data_item])
-                        hyas_object.add_attribute(
-                            **parse_attribute(hyas_object.comment, data_item_text, data_item_value))
-                loop = loop + 1
-                hyas_object.add_reference(self.attribute['uuid'], 'related-to')
-                self.misp_event.add_object(hyas_object)
+            hyas_object = misp_object(endpoint, attribute_value)
+            for data_item in result.keys():
+                if data_item in data_items:
+                    data_item_text = data_items_friendly_names[data_item]
+                    data_item_value = str(result[data_item])
+                    hyas_object.add_attribute(
+                        **parse_attribute(hyas_object.comment, data_item_text, data_item_value))
+            hyas_object.add_reference(self.attribute['uuid'], 'related-to')
+            self.misp_event.add_object(hyas_object)
 
     def get_results(self):
         """returns the dictionary object to MISP Instance"""
