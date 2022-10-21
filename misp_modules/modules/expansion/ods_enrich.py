@@ -4,6 +4,7 @@ import np
 import ezodf
 import pandas_ods_reader
 import io
+import logging
 
 misperrors = {'error': 'Error'}
 mispattributes = {'input': ['attachment'],
@@ -35,13 +36,12 @@ def handler(q=False):
     num_sheets = len(doc.sheets)
     try:
         for i in range(0, num_sheets):
-            ods = pandas_ods_reader.read_ods(ods_file, i, headers=False)
+            ods = pandas_ods_reader.algo.read_data(pandas_ods_reader.parsers.ods, ods_file, i, headers=False)
             ods_content = ods_content + "\n" + ods.to_string(max_rows=None)
-        print(ods_content)
         return {'results': [{'types': ['freetext'], 'values': ods_content, 'comment': ".ods-to-text from file " + filename},
                             {'types': ['text'], 'values': ods_content, 'comment': ".ods-to-text from file " + filename}]}
     except Exception as e:
-        print(e)
+        logging.exception(e)
         err = "Couldn't analyze file as .ods. Error was: " + str(e)
         misperrors['error'] = err
         return misperrors

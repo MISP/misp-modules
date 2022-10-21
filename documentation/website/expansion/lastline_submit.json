@@ -1,5 +1,5 @@
 {
-    "description": "Module to submit a file or URL to Lastline.",
+    "description": "Deprecation notice: this module will be deprecated by December 2021, please use vmware_nsx module.\n\nModule to submit a file or URL to Lastline.",
     "logo": "lastline.png",
     "requirements": [],
     "input": "File or URL to submit to Lastline.",

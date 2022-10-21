@@ -5,9 +5,9 @@ from joe_parser import JoeParser
 
 misperrors = {'error': 'Error'}
 userConfig = {
-    "Import PE": {
+    "Import Executable": {
         "type": "Boolean",
-        "message": "Import PE Information",
+        "message": "Import Executable Information (PE, elf or apk for instance)",
     },
     "Mitre Att&ck": {
         "type": "Boolean",
@@ -29,7 +29,7 @@ def handler(q=False):
         return False
     q = json.loads(q)
     config = {
-        "import_pe": bool(int(q["config"]["Import PE"])),
+        "import_executable": bool(int(q["config"]["Import Executable"])),
         "mitre_attack": bool(int(q["config"]["Mitre Att&ck"])),
     }
 

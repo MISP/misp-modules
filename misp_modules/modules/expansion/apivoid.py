@@ -4,8 +4,8 @@ from . import check_input_attribute, standard_error_message
 from pymisp import MISPAttribute, MISPEvent, MISPObject
 
 misperrors = {'error': 'Error'}
-mispattributes = {'input': ['domain', 'hostname'], 'format': 'misp_standard'}
-moduleinfo = {'version': '0.1', 'author': 'Christian Studer',
+mispattributes = {'input': ['domain', 'hostname', 'email', 'email-src', 'email-dst', 'email-reply-to', 'dns-soa-email', 'target-email', 'whois-registrant-email'], 'format': 'misp_standard'}
+moduleinfo = {'version': '0.2', 'author': 'Christian Studer',
               'description': 'On demand query API for APIVoid.',
               'module-type': ['expansion', 'hover']}
 moduleconfig = ['apikey']
@@ -42,6 +42,31 @@ class APIVoidParser():
             self._handle_dns_record(item, record_type, relationship)
         ssl = requests.get(f'{self.url.format("sslinfo", apikey)}host={self.attribute.value}').json()
         self._parse_ssl_certificate(ssl['data']['certificate'])
+
+    def handle_email(self, apikey):
+        feature = 'emailverify'
+        if requests.get(f'{self.url.format(feature, apikey)}stats').json()['credits_remained'] < 0.06:
+            self.result = {'error': 'You do not have enough APIVoid credits to proceed your request.'}
+            return
+        emaillookup = requests.get(f'{self.url.format(feature, apikey)}email={self.attribute.value}').json()
+        email_verification = MISPObject('apivoid-email-verification')
+        boolean_attributes = ['valid_format', 'suspicious_username', 'suspicious_email', 'dirty_words_username',
+                              'suspicious_email', 'valid_tld', 'disposable', 'has_a_records', 'has_mx_records',
+                              'has_spf_records', 'is_spoofable', 'dmarc_configured', 'dmarc_enforced', 'free_email',
+                              'russian_free_email', 'china_free_email', 'suspicious_domain', 'dirty_words_domain',
+                              'domain_popular', 'risky_tld', 'police_domain', 'government_domain', 'educational_domain',
+                              'should_block']
+        for boolean_attribute in boolean_attributes:
+            email_verification.add_attribute(boolean_attribute,
+                                             **{'type': 'boolean', 'value': emaillookup['data'][boolean_attribute]})
+        email_verification.add_attribute('email', **{'type': 'email', 'value': emaillookup['data']['email']})
+        email_verification.add_attribute('username', **{'type': 'text', 'value': emaillookup['data']['username']})
+        email_verification.add_attribute('role_address',
+                                         **{'type': 'boolean', 'value': emaillookup['data']['role_address']})
+        email_verification.add_attribute('domain', **{'type': 'domain', 'value': emaillookup['data']['domain']})
+        email_verification.add_attribute('score', **{'type': 'float', 'value': emaillookup['data']['score']})
+        email_verification.add_reference(self.attribute['uuid'], 'related-to')
+        self.misp_event.add_object(email_verification)
 
     def _handle_dns_record(self, item, record_type, relationship):
         dns_record = MISPObject('dns-record')
@@ -82,7 +107,10 @@ def handler(q=False):
         return {'error': 'Unsupported attribute type.'}
     apikey = request['config']['apikey']
     apivoid_parser = APIVoidParser(attribute)
-    apivoid_parser.parse_domain(apikey)
+    if attribute['type'] in ['domain', 'hostname']:
+        apivoid_parser.parse_domain(apikey)
+    else:
+        apivoid_parser.handle_email(apikey)
     return apivoid_parser.get_results()
 
 

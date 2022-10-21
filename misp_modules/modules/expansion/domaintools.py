@@ -1,3 +1,7 @@
+# This module does not appear to be actively maintained.
+# Please see https://github.com/DomainTools/domaintools_misp
+# for the official DomainTools-supported MISP app
+
 import json
 import logging
 import sys

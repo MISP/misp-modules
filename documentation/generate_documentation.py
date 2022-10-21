@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import os
 import json
+import sys
 
 module_types = ['expansion', 'export_mod', 'import_mod']
 titles = ['Expansion Modules', 'Export Modules', 'Import Modules']
@@ -17,6 +18,7 @@ def generate_doc(module_type, root_path, logo_path='logos'):
         githubref = f'{githubpath}/{modulename}.py'
         markdown.append(f'\n#### [{modulename}]({githubref})\n')
         filename = os.path.join(current_path, filename)
+        print(f'Processing {filename}')
         with open(filename, 'rt') as f:
             definition = json.loads(f.read())
         if 'logo' in definition:

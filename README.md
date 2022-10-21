@@ -1,17 +1,14 @@
 # MISP modules
 
-[![Build Status](https://travis-ci.org/MISP/misp-modules.svg?branch=master)](https://travis-ci.org/MISP/misp-modules)
-[![Coverage Status](https://coveralls.io/repos/github/MISP/misp-modules/badge.svg?branch=master)](https://coveralls.io/github/MISP/misp-modules?branch=master)
-[![codecov](https://codecov.io/gh/MISP/misp-modules/branch/master/graph/badge.svg)](https://codecov.io/gh/MISP/misp-modules)
+[![Python package](https://github.com/MISP/misp-modules/actions/workflows/python-package.yml/badge.svg)](https://github.com/MISP/misp-modules/actions/workflows/python-package.yml)[![Coverage Status](https://coveralls.io/repos/github/MISP/misp-modules/badge.svg?branch=main)](https://coveralls.io/github/MISP/misp-modules?branch=main)
+[![codecov](https://codecov.io/gh/MISP/misp-modules/branch/main/graph/badge.svg)](https://codecov.io/gh/MISP/misp-modules)
 
-MISP modules are autonomous modules that can be used for expansion and other services in [MISP](https://github.com/MISP/MISP).
+MISP modules are autonomous modules that can be used to extend [MISP](https://github.com/MISP/MISP) for new services such as expansion, import and export.
 
 The modules are written in Python 3 following a simple API interface. The objective is to ease the extensions of MISP functionalities
 without modifying core components. The API is available via a simple REST API which is independent from MISP installation or configuration.
 
-MISP modules support is included in MISP starting from version 2.4.28.
-
-For more information: [Extending MISP with Python modules](https://www.misp-project.org/misp-training/3.1-misp-modules.pdf) slides from MISP training.
+For more information: [Extending MISP with Python modules](https://www.misp-project.org/misp-training/3.1-misp-modules.pdf) slides from [MISP training](https://github.com/MISP/misp-training).
 
 ## Existing MISP modules
 
@@ -50,6 +47,7 @@ For more information: [Extending MISP with Python modules](https://www.misp-proj
 * [hashdd](misp_modules/modules/expansion/hashdd.py) - a hover module to check file hashes against [hashdd.com](http://www.hashdd.com) including NSLR dataset.
 * [hibp](misp_modules/modules/expansion/hibp.py) - a hover module to lookup against Have I Been Pwned?
 * [html_to_markdown](misp_modules/modules/expansion/html_to_markdown.py) - Simple HTML to markdown converter
+* [HYAS Insight](misp_modules/modules/expansion/hyasinsight.py) - a hover and expansion module to get information from [HYAS Insight](https://www.hyas.com/hyas-insight).
 * [intel471](misp_modules/modules/expansion/intel471.py) - an expansion module to get info from [Intel471](https://intel471.com).
 * [IPASN](misp_modules/modules/expansion/ipasn.py) - a hover and expansion to get the BGP ASN of an IP address.
 * [iprep](misp_modules/modules/expansion/iprep.py) - an expansion module to get IP reputation from packetmail.net.
@@ -60,6 +58,8 @@ For more information: [Extending MISP with Python modules](https://www.misp-proj
 * [macaddress.io](misp_modules/modules/expansion/macaddress_io.py) - a hover module to retrieve vendor details and other information regarding a given MAC address or an OUI from [MAC address Vendor Lookup](https://macaddress.io). See [integration tutorial here](https://macaddress.io/integrations/MISP-module).
 * [macvendors](misp_modules/modules/expansion/macvendors.py) - a hover module to retrieve mac vendor information.
 * [MALWAREbazaar](misp_modules/modules/expansion/malwarebazaar.py) - an expansion module to query MALWAREbazaar with some payload.
+* [McAfee MVISION Insights](misp_modules/modules/expansion/mcafee_insights_enrich.py) - an expansion module enrich IOCs with McAfee MVISION Insights.
+* [Mmdb server lookup](misp_modules/modules/expansion/mmdb_lookup.py) - an expansion module to enrich an ip with geolocation information from an mmdb server such as ip.circl.lu.
 * [ocr-enrich](misp_modules/modules/expansion/ocr_enrich.py) - an enrichment module to get OCRized data from images into MISP.
 * [ods-enrich](misp_modules/modules/expansion/ods_enrich.py) - an enrichment module to get text out of OpenOffice spreadsheet document into MISP (using free-text parser).
 * [odt-enrich](misp_modules/modules/expansion/odt_enrich.py) - an enrichment module to get text out of OpenOffice document into MISP (using free-text parser).
@@ -89,6 +89,7 @@ For more information: [Extending MISP with Python modules](https://www.misp-proj
 * [virustotal](misp_modules/modules/expansion/virustotal.py) - an expansion module to query the [VirusTotal](https://www.virustotal.com/gui/home) API with a high request rate limit required. (More details about the API: [here](https://developers.virustotal.com/reference))
 * [virustotal_public](misp_modules/modules/expansion/virustotal_public.py) - an expansion module to query the [VirusTotal](https://www.virustotal.com/gui/home) API with a public key and a low request rate limit. (More details about the API: [here](https://developers.virustotal.com/reference))
 * [VMray](misp_modules/modules/expansion/vmray_submit.py) - a module to submit a sample to VMray.
+* [VMware NSX](misp_modules/modules/expansion/vmware_nsx.py) - a module to enrich a file or URL with VMware NSX Defender.
 * [VulnDB](misp_modules/modules/expansion/vulndb.py) - a module to query [VulnDB](https://www.riskbasedsecurity.com/).
 * [Vulners](misp_modules/modules/expansion/vulners.py) - an expansion module to expand information about CVEs using Vulners API.
 * [whois](misp_modules/modules/expansion/whois.py) - a module to query a local instance of [uwhois](https://github.com/rafiot/uwhoisd).
@@ -127,12 +128,14 @@ For more information: [Extending MISP with Python modules](https://www.misp-proj
 
 ## How to install and start MISP modules in a Python virtualenv? (recommended)
 
+***Be sure to run the latest version of `pip`***. To install the latest version of pip, `pip install --upgrade pip` will do the job.
+
 ~~~~bash
 sudo apt-get install python3-dev python3-pip libpq5 libjpeg-dev tesseract-ocr libpoppler-cpp-dev imagemagick virtualenv libopencv-dev zbar-tools libzbar0 libzbar-dev libfuzzy-dev build-essential -y
 sudo -u www-data virtualenv -p python3 /var/www/MISP/venv
 cd /usr/local/src/
-chown -R www-data .
-sudo git clone https://github.com/MISP/misp-modules.git
+sudo chown -R www-data: .
+sudo -u www-data git clone https://github.com/MISP/misp-modules.git
 cd misp-modules
 sudo -u www-data /var/www/MISP/venv/bin/pip install -I -r REQUIREMENTS
 sudo -u www-data /var/www/MISP/venv/bin/pip install .
@@ -140,14 +143,15 @@ sudo -u www-data /var/www/MISP/venv/bin/pip install .
 sudo cp etc/systemd/system/misp-modules.service /etc/systemd/system/
 sudo systemctl daemon-reload
 sudo systemctl enable --now misp-modules
-/var/www/MISP/venv/bin/misp-modules -l 127.0.0.1 -s & #to start the modules
+sudo service misp-modules start #or
+/var/www/MISP/venv/bin/misp-modules -l 127.0.0.1 & #to start the modules
 ~~~~
 
 ## How to install and start MISP modules on RHEL-based distributions ?
 As of this writing, the official RHEL repositories only contain Ruby 2.0.0 and Ruby 2.1 or higher is required. As such, this guide installs Ruby 2.2 from the [SCL](https://access.redhat.com/documentation/en-us/red_hat_software_collections/3/html/3.2_release_notes/chap-installation#sect-Installation-Subscribe) repository. 
 
 ~~~~bash
-sudo yum install rh-ruby22
+sudo yum install rh-python36 rh-ruby22
 sudo yum install openjpeg-devel
 sudo yum install rubygem-rouge rubygem-asciidoctor zbar-devel opencv-devel gcc-c++ pkgconfig poppler-cpp-devel python-devel redhat-rpm-config
 cd /var/www/MISP
@@ -168,7 +172,7 @@ After=misp-workers.service
 Type=simple
 User=apache
 Group=apache
-ExecStart=/usr/bin/scl enable rh-python36 rh-ruby22  '/var/www/MISP/venv/bin/misp-modules –l 127.0.0.1 –s'
+ExecStart=/usr/bin/scl enable rh-python36 rh-ruby22  '/var/www/MISP/venv/bin/misp-modules -l 127.0.0.1'
 Restart=always
 RestartSec=10
 

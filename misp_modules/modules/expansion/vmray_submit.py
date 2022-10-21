@@ -19,7 +19,7 @@ from distutils.util import strtobool
 import io
 import zipfile
 
-from ._vmray.vmray_rest_api import VMRayRESTAPI
+from _vmray.rest_api import VMRayRESTAPI
 
 misperrors = {'error': 'Error'}
 mispattributes = {'input': ['attachment', 'malware-sample'], 'output': ['text', 'sha1', 'sha256', 'md5', 'link']}

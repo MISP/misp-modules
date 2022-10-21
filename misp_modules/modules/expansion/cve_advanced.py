@@ -23,11 +23,11 @@ class VulnerabilityParser():
         self.references = defaultdict(list)
         self.capec_features = ('id', 'name', 'summary', 'prerequisites', 'solutions')
         self.vulnerability_mapping = {
-            'id': ('vulnerability', 'id'), 'summary': ('text', 'summary'),
-            'vulnerable_configuration': ('cpe', 'vulnerable_configuration'),
-            'vulnerable_configuration_cpe_2_2': ('cpe', 'vulnerable_configuration'),
-            'Modified': ('datetime', 'modified'), 'Published': ('datetime', 'published'),
-            'references': ('link', 'references'), 'cvss': ('float', 'cvss-score')}
+            'id': 'id', 'summary': 'summary',
+            'vulnerable_configuration': 'vulnerable-configuration',
+            'vulnerable_configuration_cpe_2_2': 'vulnerable-configuration',
+            'Modified': 'modified', 'Published': 'published',
+            'references': 'references', 'cvss': 'cvss-score'}
         self.weakness_mapping = {'name': 'name', 'description_summary': 'description',
                                  'status': 'status', 'weaknessabs': 'weakness-abs'}
 
@@ -43,18 +43,17 @@ class VulnerabilityParser():
         for feature in ('id', 'summary', 'Modified', 'cvss'):
             value = self.vulnerability.get(feature)
             if value:
-                attribute_type, relation = self.vulnerability_mapping[feature]
-                vulnerability_object.add_attribute(relation, **{'type': attribute_type, 'value': value})
+                vulnerability_object.add_attribute(self.vulnerability_mapping[feature], value)
         if 'Published' in self.vulnerability:
-            vulnerability_object.add_attribute('published', **{'type': 'datetime', 'value': self.vulnerability['Published']})
-            vulnerability_object.add_attribute('state', **{'type': 'text', 'value': 'Published'})
+            vulnerability_object.add_attribute('published', self.vulnerability['Published'])
+            vulnerability_object.add_attribute('state', 'Published')
         for feature in ('references', 'vulnerable_configuration', 'vulnerable_configuration_cpe_2_2'):
             if feature in self.vulnerability:
-                attribute_type, relation = self.vulnerability_mapping[feature]
+                relation = self.vulnerability_mapping[feature]
                 for value in self.vulnerability[feature]:
                     if isinstance(value, dict):
                         value = value['title']
-                    vulnerability_object.add_attribute(relation, **{'type': attribute_type, 'value': value})
+                    vulnerability_object.add_attribute(relation, value)
         vulnerability_object.add_reference(self.attribute['uuid'], 'related-to')
         self.misp_event.add_object(vulnerability_object)
         if 'cwe' in self.vulnerability and self.vulnerability['cwe'] not in ('Unknown', 'NVD-CWE-noinfo'):
@@ -74,10 +73,9 @@ class VulnerabilityParser():
         for capec in self.vulnerability['capec']:
             capec_object = MISPObject('attack-pattern')
             for feature in self.capec_features:
-                capec_object.add_attribute(feature, **{'type': 'text', 'value': capec[feature]})
+                capec_object.add_attribute(feature, capec[feature])
             for related_weakness in capec['related_weakness']:
-                attribute = {'type': 'weakness', 'value': f"CWE-{related_weakness}"}
-                capec_object.add_attribute('related-weakness', **attribute)
+                capec_object.add_attribute('related-weakness', f"CWE-{related_weakness}")
             self.misp_event.add_object(capec_object)
             self.references[vulnerability_uuid].append(
                 {
@@ -87,16 +85,16 @@ class VulnerabilityParser():
             )
 
     def __parse_weakness(self, vulnerability_uuid):
-        cwe_string, cwe_id = self.vulnerability['cwe'].split('-')
+        cwe_string, cwe_id = self.vulnerability['cwe'].split('-')[:2]
         cwes = requests.get(self.api_url.replace('/cve/', '/cwe'))
         if cwes.status_code == 200:
             for cwe in cwes.json():
                 if cwe['id'] == cwe_id:
                     weakness_object = MISPObject('weakness')
-                    weakness_object.add_attribute('id', {'type': 'weakness', 'value': f'{cwe_string}-{cwe_id}'})
+                    weakness_object.add_attribute('id', f'{cwe_string}-{cwe_id}')
                     for feature, relation in self.weakness_mapping.items():
                         if cwe.get(feature):
-                            weakness_object.add_attribute(relation, **{'type': 'text', 'value': cwe[feature]})
+                            weakness_object.add_attribute(relation, cwe[feature])
                     self.misp_event.add_object(weakness_object)
                     self.references[vulnerability_uuid].append(
                         {

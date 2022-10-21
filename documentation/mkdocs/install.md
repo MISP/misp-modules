@@ -14,7 +14,8 @@ sudo apt-get install -y \
   zbar-tools \
   libzbar0 \
   libzbar-dev \
-  libfuzzy-dev
+  libfuzzy-dev \
+  libcaca-dev
 
 # BEGIN with virtualenv:   
 $SUDO_WWW virtualenv -p python3 /var/www/MISP/venv

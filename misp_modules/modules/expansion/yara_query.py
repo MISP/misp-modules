@@ -14,6 +14,12 @@ moduleconfig = []
 mispattributes = {'input': ['md5', 'sha1', 'sha256', 'filename|md5', 'filename|sha1', 'filename|sha256', 'imphash'], 'output': ['yara']}
 
 
+def extract_input_attribute(request):
+    for input_type in mispattributes['input']:
+        if input_type in request:
+            return input_type, request[input_type]
+
+
 def get_hash_condition(hashtype, hashvalue):
     hashvalue = hashvalue.lower()
     required_module, params = ('pe', '()') if hashtype == 'imphash' else ('hash', '(0, filesize)')
@@ -24,11 +30,11 @@ def handler(q=False):
     if q is False:
         return False
     request = json.loads(q)
-    del request['module']
-    if 'event_id' in request:
-        del request['event_id']
+    attribute = extract_input_attribute(request)
+    if attribute is None:
+        return {'error': f'Wrong input type, please choose in the following: {", ".join(mispattributes["input"])}'}
     uuid = request.pop('attribute_uuid') if 'attribute_uuid' in request else None
-    attribute_type, value = list(request.items())[0]
+    attribute_type, value = attribute
     if 'filename' in attribute_type:
         _, attribute_type = attribute_type.split('|')
         _, value = value.split('|')

@@ -73,7 +73,6 @@ class ShodanParser():
             ip_address_object = MISPObject('ip-api-address')
             for attribute in ip_address_attributes:
                 ip_address_object.add_attribute(**attribute)
-            ip_address_object.add_attribute(**self._get_source_attribute())
             ip_address_object.add_reference(self.attribute.uuid, 'describes')
             self.misp_event.add_object(ip_address_object)
 

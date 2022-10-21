@@ -67,7 +67,7 @@ def handler(q=False):
             image = img.make_blob('png')
             log.debug("Final image size is {}x{}".format(pdf.width, pdf.height * (p + 1)))
     else:
-        image = document
+        image = base64.b64decode(request["data"])
 
     image_file = BytesIO(image)
     image_file.seek(0)

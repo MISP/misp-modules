@@ -1,0 +1,11 @@
+{
+    "description": "Defender for Endpoint KQL hunting query export module",
+    "requirements": [],
+    "features": "This module export an event as Defender for Endpoint KQL queries that can then be used in your own python3 or Powershell tool. If you are using Microsoft Sentinel, you can directly connect your MISP instance to Sentinel and then create queries using the `ThreatIntelligenceIndicator` table to match events against imported IOC.",
+    "references": [
+        "https://docs.microsoft.com/en-us/windows/security/threat-protection/microsoft-defender-atp/advanced-hunting-schema-reference"
+    ],
+    "input": "MISP Event attributes",
+    "output": "Defender for Endpoint KQL queries",
+    "logo": "defender_endpoint.png"
+}
