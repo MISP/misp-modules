@@ -1,12 +1,13 @@
-from pymisp import MISPAttribute, MISPEvent, MISPObject
 import json
 import requests
+from . import check_input_attribute, standard_error_message
+from pymisp import MISPAttribute, MISPEvent, MISPObject
 
 misperrors = {'error': 'Error'}
-mispattributes = {'input': ['hostname', 'domain', "ip-src", "ip-dst", "md5", "sha1", "sha256", "sha512", "url"],
+mispattributes = {'input': ['hostname', 'domain', "ip-src", "ip-dst", "md5", "sha1", "sha256", "url"],
                   'format': 'misp_standard'}
 moduleinfo = {'version': '1', 'author': 'Christian Studer',
-              'description': 'Get information from virustotal public API v2.',
+              'description': 'Get information from VirusTotal public API v2.',
               'module-type': ['expansion', 'hover']}
 
 moduleconfig = ['apikey']
@@ -36,7 +37,7 @@ class VirusTotalParser():
 
     def parse_resolutions(self, resolutions, subdomains=None, uuids=None):
         domain_ip_object = MISPObject('domain-ip')
-        if self.attribute.type == 'domain':
+        if self.attribute.type in ('domain', 'hostname'):
             domain_ip_object.add_attribute('domain', type='domain', value=self.attribute.value)
             attribute_type, relation, key = ('ip-dst', 'ip', 'ip_address')
         else:
@@ -85,8 +86,10 @@ class DomainQuery(VirusTotalParser):
             whois_object = MISPObject(whois)
             whois_object.add_attribute('text', type='text', value=query_result[whois])
             self.misp_event.add_object(**whois_object)
-        siblings = (self.parse_siblings(domain) for domain in query_result['domain_siblings'])
-        self.parse_resolutions(query_result['resolutions'], query_result['subdomains'], siblings)
+        if 'domain_siblings' in query_result:
+            siblings = (self.parse_siblings(domain) for domain in query_result['domain_siblings'])
+            if 'subdomains' in query_result:
+                self.parse_resolutions(query_result['resolutions'], query_result['subdomains'], siblings)
         self.parse_urls(query_result)
 
     def parse_siblings(self, domain):
@@ -153,7 +156,7 @@ ip = ('ip', IpQuery)
 file = ('resource', HashQuery)
 misp_type_mapping = {'domain': domain, 'hostname': domain, 'ip-src': ip,
                      'ip-dst': ip, 'md5': file, 'sha1': file, 'sha256': file,
-                     'sha512': file, 'url': ('resource', UrlQuery)}
+                     'url': ('resource', UrlQuery)}
 
 
 def parse_error(status_code):
@@ -172,7 +175,11 @@ def handler(q=False):
     if not request.get('config') or not request['config'].get('apikey'):
         misperrors['error'] = "A VirusTotal api key is required for this module."
         return misperrors
+    if not request.get('attribute') or not check_input_attribute(request['attribute']):
+        return {'error': f'{standard_error_message}, which should contain at least a type, a value and an uuid.'}
     attribute = request['attribute']
+    if attribute['type'] not in mispattributes['input']:
+        return {'error': 'Unsupported attribute type.'}
     query_type, to_call = misp_type_mapping[attribute['type']]
     parser = to_call(request['config']['apikey'], attribute)
     query_result = parser.get_query_result(query_type)

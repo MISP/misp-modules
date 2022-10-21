@@ -1,83 +1,117 @@
 -i https://pypi.org/simple
 -e .
--e git+https://github.com/D4-project/BGP-Ranking.git/@429cea9c0787876820984a2df4e982449a84c10e#egg=pybgpranking&subdirectory=client
--e git+https://github.com/D4-project/IPASN-History.git/@47cd0f2658ab172fce42126ff3a1dbcddfb0b5fb#egg=pyipasnhistory&subdirectory=client
+-e git+https://github.com/D4-project/BGP-Ranking.git/@fd9c0e03af9b61d4bf0b67ac73c7208a55178a54#egg=pybgpranking&subdirectory=client
+-e git+https://github.com/D4-project/IPASN-History.git/@fc5e48608afc113e101ca6421bf693b7b9753f9e#egg=pyipasnhistory&subdirectory=client
 -e git+https://github.com/MISP/PyIntel471.git@0df8d51f1c1425de66714b3a5a45edb69b8cc2fc#egg=pyintel471
--e git+https://github.com/MISP/PyMISP.git@3e8c36dc2f34b5d812a6b6d1bd1a619f01286657#egg=pymisp
--e git+https://github.com/Rafiot/uwhoisd.git@411572840eba4c72dc321c549b36a54ed5cea9de#egg=uwhois&subdirectory=client
+-e git+https://github.com/MISP/PyMISP.git@bacd4c78cd83d3bf45dcf55cd9ad3514747ac985#egg=pymisp[fileobjects,openioc,pdfexport]
+-e git+https://github.com/Rafiot/uwhoisd.git@783bba09b5a6964f25566089826a1be4b13f2a22#egg=uwhois&subdirectory=client
 -e git+https://github.com/cartertemm/ODTReader.git/@49d6938693f6faa3ff09998f86dba551ae3a996b#egg=odtreader
 -e git+https://github.com/sebdraven/pydnstrails@48c1f740025c51289f43a24863d1845ff12fd21a#egg=pydnstrails
--e git+https://github.com/sebdraven/pyonyphe@cbb0168d5cb28a9f71f7ab3773164a7039ccdb12#egg=pyonyphe
-aiohttp==3.4.4
-apiosintDS==1.8.1
-antlr4-python3-runtime==4.7.2 ; python_version >= '3'
-async-timeout==3.0.1
-attrs==19.1.0
+-e git+https://github.com/sebdraven/pyonyphe@1ce15581beebb13e841193a08a2eb6f967855fcb#egg=pyonyphe
+aiohttp==3.6.2; python_full_version >= '3.5.3'
+antlr4-python3-runtime==4.8; python_version >= '3'
+apiosintds==1.8.3
+argparse==1.4.0
+assemblyline-client==4.0.1
+async-timeout==3.0.1; python_full_version >= '3.5.3'
+attrs==20.2.0; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3'
 backscatter==0.2.4
-beautifulsoup4==4.7.1
+beautifulsoup4==4.9.3
 blockchain==1.4.4
-certifi==2019.3.9
+certifi==2020.6.20
+cffi==1.14.3
 chardet==3.0.4
 click-plugins==1.1.1
-click==7.0
-colorama==0.4.1
-dnspython==1.16.0
-domaintools-api==0.3.3
-enum-compat==0.0.2
+click==7.1.2; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4'
+colorama==0.4.3; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4'
+configparser==5.0.1; python_version >= '3.6'
+cryptography==3.1.1
+clamd==1.0.2
+decorator==4.4.2
+deprecated==1.2.10; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3'
+dnspython==2.0.0
+domaintools-api==0.5.2
+enum-compat==0.0.3
 ez-setup==0.9
 ezodf==0.3.2
-future==0.17.1
-geoip2==2.9.0
-httplib2==0.12.3
-idna-ssl==1.1.0 ; python_version < '3.7'
-idna==2.8
+future==0.18.2; python_version >= '2.6' and python_version not in '3.0, 3.1, 3.2, 3.3'
+futures==3.1.1
+geoip2==4.1.0
+httplib2==0.18.1
+idna-ssl==1.1.0; python_version < '3.7'
+idna==2.10; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3'
 isodate==0.6.0
-jbxapi==3.1.3
-jsonschema==3.0.1
-lxml==4.3.3
+jbxapi==3.11.0
+json-log-formatter==0.3.0
+jsonschema==3.2.0
+lief==0.10.1
+lxml==4.5.2
 maclookup==1.0.3
-multidict==4.5.2
+markdownify==0.5.3
+maxminddb==2.0.2; python_version >= '3.6'
+multidict==4.7.6; python_version >= '3.5'
 np==1.0.2
-numpy==1.16.3
+numpy==1.19.2; python_version >= '3.6'
 oauth2==1.9.0.post1
-opencv-python==4.1.0.25
-pandas-ods-reader==0.0.6
-pandas==0.24.2
-passivetotal==1.0.30
-pdftotext==2.1.1
-pillow==6.0.0
-psutil==5.6.2
-pyeupi==1.0
-pyparsing==2.4.0
-pypdns==1.4.1
+opencv-python==4.4.0.44
+pandas-ods-reader==0.0.7
+pandas==1.1.3
+passivetotal==1.0.31
+pdftotext==2.1.5
+pillow==7.2.0
+progressbar2==3.53.1
+psutil==5.7.2; python_version >= '2.6' and python_version not in '3.0, 3.1, 3.2, 3.3'
+pycparser==2.20; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3'
+pycryptodome==3.9.8; python_version >= '2.6' and python_version not in '3.0, 3.1, 3.2, 3.3'
+pycryptodomex==3.9.8; python_version >= '2.6' and python_version not in '3.0, 3.1, 3.2, 3.3'
+pydeep==0.4
+pyeupi==1.1
+pygeoip==0.3.2
+pyopenssl==19.1.0
+pyparsing==2.4.7; python_version >= '2.6' and python_version not in '3.0, 3.1, 3.2, 3.3'
+pypdns==1.5.1
 pypssl==2.1
-pyrsistent==0.15.2
-pytesseract==0.2.6
-python-dateutil==2.8.0
+pyrsistent==0.17.3; python_version >= '3.5'
+pytesseract==0.3.6
+python-baseconv==1.2.2
+python-dateutil==2.8.1; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3'
 python-docx==0.8.10
+python-engineio==3.13.2
+python-magic==0.4.18
 python-pptx==0.6.18
-pytz==2019.1
-pyyaml==5.1
+python-socketio[client]==4.6.0
+python-utils==2.4.0
+pytz==2019.3
+pyyaml==5.3.1
 pyzbar==0.1.8
-rdflib==4.2.2
-redis==3.2.1
-reportlab==3.5.21
-requests-cache==0.5.0
-requests==2.22.0
-shodan==1.13.0
-sigmatools==0.10
-six==1.12.0
-soupsieve==1.9.1
-sparqlwrapper==1.8.4
-stix2-patterns==1.1.0
-tabulate==0.8.3
-tornado==6.0.2
-url-normalize==1.4.1
+pyzipper==0.3.3; python_version >= '3.5'
+rdflib==5.0.0
+redis==3.5.3; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4'
+reportlab==3.5.53
+requests-cache==0.5.2
+requests[security]==2.24.0
+shodan==1.23.1
+sigmatools==0.18.1
+six==1.15.0; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3'
+socketio-client==0.5.7.4
+soupsieve==2.0.1; python_version >= '3.0'
+sparqlwrapper==1.8.5
+stix2-patterns==1.3.1
+tabulate==0.8.7
+tornado==6.0.4; python_version >= '3.5'
+trustar==0.3.33
+tzlocal==2.1
+unicodecsv==0.14.1
+url-normalize==1.4.2; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4, 3.5'
 urlarchiver==0.2
-urllib3==1.25.3
-vulners==1.5.0
-wand==0.5.3
+urllib3==1.25.10; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4' and python_version < '4'
+validators==0.14.0
+vt-graph-api==1.0.1
+vulners==1.5.8
+wand==0.6.3
+websocket-client==0.57.0
+wrapt==1.12.1
 xlrd==1.2.0
-xlsxwriter==1.1.8
+xlsxwriter==1.3.6
 yara-python==3.8.1
-yarl==1.3.0
+yarl==1.6.0; python_version >= '3.5'

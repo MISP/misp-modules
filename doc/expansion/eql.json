@@ -1,9 +1,0 @@
-{
-    "description": "Generates EQL queries from attributes",
-    "logo": "logos/eql.png",
-    "requirements": [],
-    "input": "A filename or ip attribute.",
-    "output": "The EQL query generated from the input attribute.",
-    "references": ["https://eql.readthedocs.io/en/latest/"],
-    "features": "The module simply generates EQL rules out of the input attribute."
-}

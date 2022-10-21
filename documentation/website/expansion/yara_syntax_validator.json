@@ -1,0 +1,13 @@
+{
+    "description": "An expansion hover module to perform a syntax check on if yara rules are valid or not.",
+    "logo": "yara.png",
+    "requirements": [
+        "yara_python python library"
+    ],
+    "input": "YARA rule attribute.",
+    "output": "Text to inform users if their rule is valid.",
+    "references": [
+        "http://virustotal.github.io/yara/"
+    ],
+    "features": "This modules simply takes a YARA rule as input, and checks its syntax. It returns then a confirmation if the syntax is valid, otherwise the syntax error is displayed."
+}

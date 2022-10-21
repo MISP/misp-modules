@@ -1,8 +1,0 @@
-{
-  "description": "Module to import ThreatAnalyzer archive.zip / analysis.json files.",
-  "requirements": [],
-  "features": "The module imports MISP Attributes from a ThreatAnalyzer format file. This file can be either ZIP, or JSON format.\nThere is by the way no special feature for users to make the module work.",
-  "references": ["https://www.threattrack.com/malware-analysis.aspx"],
-  "input": "ThreatAnalyzer format file",
-  "output": "MISP Event attributes"
-}

@@ -1,6 +1,7 @@
 import requests
 import json
 import sys
+from . import check_input_attribute, standard_error_message
 from collections import defaultdict
 from pymisp import MISPAttribute, MISPEvent, MISPObject
 from requests.auth import HTTPBasicAuth
@@ -105,7 +106,7 @@ class XforceExchange():
 
     def _parse_dns(self, value):
         dns_result = self._api_call(f'{self.base_url}/resolve/{value}')
-        if dns_result and dns_result['Passive'].get('records'):
+        if dns_result.get('Passive') and dns_result['Passive'].get('records'):
             itype, ftype, value = self._fetch_types(dns_result['Passive']['query'])
             misp_object = MISPObject('domain-ip')
             misp_object.add_attribute(itype, value)
@@ -160,6 +161,10 @@ def handler(q=False):
         return misperrors
     key = request["config"]["apikey"]
     password = request['config']['apipassword']
+    if not request.get('attribute') or not check_input_attribute(request['attribute']):
+        return {'error': f'{standard_error_message} which should contain at least a type, a value and an uuid.'}
+    if request['attribute']['type'] not in mispattributes['input']:
+        return {'error': 'Unsupported attribute type.'}
     parser = XforceExchange(request['attribute'], key, password)
     parser.parse()
     return parser.get_result()

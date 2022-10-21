@@ -78,20 +78,85 @@ class TestExpansions(unittest.TestCase):
         except AssertionError:
             self.assertTrue(self.get_values(response).startswith('185.255.79.90 IS NOT listed by OSINT.digitalside.it.'))
 
+    def test_apivoid(self):
+        module_name = "apivoid"
+        query = {"module": module_name,
+                 "attribute": {"type": "domain",
+                               "value": "circl.lu",
+                               "uuid": "ea89a33b-4ab7-4515-9f02-922a0bee333d"},
+                 "config": {}}
+        if module_name in self.configs:
+            query['config'] = self.configs[module_name]
+            response = self.misp_modules_post(query)
+            try:
+                self.assertEqual(self.get_object(response), 'dns-record')
+            except Exception:
+                self.assertTrue(self.get_errors(response).startswith('You do not have enough APIVoid credits'))
+        else:
+            response = self.misp_modules_post(query)
+            self.assertEqual(self.get_errors(response), 'An API key for APIVoid is required.')
+
     def test_bgpranking(self):
-        query = {"module": "bgpranking", "AS": "13335"}
+        query = {
+            "module": "bgpranking",
+            "attribute": {
+                "type": "AS",
+                "value": "13335",
+                "uuid": "ea89a33b-4ab7-4515-9f02-922a0bee333d"
+            }
+        }
         response = self.misp_modules_post(query)
-        self.assertEqual(self.get_values(response)['response']['asn_description'], 'CLOUDFLARENET - Cloudflare, Inc., US')
+        self.assertEqual(self.get_object(response), 'asn')
 
     def test_btc_steroids(self):
         query = {"module": "btc_steroids", "btc": "1ES14c7qLb5CYhLMUekctxLgc1FV2Ti9DA"}
         response = self.misp_modules_post(query)
-        self.assertTrue(self.get_values(response).startswith('\n\nAddress:\t1ES14c7qLb5CYhLMUekctxLgc1FV2Ti9DA\nBalance:\t0.0000000000 BTC (+0.0005355700 BTC / -0.0005355700 BTC)'))
+        try:
+            self.assertTrue(self.get_values(response).startswith('\n\nAddress:\t1ES14c7qLb5CYhLMUekctxLgc1FV2Ti9DA\nBalance:\t0.0002126800 BTC (+0.0007482500 BTC / -0.0005355700 BTC)'))
+
+        except Exception:
+            self.assertEqual(self.get_values(response), 'Not a valid BTC address, or Balance has changed')
 
     def test_btc_scam_check(self):
         query = {"module": "btc_scam_check", "btc": "1ES14c7qLb5CYhLMUekctxLgc1FV2Ti9DA"}
         response = self.misp_modules_post(query)
         self.assertEqual(self.get_values(response), '1es14c7qlb5cyhlmuekctxlgc1fv2ti9da fraudolent bitcoin address')
+
+    def test_circl_passivedns(self):
+        module_name = "circl_passivedns"
+        query = {"module": module_name,
+                 "attribute": {"type": "domain",
+                               "value": "circl.lu",
+                               "uuid": "ea89a33b-4ab7-4515-9f02-922a0bee333d"},
+                 "config": {}}
+        if module_name in self.configs:
+            query['config'] = self.configs[module_name]
+            response = self.misp_modules_post(query)
+            try:
+                self.assertEqual(self.get_object(response), 'passive-dns')
+            except Exception:
+                self.assertTrue(self.get_errors(response).startswith('There is an authentication error'))
+        else:
+            response = self.misp_modules_post(query)
+            self.assertTrue(self.get_errors(response).startswith('CIRCL Passive DNS authentication is missing.'))
+
+    def test_circl_passivessl(self):
+        module_name = "circl_passivessl"
+        query = {"module": module_name,
+                 "attribute": {"type": "ip-dst",
+                               "value": "149.13.33.14",
+                               "uuid": "ea89a33b-4ab7-4515-9f02-922a0bee333d"},
+                 "config": {}}
+        if module_name in self.configs:
+            query['config'] = self.configs[module_name]
+            response = self.misp_modules_post(query)
+            try:
+                self.assertEqual(self.get_object(response), 'x509')
+            except Exception:
+                self.assertTrue(self.get_errors(response).startswith('There is an authentication error'))
+        else:
+            response = self.misp_modules_post(query)
+            self.assertTrue(self.get_errors(response).startswith('CIRCL Passive SSL authentication is missing.'))
 
     def test_countrycode(self):
         query = {"module": "countrycode", "domain": "www.circl.lu"}
@@ -156,7 +221,7 @@ class TestExpansions(unittest.TestCase):
                 try:
                     self.assertIn(result, self.get_values(response))
                 except Exception:
-                    self.assertTrue(self.get_errors(response).startwith('Something went wrong'))
+                    self.assertTrue(self.get_errors(response).startswith('Something went wrong'))
         else:
             query = {"module": module_name, "ip-src": "8.8.8.8"}
             response = self.misp_modules_post(query)
@@ -171,18 +236,32 @@ class TestExpansions(unittest.TestCase):
         self.assertEqual(to_check, 'OK (Not Found)', response)
 
     def test_greynoise(self):
-        query = {"module": "greynoise", "ip-dst": "1.1.1.1"}
-        response = self.misp_modules_post(query)
-        value = self.get_values(response)
-        if value != 'GreyNoise API not accessible (HTTP 429)':
-            self.assertTrue(value.startswith('{"ip":"1.1.1.1","status":"ok"'))
+        module_name = 'greynoise'
+        query = {"module": module_name, "ip-dst": "1.1.1.1"}
+        if module_name in self.configs:
+            query['config'] = self.configs[module_name]
+            response = self.misp_modules_post(query)
+            try:
+                self.assertEqual(self.get_values(response), 'This IP is commonly spoofed in Internet-scan activity')
+            except Exception:
+                self.assertIn(
+                    self.get_errors(reponse),
+                    (
+                        "Unauthorized. Please check your API key.",
+                        "Too many requests. You've hit the rate-limit."
+                    )
+                )
+        else:
+            response = self.misp_modules_post(query)
+            self.assertEqual(self.get_errors(response), 'Missing Greynoise API key.')
 
     def test_ipasn(self):
-        query = {"module": "ipasn", "ip-dst": "1.1.1.1"}
+        query = {"module": "ipasn",
+                 "attribute": {"type": "ip-src",
+                               "value": "149.13.33.14",
+                               "uuid": "ea89a33b-4ab7-4515-9f02-922a0bee333d"}}
         response = self.misp_modules_post(query)
-        key = list(self.get_values(response)['response'].keys())[0]
-        entry = self.get_values(response)['response'][key]['asn']
-        self.assertEqual(entry, '13335')
+        self.assertEqual(self.get_object(response), 'asn')
 
     def test_macaddess_io(self):
         module_name = 'macaddress_io'
@@ -206,7 +285,7 @@ class TestExpansions(unittest.TestCase):
             encoded = b64encode(f.read()).decode()
         query = {"module": "ocr_enrich", "attachment": filename, "data": encoded}
         response = self.misp_modules_post(query)
-        self.assertEqual(self.get_values(response), 'Threat Sharing')
+        self.assertEqual(self.get_values(response).strip('\n'), 'Threat Sharing')
 
     def test_ods(self):
         filename = 'test.ods'
@@ -255,7 +334,7 @@ class TestExpansions(unittest.TestCase):
     def test_otx(self):
         query_types = ('domain', 'ip-src', 'md5')
         query_values = ('circl.lu', '8.8.8.8', '616eff3e9a7575ae73821b4668d2801c')
-        results = (('149.13.33.14', '149.13.33.17'),
+        results = (('149.13.33.14', '149.13.33.17', '6f9814ba70e68c3bce16d253e8d8f86e04a21a2b4172a0f7631040096ba2c47a'),
                    'ffc2595aefa80b61621023252b5f0ccb22b6e31d7f1640913cd8ff74ddbd8b41',
                    '8.8.8.8')
         for query_type, query_value, result in zip(query_types, query_values, results):
@@ -304,6 +383,15 @@ class TestExpansions(unittest.TestCase):
         query = {"module": "qrcode", "attachment": filename, "data": encoded}
         response = self.misp_modules_post(query)
         self.assertEqual(self.get_values(response), '1GXZ6v7FZzYBEnoRaG77SJxhu7QkvQmFuh')
+
+    def test_ransomcoindb(self):
+        query = {"module": "ransomcoindb",
+                 "attributes": {"type": "btc",
+                                "value": "1ES14c7qLb5CYhLMUekctxLgc1FV2Ti9DA",
+                                "uuid": "ea89a33b-4ab7-4515-9f02-922a0bee333d"}}
+        if 'ransomcoindb' not in self.configs:
+            response = self.misp_modules_post(query)
+            self.assertEqual(self.get_errors(response), "Ransomcoindb API key is missing")
 
     def test_rbl(self):
         query = {"module": "rbl", "ip-src": "8.8.8.8"}

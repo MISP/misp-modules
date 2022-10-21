@@ -11,14 +11,14 @@ flake8 = "*"
 
 [packages]
 dnspython = "*"
-requests = "*"
+requests = {extras = ["security"],version = "*"}
 urlarchiver = "*"
 passivetotal = "*"
 pypdns = "*"
 pypssl = "*"
 pyeupi = "*"
 uwhois = {editable = true,git = "https://github.com/Rafiot/uwhoisd.git",ref = "testing",subdirectory = "client"}
-pymisp = {editable = true,git = "https://github.com/MISP/PyMISP.git"}
+pymisp = {editable = true,extras = ["fileobjects,openioc,pdfexport"],git = "https://github.com/MISP/PyMISP.git"}
 pyonyphe = {editable = true,git = "https://github.com/sebdraven/pyonyphe"}
 pydnstrails = {editable = true,git = "https://github.com/sebdraven/pydnstrails"}
 pytesseract = "*"
@@ -58,6 +58,11 @@ idna-ssl = {markers = "python_version < '3.7'"}
 jbxapi = "*"
 geoip2 = "*"
 apiosintDS = "*"
+assemblyline_client = "*"
+vt-graph-api = "*"
+trustar = "*"
+markdownify = "==0.5.3"
+socialscan = "*"
 
 [requires]
 python_version = "3"

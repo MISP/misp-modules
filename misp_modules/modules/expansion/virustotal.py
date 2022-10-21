@@ -1,33 +1,32 @@
-from pymisp import MISPAttribute, MISPEvent, MISPObject
 import json
 import requests
+from . import check_input_attribute, standard_error_message
+from pymisp import MISPAttribute, MISPEvent, MISPObject
 
 misperrors = {'error': 'Error'}
-mispattributes = {'input': ['hostname', 'domain', "ip-src", "ip-dst", "md5", "sha1", "sha256", "sha512", "url"],
+mispattributes = {'input': ['hostname', 'domain', "ip-src", "ip-dst", "md5", "sha1", "sha256", "url"],
                   'format': 'misp_standard'}
 
 # possible module-types: 'expansion', 'hover' or both
 moduleinfo = {'version': '4', 'author': 'Hannah Ward',
-              'description': 'Get information from virustotal',
+              'description': 'Get information from VirusTotal',
               'module-type': ['expansion']}
 
 # config fields that your code expects from the site admin
-moduleconfig = ["apikey"]
+moduleconfig = ["apikey", "event_limit"]
 
-
-# TODO: Parse the report with a private API key to be able to get more advanced results from a query with 'allinfo' set to True
 
 class VirusTotalParser(object):
-    def __init__(self, apikey):
+    def __init__(self, apikey, limit):
         self.apikey = apikey
+        self.limit = limit
         self.base_url = "https://www.virustotal.com/vtapi/v2/{}/report"
         self.misp_event = MISPEvent()
         self.parsed_objects = {}
         self.input_types_mapping = {'ip-src': self.parse_ip, 'ip-dst': self.parse_ip,
                                     'domain': self.parse_domain, 'hostname': self.parse_domain,
                                     'md5': self.parse_hash, 'sha1': self.parse_hash,
-                                    'sha256': self.parse_hash, 'sha512': self.parse_hash,
-                                    'url': self.parse_url}
+                                    'sha256': self.parse_hash, 'url': self.parse_url}
 
     def query_api(self, attribute):
         self.attribute = MISPAttribute()
@@ -54,10 +53,10 @@ class VirusTotalParser(object):
                          'downloaded': 'downloaded-from',
                          'referrer': 'referring'}
         siblings = (self.parse_siblings(domain) for domain in req['domain_siblings'])
-        uuid = self.parse_resolutions(req['resolutions'], req['subdomains'], siblings)
+        uuid = self.parse_resolutions(req['resolutions'], req['subdomains'] if 'subdomains' in req else None, siblings)
         for feature_type, relationship in feature_types.items():
             for feature in ('undetected_{}_samples', 'detected_{}_samples'):
-                for sample in req.get(feature.format(feature_type), []):
+                for sample in req.get(feature.format(feature_type), [])[:self.limit]:
                     status_code = self.parse_hash(sample[hash_type], False, uuid, relationship)
                     if status_code != 200:
                         return status_code
@@ -145,7 +144,7 @@ class VirusTotalParser(object):
 
     def parse_resolutions(self, resolutions, subdomains=None, uuids=None):
         domain_ip_object = MISPObject('domain-ip')
-        if self.attribute.type == 'domain':
+        if self.attribute.type in ('domain', 'hostname'):
             domain_ip_object.add_attribute('domain', type='domain', value=self.attribute.value)
             attribute_type, relation, key = ('ip-dst', 'ip', 'ip_address')
         else:
@@ -176,7 +175,7 @@ class VirusTotalParser(object):
             vt_object = MISPObject('virustotal-report')
             vt_object.add_attribute('permalink', type='link', value=query_result['permalink'])
             detection_ratio = '{}/{}'.format(query_result['positives'], query_result['total'])
-            vt_object.add_attribute('detection-ratio', type='text', value=detection_ratio)
+            vt_object.add_attribute('detection-ratio', type='text', value=detection_ratio, disable_correlation=True)
             self.misp_event.add_object(**vt_object)
             return vt_object.uuid
 
@@ -197,7 +196,15 @@ def handler(q=False):
     if not request.get('config') or not request['config'].get('apikey'):
         misperrors['error'] = "A VirusTotal api key is required for this module."
         return misperrors
-    parser = VirusTotalParser(request['config']['apikey'])
+    if not request.get('attribute') or not check_input_attribute(request['attribute']):
+        return {'error': f'{standard_error_message}, which should contain at least a type, a value and an uuid.'}
+    if request['attribute']['type'] not in mispattributes['input']:
+        return {'error': 'Unsupported attribute type.'}
+
+    event_limit = request['config'].get('event_limit')
+    if not isinstance(event_limit, int):
+        event_limit = 5
+    parser = VirusTotalParser(request['config']['apikey'], event_limit)
     attribute = request['attribute']
     status = parser.query_api(attribute)
     if status != 200:

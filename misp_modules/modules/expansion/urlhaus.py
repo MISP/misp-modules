@@ -1,6 +1,8 @@
-from pymisp import MISPAttribute, MISPEvent, MISPObject
+# -*- coding: utf-8 -*-
 import json
 import requests
+from . import check_input_attribute, standard_error_message
+from pymisp import MISPAttribute, MISPEvent, MISPObject
 
 misperrors = {'error': 'Error'}
 mispattributes = {'input': ['domain', 'hostname', 'ip-src', 'ip-dst', 'md5', 'sha256', 'url'],
@@ -35,6 +37,11 @@ class URLhaus():
         results = {key: event[key] for key in ('Attribute', 'Object') if (key in event and event[key])}
         return {'results': results}
 
+    def parse_error(self, query_status):
+        if query_status == 'no_results':
+            return {'error': f'No results found on URLhaus for this {self.attribute.type} attribute'}
+        return {'error': f'Error encountered during the query of URLhaus: {query_status}'}
+
 
 class HostQuery(URLhaus):
     def __init__(self, attribute):
@@ -45,9 +52,12 @@ class HostQuery(URLhaus):
 
     def query_api(self):
         response = requests.post(self.url, data={'host': self.attribute.value}).json()
+        if response['query_status'] != 'ok':
+            return self.parse_error(response['query_status'])
         if 'urls' in response and response['urls']:
             for url in response['urls']:
                 self.misp_event.add_attribute(type='url', value=url['url'])
+        return self.get_result()
 
 
 class PayloadQuery(URLhaus):
@@ -63,6 +73,8 @@ class PayloadQuery(URLhaus):
         if hasattr(self.attribute, 'object_id') and hasattr(self.attribute, 'event_id') and self.attribute.event_id != '0':
             file_object.id = self.attribute.object_id
         response = requests.post(self.url, data={'{}_hash'.format(hash_type): self.attribute.value}).json()
+        if response['query_status'] != 'ok':
+            return self.parse_error(response['query_status'])
         other_hash_type = 'md5' if hash_type == 'sha256' else 'sha256'
         for key, relation in zip(('{}_hash'.format(other_hash_type), 'file_size'), (other_hash_type, 'size-in-bytes')):
             if response[key]:
@@ -81,6 +93,7 @@ class PayloadQuery(URLhaus):
                 file_object.add_attribute(_filename_, **{'type': _filename_, 'value': url[_filename_]})
         if any((file_object.attributes, file_object.references)):
             self.misp_event.add_object(**file_object)
+        return self.get_result()
 
 
 class UrlQuery(URLhaus):
@@ -100,6 +113,8 @@ class UrlQuery(URLhaus):
 
     def query_api(self):
         response = requests.post(self.url, data={'url': self.attribute.value}).json()
+        if response['query_status'] != 'ok':
+            return self.parse_error(response['query_status'])
         if 'payloads' in response and response['payloads']:
             for payload in response['payloads']:
                 file_object = self._create_file_object(payload)
@@ -109,6 +124,7 @@ class UrlQuery(URLhaus):
                     self.misp_event.add_object(**vt_object)
                 if any((file_object.attributes, file_object.references)):
                     self.misp_event.add_object(**file_object)
+        return self.get_result()
 
 
 _misp_type_mapping = {'url': UrlQuery, 'md5': PayloadQuery, 'sha256': PayloadQuery,
@@ -120,10 +136,13 @@ def handler(q=False):
     if q is False:
         return False
     request = json.loads(q)
+    if not request.get('attribute') or not check_input_attribute(request['attribute']):
+        return {'error': f'{standard_error_message}, which should contain at least a type, a value and an uuid.'}
     attribute = request['attribute']
+    if attribute['type'] not in mispattributes['input']:
+        return {'error': 'Unsupported attribute type.'}
     urlhaus_parser = _misp_type_mapping[attribute['type']](attribute)
-    urlhaus_parser.query_api()
-    return urlhaus_parser.get_result()
+    return urlhaus_parser.query_api()
 
 
 def introspection():

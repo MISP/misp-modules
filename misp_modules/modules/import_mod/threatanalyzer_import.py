@@ -99,7 +99,7 @@ def handler(q=False):
             results = process_analysis_json(json.loads(data.decode('utf-8')))
         except ValueError:
             log.warning('MISP modules {0} failed: uploaded file is not a zip or json file.'.format(request['module']))
-            return {'error': 'Uploaded file is not a zip or json file.'.format(request['module'])}
+            return {'error': 'Uploaded file is not a zip or json file.'}
             pass
     # keep only unique entries based on the value field
     results = list({v['values']: v for v in results}.values())

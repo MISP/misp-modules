@@ -12,7 +12,7 @@ mispattributes = {'input': ['sigma'], 'output': ['text']}
 moduleinfo = {'version': '0.1', 'author': 'Christian Studer', 'module-type': ['expansion', 'hover'],
               'description': 'An expansion hover module to display the result of sigma queries.'}
 moduleconfig = []
-sigma_targets = ('es-dsl', 'es-qs', 'graylog', 'kibana', 'xpack-watcher', 'logpoint', 'splunk', 'grep', 'wdatp', 'splunkxml', 'arcsight', 'qualys')
+sigma_targets = ('es-dsl', 'es-qs', 'graylog', 'kibana', 'xpack-watcher', 'logpoint', 'splunk', 'grep', 'mdatp', 'splunkxml', 'arcsight', 'qualys')
 
 
 def handler(q=False):

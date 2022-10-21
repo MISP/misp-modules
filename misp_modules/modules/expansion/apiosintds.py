@@ -107,7 +107,7 @@ def apiosintParser(response, import_related_hashes):
         for key in response:
             for item in response[key]["items"]:
                 if item["response"]:
-                    comment = item["item"]+" IS listed by OSINT.digitalside.it. Date list: "+response[key]["list"]["date"]
+                    comment = item["item"] + " IS listed by OSINT.digitalside.it. Date list: " + response[key]["list"]["date"]
                     if key == "url":
                         if "hashes" in item.keys():
                             if "sha256" in item["hashes"].keys():
@@ -124,16 +124,16 @@ def apiosintParser(response, import_related_hashes):
                                 if import_related_hashes:
                                     if "hashes" in urls.keys():
                                         if "sha256" in urls["hashes"].keys():
-                                            ret.append({"types": ["sha256"], "values": [urls["hashes"]["sha256"]], "comment": "Related to: "+itemToInclude})
+                                            ret.append({"types": ["sha256"], "values": [urls["hashes"]["sha256"]], "comment": "Related to: " + itemToInclude})
                                         if "sha1" in urls["hashes"].keys():
-                                            ret.append({"types": ["sha1"], "values": [urls["hashes"]["sha1"]], "comment": "Related to: "+itemToInclude})
+                                            ret.append({"types": ["sha1"], "values": [urls["hashes"]["sha1"]], "comment": "Related to: " + itemToInclude})
                                         if "md5" in urls["hashes"].keys():
-                                            ret.append({"types": ["md5"], "values": [urls["hashes"]["md5"]], "comment": "Related to: "+itemToInclude})
-                                ret.append({"types": ["url"], "values": [itemToInclude], "comment": "Related to: "+item["item"]})
+                                            ret.append({"types": ["md5"], "values": [urls["hashes"]["md5"]], "comment": "Related to: " + itemToInclude})
+                                ret.append({"types": ["url"], "values": [itemToInclude], "comment": "Related to: " + item["item"]})
                             else:
-                                ret.append({"types": ["url"], "values": [urls], "comment": "Related URL to: "+item["item"]})
+                                ret.append({"types": ["url"], "values": [urls], "comment": "Related URL to: " + item["item"]})
                 else:
-                    comment = item["item"]+" IS NOT listed by OSINT.digitalside.it. Date list: "+response[key]["list"]["date"]
+                    comment = item["item"] + " IS NOT listed by OSINT.digitalside.it. Date list: " + response[key]["list"]["date"]
                 ret.append({"types": ["text"], "values": [comment]})
     return ret
 

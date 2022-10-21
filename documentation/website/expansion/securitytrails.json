@@ -1,0 +1,14 @@
+{
+    "description": "An expansion modules for SecurityTrails.",
+    "logo": "securitytrails.png",
+    "requirements": [
+        "dnstrails python library",
+        "An access to the SecurityTrails API (apikey)"
+    ],
+    "input": "A domain, hostname or IP address attribute.",
+    "output": "MISP attributes resulting from the query on SecurityTrails API, included in the following list:\n- hostname\n- domain\n- ip-src\n- ip-dst\n- dns-soa-email\n- whois-registrant-email\n- whois-registrant-phone\n- whois-registrant-name\n- whois-registrar\n- whois-creation-date\n- domain",
+    "references": [
+        "https://securitytrails.com/"
+    ],
+    "features": "The module takes a domain, hostname or IP address attribute as input and queries the SecurityTrails API with it.\n\nMultiple parsing operations are then processed on the result of the query to extract a much information as possible.\n\nFrom this data extracted are then mapped MISP attributes."
+}

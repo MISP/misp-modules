@@ -59,5 +59,5 @@ def introspection():
 
 
 def version():
-    # moduleinfo['config'] = moduleconfig
+    moduleinfo['config'] = moduleconfig
     return moduleinfo

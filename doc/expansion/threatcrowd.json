@@ -1,8 +1,0 @@
-{
-    "description": "Module to get information from ThreatCrowd.",
-    "logo": "logos/threatcrowd.png",
-    "input": "A MISP attribute included in the following list:\n- hostname\n- domain\n- ip-src\n- ip-dst\n- md5\n- sha1\n- sha256\n- sha512\n- whois-registrant-email",
-    "output": "MISP attributes mapped from the result of the query on ThreatCrowd, included in the following list:\n- domain\n- ip-src\n- ip-dst\n- text\n- md5\n- sha1\n- sha256\n- sha512\n- hostname\n- whois-registrant-email",
-    "references": ["https://www.threatcrowd.org/"],
-    "features": "This module takes a MISP attribute as input and queries ThreatCrowd with it.\n\nThe result of this query is then parsed and some data is mapped into MISP attributes in order to enrich the input attribute."
-}
