@@ -113,6 +113,7 @@ class VariotdbsParser:
                         update_date['date']
                     )
                     break
+        vulnerability_object.add_reference(self.misp_attribute.uuid, 'related-to')
         self.misp_event.add_object(vulnerability_object)
 
 
