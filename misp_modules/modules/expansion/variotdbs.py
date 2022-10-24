@@ -1,7 +1,7 @@
 import json
 import requests
 from . import check_input_attribute, standard_error_message
-from pymisp import MISPEvent, MISPObject
+from pymisp import MISPAttribute, MISPEvent, MISPObject
 
 misperrors = {'error': 'Error'}
 mispattributes = {'input': ['vulnerability'], 'format': 'misp_standard'}
@@ -31,7 +31,7 @@ class VariotdbsParser:
 
     @property
     def misp_attribute(self) -> MISPAttribute:
-        return self.__attribute
+        return self.__misp_attribute
 
     @property
     def misp_event(self) -> MISPEvent:
@@ -65,13 +65,14 @@ class VariotdbsParser:
                     query_results[feature]['data']
                 )
         if query_results.get('configurations', {}).get('data'):
-            for node in query_results['configurations']['data']['nodes']:
-                for cpe_match in node['cpe_match']:
-                    if cpe_match['vulnerable']:
-                        vulnerability_object.add_attribute(
-                            'vulnerable-configuration',
-                            cpe_match['cpe23Uri']
-                        )
+            for configuration in query_results['configurations']['data']:
+                for node in configuration['nodes']:
+                    for cpe_match in node['cpe_match']:
+                        if cpe_match['vulnerable']:
+                            vulnerability_object.add_attribute(
+                                'vulnerable-configuration',
+                                cpe_match['cpe23Uri']
+                            )
         if query_results.get('cvss', {}).get('data'):
             cvss = {}
             for cvss_data in query_results['cvss']['data']:
@@ -129,15 +130,19 @@ def handler(q=False):
     headers = {'Content-Type': 'application/json'}
     if request.get('config', {}).get('API_key'):
         headers['Authorization'] = f"Token {request['config']['API_key']}"
+    empty = True
+    parser = VariotdbsParser(attribute)
     r = requests.get(f"{variotdbs_url}/vuln/{attribute['value']}/", headers=headers)
     if r.status_code == 200:
-        query_results = r.json()
-        if not query_results:
-            return {'error': 'Empty results'}
+        vulnerability_results = r.json()
+        if vulnerability_results:
+            parser.parse_vulnerability_information(vulnerability_results)
+            empty = False
     else:
-        return {'error': 'Error while querying the variotdbs API.'}
-    parser = VariotdbsParser(attribute, query_results)
-    parser.parse_vulnerability_information()
+        if r.reason != 'Not found':
+            return {'error': 'Error while querying the variotdbs API.'}
+    if empty:
+        return {'error': 'Empty results'}
     return parser.get_results()
 
 
@@ -147,4 +152,4 @@ def introspection():
 
 def version():
     moduleinfo['config'] = moduleconfig
-    return moduleconfig
+    return moduleinfo
