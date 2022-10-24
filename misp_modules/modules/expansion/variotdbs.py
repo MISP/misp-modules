@@ -73,7 +73,7 @@ class VariotdbsParser:
         return {'results': results}
 
     def parse_exploit_information(self, query_results):
-        for exploit in query_results['results']:
+        for exploit in query_results:
             exploit_object = MISPObject('exploit')
             exploit_object.add_attribute('exploitdb-id', exploit['edb_id'])
             for feature, relation in self.exploit_mapping.items():
@@ -187,8 +187,17 @@ def handler(q=False):
     if r.status_code == 200:
         exploit_results = r.json()
         if exploit_results:
-            parser.parse_exploit_information(exploit_results)
+            parser.parse_exploit_information(exploit_results['results'])
             empty = False
+        if exploit_results['next'] is not None:
+            while(1):
+                exploit_results = requests.get(exploit_results['next'], headers=headers)
+                if exploit_results.status_code != 200:
+                    break
+                exploit_results = exploit_results.json()
+                parser.parse_exploit_information(exploit_results['results'])
+                if exploit_results['next'] is None:
+                    break
     else:
         return {'error': 'Error while querying the variotdbs API.'}
     if empty:
