@@ -1,0 +1,13 @@
+{
+    "description": "An expansion module to query the VARIoT db API for more information about a vulnerability.",
+    "logo": "variot.png",
+    "requirements": [
+        "A VARIoT db API key (if you do not want to be limited to 100 queries / day)"
+    ],
+    "input": "Vulnerability attribute.",
+    "output": "Additional information about the vulnerability, as it is stored on the VARIoT db, about the vulnerability itself, and the potential related exploits.",
+    "references": [
+        "https://www.variotdbs.pl/"
+    ],
+    "features": "The module takes a vulnerability attribute as input and queries que VARIoT db API to gather additional information.\n\nThe `vuln` endpoint is queried first to look for additional information about the vulnerability itself.\n\nThe `exploits` endpoint is also queried then to look for the information of the potential related exploits, which are parsed and added to the results using the `exploit` object template."
+}

@@ -1,7 +1,7 @@
 import json
 import requests
 from . import check_input_attribute, standard_error_message
-from pymisp import MISPEvent, MISPObject
+from pymisp import MISPAttribute, MISPEvent, MISPObject
 
 misperrors = {'error': 'Error'}
 mispattributes = {'input': ['vulnerability'], 'format': 'misp_standard'}
@@ -20,6 +20,20 @@ class VariotdbsParser:
         misp_event.add_attribute(**misp_attribute)
         self.__misp_attribute = misp_attribute
         self.__misp_event = misp_event
+        self.__exploit_mapping = {
+            'credits': 'credit',
+            'exploit': 'exploit'
+        }
+        self.__exploit_multiple_mapping = {
+            'cve': {
+                'feature': 'cve_id',
+                'relation': 'cve-id'
+            },
+            'references': {
+                'feature': 'url',
+                'relation': 'reference'
+            }
+        }
         self.__vulnerability_data_mapping = {
             'credits': 'credit',
             'description': 'description',
@@ -30,8 +44,16 @@ class VariotdbsParser:
         }
 
     @property
+    def exploit_mapping(self) -> dict:
+        return self.__exploit_mapping
+
+    @property
+    def exploit_multiple_mapping(self) -> dict:
+        return self.__exploit_multiple_mapping
+
+    @property
     def misp_attribute(self) -> MISPAttribute:
-        return self.__attribute
+        return self.__misp_attribute
 
     @property
     def misp_event(self) -> MISPEvent:
@@ -50,6 +72,26 @@ class VariotdbsParser:
         results = {key: event[key] for key in ('Attribute', 'Object') if event.get(key)}
         return {'results': results}
 
+    def parse_exploit_information(self, query_results):
+        for exploit in query_results['results']:
+            exploit_object = MISPObject('exploit')
+            exploit_object.add_attribute('exploitdb-id', exploit['edb_id'])
+            for feature, relation in self.exploit_mapping.items():
+                if exploit.get(feature):
+                    exploit_object.add_attribute(
+                        relation,
+                        exploit[feature]['data']
+                    )
+            for feature, relation in self.exploit_multiple_mapping.items():
+                if exploit.get(feature):
+                    for value in exploit[feature]['data']:
+                        exploit_object.add_attribute(
+                            relation['relation'],
+                            value[relation['feature']]
+                        )
+            exploit_object.add_reference(self.misp_attribute.uuid, 'related-to')
+            self.misp_event.add_object(exploit_object)
+
     def parse_vulnerability_information(self, query_results):
         vulnerability_object = MISPObject('vulnerability')
         for feature, relation in self.vulnerability_flat_mapping.items():
@@ -65,13 +107,14 @@ class VariotdbsParser:
                     query_results[feature]['data']
                 )
         if query_results.get('configurations', {}).get('data'):
-            for node in query_results['configurations']['data']['nodes']:
-                for cpe_match in node['cpe_match']:
-                    if cpe_match['vulnerable']:
-                        vulnerability_object.add_attribute(
-                            'vulnerable-configuration',
-                            cpe_match['cpe23Uri']
-                        )
+            for configuration in query_results['configurations']['data']:
+                for node in configuration['nodes']:
+                    for cpe_match in node['cpe_match']:
+                        if cpe_match['vulnerable']:
+                            vulnerability_object.add_attribute(
+                                'vulnerable-configuration',
+                                cpe_match['cpe23Uri']
+                            )
         if query_results.get('cvss', {}).get('data'):
             cvss = {}
             for cvss_data in query_results['cvss']['data']:
@@ -129,15 +172,27 @@ def handler(q=False):
     headers = {'Content-Type': 'application/json'}
     if request.get('config', {}).get('API_key'):
         headers['Authorization'] = f"Token {request['config']['API_key']}"
+    empty = True
+    parser = VariotdbsParser(attribute)
     r = requests.get(f"{variotdbs_url}/vuln/{attribute['value']}/", headers=headers)
     if r.status_code == 200:
-        query_results = r.json()
-        if not query_results:
-            return {'error': 'Empty results'}
+        vulnerability_results = r.json()
+        if vulnerability_results:
+            parser.parse_vulnerability_information(vulnerability_results)
+            empty = False
+    else:
+        if r.reason != 'Not found':
+            return {'error': 'Error while querying the variotdbs API.'}
+    r = requests.get(f"{variotdbs_url}/exploits/?cve={attribute['value']}", headers=headers)
+    if r.status_code == 200:
+        exploit_results = r.json()
+        if exploit_results:
+            parser.parse_exploit_information(exploit_results)
+            empty = False
     else:
         return {'error': 'Error while querying the variotdbs API.'}
-    parser = VariotdbsParser(attribute, query_results)
-    parser.parse_vulnerability_information()
+    if empty:
+        return {'error': 'Empty results'}
     return parser.get_results()
 
 
@@ -147,4 +202,4 @@ def introspection():
 
 def version():
     moduleinfo['config'] = moduleconfig
-    return moduleconfig
+    return moduleinfo

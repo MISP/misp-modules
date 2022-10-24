@@ -685,6 +685,28 @@ Expansion module to fetch the html content from an url and convert it into markd
 
 -----
 
+#### [hyasinsight](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/hyasinsight.py)
+
+<img src=logos/hyas.png height=60>
+
+HYAS Insight integration to MISP provides direct, high volume access to HYAS Insight data. It enables investigators and analysts to understand and defend against cyber adversaries and their infrastructure.
+- **features**:
+>This Module takes the IP Address, Domain, URL, Email, Phone Number, MD5, SHA1, Sha256, SHA512 MISP Attributes as input to query the HYAS Insight API.
+> The results of the HYAS Insight API are than are then returned and parsed into Hyas Insight Objects. 
+>
+>An API key is required to submit queries to the HYAS Insight API.
+>
+- **input**:
+>A MISP attribute of type IP Address(ip-src, ip-dst), Domain(hostname, domain), Email Address(email, email-src, email-dst, target-email, whois-registrant-email), Phone Number(phone-number, whois-registrant-phone), MDS(md5, x509-fingerprint-md5, ja3-fingerprint-md5, hassh-md5, hasshserver-md5), SHA1(sha1, x509-fingerprint-sha1), SHA256(sha256, x509-fingerprint-sha256), SHA512(sha512)
+- **output**:
+>Hyas Insight objects, resulting from the query on the HYAS Insight API.
+- **references**:
+>https://www.hyas.com/hyas-insight/
+- **requirements**:
+>A HYAS Insight API Key.
+
+-----
+
 #### [intel471](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/intel471.py)
 
 <img src=logos/intel471.png height=60>
@@ -1603,6 +1625,28 @@ An expansion module to query urlscan.io.
 >https://urlscan.io/
 - **requirements**:
 >An access to the urlscan.io API
+
+-----
+
+#### [variotdbs](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/variotdbs.py)
+
+<img src=logos/variot.png height=60>
+
+An expansion module to query the VARIoT db API for more information about a vulnerability.
+- **features**:
+>The module takes a vulnerability attribute as input and queries que VARIoT db API to gather additional information.
+>
+>The `vuln` endpoint is queried first to look for additional information about the vulnerability itself.
+>
+>The `exploits` endpoint is also queried then to look for the information of the potential related exploits, which are parsed and added to the results using the `exploit` object template.
+- **input**:
+>Vulnerability attribute.
+- **output**:
+>Additional information about the vulnerability, as it is stored on the VARIoT db, about the vulnerability itself, and the potential related exploits.
+- **references**:
+>https://www.variotdbs.pl/
+- **requirements**:
+>A VARIoT db API key (if you do not want to be limited to 100 queries / day)
 
 -----
 
