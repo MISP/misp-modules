@@ -181,7 +181,7 @@ def handler(q=False):
             parser.parse_vulnerability_information(vulnerability_results)
             empty = False
     else:
-        if r.reason != 'Not found':
+        if r.reason != 'Not Found':
             return {'error': 'Error while querying the variotdbs API.'}
     r = requests.get(f"{variotdbs_url}/exploits/?cve={attribute['value']}", headers=headers)
     if r.status_code == 200:
