@@ -22,7 +22,9 @@ class VariotdbsParser:
         self.__misp_event = misp_event
         self.__exploit_mapping = {
             'credits': 'credit',
-            'exploit': 'exploit'
+            'description': 'description',
+            'exploit': 'exploit',
+            'title': 'title'
         }
         self.__exploit_multiple_mapping = {
             'cve': {
