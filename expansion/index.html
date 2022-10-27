@@ -828,6 +828,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#variotdbs" class="md-nav__link">
+    variotdbs
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#virustotal" class="md-nav__link">
     virustotal
   </a>
@@ -1605,6 +1612,13 @@
         <li class="md-nav__item">
   <a href="#urlscan" class="md-nav__link">
     urlscan
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#variotdbs" class="md-nav__link">
+    variotdbs
   </a>
   
 </li>
@@ -3183,6 +3197,24 @@ MISP attributes mapped from the result of the query on urlscan.io.
 <a href="https://urlscan.io/">https://urlscan.io/</a>
 - <strong>requirements</strong>:
 An access to the urlscan.io API</p>
+</blockquote>
+<hr />
+<h4 id="variotdbs"><a href="https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/variotdbs.py">variotdbs</a><a class="headerlink" href="#variotdbs" title="Permanent link">&para;</a></h4>
+<p><img src=../logos/variot.png height=60></p>
+<p>An expansion module to query the VARIoT db API for more information about a vulnerability.
+- <strong>features</strong>:</p>
+<blockquote>
+<p>The module takes a vulnerability attribute as input and queries que VARIoT db API to gather additional information.</p>
+<p>The <code>vuln</code> endpoint is queried first to look for additional information about the vulnerability itself.</p>
+<p>The <code>exploits</code> endpoint is also queried then to look for the information of the potential related exploits, which are parsed and added to the results using the <code>exploit</code> object template.
+- <strong>input</strong>:
+Vulnerability attribute.
+- <strong>output</strong>:
+Additional information about the vulnerability, as it is stored on the VARIoT db, about the vulnerability itself, and the potential related exploits.
+- <strong>references</strong>:
+<a href="https://www.variotdbs.pl/">https://www.variotdbs.pl/</a>
+- <strong>requirements</strong>:
+A VARIoT db API key (if you do not want to be limited to 100 queries / day)</p>
 </blockquote>
 <hr />
 <h4 id="virustotal"><a href="https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/virustotal.py">virustotal</a><a class="headerlink" href="#virustotal" title="Permanent link">&para;</a></h4>
