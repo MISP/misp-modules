@@ -191,15 +191,15 @@ def handler(q=False):
         if exploit_results:
             parser.parse_exploit_information(exploit_results['results'])
             empty = False
-        if exploit_results['next'] is not None:
-            while(1):
-                exploit_results = requests.get(exploit_results['next'], headers=headers)
-                if exploit_results.status_code != 200:
-                    break
-                exploit_results = exploit_results.json()
-                parser.parse_exploit_information(exploit_results['results'])
-                if exploit_results['next'] is None:
-                    break
+            if exploit_results['next'] is not None:
+                while(1):
+                    exploit_results = requests.get(exploit_results['next'], headers=headers)
+                    if exploit_results.status_code != 200:
+                        break
+                    exploit_results = exploit_results.json()
+                    parser.parse_exploit_information(exploit_results['results'])
+                    if exploit_results['next'] is None:
+                        break
     else:
         return {'error': 'Error while querying the variotdbs API.'}
     if empty:
