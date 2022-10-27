@@ -16,19 +16,18 @@ edit_uri: ""
 use_directory_urls: true
 
 # Copyright
-copyright: "Copyright &copy; 2019 MISP Project"
+copyright: "Copyright &copy; 2019-2022 MISP Project"
 
 # Options
 extra:
   search:
     languages: "en"
   social:
-    - type: globe
-      link: https://www.misp-project.org/
-    - type: github-alt
-      link: https://github.com/MISP
-    - type: twitter
-      link: https://twitter.com/MISPProject
+     - icon: fontawesome/brands/twitter
+       link: https://twitter.com/MISPProject
+     - icon: fontawesome/brands/github-alt
+       link: https://github.com/MISP
+
 
 theme:
   name: material

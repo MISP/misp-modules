@@ -1,4 +1,3 @@
-from . import _vmray  # noqa
 import os
 import sys
 sys.path.append('{}/lib'.format('/'.join((os.path.realpath(__file__)).split('/')[:-3])))
@@ -14,5 +13,7 @@ __all__ = [
     'openiocimport',
     'threatanalyzer_import',
     'csvimport',
+    'cof2misp',
     'joe_import',
+    'taxii21'
 ]

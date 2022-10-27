@@ -1,13 +1,14 @@
+# -*- coding: utf-8 -*-
 import requests
 import json
 
 misperrors = {'error': 'Error'}
-mispattributes = {'input': ['email-dst', 'email-src'], 'output': ['text']}  # All mails as input
-moduleinfo = {'version': '0.1', 'author': 'Aurélien Schwab', 'description': 'Module to access haveibeenpwned.com API.', 'module-type': ['hover']}
-moduleconfig = ['user-agent']  # TODO take this into account in the code
+mispattributes = {'input': ['email-dst', 'email-src'], 'output': ['text']}
+moduleinfo = {'version': '0.2', 'author': 'Corsin Camichel, Aurélien Schwab', 'description': 'Module to access haveibeenpwned.com API (v3).', 'module-type': ['hover']}
+moduleconfig = ['api_key']
 
-haveibeenpwned_api_url = 'https://api.haveibeenpwned.com/api/v2/breachedaccount/'
-default_user_agent = 'MISP-Module'  # User agent (must be set, requiered by API))
+haveibeenpwned_api_url = 'https://haveibeenpwned.com/api/v3/breachedaccount/'
+API_KEY = ""  # details at https://www.troyhunt.com/authentication-and-the-have-i-been-pwned-api/
 
 
 def handler(q=False):
@@ -22,15 +23,21 @@ def handler(q=False):
         misperrors['error'] = "Unsupported attributes type"
         return misperrors
 
-    r = requests.get(haveibeenpwned_api_url + email, headers={'user-agent': default_user_agent})  # Real request
-    if r.status_code == 200:  # OK (record found)
+    if request.get('config') is None or request['config'].get('api_key') is None:
+        misperrors['error'] = 'Have I Been Pwned authentication is incomplete (no API key)'
+        return misperrors
+    else:
+        API_KEY = request['config'].get('api_key')
+
+    r = requests.get(haveibeenpwned_api_url + email, headers={'hibp-api-key': API_KEY})
+    if r.status_code == 200:
         breaches = json.loads(r.text)
         if breaches:
             return {'results': [{'types': mispattributes['output'], 'values': breaches}]}
-    elif r.status_code == 404:  # Not found (not an error)
+    elif r.status_code == 404:
         return {'results': [{'types': mispattributes['output'], 'values': 'OK (Not Found)'}]}
-    else:  # Real error
-        misperrors['error'] = 'haveibeenpwned.com API not accessible (HTTP ' + str(r.status_code) + ')'
+    else:
+        misperrors['error'] = f'haveibeenpwned.com API not accessible (HTTP {str(r.status_code)})'
         return misperrors['error']
 
 

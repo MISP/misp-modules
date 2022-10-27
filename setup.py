@@ -25,6 +25,7 @@ setup(
     install_requires=[
         'tornado',
         'psutil',
-        'redis>=3'
+        'redis>=3',
+        'pyparsing==2.4.7'
     ],
 )

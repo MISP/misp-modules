@@ -1,0 +1,6 @@
+{
+    "description": "An expansion hover module to get a blockchain balance from a BTC address in MISP.",
+    "logo": "bitcoin.png",
+    "input": "btc address attribute.",
+    "output": "Text to describe the blockchain balance and the transactions related to the btc address in input."
+}

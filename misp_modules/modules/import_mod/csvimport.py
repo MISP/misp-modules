@@ -224,7 +224,8 @@ class CsvParser():
 
     @staticmethod
     def __deal_with_tags(attribute):
-        attribute['Tag'] = [{'name': tag.strip()} for tag in attribute['Tag'].split(',')]
+        if 'Tag' in attribute.keys():
+            attribute['Tag'] = [{'name': tag.strip()} for tag in attribute['Tag'].split(',')]
 
     def __get_score(self):
         score = 1 if 'to_ids' in self.header else 0

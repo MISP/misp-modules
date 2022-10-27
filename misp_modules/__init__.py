@@ -41,14 +41,14 @@ try:
     from .modules import *  # noqa
     HAS_PACKAGE_MODULES = True
 except Exception as e:
-    print(e)
+    logging.exception(e)
     HAS_PACKAGE_MODULES = False
 
 try:
     from .helpers import *  # noqa
     HAS_PACKAGE_HELPERS = True
 except Exception as e:
-    print(e)
+    logging.exception(e)
     HAS_PACKAGE_HELPERS = False
 
 log = logging.getLogger('misp-modules')
@@ -183,10 +183,9 @@ class QueryModule(tornado.web.RequestHandler):
     executor = ThreadPoolExecutor(nb_threads)
 
     @run_on_executor
-    def run_request(self, jsonpayload):
-        x = json.loads(jsonpayload)
+    def run_request(self, module, jsonpayload):
         log.debug('MISP QueryModule request {0}'.format(jsonpayload))
-        response = mhandlers[x['module']].handler(q=jsonpayload)
+        response = mhandlers[module].handler(q=jsonpayload)
         return json.dumps(response)
 
     @tornado.gen.coroutine
@@ -198,7 +197,7 @@ class QueryModule(tornado.web.RequestHandler):
                 timeout = datetime.timedelta(seconds=int(dict_payload.get('timeout')))
             else:
                 timeout = datetime.timedelta(seconds=300)
-            response = yield tornado.gen.with_timeout(timeout, self.run_request(jsonpayload))
+            response = yield tornado.gen.with_timeout(timeout, self.run_request(dict_payload['module'], jsonpayload))
             self.write(response)
         except tornado.gen.TimeoutError:
             log.warning('Timeout on {} '.format(dict_payload['module']))

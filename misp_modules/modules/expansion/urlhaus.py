@@ -1,6 +1,8 @@
-from pymisp import MISPAttribute, MISPEvent, MISPObject
+# -*- coding: utf-8 -*-
 import json
 import requests
+from . import check_input_attribute, standard_error_message
+from pymisp import MISPAttribute, MISPEvent, MISPObject
 
 misperrors = {'error': 'Error'}
 mispattributes = {'input': ['domain', 'hostname', 'ip-src', 'ip-dst', 'md5', 'sha256', 'url'],
@@ -134,7 +136,11 @@ def handler(q=False):
     if q is False:
         return False
     request = json.loads(q)
+    if not request.get('attribute') or not check_input_attribute(request['attribute']):
+        return {'error': f'{standard_error_message}, which should contain at least a type, a value and an uuid.'}
     attribute = request['attribute']
+    if attribute['type'] not in mispattributes['input']:
+        return {'error': 'Unsupported attribute type.'}
     urlhaus_parser = _misp_type_mapping[attribute['type']](attribute)
     return urlhaus_parser.query_api()
 
