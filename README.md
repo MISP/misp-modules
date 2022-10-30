@@ -27,6 +27,7 @@ For more information: [Extending MISP with Python modules](https://www.misp-proj
 * [CIRCL Passive DNS](misp_modules/modules/expansion/circl_passivedns.py) - a hover and expansion module to expand hostname and IP addresses with passive DNS information.
 * [CIRCL Passive SSL](misp_modules/modules/expansion/circl_passivessl.py) - a hover and expansion module to expand IP addresses with the X.509 certificate(s) seen.
 * [countrycode](misp_modules/modules/expansion/countrycode.py) - a hover module to tell you what country a URL belongs to.
+* [CrowdSec](misp_modules/modules/expansion/crowdsec.py) - a hover module to expand using CrowdSec's CTI API.
 * [CrowdStrike Falcon](misp_modules/modules/expansion/crowdstrike_falcon.py) - an expansion module to expand using CrowdStrike Falcon Intel Indicator API.
 * [CPE](misp_modules/modules/expansion/cpe.py) - An expansion module to query the CVE Search API with a cpe code, to get its related vulnerabilities.
 * [CVE](misp_modules/modules/expansion/cve.py) - a hover module to give more information about a vulnerability (CVE).
