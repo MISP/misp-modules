@@ -14,8 +14,14 @@
       
         <link rel="canonical" href="https://www.misp-project.org/install/">
       
+      
+        <link rel="prev" href="../import_mod/">
+      
+      
+        <link rel="next" href="../contribute/">
+      
       <link rel="icon" href="../img/favicon.ico">
-      <meta name="generator" content="mkdocs-1.3.1, mkdocs-material-8.1.4">
+      <meta name="generator" content="mkdocs-1.4.2, mkdocs-material-9.0.0">
     
     
       
@@ -23,31 +29,30 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.bb3983ee.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.f79797b0.min.css">
       
         
-        <link rel="stylesheet" href="../assets/stylesheets/palette.e6a45f82.min.css">
-        
-          
-          
-          <meta name="theme-color" content="#ffffff">
-        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.2505c338.min.css">
       
+      
+
     
     
     
       
+        
         
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700%7CRoboto+Mono&display=fallback">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
         <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
       
     
     
-    <script>__md_scope=new URL("..",location),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
+    
     
     
   </head>
@@ -58,7 +63,7 @@
     
     
     
-    <body dir="ltr" data-md-color-scheme="" data-md-color-primary="white" data-md-color-accent="blue">
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="white" data-md-color-accent="blue">
   
     
     
@@ -88,7 +93,7 @@
 
     </a>
     <label class="md-header__button md-icon" for="__drawer">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2z"/></svg>
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
     </label>
     <div class="md-header__title" data-md-component="header-title">
       <div class="md-header__ellipsis">
@@ -110,7 +115,7 @@
     
     
       <label class="md-header__button md-icon" for="__search">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
       </label>
       <div class="md-search" data-md-component="search" role="dialog">
   <label class="md-search__overlay" for="__search"></label>
@@ -118,13 +123,13 @@
     <form class="md-search__form" name="search">
       <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
       <label class="md-search__icon md-icon" for="__search">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
       </label>
       <nav class="md-search__options" aria-label="Search">
         
-        <button type="reset" class="md-search__icon md-icon" aria-label="Clear" tabindex="-1">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
         </button>
       </nav>
       
@@ -147,7 +152,7 @@
         <a href="https://github.com/MISP/misp-modules/" title="Go to repository" class="md-source" data-md-component="source">
   <div class="md-source__icon md-icon">
     
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.2.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
   </div>
   <div class="md-source__repository">
     MISP/misp-modules
@@ -191,7 +196,7 @@
       <a href="https://github.com/MISP/misp-modules/" title="Go to repository" class="md-source" data-md-component="source">
   <div class="md-source__icon md-icon">
     
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.2.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
   </div>
   <div class="md-source__repository">
     MISP/misp-modules
@@ -337,77 +342,13 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#begin-with-virtualenv" class="md-nav__link">
-    BEGIN with virtualenv:
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#end-with-virtualenv" class="md-nav__link">
-    END with virtualenv
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#ideally-you-add-your-user-to-the-staff-group-and-make-usrlocalsrc-group-writeable-below-follows-an-example-with-user-misp" class="md-nav__link">
-    Ideally you add your user to the staff group and make /usr/local/src group writeable, below follows an example with user misp
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#install-gtcacafaup" class="md-nav__link">
-    Install gtcaca/faup
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#begin-with-virtualenv_1" class="md-nav__link">
-    BEGIN with virtualenv:
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#end-with-virtualenv_1" class="md-nav__link">
-    END with virtualenv
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#begin-without-virtualenv" class="md-nav__link">
-    BEGIN without virtualenv:
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#end-without-virtualenv" class="md-nav__link">
-    END without virtualenv
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#start-misp-modules-as-a-service" class="md-nav__link">
-    Start misp-modules as a service
-  </a>
-  
-    <nav class="md-nav" aria-label="Start misp-modules as a service">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
   <a href="#how-to-install-and-start-misp-modules-on-rhel-based-distributions" class="md-nav__link">
     How to install and start MISP modules on RHEL-based distributions ?
   </a>
   
 </li>
-        
-          <li class="md-nav__item">
+      
+        <li class="md-nav__item">
   <a href="#how-to-use-an-misp-modules-docker-container" class="md-nav__link">
     How to use an MISP modules Docker container
   </a>
@@ -429,31 +370,6 @@
   
 </li>
         
-      </ul>
-    </nav>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#start-redis" class="md-nav__link">
-    Start Redis
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#start-misp-modules" class="md-nav__link">
-    Start MISP-modules
-  </a>
-  
-    <nav class="md-nav" aria-label="Start MISP-modules">
-      <ul class="md-nav__list">
-        
           <li class="md-nav__item">
   <a href="#docker-compose" class="md-nav__link">
     Docker-compose
@@ -461,15 +377,15 @@
   
 </li>
         
-          <li class="md-nav__item">
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#install-misp-module-on-an-offline-instance" class="md-nav__link">
     Install misp-module on an offline instance.
   </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
@@ -576,77 +492,13 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#begin-with-virtualenv" class="md-nav__link">
-    BEGIN with virtualenv:
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#end-with-virtualenv" class="md-nav__link">
-    END with virtualenv
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#ideally-you-add-your-user-to-the-staff-group-and-make-usrlocalsrc-group-writeable-below-follows-an-example-with-user-misp" class="md-nav__link">
-    Ideally you add your user to the staff group and make /usr/local/src group writeable, below follows an example with user misp
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#install-gtcacafaup" class="md-nav__link">
-    Install gtcaca/faup
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#begin-with-virtualenv_1" class="md-nav__link">
-    BEGIN with virtualenv:
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#end-with-virtualenv_1" class="md-nav__link">
-    END with virtualenv
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#begin-without-virtualenv" class="md-nav__link">
-    BEGIN without virtualenv:
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#end-without-virtualenv" class="md-nav__link">
-    END without virtualenv
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#start-misp-modules-as-a-service" class="md-nav__link">
-    Start misp-modules as a service
-  </a>
-  
-    <nav class="md-nav" aria-label="Start misp-modules as a service">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
   <a href="#how-to-install-and-start-misp-modules-on-rhel-based-distributions" class="md-nav__link">
     How to install and start MISP modules on RHEL-based distributions ?
   </a>
   
 </li>
-        
-          <li class="md-nav__item">
+      
+        <li class="md-nav__item">
   <a href="#how-to-use-an-misp-modules-docker-container" class="md-nav__link">
     How to use an MISP modules Docker container
   </a>
@@ -668,31 +520,6 @@
   
 </li>
         
-      </ul>
-    </nav>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#start-redis" class="md-nav__link">
-    Start Redis
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#start-misp-modules" class="md-nav__link">
-    Start MISP-modules
-  </a>
-  
-    <nav class="md-nav" aria-label="Start MISP-modules">
-      <ul class="md-nav__list">
-        
           <li class="md-nav__item">
   <a href="#docker-compose" class="md-nav__link">
     Docker-compose
@@ -700,15 +527,15 @@
   
 </li>
         
-          <li class="md-nav__item">
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#install-misp-module-on-an-offline-instance" class="md-nav__link">
     Install misp-module on an offline instance.
   </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
@@ -720,221 +547,197 @@
               </div>
             
           
-          <div class="md-content" data-md-component="content">
-            <article class="md-content__inner md-typeset">
-              
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
                 
+                  
+
+
+
+  <h1>Install Guides</h1>
 
 <h2 id="how-to-install-and-start-misp-modules-in-a-python-virtualenv">How to install and start MISP modules (in a Python virtualenv)?<a class="headerlink" href="#how-to-install-and-start-misp-modules-in-a-python-virtualenv" title="Permanent link">&para;</a></h2>
-<p><sub>~</sub>~bash
-SUDO_WWW="sudo -u www-data"</p>
-<p>sudo apt-get install -y \
-  git \
-  libpq5 \
-  libjpeg-dev \
-  tesseract-ocr \
-  libpoppler-cpp-dev \
-  imagemagick virtualenv \
-  libopencv-dev \
-  zbar-tools \
-  libzbar0 \
-  libzbar-dev \
-  libfuzzy-dev \
-  libcaca-dev</p>
-<h1 id="begin-with-virtualenv">BEGIN with virtualenv:<a class="headerlink" href="#begin-with-virtualenv" title="Permanent link">&para;</a></h1>
-<p>$SUDO_WWW virtualenv -p python3 /var/www/MISP/venv</p>
-<h1 id="end-with-virtualenv">END with virtualenv<a class="headerlink" href="#end-with-virtualenv" title="Permanent link">&para;</a></h1>
-<p>cd /usr/local/src/</p>
-<h1 id="ideally-you-add-your-user-to-the-staff-group-and-make-usrlocalsrc-group-writeable-below-follows-an-example-with-user-misp">Ideally you add your user to the staff group and make /usr/local/src group writeable, below follows an example with user misp<a class="headerlink" href="#ideally-you-add-your-user-to-the-staff-group-and-make-usrlocalsrc-group-writeable-below-follows-an-example-with-user-misp" title="Permanent link">&para;</a></h1>
-<p>sudo adduser misp staff
-sudo chmod 2775 /usr/local/src
-sudo chown root:staff /usr/local/src
-git clone <a href="https://github.com/MISP/misp-modules.git">https://github.com/MISP/misp-modules.git</a>
-git clone git://github.com/stricaud/faup.git faup
-git clone git://github.com/stricaud/gtcaca.git gtcaca</p>
-<h1 id="install-gtcacafaup">Install gtcaca/faup<a class="headerlink" href="#install-gtcacafaup" title="Permanent link">&para;</a></h1>
-<p>cd gtcaca
-mkdir -p build
-cd build
-cmake .. &amp;&amp; make
-sudo make install
-cd ../../faup
-mkdir -p build
-cd build
-cmake .. &amp;&amp; make
-sudo make install
-sudo ldconfig</p>
-<p>cd ../../misp-modules</p>
-<h1 id="begin-with-virtualenv_1">BEGIN with virtualenv:<a class="headerlink" href="#begin-with-virtualenv_1" title="Permanent link">&para;</a></h1>
-<p>$SUDO_WWW  /var/www/MISP/venv/bin/pip install -I -r REQUIREMENTS
-$SUDO_WWW  /var/www/MISP/venv/bin/pip install .</p>
-<h1 id="end-with-virtualenv_1">END with virtualenv<a class="headerlink" href="#end-with-virtualenv_1" title="Permanent link">&para;</a></h1>
-<h1 id="begin-without-virtualenv">BEGIN without virtualenv:<a class="headerlink" href="#begin-without-virtualenv" title="Permanent link">&para;</a></h1>
-<p>sudo pip install -I -r REQUIREMENTS
-sudo pip install .</p>
-<h1 id="end-without-virtualenv">END without virtualenv<a class="headerlink" href="#end-without-virtualenv" title="Permanent link">&para;</a></h1>
-<h1 id="start-misp-modules-as-a-service">Start misp-modules as a service<a class="headerlink" href="#start-misp-modules-as-a-service" title="Permanent link">&para;</a></h1>
-<p>sudo cp etc/systemd/system/misp-modules.service /etc/systemd/system/
-sudo systemctl daemon-reload
-sudo systemctl enable --now misp-modules
-/var/www/MISP/venv/bin/misp-modules -l 127.0.0.1 -s &amp; #to start the modules
-<sub>~</sub>~</p>
+<div class="highlight"><pre><span></span><code><span class="nv">SUDO_WWW</span><span class="o">=</span><span class="s2">&quot;sudo -u www-data&quot;</span>
+
+sudo<span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>git<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>libpq5<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>libjpeg-dev<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>tesseract-ocr<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>libpoppler-cpp-dev<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>imagemagick<span class="w"> </span>virtualenv<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>libopencv-dev<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>zbar-tools<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>libzbar0<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>libzbar-dev<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>libfuzzy-dev<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>libcaca-dev
+
+<span class="c1"># BEGIN with virtualenv:   </span>
+<span class="nv">$SUDO_WWW</span><span class="w"> </span>virtualenv<span class="w"> </span>-p<span class="w"> </span>python3<span class="w"> </span>/var/www/MISP/venv
+<span class="c1"># END with virtualenv</span>
+
+<span class="nb">cd</span><span class="w"> </span>/usr/local/src/
+<span class="c1"># Ideally you add your user to the staff group and make /usr/local/src group writeable, below follows an example with user misp</span>
+sudo<span class="w"> </span>adduser<span class="w"> </span>misp<span class="w"> </span>staff
+sudo<span class="w"> </span>chmod<span class="w"> </span><span class="m">2775</span><span class="w"> </span>/usr/local/src
+sudo<span class="w"> </span>chown<span class="w"> </span>root:staff<span class="w"> </span>/usr/local/src
+git<span class="w"> </span>clone<span class="w"> </span>https://github.com/MISP/misp-modules.git
+git<span class="w"> </span>clone<span class="w"> </span>git://github.com/stricaud/faup.git<span class="w"> </span>faup
+git<span class="w"> </span>clone<span class="w"> </span>git://github.com/stricaud/gtcaca.git<span class="w"> </span>gtcaca
+
+<span class="c1"># Install gtcaca/faup</span>
+<span class="nb">cd</span><span class="w"> </span>gtcaca
+mkdir<span class="w"> </span>-p<span class="w"> </span>build
+<span class="nb">cd</span><span class="w"> </span>build
+cmake<span class="w"> </span>..<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>make
+sudo<span class="w"> </span>make<span class="w"> </span>install
+<span class="nb">cd</span><span class="w"> </span>../../faup
+mkdir<span class="w"> </span>-p<span class="w"> </span>build
+<span class="nb">cd</span><span class="w"> </span>build
+cmake<span class="w"> </span>..<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>make
+sudo<span class="w"> </span>make<span class="w"> </span>install
+sudo<span class="w"> </span>ldconfig
+
+<span class="nb">cd</span><span class="w"> </span>../../misp-modules
+
+<span class="c1"># BEGIN with virtualenv: </span>
+<span class="nv">$SUDO_WWW</span><span class="w">  </span>/var/www/MISP/venv/bin/pip<span class="w"> </span>install<span class="w"> </span>-I<span class="w"> </span>-r<span class="w"> </span>REQUIREMENTS
+<span class="nv">$SUDO_WWW</span><span class="w">  </span>/var/www/MISP/venv/bin/pip<span class="w"> </span>install<span class="w"> </span>.
+<span class="c1"># END with virtualenv</span>
+
+<span class="c1"># BEGIN without virtualenv: </span>
+sudo<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>-I<span class="w"> </span>-r<span class="w"> </span>REQUIREMENTS
+sudo<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>.
+<span class="c1"># END without virtualenv</span>
+
+<span class="c1"># Start misp-modules as a service</span>
+sudo<span class="w"> </span>cp<span class="w"> </span>etc/systemd/system/misp-modules.service<span class="w"> </span>/etc/systemd/system/
+sudo<span class="w"> </span>systemctl<span class="w"> </span>daemon-reload
+sudo<span class="w"> </span>systemctl<span class="w"> </span><span class="nb">enable</span><span class="w"> </span>--now<span class="w"> </span>misp-modules
+/var/www/MISP/venv/bin/misp-modules<span class="w"> </span>-l<span class="w"> </span><span class="m">127</span>.0.0.1<span class="w"> </span>-s<span class="w"> </span><span class="p">&amp;</span><span class="w"> </span><span class="c1">#to start the modules</span>
+</code></pre></div>
 <h2 id="how-to-install-and-start-misp-modules-on-rhel-based-distributions">How to install and start MISP modules on RHEL-based distributions ?<a class="headerlink" href="#how-to-install-and-start-misp-modules-on-rhel-based-distributions" title="Permanent link">&para;</a></h2>
 <p>As of this writing, the official RHEL repositories only contain Ruby 2.0.0 and Ruby 2.1 or higher is required. As such, this guide installs Ruby 2.2 from the SCL repository.</p>
-<p><sub>~</sub>~bash
-SUDO_WWW="sudo -u apache"
-sudo yum install \
-  rh-ruby22 \
-  openjpeg-devel \
-  rubygem-rouge \
-  rubygem-asciidoctor \
-  zbar-devel \
-  opencv-devel \
-  gcc-c++ \
-  pkgconfig \
-  poppler-cpp-devel \
-  python-devel \
-  redhat-rpm-config
-cd /usr/local/src/
-sudo git clone <a href="https://github.com/MISP/misp-modules.git">https://github.com/MISP/misp-modules.git</a>
-cd misp-modules
-$SUDO_WWW /usr/bin/scl enable rh-python36 "virtualenv -p python3 /var/www/MISP/venv"
-$SUDO_WWW /var/www/MISP/venv/bin/pip install -U -I -r REQUIREMENTS
-$SUDO_WWW /var/www/MISP/venv/bin/pip install -U .
-<sub>~</sub>~</p>
+<div class="highlight"><pre><span></span><code><span class="nv">SUDO_WWW</span><span class="o">=</span><span class="s2">&quot;sudo -u apache&quot;</span>
+sudo<span class="w"> </span>yum<span class="w"> </span>install<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>rh-ruby22<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>openjpeg-devel<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>rubygem-rouge<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>rubygem-asciidoctor<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>zbar-devel<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>opencv-devel<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>gcc-c++<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>pkgconfig<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>poppler-cpp-devel<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>python-devel<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>redhat-rpm-config
+<span class="nb">cd</span><span class="w"> </span>/usr/local/src/
+sudo<span class="w"> </span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/MISP/misp-modules.git
+<span class="nb">cd</span><span class="w"> </span>misp-modules
+<span class="nv">$SUDO_WWW</span><span class="w"> </span>/usr/bin/scl<span class="w"> </span><span class="nb">enable</span><span class="w"> </span>rh-python36<span class="w"> </span><span class="s2">&quot;virtualenv -p python3 /var/www/MISP/venv&quot;</span>
+<span class="nv">$SUDO_WWW</span><span class="w"> </span>/var/www/MISP/venv/bin/pip<span class="w"> </span>install<span class="w"> </span>-U<span class="w"> </span>-I<span class="w"> </span>-r<span class="w"> </span>REQUIREMENTS
+<span class="nv">$SUDO_WWW</span><span class="w"> </span>/var/www/MISP/venv/bin/pip<span class="w"> </span>install<span class="w"> </span>-U<span class="w"> </span>.
+</code></pre></div>
 <p>Create the service file /etc/systemd/system/misp-modules.service :</p>
-<p><sub>~</sub>~bash
-echo "[Unit]
-Description=MISP's modules
-After=misp-workers.service</p>
-<p>[Service]
-Type=simple
-User=apache
-Group=apache
-ExecStart=/usr/bin/scl enable rh-python36 rh-ruby22  '/var/www/MISP/venv/bin/misp-modules –l 127.0.0.1 –s'
-Restart=always
-RestartSec=10</p>
-<p>[Install]
-WantedBy=multi-user.target" | sudo tee /etc/systemd/system/misp-modules.service
-<sub>~</sub>~</p>
+<div class="highlight"><pre><span></span><code><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;[Unit]</span>
+<span class="s2">Description=MISP&#39;s modules</span>
+<span class="s2">After=misp-workers.service</span>
+
+<span class="s2">[Service]</span>
+<span class="s2">Type=simple</span>
+<span class="s2">User=apache</span>
+<span class="s2">Group=apache</span>
+<span class="s2">ExecStart=/usr/bin/scl enable rh-python36 rh-ruby22  &#39;/var/www/MISP/venv/bin/misp-modules –l 127.0.0.1 –s&#39;</span>
+<span class="s2">Restart=always</span>
+<span class="s2">RestartSec=10</span>
+
+<span class="s2">[Install]</span>
+<span class="s2">WantedBy=multi-user.target&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>tee<span class="w"> </span>/etc/systemd/system/misp-modules.service
+</code></pre></div>
 <p>The After=misp-workers.service must be changed or removed if you have not created a misp-workers service. Then, enable the misp-modules service and start it:</p>
-<p><sub>~</sub>~bash
-systemctl daemon-reload
-systemctl enable --now misp-modules
-<sub>~</sub>~</p>
+<div class="highlight"><pre><span></span><code>systemctl<span class="w"> </span>daemon-reload
+systemctl<span class="w"> </span><span class="nb">enable</span><span class="w"> </span>--now<span class="w"> </span>misp-modules
+</code></pre></div>
 <h2 id="how-to-use-an-misp-modules-docker-container">How to use an MISP modules Docker container<a class="headerlink" href="#how-to-use-an-misp-modules-docker-container" title="Permanent link">&para;</a></h2>
 <h3 id="docker-build">Docker build<a class="headerlink" href="#docker-build" title="Permanent link">&para;</a></h3>
-<p><sub>~</sub>~bash
-docker build -t misp-modules \
-    --build-arg BUILD_DATE=$(date -u +"%Y-%m-%d") \
-  docker/
-<sub>~</sub>~</p>
-<h3 id="docker-run">Docker run<a class="headerlink" href="#docker-run" title="Permanent link">&para;</a></h3>
-<p><sub>~</sub>~bash</p>
-<h1 id="start-redis">Start Redis<a class="headerlink" href="#start-redis" title="Permanent link">&para;</a></h1>
-<p>docker run --rm -d --name=misp-redis redis:alpine</p>
-<h1 id="start-misp-modules">Start MISP-modules<a class="headerlink" href="#start-misp-modules" title="Permanent link">&para;</a></h1>
-<p>docker run \
-    --rm -d --name=misp-modules \
-    -e REDIS_BACKEND=misp-redis \
-    -e REDIS_PORT="6379" \
-    -e REDIS_PW="" \
-    -e REDIS_DATABASE="245" \
-    -e MISP_MODULES_DEBUG="false" \
-    dcso/misp-dockerized-misp-modules
-<sub>~</sub>~</p>
-<h3 id="docker-compose">Docker-compose<a class="headerlink" href="#docker-compose" title="Permanent link">&para;</a></h3>
-<p><sub>~</sub>~yml
-services:
-  misp-modules:
-    # <a href="https://hub.docker.com/r/dcso/misp-dockerized-misp-modules">https://hub.docker.com/r/dcso/misp-dockerized-misp-modules</a>
-    image: dcso/misp-dockerized-misp-modules:3</p>
-<div class="codehilite"><pre><span></span><code># Local image:
-#image: misp-modules
-#build:
-#  context: docker/
-
-environment:
-  # Redis
-  REDIS_BACKEND: misp-redis
-  REDIS_PORT: &quot;6379&quot;
-  REDIS_DATABASE: &quot;245&quot;
-  # System PROXY (OPTIONAL)
-  http_proxy: 
-  https_proxy: 
-  no_proxy: 0.0.0.0
-  # Timezone (OPTIONAL)
-  TZ: Europe/Berlin
-  # MISP-Modules (OPTIONAL)
-  MISP_MODULES_DEBUG: &quot;false&quot;
-  # Logging options (OPTIONAL)
-  LOG_SYSLOG_ENABLED: &quot;no&quot;
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span>misp-modules<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--build-arg<span class="w"> </span><span class="nv">BUILD_DATE</span><span class="o">=</span><span class="k">$(</span>date<span class="w"> </span>-u<span class="w"> </span>+<span class="s2">&quot;%Y-%m-%d&quot;</span><span class="k">)</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>docker/
 </code></pre></div>
+<h3 id="docker-run">Docker run<a class="headerlink" href="#docker-run" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Start Redis</span>
+docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>-d<span class="w"> </span>--name<span class="o">=</span>misp-redis<span class="w"> </span>redis:alpine
+<span class="c1"># Start MISP-modules</span>
+docker<span class="w"> </span>run<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--rm<span class="w"> </span>-d<span class="w"> </span>--name<span class="o">=</span>misp-modules<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-e<span class="w"> </span><span class="nv">REDIS_BACKEND</span><span class="o">=</span>misp-redis<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-e<span class="w"> </span><span class="nv">REDIS_PORT</span><span class="o">=</span><span class="s2">&quot;6379&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-e<span class="w"> </span><span class="nv">REDIS_PW</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-e<span class="w"> </span><span class="nv">REDIS_DATABASE</span><span class="o">=</span><span class="s2">&quot;245&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-e<span class="w"> </span><span class="nv">MISP_MODULES_DEBUG</span><span class="o">=</span><span class="s2">&quot;false&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>dcso/misp-dockerized-misp-modules
+</code></pre></div>
+<h3 id="docker-compose">Docker-compose<a class="headerlink" href="#docker-compose" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code>services:
+  misp-modules:
+    # https://hub.docker.com/r/dcso/misp-dockerized-misp-modules
+    image: dcso/misp-dockerized-misp-modules:3
 
-<p>misp-redis:
-    # <a href="https://hub.docker.com/_/redis">https://hub.docker.com/_/redis</a> or alternative <a href="https://hub.docker.com/r/dcso/misp-dockerized-redis/">https://hub.docker.com/r/dcso/misp-dockerized-redis/</a>
+    # Local image:
+    #image: misp-modules
+    #build:
+    #  context: docker/
+
+    environment:
+      # Redis
+      REDIS_BACKEND: misp-redis
+      REDIS_PORT: &quot;6379&quot;
+      REDIS_DATABASE: &quot;245&quot;
+      # System PROXY (OPTIONAL)
+      http_proxy: 
+      https_proxy: 
+      no_proxy: 0.0.0.0
+      # Timezone (OPTIONAL)
+      TZ: Europe/Berlin
+      # MISP-Modules (OPTIONAL)
+      MISP_MODULES_DEBUG: &quot;false&quot;
+      # Logging options (OPTIONAL)
+      LOG_SYSLOG_ENABLED: &quot;no&quot;
+  misp-redis:
+    # https://hub.docker.com/_/redis or alternative https://hub.docker.com/r/dcso/misp-dockerized-redis/
     image: redis:alpine
-<sub>~</sub>~</p>
+</code></pre></div>
 <h2 id="install-misp-module-on-an-offline-instance">Install misp-module on an offline instance.<a class="headerlink" href="#install-misp-module-on-an-offline-instance" title="Permanent link">&para;</a></h2>
 <p>First, you need to grab all necessary packages for example like this :</p>
 <p>Use pip wheel to create an archive
-<sub>~</sub>
-mkdir misp-modules-offline
+<div class="highlight"><pre><span></span><code>mkdir misp-modules-offline
 pip3 wheel -r REQUIREMENTS shodan --wheel-dir=./misp-modules-offline
 tar -cjvf misp-module-bundeled.tar.bz2 ./misp-modules-offline/*
-<sub>~</sub>
+</code></pre></div>
 On offline machine :
-<sub>~</sub>
-mkdir misp-modules-bundle
+<div class="highlight"><pre><span></span><code>mkdir misp-modules-bundle
 tar xvf misp-module-bundeled.tar.bz2 -C misp-modules-bundle
 cd misp-modules-bundle
 ls -1|while read line; do sudo pip3 install --force-reinstall --ignore-installed --upgrade --no-index --no-deps ${line};done
-<sub>~</sub>
+</code></pre></div>
 Next you can follow standard install procedure.</p>
 
-              
-            </article>
-          </div>
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
         </div>
         
       </main>
       
         <footer class="md-footer">
-  
-    <nav class="md-footer__inner md-grid" aria-label="Footer">
-      
-        
-        <a href="../import_mod/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Import Modules" rel="prev">
-          <div class="md-footer__button md-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
-          </div>
-          <div class="md-footer__title">
-            <div class="md-ellipsis">
-              <span class="md-footer__direction">
-                Previous
-              </span>
-              Import Modules
-            </div>
-          </div>
-        </a>
-      
-      
-        
-        <a href="../contribute/" class="md-footer__link md-footer__link--next" aria-label="Next: Contribute" rel="next">
-          <div class="md-footer__title">
-            <div class="md-ellipsis">
-              <span class="md-footer__direction">
-                Next
-              </span>
-              Contribute
-            </div>
-          </div>
-          <div class="md-footer__button md-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4z"/></svg>
-          </div>
-        </a>
-      
-    </nav>
   
   <div class="md-footer-meta md-typeset">
     <div class="md-footer-meta__inner md-grid">
@@ -960,7 +763,7 @@ Next you can follow standard install procedure.</p>
       
     
     <a href="https://twitter.com/MISPProject" target="_blank" rel="noopener" title="twitter.com" class="md-social__link">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M459.37 151.716c.325 4.548.325 9.097.325 13.645 0 138.72-105.583 298.558-298.558 298.558-59.452 0-114.68-17.219-161.137-47.106 8.447.974 16.568 1.299 25.34 1.299 49.055 0 94.213-16.568 130.274-44.832-46.132-.975-84.792-31.188-98.112-72.772 6.498.974 12.995 1.624 19.818 1.624 9.421 0 18.843-1.3 27.614-3.573-48.081-9.747-84.143-51.98-84.143-102.985v-1.299c13.969 7.797 30.214 12.67 47.431 13.319-28.264-18.843-46.781-51.005-46.781-87.391 0-19.492 5.197-37.36 14.294-52.954 51.655 63.675 129.3 105.258 216.365 109.807-1.624-7.797-2.599-15.918-2.599-24.04 0-57.828 46.782-104.934 104.934-104.934 30.213 0 57.502 12.67 76.67 33.137 23.715-4.548 46.456-13.32 66.599-25.34-7.798 24.366-24.366 44.833-46.132 57.827 21.117-2.273 41.584-8.122 60.426-16.243-14.292 20.791-32.161 39.308-52.628 54.253z"/></svg>
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M459.37 151.716c.325 4.548.325 9.097.325 13.645 0 138.72-105.583 298.558-298.558 298.558-59.452 0-114.68-17.219-161.137-47.106 8.447.974 16.568 1.299 25.34 1.299 49.055 0 94.213-16.568 130.274-44.832-46.132-.975-84.792-31.188-98.112-72.772 6.498.974 12.995 1.624 19.818 1.624 9.421 0 18.843-1.3 27.614-3.573-48.081-9.747-84.143-51.98-84.143-102.985v-1.299c13.969 7.797 30.214 12.67 47.431 13.319-28.264-18.843-46.781-51.005-46.781-87.391 0-19.492 5.197-37.36 14.294-52.954 51.655 63.675 129.3 105.258 216.365 109.807-1.624-7.797-2.599-15.918-2.599-24.04 0-57.828 46.782-104.934 104.934-104.934 30.213 0 57.502 12.67 76.67 33.137 23.715-4.548 46.456-13.32 66.599-25.34-7.798 24.366-24.366 44.833-46.132 57.827 21.117-2.273 41.584-8.122 60.426-16.243-14.292 20.791-32.161 39.308-52.628 54.253z"/></svg>
     </a>
   
     
@@ -969,7 +772,7 @@ Next you can follow standard install procedure.</p>
       
     
     <a href="https://github.com/MISP" target="_blank" rel="noopener" title="github.com" class="md-social__link">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 512"><path d="M186.1 328.7c0 20.9-10.9 55.1-36.7 55.1s-36.7-34.2-36.7-55.1 10.9-55.1 36.7-55.1 36.7 34.2 36.7 55.1zM480 278.2c0 31.9-3.2 65.7-17.5 95-37.9 76.6-142.1 74.8-216.7 74.8-75.8 0-186.2 2.7-225.6-74.8-14.6-29-20.2-63.1-20.2-95 0-41.9 13.9-81.5 41.5-113.6-5.2-15.8-7.7-32.4-7.7-48.8 0-21.5 4.9-32.3 14.6-51.8 45.3 0 74.3 9 108.8 36 29-6.9 58.8-10 88.7-10 27 0 54.2 2.9 80.4 9.2 34-26.7 63-35.2 107.8-35.2 9.8 19.5 14.6 30.3 14.6 51.8 0 16.4-2.6 32.7-7.7 48.2 27.5 32.4 39 72.3 39 114.2zm-64.3 50.5c0-43.9-26.7-82.6-73.5-82.6-18.9 0-37 3.4-56 6-14.9 2.3-29.8 3.2-45.1 3.2-15.2 0-30.1-.9-45.1-3.2-18.7-2.6-37-6-56-6-46.8 0-73.5 38.7-73.5 82.6 0 87.8 80.4 101.3 150.4 101.3h48.2c70.3 0 150.6-13.4 150.6-101.3zm-82.6-55.1c-25.8 0-36.7 34.2-36.7 55.1s10.9 55.1 36.7 55.1 36.7-34.2 36.7-55.1-10.9-55.1-36.7-55.1z"/></svg>
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 512"><!--! Font Awesome Free 6.2.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M186.1 328.7c0 20.9-10.9 55.1-36.7 55.1s-36.7-34.2-36.7-55.1 10.9-55.1 36.7-55.1 36.7 34.2 36.7 55.1zM480 278.2c0 31.9-3.2 65.7-17.5 95-37.9 76.6-142.1 74.8-216.7 74.8-75.8 0-186.2 2.7-225.6-74.8-14.6-29-20.2-63.1-20.2-95 0-41.9 13.9-81.5 41.5-113.6-5.2-15.8-7.7-32.4-7.7-48.8 0-21.5 4.9-32.3 14.6-51.8 45.3 0 74.3 9 108.8 36 29-6.9 58.8-10 88.7-10 27 0 54.2 2.9 80.4 9.2 34-26.7 63-35.2 107.8-35.2 9.8 19.5 14.6 30.3 14.6 51.8 0 16.4-2.6 32.7-7.7 48.2 27.5 32.4 39 72.3 39 114.2zm-64.3 50.5c0-43.9-26.7-82.6-73.5-82.6-18.9 0-37 3.4-56 6-14.9 2.3-29.8 3.2-45.1 3.2-15.2 0-30.1-.9-45.1-3.2-18.7-2.6-37-6-56-6-46.8 0-73.5 38.7-73.5 82.6 0 87.8 80.4 101.3 150.4 101.3h48.2c70.3 0 150.6-13.4 150.6-101.3zm-82.6-55.1c-25.8 0-36.7 34.2-36.7 55.1s10.9 55.1 36.7 55.1 36.7-34.2 36.7-55.1-10.9-55.1-36.7-55.1z"/></svg>
     </a>
   
 </div>
@@ -982,10 +785,11 @@ Next you can follow standard install procedure.</p>
     <div class="md-dialog" data-md-component="dialog">
       <div class="md-dialog__inner md-typeset"></div>
     </div>
-    <script id="__config" type="application/json">{"base": "..", "features": [], "search": "../assets/javascripts/workers/search.361d90f1.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}}</script>
+    
+    <script id="__config" type="application/json">{"base": "..", "features": [], "search": "../assets/javascripts/workers/search.12658920.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
-      <script src="../assets/javascripts/bundle.289a2a4b.min.js"></script>
+      <script src="../assets/javascripts/bundle.5cf534bf.min.js"></script>
       
     
   </body>
