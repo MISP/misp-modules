@@ -95,7 +95,7 @@ pdftotext==2.2.2
 pillow==9.2.0
 pkgutil-resolve-name==1.3.10 ; python_version < '3.9'
 progressbar2==4.0.0 ; python_full_version >= '3.7.0'
-psutil==5.9.2 ; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3'
+psutil
 publicsuffixlist==0.8.0 ; python_version >= '2.6'
 git+https://github.com/D4-project/BGP-Ranking.git/@68de39f6c5196f796055c1ac34504054d688aa59#egg=pybgpranking&subdirectory=client
 pycparser==2.21
