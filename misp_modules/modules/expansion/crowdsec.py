@@ -41,7 +41,10 @@ def _handler_v2(request_data):
 
     crowdsec_cti = requests.get(
         f"https://cti.api.crowdsec.net/v2/smoke/{ip}",
-        headers={"x-api-key": request_data["config"]["api_key"]},
+        headers={
+        "x-api-key": request_data["config"]["api_key"],
+        "User-Agent": "crowdsec-misp/v1.0.0",        
+        },
     )
     crowdsec_cti.raise_for_status()
     crowdsec_cti = crowdsec_cti.json()
