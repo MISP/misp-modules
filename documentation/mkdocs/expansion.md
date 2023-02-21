@@ -773,6 +773,31 @@ Module to query an IP ASN history service (https://github.com/D4-project/IPASN-H
 
 -----
 
+#### [ipinfo](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/ipinfo.py)
+
+<img src=../logos/ipinfo.png height=60>
+
+An expansion module to query ipinfo.io to gather more information on a given IP address.
+- **features**:
+>The module takes an IP address attribute as input and queries the ipinfo.io API.  
+>The geolocation information on the IP address is always returned.
+>
+>Depending on the subscription plan, the API returns different pieces of information then:
+>- With a basic plan (free) you get the AS number and the AS organisation name concatenated in the `org` field.
+>- With a paid subscription, the AS information is returned in the `asn` field with additional AS information, and depending on which plan the user has, you can also get information on the privacy method used to protect the IP address, the related domains, or the point of contact related to the IP address in case of an abuse.
+>
+>More information on the responses content is available in the [documentation](https://ipinfo.io/developers).
+- **input**:
+>IP address attribute.
+- **output**:
+>Additional information on the IP address, like its geolocation, the autonomous system it is included in, and the related domain(s).
+- **references**:
+>https://ipinfo.io/developers
+- **requirements**:
+>An ipinfo.io token
+
+-----
+
 #### [ipqs_fraud_and_risk_scoring](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/ipqs_fraud_and_risk_scoring.py)
 
 <img src=../logos/ipqualityscore.png height=60>
