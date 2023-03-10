@@ -297,7 +297,7 @@ class TestExpansions(unittest.TestCase):
                 )
         else:
             response = self.misp_modules_post(query)
-            self.assertEqual(self.get_errors(response), 'Missing Greynoise API key.')
+            self.assertEqual(self.get_errors(response), 'GreyNoise API Key required, but missing')
 
     @unittest.skip("Service doesn't work")
     def test_ipasn(self):
