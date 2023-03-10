@@ -82,7 +82,7 @@ def handler(q=False):
         for attribute in event["Attribute"]:
             if attribute['type'] in types_to_use:
                 output = output + handlers[attribute['type']](attribute['value'], config['Period']) + '\n'
-        for obj in event["Object"]
+        for obj in event["Object"]:
             for attribute in obj["Attribute"]:
                 if attribute['type'] in types_to_use:
                     output = output + handlers[attribute['type']](attribute['value'], config['Period']) + '\n'
