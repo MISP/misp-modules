@@ -8,7 +8,7 @@ import json
 
 misperrors = {"error": "Error"}
 
-types_to_use = ['sha1', 'md5', 'domain', 'ip', 'url']
+types_to_use = ['sha256', 'sha1', 'md5', 'domain', 'ip', 'url']
 
 userConfig = {
 
@@ -23,6 +23,12 @@ responseType = 'application/txt'
 moduleinfo = {'version': '1.0', 'author': 'Julien Bachmann, Hacknowledge',
               'description': 'Defender for Endpoint KQL hunting query export module',
               'module-type': ['export']}
+
+
+def handle_sha256(value, period):
+    query = f"""find in (DeviceAlertEvents, DeviceFileEvents, DeviceImageLoadEvents, DeviceProcessEvents)
+        where SHA256 == '{value}' or InitiatingProcessSHA1 == '{value}'"""
+    return query.replace('\n', ' ')
 
 
 def handle_sha1(value, period):
@@ -56,6 +62,7 @@ def handle_url(value, period):
 
 
 handlers = {
+    'sha256': handle_sha256,
     'sha1': handle_sha1,
     'md5': handle_md5,
     'domain': handle_domain,
@@ -75,6 +82,10 @@ def handler(q=False):
         for attribute in event["Attribute"]:
             if attribute['type'] in types_to_use:
                 output = output + handlers[attribute['type']](attribute['value'], config['Period']) + '\n'
+        for obj in event["Object"]
+            for attribute in obj["Attribute"]:
+                if attribute['type'] in types_to_use:
+                    output = output + handlers[attribute['type']](attribute['value'], config['Period']) + '\n'
     r = {"response": [], "data": str(base64.b64encode(bytes(output, 'utf-8')), 'utf-8')}
     return r
 
