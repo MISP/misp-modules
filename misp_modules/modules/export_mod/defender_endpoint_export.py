@@ -20,7 +20,7 @@ inputSource = ['event']
 outputFileExtension = 'kql'
 responseType = 'application/txt'
 
-moduleinfo = {'version': '1.0', 'author': 'Julien Bachmann, Hacknowledge',
+moduleinfo = {'version': '1.1', 'author': 'Julien Bachmann, Hacknowledge, Maik Wuerth',
               'description': 'Defender for Endpoint KQL hunting query export module',
               'module-type': ['export']}
 
