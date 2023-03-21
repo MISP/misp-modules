@@ -378,6 +378,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#crowdsec" class="md-nav__link">
+    crowdsec
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#crowdstrike_falcon" class="md-nav__link">
     crowdstrike_falcon
   </a>
@@ -1167,6 +1174,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#crowdsec" class="md-nav__link">
+    crowdsec
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#crowdstrike_falcon" class="md-nav__link">
     crowdstrike_falcon
   </a>
@@ -1942,6 +1956,24 @@ CPE attribute.
 The vulnerabilities related to the CPE.
 - <strong>references</strong>:
 <a href="https://cve.circl.lu/api/">https://cve.circl.lu/api/</a></p>
+</blockquote>
+<hr />
+<h4 id="crowdsec"><a href="https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/crowdsec.py">crowdsec</a><a class="headerlink" href="#crowdsec" title="Permanent link">&para;</a></h4>
+<p><img src=../logos/crowdsec.png height=60></p>
+<p>Hover module to lookup an IP in CrowdSec's CTI
+- <strong>features</strong>:</p>
+<blockquote>
+<p>This module enables IP lookup from CrowdSec CTI API. It provides information about the IP, such as what kind of attacks it has been participant of as seen by CrowdSec's network. It also includes enrichment by CrowdSec like background noise score, aggressivity over time etc.
+- <strong>input</strong>:
+An IP address.
+- <strong>output</strong>:
+IP Lookup information from CrowdSec CTI API
+- <strong>references</strong>:
+- <a href="https://www.crowdsec.net/">https://www.crowdsec.net/</a>
+- <a href="https://docs.crowdsec.net/docs/cti_api/getting_started">https://docs.crowdsec.net/docs/cti_api/getting_started</a>
+- <a href="https://app.crowdsec.net/">https://app.crowdsec.net/</a>
+- <strong>requirements</strong>:
+A CrowdSec CTI API key. Get yours by following <a href="https://docs.crowdsec.net/docs/cti_api/getting_started/#getting-an-api-key">https://docs.crowdsec.net/docs/cti_api/getting_started/#getting-an-api-key</a></p>
 </blockquote>
 <hr />
 <h4 id="crowdstrike_falcon"><a href="https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/crowdstrike_falcon.py">crowdstrike_falcon</a><a class="headerlink" href="#crowdstrike_falcon" title="Permanent link">&para;</a></h4>
@@ -3479,7 +3511,7 @@ MISP attributes and objects fetched from the Yeti instances.
       <div class="md-copyright">
   
     <div class="md-copyright__highlight">
-      Copyright &copy; 2019-2022 MISP Project
+      Copyright &copy; 2019-2023 MISP Project
     </div>
   
   

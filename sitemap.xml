@@ -2,37 +2,37 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://www.misp-project.org/</loc>
-         <lastmod>2023-03-20</lastmod>
+         <lastmod>2023-03-21</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://www.misp-project.org/contribute/</loc>
-         <lastmod>2023-03-20</lastmod>
+         <lastmod>2023-03-21</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://www.misp-project.org/expansion/</loc>
-         <lastmod>2023-03-20</lastmod>
+         <lastmod>2023-03-21</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://www.misp-project.org/export_mod/</loc>
-         <lastmod>2023-03-20</lastmod>
+         <lastmod>2023-03-21</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://www.misp-project.org/import_mod/</loc>
-         <lastmod>2023-03-20</lastmod>
+         <lastmod>2023-03-21</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://www.misp-project.org/install/</loc>
-         <lastmod>2023-03-20</lastmod>
+         <lastmod>2023-03-21</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://www.misp-project.org/license/</loc>
-         <lastmod>2023-03-20</lastmod>
+         <lastmod>2023-03-21</lastmod>
          <changefreq>daily</changefreq>
     </url>
 </urlset>
