@@ -16,7 +16,7 @@ edit_uri: ""
 use_directory_urls: true
 
 # Copyright
-copyright: "Copyright &copy; 2019-2022 MISP Project"
+copyright: "Copyright &copy; 2019-2023 MISP Project"
 
 # Options
 extra:
