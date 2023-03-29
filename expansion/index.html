@@ -560,6 +560,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#ipinfo" class="md-nav__link">
+    ipinfo
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#ipqs_fraud_and_risk_scoring" class="md-nav__link">
     ipqs_fraud_and_risk_scoring
   </a>
@@ -1351,6 +1358,13 @@
         <li class="md-nav__item">
   <a href="#ipasn" class="md-nav__link">
     ipasn
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ipinfo" class="md-nav__link">
+    ipinfo
   </a>
   
 </li>
@@ -2454,6 +2468,27 @@ Asn object(s) objects related to the IP address used as input.
 <a href="https://github.com/D4-project/IPASN-History">https://github.com/D4-project/IPASN-History</a>
 - <strong>requirements</strong>:
 pyipasnhistory: Python library to access IPASN-history instance</p>
+</blockquote>
+<hr />
+<h4 id="ipinfo"><a href="https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/ipinfo.py">ipinfo</a><a class="headerlink" href="#ipinfo" title="Permanent link">&para;</a></h4>
+<p><img src=../logos/ipinfo.png height=60></p>
+<p>An expansion module to query ipinfo.io to gather more information on a given IP address.
+- <strong>features</strong>:</p>
+<blockquote>
+<p>The module takes an IP address attribute as input and queries the ipinfo.io API.<br />
+The geolocation information on the IP address is always returned.</p>
+<p>Depending on the subscription plan, the API returns different pieces of information then:
+- With a basic plan (free) you get the AS number and the AS organisation name concatenated in the <code>org</code> field.
+- With a paid subscription, the AS information is returned in the <code>asn</code> field with additional AS information, and depending on which plan the user has, you can also get information on the privacy method used to protect the IP address, the related domains, or the point of contact related to the IP address in case of an abuse.</p>
+<p>More information on the responses content is available in the <a href="https://ipinfo.io/developers">documentation</a>.
+- <strong>input</strong>:
+IP address attribute.
+- <strong>output</strong>:
+Additional information on the IP address, like its geolocation, the autonomous system it is included in, and the related domain(s).
+- <strong>references</strong>:
+<a href="https://ipinfo.io/developers">https://ipinfo.io/developers</a>
+- <strong>requirements</strong>:
+An ipinfo.io token</p>
 </blockquote>
 <hr />
 <h4 id="ipqs_fraud_and_risk_scoring"><a href="https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/ipqs_fraud_and_risk_scoring.py">ipqs_fraud_and_risk_scoring</a><a class="headerlink" href="#ipqs_fraud_and_risk_scoring" title="Permanent link">&para;</a></h4>
