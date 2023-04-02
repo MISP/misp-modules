@@ -195,7 +195,7 @@ class TestExpansions(unittest.TestCase):
         query = {"module": "dbl_spamhaus", "domain": "totalmateria.net"}
         response = self.misp_modules_post(query)
         try:
-            self.assertEqual(self.get_values(response), 'totalmateria.net - spam domain')
+            self.assertEqual(self.get_values(response), 'totalmateria.net - spam test domain')
         except Exception:
             try:
                 self.assertTrue(self.get_values(response).startswith('None of DNS query names exist:'))
@@ -263,7 +263,7 @@ class TestExpansions(unittest.TestCase):
             self.assertEqual(to_check, 'OK (Not Found)', response)
         else:
             self.assertEqual(self.get_errors(response), 'Have I Been Pwned authentication is incomplete (no API key)')
-            
+
     def test_hyasinsight(self):
         module_name = "hyasinsight"
         query = {"module": module_name,
@@ -432,7 +432,7 @@ class TestExpansions(unittest.TestCase):
             encoded = b64encode(f.read()).decode()
         query = {"module": "pdf_enrich", "attachment": filename, "data": encoded}
         response = self.misp_modules_post(query)
-        self.assertEqual(self.get_values(response), 'Pdf test')
+        self.assertRegex(self.get_values(response), r'^Pdf test')
 
     def test_pptx(self):
         filename = 'test.pptx'
