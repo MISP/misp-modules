@@ -2,7 +2,10 @@ import json
 import sys
 
 try:
+    original_path = sys.path
+    sys.path = original_path[1:]
     import dns.resolver
+    sys.path = original_path
     resolver = dns.resolver.Resolver()
     resolver.timeout = 0.2
     resolver.lifetime = 0.2
