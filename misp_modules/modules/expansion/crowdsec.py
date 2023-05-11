@@ -1,17 +1,17 @@
 import json
-
-from pymisp import MISPEvent, MISPObject
 import pycountry
 import requests
+from . import check_input_attribute, standard_error_message
+from pymisp import MISPEvent, MISPObject
 
-mispattributes = {"input": ["ip-dst", "ip-src"], "output": ["text"]}
+mispattributes = {"input": ["ip-dst", "ip-src"], "format": "misp_standard"}
 moduleinfo = {
     "version": "1.0",
     "author": "Shivam Sandbhor <shivam@crowdsec.net>",
     "description": "Module to access CrowdSec CTI API.",
     "module-type": ["hover", "expansion"],
 }
-moduleconfig = ["api_key", "api_version"]
+moduleconfig = ["api_key"]
 
 
 def handler(q=False):
@@ -25,18 +25,17 @@ def handler(q=False):
     if not request["config"].get("api_key"):
         return {"error": "Missing CrowdSec API key"}
 
-    request["config"]["api_version"] = "v2"
+    if not request.get('attribute') or not check_input_attribute(request['attribute']):
+        return {'error': f'{standard_error_message}, which shoul contain at least a type, a value and an uuid.'}
 
-    if request["config"]["api_version"] == "v2":
-        return _handler_v2(request)
-    return {"error": f'API version {request["config"]["api_version"]} not supported'}
+    if request['attribute'].get('type') not in mispattributes['input']:
+        return {'error': f"Wrong input type. Please choose on of the following: {', '.join(mispattributes['input'])}"}
+
+    return _handler_v2(request)
 
 
 def _handler_v2(request_data):
-    if request_data.get("ip-dst"):
-        ip = request_data.get("ip-dst")
-    elif request_data.get("ip-src"):
-        ip = request_data.get("ip-src")
+    ip = request_data['attribute']['value']
 
     crowdsec_cti = requests.get(
         f"https://cti.api.crowdsec.net/v2/smoke/{ip}",
