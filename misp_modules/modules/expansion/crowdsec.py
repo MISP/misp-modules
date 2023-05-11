@@ -4,12 +4,12 @@ from pymisp import MISPEvent, MISPObject
 import pycountry
 import requests
 
-mispattributes = {"input": ["ip-dst", "ip-src"], "output": ["text"]}
+mispattributes = {"input": ["ip-dst", "ip-src"], "output": ["text"], 'format': 'misp_standard'}
 moduleinfo = {
     "version": "1.0",
     "author": "Shivam Sandbhor <shivam@crowdsec.net>",
     "description": "Module to access CrowdSec CTI API.",
-    "module-type": ["hover"],
+    "module-type": ["hover", "expansion"],
 }
 moduleconfig = ["api_key", "api_version"]
 
@@ -26,7 +26,8 @@ def handler(q=False):
         return {"error": "Missing CrowdSec API key"}
 
     if not request["config"].get("api_version"):
-        return {"error": "Missing CrowdSec API version parameter"}
+    else:
+        request["config"] = "v2"
 
     if request["config"]["api_version"] == "v2":
         return _handler_v2(request)
@@ -43,7 +44,7 @@ def _handler_v2(request_data):
         f"https://cti.api.crowdsec.net/v2/smoke/{ip}",
         headers={
         "x-api-key": request_data["config"]["api_key"],
-        "User-Agent": "crowdsec-misp/v1.0.0",        
+        "User-Agent": "crowdsec-misp/v1.0.0",
         },
     )
     crowdsec_cti.raise_for_status()
