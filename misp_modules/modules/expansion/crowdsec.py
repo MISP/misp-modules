@@ -25,9 +25,7 @@ def handler(q=False):
     if not request["config"].get("api_key"):
         return {"error": "Missing CrowdSec API key"}
 
-    if not request["config"].get("api_version"):
-    else:
-        request["config"] = "v2"
+    request["config"]["api_version"] = "v2"
 
     if request["config"]["api_version"] == "v2":
         return _handler_v2(request)
