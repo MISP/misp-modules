@@ -4,7 +4,7 @@ from pymisp import MISPEvent, MISPObject
 import pycountry
 import requests
 
-mispattributes = {"input": ["ip-dst", "ip-src"], "output": ["text"], 'format': 'misp_standard'}
+mispattributes = {"input": ["ip-dst", "ip-src"], "output": ["text"]}
 moduleinfo = {
     "version": "1.0",
     "author": "Shivam Sandbhor <shivam@crowdsec.net>",
