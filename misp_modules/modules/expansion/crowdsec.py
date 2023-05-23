@@ -72,7 +72,7 @@ def _handler_v2(request_data):
     crowdsec_context_object.add_attribute("as-num", crowdsec_cti["as_num"])
     if crowdsec_cti.get('reverse_dns') is not None:
         crowdsec_context_object.add_attribute("reverse-dns", crowdsec_cti["reverse_dns"])
-    crowdsec_context_object.add_attribute('background-noise', crowdsec_cti['background_noise_score']
+    crowdsec_context_object.add_attribute('background-noise', crowdsec_cti['background_noise_score'])
     for behavior in crowdsec_cti["behaviors"]:
         crowdsec_context_object.add_attribute(
             "behaviors", behavior["label"],
