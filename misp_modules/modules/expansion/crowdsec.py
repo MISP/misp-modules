@@ -80,7 +80,6 @@ def _handler_v2(request_data):
         )
         tag = f'crowdsec:behavior="{behavior["name"]}"'
         ip_attribute.add_tag(tag)
-        misp_attribute.add_tag(tag)
     for feature, values in crowdsec_cti['classifications'].items():
         field = feature[:-1]
         for value in values:
@@ -89,7 +88,6 @@ def _handler_v2(request_data):
             )
             tag = f'crowdsec:{field}="{value["name"]}"'
             ip_attribute.add_tag(tag)
-            misp_attribute.add_tag(tag)
     crowdsec_context_object.add_attribute(
         "attack-details",
         ", ".join(
