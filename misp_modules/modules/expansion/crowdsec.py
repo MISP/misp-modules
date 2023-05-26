@@ -6,7 +6,7 @@ from pymisp import MISPEvent, MISPObject
 
 mispattributes = {"input": ["ip-dst", "ip-src"], "format": "misp_standard"}
 moduleinfo = {
-    "version": "1.0",
+    "version": "2.0",
     "author": "Shivam Sandbhor <shivam@crowdsec.net>",
     "description": "Module to access CrowdSec CTI API.",
     "module-type": ["hover", "expansion"],
@@ -41,9 +41,9 @@ def _handler_v2(request_data):
     crowdsec_cti = requests.get(
         f"https://cti.api.crowdsec.net/v2/smoke/{ip}",
         headers={
-        "x-api-key": request_data["config"]["api_key"],
-        "User-Agent": "crowdsec-misp/v1.0.0",
-        },
+            "x-api-key": request_data["config"]["api_key"],
+            "User-Agent": "crowdsec-misp/v1.0.0",
+        }
     )
     crowdsec_cti.raise_for_status()
     crowdsec_cti = crowdsec_cti.json()
@@ -55,7 +55,7 @@ def _handler_v2(request_data):
         first_seen=crowdsec_cti["history"]["first_seen"],
         last_seen=crowdsec_cti["history"]["last_seen"]
     )
-    crowdsec_context_object.add_attribute("ip", crowdsec_cti["ip"])
+    ip_attribute = crowdsec_context_object.add_attribute("ip", crowdsec_cti["ip"])
     crowdsec_context_object.add_attribute("ip-range", crowdsec_cti["ip_range"])
     crowdsec_context_object.add_attribute("ip-range-score", crowdsec_cti["ip_range_score"])
     crowdsec_context_object.add_attribute(
@@ -78,6 +78,18 @@ def _handler_v2(request_data):
             "behaviors", behavior["label"],
             comment=behavior['description']
         )
+        tag = f'crowdsec:behavior="{behavior["name"]}"'
+        ip_attribute.add_tag(tag)
+        misp_attribute.add_tag(tag)
+    for feature, values in crowdsec_cti['classifications'].items():
+        field = feature[:-1]
+        for value in values:
+            crowdsec_context_object.add_attribute(
+                feature, value['label'], comment=value['description']
+            )
+            tag = f'crowdsec:{field}="{value["name"]}"'
+            ip_attribute.add_tag(tag)
+            misp_attribute.add_tag(tag)
     crowdsec_context_object.add_attribute(
         "attack-details",
         ", ".join(
