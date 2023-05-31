@@ -11,7 +11,7 @@ site_url: https://www.misp-project.org/
 # Repository
 repo_name: 'MISP/misp-modules'
 repo_url: https://github.com/MISP/misp-modules/
-edit_uri: ""
+edit_uri: edit/main/docs/
 
 use_directory_urls: true
 
