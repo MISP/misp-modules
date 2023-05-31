@@ -2,6 +2,7 @@
 import os
 import json
 import sys
+from pathlib import Path
 
 module_types = ['expansion', 'export_mod', 'import_mod']
 titles = ['Expansion Modules', 'Export Modules', 'Import Modules']
@@ -53,7 +54,7 @@ def write_doc(root_path):
     for _path, title in zip(module_types, titles):
         markdown.append(f'\n## {title}\n')
         markdown.extend(generate_doc(_path, root_path))
-    with open('README.md', 'w') as w:
+    with open(root_path / 'README.md', 'w') as w:
         w.write(''.join(markdown))
 
 
@@ -65,6 +66,6 @@ def write_docs_for_mkdocs(root_path):
 
 
 if __name__ == '__main__':
-    root_path = os.path.dirname(os.path.realpath(__file__))
+    root_path = Path(__file__).resolve().parent
     write_doc(root_path)
     write_docs_for_mkdocs(root_path)
