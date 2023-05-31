@@ -2527,11 +2527,11 @@ An access to the packetmail API (apikey)</p>
 <h4 id="joesandbox_query"><a href="https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/joesandbox_query.py">joesandbox_query</a><a class="headerlink" href="#joesandbox_query" title="Permanent link">&para;</a></h4>
 <p><img src=../logos/joesandbox.png height=60></p>
 <p>Query Joe Sandbox API with a submission url to get the json report and extract its data that is parsed and converted into MISP attributes and objects.</p>
-<p>This url can by the way come from the result of the <a href="https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/joesandbox_submit.py">joesandbox_submit expansion module</a>.
+<p>This url can by the way come from the result of the <a href="https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/joesandbox_submit.py">joesandbox_submit expansion module</a>.
 - <strong>features</strong>:</p>
 <blockquote>
 <p>Module using the new format of modules able to return attributes and objects.</p>
-<p>The module returns the same results as the import module <a href="https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/import_mod/joe_import.py">joe_import</a> taking directly the json report as input.</p>
+<p>The module returns the same results as the import module <a href="https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/joe_import.py">joe_import</a> taking directly the json report as input.</p>
 <p>Even if the introspection will allow all kinds of links to call this module, obviously only the ones presenting a sample or url submission in the Joe Sandbox API will return results.</p>
 <p>To make it work you will need to fill the 'apikey' configuration with your Joe Sandbox API key and provide a valid link as input.
 - <strong>input</strong>:
@@ -2551,7 +2551,7 @@ jbxapi: Joe Sandbox API python3 library</p>
 - <strong>features</strong>:</p>
 <blockquote>
 <p>The module requires a Joe Sandbox API key to submit files or URL, and returns the link of the submitted analysis.</p>
-<p>It is then possible, when the analysis is completed, to query the Joe Sandbox API to get the data related to the analysis, using the <a href="https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/joesandbox_query.py">joesandbox_query module</a> directly on this submission link.
+<p>It is then possible, when the analysis is completed, to query the Joe Sandbox API to get the data related to the analysis, using the <a href="https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/joesandbox_query.py">joesandbox_query module</a> directly on this submission link.
 - <strong>input</strong>:
 Sample, url (or domain) to submit to Joe Sandbox for an advanced analysis.
 - <strong>output</strong>:
@@ -2567,12 +2567,12 @@ jbxapi: Joe Sandbox API python3 library</p>
 <p><img src=../logos/lastline.png height=60></p>
 <p>Deprecation notice: this module will be deprecated by December 2021, please use vmware_nsx module.</p>
 <p>Query Lastline with an analysis link and parse the report into MISP attributes and objects.
-The analysis link can also be retrieved from the output of the <a href="https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/lastline_submit.py">lastline_submit</a> expansion module.
+The analysis link can also be retrieved from the output of the <a href="https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/lastline_submit.py">lastline_submit</a> expansion module.
 - <strong>features</strong>:</p>
 <blockquote>
 <p>The module requires a Lastline Portal <code>username</code> and <code>password</code>.
 The module uses the new format and it is able to return MISP attributes and objects.
-The module returns the same results as the <a href="https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/import_mod/lastline_import.py">lastline_import</a> import module.
+The module returns the same results as the <a href="https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/lastline_import.py">lastline_import</a> import module.
 - <strong>input</strong>:
 Link to a Lastline analysis.
 - <strong>output</strong>:
@@ -2588,7 +2588,7 @@ MISP attributes and objects parsed from the analysis report.
 - <strong>features</strong>:</p>
 <blockquote>
 <p>The module requires a Lastline Analysis <code>api_token</code> and <code>key</code>.
-When the analysis is completed, it is possible to import the generated report by feeding the analysis link to the <a href="https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/lastline_query.py">lastline_query</a> module.
+When the analysis is completed, it is possible to import the generated report by feeding the analysis link to the <a href="https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/lastline_query.py">lastline_query</a> module.
 - <strong>input</strong>:
 File or URL to submit to Lastline.
 - <strong>output</strong>:
@@ -3299,7 +3299,7 @@ A VARIoT db API key (if you do not want to be limited to 100 queries / day)</p>
 <blockquote>
 <p>New format of modules able to return attributes and objects.</p>
 <p>A module to take a MISP attribute as input and query the VirusTotal API to get additional data about it.</p>
-<p>Compared to the <a href="https://github.com/MISP/misp-modules/blob/master/misp_modules/modules/expansion/virustotal_public.py">standard VirusTotal expansion module</a>, this module is made for advanced parsing of VirusTotal report, with a recursive analysis of the elements found after the first request.</p>
+<p>Compared to the <a href="https://github.com/MISP/misp-modules/blob/main/misp_modules/modules/expansion/virustotal_public.py">standard VirusTotal expansion module</a>, this module is made for advanced parsing of VirusTotal report, with a recursive analysis of the elements found after the first request.</p>
 <p>Thus, it requires a higher request rate limit to avoid the API to return a 204 error (Request rate limit exceeded), and the data parsed from the different requests are returned as MISP attributes and objects, with the corresponding relations between each one of them.
 - <strong>input</strong>:
 A domain, hash (md5, sha1, sha256 or sha512), hostname or IP address attribute.
@@ -3319,7 +3319,7 @@ An access to the VirusTotal API (apikey), with a high request rate limit.</p>
 <blockquote>
 <p>New format of modules able to return attributes and objects.</p>
 <p>A module to take a MISP attribute as input and query the VirusTotal API to get additional data about it.</p>
-<p>Compared to the <a href="https://github.com/MISP/misp-modules/blob/master/misp_modules/modules/expansion/virustotal.py">more advanced VirusTotal expansion module</a>, this module is made for VirusTotal users who have a low request rate limit.</p>
+<p>Compared to the <a href="https://github.com/MISP/misp-modules/blob/main/misp_modules/modules/expansion/virustotal.py">more advanced VirusTotal expansion module</a>, this module is made for VirusTotal users who have a low request rate limit.</p>
 <p>Thus, it only queries the API once and returns the results that is parsed into MISP attributes and objects.
 - <strong>input</strong>:
 A domain, hostname, ip, url or hash (md5, sha1, sha256 or sha512) attribute.
