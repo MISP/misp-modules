@@ -7,5 +7,5 @@
     "references": [
         "https://www.lastline.com"
     ],
-    "features": "The module requires a Lastline Analysis `api_token` and `key`.\nWhen the analysis is completed, it is possible to import the generated report by feeding the analysis link to the [lastline_query](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/lastline_query.py) module."
+    "features": "The module requires a Lastline Analysis `api_token` and `key`.\nWhen the analysis is completed, it is possible to import the generated report by feeding the analysis link to the [lastline_query](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/lastline_query.py) module."
 }

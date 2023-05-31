@@ -10,5 +10,5 @@
         "https://www.joesecurity.org",
         "https://www.joesandbox.com/"
     ],
-    "features": "The module requires a Joe Sandbox API key to submit files or URL, and returns the link of the submitted analysis.\n\nIt is then possible, when the analysis is completed, to query the Joe Sandbox API to get the data related to the analysis, using the [joesandbox_query module](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/joesandbox_query.py) directly on this submission link."
+    "features": "The module requires a Joe Sandbox API key to submit files or URL, and returns the link of the submitted analysis.\n\nIt is then possible, when the analysis is completed, to query the Joe Sandbox API to get the data related to the analysis, using the [joesandbox_query module](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/joesandbox_query.py) directly on this submission link."
 }

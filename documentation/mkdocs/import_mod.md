@@ -92,7 +92,7 @@ A module to import data from a Joe Sandbox analysis json report.
 - **features**:
 >Module using the new format of modules able to return attributes and objects.
 >
->The module returns the same results as the expansion module [joesandbox_query](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/joesandbox_query.py) using the submission link of the analysis to get the json report.
+>The module returns the same results as the expansion module [joesandbox_query](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/joesandbox_query.py) using the submission link of the analysis to get the json report.
 - **input**:
 >Json report of a Joe Sandbox analysis.
 - **output**:
@@ -113,7 +113,7 @@ Module to import and parse reports from Lastline analysis links.
 - **features**:
 >The module requires a Lastline Portal `username` and `password`.
 >The module uses the new format and it is able to return MISP attributes and objects.
->The module returns the same results as the [lastline_query](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/lastline_query.py) expansion module.
+>The module returns the same results as the [lastline_query](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/lastline_query.py) expansion module.
 - **input**:
 >Link to a Lastline analysis.
 - **output**:

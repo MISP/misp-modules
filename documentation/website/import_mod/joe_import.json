@@ -8,5 +8,5 @@
         "https://www.joesecurity.org",
         "https://www.joesandbox.com/"
     ],
-    "features": "Module using the new format of modules able to return attributes and objects.\n\nThe module returns the same results as the expansion module [joesandbox_query](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/joesandbox_query.py) using the submission link of the analysis to get the json report."
+    "features": "Module using the new format of modules able to return attributes and objects.\n\nThe module returns the same results as the expansion module [joesandbox_query](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/joesandbox_query.py) using the submission link of the analysis to get the json report."
 }

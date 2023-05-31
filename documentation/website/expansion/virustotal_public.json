@@ -10,5 +10,5 @@
         "https://www.virustotal.com",
         "https://developers.virustotal.com/reference"
     ],
-    "features": "New format of modules able to return attributes and objects.\n\nA module to take a MISP attribute as input and query the VirusTotal API to get additional data about it.\n\nCompared to the [more advanced VirusTotal expansion module](https://github.com/MISP/misp-modules/blob/master/misp_modules/modules/expansion/virustotal.py), this module is made for VirusTotal users who have a low request rate limit.\n\nThus, it only queries the API once and returns the results that is parsed into MISP attributes and objects."
+    "features": "New format of modules able to return attributes and objects.\n\nA module to take a MISP attribute as input and query the VirusTotal API to get additional data about it.\n\nCompared to the [more advanced VirusTotal expansion module](https://github.com/MISP/misp-modules/blob/main/misp_modules/modules/expansion/virustotal.py), this module is made for VirusTotal users who have a low request rate limit.\n\nThus, it only queries the API once and returns the results that is parsed into MISP attributes and objects."
 }
