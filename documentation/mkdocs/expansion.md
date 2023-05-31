@@ -239,6 +239,26 @@ An expansion module to query the CVE search API with a cpe code to get its relat
 
 -----
 
+#### [crowdsec](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/crowdsec.py)
+
+<img src=../logos/crowdsec.png height=60>
+
+Hover module to lookup an IP in CrowdSec's CTI
+- **features**:
+>This module enables IP lookup from CrowdSec CTI API. It provides information about the IP, such as what kind of attacks it has been participant of as seen by CrowdSec's network. It also includes enrichment by CrowdSec like background noise score, aggressivity over time etc.
+- **input**:
+>An IP address.
+- **output**:
+>IP Lookup information from CrowdSec CTI API
+- **references**:
+> - https://www.crowdsec.net/
+> - https://docs.crowdsec.net/docs/cti_api/getting_started
+> - https://app.crowdsec.net/
+- **requirements**:
+>A CrowdSec CTI API key. Get yours by following https://docs.crowdsec.net/docs/cti_api/getting_started/#getting-an-api-key
+
+-----
+
 #### [crowdstrike_falcon](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/crowdstrike_falcon.py)
 
 <img src=../logos/crowdstrike.png height=60>
@@ -840,11 +860,11 @@ Module to query IPRep data for IP addresses.
 
 Query Joe Sandbox API with a submission url to get the json report and extract its data that is parsed and converted into MISP attributes and objects.
 
-This url can by the way come from the result of the [joesandbox_submit expansion module](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/joesandbox_submit.py).
+This url can by the way come from the result of the [joesandbox_submit expansion module](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/joesandbox_submit.py).
 - **features**:
 >Module using the new format of modules able to return attributes and objects.
 >
->The module returns the same results as the import module [joe_import](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/import_mod/joe_import.py) taking directly the json report as input.
+>The module returns the same results as the import module [joe_import](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/joe_import.py) taking directly the json report as input.
 >
 >Even if the introspection will allow all kinds of links to call this module, obviously only the ones presenting a sample or url submission in the Joe Sandbox API will return results.
 >
@@ -869,7 +889,7 @@ A module to submit files or URLs to Joe Sandbox for an advanced analysis, and re
 - **features**:
 >The module requires a Joe Sandbox API key to submit files or URL, and returns the link of the submitted analysis.
 >
->It is then possible, when the analysis is completed, to query the Joe Sandbox API to get the data related to the analysis, using the [joesandbox_query module](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/joesandbox_query.py) directly on this submission link.
+>It is then possible, when the analysis is completed, to query the Joe Sandbox API to get the data related to the analysis, using the [joesandbox_query module](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/joesandbox_query.py) directly on this submission link.
 - **input**:
 >Sample, url (or domain) to submit to Joe Sandbox for an advanced analysis.
 - **output**:
@@ -889,11 +909,11 @@ A module to submit files or URLs to Joe Sandbox for an advanced analysis, and re
 Deprecation notice: this module will be deprecated by December 2021, please use vmware_nsx module.
 
 Query Lastline with an analysis link and parse the report into MISP attributes and objects.
-The analysis link can also be retrieved from the output of the [lastline_submit](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/lastline_submit.py) expansion module.
+The analysis link can also be retrieved from the output of the [lastline_submit](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/lastline_submit.py) expansion module.
 - **features**:
 >The module requires a Lastline Portal `username` and `password`.
 >The module uses the new format and it is able to return MISP attributes and objects.
->The module returns the same results as the [lastline_import](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/import_mod/lastline_import.py) import module.
+>The module returns the same results as the [lastline_import](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/lastline_import.py) import module.
 - **input**:
 >Link to a Lastline analysis.
 - **output**:
@@ -912,7 +932,7 @@ Deprecation notice: this module will be deprecated by December 2021, please use 
 Module to submit a file or URL to Lastline.
 - **features**:
 >The module requires a Lastline Analysis `api_token` and `key`.
->When the analysis is completed, it is possible to import the generated report by feeding the analysis link to the [lastline_query](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/lastline_query.py) module.
+>When the analysis is completed, it is possible to import the generated report by feeding the analysis link to the [lastline_query](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/lastline_query.py) module.
 - **input**:
 >File or URL to submit to Lastline.
 - **output**:
@@ -1682,7 +1702,7 @@ Module to get advanced information from virustotal.
 >
 >A module to take a MISP attribute as input and query the VirusTotal API to get additional data about it.
 >
->Compared to the [standard VirusTotal expansion module](https://github.com/MISP/misp-modules/blob/master/misp_modules/modules/expansion/virustotal_public.py), this module is made for advanced parsing of VirusTotal report, with a recursive analysis of the elements found after the first request.
+>Compared to the [standard VirusTotal expansion module](https://github.com/MISP/misp-modules/blob/main/misp_modules/modules/expansion/virustotal_public.py), this module is made for advanced parsing of VirusTotal report, with a recursive analysis of the elements found after the first request.
 >
 >Thus, it requires a higher request rate limit to avoid the API to return a 204 error (Request rate limit exceeded), and the data parsed from the different requests are returned as MISP attributes and objects, with the corresponding relations between each one of them.
 - **input**:
@@ -1707,7 +1727,7 @@ Module to get information from VirusTotal.
 >
 >A module to take a MISP attribute as input and query the VirusTotal API to get additional data about it.
 >
->Compared to the [more advanced VirusTotal expansion module](https://github.com/MISP/misp-modules/blob/master/misp_modules/modules/expansion/virustotal.py), this module is made for VirusTotal users who have a low request rate limit.
+>Compared to the [more advanced VirusTotal expansion module](https://github.com/MISP/misp-modules/blob/main/misp_modules/modules/expansion/virustotal.py), this module is made for VirusTotal users who have a low request rate limit.
 >
 >Thus, it only queries the API once and returns the results that is parsed into MISP attributes and objects.
 - **input**:
