@@ -26,7 +26,7 @@ def handler(q=False):
 
         request = json.loads(q)
 
-        if not request.get('config') or not (request['config'].get('apikey')):
+        if 'config' not in request or (not (request['config'].get('apikey') or ('apiKey' in request['config']))):
             misperrors['error'] = 'WhoisFreaks authentication is missing'
             return misperrors
         if not request.get('attribute') or not check_input_attribute(request['attribute']):
@@ -237,3 +237,4 @@ def version():
 
 # if __name__ == '__main__':
 #     main()
+ 
