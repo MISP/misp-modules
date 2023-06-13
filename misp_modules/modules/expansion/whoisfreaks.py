@@ -29,8 +29,6 @@ def handler(q=False):
         if 'config' not in request or (not (request['config'].get('apikey') or ('apiKey' in request['config']))):
             misperrors['error'] = 'WhoisFreaks authentication is missing' + request
             return misperrors
-        if not request.get('attribute') or not check_input_attribute(request['attribute']):
-            return {'error': f'{standard_error_message}, which should contain at least a single attribute'}
 
         apiKey = request['config'].get('apikey')
 
