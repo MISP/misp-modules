@@ -1,9 +1,6 @@
 import json
-import logging
 
 import requests
-
-from . import check_input_attribute, standard_error_message
 
 misperrors = {'error': 'Error'}
 mispattributes = {
@@ -26,7 +23,7 @@ def handler(q=False):
 
         request = json.loads(q)
 
-        if 'config' not in request or (not ('apiKey' in request['config'])):
+        if 'config' not in request or ('apiKey' not in request['config']):
             misperrors['error'] = 'WhoisFreaks authentication is missing' + request
             return misperrors
 
