@@ -1,5 +1,5 @@
 {
-    "description": "An expansion modules for WhoisFreaks.",
+    "description": "An expansion module for https://whoisfreaks.com/ that will provide an enriched analysis of the provided domain, including WHOIS and DNS information",
     "logo": "whoisfreaks.png",
     "requirements": [
         "An access to the Whoisfreaks API_KEY"
