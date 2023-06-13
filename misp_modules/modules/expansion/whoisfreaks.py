@@ -1,9 +1,6 @@
 import json
-import logging
 
 import requests
-
-from . import check_input_attribute, standard_error_message
 
 misperrors = {'error': 'Error'}
 mispattributes = {
