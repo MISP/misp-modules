@@ -1,6 +1,9 @@
 import json
+import logging
 
 import requests
+
+from . import check_input_attribute, standard_error_message
 
 misperrors = {'error': 'Error'}
 mispattributes = {
@@ -23,7 +26,7 @@ def handler(q=False):
 
         request = json.loads(q)
 
-        if 'config' not in request or ('apiKey' not in request['config']):
+        if 'config' not in request or (not (request['config'].get('apikey') or ('apiKey' in request['config']))):
             misperrors['error'] = 'WhoisFreaks authentication is missing' + request
             return misperrors
 
@@ -32,56 +35,13 @@ def handler(q=False):
         if request.get('domain'):
             domain = request['domain']
             return handle_domain(apiKey, domain, misperrors)
-        elif request.get('email'):
-            email = request['email']
-            return handle_email(apiKey, email, misperrors)
         else:
             misperrors['error'] = "Unsupported attributes types"
             return misperrors
     else:
         return False
 
-def handle_email(apiKey, email, errors):
-    result_filtered = {"results": []}
-    r, status_ok = expand_email(apiKey, email)
-    if status_ok:
-        if r:
-            result_filtered['results'].extend(r)
-    
-    return result_filtered
-    
-def expand_email(apiKey, email):
-    r = []
-    domains = []
-    status_ok = False
 
-    try:
-        results = get_reverse_whois_response(email, apiKey)
-
-        if results:
-            status_ok = True
-            
-            if 'whois_domains_historical' in results:
-                for record in results['whois_domains_historical']:
-                    if 'domain_name' in record:
-                        domains.append(record['domain_name'])
-                        
-                r.append(
-                    {
-                        'types': ['domain'],
-                        'values': domains,
-                        'categories': ['Attribution'],
-                        'comment': 'Creation Date for %s by whoisFreaks'
-                                   % email
-                    }
-                )
-
-    except Exception:
-        misperrors['error'] = "Error while processing Whois Data"
-        return [], False
-
-    return r, status_ok
-    
 def handle_domain(apiKey, domain, errors):
     result_filtered = {"results": []}
     r, status_ok = expand_whois(apiKey, domain)
@@ -252,15 +212,6 @@ def get_whois_response(domain, apiKey):
 def get_dns_response(domain, apiKey):
     query = requests.get(
         f"https://api.whoisfreaks.com/v1.0/dns/live?apiKey={apiKey}&domainName={domain}&type=SOA,AAAA,A,MX"
-    )
-    if query.status_code != 200 and query.status_code != 206:
-        return {'error': f'Error while querying whoisfreaks.com - {query.status_code}: {query.reason}'}
-    return query.json()
-
-
-def get_reverse_whois_response(email, apiKey):
-    query = requests.get(
-        f"https://api.whoisfreaks.com/v1.0/whois?apiKey={apiKey}&whois=reverse&email={email}"
     )
     if query.status_code != 200 and query.status_code != 206:
         return {'error': f'Error while querying whoisfreaks.com - {query.status_code}: {query.reason}'}
