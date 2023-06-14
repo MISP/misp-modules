@@ -1844,6 +1844,38 @@ Module to query a local instance of uwhois (https://github.com/rafiot/uwhoisd).
 
 -----
 
+#### [whoisfreaks](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/whoisfreaks.py)
+
+<img src=../logos/whoisfreaks.png height=60>
+
+An expansion module for https://whoisfreaks.com/ that will provide an enriched analysis of the provided domain, including WHOIS and DNS information.
+Our Whois service, DNS Lookup API, and SSL analysis, equips organizations with comprehensive threat intelligence and attack surface analysis capabilities for enhanced security. 
+Explore our website's product section at https://whoisfreaks.com/ for a wide range of additional services catering to threat intelligence and attack surface analysis needs.
+- **features**:
+>The module takes a domain as input and queries the Whoisfreaks API with it.
+>
+>Some parsing operations are then processed on the result of the query to extract as much information as possible.
+>
+>After this we map the extracted data to MISP attributes.
+- **input**:
+>A domain whose Data is required
+- **output**:
+>MISP attributes resulting from the query on Whoisfreaks API, included in the following list:
+>- domain
+>- dns-soa-email
+>- whois-registrant-email
+>- whois-registrant-phone
+>- whois-registrant-name
+>- whois-registrar
+>- whois-creation-date
+>- domain
+- **references**:
+>https://whoisfreaks.com/
+- **requirements**:
+>An access to the Whoisfreaks API_KEY
+
+-----
+
 #### [wiki](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/wiki.py)
 
 <img src=../logos/wikidata.png height=60>
