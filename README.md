@@ -96,6 +96,8 @@ For more information: [Extending MISP with Python modules](https://www.misp-proj
 * [VulnDB](misp_modules/modules/expansion/vulndb.py) - a module to query [VulnDB](https://www.riskbasedsecurity.com/).
 * [Vulners](misp_modules/modules/expansion/vulners.py) - an expansion module to expand information about CVEs using Vulners API.
 * [whois](misp_modules/modules/expansion/whois.py) - a module to query a local instance of [uwhois](https://github.com/rafiot/uwhoisd).
+* [whoisfreaks](misp_modules/modules/expansion/whoisfreaks.py) - An expansion module for [whoisfreaks](https://whoisfreaks.com/) that will provide an enriched analysis of the provided domain, including WHOIS and DNS information.
+Our [Whois service](https://whoisfreaks.com/products/whois-api.html), [DNS Lookup API](https://whoisfreaks.com/products/dns-records-api.html), and [SSL analysis](https://whoisfreaks.com/products/ssl-certificate-api.html), equips organizations with comprehensive threat intelligence and attack surface analysis capabilities for enhanced security. Explore our website's product section at https://whoisfreaks.com/ for a wide range of additional services catering to threat intelligence and attack surface analysis needs.
 * [wikidata](misp_modules/modules/expansion/wiki.py) - a [wikidata](https://www.wikidata.org) expansion module.
 * [xforce](misp_modules/modules/expansion/xforceexchange.py) - an IBM X-Force Exchange expansion module.
 * [xlsx-enrich](misp_modules/modules/expansion/xlsx_enrich.py) - an enrichment module to get text out of an Excel document into MISP (using free-text parser).
