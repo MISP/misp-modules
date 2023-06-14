@@ -1848,7 +1848,9 @@ Module to query a local instance of uwhois (https://github.com/rafiot/uwhoisd).
 
 <img src=../logos/whoisfreaks.png height=60>
 
-An expansion module for https://whoisfreaks.com/ that will provide an enriched analysis of the provided domain, including WHOIS and DNS information
+An expansion module for https://whoisfreaks.com/ that will provide an enriched analysis of the provided domain, including WHOIS and DNS information.
+Our Whois service, DNS Lookup API, and SSL analysis, equips organizations with comprehensive threat intelligence and attack surface analysis capabilities for enhanced security. 
+Explore our website's product section at https://whoisfreaks.com/ for a wide range of additional services catering to threat intelligence and attack surface analysis needs.
 - **features**:
 >The module takes a domain as input and queries the Whoisfreaks API with it.
 >

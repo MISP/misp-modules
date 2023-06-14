@@ -117,7 +117,7 @@ def expand_whois(apiKey, domain):
                         'types': ['domain'],
                         'values': ns_servers,
                         'categories': ['Attribution'],
-                        'comment': 'list of name server for %s by whoisFreaks'
+                        'comment': 'Name server for %s by whoisFreaks'
                                    % domain
 
                     }
@@ -162,7 +162,7 @@ def expand_dns(apiKey, domain):
                           'values': ['%s|%s' % (domain, ipv4) for ipv4 in
                                     list_ipv4],
                           'categories': ['Network activity'],
-                                  'comment': ' List ipv4 of %s ' %
+                                  'comment': 'ipv4 of %s ' %
                                     domain
                                   })
             if list_ipv6:
@@ -170,7 +170,7 @@ def expand_dns(apiKey, domain):
                           'values': ['%s|%s' % (domain, ipv6) for ipv6 in
                                     list_ipv6],
                           'categories': ['Network activity'],
-                          'comment': ' List ipv6 of %s' %
+                          'comment': 'ipv6 of %s' %
                                     domain
                           })
 
@@ -178,14 +178,14 @@ def expand_dns(apiKey, domain):
                 r.append({'types': ['domain'],
                           'values': servers_mx,
                           'categories': ['Network activity'],
-                          'comment': ' List mx of %s' %
+                          'comment': 'mx of %s' %
                                     domain
                           })
             if soa_hostnames:
                 r.append({'types': ['domain'],
                           'values': soa_hostnames,
                           'categories': ['Network activity'],
-                          'comment': ' List soa of %s' %
+                          'comment': 'soa hostname of %s' %
                                     domain
                           })
 
@@ -220,16 +220,3 @@ def introspection():
 def version():
     moduleinfo['config'] = moduleconfig
     return moduleinfo
-
-
-# def main():
-
-        
-#     apiKey = 'b7d971e9fe0f43d097d130e245b0f687'
-#     domain = 'google.com'
-#     return handle_domain(apiKey, domain, misperrors)
-        
-
-# if __name__ == '__main__':
-#     main()
- 

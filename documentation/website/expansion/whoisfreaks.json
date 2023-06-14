@@ -1,5 +1,5 @@
 {
-    "description": "An expansion module for https://whoisfreaks.com/ that will provide an enriched analysis of the provided domain, including WHOIS and DNS information",
+    "description": "An expansion module for https://whoisfreaks.com/ that will provide an enriched analysis of the provided domain, including WHOIS and DNS information.\nOur Whois service, DNS Lookup API, and SSL analysis, equips organizations with comprehensive threat intelligence and attack surface analysis capabilities for enhanced security. \nExplore our website's product section at https://whoisfreaks.com/ for a wide range of additional services catering to threat intelligence and attack surface analysis needs.",
     "logo": "whoisfreaks.png",
     "requirements": [
         "An access to the Whoisfreaks API_KEY"
