@@ -58,7 +58,7 @@ A module tu query the AssemblyLine API with a submission ID to get the submissio
 - **output**:
 >MISP attributes & objects parsed from the AssemblyLine submission.
 - **references**:
->https://www.cyber.cg.ca/en/assemblyline
+>https://www.cyber.gc.ca/en/assemblyline
 - **requirements**:
 >assemblyline_client: Python library to query the AssemblyLine rest API.
 
