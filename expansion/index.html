@@ -903,6 +903,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#whoisfreaks" class="md-nav__link">
+    whoisfreaks
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#wiki" class="md-nav__link">
     wiki
   </a>
@@ -1706,6 +1713,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#whoisfreaks" class="md-nav__link">
+    whoisfreaks
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#wiki" class="md-nav__link">
     wiki
   </a>
@@ -1815,7 +1829,7 @@ Link of an AssemblyLine submission report.
 - <strong>output</strong>:
 MISP attributes &amp; objects parsed from the AssemblyLine submission.
 - <strong>references</strong>:
-<a href="https://www.cyber.cg.ca/en/assemblyline">https://www.cyber.cg.ca/en/assemblyline</a>
+<a href="https://www.cyber.gc.ca/en/assemblyline">https://www.cyber.gc.ca/en/assemblyline</a>
 - <strong>requirements</strong>:
 assemblyline_client: Python library to query the AssemblyLine rest API.</p>
 </blockquote>
@@ -3422,6 +3436,34 @@ Text describing the result of a whois request for the input value.
 <a href="https://github.com/rafiot/uwhoisd">https://github.com/rafiot/uwhoisd</a>
 - <strong>requirements</strong>:
 uwhois: A whois python library</p>
+</blockquote>
+<hr />
+<h4 id="whoisfreaks"><a href="https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/whoisfreaks.py">whoisfreaks</a><a class="headerlink" href="#whoisfreaks" title="Permanent link">&para;</a></h4>
+<p><img src=../logos/whoisfreaks.png height=60></p>
+<p>An expansion module for <a href="https://whoisfreaks.com/">https://whoisfreaks.com/</a> that will provide an enriched analysis of the provided domain, including WHOIS and DNS information.
+Our Whois service, DNS Lookup API, and SSL analysis, equips organizations with comprehensive threat intelligence and attack surface analysis capabilities for enhanced security. 
+Explore our website's product section at <a href="https://whoisfreaks.com/">https://whoisfreaks.com/</a> for a wide range of additional services catering to threat intelligence and attack surface analysis needs.
+- <strong>features</strong>:</p>
+<blockquote>
+<p>The module takes a domain as input and queries the Whoisfreaks API with it.</p>
+<p>Some parsing operations are then processed on the result of the query to extract as much information as possible.</p>
+<p>After this we map the extracted data to MISP attributes.
+- <strong>input</strong>:
+A domain whose Data is required
+- <strong>output</strong>:
+MISP attributes resulting from the query on Whoisfreaks API, included in the following list:
+- domain
+- dns-soa-email
+- whois-registrant-email
+- whois-registrant-phone
+- whois-registrant-name
+- whois-registrar
+- whois-creation-date
+- domain
+- <strong>references</strong>:
+<a href="https://whoisfreaks.com/">https://whoisfreaks.com/</a>
+- <strong>requirements</strong>:
+An access to the Whoisfreaks API_KEY</p>
 </blockquote>
 <hr />
 <h4 id="wiki"><a href="https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/wiki.py">wiki</a><a class="headerlink" href="#wiki" title="Permanent link">&para;</a></h4>
