@@ -28,7 +28,7 @@ def handler(q=False):
         misperrors['error'] = 'IpGeolocation apiKey is missing'
         return misperrors
     
-    if request.get('ip-src'):
+    if request.get('ip-dst'):
             ip = request['ip-dst']
             apiKey = request['config']['apiKey']
             return handle_ip(apiKey, ip, misperrors)
