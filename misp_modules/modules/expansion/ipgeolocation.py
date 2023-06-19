@@ -13,7 +13,6 @@ moduleinfo = {
     'module-type': ['expansion', 'hover']
 }
 moduleconfig = ['apiKey']
-misperrors = {'error': 'Error'}
 
 
 def handler(q=False):
@@ -22,32 +21,25 @@ def handler(q=False):
         return False
     request = json.loads(q)
     if not request.get('config'):
-        misperrors['error'] = 'IpGeolocation Configuration is missing'
-        return misperrors
+        return {'error' : 'IpGeolocation Configuration is missing'}
     if not request['config'].get('apiKey'):
-        misperrors['error'] = 'IpGeolocation apiKey is missing'
-        return misperrors
+        return {'error' : 'IpGeolocation apiKey is missing'}
     
     if request['attribute']['type'] not in mispattributes['input']:
         return {'error': 'Unsupported attribute type.'}
             
-    try:
-        ip = request['attribute']['value']
-    except Exception:
-        return {'error': 'Error Getting IP' + request}
-    try:
-        apiKey = request['config']['apiKey']
-    except Exception:
-        return {'error': 'Error Getting apiKey' + request}
-    return handle_ip(apiKey, ip, misperrors)
+    ip = request['attribute']['value']
+    apiKey = request['config']['apiKey']
+    response = handle_ip(apiKey, ip)
+    return {'error': 'Going to the handleIP method' + response}
     
-def handle_ip(apiKey, ip, misperrors):
+    
+def handle_ip(apiKey, ip):
 
     try:
         results = query_ipgeolocation(apiKey, ip)
     except Exception:
-        misperrors['error'] = "Error while Querying IP Address"
-        return []
+        return {'error' : 'Error during querying IPGeolocation API.'}
 
 
     # Check if the IP address is not reserved for special use
