@@ -4,7 +4,7 @@ import requests
 from pymisp import MISPAttribute, MISPEvent, MISPObject
 
 mispattributes = {
-    'input': ['ip-dst'],
+    'input': ['ip-dst', 'ip-src'],
     'format': 'misp_standard'
 }
 moduleinfo = {
@@ -28,20 +28,19 @@ def handler(q=False):
         misperrors['error'] = 'IpGeolocation apiKey is missing'
         return misperrors
     
-    if request.get('ip-dst'):
-            ip = request['ip-dst']
-            apiKey = request['config']['apiKey']
-            return handle_ip(apiKey, ip, misperrors)
-    else:
-        misperrors['error'] = "Unsupported attributes types"
-        return misperrors
+    if request['attribute']['type'] not in mispattributes['input']:
+        return {'error': 'Unsupported attribute type.'}
+            
+    ip = request['attribute']['value']
+    apiKey = request['config']['apiKey']
+    return handle_ip(apiKey, ip, misperrors)
     
 def handle_ip(apiKey, ip, misperrors):
 
     try:
         results = query_ipgeolocation(apiKey, ip)
     except Exception:
-        misperrors['error'] = "Error while processing IP Data"
+        misperrors['error'] = "Error while Querying IP Address"
         return [], False
 
 
@@ -50,7 +49,7 @@ def handle_ip(apiKey, ip, misperrors):
         if 'bogon' in results['message']:
             return {'error': 'The IP address(bogon IP) is reserved for special use'}
         else:
-            return {'error': 'Error Occurred during IP data Extraction'}
+            return {'error': 'Error Occurred during IP data Extraction from Message'}
 
     # Initiate the MISP data structures
     misp_event = MISPEvent()
