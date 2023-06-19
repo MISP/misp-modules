@@ -1,0 +1,13 @@
+{
+    "description": "An expansion module to query IpGeolocation.io to gather more information on a given IP address. We provide data such as country name, country code, city, state, local currency, time zone, ISP, ASN, Company Details, device data from User Agent String, VPN, Proxy, Tor and threat intelligence data served globally with latency based routing.",
+    "logo": "ipgeolocation.png",
+    "requirements": [
+        "An apiKey of ipGeolocation"
+    ],
+    "input": "IP address",
+    "output": "Additional information on the IP address, like its geolocation, the autonomous system it is included in.",
+    "references": [
+        "https://ipgeolocation.io/"
+    ],
+    "features": "The module takes an IP address attribute as input and queries the IpGeolocation API.  \nThe geolocation information on the IP address is always returned.\n\nDepending on the subscription plan, the API returns different pieces of information for details check our [page](https://ipgeolocation.io/ip-location-api.html)."
+}

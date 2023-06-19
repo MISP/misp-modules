@@ -36,6 +36,7 @@ For more information: [Extending MISP with Python modules](https://www.misp-proj
 * [Cytomic Orion](misp_modules/modules/expansion/cytomic_orion.py) - An expansion module to enrich attributes in MISP and share indicators of compromise with Cytomic Orion.
 * [DBL Spamhaus](misp_modules/modules/expansion/dbl_spamhaus.py) - a hover module to check Spamhaus DBL for a domain name.
 * [DNS](misp_modules/modules/expansion/dns.py) - a simple module to resolve MISP attributes like hostname and domain to expand IP addresses attributes.
+* [DNS WhoisFreaks](https://whoisfreaks.com/products/dns-records-api.html) - a simple Whoisfreaks Module that is useful for DNS Information. Our DNS checker API is a great way to gain a more in-depth understanding of an organization's online presence.
 * [docx-enrich](misp_modules/modules/expansion/docx_enrich.py) - an enrichment module to get text out of Word document into MISP (using free-text parser).
 * [DomainTools](misp_modules/modules/expansion/domaintools.py) - a hover and expansion module to get information from [DomainTools](http://www.domaintools.com/) whois.
 * [EQL](misp_modules/modules/expansion/eql.py) - an expansion module to generate event query language (EQL) from an attribute. [Event Query Language](https://eql.readthedocs.io/en/latest/)
@@ -50,6 +51,7 @@ For more information: [Extending MISP with Python modules](https://www.misp-proj
 * [html_to_markdown](misp_modules/modules/expansion/html_to_markdown.py) - Simple HTML to markdown converter
 * [HYAS Insight](misp_modules/modules/expansion/hyasinsight.py) - a hover and expansion module to get information from [HYAS Insight](https://www.hyas.com/hyas-insight).
 * [intel471](misp_modules/modules/expansion/intel471.py) - an expansion module to get info from [Intel471](https://intel471.com).
+* [Ipgeolocation](https://ipgeolocation.io/) - an expansion and hover module for IP Intelligence Stack with [IP to Geolocation](https://ipgeolocation.io/ip-location-api.html), [Timezone](https://ipgeolocation.io/astronomy-api.html) and [Astronomy API](https://ipgeolocation.io/timezone-api.html).
 * [IPASN](misp_modules/modules/expansion/ipasn.py) - a hover and expansion to get the BGP ASN of an IP address.
 * [ipinfo.io](misp_modules/modules/expansion/ipinfo.py) - an expansion module to get additional information on an IP address using the ipinfo.io API
 * [iprep](misp_modules/modules/expansion/iprep.py) - an expansion module to get IP reputation from packetmail.net.
@@ -96,8 +98,7 @@ For more information: [Extending MISP with Python modules](https://www.misp-proj
 * [VulnDB](misp_modules/modules/expansion/vulndb.py) - a module to query [VulnDB](https://www.riskbasedsecurity.com/).
 * [Vulners](misp_modules/modules/expansion/vulners.py) - an expansion module to expand information about CVEs using Vulners API.
 * [whois](misp_modules/modules/expansion/whois.py) - a module to query a local instance of [uwhois](https://github.com/rafiot/uwhoisd).
-* [whoisfreaks](misp_modules/modules/expansion/whoisfreaks.py) - An expansion module for [whoisfreaks](https://whoisfreaks.com/) that will provide an enriched analysis of the provided domain, including WHOIS and DNS information.
-Our [Whois service](https://whoisfreaks.com/products/whois-api.html), [DNS Lookup API](https://whoisfreaks.com/products/dns-records-api.html), and [SSL analysis](https://whoisfreaks.com/products/ssl-certificate-api.html), equips organizations with comprehensive threat intelligence and attack surface analysis capabilities for enhanced security. Explore our website's product section at https://whoisfreaks.com/ for a wide range of additional services catering to threat intelligence and attack surface analysis needs.
+* [whoisfreaks](misp_modules/modules/expansion/whoisfreaks.py) - An expansion module for [whoisfreaks](https://whoisfreaks.com/) that will provide an enriched analysis of the provided domain, including WHOIS and DNS information. Our [Whois service](https://whoisfreaks.com/products/whois-api.html), [DNS Lookup API](https://whoisfreaks.com/products/dns-records-api.html), and [SSL analysis](https://whoisfreaks.com/products/ssl-certificate-api.html), equips organizations with comprehensive threat intelligence and attack surface analysis capabilities for enhanced security. Explore our website's product section at https://whoisfreaks.com/ for a wide range of additional services catering to threat intelligence and attack surface analysis needs.
 * [wikidata](misp_modules/modules/expansion/wiki.py) - a [wikidata](https://www.wikidata.org) expansion module.
 * [xforce](misp_modules/modules/expansion/xforceexchange.py) - an IBM X-Force Exchange expansion module.
 * [xlsx-enrich](misp_modules/modules/expansion/xlsx_enrich.py) - an enrichment module to get text out of an Excel document into MISP (using free-text parser).
