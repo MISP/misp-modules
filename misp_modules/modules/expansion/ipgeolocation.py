@@ -31,8 +31,14 @@ def handler(q=False):
     if request['attribute']['type'] not in mispattributes['input']:
         return {'error': 'Unsupported attribute type.'}
             
-    ip = request['attribute']['value']
-    apiKey = request['config']['apiKey']
+    try:
+        ip = request['attribute']['value']
+    except Exception:
+        return {'error': 'Error Getting IP' + request}
+    try:
+        apiKey = request['config']['apiKey']
+    except Exception:
+        return {'error': 'Error Getting apiKey' + request}
     return handle_ip(apiKey, ip, misperrors)
     
 def handle_ip(apiKey, ip, misperrors):
