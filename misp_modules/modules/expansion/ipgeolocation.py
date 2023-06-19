@@ -28,14 +28,14 @@ def handler(q=False):
     if request['attribute']['type'] not in mispattributes['input']:
         return {'error': 'Unsupported attribute type.'}
             
+    attribute = request['attribute']
     ip = request['attribute']['value']
     apiKey = request['config']['apiKey']
     # Correct
-    response = handle_ip(apiKey, ip)
-    return {'error': 'Going to the handleIP method'}
+    return handle_ip(apiKey, ip, attribute)
     
     
-def handle_ip(apiKey, ip):
+def handle_ip(apiKey, ip, attribute):
 
     try:
         results = query_ipgeolocation(apiKey, ip)
@@ -44,37 +44,28 @@ def handle_ip(apiKey, ip):
 
 
     # Check if the IP address is not reserved for special use
-    try:
-        if results.get('message'):
-            if 'bogon' in results['message']:
-                return {'error': 'The IP address(bogon IP) is reserved for special use'}
-            else:
-                return {'error': 'Error Occurred during IP data Extraction from Message'}
-    except Exception:
-        return {'error': 'line 54'}
-    try:
-        misp_event = MISPEvent()
-    except Exception:
-        return {'error': 'line 58'}
-    # input_attribute = MISPAttribute()
-    # misp_event.add_attribute(**input_attribute)
-
+    if results.get('message'):
+        if 'bogon' in results['message']:
+            return {'error': 'The IP address(bogon IP) is reserved for special use'}
+        else:
+            return {'error': 'Error Occurred during IP data Extraction from Message'}
+    misp_event = MISPEvent()
+    input_attribute = MISPAttribute()
+    input_attribute.from_dict(**attribute)
+    misp_event.add_attribute(**input_attribute)
 
     ipObject = MISPObject('ip-api-address')
-    return {'error': 'line 64'}
-    # mapping = get_mapping().json()
-    # try:
-        # for field, relation in mapping.items():
-            # ipObject.add_attribute(relation, results[field])
-    # except Exception:
-        # return {'error': 'Error while Adding attributes'}
-    # misp_event.add_object(ipObject)
-# 
+    # Correct
+    mapping = get_mapping().json()
+    for field, relation in mapping.items():
+        ipObject.add_attribute(relation, results[field])
+    misp_event.add_object(ipObject)
+
     # Return the results in MISP format
-    # event = json.loads(misp_event.to_json())
-    # return {
-        # 'results': {key: event[key] for key in ('Attribute', 'Object')}
-    # }
+    event = json.loads(misp_event.to_json())
+    return {
+        'results': {key: event[key] for key in ('Attribute', 'Object')}
+    }
 
 
 def query_ipgeolocation(apiKey, ip):
