@@ -47,7 +47,7 @@ def handle_ip(apiKey, ip, misperrors):
         results = query_ipgeolocation(apiKey, ip)
     except Exception:
         misperrors['error'] = "Error while Querying IP Address"
-        return [], False
+        return []
 
 
     # Check if the IP address is not reserved for special use
@@ -65,9 +65,11 @@ def handle_ip(apiKey, ip, misperrors):
     # Parse the geolocation information related to the IP address
     ipObject = MISPObject('ip-api-address')
     mapping = get_mapping()
-    for field, relation in mapping.items():
-        ipObject.add_attribute(relation, results[field])
-        
+    try:
+        for field, relation in mapping.items():
+            ipObject.add_attribute(relation, results[field])
+    except Exception:
+        return {'error': 'Error while Adding attributes'}
     misp_event.add_object(ipObject)
 
     # Return the results in MISP format
