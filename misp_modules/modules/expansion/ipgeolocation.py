@@ -31,8 +31,8 @@ def handler(q=False):
     ip = request['attribute']['value']
     apiKey = request['config']['apiKey']
     return {'error': 'Going to the handleIP method'}
-    response = handle_ip(apiKey, ip)
-    return {'error': 'Going to the handleIP method'}
+    # response = handle_ip(apiKey, ip)
+    # return {'error': 'Going to the handleIP method'}
     
     
 def handle_ip(apiKey, ip):
