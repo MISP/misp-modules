@@ -16,20 +16,20 @@ moduleinfo = {
 moduleconfig = ['apiKey']
 
 _IPGEO_MAPPING ={
-        'isp':'ISP',
-        'asn':'asn',
-        'city':'city',
-        'country_name':'country',
-        'country_code2':'country-code',
-        'latitude':'latitude',
-        'longitude':'longitude',
-        'organization':'organization',
-        'continent_name':'region',
-        'continent_code':'region-code',
-        'state_prov':'state',
-        'zipcode':'zipcode',
-        'ip':'ip-src'
-    }
+    'isp':'ISP',
+    'asn':'asn',
+    'city':'city',
+    'country_name':'country',
+    'country_code2':'country-code',
+    'latitude':'latitude',
+    'longitude':'longitude',
+    'organization':'organization',
+    'continent_name':'region',
+    'continent_code':'region-code',
+    'state_prov':'state',
+    'zipcode':'zipcode',
+    'ip':'ip-src'
+}
 
 
 def handler(q=False):
@@ -37,7 +37,7 @@ def handler(q=False):
     if q is False:
         return False
     request = json.loads(q)
-    if not request.get('config'):
+    if request.get('config'):
         return {'error' : 'IpGeolocation Configuration is missing'}
     if not request['config'].get('apiKey'):
         return {'error' : 'IpGeolocation apiKey is missing'}
