@@ -53,6 +53,7 @@ def handler(q=False):
     mapping = get_mapping()
     for field, relation in mapping.items():
         ipObject.add_attribute(relation, query[field])
+    ipObject.add_reference(input_attribute.uuid, 'locates')
     misp_event.add_object(ipObject)
     # Return the results in MISP format
     event = json.loads(misp_event.to_json())
@@ -60,9 +61,6 @@ def handler(q=False):
         'results': {key: event[key] for key in ('Attribute', 'Object')}
     }
     # return {'error' : 'Completed Response'}
-
-
-
 
 def get_mapping():
     return {
