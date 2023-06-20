@@ -32,64 +32,37 @@ def handler(q=False):
     attribute = request['attribute']
     ip = request['attribute']['value']
     apiKey = request['config']['apiKey']
-    # Correct
-    response = handle_ip(apiKey, ip, attribute)
-    return {'error' : f'Completed Response - {response}'}
-    
-def handle_ip(apiKey, ip, attribute):
-
-    try:
-        results = query_ipgeolocation(apiKey, ip)
-    except Exception:
-        return {'error' : 'Error during querying IPGeolocation API.'}
+    query = requests.get(f"https://api.ipgeolocation.io/ipgeo?apiKey={apiKey}&ip={ip}")
+    if query.status_code != 200:
+        return {'error': f'Error while querying ipGeolocation.io - {query.status_code}: {query.reason}'}
 
 
     # Check if the IP address is not reserved for special use
-    if results.get('message'):
-        if 'bogon' in results['message']:
+    if query.get('message'):
+        if 'bogon' in query['message']:
             return {'error': 'The IP address(bogon IP) is reserved for special use'}
         else:
             return {'error': 'Error Occurred during IP data Extraction from Message'}
-    try:
-        misp_event = MISPEvent()
-        input_attribute = MISPAttribute()
-        input_attribute.from_dict(**attribute)
-        misp_event.add_attribute(**input_attribute)
-    except Exception:
-        return {'error': f'Error on line 58 - {traceback.print_exc()}'}
+    misp_event = MISPEvent()
+    input_attribute = MISPAttribute()
+    input_attribute.from_dict(**attribute)
+    misp_event.add_attribute(**input_attribute)
 
     ipObject = MISPObject('ip-api-address')
     # Correct
-    try:
-        mapping = get_mapping()
-    except Exception:
-        return {'error': f'Error on line 66 - {traceback.print_exc()}'}
-    try:
-        for field, relation in mapping.items():
-            ipObject.add_attribute(relation, results[field])
-    except Exception:
-        return {'error': f'Error on line 71 - {traceback.print_exc()}'}
-    try:
-        misp_event.add_object(ipObject)
-    except Exception:
-        return {'error': f'Error on line 75 - {traceback.print_exc()}'}
+    mapping = get_mapping()
+    for field, relation in mapping.items():
+        ipObject.add_attribute(relation, query[field])
+    misp_event.add_object(ipObject)
     # Return the results in MISP format
-    try:
-        event = json.loads(misp_event.to_json())
-        return {
-            'results': {key: event[key] for key in ('Attribute', 'Object')}
-        }
-    except Exception:
-        return {'error': f'Error on line 83 - {traceback.print_exc()}'}
+    event = json.loads(misp_event.to_json())
+    return {
+        'results': {key: event[key] for key in ('Attribute', 'Object')}
+    }
+    # return {'error' : 'Completed Response'}
 
 
-def query_ipgeolocation(apiKey, ip):
-    query = requests.get(
-        f"https://api.ipgeolocation.io/ipgeo?apiKey={apiKey}&ip={ip}"
-    )
-    if query.status_code != 200:
-        return {'error': f'Error while querying ipGeolocation.io - {query.status_code}: {query.reason}'}
-    return query.json()
+
 
 def get_mapping():
     return {
