@@ -51,8 +51,7 @@ def handler(q=False):
     query = requests.get(f"https://api.ipgeolocation.io/ipgeo?apiKey={apiKey}&ip={ip}")
     if query.status_code != 200:
         return {'error': f'Error while querying ipGeolocation.io - {query.status_code}: {query.reason}'}
-
-
+    query = query.json()
     # Check if the IP address is not reserved for special use
     if query.get('message'):
         if 'bogon' in query['message']:
