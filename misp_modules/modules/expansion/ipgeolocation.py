@@ -37,7 +37,7 @@ def handler(q=False):
     if q is False:
         return False
     request = json.loads(q)
-    if request.get('config'):
+    if not request.get('config'):
         return {'error' : 'IpGeolocation Configuration is missing'}
     if not request['config'].get('apiKey'):
         return {'error' : 'IpGeolocation apiKey is missing'}
