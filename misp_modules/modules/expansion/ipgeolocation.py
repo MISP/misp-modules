@@ -53,7 +53,7 @@ def handle_ip(apiKey, ip, attribute):
     try:
         misp_event = MISPEvent()
         input_attribute = MISPAttribute()
-        # input_attribute.from_dict(**attribute)
+        input_attribute.from_dict(**attribute)
         misp_event.add_attribute(**input_attribute)
     except Exception:
         return {'error': f'Error on line 58 - {traceback.print_exc()}'}
