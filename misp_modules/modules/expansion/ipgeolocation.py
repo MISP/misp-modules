@@ -1,4 +1,5 @@
 import json
+import traceback
 
 import requests
 from pymisp import MISPAttribute, MISPEvent, MISPObject
@@ -32,8 +33,8 @@ def handler(q=False):
     ip = request['attribute']['value']
     apiKey = request['config']['apiKey']
     # Correct
-    return handle_ip(apiKey, ip, attribute)
-    
+    response = handle_ip(apiKey, ip, attribute)
+    return {'error' : f'Completed Response - {response}'}
     
 def handle_ip(apiKey, ip, attribute):
 
@@ -49,23 +50,37 @@ def handle_ip(apiKey, ip, attribute):
             return {'error': 'The IP address(bogon IP) is reserved for special use'}
         else:
             return {'error': 'Error Occurred during IP data Extraction from Message'}
-    misp_event = MISPEvent()
-    input_attribute = MISPAttribute()
-    input_attribute.from_dict(**attribute)
-    misp_event.add_attribute(**input_attribute)
+    try:
+        misp_event = MISPEvent()
+        input_attribute = MISPAttribute()
+        # input_attribute.from_dict(**attribute)
+        misp_event.add_attribute(**input_attribute)
+    except Exception:
+        return {'error': f'Error on line 58 - {traceback.print_exc()}'}
 
     ipObject = MISPObject('ip-api-address')
     # Correct
-    mapping = get_mapping()
-    for field, relation in mapping.items():
-        ipObject.add_attribute(relation, results[field])
-    misp_event.add_object(ipObject)
-
+    try:
+        mapping = get_mapping()
+    except Exception:
+        return {'error': f'Error on line 66 - {traceback.print_exc()}'}
+    try:
+        for field, relation in mapping.items():
+            ipObject.add_attribute(relation, results[field])
+    except Exception:
+        return {'error': f'Error on line 71 - {traceback.print_exc()}'}
+    try:
+        misp_event.add_object(ipObject)
+    except Exception:
+        return {'error': f'Error on line 75 - {traceback.print_exc()}'}
     # Return the results in MISP format
-    event = json.loads(misp_event.to_json())
-    return {
-        'results': {key: event[key] for key in ('Attribute', 'Object')}
-    }
+    try:
+        event = json.loads(misp_event.to_json())
+        return {
+            'results': {key: event[key] for key in ('Attribute', 'Object')}
+        }
+    except Exception:
+        return {'error': f'Error on line 83 - {traceback.print_exc()}'}
 
 
 def query_ipgeolocation(apiKey, ip):
@@ -101,13 +116,14 @@ def version():
     moduleinfo['config'] = moduleconfig
     return moduleinfo
 
-# def main():
-#     attribute = {
-#         'type' : 'ip-src',
-#         'value' : '20.20.12.154'
-#     }
-#     handle_ip('efe037a76a17432fad2dbdca8299d559','21.02.15.123', attribute)    
+def main():
+    attribute = {
+        'type' : 'ip-src',
+        'value' : '20.20.12.154'
+    }
+    handle_ip('efe037a76a17432fad2dbdca8299d559','21.02.15.123', attribute)    
     
-# if __name__ == '__main__':
-#     main()
+if __name__ == '__main__':
+    main()
+
 
