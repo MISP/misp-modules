@@ -74,24 +74,6 @@ def handler(q=False):
     return {
         'results': {key: event[key] for key in ('Attribute', 'Object')}
     }
-    # return {'error' : 'Completed Response'}
-
-def get_mapping():
-    return {
-        'isp':'ISP',
-        'asn':'asn',
-        'city':'city',
-        'country_name':'country',
-        'country_code2':'country-code',
-        'latitude':'latitude',
-        'longitude':'longitude',
-        'organization':'organization',
-        'continent_name':'region',
-        'continent_code':'region-code',
-        'state_prov':'state',
-        'zipcode':'zipcode',
-        'ip':'ip-src'
-    }
 
 def introspection():
     return mispattributes
@@ -101,14 +83,5 @@ def version():
     moduleinfo['config'] = moduleconfig
     return moduleinfo
 
-# def main():
-#     attribute = {
-#         'type' : 'ip-src',
-#         'value' : '20.20.12.154'
-#     }
-#     handle_ip('efe037a76a17432fad2dbdca8299d559','21.02.15.123', attribute)    
-    
-# if __name__ == '__main__':
-#     main()
 
 
