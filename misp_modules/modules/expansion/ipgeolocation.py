@@ -116,14 +116,14 @@ def version():
     moduleinfo['config'] = moduleconfig
     return moduleinfo
 
-def main():
-    attribute = {
-        'type' : 'ip-src',
-        'value' : '20.20.12.154'
-    }
-    handle_ip('efe037a76a17432fad2dbdca8299d559','21.02.15.123', attribute)    
+# def main():
+#     attribute = {
+#         'type' : 'ip-src',
+#         'value' : '20.20.12.154'
+#     }
+#     handle_ip('efe037a76a17432fad2dbdca8299d559','21.02.15.123', attribute)    
     
-if __name__ == '__main__':
-    main()
+# if __name__ == '__main__':
+#     main()
 
 
