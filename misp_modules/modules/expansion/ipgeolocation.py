@@ -15,6 +15,22 @@ moduleinfo = {
 }
 moduleconfig = ['apiKey']
 
+_IPGEO_MAPPING ={
+        'isp':'ISP',
+        'asn':'asn',
+        'city':'city',
+        'country_name':'country',
+        'country_code2':'country-code',
+        'latitude':'latitude',
+        'longitude':'longitude',
+        'organization':'organization',
+        'continent_name':'region',
+        'continent_code':'region-code',
+        'state_prov':'state',
+        'zipcode':'zipcode',
+        'ip':'ip-src'
+    }
+
 
 def handler(q=False):
     # Input checks
@@ -50,8 +66,7 @@ def handler(q=False):
 
     ipObject = MISPObject('ip-api-address')
     # Correct
-    mapping = get_mapping()
-    for field, relation in mapping.items():
+    for field, relation in _IPGEO_MAPPING.items():
         ipObject.add_attribute(relation, query[field])
     ipObject.add_reference(input_attribute.uuid, 'locates')
     misp_event.add_object(ipObject)
