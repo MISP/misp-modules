@@ -183,21 +183,28 @@ class QueryModule(tornado.web.RequestHandler):
     executor = ThreadPoolExecutor(nb_threads)
 
     @run_on_executor
-    def run_request(self, module, jsonpayload):
-        log.debug('MISP QueryModule request {0}'.format(jsonpayload))
-        response = mhandlers[module].handler(q=jsonpayload)
+    def run_request(self, dict_payload, json_payload):
+        if log.isEnabledFor(logging.DEBUG):
+            log.debug('MISP QueryModule request {0}'.format(json_payload))
+        module = dict_payload['module']
+        module_handler = mhandlers[module]
+        if hasattr(module_handler, 'REQUIRE_DICT') and module_handler.REQUIRE_DICT:
+            response = module_handler.handler(q=dict_payload)
+        else:
+            response = module_handler.handler(q=json_payload)
+
         return json.dumps(response)
 
     @tornado.gen.coroutine
     def post(self):
         try:
-            jsonpayload = self.request.body.decode('utf-8')
-            dict_payload = json.loads(jsonpayload)
+            json_payload = self.request.body.decode('utf-8')
+            dict_payload = json.loads(json_payload)
             if dict_payload.get('timeout'):
                 timeout = datetime.timedelta(seconds=int(dict_payload.get('timeout')))
             else:
                 timeout = datetime.timedelta(seconds=300)
-            response = yield tornado.gen.with_timeout(timeout, self.run_request(dict_payload['module'], jsonpayload))
+            response = yield tornado.gen.with_timeout(timeout, self.run_request(dict_payload, json_payload))
             self.write(response)
         except tornado.gen.TimeoutError:
             log.warning('Timeout on {} '.format(dict_payload['module']))
@@ -223,15 +230,15 @@ def main():
     global loaded_modules
     signal.signal(signal.SIGINT, handle_signal)
     signal.signal(signal.SIGTERM, handle_signal)
-    argParser = argparse.ArgumentParser(description='misp-modules server', formatter_class=argparse.RawTextHelpFormatter)
-    argParser.add_argument('-t', default=False, action='store_true', help='Test mode')
-    argParser.add_argument('-s', default=False, action='store_true', help='Run a system install (package installed via pip)')
-    argParser.add_argument('-d', default=False, action='store_true', help='Enable debugging')
-    argParser.add_argument('-p', default=6666, help='misp-modules TCP port (default 6666)')
-    argParser.add_argument('-l', default='localhost', help='misp-modules listen address (default localhost)')
-    argParser.add_argument('-m', default=[], action='append', help='Register a custom module')
-    argParser.add_argument('--devel', default=False, action='store_true', help='''Start in development mode, enable debug, start only the module(s) listed in -m.\nExample: -m misp_modules.modules.expansion.bgpranking''')
-    args = argParser.parse_args()
+    arg_parser = argparse.ArgumentParser(description='misp-modules server', formatter_class=argparse.RawTextHelpFormatter)
+    arg_parser.add_argument('-t', default=False, action='store_true', help='Test mode')
+    arg_parser.add_argument('-s', default=False, action='store_true', help='Run a system install (package installed via pip)')
+    arg_parser.add_argument('-d', default=False, action='store_true', help='Enable debugging')
+    arg_parser.add_argument('-p', default=6666, help='misp-modules TCP port (default 6666)')
+    arg_parser.add_argument('-l', default='localhost', help='misp-modules listen address (default localhost)')
+    arg_parser.add_argument('-m', default=[], action='append', help='Register a custom module')
+    arg_parser.add_argument('--devel', default=False, action='store_true', help='''Start in development mode, enable debug, start only the module(s) listed in -m.\nExample: -m misp_modules.modules.expansion.bgpranking''')
+    args = arg_parser.parse_args()
     port = args.p
     listen = args.l
     if args.devel:
