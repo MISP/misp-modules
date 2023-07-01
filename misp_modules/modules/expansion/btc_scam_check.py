@@ -27,7 +27,7 @@ def handler(q=False):
     btc = request['btc']
     query = f"{btc}.{url}"
     try:
-        result = ' - '.join([str(r) for r in resolver.query(query, 'TXT')])[1:-1]
+        result = ' - '.join([str(r) for r in resolver.resolve(query, 'TXT')])[1:-1]
     except NXDOMAIN:
         result = f"{btc} is not known as a scam address."
     except LabelTooLong:
