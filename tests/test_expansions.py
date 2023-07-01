@@ -54,7 +54,8 @@ class TestExpansions(unittest.TestCase):
     @staticmethod
     def get_object(response):
         data = response.json()
-        if not isinstance(data, dict):
+        if not isinstance(data, dict) or 'results' not in data:
+            # Unexpected result
             print(json.dumps(data, indent=2))
             return data
         return data['results']['Object'][0]['name']
