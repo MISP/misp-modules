@@ -27,7 +27,7 @@ def handler(q=False):
     q = json.loads(q)
     filename = q['attachment']
     try:
-        img_array = np.fromstring(binascii.a2b_base64(q['data']), np.uint8)
+        img_array = np.frombuffer(binascii.a2b_base64(q['data']), np.uint8)
     except Exception as e:
         err = "Couldn't fetch attachment (JSON 'data' is empty). Are you using the 'Query enrichment' action?"
         misperrors['error'] = err
