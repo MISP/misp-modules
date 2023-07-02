@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 #
 # Core MISP expansion modules loader and web service
 #
@@ -36,6 +35,8 @@ import tornado.process
 from tornado.ioloop import IOLoop
 from tornado.concurrent import run_on_executor
 from concurrent.futures import ThreadPoolExecutor
+
+logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
 try:
     from .modules import *  # noqa
@@ -92,8 +93,8 @@ def load_helpers(helpersdir):
 
 def load_package_helpers():
     if not HAS_PACKAGE_HELPERS:
-        log.info('Unable to load MISP helpers from package.')
-        sys.exit()
+        log.error('Unable to load MISP helpers from package.')
+        sys.exit(1)
     mhandlers = {}
     helpers = []
     for path, helper in sys.modules.items():
@@ -129,18 +130,18 @@ def load_modules(mod_dir):
             try:
                 mhandlers[modulename] = importlib.import_module(os.path.basename(root) + '.' + modulename)
             except Exception as e:
-                log.warning('MISP modules {0} failed due to {1}'.format(modulename, e))
+                log.warning('MISP module {0} failed due to {1}'.format(modulename, e))
                 continue
             modules.append(modulename)
-            log.info('MISP modules {0} imported'.format(modulename))
+            log.info('MISP module {0} imported'.format(modulename))
             mhandlers['type:' + modulename] = moduletype
     return mhandlers, modules
 
 
 def load_package_modules():
     if not HAS_PACKAGE_MODULES:
-        log.info('Unable to load MISP modules from package.')
-        sys.exit()
+        log.error('Unable to load MISP modules from package.')
+        sys.exit(1)
     mhandlers = {}
     modules = []
     for path, module in sys.modules.items():
@@ -149,7 +150,7 @@ def load_package_modules():
             moduletype, modulename = r[0]
             mhandlers[modulename] = module
             modules.append(modulename)
-            log.info('MISP modules {0} imported'.format(modulename))
+            log.info('MISP module {0} imported'.format(modulename))
             mhandlers['type:' + modulename] = moduletype
     return mhandlers, modules
 
@@ -214,20 +215,22 @@ def _launch_from_current_dir():
     return load_modules(modulesdir)
 
 
-def main():
+def main() -> int:
     global mhandlers
     global loaded_modules
     signal.signal(signal.SIGINT, handle_signal)
     signal.signal(signal.SIGTERM, handle_signal)
-    argParser = argparse.ArgumentParser(description='misp-modules server', formatter_class=argparse.RawTextHelpFormatter)
-    argParser.add_argument('-t', default=False, action='store_true', help='Test mode')
-    argParser.add_argument('-s', default=False, action='store_true', help='Run a system install (package installed via pip)')
-    argParser.add_argument('-d', default=False, action='store_true', help='Enable debugging')
-    argParser.add_argument('-p', default=6666, help='misp-modules TCP port (default 6666)')
-    argParser.add_argument('-l', default='localhost', help='misp-modules listen address (default localhost)')
-    argParser.add_argument('-m', default=[], action='append', help='Register a custom module')
-    argParser.add_argument('--devel', default=False, action='store_true', help='''Start in development mode, enable debug, start only the module(s) listed in -m.\nExample: -m misp_modules.modules.expansion.bgpranking''')
-    args = argParser.parse_args()
+
+    arg_parser = argparse.ArgumentParser(description='misp-modules server', formatter_class=argparse.RawTextHelpFormatter)
+    arg_parser.add_argument('-t', default=False, action='store_true', help='Test mode')
+    arg_parser.add_argument('-s', default=False, action='store_true', help='Run a system install (package installed via pip)')
+    arg_parser.add_argument('-d', default=False, action='store_true', help='Enable debugging')
+    arg_parser.add_argument('-p', default=6666, help='misp-modules TCP port (default 6666)')
+    arg_parser.add_argument('-l', default='localhost', help='misp-modules listen address (default localhost)')
+    arg_parser.add_argument('-m', default=[], action='append', help='Register a custom module')
+    arg_parser.add_argument('--devel', default=False, action='store_true', help='''Start in development mode, enable debug, start only the module(s) listed in -m.\nExample: -m misp_modules.modules.expansion.bgpranking''')
+    args = arg_parser.parse_args()
+
     port = args.p
     listen = args.l
     if args.devel:
@@ -275,14 +278,14 @@ def main():
                     print("\nmisp-modules is still running as PID: {}\n".format(pid))
                     print("Please kill accordingly:")
                     print("sudo kill {}".format(pid))
-                    sys.exit(-1)
+                    return 1
             print(e)
             print("misp-modules might still be running.")
 
     log.info('MISP modules server started on {0} port {1}'.format(listen, port))
     if args.t:
         log.info('MISP modules started in test-mode, quitting immediately.')
-        sys.exit()
+        return 0
     try:
         IOLoop.instance().start()
     finally:
