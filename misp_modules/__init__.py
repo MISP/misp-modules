@@ -58,17 +58,13 @@ def handle_signal(sig, frame):
     IOLoop.instance().add_callback_from_signal(IOLoop.instance().stop)
 
 
-def init_logger(level=False):
+def init_logger(debug=False):
     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-    handler = logging.StreamHandler(stream=sys.stdout)
+    handler = logging.StreamHandler()
     handler.setFormatter(formatter)
-    handler.setLevel(logging.INFO)
-    if level:
-        handler.setLevel(logging.DEBUG)
     log.addHandler(handler)
-    log.setLevel(logging.INFO)
-    if level:
-        log.setLevel(logging.DEBUG)
+    log.propagate = False
+    log.setLevel(logging.DEBUG if debug else logging.INFO)
     return log
 
 
@@ -235,7 +231,7 @@ def main():
     port = args.p
     listen = args.l
     if args.devel:
-        log = init_logger(level=True)
+        log = init_logger(debug=True)
         log.info('Launch MISP modules server in development mode. Enable debug, load a list of modules is -m is used.')
         if args.m:
             mhandlers = {}
@@ -251,7 +247,7 @@ def main():
         else:
             mhandlers, loaded_modules = _launch_from_current_dir()
     else:
-        log = init_logger(level=args.d)
+        log = init_logger(debug=args.d)
         if args.s:
             log.info('Launch MISP modules server from package.')
             load_package_helpers()
