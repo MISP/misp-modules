@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 
 import unittest
 import requests
@@ -10,8 +9,8 @@ import os
 
 LiveCI = True
 
-class TestExpansions(unittest.TestCase):
 
+class TestExpansions(unittest.TestCase):
     def setUp(self):
         self.maxDiff = None
         self.headers = {'Content-Type': 'application/json'}
@@ -31,7 +30,6 @@ class TestExpansions(unittest.TestCase):
     def get_attribute(response):
         data = response.json()
         if not isinstance(data, dict):
-            print(json.dumps(data, indent=2))
             return data
         return data['results']['Attribute'][0]['type']
 
@@ -39,7 +37,6 @@ class TestExpansions(unittest.TestCase):
     def get_data(response):
         data = response.json()
         if not isinstance(data, dict):
-            print(json.dumps(data, indent=2))
             return data
         return data['results'][0]['data']
 
@@ -47,7 +44,6 @@ class TestExpansions(unittest.TestCase):
     def get_errors(response):
         data = response.json()
         if not isinstance(data, dict):
-            print(json.dumps(data, indent=2))
             return data
         return data['error']
 
@@ -55,8 +51,6 @@ class TestExpansions(unittest.TestCase):
     def get_object(response):
         data = response.json()
         if not isinstance(data, dict) or 'results' not in data:
-            # Unexpected result
-            print(json.dumps(data, indent=2))
             return data
         return data['results']['Object'][0]['name']
 
@@ -64,7 +58,6 @@ class TestExpansions(unittest.TestCase):
     def get_values(response):
         data = response.json()
         if not isinstance(data, dict):
-            print(json.dumps(data, indent=2))
             return data
         if 'results' not in data:
             return data
@@ -114,7 +107,7 @@ class TestExpansions(unittest.TestCase):
 
     def test_btc_steroids(self):
         if LiveCI:
-            return True
+            self.skipTest("Live CI")
 
         query = {"module": "btc_steroids", "btc": "1ES14c7qLb5CYhLMUekctxLgc1FV2Ti9DA"}
         response = self.misp_modules_post(query)
@@ -368,7 +361,7 @@ class TestExpansions(unittest.TestCase):
     def test_onyphe(self):
         module_name = "onyphe"
         if LiveCI:
-            return True
+            self.skipTest("Live CI")
         query = {"module": module_name, "ip-src": "8.8.8.8"}
         if module_name in self.configs:
             query["config"] = self.configs[module_name]
@@ -384,7 +377,7 @@ class TestExpansions(unittest.TestCase):
     def test_onyphe_full(self):
         module_name = "onyphe_full"
         if LiveCI:
-            return True
+            self.skipTest("Live CI")
         query = {"module": module_name, "ip-src": "8.8.8.8"}
         if module_name in self.configs:
             query["config"] = self.configs[module_name]
@@ -462,7 +455,7 @@ class TestExpansions(unittest.TestCase):
 
     def test_rbl(self):
         if LiveCI:
-            return True
+            self.skipTest("Live CI")
         query = {"module": "rbl", "ip-src": "8.8.8.8"}
         response = self.misp_modules_post(query)
         try:
@@ -532,9 +525,10 @@ class TestExpansions(unittest.TestCase):
         query = {"module": "stix2_pattern_syntax_validator", "stix2-pattern": "[ipv4-addr:value = '8.8.8.8']"}
         response = self.misp_modules_post(query)
         self.assertEqual(self.get_values(response), 'Syntax valid')
+
     def test_threatcrowd(self):
         if LiveCI:
-            return True
+            self.skipTest("Live CI")
         query_types = ('domain', 'ip-src', 'md5', 'whois-registrant-email')
         query_values = ('circl.lu', '149.13.33.14', '616eff3e9a7575ae73821b4668d2801c', 'hostmaster@eurodns.com')
         results = ('149.13.33.4', 'cve.circl.lu', 'devilreturns.com', 'navabi.lu')
@@ -564,7 +558,7 @@ class TestExpansions(unittest.TestCase):
 
     def test_threatminer(self):
         if LiveCI:
-            return True
+            self.skipTest("Live CI")
         query_types = ('domain', 'ip-src', 'md5')
         query_values = ('circl.lu', '149.13.33.4', 'b538dbc6160ef54f755a540e06dc27cd980fc4a12005e90b3627febb44a1a90f')
         results = ('149.13.33.14', 'f6ecb9d5c21defb1f622364a30cb8274f817a1a2', 'http://www.circl.lu/')
@@ -737,7 +731,7 @@ class TestExpansions(unittest.TestCase):
 
     def test_xlsx(self):
         if LiveCI:
-            return True
+            self.skipTest("Live CI")
         filename = 'test.xlsx'
         with open(f'{self.dirname}/test_files/{filename}', 'rb') as f:
             encoded = b64encode(f.read()).decode()
