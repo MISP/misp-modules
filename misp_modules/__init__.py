@@ -236,7 +236,7 @@ def main():
     listen = args.l
     if args.devel:
         log = init_logger(level=True)
-        log.info('Launch MISP modules server in developement mode. Enable debug, load a list of modules is -m is used.')
+        log.info('Launch MISP modules server in development mode. Enable debug, load a list of modules is -m is used.')
         if args.m:
             mhandlers = {}
             modules = []
