@@ -183,7 +183,7 @@ class TestExpansions(unittest.TestCase):
         try:
             self.assertEqual(self.get_object(response), 'vulnerability')
         except Exception:
-            print(self.get_errors(response))
+            self.fail(self.get_errors(response))
 
     def test_dbl_spamhaus(self):
         query = {"module": "dbl_spamhaus", "domain": "totalmateria.net"}
