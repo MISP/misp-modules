@@ -34,7 +34,9 @@ def handler(q=False):
     if 'score' in vulners_document.get('enchantments', {}):
         vulners_ai_score = vulners_document['enchantments']['score']['value']
     else:
-        vulners_ai_score = None
+        vulners_ai_score = vulners_api.get_ai_score(vulnerability)
+        if len(vulners_ai_score) == 2:
+            vulners_ai_score = vulners_ai_score[0]
 
     vulners_exploits = vulners_api.searchExploit(vulnerability)
 
@@ -44,7 +46,7 @@ def handler(q=False):
         vuln_summary += 'Non existing CVE'
 
     if vulners_ai_score:
-        ai_summary += 'Vulners AI Score is ' + str(vulners_ai_score[0]) + " "
+        ai_summary += 'Vulners AI Score is ' + str(vulners_ai_score) + " "
 
     if vulners_exploits:
         exploit_summary += " ||  " + str(len(vulners_exploits)) + " Public exploits available:\n  "
