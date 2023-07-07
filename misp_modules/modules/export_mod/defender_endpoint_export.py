@@ -8,7 +8,7 @@ import json
 
 misperrors = {"error": "Error"}
 
-types_to_use = ['sha256', 'sha1', 'md5', 'domain', 'ip', 'url']
+types_to_use = ['sha256', 'sha1', 'md5', 'domain', 'ip-src', 'ip-dst', 'url']
 
 userConfig = {
 
