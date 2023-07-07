@@ -8,7 +8,7 @@ import json
 
 misperrors = {"error": "Error"}
 
-types_to_use = ['sha256', 'sha1', 'md5', 'domain', 'ip', 'url']
+types_to_use = ['sha256', 'sha1', 'md5', 'domain', 'ip-src', 'ip-dst', 'url']
 
 userConfig = {
 
@@ -26,38 +26,48 @@ moduleinfo = {'version': '1.1', 'author': 'Julien Bachmann, Hacknowledge, Maik W
 
 
 def handle_sha256(value, period):
-    query = f"""find in (DeviceAlertEvents, DeviceFileEvents, DeviceImageLoadEvents, DeviceProcessEvents)
-        where SHA256 == '{value}' or InitiatingProcessSHA1 == '{value}'"""
+    query = f"""find in (DeviceEvents, DeviceAlertEvents,AlertInfo, AlertEvidence,  DeviceFileEvents, DeviceImageLoadEvents, DeviceProcessEvents)
+        where (SHA256 == '{value}' or InitiatingProcessSHA1 == '{value}') and 
+        Timestamp between(ago({period}) .. now())"""
     return query.replace('\n', ' ')
 
 
 def handle_sha1(value, period):
-    query = f"""find in (DeviceAlertEvents, DeviceFileEvents, DeviceImageLoadEvents, DeviceProcessEvents)
-        where SHA1 == '{value}' or InitiatingProcessSHA1 == '{value}'"""
+    query = f"""find in (DeviceEvents, DeviceAlertEvents, AlertInfo, AlertEvidence, DeviceFileEvents, DeviceImageLoadEvents, DeviceProcessEvents)
+        where (SHA1 == '{value}' or InitiatingProcessSHA1 == '{value}') and 
+        Timestamp between(ago({period}) .. now())"""
     return query.replace('\n', ' ')
 
 
 def handle_md5(value, period):
-    query = f"""find in (DeviceAlertEvents, DeviceFileEvents, DeviceImageLoadEvents, DeviceProcessEvents)
-        where MD5 == '{value}' or InitiatingProcessMD5 == '{value}'"""
+    query = f"""find in (DeviceEvents, DeviceAlertEvents, AlertInfo, AlertEvidence, DeviceFileEvents, DeviceImageLoadEvents, DeviceProcessEvents)
+        where (MD5 == '{value}' or InitiatingProcessMD5 == '{value}') and 
+        Timestamp between(ago({period}) .. now())"""
     return query.replace('\n', ' ')
 
 
 def handle_domain(value, period):
-    query = f"""find in (DeviceAlertEvents, DeviceNetworkEvents)
-        where RemoteUrl contains '{value}'"""
+    query = f"""find in (DeviceAlertEvents, AlertInfo, AlertEvidence, DeviceNetworkEvents)
+        where RemoteUrl contains '{value}' and 
+        Timestamp between(ago({period}) .. now())"""
     return query.replace('\n', ' ')
 
 
 def handle_ip(value, period):
-    query = f"""find in (DeviceAlertEvents, DeviceNetworkEvents)
-        where RemoteIP == '{value}'"""
+    query = f"""find in (DeviceAlertEvents, AlertInfo, AlertEvidence, DeviceNetworkEvents)
+        where RemoteIP == '{value}' and 
+        Timestamp between(ago({period}) .. now())"""
     return query.replace('\n', ' ')
 
 
 def handle_url(value, period):
-    query = f"""find in (DeviceAlertEvents, DeviceNetworkEvents)
-        where RemoteUrl startswith '{value}'"""
+    query = f"""let url = '{value}';
+        search in (EmailUrlInfo,UrlClickEvents,DeviceNetworkEvents,DeviceFileEvents,DeviceEvents,BehaviorEntities, AlertInfo, AlertEvidence, DeviceAlertEvents)
+        Timestamp between(ago({period}) .. now()) and
+        RemoteUrl has url
+        or FileOriginUrl has url
+        or FileOriginReferrerUrl has url
+        or Url has url"""
     return query.replace('\n', ' ')
 
 
@@ -65,8 +75,9 @@ handlers = {
     'sha256': handle_sha256,
     'sha1': handle_sha1,
     'md5': handle_md5,
-    'domain': handle_domain,
-    'ip': handle_ip,
+    'domain': handle_url,
+    'ip-src': handle_ip,
+    'ip-dst': handle_ip,
     'url': handle_url
 }
 
