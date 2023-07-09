@@ -338,6 +338,7 @@ def apiosintParserHover(ispersistent, response, import_related, stix):
                     else:
                         notfound = item["item"] + " IS NOT listed by OSINT.digitalside.it. Date list: " + response[key]["list"]["date"]
                         ret.append({"types": ["comment"], "values": [notfound]})
+                        retHover.append({"types": ["comment"], "values": [notfound]})
 
     if ispersistent == 0:
         return ret
