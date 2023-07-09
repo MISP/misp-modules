@@ -74,12 +74,13 @@ class TestExpansions(unittest.TestCase):
         return data['results'][0]['values']
 
     def test_apiosintds(self):
-        query = {'module': 'apiosintds', 'ip-dst': '185.255.79.90'}
+        query = {'module': 'apiosintds', 'ip-dst': '10.10.10.10'}
         response = self.misp_modules_post(query)
+        
         try:
-            self.assertTrue(self.get_values(response).startswith('185.255.79.90 IS listed by OSINT.digitalside.it.'))
+            self.assertTrue(self.get_values(response).startswith('IoC 10.10.10.10'))
         except AssertionError:
-            self.assertTrue(self.get_values(response).startswith('185.255.79.90 IS NOT listed by OSINT.digitalside.it.'))
+            self.assertTrue(self.get_values(response).startswith('10.10.10.10 IS NOT listed by OSINT.digitalside.it.'))
 
     def test_apivoid(self):
         module_name = "apivoid"
