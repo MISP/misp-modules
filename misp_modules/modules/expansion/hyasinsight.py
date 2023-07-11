@@ -295,6 +295,7 @@ class RequestHandler:
         headers = {
             'Content-type': 'application/json',
             'X-API-Key': self.api_key,
+            'User-Agent': 'Misp Modules'
         }
         req_body = request_body(query_input, query_param, current)
         try:
