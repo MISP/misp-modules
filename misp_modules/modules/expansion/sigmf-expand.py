@@ -142,8 +142,6 @@ def handler(q=False):
 
     event = MISPEvent()
     expanded_sigmf = MISPObject('sigmf-expanded-recording')
-    logging.error(expanded_sigmf.to_json())
-    logging.error(pymisp.__file__)
 
     if 'core:author' in sigmf_meta['global']:
         expanded_sigmf.add_attribute(
