@@ -1,4 +1,5 @@
 import json
+from pyfaup.faup import Faup
 from mattermostdriver import Driver
 from ._utils import utils
 
@@ -9,7 +10,7 @@ moduleconfig = {
     'params': {
         'mattermost_hostname': {
             'type': 'string',
-            'description': 'The Mattermost domain',
+            'description': 'The Mattermost domain or URL',
             'value': 'example.mattermost.com',
         },
         'bot_access_token': {
@@ -44,15 +45,18 @@ moduleinfo = {'version': '0.1', 'author': 'Sami Mokaddem',
               'description': 'Simplistic module to send message to a Mattermost channel.',
               'module-type': ['action']}
 
+f = Faup()
 
 def createPost(request):
     params = request['params']
+    f.decode(params['mattermost_hostname'])
+    parsedURL = f.get()
     mm = Driver({
-        'url': params['mattermost_hostname'],
+        'url': parsedURL['host'],
         'token': params['bot_access_token'],
-        'scheme': 'https',
+        'scheme': parsedURL['scheme'] if parsedURL['scheme'] is not None else 'https',
         'basepath': '/api/v4',
-        'port': 443,
+        'port': int(parsedURL['port']) if parsedURL['port'] is not None else 443,
     })
     mm.login()
 
