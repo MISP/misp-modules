@@ -5,12 +5,31 @@ from . import check_input_attribute, checking_error, standard_error_message
 import dns.resolver
 
 misperrors = {'error': 'Error'}
-mispattributes = {'input': ['hostname', 'domain', 'domain|ip'], 'format': 'misp_standard'}
+mispattributes = {'input': ['ip-src', 'ip-dst', 'hostname', 'domain', 'domain|ip'], 'format': 'misp_standard'}
 moduleinfo = {'version': '0.1', 'author': 'Stephanie S',
               'description': 'AbuseIPDB MISP expansion module',
               'module-type': ['expansion', 'hover']}
 
-moduleconfig = ['api_key', 'max_age_in_days']
+moduleconfig = ['api_key', 'max_age_in_days', 'abuse_threshold']
+
+def get_ip(request):
+    # Need to get the ip from the domain
+    resolver = dns.resolver.Resolver()
+    resolver.timeout = 2
+    resolver.lifetime = 2
+
+    try:
+        ip = resolver.query(request["attribute"]["value"], 'A')
+        return ip
+    except dns.resolver.NXDOMAIN:
+        misperrors['error'] = "NXDOMAIN"
+        return misperrors
+    except dns.exception.Timeout:
+        misperrors['error'] = "Timeout"
+        return misperrors
+    except Exception:
+        misperrors['error'] = "DNS resolving error"
+        return misperrors
 
 def handler(q=False):
     if q is False:
@@ -21,33 +40,24 @@ def handler(q=False):
         return {"error": "AbuseIPDB API key is missing"}
     if "max_age_in_days" not in request["config"]:
         return {"error": "AbuseIPDB max age in days is missing"}
+    if "abuse_threshold" not in request["config"]:
+        return {"error": "AbuseIPDB abuse threshold is missing"}
     if not request.get('attribute') or not check_input_attribute(request['attribute'], requirements=('type', 'value')):
         return {'error': f'{standard_error_message}, {checking_error}.'}
     if request['attribute']['type'] not in mispattributes['input']:
         return {'error': 'Unsupported attribute type.'}
 
-    # Need to get the ip from the domain
-    resolver = dns.resolver.Resolver()
-    resolver.timeout = 2
-    resolver.lifetime = 2
+    if (request['attribute']['type'] == 'hostname' or request['attribute']['type'] == 'domain' or request['attribute']['type'] == 'domain|ip'):
+       ip = get_ip(request)[0]
 
-    try:
-        ip = resolver.query(request["attribute"]["value"], 'A')
-    except dns.resolver.NXDOMAIN:
-        misperrors['error'] = "NXDOMAIN"
-        return misperrors
-    except dns.exception.Timeout:
-        misperrors['error'] = "Timeout"
-        return misperrors
-    except Exception:
-        misperrors['error'] = "DNS resolving error"
-        return misperrors
-  
+    else:
+        ip = request["attribute"]["value"]
+    
     api_key = request["config"]["api_key"]   
     max_age_in_days = request["config"]["max_age_in_days"]
     api_endpoint = 'https://api.abuseipdb.com/api/v2/check'
     querystring = {
-        'ipAddress': ip[0],
+        'ipAddress': ip,
         'maxAgeInDays': max_age_in_days
     }
     headers = {
@@ -65,6 +75,13 @@ def handler(q=False):
         is_public = response_json['data']['isPublic']
         abuse_confidence_score = response_json['data']['abuseConfidenceScore']
 
+        abuse_threshold = request["config"]["abuse_threshold"]
+
+        if (request["config"]["abuse_threshold"] is not None):
+            abuse_threshold = request["config"]["abuse_threshold"]
+        else:
+            abuse_threshold = 70
+
         if (is_whitelisted == False):
             is_whitelisted = 0
         if (is_tor == False):
@@ -79,8 +96,14 @@ def handler(q=False):
         else:
             event = MISPEvent()
             obj = MISPObject('abuseipdb')
-            attribute = MISPAttribute()
             event.add_attribute(**request['attribute'])
+
+            if int(abuse_confidence_score) >= int(abuse_threshold):
+                malicious_attribute = obj.add_attribute('is-malicious', **{'type': 'boolean', 'value': 1})
+                malicious_attribute.add_tag(f'ioc:artifact-state="malicious"')
+            else:
+                malicious_attribute = obj.add_attribute('is-malicious', **{'type': 'boolean', 'value': 0})
+                malicious_attribute.add_tag(f'ioc:artifact-state="not-malicious"')
 
             if is_whitelisted is not None:
                 obj.add_attribute('is-whitelisted', **{'type': 'boolean', 'value': is_whitelisted})
