@@ -91,7 +91,7 @@ class DomainArtifact(Artifact):
         attr = obj.add_attribute(
             "domain", value=self.domain, to_ids=self.is_ioc, comment=classifications
         )
-        if tag:
+        if tag and attr:
             self.tag_artifact_attribute(attr)
 
         for ip in self.ips:
@@ -141,7 +141,7 @@ class EmailArtifact(Artifact):
             attr = obj.add_attribute(
                 "from", value=self.sender, to_ids=self.is_ioc, comment=classifications
             )
-            if tag:
+            if tag and attr:
                 self.tag_artifact_attribute(attr)
 
         if self.subject:
@@ -220,7 +220,7 @@ class FileArtifact(Artifact):
                 key, value=value, to_ids=self.is_ioc, comment=classifications
             )
 
-            if tag:
+            if tag and attr:
                 self.tag_artifact_attribute(attr)
 
         if self.mimetype:
@@ -277,7 +277,7 @@ class IpArtifact(Artifact):
         attr = obj.add_attribute(
             "ip", value=self.ip, comment=classifications, to_ids=self.is_ioc
         )
-        if tag:
+        if tag and attr:
             self.tag_artifact_attribute(attr)
 
         return obj
@@ -320,7 +320,7 @@ class MutexArtifact(Artifact):
             to_ids=False,
             comment=classifications,
         )
-        if tag:
+        if tag and attr:
             self.tag_artifact_attribute(attr)
 
         operations = None
@@ -377,8 +377,10 @@ class ProcessArtifact(Artifact):
         cmd_attr = obj.add_attribute("command-line", value=self.cmd_line)
 
         if tag:
-            self.tag_artifact_attribute(name_attr)
-            self.tag_artifact_attribute(cmd_attr)
+            if name_attr:
+                self.tag_artifact_attribute(name_attr)
+            if cmd_attr:
+                self.tag_artifact_attribute(cmd_attr)
 
         return obj
 
@@ -418,7 +420,7 @@ class RegistryArtifact(Artifact):
         attr = obj.add_attribute(
             "key", value=self.key, to_ids=self.is_ioc, comment=operations
         )
-        if tag:
+        if tag and attr:
             self.tag_artifact_attribute(attr)
 
         return obj
@@ -464,7 +466,7 @@ class UrlArtifact(Artifact):
             category="External analysis",
             to_ids=False,
         )
-        if tag:
+        if tag and attr:
             self.tag_artifact_attribute(attr)
 
         if self.domain:
@@ -698,7 +700,7 @@ class Summary(ReportParser):
         for process in processes:
             classifications = process.get("classifications", [])
             cmd_line = process.get("cmd_line")
-            name = process["image_name"]
+            name = process.get("image_name")
             verdict = self.to_verdict(process.get("severity"))
             is_ioc = process.get("ioc", False)
 
@@ -731,7 +733,7 @@ class Summary(ReportParser):
 
             artifact = UrlArtifact(
                 url=url["url"],
-                operations=url["operations"],
+                operations=url.get("operations", []),
                 ips=ips,
                 is_ioc=is_ioc,
                 verdict=verdict,
@@ -871,7 +873,9 @@ class SummaryV2(ReportParser):
                 continue
 
             for ip_address in self._resolve_refs(ref_ip_addresses):
-                artifact.ips.append(ip_address["ip_address"])
+                ip = ip_address.get("ip_address")
+                if ip is not None:
+                    artifact.ips.append(ip)
 
             yield artifact
 
@@ -956,7 +960,7 @@ class SummaryV2(ReportParser):
             artifact = ProcessArtifact(
                 pid=process["os_pid"],
                 parent_pid=process["origin_monitor_id"],
-                filename=process["filename"],
+                filename=process.get("filename"),
                 is_ioc=process["is_ioc"],
                 cmd_line=cmd_line,
                 classifications=classifications,
@@ -978,17 +982,19 @@ class SummaryV2(ReportParser):
         for url in self._resolve_refs(url_refs):
             domain = None
             ref_domain = url.get("ref_domain", {})
-            if ref_domain:
+            if ref_domain and self._resolve_ref(ref_domain).get("domain") is not None:
                 domain = self._resolve_ref(ref_domain)["domain"]
 
             ips = []
             ref_ip_addresses = url.get("ref_ip_addresses", [])
             for ip_address in self._resolve_refs(ref_ip_addresses):
-                ips.append(ip_address["ip_address"])
+                ip = ip_address.get("ip_address")
+                if ip is not None:
+                    ips.append(ip)
 
             artifact = UrlArtifact(
                 url=url["url"],
-                operations=url["operations"],
+                operations=url.get("operations", []),
                 is_ioc=url["is_ioc"],
                 domain=domain,
                 ips=ips,
