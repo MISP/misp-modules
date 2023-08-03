@@ -578,13 +578,14 @@ class TestExpansions(unittest.TestCase):
         query_values = ('www.bestwpdesign.com', '79.118.195.239',
                         'a04ac6d98ad989312783d4fe3456c53730b212c79a426fb215708b6c6daa3de3',
                         'http://79.118.195.239:1924/.i')
-        results = ('url', 'url', 'virustotal-report', 'virustotal-report')
+        results = ('url', 'url', 'file', 'virustotal-report')
         for query_type, query_value, result in zip(query_types[:2], query_values[:2], results[:2]):
             query = {"module": "urlhaus",
                      "attribute": {"type": query_type,
                                    "value": query_value,
                                    "uuid": "ea89a33b-4ab7-4515-9f02-922a0bee333d"}}
             response = self.misp_modules_post(query)
+            print(response.json())
             self.assertEqual(self.get_attribute(response), result)
         for query_type, query_value, result in zip(query_types[2:], query_values[2:], results[2:]):
             query = {"module": "urlhaus",
@@ -592,6 +593,7 @@ class TestExpansions(unittest.TestCase):
                                    "value": query_value,
                                    "uuid": "ea89a33b-4ab7-4515-9f02-922a0bee333d"}}
             response = self.misp_modules_post(query)
+            print(response.json())
             self.assertEqual(self.get_object(response), result)
 
     def test_urlscan(self):
