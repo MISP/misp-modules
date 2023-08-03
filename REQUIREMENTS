@@ -71,7 +71,8 @@ maclookup==1.0.3
 markdown-it-py==2.2.0 ; python_version >= '3.7'
 markdownify==0.5.3
 markupsafe==2.1.2 ; python_version >= '3.7'
-matplotlib==3.7.2
+matplotlib==3.7.2 ; python_version >= '3.8'
+matplotlib==3.5.3 ; python_version == '3.7'
 mattermostdriver==7.3.2
 maxminddb==2.3.0 ; python_version >= '3.7'
 mdurl==0.1.2 ; python_version >= '3.7'
