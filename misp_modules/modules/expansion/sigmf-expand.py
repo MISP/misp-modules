@@ -12,7 +12,6 @@ from pymisp import MISPObject, MISPEvent
 from sigmf import SigMFFile
 from sigmf.archive import SIGMF_DATASET_EXT, SIGMF_METADATA_EXT
 import tarfile
-import codecs
 
 log = logging.getLogger("sigmf-expand")
 log.setLevel(logging.DEBUG)
