@@ -1,0 +1,14 @@
+{
+    "description": "Enrichs a SigMF Recording or extracts a SigMF Archive into a SigMF Recording.",
+    "requirements": [
+        "matplotlib: For plotting the waterfall plot of the recording.",
+        "numpy: For the waterfall plot of the recording.",
+        "sigmf: For validating SigMF files."
+    ],
+    "input": "Object of sigmf-archive or sigmf-recording template.",
+    "output": "Object of sigmf-expanded-recording or sigmf-recording template.",
+    "references": [
+        "https://github.com/sigmf/SigMF"
+    ],
+    "features": "This module can be used to expand a SigMF Recording object into a SigMF Expanded Recording object with a waterfall plot or to extract a SigMF Archive object into a SigMF Recording objet."
+}
