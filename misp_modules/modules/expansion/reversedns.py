@@ -2,10 +2,10 @@ import json
 from dns import reversename, resolver, exception
 
 misperrors = {'error': 'Error'}
-mispattributes = {'input': ['ip-src', 'ip-dst', 'domain|ip'], 'output': ['hostname']}
+mispattributes = {'input': ['ip-src', 'ip-dst', 'domain|ip', 'ip-src|port', 'ip-dst|port'], 'output': ['hostname']}
 
 # possible module-types: 'expansion', 'hover' or both
-moduleinfo = {'version': '0.2', 'author': 'Andreas Muehlemann',
+moduleinfo = {'version': '0.3', 'author': 'Andreas Muehlemann',
               'description': 'Simple Reverse DNS expansion service to resolve reverse DNS from MISP attributes',
               'module-type': ['expansion', 'hover']}
 
