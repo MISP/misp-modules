@@ -14,7 +14,7 @@ attrs==23.1.0 ; python_version >= '3.7'
 backoff==2.2.1 ; python_version >= '3.7' and python_version < '4.0'
 backports.zoneinfo==0.2.1 ; python_version < '3.9'
 backscatter==0.2.4
-beautifulsoup4==4.11.2
+beautifulsoup4==4.12.2
 bidict==0.22.1 ; python_version >= '3.7'
 blockchain==1.4.4
 censys==2.2.2
@@ -33,7 +33,7 @@ crowdstrike-falconpy==1.2.15
 cryptography==40.0.2 ; python_version >= '3.6'
 dateparser==1.1.8 ; python_version >= '3.7'
 decorator==5.1.1 ; python_version >= '3.5'
-deprecated==1.2.13 ; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3'
+deprecated==1.2.14 ; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3'
 dnsdb2==1.1.4
 dnspython==2.3.0
 domaintools-api==1.0.1
@@ -41,7 +41,7 @@ easygui==0.98.3
 ebcdic==1.1.1
 enum-compat==0.0.3
 et-xmlfile==1.1.0 ; python_version >= '3.6'
-extract-msg==0.38.4
+extract-msg==0.45.0
 ezodf==0.3.2
 filelock==3.12.0 ; python_version >= '3.7'
 frozenlist==1.3.3 ; python_version >= '3.7'
@@ -62,10 +62,10 @@ jbxapi==3.21.0
 jeepney==0.8.0 ; sys_platform == 'linux'
 jinja2==3.1.2
 json-log-formatter==0.5.2 ; python_version >= '2.7'
-jsonschema==4.17.3 ; python_version >= '3.7'
+jsonschema==4.19.0 ; python_version >= '3.7'
 keyring==23.13.1 ; python_version >= '3.7'
 lark-parser==0.12.0
-lief==0.12.3
+lief==0.13.2
 lxml==4.9.2
 maclookup==1.0.3
 markdown-it-py==2.2.0 ; python_version >= '3.7'
@@ -100,7 +100,7 @@ pillow==9.5.0
 pkgutil-resolve-name==1.3.10 ; python_version < '3.9'
 progressbar2==4.2.0 ; python_full_version >= '3.7.0'
 psutil==5.9.5 ; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3'
-publicsuffixlist==0.9.4 ; python_version >= '2.6'
+publicsuffixlist==0.10.0.20230828 ; python_version >= '2.6'
 git+https://github.com/D4-project/BGP-Ranking.git/@68de39f6c5196f796055c1ac34504054d688aa59#egg=pybgpranking&subdirectory=client
 pycountry==22.3.5
 pycparser==2.21
@@ -114,7 +114,7 @@ pygeoip==0.3.2
 pygments==2.15.1 ; python_version >= '3.7'
 git+https://github.com/MISP/PyIntel471.git@917272fafa8e12102329faca52173e90c5256968#egg=pyintel471
 git+https://github.com/D4-project/IPASN-History.git/@a2853c39265cecdd0c0d16850bd34621c0551b87#egg=pyipasnhistory&subdirectory=client
-pymisp[email,fileobjects,openioc,pdfexport,url]==2.4.167
+pymisp[email,fileobjects,openioc,pdfexport,url]==2.4.175
 git+https://github.com/sebdraven/pyonyphe@d1d6741f8ea4475f3bb77ff20c876f08839cabd1#egg=pyonyphe
 pyparsing==2.4.7 ; python_version >= '2.6' and python_version not in '3.0, 3.1, 3.2, 3.3'
 pypdns==1.5.2
@@ -139,12 +139,12 @@ rdflib==6.3.2 ; python_version >= '3.7' and python_version < '4.0'
 red-black-tree-mod==1.20
 redis==4.5.5 ; python_version >= '3.7'
 regex==2023.5.5 ; python_version >= '3.6'
-reportlab==3.6.13
-requests[security]==2.30.0
+reportlab==4.0.4
+requests[security]==2.31.0
 requests-cache==0.6.4 ; python_version >= '3.6'
 requests-file==1.5.1
 rich==13.3.5 ; python_full_version >= '3.7.0'
-rtfde==0.0.2
+rtfde==0.1.0
 secretstorage==3.3.3 ; sys_platform == 'linux'
 setuptools==67.7.2 ; python_version >= '3.7'
 shodan==1.29.1
