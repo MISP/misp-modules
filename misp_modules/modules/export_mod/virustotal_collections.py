@@ -75,8 +75,8 @@ def create_collection(api_key, event_data):
   response_data = response.json()
 
   if response.status_code == 200:
-    link = response_data['data']['links']['self']
-    return f'{uuid}: {link}'
+    col_id = response_data['data']['id']
+    return f'{uuid}: https://www.virustotal.com/gui/collection/{col_id}/iocs'
 
   error = response_data['error']['message']
   if response.status_code == 400:
