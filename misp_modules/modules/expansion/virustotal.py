@@ -153,11 +153,11 @@ class VirusTotalParser:
             ('contacted_domains', 'communicates-with'),
             ('contacted_ips', 'communicates-with')
         ]:
-            files_iterator = self.client.iterator(f'/files/{file_report.id}/{relationship_name}', limit=self.limit)
-            for file in files_iterator:
-                file_object = self.create_misp_object(file)
-                file_object.add_reference(file_object.uuid, misp_name)
-                self.misp_event.add_object(**file_object)
+            related_files_iterator = self.client.iterator(f'/files/{file_report.id}/{relationship_name}', limit=self.limit)
+            for related_file in related_files_iterator:
+                related_file_object = self.create_misp_object(related_file)
+                related_file_object.add_reference(file_object.uuid, misp_name)
+                self.misp_event.add_object(**related_file_object)
 
         self.misp_event.add_object(**file_object)
         return file_object.uuid
