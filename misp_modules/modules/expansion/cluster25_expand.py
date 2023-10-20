@@ -1,5 +1,6 @@
 import json
 import requests
+from typing import List
 from . import check_input_attribute, standard_error_message
 from pymisp import MISPAttribute, MISPEvent
 
@@ -9,7 +10,7 @@ moduleinfo = {'version': '0.1',
               'module-type': ['expansion', 'hover']}
 moduleconfig = ['api_id', 'apikey', 'base_url']
 misperrors = {'error': 'Error'}
-misp_type_in = ['domain', 'email', 'filename', 'md5', 'sha1', 'sha256',  'ip', 'mutex', 'url', 'vulnerability', 'btc',
+misp_type_in = ['domain', 'email', 'filename', 'md5', 'sha1', 'sha256',  'ip', 'url', 'vulnerability', 'btc',
                 'xmr', 'ja3-fingerprint-md5']
 mapping_out = {  # mapping between the MISP attributes type and the compatible Cluster25 indicator types.
     'domain': {'type': 'domain', 'to_ids': True},
@@ -20,7 +21,6 @@ mapping_out = {  # mapping between the MISP attributes type and the compatible C
     'sha256': {'type': 'sha256', 'to_ids': True},
     'ipv4': {'type': 'ip', 'to_ids': True},
     'ipv6': {'type': 'ip', 'to_ids': True},
-    'mutex': {'type': 'mutex', 'to_ids': True},
     'url': {'type': 'url', 'to_ids': True},
     'cve': {'type': 'vulnerability', 'to_ids': True},
     'btcaddress': {'type': 'btc', 'to_ids': True},
@@ -119,7 +119,7 @@ class Cluster25CTI:
             )
         return r.json()["data"]["token"]
 
-    def search_indicators(self, indicator_type):
+    def search_indicators(self, indicator_type) -> List[dict]:
         headers = {"Authorization": f"Bearer {self.current_token}"}
         params = {'type': indicator_type, 'include_info': True}
         r = requests.get(url=f"{self.base_url}/indicators", params=params, headers=headers)

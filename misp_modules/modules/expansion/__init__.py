@@ -4,7 +4,7 @@ import sys
 sys.path.append('{}/lib'.format('/'.join((os.path.realpath(__file__)).split('/')[:-3])))
 
 __all__ = ['cuckoo_submit', 'vmray_submit', 'bgpranking', 'circl_passivedns', 'circl_passivessl',
-           'cluster25', 'countrycode', 'cve', 'cve_advanced', 'cpe', 'dns', 'btc_steroids', 'domaintools',
+           'cluster25_expand', 'countrycode', 'cve', 'cve_advanced', 'cpe', 'dns', 'btc_steroids', 'domaintools',
            'eupi', 'eql', 'farsight_passivedns', 'ipasn', 'passivetotal', 'sourcecache', 'virustotal',
            'whois', 'shodan', 'reversedns', 'geoip_asn', 'geoip_city', 'geoip_country', 'wiki', 'iprep',
            'threatminer', 'otx', 'threatcrowd', 'vulndb', 'crowdstrike_falcon',
