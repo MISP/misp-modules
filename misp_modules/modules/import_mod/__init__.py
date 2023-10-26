@@ -16,6 +16,5 @@ __all__ = [
     'cof2misp',
     'joe_import',
     'taxii21',
-    'url_import',
-    'cluster25_import'
+    'url_import'
 ]
