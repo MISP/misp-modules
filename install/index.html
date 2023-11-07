@@ -563,88 +563,88 @@
 <h2 id="how-to-install-and-start-misp-modules-in-a-python-virtualenv">How to install and start MISP modules (in a Python virtualenv)?<a class="headerlink" href="#how-to-install-and-start-misp-modules-in-a-python-virtualenv" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><span class="nv">SUDO_WWW</span><span class="o">=</span><span class="s2">&quot;sudo -u www-data&quot;</span>
 
-sudo apt-get install -y <span class="se">\</span>
-  git <span class="se">\</span>
-  libpq5 <span class="se">\</span>
-  libjpeg-dev <span class="se">\</span>
-  tesseract-ocr <span class="se">\</span>
-  libpoppler-cpp-dev <span class="se">\</span>
-  imagemagick virtualenv <span class="se">\</span>
-  libopencv-dev <span class="se">\</span>
-  zbar-tools <span class="se">\</span>
-  libzbar0 <span class="se">\</span>
-  libzbar-dev <span class="se">\</span>
-  libfuzzy-dev <span class="se">\</span>
-  libcaca-dev
+sudo<span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>git<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>libpq5<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>libjpeg-dev<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>tesseract-ocr<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>libpoppler-cpp-dev<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>imagemagick<span class="w"> </span>virtualenv<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>libopencv-dev<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>zbar-tools<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>libzbar0<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>libzbar-dev<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>libfuzzy-dev<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>libcaca-dev
 
 <span class="c1"># BEGIN with virtualenv:   </span>
-<span class="nv">$SUDO_WWW</span> virtualenv -p python3 /var/www/MISP/venv
+<span class="nv">$SUDO_WWW</span><span class="w"> </span>virtualenv<span class="w"> </span>-p<span class="w"> </span>python3<span class="w"> </span>/var/www/MISP/venv
 <span class="c1"># END with virtualenv</span>
 
-<span class="nb">cd</span> /usr/local/src/
+<span class="nb">cd</span><span class="w"> </span>/usr/local/src/
 <span class="c1"># Ideally you add your user to the staff group and make /usr/local/src group writeable, below follows an example with user misp</span>
-sudo adduser misp staff
-sudo chmod <span class="m">2775</span> /usr/local/src
-sudo chown root:staff /usr/local/src
-git clone https://github.com/MISP/misp-modules.git
-git clone git://github.com/stricaud/faup.git faup
-git clone git://github.com/stricaud/gtcaca.git gtcaca
+sudo<span class="w"> </span>adduser<span class="w"> </span>misp<span class="w"> </span>staff
+sudo<span class="w"> </span>chmod<span class="w"> </span><span class="m">2775</span><span class="w"> </span>/usr/local/src
+sudo<span class="w"> </span>chown<span class="w"> </span>root:staff<span class="w"> </span>/usr/local/src
+git<span class="w"> </span>clone<span class="w"> </span>https://github.com/MISP/misp-modules.git
+git<span class="w"> </span>clone<span class="w"> </span>git://github.com/stricaud/faup.git<span class="w"> </span>faup
+git<span class="w"> </span>clone<span class="w"> </span>git://github.com/stricaud/gtcaca.git<span class="w"> </span>gtcaca
 
 <span class="c1"># Install gtcaca/faup</span>
-<span class="nb">cd</span> gtcaca
-mkdir -p build
-<span class="nb">cd</span> build
-cmake .. <span class="o">&amp;&amp;</span> make
-sudo make install
-<span class="nb">cd</span> ../../faup
-mkdir -p build
-<span class="nb">cd</span> build
-cmake .. <span class="o">&amp;&amp;</span> make
-sudo make install
-sudo ldconfig
+<span class="nb">cd</span><span class="w"> </span>gtcaca
+mkdir<span class="w"> </span>-p<span class="w"> </span>build
+<span class="nb">cd</span><span class="w"> </span>build
+cmake<span class="w"> </span>..<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>make
+sudo<span class="w"> </span>make<span class="w"> </span>install
+<span class="nb">cd</span><span class="w"> </span>../../faup
+mkdir<span class="w"> </span>-p<span class="w"> </span>build
+<span class="nb">cd</span><span class="w"> </span>build
+cmake<span class="w"> </span>..<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>make
+sudo<span class="w"> </span>make<span class="w"> </span>install
+sudo<span class="w"> </span>ldconfig
 
-<span class="nb">cd</span> ../../misp-modules
+<span class="nb">cd</span><span class="w"> </span>../../misp-modules
 
 <span class="c1"># BEGIN with virtualenv: </span>
-<span class="nv">$SUDO_WWW</span>  /var/www/MISP/venv/bin/pip install -I -r REQUIREMENTS
-<span class="nv">$SUDO_WWW</span>  /var/www/MISP/venv/bin/pip install .
+<span class="nv">$SUDO_WWW</span><span class="w">  </span>/var/www/MISP/venv/bin/pip<span class="w"> </span>install<span class="w"> </span>-I<span class="w"> </span>-r<span class="w"> </span>REQUIREMENTS
+<span class="nv">$SUDO_WWW</span><span class="w">  </span>/var/www/MISP/venv/bin/pip<span class="w"> </span>install<span class="w"> </span>.
 <span class="c1"># END with virtualenv</span>
 
 <span class="c1"># BEGIN without virtualenv: </span>
-sudo pip install -I -r REQUIREMENTS
-sudo pip install .
+sudo<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>-I<span class="w"> </span>-r<span class="w"> </span>REQUIREMENTS
+sudo<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>.
 <span class="c1"># END without virtualenv</span>
 
 <span class="c1"># Start misp-modules as a service</span>
-sudo cp etc/systemd/system/misp-modules.service /etc/systemd/system/
-sudo systemctl daemon-reload
-sudo systemctl <span class="nb">enable</span> --now misp-modules
-/var/www/MISP/venv/bin/misp-modules -l <span class="m">127</span>.0.0.1 -s <span class="p">&amp;</span> <span class="c1">#to start the modules</span>
+sudo<span class="w"> </span>cp<span class="w"> </span>etc/systemd/system/misp-modules.service<span class="w"> </span>/etc/systemd/system/
+sudo<span class="w"> </span>systemctl<span class="w"> </span>daemon-reload
+sudo<span class="w"> </span>systemctl<span class="w"> </span><span class="nb">enable</span><span class="w"> </span>--now<span class="w"> </span>misp-modules
+/var/www/MISP/venv/bin/misp-modules<span class="w"> </span>-l<span class="w"> </span><span class="m">127</span>.0.0.1<span class="w"> </span>-s<span class="w"> </span><span class="p">&amp;</span><span class="w"> </span><span class="c1">#to start the modules</span>
 </code></pre></div>
 <h2 id="how-to-install-and-start-misp-modules-on-rhel-based-distributions">How to install and start MISP modules on RHEL-based distributions ?<a class="headerlink" href="#how-to-install-and-start-misp-modules-on-rhel-based-distributions" title="Permanent link">&para;</a></h2>
 <p>As of this writing, the official RHEL repositories only contain Ruby 2.0.0 and Ruby 2.1 or higher is required. As such, this guide installs Ruby 2.2 from the SCL repository.</p>
 <div class="highlight"><pre><span></span><code><span class="nv">SUDO_WWW</span><span class="o">=</span><span class="s2">&quot;sudo -u apache&quot;</span>
-sudo yum install <span class="se">\</span>
-  rh-ruby22 <span class="se">\</span>
-  openjpeg-devel <span class="se">\</span>
-  rubygem-rouge <span class="se">\</span>
-  rubygem-asciidoctor <span class="se">\</span>
-  zbar-devel <span class="se">\</span>
-  opencv-devel <span class="se">\</span>
-  gcc-c++ <span class="se">\</span>
-  pkgconfig <span class="se">\</span>
-  poppler-cpp-devel <span class="se">\</span>
-  python-devel <span class="se">\</span>
-  redhat-rpm-config
-<span class="nb">cd</span> /usr/local/src/
-sudo git clone https://github.com/MISP/misp-modules.git
-<span class="nb">cd</span> misp-modules
-<span class="nv">$SUDO_WWW</span> /usr/bin/scl <span class="nb">enable</span> rh-python36 <span class="s2">&quot;virtualenv -p python3 /var/www/MISP/venv&quot;</span>
-<span class="nv">$SUDO_WWW</span> /var/www/MISP/venv/bin/pip install -U -I -r REQUIREMENTS
-<span class="nv">$SUDO_WWW</span> /var/www/MISP/venv/bin/pip install -U .
+sudo<span class="w"> </span>yum<span class="w"> </span>install<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>rh-ruby22<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>openjpeg-devel<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>rubygem-rouge<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>rubygem-asciidoctor<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>zbar-devel<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>opencv-devel<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>gcc-c++<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>pkgconfig<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>poppler-cpp-devel<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>python-devel<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>redhat-rpm-config
+<span class="nb">cd</span><span class="w"> </span>/usr/local/src/
+sudo<span class="w"> </span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/MISP/misp-modules.git
+<span class="nb">cd</span><span class="w"> </span>misp-modules
+<span class="nv">$SUDO_WWW</span><span class="w"> </span>/usr/bin/scl<span class="w"> </span><span class="nb">enable</span><span class="w"> </span>rh-python36<span class="w"> </span><span class="s2">&quot;virtualenv -p python3 /var/www/MISP/venv&quot;</span>
+<span class="nv">$SUDO_WWW</span><span class="w"> </span>/var/www/MISP/venv/bin/pip<span class="w"> </span>install<span class="w"> </span>-U<span class="w"> </span>-I<span class="w"> </span>-r<span class="w"> </span>REQUIREMENTS
+<span class="nv">$SUDO_WWW</span><span class="w"> </span>/var/www/MISP/venv/bin/pip<span class="w"> </span>install<span class="w"> </span>-U<span class="w"> </span>.
 </code></pre></div>
 <p>Create the service file /etc/systemd/system/misp-modules.service :</p>
-<div class="highlight"><pre><span></span><code><span class="nb">echo</span> <span class="s2">&quot;[Unit]</span>
+<div class="highlight"><pre><span></span><code><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;[Unit]</span>
 <span class="s2">Description=MISP&#39;s modules</span>
 <span class="s2">After=misp-workers.service</span>
 
@@ -657,30 +657,30 @@ sudo git clone https://github.com/MISP/misp-modules.git
 <span class="s2">RestartSec=10</span>
 
 <span class="s2">[Install]</span>
-<span class="s2">WantedBy=multi-user.target&quot;</span> <span class="p">|</span> sudo tee /etc/systemd/system/misp-modules.service
+<span class="s2">WantedBy=multi-user.target&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>tee<span class="w"> </span>/etc/systemd/system/misp-modules.service
 </code></pre></div>
 <p>The After=misp-workers.service must be changed or removed if you have not created a misp-workers service. Then, enable the misp-modules service and start it:</p>
-<div class="highlight"><pre><span></span><code>systemctl daemon-reload
-systemctl <span class="nb">enable</span> --now misp-modules
+<div class="highlight"><pre><span></span><code>systemctl<span class="w"> </span>daemon-reload
+systemctl<span class="w"> </span><span class="nb">enable</span><span class="w"> </span>--now<span class="w"> </span>misp-modules
 </code></pre></div>
 <h2 id="how-to-use-an-misp-modules-docker-container">How to use an MISP modules Docker container<a class="headerlink" href="#how-to-use-an-misp-modules-docker-container" title="Permanent link">&para;</a></h2>
 <h3 id="docker-build">Docker build<a class="headerlink" href="#docker-build" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code>docker build -t misp-modules <span class="se">\</span>
-    --build-arg <span class="nv">BUILD_DATE</span><span class="o">=</span><span class="k">$(</span>date -u +<span class="s2">&quot;%Y-%m-%d&quot;</span><span class="k">)</span> <span class="se">\</span>
-  docker/
+<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span>misp-modules<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--build-arg<span class="w"> </span><span class="nv">BUILD_DATE</span><span class="o">=</span><span class="k">$(</span>date<span class="w"> </span>-u<span class="w"> </span>+<span class="s2">&quot;%Y-%m-%d&quot;</span><span class="k">)</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>docker/
 </code></pre></div>
 <h3 id="docker-run">Docker run<a class="headerlink" href="#docker-run" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><span class="c1"># Start Redis</span>
-docker run --rm -d --name<span class="o">=</span>misp-redis redis:alpine
+docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>-d<span class="w"> </span>--name<span class="o">=</span>misp-redis<span class="w"> </span>redis:alpine
 <span class="c1"># Start MISP-modules</span>
-docker run <span class="se">\</span>
-    --rm -d --name<span class="o">=</span>misp-modules <span class="se">\</span>
-    -e <span class="nv">REDIS_BACKEND</span><span class="o">=</span>misp-redis <span class="se">\</span>
-    -e <span class="nv">REDIS_PORT</span><span class="o">=</span><span class="s2">&quot;6379&quot;</span> <span class="se">\</span>
-    -e <span class="nv">REDIS_PW</span><span class="o">=</span><span class="s2">&quot;&quot;</span> <span class="se">\</span>
-    -e <span class="nv">REDIS_DATABASE</span><span class="o">=</span><span class="s2">&quot;245&quot;</span> <span class="se">\</span>
-    -e <span class="nv">MISP_MODULES_DEBUG</span><span class="o">=</span><span class="s2">&quot;false&quot;</span> <span class="se">\</span>
-    dcso/misp-dockerized-misp-modules
+docker<span class="w"> </span>run<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--rm<span class="w"> </span>-d<span class="w"> </span>--name<span class="o">=</span>misp-modules<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-e<span class="w"> </span><span class="nv">REDIS_BACKEND</span><span class="o">=</span>misp-redis<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-e<span class="w"> </span><span class="nv">REDIS_PORT</span><span class="o">=</span><span class="s2">&quot;6379&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-e<span class="w"> </span><span class="nv">REDIS_PW</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-e<span class="w"> </span><span class="nv">REDIS_DATABASE</span><span class="o">=</span><span class="s2">&quot;245&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-e<span class="w"> </span><span class="nv">MISP_MODULES_DEBUG</span><span class="o">=</span><span class="s2">&quot;false&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>dcso/misp-dockerized-misp-modules
 </code></pre></div>
 <h3 id="docker-compose">Docker-compose<a class="headerlink" href="#docker-compose" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code>services:

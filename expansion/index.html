@@ -364,6 +364,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#cluster25_expand" class="md-nav__link">
+    cluster25_expand
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#countrycode" class="md-nav__link">
     countrycode
   </a>
@@ -779,6 +786,13 @@
         <li class="md-nav__item">
   <a href="#sigma_syntax_validator" class="md-nav__link">
     sigma_syntax_validator
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sigmf-expand" class="md-nav__link">
+    sigmf-expand
   </a>
   
 </li>
@@ -1174,6 +1188,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#cluster25_expand" class="md-nav__link">
+    cluster25_expand
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#countrycode" class="md-nav__link">
     countrycode
   </a>
@@ -1594,6 +1615,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#sigmf-expand" class="md-nav__link">
+    sigmf-expand
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#socialscan" class="md-nav__link">
     socialscan
   </a>
@@ -1958,6 +1986,41 @@ x509 certificate objects seen by the IP address(es).
 - <strong>requirements</strong>:
 - pypssl: Passive SSL python library
 - A CIRCL passive SSL account with username &amp; password</p>
+</blockquote>
+<hr />
+<h4 id="cluster25_expand"><a href="https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/cluster25_expand.py">cluster25_expand</a><a class="headerlink" href="#cluster25_expand" title="Permanent link">&para;</a></h4>
+<p><img src=../logos/cluster25.png height=60></p>
+<p>Module to query Cluster25 CTI.
+- <strong>features</strong>:</p>
+<blockquote>
+<p>This module takes a MISP attribute value as input to query the Cluster25CTI API. The result is then mapped into compatible MISP Objects and relative attributes.</p>
+<ul>
+<li><strong>input</strong>:
+An Indicator value of type included in the following list:</li>
+<li>domain</li>
+<li>email-src</li>
+<li>email-dst</li>
+<li>filename</li>
+<li>md5</li>
+<li>sha1</li>
+<li>sha256</li>
+<li>ip-src</li>
+<li>ip-dst</li>
+<li>url</li>
+<li>vulnerability</li>
+<li>btc</li>
+<li>xmr
+ja3-fingerprint-md5</li>
+<li><strong>output</strong>:
+A series of c25 MISP Objects with colletion of attributes mapped from Cluster25 CTI query result.</li>
+<li>
+<p><strong>references</strong>:</p>
+</li>
+<li>
+<p><strong>requirements</strong>:
+A Cluster25 API access (API id &amp; key)</p>
+</li>
+</ul>
 </blockquote>
 <hr />
 <h4 id="countrycode"><a href="https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/countrycode.py">countrycode</a><a class="headerlink" href="#countrycode" title="Permanent link">&para;</a></h4>
@@ -3097,6 +3160,23 @@ Text describing the validity of the Sigma rule.
 - <strong>requirements</strong>:
 - Sigma python library
 - Yaml python library</p>
+</blockquote>
+<hr />
+<h4 id="sigmf-expand"><a href="https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/sigmf-expand.py">sigmf-expand</a><a class="headerlink" href="#sigmf-expand" title="Permanent link">&para;</a></h4>
+<p>Enrichs a SigMF Recording or extracts a SigMF Archive into a SigMF Recording.
+- <strong>features</strong>:</p>
+<blockquote>
+<p>This module can be used to expand a SigMF Recording object into a SigMF Expanded Recording object with a waterfall plot or to extract a SigMF Archive object into a SigMF Recording objet.
+- <strong>input</strong>:
+Object of sigmf-archive or sigmf-recording template.
+- <strong>output</strong>:
+Object of sigmf-expanded-recording or sigmf-recording template.
+- <strong>references</strong>:
+<a href="https://github.com/sigmf/SigMF">https://github.com/sigmf/SigMF</a>
+- <strong>requirements</strong>:
+- matplotlib: For plotting the waterfall plot of the recording.
+- numpy: For the waterfall plot of the recording.
+- sigmf: For validating SigMF files.</p>
 </blockquote>
 <hr />
 <h4 id="socialscan"><a href="https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/socialscan.py">socialscan</a><a class="headerlink" href="#socialscan" title="Permanent link">&para;</a></h4>

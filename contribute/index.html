@@ -833,47 +833,47 @@
 </code></pre></div>
 <p>The MISP module service returns the available modules in a JSON array containing each module name along with their supported input attributes.</p>
 <p>Based on this information, a query can be built in a JSON format and saved as body.json:</p>
-<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;hostname&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;www.foo.be&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;module&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;dns&quot;</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;hostname&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;www.foo.be&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;module&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;dns&quot;</span>
+<span class="p">}</span>
 </code></pre></div>
 <p>Then you can POST this JSON format query towards the MISP object server:</p>
-<div class="highlight"><pre><span></span><code>curl -s http://127.0.0.1:6666/query -H <span class="s2">&quot;Content-Type: application/json&quot;</span> --data @body.json -X POST
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-s<span class="w"> </span>http://127.0.0.1:6666/query<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Content-Type: application/json&quot;</span><span class="w"> </span>--data<span class="w"> </span>@body.json<span class="w"> </span>-X<span class="w"> </span>POST
 </code></pre></div>
 <p>The module should output the following JSON:</p>
-<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;results&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">    </span><span class="p">{</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;types&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">        </span><span class="s2">&quot;ip-src&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="s2">&quot;ip-dst&quot;</span><span class="w"></span>
-<span class="w">      </span><span class="p">],</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;values&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">        </span><span class="s2">&quot;188.65.217.78&quot;</span><span class="w"></span>
-<span class="w">      </span><span class="p">]</span><span class="w"></span>
-<span class="w">    </span><span class="p">}</span><span class="w"></span>
-<span class="w">  </span><span class="p">]</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;results&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;types&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="s2">&quot;ip-src&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;ip-dst&quot;</span>
+<span class="w">      </span><span class="p">],</span>
+<span class="w">      </span><span class="nt">&quot;values&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="s2">&quot;188.65.217.78&quot;</span>
+<span class="w">      </span><span class="p">]</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">]</span>
+<span class="p">}</span>
 </code></pre></div>
 <p>It is also possible to restrict the category options of the resolved attributes by passing a list of categories along (optional):</p>
-<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;results&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">    </span><span class="p">{</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;types&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">        </span><span class="s2">&quot;ip-src&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="s2">&quot;ip-dst&quot;</span><span class="w"></span>
-<span class="w">      </span><span class="p">],</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;values&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">        </span><span class="s2">&quot;188.65.217.78&quot;</span><span class="w"></span>
-<span class="w">      </span><span class="p">],</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;categories&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">        </span><span class="s2">&quot;Network activity&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="s2">&quot;Payload delivery&quot;</span><span class="w"></span>
-<span class="w">      </span><span class="p">]</span><span class="w"></span>
-<span class="w">    </span><span class="p">}</span><span class="w"></span>
-<span class="w">  </span><span class="p">]</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;results&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;types&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="s2">&quot;ip-src&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;ip-dst&quot;</span>
+<span class="w">      </span><span class="p">],</span>
+<span class="w">      </span><span class="nt">&quot;values&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="s2">&quot;188.65.217.78&quot;</span>
+<span class="w">      </span><span class="p">],</span>
+<span class="w">      </span><span class="nt">&quot;categories&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="s2">&quot;Network activity&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;Payload delivery&quot;</span>
+<span class="w">      </span><span class="p">]</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">]</span>
+<span class="p">}</span>
 </code></pre></div>
 <p>For both the type and the category lists, the first item in the list will be the default setting on the interface.</p>
 <h3 id="enable-your-module-in-the-web-interface">Enable your module in the web interface<a class="headerlink" href="#enable-your-module-in-the-web-interface" title="Permanent link">&para;</a></h3>
@@ -917,12 +917,12 @@ Recommended     Plugin.Import_ocr_enabled       true   Enable or disable the ocr
 <li>SSH into the machine (Login info on training page)</li>
 <li>Go into the misp-modules directory</li>
 </ul>
-<div class="highlight"><pre><span></span><code><span class="nb">cd</span> /usr/local/src/misp-modules
+<div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>/usr/local/src/misp-modules
 </code></pre></div>
 <p>Set the git repo to your fork and checkout your development branch. If you SSH'ed in as the misp user you will have to use sudo.</p>
-<div class="highlight"><pre><span></span><code>sudo git remote set-url origin https://github.com/YourRepo/misp-modules.git
-sudo git pull
-sudo git checkout MyModBranch
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>git<span class="w"> </span>remote<span class="w"> </span>set-url<span class="w"> </span>origin<span class="w"> </span>https://github.com/YourRepo/misp-modules.git
+sudo<span class="w"> </span>git<span class="w"> </span>pull
+sudo<span class="w"> </span>git<span class="w"> </span>checkout<span class="w"> </span>MyModBranch
 </code></pre></div>
 <p>Remove the contents of the build directory and re-install misp-modules.</p>
 <div class="highlight"><pre><span></span><code><span class="n">sudo</span> <span class="n">rm</span> <span class="o">-</span><span class="n">fr</span> <span class="n">build</span><span class="o">/*</span>
@@ -933,9 +933,9 @@ sudo git checkout MyModBranch
 <span class="n">misp</span><span class="o">-</span><span class="n">modules</span> <span class="o">-</span><span class="n">d</span>
 </code></pre></div>
 <p>In your original terminal you can now run your tests manually and see any errors that arrive</p>
-<div class="highlight"><pre><span></span><code><span class="nb">cd</span> tests/
-curl -s http://127.0.0.1:6666/query -H <span class="s2">&quot;Content-Type: application/json&quot;</span> --data @MY_TEST_FILE.json -X POST
-<span class="nb">cd</span> ../
+<div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>tests/
+curl<span class="w"> </span>-s<span class="w"> </span>http://127.0.0.1:6666/query<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Content-Type: application/json&quot;</span><span class="w"> </span>--data<span class="w"> </span>@MY_TEST_FILE.json<span class="w"> </span>-X<span class="w"> </span>POST
+<span class="nb">cd</span><span class="w"> </span>../
 </code></pre></div>
 
 
