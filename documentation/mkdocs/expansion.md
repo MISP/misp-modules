@@ -793,6 +793,27 @@ Module to query an IP ASN history service (https://github.com/D4-project/IPASN-H
 
 -----
 
+#### [ipgeolocation](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/ipgeolocation.py)
+
+<img src=../logos/ipgeolocation.png height=60>
+
+An expansion module to query IpGeolocation.io to gather more information on a given IP address. We provide data such as country name, country code, city, state, local currency, time zone, ISP, ASN, Company Details, device data from User Agent String, VPN, Proxy, Tor and threat intelligence data served globally with latency based routing.
+- **features**:
+>The module takes an IP address attribute as input and queries the IpGeolocation API.  
+>The geolocation information on the IP address is always returned.
+>
+>Depending on the subscription plan, the API returns different pieces of information for details check our [page](https://ipgeolocation.io/ip-location-api.html).
+- **input**:
+>IP address
+- **output**:
+>Additional information on the IP address, like its geolocation, the autonomous system it is included in.
+- **references**:
+>https://ipgeolocation.io/
+- **requirements**:
+>An apiKey of ipGeolocation
+
+-----
+
 #### [ipinfo](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/ipinfo.py)
 
 <img src=../logos/ipinfo.png height=60>
