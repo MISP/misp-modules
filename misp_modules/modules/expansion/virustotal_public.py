@@ -75,7 +75,7 @@ class VirusTotalParser:
         elif report.type == 'domain':
             misp_object = MISPObject('domain-ip')
             misp_object.add_attribute('domain', type='domain', value=report.id)
-        elif report.type == 'ip_address':
+        elif report.type == 'ip-address':
             misp_object = MISPObject('domain-ip')
             misp_object.add_attribute('ip', type='ip-dst', value=report.id)
         elif report.type == 'url':
@@ -112,7 +112,7 @@ class VirusTotalParser:
         # RESOLUTIONS
         resolutions_iterator = self.client.iterator(f'/domains/{domain_report.id}/resolutions', limit=self.limit)
         for resolution in resolutions_iterator:
-            domain_object.add_attribute('ip', type='ip-dst', value=resolution.ip_address)
+            domain_object.add_attribute('ip', type='ip-dst', value=resolution.ip-address)
 
         # COMMUNICATING AND REFERRER FILES
         for relationship_name, misp_name in [
@@ -148,7 +148,7 @@ class VirusTotalParser:
         return file_object.uuid
 
     def parse_ip(self, ip: str) -> str:
-        ip_report = self.client.get_object(f'/ip_addresses/{ip}')
+        ip_report = self.client.get_object(f'/ip-addresses/{ip}')
 
         # IP
         ip_object = self.create_misp_object(ip_report)
@@ -161,7 +161,7 @@ class VirusTotalParser:
         self.misp_event.add_object(**asn_object)
 
         # RESOLUTIONS
-        resolutions_iterator = self.client.iterator(f'/ip_addresses/{ip_report.id}/resolutions', limit=self.limit)
+        resolutions_iterator = self.client.iterator(f'/ip-addresses/{ip_report.id}/resolutions', limit=self.limit)
         for resolution in resolutions_iterator:
             ip_object.add_attribute('domain', type='domain', value=resolution.host_name)
 
