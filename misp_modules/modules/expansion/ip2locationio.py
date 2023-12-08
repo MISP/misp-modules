@@ -16,9 +16,9 @@ moduleinfo = {
 moduleconfig = ['key']
 
 _GEOLOCATION_OBJECT_MAPPING = {
-    'country_code': 'country code',
-    'country_name': 'country name',
-    'region_name': 'region name',
+    'country_code': 'countrycode',
+    'country_name': 'country',
+    'region_name': 'region',
     'city_name': 'city',
     'zip_code': 'zipcode',
     'latitude': 'latitude',
@@ -43,7 +43,7 @@ def handler(q=False):
 
     # Query ip2location.io
     query = requests.get(
-        f"https://api.ip2location.io/json?key={request['config']['key']&ip={attribute['value']}"
+        f"https://api.ip2location.io/json?key={request['config']['key']}&ip={attribute['value']}"
     )
     if query.status_code != 200:
         return {'error': f'Error while querying ip2location.io - {query.status_code}: {query.reason}'}
@@ -66,18 +66,6 @@ def handler(q=False):
         geolocation.add_attribute(relation, iplio_result[field])
     geolocation.add_reference(input_attribute.uuid, 'locates')
     misp_event.add_object(geolocation)
-    
-    # Parse proxy information
-    proxy = MISPObject('proxy')
-    proxy.add_reference(input_attribute.uuid, 'related-to')
-    if iplio_result.get('proxy') is not None:
-        proxy_info = iplio_result['proxy']
-        proxy.add_attribute('proxy_type', proxy_info['proxy_type'])
-        proxy.add_attribute('threat', proxy_info['threat'])
-        proxy.add_attribute('provider', proxy_info['provider'])
-        proxy.add_attribute('last_seen', proxy_info['last_seen'])
-        misp_event.add_object(proxy)
-    
 
     # Return the results in MISP format
     event = json.loads(misp_event.to_json())
