@@ -497,14 +497,6 @@ class JoeParser():
                 self.misp_event.add_attribute(**attribute)
                 reference = dict(referenced_uuid=attribute.uuid, relationship_type='contacts')
                 self.add_process_reference(ip['@targetid'], ip['@currentpath'], reference)
-        ip2locationio = self.data['ip2locationio']
-        if ip2locationio:
-            for ip in ip2locationio['ip']:
-                attribute = MISPAttribute()
-                attribute.from_dict(**{'type': 'ip-dst', 'value': ip['@ip'], 'to_ids': False})
-                self.misp_event.add_attribute(**attribute)
-                reference = dict(referenced_uuid=attribute.uuid, relationship_type='contacts')
-                self.add_process_reference(ip['@targetid'], ip['@currentpath'], reference)
         urlinfo = self.data['urlinfo']
         if urlinfo:
             for url in urlinfo['url']:
