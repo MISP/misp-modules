@@ -49,6 +49,7 @@ For more information: [Extending MISP with Python modules](https://www.misp-proj
 * [html_to_markdown](misp_modules/modules/expansion/html_to_markdown.py) - Simple HTML to markdown converter
 * [HYAS Insight](misp_modules/modules/expansion/hyasinsight.py) - a hover and expansion module to get information from [HYAS Insight](https://www.hyas.com/hyas-insight).
 * [intel471](misp_modules/modules/expansion/intel471.py) - an expansion module to get info from [Intel471](https://intel471.com).
+* [IP2Location.io](misp_modules/modules/expansion/ip2locationio.py) - an expansion module to get additional information on an IP address using the IP2Location.io API
 * [IPASN](misp_modules/modules/expansion/ipasn.py) - a hover and expansion to get the BGP ASN of an IP address.
 * [ipinfo.io](misp_modules/modules/expansion/ipinfo.py) - an expansion module to get additional information on an IP address using the ipinfo.io API
 * [iprep](misp_modules/modules/expansion/iprep.py) - an expansion module to get IP reputation from packetmail.net.

@@ -42,6 +42,7 @@ For more information: [Extending MISP with Python modules](https://www.circl.lu/
 * [hashdd](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/hashdd.py) - a hover module to check file hashes against [hashdd.com](http://www.hashdd.com) including NSLR dataset.
 * [hibp](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/hibp.py) - a hover module to lookup against Have I Been Pwned?
 * [intel471](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/intel471.py) - an expansion module to get info from [Intel471](https://intel471.com).
+* [IP2Location.io](misp_modules/modules/expansion/ip2locationio.py) - an expansion module to get additional information on an IP address using the IP2Location.io API
 * [IPASN](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/ipasn.py) - a hover and expansion to get the BGP ASN of an IP address.
 * [iprep](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/iprep.py) - an expansion module to get IP reputation from packetmail.net.
 * [Joe Sandbox submit](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/joesandbox_submit.py) - Submit files and URLs to Joe Sandbox.
