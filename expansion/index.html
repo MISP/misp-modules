@@ -560,6 +560,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#ip2locationio" class="md-nav__link">
+    ip2locationio
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#ipasn" class="md-nav__link">
     ipasn
   </a>
@@ -1379,6 +1386,13 @@
         <li class="md-nav__item">
   <a href="#intelmq_eventdb" class="md-nav__link">
     intelmq_eventdb
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ip2locationio" class="md-nav__link">
+    ip2locationio
   </a>
   
 </li>
@@ -2533,6 +2547,25 @@ Text giving information about the input using IntelMQ database.
 - <strong>requirements</strong>:
 - psycopg2: Python library to support PostgreSQL
 - An access to the IntelMQ database (username, password, hostname and database reference)</p>
+</blockquote>
+<hr />
+<h4 id="ip2locationio"><a href="https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/ip2locationio.py">ip2locationio</a><a class="headerlink" href="#ip2locationio" title="Permanent link">&para;</a></h4>
+<p><img src=../logos/ip2locationio.png height=60></p>
+<p>An expansion module to query IP2Location.io to gather more information on a given IP address.
+- <strong>features</strong>:</p>
+<blockquote>
+<p>The module takes an IP address attribute as input and queries the IP2Location.io API.<br />
+Free plan user will get the basic geolocation informaiton, and different subsription plan will get more information on the IP address. 
+Refer to <a href="https://www.ip2location.io/pricing">pricing page</a> for more information on data available for each plan. </p>
+<p>More information on the responses content is available in the <a href="https://www.ip2location.io/ip2location-documentation">documentation</a>.
+- <strong>input</strong>:
+IP address attribute.
+- <strong>output</strong>:
+Additional information on the IP address, such as geolocation, proxy and so on. Refer to the Response Format section in <a href="https://www.ip2location.io/ip2location-documentation">https://www.ip2location.io/ip2location-documentation</a> to find out the full format of the data returned.
+- <strong>references</strong>:
+<a href="https://www.ip2location.io/ip2location-documentation">https://www.ip2location.io/ip2location-documentation</a>
+- <strong>requirements</strong>:
+An IP2Location.io token</p>
 </blockquote>
 <hr />
 <h4 id="ipasn"><a href="https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/ipasn.py">ipasn</a><a class="headerlink" href="#ipasn" title="Permanent link">&para;</a></h4>
