@@ -28,15 +28,23 @@ extra:
      - icon: fontawesome/brands/github-alt
        link: https://github.com/MISP
 
+plugins:
+  - tags
+
 
 theme:
   name: material
   palette:
-    primary: 'white'
-    accent: 'blue'
+      scheme: default
+
   language: en
   favicon: img/favicon.ico
   logo: img/misp.png
+  feature:
+      - navigation.tabs
+      - navigation.tracking
+      - search.highlight
+      - search.share
 
 # Extensions
 markdown_extensions:
