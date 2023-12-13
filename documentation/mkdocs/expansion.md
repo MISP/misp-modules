@@ -55,7 +55,7 @@ A module tu query the AssemblyLine API with a submission ID to get the submissio
 - **output**:
 >MISP attributes & objects parsed from the AssemblyLine submission.
 - **references**:
->https://www.cyber.cg.ca/en/assemblyline
+>https://www.cyber.gc.ca/en/assemblyline
 - **requirements**:
 >assemblyline_client: Python library to query the AssemblyLine rest API.
 
@@ -201,6 +201,39 @@ Modules to access CIRCL Passive SSL.
 - **requirements**:
 > - pypssl: Passive SSL python library
 > - A CIRCL passive SSL account with username & password
+
+-----
+
+#### [cluster25_expand](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/cluster25_expand.py)
+
+<img src=../logos/cluster25.png height=60>
+
+Module to query Cluster25 CTI.
+- **features**:
+>This module takes a MISP attribute value as input to query the Cluster25CTI API. The result is then mapped into compatible MISP Objects and relative attributes.
+>
+- **input**:
+>An Indicator value of type included in the following list:
+>- domain
+>- email-src
+>- email-dst
+>- filename
+>- md5
+>- sha1
+>- sha256
+>- ip-src
+>- ip-dst
+>- url
+>- vulnerability
+>- btc
+>- xmr
+> ja3-fingerprint-md5
+- **output**:
+>A series of c25 MISP Objects with colletion of attributes mapped from Cluster25 CTI query result.
+- **references**:
+>
+- **requirements**:
+>A Cluster25 API access (API id & key)
 
 -----
 
@@ -774,6 +807,28 @@ Module to access intelmqs eventdb.
 - **requirements**:
 > - psycopg2: Python library to support PostgreSQL
 > - An access to the IntelMQ database (username, password, hostname and database reference)
+
+-----
+
+#### [ip2locationio](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/ip2locationio.py)
+
+<img src=../logos/ip2locationio.png height=60>
+
+An expansion module to query IP2Location.io to gather more information on a given IP address.
+- **features**:
+>The module takes an IP address attribute as input and queries the IP2Location.io API.  
+>Free plan user will get the basic geolocation informaiton, and different subsription plan will get more information on the IP address. 
+> Refer to [pricing page](https://www.ip2location.io/pricing) for more information on data available for each plan. 
+>
+>More information on the responses content is available in the [documentation](https://www.ip2location.io/ip2location-documentation).
+- **input**:
+>IP address attribute.
+- **output**:
+>Additional information on the IP address, such as geolocation, proxy and so on. Refer to the Response Format section in https://www.ip2location.io/ip2location-documentation to find out the full format of the data returned.
+- **references**:
+>https://www.ip2location.io/ip2location-documentation
+- **requirements**:
+>An IP2Location.io token
 
 -----
 
@@ -1453,6 +1508,24 @@ An expansion hover module to perform a syntax check on sigma rules.
 - **requirements**:
 > - Sigma python library
 > - Yaml python library
+
+-----
+
+#### [sigmf-expand](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/sigmf-expand.py)
+
+Enrichs a SigMF Recording or extracts a SigMF Archive into a SigMF Recording.
+- **features**:
+>This module can be used to expand a SigMF Recording object into a SigMF Expanded Recording object with a waterfall plot or to extract a SigMF Archive object into a SigMF Recording objet.
+- **input**:
+>Object of sigmf-archive or sigmf-recording template.
+- **output**:
+>Object of sigmf-expanded-recording or sigmf-recording template.
+- **references**:
+>https://github.com/sigmf/SigMF
+- **requirements**:
+> - matplotlib: For plotting the waterfall plot of the recording.
+> - numpy: For the waterfall plot of the recording.
+> - sigmf: For validating SigMF files.
 
 -----
 
