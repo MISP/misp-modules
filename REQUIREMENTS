@@ -177,6 +177,7 @@ validators==0.14.0
 vt-graph-api==2.2.0
 vt-py==0.17.5
 vulners==2.0.10
+vysion=1.0.8 ; python_version >= '3.7'
 wand==0.6.11
 websocket-client==1.5.1 ; python_version >= '3.7'
 websockets==11.0.3 ; python_version >= '3.7'
