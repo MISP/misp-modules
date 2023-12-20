@@ -114,7 +114,7 @@ def handler(q=False):
 
     if not request.get("attribute"):
         return {
-            "error": f"{standard_error_message}, which should contain at least a type, a value and an uuid."
+            "error": "The request is missing required attribute information, which should contain at least a type, a value, and a UUID."
         }
 
     if request["attribute"]["type"] not in mispattributes["input"]:
