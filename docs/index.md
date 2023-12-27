@@ -75,7 +75,7 @@ For more information: [Extending MISP with Python modules](https://www.circl.lu/
 * [VMray](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/vmray_submit.py) - a module to submit a sample to VMray.
 * [VulnDB](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/vulndb.py) - a module to query [VulnDB](https://www.riskbasedsecurity.com/).
 * [Vulners](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/vulners.py) - an expansion module to expand information about CVEs using Vulners API.
-* [Vysion](misp-modules/misp_modules/modules/expansion/vysion.py) - an expansion module to add dark web intelligence using Vysion API.
+* [Vysion](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/vysion.py) - an expansion module to add dark web intelligence using Vysion API.
 * [whois](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/whois.py) - a module to query a local instance of [uwhois](https://github.com/rafiot/uwhoisd).
 * [wikidata](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/wiki.py) - a [wikidata](https://www.wikidata.org) expansion module.
 * [xforce](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/xforceexchange.py) - an IBM X-Force Exchange expansion module.
