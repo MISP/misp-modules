@@ -161,6 +161,11 @@ def load_package_modules():
     return mhandlers, modules
 
 
+class Healthcheck(tornado.web.RequestHandler):
+    def get(self):
+        self.write(b'{"status": true}')
+
+
 class ListModules(tornado.web.RequestHandler):
     global loaded_modules
     global mhandlers
@@ -168,12 +173,12 @@ class ListModules(tornado.web.RequestHandler):
     def get(self):
         ret = []
         for module in loaded_modules:
-            x = {}
-            x['name'] = module
-            x['type'] = mhandlers['type:' + module]
-            x['mispattributes'] = mhandlers[module].introspection()
-            x['meta'] = mhandlers[module].version()
-            ret.append(x)
+            ret.append({
+                'name': module,
+                'type': mhandlers['type:' + module],
+                'mispattributes': mhandlers[module].introspection(),
+                'meta': mhandlers[module].version()
+            })
         log.debug('MISP ListModules request')
         self.write(json.dumps(ret))
 
@@ -268,7 +273,11 @@ def main():
             mispmod = importlib.import_module(module)
             mispmod.register(mhandlers, loaded_modules)
 
-    service = [(r'/modules', ListModules), (r'/query', QueryModule)]
+    service = [
+        (r'/modules', ListModules),
+        (r'/query', QueryModule),
+        (r'/healthcheck', Healthcheck),
+    ]
 
     application = tornado.web.Application(service)
     try:
