@@ -187,9 +187,14 @@ class QueryModule(tornado.web.RequestHandler):
     executor = ThreadPoolExecutor(nb_threads)
 
     @run_on_executor
-    def run_request(self, module_name, json_payload):
-        log.debug('MISP QueryModule request %s', json_payload)
-        response = mhandlers[module_name].handler(q=json_payload)
+    def run_request(self, module_name, json_payload, dict_payload):
+        log.debug('MISP QueryModule %s request %s', module_name, json_payload)
+        module = mhandlers[module_name]
+        if getattr(module, "dict_handler", None):
+            # New method that avoids double JSON decoding, new modules should define dict_handler
+            response = module.dict_handler(request=dict_payload)
+        else:
+            response = module.handler(q=json_payload)
         return json.dumps(response)
 
     @tornado.gen.coroutine
@@ -201,7 +206,8 @@ class QueryModule(tornado.web.RequestHandler):
                 timeout = datetime.timedelta(seconds=int(dict_payload.get('timeout')))
             else:
                 timeout = datetime.timedelta(seconds=300)
-            response = yield tornado.gen.with_timeout(timeout, self.run_request(dict_payload['module'], json_payload))
+            future = self.run_request(dict_payload['module'], json_payload, dict_payload)
+            response = yield tornado.gen.with_timeout(timeout, future)
             self.write(response)
         except tornado.gen.TimeoutError:
             log.warning('Timeout on {}'.format(dict_payload['module']))

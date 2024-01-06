@@ -1,6 +1,5 @@
 import base64
 import io
-import json
 import logging
 import sys
 import zipfile
@@ -58,12 +57,7 @@ def connect_to_clamav(connection_string: str) -> clamd.ClamdNetworkSocket:
         raise Exception("ClamAV connection string is invalid. It must be unix socket path with 'unix://' prefix or IP:PORT.")
 
 
-def handler(q=False):
-    if q is False:
-        return False
-
-    request = json.loads(q)
-
+def dict_handler(request: dict):
     connection_string: str = request["config"].get("connection")
     if not connection_string:
         return {"error": "No ClamAV connection string provided"}
