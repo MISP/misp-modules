@@ -90,12 +90,12 @@ def load_helpers(helpersdir):
                 helpers.append(helpername)
                 log.info(f'Helpers loaded {filename}')
             else:
-                log.info(f'Helpers failed {filename} due to {selftest}')
+                log.warning(f'Helpers failed {filename} due to {selftest}')
 
 
 def load_package_helpers():
     if not HAS_PACKAGE_HELPERS:
-        log.info('Unable to load MISP helpers from package.')
+        log.error('Unable to load MISP helpers from package.')
         sys.exit(1)
     mhandlers = {}
     helpers = []
@@ -109,7 +109,7 @@ def load_package_helpers():
             helpers.append(helper_name)
             log.info(f'Helper loaded {helper_name}')
         else:
-            log.info(f'Helpers failed {helper_name} due to {selftest}')
+            log.warning(f'Helpers failed {helper_name} due to {selftest}')
     return mhandlers, helpers
 
 
@@ -142,7 +142,7 @@ def load_modules(mod_dir):
 
 def load_package_modules():
     if not HAS_PACKAGE_MODULES:
-        log.info('Unable to load MISP modules from package.')
+        log.error('Unable to load MISP modules from package.')
         sys.exit(1)
     mhandlers = {}
     modules = []
@@ -168,12 +168,12 @@ class ListModules(tornado.web.RequestHandler):
 
     def get(self):
         ret = []
-        for module in loaded_modules:
+        for module_name in loaded_modules:
             ret.append({
-                'name': module,
-                'type': mhandlers['type:' + module],
-                'mispattributes': mhandlers[module].introspection(),
-                'meta': mhandlers[module].version()
+                'name': module_name,
+                'type': mhandlers['type:' + module_name],
+                'mispattributes': mhandlers[module_name].introspection(),
+                'meta': mhandlers[module_name].version()
             })
         log.debug('MISP ListModules request')
         self.write(json.dumps(ret))
@@ -187,9 +187,9 @@ class QueryModule(tornado.web.RequestHandler):
     executor = ThreadPoolExecutor(nb_threads)
 
     @run_on_executor
-    def run_request(self, module, json_payload):
-        log.debug(f'MISP QueryModule request {json_payload}')
-        response = mhandlers[module].handler(q=json_payload)
+    def run_request(self, module_name, json_payload):
+        log.debug('MISP QueryModule request %s', json_payload)
+        response = mhandlers[module_name].handler(q=json_payload)
         return json.dumps(response)
 
     @tornado.gen.coroutine
@@ -208,7 +208,7 @@ class QueryModule(tornado.web.RequestHandler):
             self.write(json.dumps({'error': 'Timeout.'}))
         except Exception:
             self.write(json.dumps({'error': 'Something went wrong, look in the server logs for details'}))
-            log.exception('Something went wrong:')
+            log.exception('Something went wrong when processing query request')
         finally:
             self.finish()
 
