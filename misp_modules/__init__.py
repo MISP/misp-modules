@@ -22,13 +22,17 @@ import os
 import signal
 import sys
 import importlib
-import json
 import logging
 import fnmatch
 import argparse
 import re
 import datetime
 import psutil
+
+try:
+    import orjson as json
+except ImportError:
+    import json
 
 import tornado.web
 import tornado.process
@@ -182,24 +186,24 @@ class QueryModule(tornado.web.RequestHandler):
     executor = ThreadPoolExecutor(nb_threads)
 
     @run_on_executor
-    def run_request(self, module, jsonpayload):
-        log.debug('MISP QueryModule request {0}'.format(jsonpayload))
-        response = mhandlers[module].handler(q=jsonpayload)
+    def run_request(self, module, json_payload):
+        log.debug(f'MISP QueryModule request {json_payload}')
+        response = mhandlers[module].handler(q=json_payload)
         return json.dumps(response)
 
     @tornado.gen.coroutine
     def post(self):
         try:
-            jsonpayload = self.request.body.decode('utf-8')
-            dict_payload = json.loads(jsonpayload)
+            json_payload = self.request.body
+            dict_payload = json.loads(json_payload)
             if dict_payload.get('timeout'):
                 timeout = datetime.timedelta(seconds=int(dict_payload.get('timeout')))
             else:
                 timeout = datetime.timedelta(seconds=300)
-            response = yield tornado.gen.with_timeout(timeout, self.run_request(dict_payload['module'], jsonpayload))
+            response = yield tornado.gen.with_timeout(timeout, self.run_request(dict_payload['module'], json_payload))
             self.write(response)
         except tornado.gen.TimeoutError:
-            log.warning('Timeout on {} '.format(dict_payload['module']))
+            log.warning('Timeout on {}'.format(dict_payload['module']))
             self.write(json.dumps({'error': 'Timeout.'}))
         except Exception:
             self.write(json.dumps({'error': 'Something went wrong, look in the server logs for details'}))
