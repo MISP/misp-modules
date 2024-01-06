@@ -43,7 +43,7 @@ def create_response(original_attribute: dict, software: str, signature: Optional
         av_signature_object.add_reference(original_attribute["uuid"], "belongs-to")
         misp_event.add_object(av_signature_object)
 
-    event = json.loads(misp_event.to_json())
+    event = misp_event.to_dict()
     results = {key: event[key] for key in ('Attribute', 'Object') if (key in event and event[key])}
     return {"results": results}
 
