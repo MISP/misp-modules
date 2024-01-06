@@ -127,10 +127,11 @@ def handler(q=False):
     try:
         response = apiosintDS.request(entities=tosubmit, stix=submit_stix, cache=submitcache, cachedirectory=submitcache_directory, cachetimeout=submitcache_timeout, verbose=True, localdirectory=sumbit_localdirectory)
         r["results"] += apiosintParserHover(persistent, response, import_related, submit_stix)
-    except ValueError as e:
-        log.debug(str(e))
-        misperrors['error'] = str(e)
-    return r
+        return r
+    except Exception as e:
+        log.exception("Could not process apiosintDS")
+        return {'error': str(e)}
+
 
 def apiosintParserHover(ispersistent, response, import_related, stix):
     apiosinttype = ['hash', 'ip', 'url', 'domain']
