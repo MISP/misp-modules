@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 #
 # Core MISP expansion modules loader and web service
 #
@@ -23,13 +22,17 @@ import os
 import signal
 import sys
 import importlib
-import json
 import logging
 import fnmatch
 import argparse
 import re
 import datetime
 import psutil
+
+try:
+    import orjson as json
+except ImportError:
+    import json
 
 import tornado.web
 import tornado.process
@@ -58,17 +61,13 @@ def handle_signal(sig, frame):
     IOLoop.instance().add_callback_from_signal(IOLoop.instance().stop)
 
 
-def init_logger(level=False):
+def init_logger(debug=False):
     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-    handler = logging.StreamHandler(stream=sys.stdout)
+    handler = logging.StreamHandler()
     handler.setFormatter(formatter)
-    handler.setLevel(logging.INFO)
-    if level:
-        handler.setLevel(logging.DEBUG)
     log.addHandler(handler)
-    log.setLevel(logging.INFO)
-    if level:
-        log.setLevel(logging.DEBUG)
+    log.propagate = False
+    log.setLevel(logging.DEBUG if debug else logging.INFO)
     return log
 
 
@@ -89,28 +88,28 @@ def load_helpers(helpersdir):
             selftest = hhandlers[helpername].selftest()
             if selftest is None:
                 helpers.append(helpername)
-                log.info('Helpers loaded {} '.format(filename))
+                log.info(f'Helpers loaded {filename}')
             else:
-                log.info('Helpers failed {} due to {}'.format(filename, selftest))
+                log.warning(f'Helpers failed {filename} due to {selftest}')
 
 
 def load_package_helpers():
     if not HAS_PACKAGE_HELPERS:
-        log.info('Unable to load MISP helpers from package.')
-        sys.exit()
+        log.error('Unable to load MISP helpers from package.')
+        sys.exit(1)
     mhandlers = {}
     helpers = []
     for path, helper in sys.modules.items():
         if not path.startswith('misp_modules.helpers.'):
             continue
-        helpername = path.replace('misp_modules.helpers.', '')
-        mhandlers[helpername] = helper
-        selftest = mhandlers[helpername].selftest()
+        helper_name = path.replace('misp_modules.helpers.', '')
+        mhandlers[helper_name] = helper
+        selftest = mhandlers[helper_name].selftest()
         if selftest is None:
-            helpers.append(helpername)
-            log.info('Helper loaded {}'.format(helpername))
+            helpers.append(helper_name)
+            log.info(f'Helper loaded {helper_name}')
         else:
-            log.info('Helpers failed {} due to {}'.format(helpername, selftest))
+            log.warning(f'Helpers failed {helper_name} due to {selftest}')
     return mhandlers, helpers
 
 
@@ -128,34 +127,39 @@ def load_modules(mod_dir):
                 continue
             if filename == '__init__.py':
                 continue
-            modulename = filename.split(".")[0]
-            moduletype = os.path.split(mod_dir)[1]
+            module_name = filename.split(".")[0]
+            module_type = os.path.split(mod_dir)[1]
             try:
-                mhandlers[modulename] = importlib.import_module(os.path.basename(root) + '.' + modulename)
+                mhandlers[module_name] = importlib.import_module(os.path.basename(root) + '.' + module_name)
             except Exception as e:
-                log.warning('MISP modules {0} failed due to {1}'.format(modulename, e))
+                log.warning(f'MISP modules {module_name} failed due to {e}')
                 continue
-            modules.append(modulename)
-            log.info('MISP modules {0} imported'.format(modulename))
-            mhandlers['type:' + modulename] = moduletype
+            modules.append(module_name)
+            log.info(f'MISP modules {module_name} imported')
+            mhandlers['type:' + module_name] = module_type
     return mhandlers, modules
 
 
 def load_package_modules():
     if not HAS_PACKAGE_MODULES:
-        log.info('Unable to load MISP modules from package.')
-        sys.exit()
+        log.error('Unable to load MISP modules from package.')
+        sys.exit(1)
     mhandlers = {}
     modules = []
     for path, module in sys.modules.items():
         r = re.findall(r"misp_modules[.]modules[.](\w+)[.]([^_]\w+)", path)
         if r and len(r[0]) == 2:
-            moduletype, modulename = r[0]
-            mhandlers[modulename] = module
-            modules.append(modulename)
-            log.info('MISP modules {0} imported'.format(modulename))
-            mhandlers['type:' + modulename] = moduletype
+            module_type, module_name = r[0]
+            mhandlers[module_name] = module
+            modules.append(module_name)
+            log.info(f'MISP modules {module_name} imported')
+            mhandlers['type:' + module_name] = module_type
     return mhandlers, modules
+
+
+class Healthcheck(tornado.web.RequestHandler):
+    def get(self):
+        self.write(b'{"status": true}')
 
 
 class ListModules(tornado.web.RequestHandler):
@@ -164,13 +168,13 @@ class ListModules(tornado.web.RequestHandler):
 
     def get(self):
         ret = []
-        for module in loaded_modules:
-            x = {}
-            x['name'] = module
-            x['type'] = mhandlers['type:' + module]
-            x['mispattributes'] = mhandlers[module].introspection()
-            x['meta'] = mhandlers[module].version()
-            ret.append(x)
+        for module_name in loaded_modules:
+            ret.append({
+                'name': module_name,
+                'type': mhandlers['type:' + module_name],
+                'mispattributes': mhandlers[module_name].introspection(),
+                'meta': mhandlers[module_name].version()
+            })
         log.debug('MISP ListModules request')
         self.write(json.dumps(ret))
 
@@ -183,28 +187,34 @@ class QueryModule(tornado.web.RequestHandler):
     executor = ThreadPoolExecutor(nb_threads)
 
     @run_on_executor
-    def run_request(self, module, jsonpayload):
-        log.debug('MISP QueryModule request {0}'.format(jsonpayload))
-        response = mhandlers[module].handler(q=jsonpayload)
+    def run_request(self, module_name, json_payload, dict_payload):
+        log.debug('MISP QueryModule %s request %s', module_name, json_payload)
+        module = mhandlers[module_name]
+        if getattr(module, "dict_handler", None):
+            # New method that avoids double JSON decoding, new modules should define dict_handler
+            response = module.dict_handler(request=dict_payload)
+        else:
+            response = module.handler(q=json_payload)
         return json.dumps(response)
 
     @tornado.gen.coroutine
     def post(self):
         try:
-            jsonpayload = self.request.body.decode('utf-8')
-            dict_payload = json.loads(jsonpayload)
+            json_payload = self.request.body
+            dict_payload = json.loads(json_payload)
             if dict_payload.get('timeout'):
                 timeout = datetime.timedelta(seconds=int(dict_payload.get('timeout')))
             else:
                 timeout = datetime.timedelta(seconds=300)
-            response = yield tornado.gen.with_timeout(timeout, self.run_request(dict_payload['module'], jsonpayload))
+            future = self.run_request(dict_payload['module'], json_payload, dict_payload)
+            response = yield tornado.gen.with_timeout(timeout, future)
             self.write(response)
         except tornado.gen.TimeoutError:
-            log.warning('Timeout on {} '.format(dict_payload['module']))
+            log.warning('Timeout on {}'.format(dict_payload['module']))
             self.write(json.dumps({'error': 'Timeout.'}))
         except Exception:
             self.write(json.dumps({'error': 'Something went wrong, look in the server logs for details'}))
-            log.exception('Something went wrong:')
+            log.exception('Something went wrong when processing query request')
         finally:
             self.finish()
 
@@ -223,20 +233,22 @@ def main():
     global loaded_modules
     signal.signal(signal.SIGINT, handle_signal)
     signal.signal(signal.SIGTERM, handle_signal)
-    argParser = argparse.ArgumentParser(description='misp-modules server', formatter_class=argparse.RawTextHelpFormatter)
-    argParser.add_argument('-t', default=False, action='store_true', help='Test mode')
-    argParser.add_argument('-s', default=False, action='store_true', help='Run a system install (package installed via pip)')
-    argParser.add_argument('-d', default=False, action='store_true', help='Enable debugging')
-    argParser.add_argument('-p', default=6666, help='misp-modules TCP port (default 6666)')
-    argParser.add_argument('-l', default='localhost', help='misp-modules listen address (default localhost)')
-    argParser.add_argument('-m', default=[], action='append', help='Register a custom module')
-    argParser.add_argument('--devel', default=False, action='store_true', help='''Start in development mode, enable debug, start only the module(s) listed in -m.\nExample: -m misp_modules.modules.expansion.bgpranking''')
-    args = argParser.parse_args()
+
+    arg_parser = argparse.ArgumentParser(description='misp-modules server', formatter_class=argparse.RawTextHelpFormatter)
+    arg_parser.add_argument('-t', default=False, action='store_true', help='Test mode')
+    arg_parser.add_argument('-s', default=False, action='store_true', help='Run a system install (package installed via pip)')
+    arg_parser.add_argument('-d', default=False, action='store_true', help='Enable debugging')
+    arg_parser.add_argument('-p', default=6666, help='misp-modules TCP port (default 6666)')
+    arg_parser.add_argument('-l', default='localhost', help='misp-modules listen address (default localhost)')
+    arg_parser.add_argument('-m', default=[], action='append', help='Register a custom module')
+    arg_parser.add_argument('--devel', default=False, action='store_true', help='''Start in development mode, enable debug, start only the module(s) listed in -m.\nExample: -m misp_modules.modules.expansion.bgpranking''')
+    args = arg_parser.parse_args()
+
     port = args.p
     listen = args.l
     if args.devel:
-        log = init_logger(level=True)
-        log.info('Launch MISP modules server in developement mode. Enable debug, load a list of modules is -m is used.')
+        log = init_logger(debug=True)
+        log.info('Launch MISP modules server in development mode. Enable debug, load a list of modules is -m is used.')
         if args.m:
             mhandlers = {}
             modules = []
@@ -247,11 +259,11 @@ def main():
                 mhandlers[modulename] = importlib.import_module(module)
                 mhandlers['type:' + modulename] = moduletype
                 modules.append(modulename)
-                log.info('MISP modules {0} imported'.format(modulename))
+                log.info(f'MISP modules {modulename} imported')
         else:
             mhandlers, loaded_modules = _launch_from_current_dir()
     else:
-        log = init_logger(level=args.d)
+        log = init_logger(debug=args.d)
         if args.s:
             log.info('Launch MISP modules server from package.')
             load_package_helpers()
@@ -263,7 +275,11 @@ def main():
             mispmod = importlib.import_module(module)
             mispmod.register(mhandlers, loaded_modules)
 
-    service = [(r'/modules', ListModules), (r'/query', QueryModule)]
+    service = [
+        (r'/modules', ListModules),
+        (r'/query', QueryModule),
+        (r'/healthcheck', Healthcheck),
+    ]
 
     application = tornado.web.Application(service)
     try:
@@ -279,14 +295,14 @@ def main():
                     print("\nmisp-modules is still running as PID: {}\n".format(pid))
                     print("Please kill accordingly:")
                     print("sudo kill {}".format(pid))
-                    sys.exit(-1)
+                    return 1
             print(e)
             print("misp-modules might still be running.")
 
-    log.info('MISP modules server started on {0} port {1}'.format(listen, port))
+    log.info(f'MISP modules server started on {listen} port {port}')
     if args.t:
         log.info('MISP modules started in test-mode, quitting immediately.')
-        sys.exit()
+        return 0
     try:
         IOLoop.instance().start()
     finally:

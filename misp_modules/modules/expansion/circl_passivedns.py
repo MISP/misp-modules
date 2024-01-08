@@ -1,4 +1,3 @@
-import json
 import pypdns
 from . import check_input_attribute, standard_error_message
 from pymisp import MISPAttribute, MISPEvent, MISPObject
@@ -10,7 +9,7 @@ moduleinfo = {'version': '0.2', 'author': 'Alexandre Dulaunoy',
 moduleconfig = ['username', 'password']
 
 
-class PassiveDNSParser():
+class PassiveDNSParser:
     def __init__(self, attribute, authentication):
         self.misp_event = MISPEvent()
         self.attribute = MISPAttribute()
@@ -21,7 +20,7 @@ class PassiveDNSParser():
     def get_results(self):
         if hasattr(self, 'result'):
             return self.result
-        event = json.loads(self.misp_event.to_json())
+        event = self.misp_event.to_dict()
         results = {key: event[key] for key in ('Attribute', 'Object')}
         return {'results': results}
 
@@ -50,10 +49,7 @@ class PassiveDNSParser():
             self.misp_event.add_object(**pdns_object)
 
 
-def handler(q=False):
-    if q is False:
-        return False
-    request = json.loads(q)
+def dict_handler(request: dict):
     if not request.get('config'):
         return {'error': 'CIRCL Passive DNS authentication is missing.'}
     if not request['config'].get('username') or not request['config'].get('password'):

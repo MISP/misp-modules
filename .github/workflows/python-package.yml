@@ -19,16 +19,12 @@ jobs:
     - name: Install packages
       run: |
         sudo apt-get install libpoppler-cpp-dev libzbar0 tesseract-ocr
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
-    - name: Cache Python dependencies
-      uses: actions/cache@v2
-      with:
-        path: ~/.cache/pip
-        key: ${{ runner.os }}-pip-${{ matrix.python-version }}-${{ hashFiles('REQUIREMENTS') }}
+        cache: 'pip'
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
@@ -42,12 +38,17 @@ jobs:
         flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
         # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+    - name: Run server in background
+      run: |
+        misp-modules -l 127.0.0.1 -s 2>error.log &
+        sleep 5
+    - name: Check if server is running
+      run: |
+        curl -sS localhost:6666/healthcheck
     - name: Test with pytest
       run: |
-        # Run server in background
-        misp-modules -l 127.0.0.1 -s &
-        sleep 5
-        # Check if modules are running
-        curl -sS localhost:6666/modules
-        # Run tests
         pytest tests
+    - name: Show error log
+      if: always()
+      run: |
+        cat error.log
