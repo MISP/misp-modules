@@ -215,7 +215,7 @@ class TestExpansions(unittest.TestCase):
             self.assertEqual(self.get_values(response), 'totalmateria.net - spam test domain')
         except Exception:
             try:
-                self.assertTrue(self.get_values(response).startswith('None of DNS query names exist:'))
+                self.assertTrue(self.get_values(response).startswith('The DNS query name does not exist:'))
             except Exception:
                 self.assertEqual(self.get_errors(response), 'Not able to reach dbl.spamhaus.org or something went wrong')
 
