@@ -303,6 +303,9 @@ def main():
                     return 1
             print(e)
             print("misp-modules might still be running.")
+        else:
+            log.exception(f"Could not listen on {args.listen}:{args.port}")
+            return 1
 
     log.info(f'MISP modules server started on {args.listen} port {args.port}')
     if args.test:
