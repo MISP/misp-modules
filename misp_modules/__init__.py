@@ -174,17 +174,22 @@ class ListModules(tornado.web.RequestHandler):
     global loaded_modules
     global mhandlers
 
+    _cached_json = None
+
     def get(self):
-        ret = []
-        for module_name in loaded_modules:
-            ret.append({
-                'name': module_name,
-                'type': mhandlers['type:' + module_name],
-                'mispattributes': mhandlers[module_name].introspection(),
-                'meta': mhandlers[module_name].version()
-            })
+        if not self._cached_json:
+            ret = []
+            for module_name in loaded_modules:
+                ret.append({
+                    'name': module_name,
+                    'type': mhandlers['type:' + module_name],
+                    'mispattributes': mhandlers[module_name].introspection(),
+                    'meta': mhandlers[module_name].version()
+                })
+            self._cached_json = json.dumps(ret)
+
         log.debug('MISP ListModules request')
-        self.write(json.dumps(ret))
+        self.write(self._cached_json)
 
 
 class QueryModule(tornado.web.RequestHandler):
