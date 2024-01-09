@@ -39,6 +39,7 @@ import tornado.process
 from tornado.ioloop import IOLoop
 from tornado.concurrent import run_on_executor
 from concurrent.futures import ThreadPoolExecutor
+from pymisp import pymisp_json_default
 
 try:
     from .modules import *  # noqa
@@ -202,7 +203,7 @@ class QueryModule(tornado.web.RequestHandler):
             response = module.dict_handler(request=dict_payload)
         else:
             response = module.handler(q=json_payload)
-        return json.dumps(response)
+        return json.dumps(response, default=pymisp_json_default)
 
     @tornado.gen.coroutine
     def post(self):
@@ -303,6 +304,9 @@ def main():
                     return 1
             print(e)
             print("misp-modules might still be running.")
+        else:
+            log.exception(f"Could not listen on {args.listen}:{args.port}")
+            return 1
 
     log.info(f'MISP modules server started on {args.listen} port {args.port}')
     if args.test:
