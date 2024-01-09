@@ -65,10 +65,17 @@ def init_logger(debug=False):
     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     handler = logging.StreamHandler()
     handler.setFormatter(formatter)
+
+    # Enable access logs
+    access_log = logging.getLogger('tornado.access')
+    access_log.propagate = False
+    access_log.setLevel(logging.INFO)
+    access_log.addHandler(handler)
+
+    # Set application log
     log.addHandler(handler)
     log.propagate = False
     log.setLevel(logging.DEBUG if debug else logging.INFO)
-    return log
 
 
 def load_helpers(helpersdir):
@@ -235,19 +242,17 @@ def main():
     signal.signal(signal.SIGTERM, handle_signal)
 
     arg_parser = argparse.ArgumentParser(description='misp-modules server', formatter_class=argparse.RawTextHelpFormatter)
-    arg_parser.add_argument('-t', default=False, action='store_true', help='Test mode')
-    arg_parser.add_argument('-s', default=False, action='store_true', help='Run a system install (package installed via pip)')
-    arg_parser.add_argument('-d', default=False, action='store_true', help='Enable debugging')
-    arg_parser.add_argument('-p', default=6666, help='misp-modules TCP port (default 6666)')
-    arg_parser.add_argument('-l', default='localhost', help='misp-modules listen address (default localhost)')
+    arg_parser.add_argument('-t', '--test', default=False, action='store_true', help='Test mode')
+    arg_parser.add_argument('-s', '--system', default=False, action='store_true', help='Run a system install (package installed via pip)')
+    arg_parser.add_argument('-d', '--debug', default=False, action='store_true', help='Enable debugging')
+    arg_parser.add_argument('-p', '--port', default=6666, help='misp-modules TCP port (default 6666)')
+    arg_parser.add_argument('-l', '--listen', default='localhost', help='misp-modules listen address (default localhost)')
     arg_parser.add_argument('-m', default=[], action='append', help='Register a custom module')
     arg_parser.add_argument('--devel', default=False, action='store_true', help='''Start in development mode, enable debug, start only the module(s) listed in -m.\nExample: -m misp_modules.modules.expansion.bgpranking''')
     args = arg_parser.parse_args()
 
-    port = args.p
-    listen = args.l
     if args.devel:
-        log = init_logger(debug=True)
+        init_logger(debug=True)
         log.info('Launch MISP modules server in development mode. Enable debug, load a list of modules is -m is used.')
         if args.m:
             mhandlers = {}
@@ -263,8 +268,8 @@ def main():
         else:
             mhandlers, loaded_modules = _launch_from_current_dir()
     else:
-        log = init_logger(debug=args.d)
-        if args.s:
+        init_logger(debug=args.debug)
+        if args.system:
             log.info('Launch MISP modules server from package.')
             load_package_helpers()
             mhandlers, loaded_modules = load_package_modules()
@@ -283,7 +288,7 @@ def main():
 
     application = tornado.web.Application(service)
     try:
-        application.listen(port, address=listen)
+        application.listen(args.port, address=args.listen)
     except Exception as e:
         if e.errno == 98:
             pids = psutil.pids()
@@ -299,8 +304,8 @@ def main():
             print(e)
             print("misp-modules might still be running.")
 
-    log.info(f'MISP modules server started on {listen} port {port}')
-    if args.t:
+    log.info(f'MISP modules server started on {args.listen} port {args.port}')
+    if args.test:
         log.info('MISP modules started in test-mode, quitting immediately.')
         return 0
     try:
