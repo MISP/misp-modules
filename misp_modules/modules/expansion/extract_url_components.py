@@ -22,9 +22,12 @@ def createObjectFromURL(url):
     if parsed['subdomain'] is not None:
         obj.add_attribute('subdomain', type='text', value=parsed['subdomain'])
     obj.add_attribute('scheme', type='text', value=parsed['scheme'])
-    obj.add_attribute('resource_path', type='text', value=parsed['resource_path'])
-    obj.add_attribute('query_string', type='text', value=parsed['query_string'])
-    obj.add_attribute('port', type='port', value=parsed['port'])
+    if parsed['resource_path'] is not None:
+        obj.add_attribute('resource_path', type='text', value=parsed['resource_path'])
+    if parsed['query_string'] is not None:
+        obj.add_attribute('query_string', type='text', value=parsed['query_string'])
+    if parsed['port'] is not None:
+        obj.add_attribute('port', type='port', value=parsed['port'])
     obj.add_attribute('host', type='hostname', value=parsed['host'])
     if parsed['fragment'] is not None:
         obj.add_attribute('fragment', type='text', value=parsed['fragment'])

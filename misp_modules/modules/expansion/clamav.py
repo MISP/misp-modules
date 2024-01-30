@@ -1,6 +1,5 @@
 import base64
 import io
-import json
 import logging
 import sys
 import zipfile
@@ -43,7 +42,7 @@ def create_response(original_attribute: dict, software: str, signature: Optional
         av_signature_object.add_reference(original_attribute["uuid"], "belongs-to")
         misp_event.add_object(av_signature_object)
 
-    event = json.loads(misp_event.to_json())
+    event = misp_event.to_dict()
     results = {key: event[key] for key in ('Attribute', 'Object') if (key in event and event[key])}
     return {"results": results}
 
@@ -58,12 +57,7 @@ def connect_to_clamav(connection_string: str) -> clamd.ClamdNetworkSocket:
         raise Exception("ClamAV connection string is invalid. It must be unix socket path with 'unix://' prefix or IP:PORT.")
 
 
-def handler(q=False):
-    if q is False:
-        return False
-
-    request = json.loads(q)
-
+def dict_handler(request: dict):
     connection_string: str = request["config"].get("connection")
     if not connection_string:
         return {"error": "No ClamAV connection string provided"}

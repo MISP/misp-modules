@@ -42,7 +42,7 @@ def handler(q=False):
         r.nameservers = ['8.8.8.8']
 
     try:
-        answer = r.query(revname, 'PTR')
+        answer = r.resolve(revname, 'PTR')
     except resolver.NXDOMAIN:
         misperrors['error'] = "NXDOMAIN"
         return misperrors

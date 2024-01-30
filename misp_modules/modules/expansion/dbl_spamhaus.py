@@ -50,7 +50,7 @@ def handler(q=False):
         return misperrors
     query = "{}.{}".format(requested_value, dbl)
     try:
-        query_result = resolver.query(query, 'A')[0]
+        query_result = resolver.resolve(query, 'A')[0]
         result = "{} - {}".format(requested_value, dbl_mapping[str(query_result)])
     except dns.resolver.NXDOMAIN as e:
         result = e.msg

@@ -1,4 +1,3 @@
-import json
 from urllib.parse import urlparse
 import vt
 from . import check_input_attribute, standard_error_message
@@ -45,7 +44,7 @@ class VirusTotalParser:
         self.input_types_mapping[self.attribute.type](self.attribute.value)
 
     def get_result(self) -> dict:
-        event = json.loads(self.misp_event.to_json())
+        event = self.misp_event.to_dict()
         results = {key: event[key] for key in ('Attribute', 'Object') if (key in event and event[key])}
         return {'results': results}
 
@@ -153,11 +152,11 @@ class VirusTotalParser:
             ('contacted_domains', 'communicates-with'),
             ('contacted_ips', 'communicates-with')
         ]:
-            files_iterator = self.client.iterator(f'/files/{file_report.id}/{relationship_name}', limit=self.limit)
-            for file in files_iterator:
-                file_object = self.create_misp_object(file)
-                file_object.add_reference(file_object.uuid, misp_name)
-                self.misp_event.add_object(**file_object)
+            related_files_iterator = self.client.iterator(f'/files/{file_report.id}/{relationship_name}', limit=self.limit)
+            for related_file in related_files_iterator:
+                related_file_object = self.create_misp_object(related_file)
+                related_file_object.add_reference(file_object.uuid, misp_name)
+                self.misp_event.add_object(**related_file_object)
 
         self.misp_event.add_object(**file_object)
         return file_object.uuid
@@ -257,10 +256,7 @@ def parse_error(status_code: int) -> str:
     return "VirusTotal may not be accessible."
 
 
-def handler(q=False):
-    if q is False:
-        return False
-    request = json.loads(q)
+def dict_handler(request: dict):
     if not request.get('config') or not request['config'].get('apikey'):
         misperrors['error'] = 'A VirusTotal api key is required for this module.'
         return misperrors

@@ -4,8 +4,8 @@ import sys
 sys.path.append('{}/lib'.format('/'.join((os.path.realpath(__file__)).split('/')[:-3])))
 
 __all__ = ['cuckoo_submit', 'vmray_submit', 'bgpranking', 'circl_passivedns', 'circl_passivessl',
-           'countrycode', 'cve', 'cve_advanced', 'cpe', 'dns', 'btc_steroids', 'domaintools', 'eupi',
-           'eql', 'farsight_passivedns', 'ipasn', 'passivetotal', 'sourcecache', 'virustotal',
+           'cluster25_expand', 'countrycode', 'cve', 'cve_advanced', 'cpe', 'dns', 'btc_steroids', 'domaintools',
+           'eupi', 'eql', 'farsight_passivedns', 'ipasn', 'passivetotal', 'sourcecache', 'virustotal',
            'whois', 'shodan', 'reversedns', 'geoip_asn', 'geoip_city', 'geoip_country', 'wiki', 'iprep',
            'threatminer', 'otx', 'threatcrowd', 'vulndb', 'crowdstrike_falcon',
            'yara_syntax_validator', 'hashdd', 'onyphe', 'onyphe_full', 'rbl',
@@ -20,7 +20,7 @@ __all__ = ['cuckoo_submit', 'vmray_submit', 'bgpranking', 'circl_passivedns', 'c
            'trustar_enrich', 'recordedfuture', 'html_to_markdown', 'socialscan', 'passive-ssh',
            'qintel_qsentry', 'mwdb', 'hashlookup', 'mmdb_lookup', 'ipqs_fraud_and_risk_scoring',
            'clamav', 'jinja_template_rendering','hyasinsight', 'variotdbs', 'crowdsec',
-           'extract_url_components', 'ipinfo']
+           'extract_url_components', 'ipinfo', 'whoisfreaks', 'ip2locationio', 'vysion']
 
 
 minimum_required_fields = ('type', 'uuid', 'value')

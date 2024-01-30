@@ -13,8 +13,7 @@ For more information: [Extending MISP with Python modules](https://www.misp-proj
 ## Existing MISP modules
 
 ### Expansion modules
-
-* [apiosintDS](misp_modules/modules/expansion/apiosintds.py) - a hover and expansion module to query the OSINT.digitalside.it API.
+* [apiosintDS](misp_modules/modules/expansion/apiosintds.py) - a hover and expansion module to query the [OSINT.digitalside.it](https://osint.digitalside.it) API. [Documentation](https://apiosintds.readthedocs.io/en/latest/userguidemisp.html).
 * [API Void](misp_modules/modules/expansion/apivoid.py) - an expansion and hover module to query API Void with a domain attribute.
 * [AssemblyLine submit](misp_modules/modules/expansion/assemblyline_submit.py) - an expansion module to submit samples and urls to AssemblyLine.
 * [AssemblyLine query](misp_modules/modules/expansion/assemblyline_query.py) - an expansion module to query AssemblyLine and parse the full submission report.
@@ -50,6 +49,7 @@ For more information: [Extending MISP with Python modules](https://www.misp-proj
 * [html_to_markdown](misp_modules/modules/expansion/html_to_markdown.py) - Simple HTML to markdown converter
 * [HYAS Insight](misp_modules/modules/expansion/hyasinsight.py) - a hover and expansion module to get information from [HYAS Insight](https://www.hyas.com/hyas-insight).
 * [intel471](misp_modules/modules/expansion/intel471.py) - an expansion module to get info from [Intel471](https://intel471.com).
+* [IP2Location.io](misp_modules/modules/expansion/ip2locationio.py) - an expansion module to get additional information on an IP address using the IP2Location.io API
 * [IPASN](misp_modules/modules/expansion/ipasn.py) - a hover and expansion to get the BGP ASN of an IP address.
 * [ipinfo.io](misp_modules/modules/expansion/ipinfo.py) - an expansion module to get additional information on an IP address using the ipinfo.io API
 * [iprep](misp_modules/modules/expansion/iprep.py) - an expansion module to get IP reputation from packetmail.net.
@@ -95,7 +95,9 @@ For more information: [Extending MISP with Python modules](https://www.misp-proj
 * [VMware NSX](misp_modules/modules/expansion/vmware_nsx.py) - a module to enrich a file or URL with VMware NSX Defender.
 * [VulnDB](misp_modules/modules/expansion/vulndb.py) - a module to query [VulnDB](https://www.riskbasedsecurity.com/).
 * [Vulners](misp_modules/modules/expansion/vulners.py) - an expansion module to expand information about CVEs using Vulners API.
+* [Vysion](misp_modules/modules/expansion/vysion.py) - an expansion module to add dark web intelligence using Vysion API.
 * [whois](misp_modules/modules/expansion/whois.py) - a module to query a local instance of [uwhois](https://github.com/rafiot/uwhoisd).
+* [whoisfreaks](misp_modules/modules/expansion/whoisfreaks.py) - An expansion module for [whoisfreaks](https://whoisfreaks.com/) that will provide an enriched analysis of the provided domain, including WHOIS and DNS information.
 * [wikidata](misp_modules/modules/expansion/wiki.py) - a [wikidata](https://www.wikidata.org) expansion module.
 * [xforce](misp_modules/modules/expansion/xforceexchange.py) - an IBM X-Force Exchange expansion module.
 * [xlsx-enrich](misp_modules/modules/expansion/xlsx_enrich.py) - an enrichment module to get text out of an Excel document into MISP (using free-text parser).

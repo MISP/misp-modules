@@ -36,7 +36,7 @@ def handler(q=False):
         r.nameservers = ['8.8.8.8']
 
     try:
-        answer = r.query(toquery, 'A')
+        answer = r.resolve(toquery, 'A')
     except dns.resolver.NXDOMAIN:
         misperrors['error'] = "NXDOMAIN"
         return misperrors
