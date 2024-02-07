@@ -153,9 +153,13 @@ class Session_class:
         db.session.commit()
 
         histories = History.query.all()
-        while len(histories) > 100:
-            history = History.query.filter_by(func.min(History.id))
-            history.delete()
+        
+        while len(histories) > 3:
+            history = History.query.order_by(History.id).all()
+            Session_db.query.filter_by(id=history[0].session_id).delete()
+            History.query.filter_by(id=history[0].id).delete()
+
             histories = History.query.all()
 
+        db.session.commit()
         return

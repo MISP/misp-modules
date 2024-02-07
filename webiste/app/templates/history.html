@@ -11,9 +11,24 @@
     <br>
 
     <div v-if="history">
-        <div v-for="h in history">
-            [[h]]
-        </div>
+        <template v-for="h, key in history">
+            <div class="list-group" style="margin-bottom: 20px;">
+                <!-- <a :href="'/query/'+h.uuid" class="list-group-item list-group-item-action"> -->
+                <a href="#" class="list-group-item list-group-item-action">
+                    <div class="d-flex w-100 justify-content-between">
+                        <h5 class="mb-1">[[key+1]]- [[h.query]]</h5>
+                        <small><i>[[h.uuid]]</i></small>
+                    </div>
+                    <p class="mb-1" style="color: green;"><u>Input</u>:</p>
+                    <div>[[h.input]]</div>
+                    <br>
+                    <p class="mb-1" style="color: #2000ff;"><u>Modules</u>:</p>
+                    <div>
+                        <template v-for="module in h.modules">[[module]],</template>
+                    </div>
+                </a>
+            </div>
+        </template>
     </div>
     
     <span id="goTop">[<a href="#top">Go Back Top</a>]</span>
