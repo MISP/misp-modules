@@ -1,0 +1,25 @@
+{% macro render_flashes(class) %}
+    {% with msgs = get_flashed_messages(category_filter=[class]) %}
+        {% for msg in msgs %}
+            {% if class == 'error'%}
+                <div class="alert alert-danger alert-dismissible fade show message" data-autohide="3">
+            {%else%}
+                <div class="alert alert-{{ class }} alert-dismissible fade show message" data-autohide="3">
+            {%endif%}
+                {{ msg }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endwith %}
+{% endmacro %}
+
+<div class="ui text container">
+    <div class="flashes" style="position:fixed; left: 40%">
+        {{ render_flashes('error') }}
+        {{ render_flashes('warning') }}
+        {{ render_flashes('info') }}
+        {{ render_flashes('success') }}
+    </div>
+</div>
+
+

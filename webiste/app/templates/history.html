@@ -1,0 +1,47 @@
+<!-- 
+    Author: David Cruciani
+-->
+
+{% extends 'base.html' %}
+
+{% block content %}
+    <div id="top"> <h1>History</h1> </div>
+
+    <hr>
+    <br>
+
+    <div v-if="history">
+        <div v-for="h in history">
+            [[h]]
+        </div>
+    </div>
+    
+    <span id="goTop">[<a href="#top">Go Back Top</a>]</span>
+{% endblock %}
+
+{% block script %}
+<script type="module">
+    const { createApp, ref, onMounted, nextTick, defineComponent} = Vue
+    import {display_toast, message_list} from '/static/js/toaster.js'
+    createApp({
+        delimiters: ['[[', ']]'],
+        setup() {
+            const history = ref({})
+
+            async function get_history(){
+                let res = await fetch("/get_history")
+                let loc = await res.json()
+                history.value = loc
+            }
+            get_history()
+
+
+            return {
+                message_list,
+                history,
+            }
+        }
+    }).mount('.container')
+
+</script>
+{% endblock %}

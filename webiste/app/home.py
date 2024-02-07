@@ -1,0 +1,138 @@
+from flask import Flask, Blueprint, render_template, request, jsonify
+from . import home_core as HomeModel
+from . import session as SessionModel
+
+home_blueprint = Blueprint(
+    'home',
+    __name__,
+    template_folder='templates',
+    static_folder='static'
+)
+
+
+@home_blueprint.route("/")
+def home():
+    return render_template("home.html")
+
+@home_blueprint.route("/get_modules")
+def get_modules():
+    """Return all modules available"""
+    expansion = ""
+    hover = ""
+
+    if "expansion" in request.args:
+        expansion = request.args.get("expansion")
+    if "hover" in request.args:
+        hover = request.args.get("hover")
+    res = HomeModel.get_modules(expansion, hover)
+
+    if "message" in res:
+        return res, 404
+    return res, 200
+
+@home_blueprint.route("/get_list_misp_attributes")
+def get_list_misp_attributes():
+    """Return all misp attributes for input and output"""
+    expansion = ""
+    hover = ""
+
+    if "expansion" in request.args:
+        expansion = request.args.get("expansion")
+    if "hover" in request.args:
+        hover = request.args.get("hover")
+
+    res = HomeModel.get_list_misp_attributes(expansion, hover)
+
+    if "message" in res:
+        return res, 404
+    return res, 200
+
+@home_blueprint.route("/run_modules", methods=['POST'])
+def run_modules():
+    """Run modules"""
+    if "query" in request.json:
+        if "input" in request.json:
+            if "expansion" in request.json or "hover" in request.json:
+                session = SessionModel.Session_class(request.json)
+                session.start()
+                SessionModel.sessions.append(session)
+                return jsonify(session.status()), 201
+            return {"message": "Need a module type"}, 400
+        return {"message": "Need an input (misp attribute)"}, 400
+    return {"message": "Need to type something"}, 400
+
+@home_blueprint.route("/status/<sid>")
+def status(sid):
+    """Status of <sid> queue"""
+    sess = HomeModel.get_session(sid)
+    if sess:
+        return jsonify(HomeModel.get_status_db(sess))
+    else:
+        for s in SessionModel.sessions:
+            if s.id == sid:
+                return jsonify(s.status())
+    return jsonify({'message': 'Scan session not found'}), 404
+
+@home_blueprint.route("/result/<sid>")
+def result(sid):
+    """Result of <sid> queue"""
+    sess = HomeModel.get_session(sid)
+    if sess:
+        return jsonify(HomeModel.get_result_db(sess))
+    else:
+        for s in SessionModel.sessions:
+            if s.id == sid:
+                return jsonify(s.get_result())
+    return jsonify({'message': 'Scan session not found'}), 404
+
+
+
+
+
+
+@home_blueprint.route("/modules_config")
+def modules_config():
+    """List all modules for configuration"""
+
+    return render_template("modules_config.html")
+
+@home_blueprint.route("/modules_config_data")
+def modules_config_data():
+    """List all modules for configuration"""
+
+    modules_config = HomeModel.get_modules_config()
+    return modules_config, 200
+
+
+@home_blueprint.route("/change_config", methods=["POST"])
+def change_config():
+    """Change configuation for a module"""
+    if "module_name" in request.json["result_dict"]:
+        res = HomeModel.change_config_core(request.json["result_dict"])
+        if res:
+            return {'message': 'Config changed', 'toast_class': "success-subtle"}, 200
+        return {'message': 'Something went wrong', 'toast_class': "danger-subtle"}, 400
+    return {'message': 'Need to pass "module_name"', 'toast_class': "warning-subtle"}, 400
+
+@home_blueprint.route("/change_status", methods=["GET"])
+def change_status():
+    """Change the status of a module, active or unactive"""
+    if "module_id" in request.args:
+        res = HomeModel.change_status_core(request.args.get("module_id"))
+        if res:
+            return {'message': 'Module status changed', 'toast_class': "success-subtle"}, 200
+        return {'message': 'Something went wrong', 'toast_class': "danger-subtle"}, 400
+    return {'message': 'Need to pass "module_id"', 'toast_class': "warning-subtle"}, 400
+
+
+
+@home_blueprint.route("/history", methods=["GET"])
+def history():
+    """View all history"""
+    return render_template("history.html")
+
+@home_blueprint.route("/get_history", methods=["GET"])
+def get_history():
+    """Get all history"""
+    histories = HomeModel.get_history()
+    return histories

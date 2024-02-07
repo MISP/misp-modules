@@ -1,0 +1,14 @@
+flask
+sqlalchemy
+flask-sqlalchemy
+Flask-WTF
+Flask-Migrate
+WTForms
+Werkzeug==2.3.7
+Flask-Migrate
+flask-restx
+python-dateutil
+schedule
+pytest
+gunicorn
+jsonschema

@@ -1,0 +1,30 @@
+<!--Main Navigation-->
+<header>
+  	<!-- Sidebar -->
+	<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+		<span class="navbar-toggler-icon"></span>
+	</button>
+  	<nav id="sidebarMenu" class="d-lg-block sidebar bg-white">
+		
+		<a class="navbar-brand" style="margin-left: 20px;" href="/">
+			<img src="{{ url_for('static',filename='image/misp.png') }}" height="55" alt="Misp Logo" loading="lazy" />
+		</a>
+	  
+		<div class="position-sticky">
+			<div class="list-group list-group-flush mx-3 mt-4">
+				<a href="/" class="list-group-item list-group-item-action py-2 ripple" aria-current="true">
+					<i class="fa-solid fa-house fa-fw me-3"></i><span>Home</span>
+				</a>
+				<a style="margin-top: 30px;" href="/history" class="list-group-item list-group-item-action py-2 ripple">
+					<i class="fa-solid fa-clock-rotate-left fa-fw me-3"></i><span>History</span>
+				</a>
+				<a style="margin-top: 30px;" href="/modules_config" class="list-group-item list-group-item-action py-2 ripple">
+					<i class="fa-solid fa-gear fa-fw me-3"></i><span>Config</span>
+				</a>
+			</div>
+		</div>
+  	</nav>
+  <!-- Sidebar -->
+
+</header>
+<!--Main Navigation-->
