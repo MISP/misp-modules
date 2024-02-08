@@ -21,7 +21,7 @@ class Module(db.Model):
 class Session_db(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     uuid = db.Column(db.String(36), index=True, unique=True)
-    glob_query = db.Column(db.String)
+    modules_list = db.Column(db.String)
     query_enter = db.Column(db.String)
     input_query = db.Column(db.String)
     config_module=db.Column(db.String)

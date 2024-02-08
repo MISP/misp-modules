@@ -22,13 +22,13 @@ class Session_class:
         self.result = dict()
         self.query = request_json["query"]
         self.input_query = request_json["input"]
-        self.glob_query = self.expansion + self.hover
+        self.modules_list = request_json["modules"]
         self.nb_errors = 0
         self.config_module = self.config_module_setter(request_json)
     
     def config_module_setter(self, request_json):
         if request_json["config"]:
-            for query in self.glob_query:
+            for query in self.modules_list:
                 if not query in request_json["config"]:
                     request_json["config"][query] = {}
                     module = HomeModel.get_module_by_name(query)
@@ -41,9 +41,9 @@ class Session_class:
 
     def start(self):
         """Start all worker"""
-        for i in range(len(self.glob_query)):
+        for i in range(len(self.modules_list)):
             #need the index and the url in each queue item.
-            self.jobs.put((i, self.glob_query[i]))
+            self.jobs.put((i, self.modules_list[i]))
         for _ in range(self.thread_count):
             worker = Thread(target=self.process)
             worker.daemon = True
@@ -55,7 +55,7 @@ class Session_class:
         if self.jobs.empty():
             self.stop()
 
-        total = len(self.glob_query)
+        total = len(self.modules_list)
         remaining = max(self.jobs.qsize(), len(self.threads))
         complete = total - remaining
         registered = len(self.result)
@@ -123,7 +123,7 @@ class Session_class:
     def save_info(self):
         s = Session_db(
             uuid=str(self.id),
-            glob_query=json.dumps(self.glob_query),
+            modules_list=json.dumps(self.modules_list),
             query_enter=self.query,
             input_query=self.input_query,
             config_module=json.dumps(self.config_module),

@@ -116,13 +116,13 @@ def change_status_core(module_id):
 ##############
 
 def get_status_db(session):
-    glob_query = json.loads(session.glob_query)
     """Return status of a session"""
+    modules_list = json.loads(session.modules_list)
     result = json.loads(session.result)
     return{
         'id': session.uuid,
-        'total': len(glob_query),
-        'complete': len(glob_query),
+        'total': len(modules_list),
+        'complete': len(modules_list),
         'remaining': 0,
         'registered': len(result),
         'stopped' : True,
@@ -139,5 +139,5 @@ def get_history():
     histories = History.query.all()
     for history in histories:
         session = Session_db.query.get(history.session_id)
-        histories_list.append({"uuid": session.uuid, "query": session.query_enter, "modules": json.loads(session.glob_query), "input": session.input_query})
+        histories_list.append({"uuid": session.uuid, "query": session.query_enter, "modules": json.loads(session.modules_list), "input": session.input_query})
     return histories_list

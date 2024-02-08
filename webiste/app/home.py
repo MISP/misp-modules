@@ -29,7 +29,7 @@ def query(sid):
                 query_loc = s.query
                 session=s
     if flag:
-        return render_template("query.html", query=query_loc, sid=sid, input_query=session.input_query, modules=json.loads(session.glob_query))
+        return render_template("query.html", query=query_loc, sid=sid, input_query=session.input_query, modules=json.loads(session.modules_list))
     return render_template("404.html")
 
 
