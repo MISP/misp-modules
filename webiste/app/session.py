@@ -7,7 +7,6 @@ from . import home_core as HomeModel
 import uuid
 from . import db
 from .db_class.db import History, Session_db
-from sqlalchemy import func
 
 
 sessions = list()
@@ -21,23 +20,11 @@ class Session_class:
         self.stopped = False
         self.result_stopped = dict()
         self.result = dict()
-        self.expansion = self.expansion_setter(request_json)
-        self.hover = self.hover_setter(request_json)
         self.query = request_json["query"]
         self.input_query = request_json["input"]
         self.glob_query = self.expansion + self.hover
         self.nb_errors = 0
         self.config_module = self.config_module_setter(request_json)
-
-    def expansion_setter(self, request_json):
-        if "expansion" in request_json:
-            return request_json["expansion"]
-        return []
-        
-    def hover_setter(self, request_json):
-        if "hover" in request_json:
-            return request_json["hover"]
-        return []
     
     def config_module_setter(self, request_json):
         if request_json["config"]:

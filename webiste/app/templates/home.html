@@ -20,75 +20,38 @@
         <span v-if="status_site" id="status">[[status_site]]</span>
     </div>
 
-    <!-- Modules selection -->
-    <div class="card card-body" style="margin-top: 10px;">
-        <h4>Modules Type</h4>
-        <table>
-            <tr>
-                <td>
-                    <input type="checkbox" id="expansion_module" @click="expansion_module()" value="expansion_module">
-                    <label class="checkbox-type-module" for="expansion_module" title="Select all expansion modules">Expansion modules</label>
-                </td>
-                <td>
-                    <input type="checkbox" id="hover_module" @click="hover_module()" value="hover_module">
-                    <label class="checkbox-type-module" for="hover_module" title="Select all hover modules">Hover modules</label>
-                </td>
-            </tr>
-        </table>
-    </div>
-
+    <br>
     <!-- Attributes selection -->
-    <div v-if="misp_attributes_list.length" class="card card-body" style="margin-top: 10px;">
-        <div class="row" style="margin-top: 2px;">
-            <div>
-                <div>
-                    <h4>Input Attributes</h4>
-                </div>
-                <div>
-                    <select data-placeholder="Input" class="select2-input form-control" name="input_select" id="input_select">
-                        <option value="None">--</option>
-                        <template v-for="attributes in misp_attributes_list">
-                            <option :value="attributes">[[attributes]]</option>
-                        </template>
-                    </select>
-                </div>
-            </div>
+    <div v-if="misp_attributes_list.length" style="margin-top: 10px; transform: translate(25%, 0);">
+        <div>
+            <h4>Input Attributes</h4>
+        </div>
+        <div>
+            <select data-placeholder="Input" class="select2-input form-control" name="input_select" id="input_select">
+                <option value="None">--</option>
+                <template v-for="attributes in misp_attributes_list">
+                    <option :value="attributes">[[attributes]]</option>
+                </template>
+            </select>
         </div>
     </div>
 
     <!-- Results modules selection -->
-    <template v-if="modules_list">
-        <div v-if="Object.keys(modules_list).length">
-            <div class="row" v-if="attr_selected.length">
-                <div class="col-5" v-if="modules_list.expansion.length">
-                    <div class="col-5">
-                        <h4>Expansions Modules</h4>
-                    </div>
-
-                    <select data-placeholder="Expansion" class="select2-expansion form-control" multiple name="expansion_select" id="expansion_select">
-                        <template v-for="key in modules_list.expansion">
-                            <option v-if="key.mispattributes.input.includes(attr_selected)" :value="key.name" :title="key.meta.description">[[key.name]]</option>
-                        </template>
-                    </select>
-                </div>
-                <div class="col-5" v-if="modules_list.hover.length">
-                    <div class="col-5">
-                        <h4>Hover Modules</h4>
-                    </div>
-                    <select data-placeholder="Hover" class="select2-hover form-control" multiple name="hover_select" id="hover_select">
-                        <template v-for="key in modules_list.hover">
-                            <option v-if="key.mispattributes.input.includes(attr_selected)" :value="key.name" :title="key.meta.description">[[key.name]]</option>
-                        </template>
-                    </select>
-                </div>
-            </div>
+    <template v-if="modules_list.length">
+        <div v-if="attr_selected.length" style="margin-top: 10px; width: 50%; transform: translate(50%, 0);">
+            <h4>Modules</h4>
+            <select data-placeholder="Modules" class="select2-modules form-control" multiple name="modules_select" id="modules_select">
+                <template v-for="key in modules_list">
+                    <option v-if="key.mispattributes.input.includes(attr_selected)" :value="key.name" :title="key.meta.description">[[key.name]]</option>
+                </template>
+            </select>
         </div>
     </template>
 
     <!-- Display in case a module as reauest_on_query activate -->
-    <div v-if="config_query.length" style="margin-top: 10px;" class="row">
+    <div v-if="config_query.length" style="margin-top: 10px; padding: 5px" class="row">
         <h4>Config</h4>
-        <div class="card col" style="margin-top: 10px;" v-for="module in config_query">
+        <div class="card col-4" style="margin-top: 10px; padding: 15px" v-for="module in config_query">
             <h4>[[module.name]]</h4>
             <div v-for="conf in module.meta.config" class="mb-3">
                 <label :for="'form-'+conf+'-'+module.name" class="form-label">[[conf]]</label>
@@ -112,14 +75,11 @@
         delimiters: ['[[', ']]'],
         setup() {
             const query = ref("Query")
-            const modules_list = ref({})
+            const modules_list = ref([])
             const misp_attributes_list = ref({})
             const attr_selected = ref([])
 
             const progress = ref(0)
-
-            let expansion_bool = false
-            let hover_bool = false
 
             const current_query = ref()
             const status_site = ref()
@@ -131,6 +91,7 @@
                 current_query.value = $("#process-query").val()
                 if (!current_query.value) {
                     status_site.value = '↖ You need to type something'
+                    window.scrollTo(0, 0);
                     return
                 }else{
                     status_site.value = ""
@@ -140,8 +101,7 @@
                     progress.value = 0
                     let error_flag = false
 
-                    let result_dict = {"expansion": $("#expansion_select").val(), 
-                                        "hover": $("#hover_select").val(), 
+                    let result_dict = {"modules": $("#modules_select").val(), 
                                         "input": $("#input_select").val(), 
                                         "query": current_query.value
                                     }
@@ -185,26 +145,17 @@
             }
 
 
-
-
             async function query_modules(){
-                let url = ""
-                if(expansion_bool) url += "expansion="+expansion_bool+"&"
-                if(hover_bool) url += "hover="+hover_bool
-
-                let res = await fetch("/get_modules?"+url)
+                let res = await fetch("/get_modules")
                 let loc = await res.json()
                 modules_list.value = loc
 
                 await query_misp_attributes()
             }
+            query_modules()
 
             async function query_misp_attributes(){
-                let url = ""
-                if(expansion_bool) url += "expansion="+expansion_bool+"&"
-                if(hover_bool) url += "hover="+hover_bool
-
-                let res = await fetch("/get_list_misp_attributes?"+url)
+                let res = await fetch("/get_list_misp_attributes")
                 let loc = await res.json()
                 misp_attributes_list.value = loc
 
@@ -212,7 +163,8 @@
 
                 if (!$('.select2-input').hasClass("select2-hidden-accessible")) {
                     $('.select2-input').select2({
-                        theme: 'bootstrap-5'
+                        theme: 'bootstrap-5',
+                        width: '50%'
                     })
                 }
                 if (!$('.select2-expansion').hasClass("select2-hidden-accessible")) {
@@ -234,45 +186,30 @@
 
                     await nextTick()
 
-                    if (!$('.select2-expansion').hasClass("select2-hidden-accessible")) {
-                        $('.select2-expansion').select2({
+                    if (!$('.select2-modules').hasClass("select2-hidden-accessible")) {
+                        $('.select2-modules').select2({
                             theme: 'bootstrap-5'
                         })
-                        $('#expansion_select').on('change.select2', async function (e) {
+                        $('#modules_select').on('change.select2', async function (e) {
                             let loc_list = $(this).select2('data').map(item => item.id)
                             config_query.value = []
                             for(let el in loc_list){
-                                for(let index in modules_list.value.expansion){
-                                    if(modules_list.value.expansion[index].name == loc_list[el]){
-                                        if(modules_list.value.expansion[index].request_on_query){
-                                            config_query.value.push(modules_list.value.expansion[index])
+                                for(let index in modules_list.value){
+                                    if(modules_list.value[index].name == loc_list[el]){
+                                        if(modules_list.value[index].request_on_query){
+                                            config_query.value.push(modules_list.value[index])
                                         }
                                         break
                                     }
                                 }
                             }
                         })
-                    }
-                    if (!$('.select2-hover').hasClass("select2-hidden-accessible")) {
-                        $('.select2-hover').select2({
-                            theme: 'bootstrap-5'
-                        })
-                    }
-                    
+                    }                    
                 })
 
                 $('#input_select').on('select2:open', function (e) {
                     document.querySelector('.select2-search__field').focus();
                 })
-            }
-
-            async function expansion_module(){
-                expansion_bool = !expansion_bool
-                await query_modules()
-            }
-            async function hover_module(){
-                hover_bool = !hover_bool
-                await query_modules()
             }
 
             function pairedList() {
@@ -298,8 +235,6 @@
                 status_site,
                 config_query,
                 actionQuery,
-                expansion_module,
-                hover_module,
                 pairedList,
                 checked_attr,
                 generateCoreFormatUI

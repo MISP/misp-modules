@@ -37,14 +37,7 @@ def query(sid):
 @home_blueprint.route("/get_modules")
 def get_modules():
     """Return all modules available"""
-    expansion = ""
-    hover = ""
-
-    if "expansion" in request.args:
-        expansion = request.args.get("expansion")
-    if "hover" in request.args:
-        hover = request.args.get("hover")
-    res = HomeModel.get_modules(expansion, hover)
+    res = HomeModel.get_modules()
 
     if "message" in res:
         return res, 404
@@ -53,15 +46,7 @@ def get_modules():
 @home_blueprint.route("/get_list_misp_attributes")
 def get_list_misp_attributes():
     """Return all misp attributes for input and output"""
-    expansion = ""
-    hover = ""
-
-    if "expansion" in request.args:
-        expansion = request.args.get("expansion")
-    if "hover" in request.args:
-        hover = request.args.get("hover")
-
-    res = HomeModel.get_list_misp_attributes(expansion, hover)
+    res = HomeModel.get_list_misp_attributes()
 
     if "message" in res:
         return res, 404
@@ -72,7 +57,7 @@ def run_modules():
     """Run modules"""
     if "query" in request.json:
         if "input" in request.json:
-            if "expansion" in request.json or "hover" in request.json:
+            if "modules" in request.json:
                 session = SessionModel.Session_class(request.json)
                 session.start()
                 SessionModel.sessions.append(session)

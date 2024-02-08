@@ -121,12 +121,15 @@
                     if (data['remaining'] > 0) {
                         setTimeout(pollScan, 3000);
                     } else {
+                        let sum = data['complete'] - data["nb_errors"]
                         // Button Stop pressed
-                        if (data['stopped'])
-                            status_site.value = 'Stopped ! ' + data['complete'] - data["nb_errors"] + ' Success. ' + data["nb_errors"] + ' Errors. ' + data['complete'] + ' Total.'
-                        // Display result of the search
-                        else
-                            status_site.value = data['complete'] - data["nb_errors"] + ' Success. ' + data["nb_errors"] + ' Errors. ' + data['complete'] + ' Total.'
+                        if (data['stopped']){
+                            status_site.value = 'Stopped ! ' + sum + ' Success. ' + data["nb_errors"] + ' Errors. ' + data['complete'] + ' Total.'
+                            console.log(data['complete'] - data["nb_errors"]);
+                            // Display result of the search
+                        }else{
+                            status_site.value = sum + ' Success. ' + data["nb_errors"] + ' Errors. ' + data['complete'] + ' Total.'
+                        }
                     }
                     if (last_registered < data['registered']) {
                         last_registered = data['registered']
