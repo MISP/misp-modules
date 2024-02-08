@@ -13,16 +13,10 @@
 
     <hr>
     <br>
-    <div>
-        <div id="searchbox">
-            <input type="hidden" id="share" value="{{share}}">
-            <input type="text" id="process-query" placeholder="Enter here..." autofocus>
-            <!-- <button id="query" @click="actionQuery()">[[query]]</button> -->
+    <div style="width:50%; transform: translate(50%, 0);">
+        <div>
+            <input type="text" id="process-query" placeholder="Enter here..." autofocus class="form-control" style="border-radius: 5px;" />
         </div>
-        <div v-if="is_searching" class="progress">
-            <div class="progress-bar progress-bar-striped active" id="progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" :style="'width:'+progress + '%;'">
-            </div>
-        </div> 
         <span v-if="status_site" id="status">[[status_site]]</span>
     </div>
 
@@ -48,7 +42,7 @@
         <div class="row" style="margin-top: 2px;">
             <div>
                 <div>
-                    <h4>Input</h4>
+                    <h4>Input Attributes</h4>
                 </div>
                 <div>
                     <select data-placeholder="Input" class="select2-input form-control" name="input_select" id="input_select">
@@ -63,31 +57,33 @@
     </div>
 
     <!-- Results modules selection -->
-    <div v-if="Object.keys(modules_list).length">
-        <div class="row" v-if="attr_selected.length">
-            <div class="col-5" v-if="modules_list.expansion.length">
-                <div class="col-5">
-                    <h4>Expansion</h4>
-                </div>
+    <template v-if="modules_list">
+        <div v-if="Object.keys(modules_list).length">
+            <div class="row" v-if="attr_selected.length">
+                <div class="col-5" v-if="modules_list.expansion.length">
+                    <div class="col-5">
+                        <h4>Expansions Modules</h4>
+                    </div>
 
-                <select data-placeholder="Expansion" class="select2-expansion form-control" multiple name="expansion_select" id="expansion_select">
-                    <template v-for="key in modules_list.expansion">
-                        <option v-if="key.mispattributes.input.includes(attr_selected)" :value="key.name" :title="key.meta.description">[[key.name]]</option>
-                    </template>
-                </select>
-            </div>
-            <div class="col-5" v-if="modules_list.hover.length">
-                <div class="col-5">
-                    <h4>Hover</h4>
+                    <select data-placeholder="Expansion" class="select2-expansion form-control" multiple name="expansion_select" id="expansion_select">
+                        <template v-for="key in modules_list.expansion">
+                            <option v-if="key.mispattributes.input.includes(attr_selected)" :value="key.name" :title="key.meta.description">[[key.name]]</option>
+                        </template>
+                    </select>
                 </div>
-                <select data-placeholder="Hover" class="select2-hover form-control" multiple name="hover_select" id="hover_select">
-                    <template v-for="key in modules_list.hover">
-                        <option v-if="key.mispattributes.input.includes(attr_selected)" :value="key.name" :title="key.meta.description">[[key.name]]</option>
-                    </template>
-                </select>
+                <div class="col-5" v-if="modules_list.hover.length">
+                    <div class="col-5">
+                        <h4>Hover Modules</h4>
+                    </div>
+                    <select data-placeholder="Hover" class="select2-hover form-control" multiple name="hover_select" id="hover_select">
+                        <template v-for="key in modules_list.hover">
+                            <option v-if="key.mispattributes.input.includes(attr_selected)" :value="key.name" :title="key.meta.description">[[key.name]]</option>
+                        </template>
+                    </select>
+                </div>
             </div>
         </div>
-    </div>
+    </template>
 
     <!-- Display in case a module as reauest_on_query activate -->
     <div v-if="config_query.length" style="margin-top: 10px;" class="row">
@@ -106,50 +102,6 @@
 
     <button class="btn btn-primary" @click="actionQuery()">Query</button>
 
-    <!-- Results Part -->
-    <hr>      
-    <div class="row" v-if="Object.keys(modules_res).length">
-        <div class="col-10">
-            <h3 id="results_part">Results</h3>
-            <div class="accordion">
-                <div class="accordion-item" v-for="result, key in modules_res">
-                    <template v-if="!('error' in result)">
-                        <h2 class="accordion-header">
-                            <button class="accordion-button" type="button" data-bs-toggle="collapse" :data-bs-target="'#panelsStayOpen-'+key" aria-expanded="true" :aria-controls="'panelsStayOpen-'+key">
-                                [[key]]
-                            </button>
-                        </h2>
-                        <div :id="'panelsStayOpen-'+key" class="accordion-collapse collapse show">
-                            <div class="accordion-body" v-html="generateCoreFormatUI(result)[0].outerHTML"></div>
-                        </div>
-                    </template>
-                </div>
-            </div>
-
-            <!-- Errors Part -->
-            <hr style="margin-top: 50px">
-            <h3 id="errors_part">Errors</h3>
-            <div class="accordion">
-                <div class="accordion-item" v-for="result, key in modules_res">
-                    <template v-if="'error' in result">
-                        <h2 class="accordion-header">
-                            <button class="accordion-button" type="button" data-bs-toggle="collapse" :data-bs-target="'#panelsStayOpen-'+key" aria-expanded="true" :aria-controls="'panelsStayOpen-'+key">
-                                [[key]]
-                                <span style="margin-left: 5px;" title="Error">❌</span>
-                            </button>
-                        </h2>
-                        <div :id="'panelsStayOpen-'+key" class="accordion-collapse collapse show">
-                            <div class="accordion-body" v-html="generateCoreFormatUI(result)[0].outerHTML"></div>
-                        </div>
-                    </template>
-                </div>
-            </div>
-        </div>
-        <div class="col-1" style="position: fixed; right: 0px; box-shadow: 0 2px 5px 0 rgb(0 0 0 / 5%), 0 2px 10px 0 rgb(0 0 0 / 5%);">
-            <div style="padding: 10px;"><a style="text-decoration: none;" href="#results_part">Results</a></div>
-            <div style="padding: 10px;"><a style="text-decoration: none;" href="#errors_part">Errors</a></div>
-        </div>
-    </div>
 {% endblock %}
 
 {% block script %}
@@ -160,14 +112,10 @@
         delimiters: ['[[', ']]'],
         setup() {
             const query = ref("Query")
-            const is_searching = ref(false)
             const modules_list = ref({})
             const misp_attributes_list = ref({})
             const attr_selected = ref([])
 
-            const sid = ref(null)
-            let last_registered = 0
-            const modules_res = ref({})
             const progress = ref(0)
 
             let expansion_bool = false
@@ -189,8 +137,6 @@
                 }
 
                 if (query.value == 'Query') {
-                    last_registered = 0;
-                    is_searching.value = true
                     progress.value = 0
                     let error_flag = false
 
@@ -221,10 +167,10 @@
                                     })
                         if(await res.status == 201){
                             let loc = await res.json()
-                            is_searching.value = true
-                            sid.value = loc['id']
                             query.value = 'Stop'
-                            pollScan();
+                            console.log(loc['id']);
+                            await nextTick()
+                            window.location.href="/query/" + loc['id']
                         }else{
                             let loc = await res.json()
                             query.value = 'Query'                          
@@ -237,41 +183,6 @@
                     }
                 }
             }
-
-            function pollScan() {
-                // Loop function to update the list of identified domains
-                $.getJSON('/status/' + sid.value, function(data) {
-                    progress.value = Math.round((data['complete']/data['total'])*100)
-                    status_site.value = 'Processed ' + data['complete'] + ' of ' + data['total']
-                    if (data['remaining'] > 0) {
-                        setTimeout(pollScan, 3000);
-                    } else {
-                        // Button Stop pressed
-                        if (data['stopped'])
-                            status_site.value = 'Stopped ! ' + data['complete'] - data["nb_errors"] + ' Success. ' + data["nb_errors"] + ' Errors. ' + data['complete'] + ' Total.'
-                        // Display result of the search
-                        else
-                            status_site.value = data['complete'] - data["nb_errors"] + ' Success. ' + data["nb_errors"] + ' Errors. ' + data['complete'] + ' Total.'
-                        query.value = 'Query'
-                    }
-                    if (last_registered < data['registered']) {
-                        last_registered = data['registered']
-                        fetchResult();
-                    }
-                });
-            }
-
-            async function fetchResult(){
-                modules_res.value = {}
-                const res = await fetch("/result/"+sid.value)
-                let loc = await res.json()
-                modules_res.value = loc
-            }
-
-
-
-
-
 
 
 
@@ -381,12 +292,10 @@
                 message_list,
                 query,
                 progress,
-                is_searching,
                 modules_list,
                 misp_attributes_list,
                 attr_selected,
                 status_site,
-                modules_res,
                 config_query,
                 actionQuery,
                 expansion_module,

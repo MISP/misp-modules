@@ -1,14 +1,14 @@
 <!--Main Navigation-->
 <header>
   	<!-- Sidebar -->
-	<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-		<span class="navbar-toggler-icon"></span>
-	</button>
-  	<nav id="sidebarMenu" class="d-lg-block sidebar bg-white">
+  	<nav id="sidebarMenu" class="collapse d-lg-block sidebar collapse bg-white">
 		
 		<a class="navbar-brand" style="margin-left: 20px;" href="/">
 			<img src="{{ url_for('static',filename='image/misp.png') }}" height="55" alt="Misp Logo" loading="lazy" />
 		</a>
+		<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+			<span class="navbar-toggler-icon"></span>
+		</button>
 	  
 		<div class="position-sticky">
 			<div class="list-group list-group-flush mx-3 mt-4">

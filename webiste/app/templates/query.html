@@ -1,0 +1,162 @@
+<!-- 
+    Author: David Cruciani
+-->
+
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1 id="top">MISP Modules</h1>
+
+    <hr>
+    <br>
+    <div style="width:50%; transform: translate(50%, 0);">
+        <div>
+            <input type="hidden" id="share" value="{{sid}}">
+            <input type="text" id="process-query" value="{{query}}" class="form-control" style="border-radius: 5px;" />
+        </div>
+        <div v-if="is_searching" class="progress" >
+            <div class="progress-bar progress-bar-striped active" id="progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" :style="'width:'+progress + '%;'">
+            </div>
+        </div>
+        <span v-if="status_site" id="status">[[status_site]]</span>
+    </div>
+
+
+    <button style="margin-top: 10px;" class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#collapseInfo" aria-expanded="false" aria-controls="collapseInfo">
+        More Info
+    </button>
+    <div class="collapse" id="collapseInfo">
+        <div class="card card-body">
+            <div class="row">
+                <div class="col">
+                    <h4>Input Attribute:</h4>
+                    {{input_query}}
+                </div>
+                <div class="col">
+                    <h4>Modules:</h4>
+                    {%for module in modules%} {{module}}, {%endfor%}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div style="margin-top: 10px;"><a href="/">New query</a></div>
+
+    <br/>
+
+    <!-- Results Part -->
+    <hr>      
+    <div class="row" v-if="Object.keys(modules_res).length">
+        <div class="col-10">
+            <h3 id="results_part">Results</h3>
+            <div class="accordion">
+                <div class="accordion-item" v-for="result, key in modules_res">
+                    <template v-if="!('error' in result)">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse" :data-bs-target="'#panelsStayOpen-'+key" aria-expanded="true" :aria-controls="'panelsStayOpen-'+key">
+                                [[key]]
+                            </button>
+                        </h2>
+                        <div :id="'panelsStayOpen-'+key" class="accordion-collapse collapse show">
+                            <div class="accordion-body" v-html="generateCoreFormatUI(result)[0].outerHTML"></div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+
+            <!-- Errors Part -->
+            <hr style="margin-top: 50px">
+            <h3 id="errors_part">Errors</h3>
+            <div class="accordion">
+                <div class="accordion-item" v-for="result, key in modules_res">
+                    <template v-if="'error' in result">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse" :data-bs-target="'#panelsStayOpen-'+key" aria-expanded="true" :aria-controls="'panelsStayOpen-'+key">
+                                [[key]]
+                                <span style="margin-left: 5px;" title="Error">❌</span>
+                            </button>
+                        </h2>
+                        <div :id="'panelsStayOpen-'+key" class="accordion-collapse collapse show">
+                            <div class="accordion-body" v-html="generateCoreFormatUI(result)[0].outerHTML"></div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+        <div class="col-1" style="position: fixed; right: 0px; box-shadow: 0 2px 5px 0 rgb(0 0 0 / 5%), 0 2px 10px 0 rgb(0 0 0 / 5%);">
+            <div style="padding: 10px;"><a style="text-decoration: none;" href="#results_part">Results</a></div>
+            <div style="padding: 10px;"><a style="text-decoration: none;" href="#errors_part">Errors</a></div>
+        </div>
+    </div>
+    <span id="goTop">[<a href="#top">Go Back Top</a>]</span>
+{% endblock %}
+
+{% block script %}
+<script type="module">
+    const { createApp, ref, onMounted, nextTick, defineComponent} = Vue
+    import {message_list} from '/static/js/toaster.js'
+    createApp({
+        delimiters: ['[[', ']]'],
+        setup() {
+            const is_searching = ref(false)
+
+            const sid = ref(null)
+            let last_registered = 0
+            const modules_res = ref({})
+            const progress = ref(0)
+            const status_site = ref()
+
+
+            function actionQuery(){
+                is_searching.value = true
+                sid.value = $("#share").val()
+                pollScan();
+            }
+
+            function pollScan() {
+                // Loop function to update the list of identified domains
+                $.getJSON('/status/' + sid.value, function(data) {
+                    progress.value = Math.round((data['complete']/data['total'])*100)
+                    status_site.value = 'Processed ' + data['complete'] + ' of ' + data['total']
+                    if (data['remaining'] > 0) {
+                        setTimeout(pollScan, 3000);
+                    } else {
+                        // Button Stop pressed
+                        if (data['stopped'])
+                            status_site.value = 'Stopped ! ' + data['complete'] - data["nb_errors"] + ' Success. ' + data["nb_errors"] + ' Errors. ' + data['complete'] + ' Total.'
+                        // Display result of the search
+                        else
+                            status_site.value = data['complete'] - data["nb_errors"] + ' Success. ' + data["nb_errors"] + ' Errors. ' + data['complete'] + ' Total.'
+                    }
+                    if (last_registered < data['registered']) {
+                        last_registered = data['registered']
+                        fetchResult();
+                    }
+                });
+            }
+
+            async function fetchResult(){
+                modules_res.value = {}
+                const res = await fetch("/result/"+sid.value)
+                let loc = await res.json()
+                modules_res.value = loc
+            }
+
+            onMounted(() => {
+                actionQuery()
+            })
+
+
+            return {
+                message_list,
+                progress,
+                status_site,
+                is_searching,
+                modules_res,
+                generateCoreFormatUI
+            }
+        }
+    }).mount('.container')
+
+</script>
+{% endblock %}

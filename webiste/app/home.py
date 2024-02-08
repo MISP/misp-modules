@@ -1,3 +1,4 @@
+import json
 from flask import Flask, Blueprint, render_template, request, jsonify
 from . import home_core as HomeModel
 from . import session as SessionModel
@@ -13,6 +14,25 @@ home_blueprint = Blueprint(
 @home_blueprint.route("/")
 def home():
     return render_template("home.html")
+
+@home_blueprint.route("/query/<sid>")
+def query(sid):
+    session = HomeModel.get_session(sid)
+    flag=False
+    if session:
+        flag = True
+        query_loc = session.query_enter
+    else:
+        for s in SessionModel.sessions:
+            if s.id == sid:
+                flag = True
+                query_loc = s.query
+                session=s
+    if flag:
+        return render_template("query.html", query=query_loc, sid=sid, input_query=session.input_query, modules=json.loads(session.glob_query))
+    return render_template("404.html")
+
+
 
 @home_blueprint.route("/get_modules")
 def get_modules():
