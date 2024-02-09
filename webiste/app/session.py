@@ -25,19 +25,19 @@ class Session_class:
         self.modules_list = request_json["modules"]
         self.nb_errors = 0
         self.config_module = self.config_module_setter(request_json)
+
     
     def config_module_setter(self, request_json):
-        if request_json["config"]:
-            for query in self.modules_list:
-                if not query in request_json["config"]:
-                    request_json["config"][query] = {}
-                    module = HomeModel.get_module_by_name(query)
-                    mcs = HomeModel.get_module_config_module(module.id)
-                    for mc in mcs:
-                        config_db = HomeModel.get_config(mc.config_id)
-                        request_json["config"][query][config_db.name] = mc.value
-            return request_json["config"]
-        return {}
+        """Setter for config for all modules used"""
+        for query in self.modules_list:
+            if not query in request_json["config"]:
+                request_json["config"][query] = {}
+                module = HomeModel.get_module_by_name(query)
+                mcs = HomeModel.get_module_config_module(module.id)
+                for mc in mcs:
+                    config_db = HomeModel.get_config(mc.config_id)
+                    request_json["config"][query][config_db.name] = mc.value
+        return request_json["config"]
 
     def start(self):
         """Start all worker"""
@@ -103,7 +103,6 @@ class Session_class:
             if work[1] in self.config_module:
                 loc_config = self.config_module[work[1]]
                 
-                        
             if loc_query:
                 send_to = {"module": work[1], "attribute": loc_query, "config": loc_config}
             else:
@@ -121,6 +120,7 @@ class Session_class:
         return self.result
     
     def save_info(self):
+        """Save info in the db"""
         s = Session_db(
             uuid=str(self.id),
             modules_list=json.dumps(self.modules_list),

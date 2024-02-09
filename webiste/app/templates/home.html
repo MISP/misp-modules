@@ -74,7 +74,6 @@
     createApp({
         delimiters: ['[[', ']]'],
         setup() {
-            const query = ref("Query")
             const modules_list = ref([])
             const misp_attributes_list = ref({})
             const attr_selected = ref([])
@@ -97,48 +96,43 @@
                     status_site.value = ""
                 }
 
-                if (query.value == 'Query') {
-                    progress.value = 0
-                    let error_flag = false
+                progress.value = 0
+                let error_flag = false
 
-                    let result_dict = {"modules": $("#modules_select").val(), 
-                                        "input": $("#input_select").val(), 
-                                        "query": current_query.value
-                                    }
-                    result_dict["config"] = {}
-                    for(let el in config_query.value){
-                        result_dict["config"][config_query.value[el].name] = {}
-                        for(let conf in config_query.value[el].meta.config){
-                            $("#error-"+config_query.value[el].meta.config[conf]+"-"+config_query.value[el].name).text("")
-                            let loc = $("#form-"+config_query.value[el].meta.config[conf]+"-"+config_query.value[el].name).val()
-                            if(!loc){
-                                error_flag = true
-                                $("#error-"+config_query.value[el].meta.config[conf]+"-"+config_query.value[el].name).text("Please enter value")
-                            }else{
-                                result_dict["config"][config_query.value[el].name][config_query.value[el].meta.config[conf]] = loc
-                            }
+                let result_dict = {"modules": $("#modules_select").val(), 
+                                    "input": $("#input_select").val(), 
+                                    "query": current_query.value
+                                }
+                result_dict["config"] = {}
+                for(let el in config_query.value){
+                    result_dict["config"][config_query.value[el].name] = {}
+                    for(let conf in config_query.value[el].meta.config){
+                        $("#error-"+config_query.value[el].meta.config[conf]+"-"+config_query.value[el].name).text("")
+                        let loc = $("#form-"+config_query.value[el].meta.config[conf]+"-"+config_query.value[el].name).val()
+                        if(!loc){
+                            error_flag = true
+                            $("#error-"+config_query.value[el].meta.config[conf]+"-"+config_query.value[el].name).text("Please enter value")
+                        }else{
+                            result_dict["config"][config_query.value[el].name][config_query.value[el].meta.config[conf]] = loc
                         }
                     }
-                    if(!error_flag){
-                        const res = await fetch('/run_modules',{
-                                        headers: { "X-CSRFToken": $("#csrf_token").val(), "Content-Type": "application/json" },
-                                        method: "POST",
-                                        body: JSON.stringify(result_dict)
-                                    })
-                        if(await res.status == 201){
-                            let loc = await res.json()
-                            query.value = 'Stop'
-                            console.log(loc['id']);
-                            await nextTick()
-                            window.location.href="/query/" + loc['id']
-                        }else{
-                            let loc = await res.json()
-                            query.value = 'Query'                          
-                            status_site.value = loc['message'] || 'Something went wrong'
+                }
+                if(!error_flag){
+                    const res = await fetch('/run_modules',{
+                                    headers: { "X-CSRFToken": $("#csrf_token").val(), "Content-Type": "application/json" },
+                                    method: "POST",
+                                    body: JSON.stringify(result_dict)
+                                })
+                    if(await res.status == 201){
+                        let loc = await res.json()
+                        await nextTick()
+                        window.location.href="/query/" + loc['id']
+                    }else{
+                        let loc = await res.json()
+                        status_site.value = loc['message'] || 'Something went wrong'
 
-                            if(status_site.value.includes("]")){
-                                status_site.value = status_site.value.split("]")[1]
-                            }
+                        if(status_site.value.includes("]")){
+                            status_site.value = status_site.value.split("]")[1]
                         }
                     }
                 }
@@ -227,7 +221,6 @@
 
             return {
                 message_list,
-                query,
                 progress,
                 modules_list,
                 misp_attributes_list,
