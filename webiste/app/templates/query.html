@@ -37,6 +37,10 @@
                     {%for module in modules%} {{module}}, {%endfor%}
                 </div>
             </div>
+            <div class="d-flex w-100 justify-content-between">
+                <div></div>
+                <small><i>{{query_date}}</i></small>
+            </div>
         </div>
     </div>
 
@@ -125,7 +129,6 @@
                         // Button Stop pressed
                         if (data['stopped']){
                             status_site.value = 'Stopped ! ' + sum + ' Success. ' + data["nb_errors"] + ' Errors. ' + data['complete'] + ' Total.'
-                            console.log(data['complete'] - data["nb_errors"]);
                             // Display result of the search
                         }else{
                             status_site.value = sum + ' Success. ' + data["nb_errors"] + ' Errors. ' + data['complete'] + ' Total.'

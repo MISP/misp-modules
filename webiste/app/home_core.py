@@ -139,5 +139,11 @@ def get_history():
     histories = History.query.all()
     for history in histories:
         session = Session_db.query.get(history.session_id)
-        histories_list.append({"uuid": session.uuid, "query": session.query_enter, "modules": json.loads(session.modules_list), "input": session.input_query})
+        histories_list.append({
+            "uuid": session.uuid, 
+            "query": session.query_enter, 
+            "modules": json.loads(session.modules_list), 
+            "input": session.input_query, 
+            "query_date": session.query_date.strftime('%Y-%m-%d')
+            })
     return histories_list

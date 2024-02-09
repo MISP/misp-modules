@@ -27,6 +27,7 @@ class Session_db(db.Model):
     config_module=db.Column(db.String)
     result=db.Column(db.String)
     nb_errors = db.Column(db.Integer, index=True)
+    query_date = db.Column(db.DateTime, index=True)
 
     def to_json(self):
         return

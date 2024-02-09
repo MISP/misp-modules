@@ -29,7 +29,12 @@ def query(sid):
                 query_loc = s.query
                 session=s
     if flag:
-        return render_template("query.html", query=query_loc, sid=sid, input_query=session.input_query, modules=json.loads(session.modules_list))
+        return render_template("query.html", 
+                               query=query_loc, 
+                               sid=sid, 
+                               input_query=session.input_query, 
+                               modules=json.loads(session.modules_list), 
+                               query_date=session.query_date.strftime('%Y-%m-%d'))
     return render_template("404.html")
 
 

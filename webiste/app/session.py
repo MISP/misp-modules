@@ -1,3 +1,4 @@
+import datetime
 import json
 from queue import Queue
 from threading import Thread
@@ -25,6 +26,7 @@ class Session_class:
         self.modules_list = request_json["modules"]
         self.nb_errors = 0
         self.config_module = self.config_module_setter(request_json)
+        self.query_date = datetime.datetime.now(tz=datetime.timezone.utc)
 
     
     def config_module_setter(self, request_json):
@@ -128,7 +130,8 @@ class Session_class:
             input_query=self.input_query,
             config_module=json.dumps(self.config_module),
             result=json.dumps(self.result),
-            nb_errors=self.nb_errors
+            nb_errors=self.nb_errors,
+            query_date=self.query_date
         )
         db.session.add(s)
         db.session.commit()
