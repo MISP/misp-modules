@@ -1,5 +1,6 @@
 flask
 sqlalchemy
+flask-session
 flask-sqlalchemy
 Flask-WTF
 Flask-Migrate
@@ -12,3 +13,4 @@ schedule
 pytest
 gunicorn
 jsonschema
+requests

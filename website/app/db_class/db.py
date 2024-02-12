@@ -7,6 +7,7 @@ class Module(db.Model):
     description = db.Column(db.String)
     is_active = db.Column(db.Boolean, default=True)
     request_on_query = db.Column(db.Boolean, default=False)
+    input_attr = db.Column(db.String)
 
     def to_json(self):
         json_dict = {
@@ -14,7 +15,8 @@ class Module(db.Model):
             "name": self.name,
             "description": self.description,
             "is_active": self.is_active,
-            "request_on_query": self.request_on_query
+            "request_on_query": self.request_on_query,
+            "input_attr": self.input_attr
         }
         return json_dict
 

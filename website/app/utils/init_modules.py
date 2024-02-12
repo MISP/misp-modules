@@ -10,11 +10,16 @@ def create_modules_db():
 
     for module in modules:
         m = Module.query.filter_by(name=module["name"]).first()
+        input_attr = ""
+        if "input" in module["mispattributes"]:
+            input_attr = json.dumps(module["mispattributes"]["input"])
         if not m:
             m = Module(
                 name=module["name"],
                 description=module["meta"]["description"],
-                is_active=True
+                is_active=True,
+                request_on_query=False,
+                input_attr=input_attr
             )
             db.session.add(m)
             db.session.commit()

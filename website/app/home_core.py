@@ -79,6 +79,8 @@ def get_modules_config():
     modules_list = []
     for module in modules:
         loc_module = module.to_json()
+        if loc_module["input_attr"]:
+            loc_module["input_attr"] = json.loads(loc_module["input_attr"])
         loc_module["config"] = []
         mcs = Module_Config.query.filter_by(module_id=module.id).all()
         for mc in mcs:

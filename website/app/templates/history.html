@@ -12,27 +12,7 @@
 
     <div v-if="history">
         <template v-for="h, key in history">
-            <div class="list-group" style="margin-bottom: 20px;">
-                <a :href="'/query/'+h.uuid" class="list-group-item list-group-item-action">
-                    <div class="d-flex w-100 justify-content-between">
-                        <h5 class="mb-1">[[key+1]]- [[h.query]]</h5>
-                        <small><i>[[h.uuid]]</i></small>
-                    </div>
-                    <p class="mb-1" style="color: green;"><u>Input Attribute</u>:</p>
-                    <div>[[h.input]]</div>
-                    <br>
-                    <p class="mb-1" style="color: #2000ff;"><u>Modules</u>:</p>
-                    <div>
-                        <template v-for="module in h.modules">[[module]],</template>
-                    </div>
-
-                    
-                    <div class="d-flex w-100 justify-content-between">
-                        <div></div>
-                        <small><i>[[h.query_date]]</i></small>
-                    </div>
-                </a>
-            </div>
+            <history_view :history="h" :key_loop="key" />
         </template>
     </div>
     
@@ -43,8 +23,12 @@
 <script type="module">
     const { createApp, ref, onMounted, nextTick, defineComponent} = Vue
     import {display_toast, message_list} from '/static/js/toaster.js'
+    import history_view from '/static/js/history_view.js'
     createApp({
         delimiters: ['[[', ']]'],
+        components: {
+            history_view
+        },
         setup() {
             const history = ref({})
 

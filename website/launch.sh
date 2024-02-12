@@ -1,5 +1,4 @@
 #!/bin/bash
-source env/bin/activate
 
 
 function launch {

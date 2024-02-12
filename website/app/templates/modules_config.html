@@ -39,19 +39,27 @@
             </div>
             <br>
             <h4>[[ current_config['module_name'] ]]</h4>
+            <i>
+                <small>
+                    Attributes:
+                    <template v-for="attr in current_config['input_attr']">
+                        [[ attr ]],
+                    </template>
+                </small> 
+            </i>
             <template v-for="conf, key in current_config">
-                <div class="mb-3" v-if="key != 'module_name' && !current_config['request_on_query'] && key != 'request_on_query'">
+                <div class="mb-3" v-if="key != 'module_name' && !current_config['request_on_query'] && key != 'request_on_query' && key != 'input_attr'">
                     <label :for="'form-'+key" class="form-label">[[key]]</label>
                     <input type="text" class="form-control" :id="'form-'+key+'-'+current_config['module_name']" :value="conf">
                 </div>
             </template>
-            <div class="mb-3">
+            <div class="mb-3" v-if="Object.keys(current_config).length > 3">
                 <label :for="'form-'+current_config['module_name']+'-checkbox'" class="form-label">Request for config on query</label>
                 <div>
                     <input type="checkbox" :checked="current_config['request_on_query']" @click="check_request_on_query()" :id="'form-'+current_config['module_name']+'-checkbox'">
                 </div>
             </div>
-            <button class="btn btn-primary" @click="change_config()">Save</button>
+            <button v-if="Object.keys(current_config).length > 3" class="btn btn-primary" @click="change_config()">Save</button>
         </div>
     </div>
     
@@ -89,9 +97,10 @@
                             }
                         }
                     }
-                    current_config.value["module_name"] = module.name
                     current_config.value["request_on_query"] = module.request_on_query
                 }
+                current_config.value["module_name"] = module.name
+                current_config.value["input_attr"] = module.input_attr
             }
 
             function close_panel(){
@@ -101,7 +110,7 @@
             async function change_config(){
                 let result_dict = {}
                 for(let key in current_config.value){
-                    if(key != "module_name" && key != "request_on_query"){
+                    if(key != "module_name" && key != "request_on_query" && key != "input_attr"){
                         let loc = $("#form-"+key+"-"+current_config.value["module_name"]).val()
                         result_dict[key] = loc
                         current_config.value[key] = loc
