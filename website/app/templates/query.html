@@ -49,10 +49,63 @@
     <br/>
 
     <!-- Results Part -->
-    <hr>      
-    <div class="row" v-if="Object.keys(modules_res).length">
-        <div class="col-10">
-            <h3 id="results_part">Results</h3>
+    <hr>
+    <ul class="nav nav-tabs" style="margin-bottom: 10px;">
+        <li class="nav-item">
+            <button class="nav-link active" id="tab-json" aria-current="page" @click="active_tab(true)">Json</button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link" id="tab-parser" @click="active_tab(false)">Parser</button>
+        </li>
+    </ul>
+
+    <template v-if="json_tab">
+        <div class="row" v-if="Object.keys(modules_res).length">
+            <div class="col-10">
+                <h3 id="results_part">Results</h3>
+                <div class="accordion">
+                    <div class="accordion-item" v-for="result, key in modules_res">
+                        <template v-if="!('error' in result)">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button" type="button" data-bs-toggle="collapse" :data-bs-target="'#panelsStayOpen-'+key" aria-expanded="true" :aria-controls="'panelsStayOpen-'+key">
+                                    [[key]]
+                                </button>
+                            </h2>
+                            <div :id="'panelsStayOpen-'+key" class="accordion-collapse collapse show">
+                                <div class="accordion-body" v-html="generateCoreFormatUI(result)[0].outerHTML"></div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+
+                <!-- Errors Part -->
+                <hr style="margin-top: 50px">
+                <h3 id="errors_part">Errors</h3>
+                <div class="accordion">
+                    <div class="accordion-item" v-for="result, key in modules_res">
+                        <template v-if="'error' in result">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button" type="button" data-bs-toggle="collapse" :data-bs-target="'#panelsStayOpen-'+key" aria-expanded="true" :aria-controls="'panelsStayOpen-'+key">
+                                    [[key]]
+                                    <span style="margin-left: 5px;" title="Error">❌</span>
+                                </button>
+                            </h2>
+                            <div :id="'panelsStayOpen-'+key" class="accordion-collapse collapse show">
+                                <div class="accordion-body" v-html="generateCoreFormatUI(result)[0].outerHTML"></div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </div>
+            <div class="col-1" style="position: fixed; right: 0px; box-shadow: 0 2px 5px 0 rgb(0 0 0 / 5%), 0 2px 10px 0 rgb(0 0 0 / 5%);">
+                <div style="padding: 10px;"><a style="text-decoration: none;" href="#results_part">Results</a></div>
+                <div style="padding: 10px;"><a style="text-decoration: none;" href="#errors_part">Errors</a></div>
+            </div>
+        </div>
+    </template>
+
+    <template v-else>
+        <div v-if="Object.keys(modules_res).length">
             <div class="accordion">
                 <div class="accordion-item" v-for="result, key in modules_res">
                     <template v-if="!('error' in result)">
@@ -62,36 +115,30 @@
                             </button>
                         </h2>
                         <div :id="'panelsStayOpen-'+key" class="accordion-collapse collapse show">
-                            <div class="accordion-body" v-html="generateCoreFormatUI(result)[0].outerHTML"></div>
+                            <div class="accordion-body row">
+                                <template v-for="obj, key_obj in result.results.Object">
+                                    <h4>Object #[[key_obj+1]] - <small>[[obj.name]]</small></h4>
+                                    <div class="row" style="margin: 5px; padding: 5px;">
+                                        <div class="col-4 mb-3" style="border: 1px solid #939393; border-radius: 10px;" v-for="attr, key_attr in obj.Attribute">
+                                            <h6>Attributes #[[key_attr+1]]</h6>
+                                            <div>
+                                                Type: [[attr.type]]
+                                            </div>
+                                            <div>
+                                                Value: [[attr.value]]
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <hr>
+                                </template>
+                            </div>
                         </div>
                     </template>
                 </div>
             </div>
+        </div>
+    </template>
 
-            <!-- Errors Part -->
-            <hr style="margin-top: 50px">
-            <h3 id="errors_part">Errors</h3>
-            <div class="accordion">
-                <div class="accordion-item" v-for="result, key in modules_res">
-                    <template v-if="'error' in result">
-                        <h2 class="accordion-header">
-                            <button class="accordion-button" type="button" data-bs-toggle="collapse" :data-bs-target="'#panelsStayOpen-'+key" aria-expanded="true" :aria-controls="'panelsStayOpen-'+key">
-                                [[key]]
-                                <span style="margin-left: 5px;" title="Error">❌</span>
-                            </button>
-                        </h2>
-                        <div :id="'panelsStayOpen-'+key" class="accordion-collapse collapse show">
-                            <div class="accordion-body" v-html="generateCoreFormatUI(result)[0].outerHTML"></div>
-                        </div>
-                    </template>
-                </div>
-            </div>
-        </div>
-        <div class="col-1" style="position: fixed; right: 0px; box-shadow: 0 2px 5px 0 rgb(0 0 0 / 5%), 0 2px 10px 0 rgb(0 0 0 / 5%);">
-            <div style="padding: 10px;"><a style="text-decoration: none;" href="#results_part">Results</a></div>
-            <div style="padding: 10px;"><a style="text-decoration: none;" href="#errors_part">Errors</a></div>
-        </div>
-    </div>
     <span id="goTop">[<a href="#top">Go Back Top</a>]</span>
 {% endblock %}
 
@@ -109,6 +156,7 @@
             const modules_res = ref({})
             const progress = ref(0)
             const status_site = ref()
+            const json_tab = ref(true)
 
 
             function actionQuery(){
@@ -148,10 +196,25 @@
                 modules_res.value = loc
             }
 
+            function active_tab(is_json){
+                if(is_json){
+                    json_tab.value = true
+                    if ( !document.getElementById("tab-json").classList.contains("active") ){
+                        document.getElementById("tab-json").classList.add("active")
+                        document.getElementById("tab-parser").classList.remove("active")
+                    }
+                }else{
+                    json_tab.value = false
+                    if ( !document.getElementById("tab-parser").classList.contains("active") ){
+                        document.getElementById("tab-parser").classList.add("active")
+                        document.getElementById("tab-json").classList.remove("active")
+                    }
+                }
+            }
+
             onMounted(() => {
                 actionQuery()
             })
-
 
             return {
                 message_list,
@@ -159,7 +222,9 @@
                 status_site,
                 is_searching,
                 modules_res,
-                generateCoreFormatUI
+                json_tab,
+                generateCoreFormatUI,
+                active_tab
             }
         }
     }).mount('.container')

@@ -8,6 +8,8 @@ class Config:
 class DevelopmentConfig(Config):
     DEBUG = True
     SQLALCHEMY_DATABASE_URI = "sqlite:///misp-module.sqlite"
+    SESSION_TYPE = "sqlalchemy"
+    SESSION_SQLALCHEMY_TABLE = "flask_sessions"
 
     @classmethod
     def init_app(cls, app):
