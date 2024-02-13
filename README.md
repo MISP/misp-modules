@@ -45,6 +45,7 @@ For more information: [Extending MISP with Python modules](https://www.misp-proj
 * [GeoIP_ASN](misp_modules/modules/expansion/geoip_asn.py) - a hover and expansion module to get GeoIP ASN information from geolite/maxmind.
 * [GreyNoise](misp_modules/modules/expansion/greynoise.py) - a hover and expansion module to get IP and CVE information from GreyNoise.
 * [hashdd](misp_modules/modules/expansion/hashdd.py) - a hover module to check file hashes against [hashdd.com](http://www.hashdd.com) including NSLR dataset.
+* [Hashlookup](misp_modules/modules/expansion/hashlookup.py) - An expansion module to enrich a file hash with hashlookup.circl.lu services (NSRL and other sources)
 * [hibp](misp_modules/modules/expansion/hibp.py) - a hover module to lookup against Have I Been Pwned?
 * [html_to_markdown](misp_modules/modules/expansion/html_to_markdown.py) - Simple HTML to markdown converter
 * [HYAS Insight](misp_modules/modules/expansion/hyasinsight.py) - a hover and expansion module to get information from [HYAS Insight](https://www.hyas.com/hyas-insight).
