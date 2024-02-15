@@ -7,7 +7,8 @@ from .utils.utils import query_post_query, query_get_module
 from . import home_core as HomeModel
 import uuid
 from . import db
-from .db_class.db import History, Session_db
+from .db_class.db import History, History_Tree, Session_db
+from . import sess
 
 
 sessions = list()
@@ -144,9 +145,11 @@ class Session_class:
 
         histories = History.query.all()
         
-        while len(histories) > 10:
+        while len(histories) > 200:
             history = History.query.order_by(History.id).all()
-            Session_db.query.filter_by(id=history[0].session_id).delete()
+            session = Session_db.query.filter_by(id=history[0].session_id)
+            if not History_Tree.query.filter_by(session_uuid=session.uuid):
+                Session_db.query.filter_by(id=history[0].session_id).delete()
             History.query.filter_by(id=history[0].id).delete()
 
             histories = History.query.all()

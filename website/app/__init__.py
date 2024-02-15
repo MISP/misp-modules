@@ -28,7 +28,9 @@ def create_app():
     sess.init_app(app)
 
     from .home import home_blueprint
+    from .history.history import history_blueprint
     app.register_blueprint(home_blueprint, url_prefix="/")
+    app.register_blueprint(history_blueprint, url_prefix="/")
 
     return app
     
