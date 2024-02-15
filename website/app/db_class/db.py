@@ -1,3 +1,4 @@
+import json
 from .. import db
 
 
@@ -32,13 +33,38 @@ class Session_db(db.Model):
     query_date = db.Column(db.DateTime, index=True)
 
     def to_json(self):
-        return
+        json_dict = {
+            "id": self.id,
+            "uuid": self.uuid,
+            "modules": json.loads(self.modules_list),
+            "query_enter": self.query_enter,
+            "input_query": self.input_query,
+            "config_module": json.loads(self.config_module),
+            "result": json.loads(self.result),
+            "nb_errors": self.nb_errors,
+            "query_date": self.query_date.strftime('%Y-%m-%d')
+        }
+        return json_dict
+    
+    def history_json(self):
+        json_dict = {
+            "uuid": self.uuid,
+            "modules": json.loads(self.modules_list),
+            "query": self.query_enter,
+            "input": self.input_query,
+            "query_date": self.query_date.strftime('%Y-%m-%d')
+        }
+        return json_dict
 
 
 class History(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     session_id = db.Column(db.Integer, index=True)
 
+class History_Tree(db.Model):
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    session_uuid = db.Column(db.String(36), index=True)
+    tree = db.Column(db.String)
 
 class Config(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)

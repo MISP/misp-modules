@@ -127,6 +127,7 @@
                                             <div>
                                                 Value: [[attr.value]]
                                             </div>
+                                            <a v-if="attr.type != 'counter' && attr.type != 'datetime'" :href="'/home/{{sid}}?query='+attr.value">query</a>
                                         </div>
                                     </div>
                                     <hr>

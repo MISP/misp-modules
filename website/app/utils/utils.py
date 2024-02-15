@@ -1,5 +1,5 @@
 # import os
-# import uuid
+import uuid
 import json
 import requests
 # import jsonschema
@@ -31,12 +31,12 @@ def query_post_query(data, headers={'Content-type': 'application/json'}):
     return r.json()
 
 
-# def isUUID(uid):
-#     try:
-#         uuid.UUID(str(uid))
-#         return True
-#     except ValueError:
-#         return False
+def isUUID(uid):
+    try:
+        uuid.UUID(str(uid))
+        return True
+    except ValueError:
+        return False
 
 
 # def form_to_dict(form):

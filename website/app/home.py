@@ -15,6 +15,13 @@ home_blueprint = Blueprint(
 def home():
     return render_template("home.html")
 
+@home_blueprint.route("/home/<sid>", methods=["GET", "POST"])
+def home_query(sid):
+    if "query" in request.args:
+        query = request.args.get("query")
+        return render_template("home.html", query=query, sid=sid)
+    return render_template("404.html")
+
 @home_blueprint.route("/query/<sid>")
 def query(sid):
     session = HomeModel.get_session(sid)
@@ -24,7 +31,7 @@ def query(sid):
         query_loc = session.query_enter
     else:
         for s in SessionModel.sessions:
-            if s.id == sid:
+            if s.uuid == sid:
                 flag = True
                 query_loc = s.query
                 session=s
@@ -64,6 +71,7 @@ def run_modules():
         if "input" in request.json:
             if "modules" in request.json:
                 session = SessionModel.Session_class(request.json)
+                HomeModel.set_flask_session(session, request.json["parent_id"])
                 session.start()
                 SessionModel.sessions.append(session)
                 return jsonify(session.status()), 201
@@ -79,7 +87,7 @@ def status(sid):
         return jsonify(HomeModel.get_status_db(sess))
     else:
         for s in SessionModel.sessions:
-            if s.id == sid:
+            if s.uuid == sid:
                 return jsonify(s.status())
     return jsonify({'message': 'Scan session not found'}), 404
 
@@ -91,7 +99,7 @@ def result(sid):
         return jsonify(HomeModel.get_result_db(sess))
     else:
         for s in SessionModel.sessions:
-            if s.id == sid:
+            if s.uuid == sid:
                 return jsonify(s.get_result())
     return jsonify({'message': 'Scan session not found'}), 404
 
@@ -146,3 +154,34 @@ def get_history():
     """Get all history"""
     histories = HomeModel.get_history()
     return histories
+
+@home_blueprint.route("/history_session", methods=["GET"])
+def history_session():
+    """View all history"""
+    return render_template("history_session.html", tree_view=False)
+
+@home_blueprint.route("/get_history_session", methods=["GET"])
+def get_history_session():
+    """Get all history"""
+    histories = HomeModel.get_history_session()
+    if histories:
+        return histories
+    return {}
+
+@home_blueprint.route("/save_history/<sid>", methods=["GET"])
+def save_history(sid):
+    return HomeModel.save_history_core(sid)
+
+
+@home_blueprint.route("/history_tree", methods=["GET"])
+def history_tree():
+    """View all history"""
+    return render_template("history_session.html", tree_view=True)
+
+@home_blueprint.route("/get_history_tree", methods=["GET"])
+def get_history_tree():
+    """Get all history"""
+    histories = HomeModel.get_history_tree()
+    if histories:
+        return histories
+    return {}

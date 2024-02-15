@@ -15,7 +15,8 @@
     <br>
     <div style="width:50%; transform: translate(50%, 0);">
         <div>
-            <input type="text" id="process-query" placeholder="Enter here..." autofocus class="form-control" style="border-radius: 5px;" />
+            <input type="hidden" id="parent_id" value="{{sid}}">
+            <input type="text" value="{{query}}" id="process-query" placeholder="Enter here..." autofocus class="form-control" style="border-radius: 5px;" />
         </div>
         <span v-if="status_site" id="status">[[status_site]]</span>
     </div>
@@ -100,8 +101,9 @@
                 let error_flag = false
 
                 let result_dict = {"modules": $("#modules_select").val(), 
-                                    "input": $("#input_select").val(), 
-                                    "query": current_query.value
+                                    "input": $("#input_select").val(),
+                                    "query": current_query.value,
+                                    "parent_id": $("#parent_id").val()
                                 }
                 result_dict["config"] = {}
                 for(let el in config_query.value){

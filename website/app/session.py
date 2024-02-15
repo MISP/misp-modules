@@ -14,7 +14,7 @@ sessions = list()
 
 class Session_class:
     def __init__(self, request_json) -> None:
-        self.id = str(uuid4())
+        self.uuid = str(uuid4())
         self.thread_count = 4
         self.jobs = Queue(maxsize=0)
         self.threads = []
@@ -63,7 +63,7 @@ class Session_class:
         registered = len(self.result)
 
         return {
-            'id': self.id,
+            'id': self.uuid,
             'total': total,
             'complete': complete,
             'remaining': remaining,
@@ -110,7 +110,7 @@ class Session_class:
             else:
                 send_to = {"module": work[1], self.input_query: self.query, "config": loc_config}
             res = query_post_query(send_to)
-            print(res)
+            # print(res)
             if "error" in res:
                 self.nb_errors += 1
             self.result[work[1]] = res
@@ -124,7 +124,7 @@ class Session_class:
     def save_info(self):
         """Save info in the db"""
         s = Session_db(
-            uuid=str(self.id),
+            uuid=str(self.uuid),
             modules_list=json.dumps(self.modules_list),
             query_enter=self.query,
             input_query=self.input_query,
