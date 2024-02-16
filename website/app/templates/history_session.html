@@ -63,8 +63,8 @@
                     <ul style="list-style-type: none;">
                         <li>
                             <div class="card-body">
-                                <template v-for="h, key in his['children']">
-                                    <history_view :history="h" :key_loop="key" />
+                                <template v-for="h, key_loop in his['children']">
+                                    <history_view :history="h" :key_loop="key_loop" :tree_view="tree_view" @delete_node="(msg) => change_tree(his, key)"/>
                                 </template>
                             </div>
                         </li>
@@ -111,6 +111,19 @@
                 display_toast(res)
             }
 
+            async function change_tree(history_loc, key){
+                if(!tree_view){
+                    const res = await fetch("/get_history_session/"+history_loc.uuid)
+                    let loc = await res.json()
+                    history.value[key] = loc
+                }else{
+                    const res = await fetch("/get_history_tree/"+history_loc.uuid)
+                    let loc = await res.json()
+                    history.value[key] = loc
+                }
+                
+            }
+
             onMounted(() => {
                 tree_view.value = $("#tree_view").val()
                 if(tree_view.value == "True"){
@@ -129,6 +142,7 @@
                 history,
                 tree_view,
                 save_history,
+                change_tree
             }
         }
     }).mount('.container')

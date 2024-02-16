@@ -51,3 +51,29 @@ def get_history_tree():
     if histories:
         return histories
     return {}
+
+@history_blueprint.route("/get_history_tree/<sid>", methods=["GET"])
+def get_history_tree_uuid(sid):
+    """Get all history"""
+    histories = HistoryModel.get_history_tree_uuid(sid)
+    if histories:
+        return histories
+    return {}
+
+@history_blueprint.route("/get_history_session/<sid>", methods=["GET"])
+def get_history_session_uuid(sid):
+    """Get all history"""
+    histories = HistoryModel.get_history_session_uuid(sid)
+    if histories:
+        return histories
+    return {}
+
+@history_blueprint.route("/history/remove_node_session/<sid>", methods=["GET"])
+def remove_node_session(sid):
+    HistoryModel.remove_node_session(sid)
+    return {"message": "Node deleted", "toast_class": "success-subtle"}
+
+@history_blueprint.route("/history/remove_node_tree/<sid>", methods=["GET"])
+def remove_node_tree(sid):
+    HistoryModel.remove_node_tree(sid)
+    return {"message": "Node deleted", "toast_class": "success-subtle"}
