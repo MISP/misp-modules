@@ -8,8 +8,6 @@ from . import home_core as HomeModel
 import uuid
 from . import db
 from .db_class.db import History, History_Tree, Session_db
-from . import sess
-
 
 sessions = list()
 

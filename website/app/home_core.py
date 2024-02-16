@@ -2,7 +2,6 @@ import json
 from .utils.utils import query_get_module, isUUID
 from . import db
 from .db_class.db import History, Module, Config, Module_Config, Session_db, History_Tree
-from . import sess
 from flask import session as sess
 from sqlalchemy import desc
 
@@ -147,3 +146,49 @@ def get_history():
         histories_list.append(session.history_json())
     return histories_list
 
+
+
+
+def util_set_flask_session(parent_id, loc_session, current_session):
+    if parent_id == loc_session["uuid"]:
+        loc_json = {
+            "uuid": current_session.uuid,
+            "modules": current_session.modules_list,
+            "query": current_session.query,
+            "input": current_session.input_query,
+            "query_date": current_session.query_date.strftime('%Y-%m-%d')
+        }
+        loc_session["children"].append(loc_json)
+        return True
+    elif "children" in loc_session:
+        return deep_explore(loc_session["children"], parent_id, current_session)
+
+def deep_explore(session_dict, parent_id, current_session):
+    for loc_session in session_dict:
+        if not "children" in loc_session:
+            loc_session["children"] = list()
+        if util_set_flask_session(parent_id, loc_session, current_session):
+            return True
+    return False
+
+def set_flask_session(current_session, parent_id):
+    current_query = sess.get("current_query")
+    if not current_query or current_query not in sess:
+        loc_json = {
+            "uuid": current_session.uuid,
+            "modules": current_session.modules_list,
+            "query": current_session.query,
+            "input": current_session.input_query,
+            "query_date": current_session.query_date.strftime('%Y-%m-%d')
+        }
+
+        sess["current_query"] = current_session.uuid
+        sess[sess.get("current_query")] = loc_json
+        sess[sess.get("current_query")]["children"] = list()
+    else:
+        # sess["uuid"]
+        loc_session = sess.get(sess.get("current_query"))
+        if not "children" in loc_session:
+            loc_session["children"] = list()
+        if not util_set_flask_session(parent_id, loc_session, current_session):
+            sess["current_query"] = current_session.uuid
