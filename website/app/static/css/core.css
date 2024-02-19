@@ -177,8 +177,8 @@ span#status {
     position: relative !important;
 }
 
-/* @media (min-width: 992px) {
+@media (min-width: 992px) {
     .side-panel-config {
         max-width: calc((100% - 200px) / 2 - 1*var(--bs-gutter-x) * .5);
     }
-} */
+}
