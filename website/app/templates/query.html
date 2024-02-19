@@ -52,14 +52,17 @@
     <hr>
     <ul class="nav nav-tabs" style="margin-bottom: 10px;">
         <li class="nav-item">
-            <button class="nav-link active" id="tab-json" aria-current="page" @click="active_tab(true)">Json</button>
+            <button class="nav-link active" id="tab-json" aria-current="page" @click="active_tab('json')">Json</button>
         </li>
         <li class="nav-item">
-            <button class="nav-link" id="tab-parser" @click="active_tab(false)">Parser</button>
+            <button class="nav-link" id="tab-parser" @click="active_tab('parser')">Parser</button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link" id="tab-markdown" @click="active_tab('markdown')">Markdown</button>
         </li>
     </ul>
 
-    <template v-if="json_tab">
+    <template v-if="tab_list == 'json'">
         <div class="row" v-if="Object.keys(modules_res).length">
             <div class="col-10">
                 <h3 id="results_part">Results</h3>
@@ -104,7 +107,7 @@
         </div>
     </template>
 
-    <template v-else>
+    <template v-else-if="tab_list == 'parser'">
         <div v-if="Object.keys(modules_res).length">
             <div class="accordion">
                 <div class="accordion-item" v-for="result, key in modules_res">
@@ -140,6 +143,39 @@
         </div>
     </template>
 
+    <template v-else-if="tab_list == 'markdown'">
+        <div v-if="Object.keys(modules_res).length">
+            <div class="accordion">
+                <div class="accordion-item" v-for="result, key in modules_res">
+                    <template v-if="!('error' in result)">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse" :data-bs-target="'#panelsStayOpen-'+key" aria-expanded="true" :aria-controls="'panelsStayOpen-'+key">
+                                [[key]]
+                            </button>
+                        </h2>
+                        <div :id="'panelsStayOpen-'+key" class="accordion-collapse collapse show">
+                            <div class="accordion-body row">
+                                <template v-for="obj, key_obj in result.results.Object">
+                                    <h4>Object #[[key_obj+1]] - <small>[[obj.name]]</small></h4>
+                                    <div style="margin-bottom: 10px;" v-for="attr, key_attr in obj.Attribute">
+                                        <h6>Attributes #[[key_attr+1]]</h6>
+                                        <div>
+                                            Type: [[attr.type]]
+                                        </div>
+                                        <div>
+                                            Value: [[attr.value]]
+                                        </div>
+                                    </div>
+                                    <hr>
+                                </template>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    </template>
+
     <span id="goTop">[<a href="#top">Go Back Top</a>]</span>
 {% endblock %}
 
@@ -157,7 +193,7 @@
             const modules_res = ref({})
             const progress = ref(0)
             const status_site = ref()
-            const json_tab = ref(true)
+            const tab_list = ref("json")
 
 
             function actionQuery(){
@@ -197,18 +233,27 @@
                 modules_res.value = loc
             }
 
-            function active_tab(is_json){
-                if(is_json){
-                    json_tab.value = true
+            function active_tab(active_tab){
+                if(active_tab == "json"){
+                    tab_list.value = "json"
                     if ( !document.getElementById("tab-json").classList.contains("active") ){
                         document.getElementById("tab-json").classList.add("active")
                         document.getElementById("tab-parser").classList.remove("active")
+                        document.getElementById("tab-markdown").classList.remove("active")
                     }
-                }else{
-                    json_tab.value = false
+                }else if(active_tab == "parser"){
+                    tab_list.value = "parser"
                     if ( !document.getElementById("tab-parser").classList.contains("active") ){
                         document.getElementById("tab-parser").classList.add("active")
                         document.getElementById("tab-json").classList.remove("active")
+                        document.getElementById("tab-markdown").classList.remove("active")
+                    }
+                }else if(active_tab == "markdown"){
+                    tab_list.value = "markdown"
+                    if ( !document.getElementById("tab-markdown").classList.contains("active") ){
+                        document.getElementById("tab-markdown").classList.add("active")
+                        document.getElementById("tab-json").classList.remove("active")
+                        document.getElementById("tab-parser").classList.remove("active")
                     }
                 }
             }
@@ -223,7 +268,7 @@
                 status_site,
                 is_searching,
                 modules_res,
-                json_tab,
+                tab_list,
                 generateCoreFormatUI,
                 active_tab
             }
