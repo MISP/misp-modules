@@ -39,45 +39,48 @@
     </head>
 
     <body>
-        {% include 'sidebar.html' %}
+        <div class="container-fluid">
+            <div class="row flex-nowrap">
+                {% include 'sidebar.html' %}
 
-        <!--Main layout-->
-        <main>
-            <div class="container pt-4" style="max-width: 100%;">
-                {% include 'macros/_flashes.html' %}
-
-                <div aria-live="polite" aria-atomic="true" class="">
-                    <div class="toast-container start-50 translate-middle-x top-0 p-3" style="position: fixed;">
-                        <template v-if="message_list">
-                            <template v-for="message in message_list" v-key="message.id">
-                                <div :id="`liveToast-${message.id}`" :class="`toast bg-${message.toast_class}`" role="alert" aria-live="assertive" data-bs-delay="5000" aria-atomic="true" style="--bs-toast-spacing: 0.5rem;">
-                                    <div class="d-flex">
-                                        <div class="toast-body">
-                                            <template v-if="message.message">
-                                                [[message.message]]
-                                            </template>
+                <!--Main layout-->
+                <main class="col ps-md-4 pt-2">
+                    {% include 'macros/_flashes.html' %}
+    
+                    <div aria-live="polite" aria-atomic="true" class="">
+                        <div class="toast-container start-50 translate-middle-x top-0 p-3" style="position: fixed;">
+                            <template v-if="message_list">
+                                <template v-for="message in message_list" v-key="message.id">
+                                    <div :id="`liveToast-${message.id}`" :class="`toast bg-${message.toast_class}`" role="alert" aria-live="assertive" data-bs-delay="5000" aria-atomic="true" style="--bs-toast-spacing: 0.5rem;">
+                                        <div class="d-flex">
+                                            <div class="toast-body">
+                                                <template v-if="message.message">
+                                                    [[message.message]]
+                                                </template>
+                                            </div>
+                                            <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
                                         </div>
-                                        <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
                                     </div>
-                                </div>
+                                </template>
                             </template>
-                        </template>
+                        </div>
                     </div>
-                </div>
-
-                {# When extended, the content block contains all the html of the webpage #}
-                {% block content %}
-                {% endblock %}
+                    <a href="#" data-bs-target="#sidebar" data-bs-toggle="collapse" class="border rounded-3 p-1 text-decoration-none"><i class="fa-solid fa-bars-staggered"></i> Menu</a>
+                    {# When extended, the content block contains all the html of the webpage #}
+                    {% block content %}
+                    {% endblock %}
+                </main>
+                <!--Main layout-->
+        
+                {# Implement CSRF protection for site #}
+                {% if csrf_token()|safe %}
+                    <div style="visibility: hidden; display: none">
+                    <input type="hidden" id="csrf_token" name="csrf_token" value="{{ csrf_token()|safe }}">
+                    </div>
+                {% endif %}
             </div>
-        </main>
-        <!--Main layout-->
-
-        {# Implement CSRF protection for site #}
-        {% if csrf_token()|safe %}
-            <div style="visibility: hidden; display: none">
-            <input type="hidden" id="csrf_token" name="csrf_token" value="{{ csrf_token()|safe }}">
-            </div>
-        {% endif %}
+        </div>
+        
 
         {% block script %}
         <script type="module">
@@ -86,7 +89,7 @@
             createApp({
                 delimiters: ['[[', ']]'],
                 setup() {}
-            }).mount('.container')
+            }).mount('.container-fluid')
         </script>
         {% endblock %}
         

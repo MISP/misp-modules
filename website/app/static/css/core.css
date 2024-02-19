@@ -3,11 +3,11 @@ body {
   background-color: #fbfbfb;
 }
 
-@media (min-width: 991.98px) {
+/* @media (min-width: 991.98px) {
   main {
     padding-left: 200px;
   }
-}
+} */
 
 span#goTop, span#project-version{
   position: fixed;
@@ -164,8 +164,8 @@ span#status {
     right: calc(var(--bs-gutter-x) * .5);
 }
 
-@media (min-width: 992px) {
+/* @media (min-width: 992px) {
     .side-panel-config {
         max-width: calc((100% - 200px) / 2 - 1*var(--bs-gutter-x) * .5);
     }
-}
+} */

@@ -1,36 +1,31 @@
 <!--Main Navigation-->
-<header>
-  	<!-- Sidebar -->
-  	<nav id="sidebarMenu" class="collapse d-lg-block sidebar collapse bg-white">
-		
-		<a class="navbar-brand" style="margin-left: 20px;" href="/">
-			<img src="{{ url_for('static',filename='image/misp.png') }}" height="55" alt="Misp Logo" loading="lazy" />
-		</a>
-		<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-			<span class="navbar-toggler-icon"></span>
-		</button>
-	  
-		<div class="position-sticky">
+
+<div class="col-auto px-0">
+	<div id="sidebar" class="collapse collapse-horizontal show border-end">
+		<div id="sidebar-nav" class="rounded-0 text-sm-start min-vh-100">
+			<a class="navbar-brand" style="margin-left: 20px;" href="/">
+				<img src="{{ url_for('static',filename='image/misp.png') }}" height="55" alt="Misp Logo" loading="lazy" />
+			</a>
 			<div class="list-group list-group-flush mx-3 mt-4">
-				<a href="/" class="list-group-item list-group-item-action py-2 ripple" aria-current="true">
+				<a href="/" class="list-group-item list-group-item-action text-nowrap" aria-current="true">
 					<i class="fa-solid fa-house fa-fw me-3"></i><span>Home</span>
 				</a>
-				<a style="margin-top: 30px;" href="/history" class="list-group-item list-group-item-action py-2 ripple">
+				<a style="margin-top: 30px;" href="/history" class="list-group-item list-group-item-action text-nowrap">
 					<i class="fa-solid fa-clock-rotate-left fa-fw me-3"></i><span>History</span>
 				</a>
-				<a style="margin-top: 30px;" href="/history_session" class="list-group-item list-group-item-action py-2 ripple">
+				<a style="margin-top: 30px;" href="/history_session" class="list-group-item list-group-item-action text-nowrap">
 					<i class="fa-solid fa-clock fa-fw me-3"></i><span>History Session</span>
 				</a>
-				<a style="margin-top: 30px;" href="/history_tree" class="list-group-item list-group-item-action py-2 ripple">
+				<a style="margin-top: 30px;" href="/history_tree" class="list-group-item list-group-item-action text-nowrap">
 					<i class="fa-solid fa-timeline fa-fw me-3"></i><span>History Tree</span>
 				</a>
-				<a style="margin-top: 30px;" href="/modules_config" class="list-group-item list-group-item-action py-2 ripple">
+				<a style="margin-top: 30px;" href="/modules_config" class="list-group-item list-group-item-action text-nowrap">
 					<i class="fa-solid fa-gear fa-fw me-3"></i><span>Config</span>
 				</a>
 			</div>
 		</div>
-  	</nav>
-  <!-- Sidebar -->
+	</div>
+</div>
 
-</header>
+
 <!--Main Navigation-->
