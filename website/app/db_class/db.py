@@ -42,7 +42,7 @@ class Session_db(db.Model):
             "config_module": json.loads(self.config_module),
             "result": json.loads(self.result),
             "nb_errors": self.nb_errors,
-            "query_date": self.query_date.strftime('%Y-%m-%d')
+            "query_date": self.query_date.strftime('%Y-%m-%d %H:%M')
         }
         return json_dict
     
@@ -52,7 +52,7 @@ class Session_db(db.Model):
             "modules": json.loads(self.modules_list),
             "query": self.query_enter,
             "input": self.input_query,
-            "query_date": self.query_date.strftime('%Y-%m-%d')
+            "query_date": self.query_date.strftime('%Y-%m-%d %H:%M')
         }
         return json_dict
 

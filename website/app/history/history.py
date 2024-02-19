@@ -18,8 +18,9 @@ def history():
 @history_blueprint.route("/get_history", methods=["GET"])
 def get_history():
     """Get all history"""
-    histories = HistoryModel.get_history()
-    return histories
+    page = request.args.get('page', 1, type=int)
+    histories, nb_pages = HistoryModel.get_history(page)
+    return {"history": histories, "nb_pages": nb_pages}
 
 @history_blueprint.route("/history_session", methods=["GET"])
 def history_session():

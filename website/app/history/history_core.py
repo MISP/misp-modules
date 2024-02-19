@@ -13,14 +13,14 @@ def get_session(sid):
 
 
 
-def get_history():
+def get_history(page):
     """Return history"""
     histories_list = list()
-    histories = History.query.order_by(desc(History.id))
+    histories = History.query.order_by(desc(History.id)).paginate(page=page, per_page=20, max_per_page=50)
     for history in histories:
         session = Session_db.query.get(history.session_id)
         histories_list.append(session.history_json())
-    return histories_list
+    return histories_list, histories.pages
 
 
 def get_history_session():
