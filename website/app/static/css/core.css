@@ -1,3 +1,6 @@
+:root {
+    --sidebar-width: 210px;
+}
 
 body {
   background-color: #fbfbfb;
@@ -162,6 +165,16 @@ span#status {
     position: fixed;
     max-width: calc((100%) / 2 - 1*var(--bs-gutter-x) * .5);
     right: calc(var(--bs-gutter-x) * .5);
+}
+
+#sidebar-nav {
+    width: var(--sidebar-width);
+}
+#sidebar .sidebar-menu-wrapper {
+    position: fixed;
+}
+#sidebar.collapsing .sidebar-menu-wrapper {
+    position: relative !important;
 }
 
 /* @media (min-width: 992px) {
