@@ -1,4 +1,4 @@
-import {display_toast} from './toaster.js'
+import {display_toast} from '../toaster.js'
 export default {
 	name: "History_view",
 	delimiters: ['[[', ']]'],

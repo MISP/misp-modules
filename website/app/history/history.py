@@ -35,6 +35,12 @@ def get_history_session():
         return histories
     return {}
 
+@history_blueprint.route("/get_current_query_history", methods=["GET"])
+def get_current_query_history():
+    """Get current query history"""
+    return HistoryModel.get_current_query_history()
+
+
 @history_blueprint.route("/save_history/<sid>", methods=["GET"])
 def save_history(sid):
     return HistoryModel.save_history_core(sid)

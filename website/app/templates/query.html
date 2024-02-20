@@ -48,6 +48,30 @@
 
     <br/>
 
+    <button class="btn btn-outline-primary" style="position: fixed; right: 0px; top: 50%" title="Session history" data-bs-toggle="offcanvas" data-bs-target="#offcanvasScrolling" aria-controls="offcanvasScrolling">
+        <i class="fa-solid fa-bars"></i>
+    </button>
+
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasScrolling" aria-labelledby="offcanvasScrollingLabel">
+        <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="offcanvasScrollingLabel">Current History query</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div style="margin-left: 18px;">
+            <a class="btn btn-secondary btn-sm" href="/history_session">Complete view</a>
+        </div>
+        <div class="offcanvas-body">
+            <ul>
+                <li><a :href="'/query/'+history.uuid" :title="'Attribute: \n' +history.input+ '\n\nModules: \n' + history.modules">[[history.query]]</a></li>
+                <ul>
+                    <template v-for="child in history.children">
+                        <history_view :history="child"></history_view>
+                    </template>
+                </ul>
+            </ul>
+        </div>
+    </div>
+
     <!-- Results Part -->
     <hr>
     <ul class="nav nav-tabs" style="margin-bottom: 10px;">
@@ -183,8 +207,12 @@
 <script type="module">
     const { createApp, ref, onMounted, nextTick, defineComponent} = Vue
     import {message_list} from '/static/js/toaster.js'
+    import history_view from '/static/js/history/history_tree_query.js'
     createApp({
         delimiters: ['[[', ']]'],
+        components: {
+            history_view
+        },
         setup() {
             const is_searching = ref(false)
 
@@ -194,6 +222,7 @@
             const progress = ref(0)
             const status_site = ref()
             const tab_list = ref("json")
+            const history = ref({})
 
 
             function actionQuery(){
@@ -258,8 +287,15 @@
                 }
             }
 
+            async function get_history_session(){
+                let res = await fetch("/get_current_query_history")
+                let loc = await res.json()
+                history.value = loc
+            }
+
             onMounted(() => {
                 actionQuery()
+                get_history_session()
             })
 
             return {
@@ -269,6 +305,7 @@
                 is_searching,
                 modules_res,
                 tab_list,
+                history,
                 generateCoreFormatUI,
                 active_tab
             }

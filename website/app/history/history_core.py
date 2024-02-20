@@ -30,7 +30,7 @@ def get_history_session():
         # If current query have no children then don't display it
         # It's already save in history
         # Only parent-child tree structure is in flask session
-        current_query_value = sess.get(sess.get("current_query"))
+        current_query_value = sess.get(current_query)
         if current_query_value and current_query_value["children"]:
             loc_list.append(current_query_value)
     for q in sess:
@@ -42,6 +42,14 @@ def get_history_session():
                     loc_list.append(q_value)
 
     return loc_list
+
+def get_current_query_history():
+    current_query = sess.get("current_query")
+    if current_query:
+        current_query_value = sess.get(current_query)
+        if current_query_value and current_query_value["children"]:
+            return current_query_value
+    return {}
 
 
 def get_history_session_uuid(history_uuid):
