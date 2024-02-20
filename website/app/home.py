@@ -41,7 +41,7 @@ def query(sid):
                                sid=sid, 
                                input_query=session.input_query, 
                                modules=json.loads(session.modules_list), 
-                               query_date=session.query_date.strftime('%Y-%m-%d'))
+                               query_date=session.query_date.strftime('%Y-%m-%d %H:%M'))
     return render_template("404.html")
 
 

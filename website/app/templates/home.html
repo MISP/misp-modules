@@ -13,58 +13,63 @@
 
     <hr>
     <br>
-    <div style="width:50%; transform: translate(50%, 0);">
-        <div>
-            <input type="hidden" id="parent_id" value="{{sid}}">
-            <input type="text" value="{{query}}" id="process-query" placeholder="Enter here..." autofocus class="form-control" style="border-radius: 5px;" />
+    <div class="row">
+        <div class="col-1">
+            <button style="position: fixed; top: 35%" class="btn btn-primary" @click="actionQuery()">Query</button>
         </div>
-        <span v-if="status_site" id="status">[[status_site]]</span>
-    </div>
-
-    <br>
-    <!-- Attributes selection -->
-    <div v-if="misp_attributes_list.length" style="margin-top: 10px; transform: translate(25%, 0);">
-        <div>
-            <h4>Input Attributes</h4>
-        </div>
-        <div>
-            <select data-placeholder="Input" class="select2-input form-control" name="input_select" id="input_select">
-                <option value="None">--</option>
-                <template v-for="attributes in misp_attributes_list">
-                    <option :value="attributes">[[attributes]]</option>
-                </template>
-            </select>
-        </div>
-    </div>
-
-    <!-- Results modules selection -->
-    <template v-if="modules_list.length">
-        <div v-if="attr_selected.length" style="margin-top: 10px; width: 50%; transform: translate(50%, 0);">
-            <h4>Modules</h4>
-            <select data-placeholder="Modules" class="select2-modules form-control" multiple name="modules_select" id="modules_select">
-                <template v-for="key in modules_list">
-                    <option v-if="key.mispattributes.input.includes(attr_selected)" :value="key.name" :title="key.meta.description">[[key.name]]</option>
-                </template>
-            </select>
-        </div>
-    </template>
-
-    <!-- Display in case a module as reauest_on_query activate -->
-    <div v-if="config_query.length" style="margin-top: 10px; padding: 5px" class="row">
-        <h4>Config</h4>
-        <div class="card col-4" style="margin-top: 10px; padding: 15px" v-for="module in config_query">
-            <h4>[[module.name]]</h4>
-            <div v-for="conf in module.meta.config" class="mb-3">
-                <label :for="'form-'+conf+'-'+module.name" class="form-label">[[conf]]</label>
-                <input type="text" class="form-control" :id="'form-'+conf+'-'+module.name">
-                <span style="color: brown;" :id="'error-'+conf+'-'+module.name"></span>
+        <div class="col-11">
+            <div style="width:50%; transform: translate(50%, 0);">
+                <div>
+                    <input type="hidden" id="parent_id" value="{{sid}}">
+                    <input type="text" value="{{query}}" id="process-query" placeholder="Enter here..." autofocus class="form-control" style="border-radius: 5px;" />
+                </div>
+                <span v-if="status_site" id="status">[[status_site]]</span>
             </div>
+        
+            <br>
+            <!-- Attributes selection -->
+            <div v-if="misp_attributes_list.length" style="margin-top: 10px; transform: translate(25%, 0);">
+                <div>
+                    <h4>Input Attributes</h4>
+                </div>
+                <div>
+                    <select data-placeholder="Input" class="select2-input form-control" name="input_select" id="input_select">
+                        <option value="None">--</option>
+                        <template v-for="attributes in misp_attributes_list">
+                            <option :value="attributes">[[attributes]]</option>
+                        </template>
+                    </select>
+                </div>
+            </div>
+        
+            <!-- Results modules selection -->
+            <template v-if="modules_list.length">
+                <div v-if="attr_selected.length" style="margin-top: 10px; width: 50%; transform: translate(50%, 0);">
+                    <h4>Modules</h4>
+                    <select data-placeholder="Modules" class="select2-modules form-control" multiple name="modules_select" id="modules_select">
+                        <template v-for="key in modules_list">
+                            <option v-if="key.mispattributes.input.includes(attr_selected)" :value="key.name" :title="key.meta.description">[[key.name]]</option>
+                        </template>
+                    </select>
+                </div>
+            </template>
+        
+            <!-- Display in case a module as reauest_on_query activate -->
+            <div v-if="config_query.length" style="margin-top: 10px; padding: 5px" class="row">
+                <h4>Config</h4>
+                <div class="card col-4" style="margin-top: 10px; padding: 15px" v-for="module in config_query">
+                    <h4>[[module.name]]</h4>
+                    <div v-for="conf in module.meta.config" class="mb-3">
+                        <label :for="'form-'+conf+'-'+module.name" class="form-label">[[conf]]</label>
+                        <input type="text" class="form-control" :id="'form-'+conf+'-'+module.name">
+                        <span style="color: brown;" :id="'error-'+conf+'-'+module.name"></span>
+                    </div>
+                </div>
+            </div>
+        
+            <br/>
         </div>
     </div>
-
-    <br/>
-
-    <button class="btn btn-primary" @click="actionQuery()">Query</button>
 
 {% endblock %}
 
