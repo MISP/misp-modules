@@ -41,10 +41,7 @@
             <h4>[[ current_config['module_name'] ]]</h4>
             <i>
                 <small>
-                    Attributes:
-                    <template v-for="attr in current_config['input_attr']">
-                        [[ attr ]],
-                    </template>
+                    Attributes: [[current_config['input_attr'].join(", ")]]
                 </small> 
             </i>
             <template v-for="conf, key in current_config">

@@ -56,7 +56,7 @@ export default {
 				</li>
 				<li class="list-group-item">
 					<h5 style="color: brown"><u>Modules</u></h5>
-					<template v-for="module in history.modules">[[module]],</template>
+					[[history.modules.join(", ")]]
 				</li>
 			</ul>
 		</a>
@@ -77,7 +77,7 @@ export default {
 				<br>
 				<p class="mb-1" style="color: #2000ff;"><u>Modules</u>:</p>
 				<div>
-					<template v-for="module in history.modules">[[module]],</template>
+					[[history.modules.join(", ")]]
 				</div>
 				<div></div>
 				<div class="d-flex w-100 justify-content-between">
