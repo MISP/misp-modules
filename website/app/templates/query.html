@@ -197,12 +197,19 @@
             const status_site = ref()
             const tab_list = ref("visual")
             const history = ref({})
+            const query_info = ref({})
 
 
             function actionQuery(){
                 is_searching.value = true
-                sid.value = $("#share").val()
                 pollScan();
+            }
+
+            async function queryInfo(){
+                sid.value = $("#share").val()
+                let res = await fetch("/get_query_info/" + sid.value)
+                let loc = await res.json()
+                query_info.value = loc
             }
 
             function pollScan() {
@@ -267,13 +274,36 @@
                 history.value = loc
             }
 
+            async function query_as_same(value){
+                let result_dict = {"modules": query_info.value["modules"], 
+                                    "input": query_info.value["input_query"],
+                                    "query": value,
+                                    "parent_id": sid.value,
+                                    "query_as_same": true,
+                                    "config": {}
+                                }
+                const res = await fetch('/run_modules',{
+                                headers: { "X-CSRFToken": $("#csrf_token").val(), "Content-Type": "application/json" },
+                                method: "POST",
+                                body: JSON.stringify(result_dict)
+                            })
+                if(await res.status == 201){
+                    let loc = await res.json()
+                    await nextTick()
+                    window.location.href="/query/" + loc['id']
+                }
+            }
+
             onMounted(() => {
+                queryInfo()
                 actionQuery()
                 get_history_session()
+                window._query_as_same = query_as_same
             })
 
             return {
                 message_list,
+                query_info,
                 progress,
                 status_site,
                 is_searching,
@@ -283,6 +313,7 @@
                 generateCoreFormatUI,
                 parseMispObject,
                 active_tab,
+                query_as_same
             }
         }
     }).mount('.container-fluid')

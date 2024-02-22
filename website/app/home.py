@@ -46,6 +46,31 @@ def query(sid):
 
 
 
+@home_blueprint.route("/get_query_info/<sid>")
+def get_query_info(sid):
+    """Return info for a query"""
+    session = HomeModel.get_session(sid)
+    flag=False
+    if session:
+        flag = True
+        query_loc = session.query_enter
+    else:
+        for s in SessionModel.sessions:
+            if s.uuid == sid:
+                flag = True
+                query_loc = s.query
+                session=s
+    if flag:
+        loc_dict = {
+            "query": query_loc,
+            "input_query": session.input_query,
+            "modules": json.loads(session.modules_list), 
+            "query_date": session.query_date.strftime('%Y-%m-%d %H:%M')
+            }
+        return loc_dict
+    return {"message": "Session not found"}, 404
+
+
 @home_blueprint.route("/get_modules")
 def get_modules():
     """Return all modules available"""
@@ -70,7 +95,10 @@ def run_modules():
     if "query" in request.json:
         if "input" in request.json:
             if "modules" in request.json:
-                session = SessionModel.Session_class(request.json)
+                if "query_as_same" in request.json:
+                    session = SessionModel.Session_class(request.json, query_as_same=True, parent_id=request.json["parent_id"])
+                else:
+                    session = SessionModel.Session_class(request.json)
                 HomeModel.set_flask_session(session, request.json["parent_id"])
                 session.start()
                 SessionModel.sessions.append(session)

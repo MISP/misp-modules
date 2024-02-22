@@ -8,11 +8,12 @@ from . import home_core as HomeModel
 import uuid
 from . import db
 from .db_class.db import History, History_Tree, Session_db
+from flask import session as sess 
 
 sessions = list()
 
 class Session_class:
-    def __init__(self, request_json) -> None:
+    def __init__(self, request_json, query_as_same=False, parent_id=None) -> None:
         self.uuid = str(uuid4())
         self.thread_count = 4
         self.jobs = Queue(maxsize=0)
@@ -24,20 +25,41 @@ class Session_class:
         self.input_query = request_json["input"]
         self.modules_list = request_json["modules"]
         self.nb_errors = 0
-        self.config_module = self.config_module_setter(request_json)
+        self.config_module = self.config_module_setter(request_json, query_as_same, parent_id)
         self.query_date = datetime.datetime.now(tz=datetime.timezone.utc)
 
     
-    def config_module_setter(self, request_json):
+    def util_config_as_same(self, child, parent_id):
+        if child["uuid"] == parent_id:
+            return child["config"]
+        elif "children" in child:
+            for c in child["children"]:
+                return self.util_config_as_same(c, parent_id)
+
+    
+    def config_module_setter(self, request_json, query_as_same, parent_id):
         """Setter for config for all modules used"""
-        for query in self.modules_list:
-            if not query in request_json["config"]:
-                request_json["config"][query] = {}
-                module = HomeModel.get_module_by_name(query)
-                mcs = HomeModel.get_module_config_module(module.id)
-                for mc in mcs:
-                    config_db = HomeModel.get_config(mc.config_id)
-                    request_json["config"][query][config_db.name] = mc.value
+        flag = False
+        if query_as_same:
+            current_query_val = sess.get(sess.get("current_query"))
+            if current_query_val:
+                if current_query_val["uuid"] == parent_id:
+                    return current_query_val["config"]
+                else:
+                    for child in current_query_val["children"]:
+                        res = self.util_config_as_same(child, parent_id)
+                        if res:
+                            flag = True
+                            return res
+        if not flag:
+            for query in self.modules_list:
+                if not query in request_json["config"]:
+                    request_json["config"][query] = {}
+                    module = HomeModel.get_module_by_name(query)
+                    mcs = HomeModel.get_module_config_module(module.id)
+                    for mc in mcs:
+                        config_db = HomeModel.get_config(mc.config_id)
+                        request_json["config"][query][config_db.name] = mc.value
         return request_json["config"]
 
     def start(self):
