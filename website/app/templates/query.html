@@ -67,17 +67,38 @@
     <hr>
     <ul class="nav nav-tabs" style="margin-bottom: 10px;">
         <li class="nav-item">
-            <button class="nav-link active" id="tab-json" aria-current="page" @click="active_tab('json')">Json</button>
+            <button class="nav-link active" id="tab-visual" @click="active_tab('visual')">Visual</button>
         </li>
         <li class="nav-item">
-            <button class="nav-link" id="tab-parser" @click="active_tab('parser')">Parser</button>
+            <button class="nav-link" id="tab-json" aria-current="page" @click="active_tab('json')">Json</button>
         </li>
         <li class="nav-item">
             <button class="nav-link" id="tab-markdown" @click="active_tab('markdown')">Markdown</button>
         </li>
     </ul>
 
-    <template v-if="tab_list == 'json'">
+    <template v-if="tab_list == 'visual'">
+        <div class="accordion" v-if="Object.keys(modules_res).length" style="width: 95%">
+            <div class="accordion-item" v-for="result, key in modules_res">
+                <template v-if="!('error' in result)">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button" type="button" data-bs-toggle="collapse" :data-bs-target="'#panelsStayOpen-'+key" aria-expanded="true" :aria-controls="'panelsStayOpen-'+key">
+                            [[key]]
+                        </button>
+                    </h2>
+                    <div :id="'panelsStayOpen-'+key" class="accordion-collapse collapse show">
+                        <div class="accordion-body row">
+                            <template v-for="obj in result.results.Object">
+                                <div v-html="parseMispObject(obj, '/home/{{sid}}?query=', query_as_same)[0].outerHTML"></div>
+                            </template>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </div>
+    </template>
+
+    <template v-else-if="tab_list == 'json'">
         <div class="row" v-if="Object.keys(modules_res).length">
             <div class="col-10">
                 <h3 id="results_part">Results</h3>
@@ -118,40 +139,6 @@
             <div class="col-1" style="position: fixed; right: 0px; box-shadow: 0 2px 5px 0 rgb(0 0 0 / 5%), 0 2px 10px 0 rgb(0 0 0 / 5%);">
                 <div style="padding: 10px;"><a style="text-decoration: none;" href="#results_part">Results</a></div>
                 <div style="padding: 10px;"><a style="text-decoration: none;" href="#errors_part">Errors</a></div>
-            </div>
-        </div>
-    </template>
-
-    <template v-else-if="tab_list == 'parser'">
-        <div class="accordion" v-if="Object.keys(modules_res).length" style="width: 95%">
-            <div class="accordion-item" v-for="result, key in modules_res">
-                <template v-if="!('error' in result)">
-                    <h2 class="accordion-header">
-                        <button class="accordion-button" type="button" data-bs-toggle="collapse" :data-bs-target="'#panelsStayOpen-'+key" aria-expanded="true" :aria-controls="'panelsStayOpen-'+key">
-                            [[key]]
-                        </button>
-                    </h2>
-                    <div :id="'panelsStayOpen-'+key" class="accordion-collapse collapse show">
-                        <div class="accordion-body row">
-                            <template v-for="obj, key_obj in result.results.Object">
-                                <h4>Object #[[key_obj+1]] - <small>[[obj.name]]</small></h4>
-                                <div class="row" style="margin: 5px; padding: 5px;">
-                                    <div class="col-4 mb-3" style="border: 1px solid #939393; border-radius: 10px;" v-for="attr, key_attr in obj.Attribute">
-                                        <h6>Attributes #[[key_attr+1]]</h6>
-                                        <div>
-                                            Type: [[attr.type]]
-                                        </div>
-                                        <div>
-                                            Value: [[attr.value]]
-                                        </div>
-                                        <a v-if="attr.type != 'counter' && attr.type != 'datetime'" :href="'/home/{{sid}}?query='+attr.value">query</a>
-                                    </div>
-                                </div>
-                                <hr>
-                            </template>
-                        </div>
-                    </div>
-                </template>
             </div>
         </div>
     </template>
@@ -208,7 +195,7 @@
             const modules_res = ref({})
             const progress = ref(0)
             const status_site = ref()
-            const tab_list = ref("json")
+            const tab_list = ref("visual")
             const history = ref({})
 
 
@@ -254,13 +241,13 @@
                     tab_list.value = "json"
                     if ( !document.getElementById("tab-json").classList.contains("active") ){
                         document.getElementById("tab-json").classList.add("active")
-                        document.getElementById("tab-parser").classList.remove("active")
+                        document.getElementById("tab-visual").classList.remove("active")
                         document.getElementById("tab-markdown").classList.remove("active")
                     }
-                }else if(active_tab == "parser"){
-                    tab_list.value = "parser"
-                    if ( !document.getElementById("tab-parser").classList.contains("active") ){
-                        document.getElementById("tab-parser").classList.add("active")
+                }else if(active_tab == "visual"){
+                    tab_list.value = "visual"
+                    if ( !document.getElementById("tab-visual").classList.contains("active") ){
+                        document.getElementById("tab-visual").classList.add("active")
                         document.getElementById("tab-json").classList.remove("active")
                         document.getElementById("tab-markdown").classList.remove("active")
                     }
@@ -269,7 +256,7 @@
                     if ( !document.getElementById("tab-markdown").classList.contains("active") ){
                         document.getElementById("tab-markdown").classList.add("active")
                         document.getElementById("tab-json").classList.remove("active")
-                        document.getElementById("tab-parser").classList.remove("active")
+                        document.getElementById("tab-visual").classList.remove("active")
                     }
                 }
             }
@@ -294,7 +281,8 @@
                 tab_list,
                 history,
                 generateCoreFormatUI,
-                active_tab
+                parseMispObject,
+                active_tab,
             }
         }
     }).mount('.container-fluid')
