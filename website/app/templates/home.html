@@ -23,7 +23,7 @@
                     <input type="hidden" id="parent_id" value="{{sid}}">
                     <input type="text" value="{{query}}" id="process-query" placeholder="Enter here..." autofocus class="form-control" style="border-radius: 5px;" />
                 </div>
-                <span v-if="status_site" id="status">[[status_site]]</span>
+                <span v-if="status_site" style="color: brown;" id="status">[[status_site]]</span>
             </div>
         
             <br>
@@ -105,8 +105,18 @@
                 progress.value = 0
                 let error_flag = false
 
-                let result_dict = {"modules": $("#modules_select").val(), 
-                                    "input": $("#input_select").val(),
+                let loc = undefined
+                if($("#input_select").val() != "None"){
+                    loc = $("#input_select").val()
+                }
+
+                let loc_modules = undefined
+                if(!$("#modules_select").val()){
+                    loc_modules = $("#modules_select").val()
+                }
+
+                let result_dict = {"modules": loc_modules, 
+                                    "input": loc,
                                     "query": current_query.value,
                                     "parent_id": $("#parent_id").val()
                                 }

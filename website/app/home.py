@@ -93,7 +93,7 @@ def get_list_misp_attributes():
 def run_modules():
     """Run modules"""
     if "query" in request.json:
-        if "input" in request.json:
+        if "input" in request.json and request.json["input"]:
             if "modules" in request.json:
                 if "query_as_same" in request.json:
                     session = SessionModel.Session_class(request.json, query_as_same=True, parent_id=request.json["parent_id"])
