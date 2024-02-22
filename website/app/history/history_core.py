@@ -134,13 +134,15 @@ def get_history_tree():
 
 def get_history_tree_uuid(history_uuid):
     history_tree = History_Tree.query.filter_by(session_uuid=history_uuid).first()
-    tree = json.loads(history_tree.tree)
-    loc_session = get_session(history_tree.session_uuid)
-    loc_json = loc_session.history_json()
-    loc_json["children"] = list()
-    for child in tree[history_tree.session_uuid]:
-        loc_json["children"].append(util_get_history_tree(child))
-    return loc_json
+    if history_tree:
+        tree = json.loads(history_tree.tree)
+        loc_session = get_session(history_tree.session_uuid)
+        loc_json = loc_session.history_json()
+        loc_json["children"] = list()
+        for child in tree[history_tree.session_uuid]:
+            loc_json["children"].append(util_get_history_tree(child))
+        return loc_json
+    return {}
 
 
 def util_remove_node_session(node_uuid, parent, parent_path):
@@ -153,14 +155,19 @@ def util_remove_node_session(node_uuid, parent, parent_path):
             return util_remove_node_session(node_uuid, child, parent_path["children"][i])
 
 def remove_node_session(node_uuid):
-    for q in sess:
-        if isUUID(q):
-            q_value = sess.get(q)
+    keys_list = list(sess.keys())
+    loc = None
+    for i in range(0, len(keys_list)):
+        if isUUID(keys_list[i]):
+            q_value = sess.get(keys_list[i])
             if q_value["uuid"] == node_uuid:
-                del sess[q]
+                loc = i
+                break
             else:
                 if q_value["children"]:
-                    return util_remove_node_session(node_uuid, q_value, sess[q])
+                    return util_remove_node_session(node_uuid, q_value, sess[keys_list[i]])
+    if loc:
+        del sess[keys_list[i]]
 
 
 
@@ -181,8 +188,7 @@ def remove_node_tree(node_uuid):
         tree = json.loads(history_tree.tree)
         for e in tree:
             if e == node_uuid:
-                del tree[e]
-                history_tree.tree = json.dumps(tree)
+                db.session.delete(history_tree)
                 db.session.commit()
                 return
             else:

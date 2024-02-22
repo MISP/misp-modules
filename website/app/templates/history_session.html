@@ -36,6 +36,10 @@
                         </li>
                     </ul>
                 </a>
+                <div style="display: flex; align-items: center; margin-left: 3px">
+                    <button v-if="!tree_view" class="btn btn-danger btn-sm" title="Remove this node" @click="remove_node(his, key)"><i class="fa-solid fa-trash"></i></button>
+                    <button v-else class="btn btn-danger btn-sm" title="Remove this node" @click="remove_node_tree(his, key)"><i class="fa-solid fa-trash"></i></button>
+                </div>
             </div>
             <div>
                 <div class="collapse" :id="'collapse'+his.uuid" style="width: 70%; margin-left:30px">
@@ -111,17 +115,35 @@
                 display_toast(res)
             }
 
+            async function remove_node(history_loc, key){
+                const res = await fetch('/history/remove_node_session/' + history_loc.uuid)
+                display_toast(res)
+                await change_tree(history_loc, key)
+            }
+            async function remove_node_tree(history_loc, key){
+                const res = await fetch('/history/remove_node_tree/' + history_loc.uuid)
+                display_toast(res)
+                await change_tree(history_loc, key)
+            }
+
             async function change_tree(history_loc, key){
-                if(!tree_view){
+                if(!tree_view.value){
                     const res = await fetch("/get_history_session/"+history_loc.uuid)
                     let loc = await res.json()
-                    history.value[key] = loc
+                    if(!Object.keys(loc).length){
+                        history.value.splice(key, key+1)
+                    }else{
+                        history.value[key] = loc
+                    }
                 }else{
                     const res = await fetch("/get_history_tree/"+history_loc.uuid)
                     let loc = await res.json()
-                    history.value[key] = loc
-                }
-                
+                    if(!Object.keys(loc).length){
+                        history.value.splice(key, key+1)
+                    }else{
+                        history.value[key] = loc
+                    }
+                }                
             }
 
             onMounted(() => {
@@ -142,7 +164,9 @@
                 history,
                 tree_view,
                 save_history,
-                change_tree
+                change_tree,
+                remove_node,
+                remove_node_tree
             }
         }
     }).mount('.container-fluid')
