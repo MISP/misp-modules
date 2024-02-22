@@ -13,6 +13,8 @@ home_blueprint = Blueprint(
 
 @home_blueprint.route("/")
 def home():
+    if "query" in request.args:
+        return render_template("home.html", query=request.args.get("query"))
     return render_template("home.html")
 
 @home_blueprint.route("/home/<sid>", methods=["GET", "POST"])

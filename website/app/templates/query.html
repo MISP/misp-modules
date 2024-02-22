@@ -11,7 +11,11 @@
         <h2>{{query}}</h2>
     </div>
 
-    <a style="float: right;" class="btn btn-primary" href="/">New query</a>
+    <div class="btn-group" style="float: right;" role="group" aria-label="Basic mixed styles example">
+        <a style="float: right;" class="btn btn-primary" href="/" title="Do a new query with no relation with this one">New query</a>
+        <a style="float: right;" class="btn btn-secondary" href="/?query={{query}}" title="New query with same name">Query</a>
+      </div>
+    
 
     <div class="card card-body">
         <div class="row">
