@@ -135,6 +135,28 @@ def result(sid):
 
 
 
+@home_blueprint.route("/download/<sid>")
+def download(sid):
+    """Download a module result as json"""
+    sess = HomeModel.get_session(sid)
+    if "module" in request.args:
+        if sess:
+            loc = json.loads(sess.result)
+            module = request.args.get("module")
+            if module in loc:
+                return jsonify(loc[module]), 200, {'Content-Disposition': f'attachment; filename={sess.query_enter.replace(".", "_")}-{module}.json'}
+            return {"message": "Module not in result", "toast_class": "danger-subtle"}, 400
+        else:
+            for s in SessionModel.sessions:
+                if s.uuid == sid:
+                    module = request.args.get("module")
+                    if module in s.result:
+                        return jsonify(s.result[module]), 200, {'Content-Disposition': f'attachment; filename={s.query}-{module}.json'}
+                    return {"message": "Module not in result", "toast_class": "danger-subtle"}, 400
+        return {"message": "Session not found", 'toast_class': "danger-subtle"}, 404
+    return {"message": "Need to pass a module", "toast_class": "warning-subtle"}, 400
+
+
 
 
 
