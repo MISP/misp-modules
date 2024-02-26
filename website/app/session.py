@@ -3,7 +3,7 @@ import json
 from queue import Queue
 from threading import Thread
 from uuid import uuid4
-from .utils.utils import query_post_query, query_get_module
+from .utils.utils import query_post_query, query_get_module, get_object
 from . import home_core as HomeModel
 import uuid
 from . import db
@@ -131,6 +131,20 @@ class Session_class:
             else:
                 send_to = {"module": work[1], self.input_query: self.query, "config": loc_config}
             res = query_post_query(send_to)
+
+            ## Sort attr in object by ui-priority
+            if "results" in res:
+                if "Object" in res["results"]:
+                    for obj in res["results"]["Object"]:
+                        loc_obj = get_object(obj["name"])
+                        if loc_obj:
+                            for attr in obj["Attribute"]:
+                                attr["ui-priority"] = loc_obj["attributes"][attr["object_relation"]]["ui-priority"]
+                            
+                            # After adding 'ui-priority'
+                            obj["Attribute"].sort(key=lambda x: x["ui-priority"], reverse=True)
+                    
+
             # print(res)
             if "error" in res:
                 self.nb_errors += 1

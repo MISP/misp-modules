@@ -8,5 +8,7 @@ source env/bin/activate
 
 pip install -r requirements.txt
 
+git submodule init && git submodule update
+
 python app.py -i
 deactivate

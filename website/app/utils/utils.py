@@ -1,4 +1,4 @@
-# import os
+import os
 import uuid
 import json
 import requests
@@ -37,6 +37,15 @@ def isUUID(uid):
         return True
     except ValueError:
         return False
+    
+def get_object(obj_name):
+    loc_path = os.path.join(os.getcwd(), "data", "misp-objects", "objects")
+    if os.path.isdir(loc_path):
+        with open(os.path.join(loc_path, obj_name, "definition.json"), "r") as read_json:
+            loc_json = json.load(read_json)
+        return loc_json
+    return False
+    
 
 
 # def form_to_dict(form):
