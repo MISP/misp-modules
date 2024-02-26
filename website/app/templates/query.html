@@ -115,10 +115,10 @@
                 </div>
                 
                 <!-- Errors Part -->
-                <hr style="margin-top: 50px">
+                <hr style="margin-top: 50px; width: 95%">
                 <h3 id="errors_part">Errors</h3>
                 <div data-bs-spy="scroll" data-bs-target="#list-error" data-bs-smooth-scroll="true" class="scrollspy-example" tabindex="0">
-                    <div class="accordion">
+                    <div class="accordion" style="width: 95%">
                         <div class="accordion-item" :id="'list-item-'+key" v-for="result, key in modules_res">
                             <template v-if="'error' in result">
                                 <h2 class="accordion-header">
@@ -158,10 +158,10 @@
                         </div>
 
                         <!-- Errors Part -->
-                        <hr style="margin-top: 50px">
+                        <hr style="margin-top: 50px; width: 95%">
                         <h3 id="errors_part">Errors</h3>
                         <div data-bs-spy="scroll" data-bs-target="#list-error" data-bs-smooth-scroll="true" class="scrollspy-example" tabindex="0">
-                            <div class="accordion">
+                            <div class="accordion" style="width: 95%">
                                 <div class="accordion-item" :id="'list-item-'+key" v-for="result, key in modules_res">
                                     <template v-if="'error' in result">
                                         <h2 class="accordion-header">
@@ -191,16 +191,29 @@
                             </h2>
                             <div :id="'panelsStayOpen-'+key" class="accordion-collapse collapse show">
                                 <div class="accordion-body row">
-                                    <template v-for="obj, key_obj in result.results.Object">
-                                        <pre>
+                                    <template v-if="'Object' in result.results">
+                                        <template v-for="obj, key_obj in result.results.Object">
+                                            <pre>
 #### [[obj.name]]
 <template v-for="attr, key_attr in obj.Attribute">
 ###### [[attr.object_relation]]
 Type: [[attr.type]]
 Value: [[attr.value]]
 </template>
-                                        </pre>
-                                        <hr>
+                                            </pre>
+                                            <hr>
+                                        </template>
+                                    </template>
+                                    <template v-else>
+                                        <template v-for="misp_attrs, key_loop in result.results">
+                                            <template v-for="misp_attr in misp_attrs.values">
+                                                <pre>
+#### Attr [[key_loop +1]]
+Type: [[misp_attrs.types.join(", ")]]
+Value: [[misp_attr]]
+                                                </pre>
+                                            </template>
+                                        </template>
                                     </template>
                                 </div>
                             </div>
