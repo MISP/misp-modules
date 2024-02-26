@@ -48,7 +48,7 @@
                     <h4>Modules</h4>
                     <select data-placeholder="Modules" class="select2-modules form-control" multiple name="modules_select" id="modules_select">
                         <template v-for="key in modules_list">
-                            <option v-if="key.mispattributes.input.includes(attr_selected)" :value="key.name" :title="key.meta.description">[[key.name]]</option>
+                            <option v-if="checked_attr(key.mispattributes.input)" :value="key.name" :title="key.meta.description">[[key.name]]</option>
                         </template>
                     </select>
                 </div>
@@ -232,7 +232,14 @@
             }
 
             function checked_attr(arr1){
-                return arr1.includes(attr_selected.value)
+                let loc = arr1.includes(attr_selected.value)
+                if(!loc && attr_selected.value == 'ip'){
+                    loc = arr1.includes('ip-dst')
+                    if(!loc && attr_selected.value == 'ip'){
+                        loc = arr1.includes('ip-src')
+                    }
+                }
+                return loc
             }
 
 

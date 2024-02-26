@@ -6,7 +6,10 @@ body {
   background-color: #fbfbfb;
 }
 
-
+main
+ {
+    overflow-x: auto;
+ }
 span#goTop{
   position: fixed;
   right: 1em;
