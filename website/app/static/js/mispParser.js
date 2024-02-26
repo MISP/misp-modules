@@ -60,8 +60,60 @@ function parseMispObject(misp_object, query_url, functionToCall){
         )
     )
     $mainContainer.append(first_elem)
-    $mainContainer.append(first_elem)
     $mainContainer.append(generate(misp_object, query_url, functionToCall))
+    $mainContainer.append($("<hr>"))
+    return $mainContainer
+}
+
+function parseMispAttr(misp_attr, misp_types, key, query_url, query_as_same){
+    let $query = $("<a>")
+    let $query_same = null
+
+    if(!misp_types.includes('counter') && !misp_types.includes('datetime') ){
+        if(query_url){
+            $query=$("<a>").attr("href", query_url+misp_attr).text("query").css("margin-left", "10px")
+        }
+        // `_${functionToCall.name}('${misp_attr}')` refer to 'window._query_as_same = query_as_same' in my vue file
+        $query_same = $("<button>").attr({"onclick": `_${query_as_same.name}('${misp_attr}')`, 
+                        "title": "Query this value with the same attribute and modules as the main query",
+                        "class": "btn btn-link"
+                    })
+                .text("query as same")
+                .css({"margin-left": "10px", "padding": "0", "--bs-btn-border-width": "0"})
+    }
+
+
+    var $mainContainer = $('<div>')
+    let cp = key+1
+    $mainContainer.append($("<h6>").append($("<u>").text("#Attr "+cp)))
+    $mainContainer.append($("<div>").css("display", "flex").append(
+        $("<div>").css({
+            "border-left": "2px solid grey",
+            "border-bottom": "2px solid grey",
+            "width": "15px",
+            "height": "15px",
+            "display": "flex",
+            "margin-left": "0.5em",
+        }),
+        $("<div>").text("Type: "+ misp_types.join(", "))
+        )
+    )
+
+    $mainContainer.append($("<div>").css("display", "flex").append(
+            $("<div>").css({
+                "border-left": "2px solid grey",
+                "border-bottom": "2px solid grey",
+                "width": "15px",
+                "height": "15px",
+                "display": "flex",
+                "margin-left": "0.5em",
+            }),
+            $("<div>").text("Value: "+ misp_attr),
+            $query,
+            $query_same
+        )
+    )
+
     $mainContainer.append($("<hr>"))
     return $mainContainer
 }
