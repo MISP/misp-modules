@@ -2,6 +2,3 @@
 	path = misp_modules/lib/misp-objects
 	url = https://github.com/MISP/misp-objects.git
 	branch = main
-[submodule "website/data/misp-objects"]
-	path = website/data/misp-objects
-	url = https://github.com/MISP/misp-objects

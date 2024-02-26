@@ -4,6 +4,7 @@ import json
 import requests
 # import jsonschema
 from config import Config
+from pathlib import Path
 
 MODULES = []
 
@@ -39,7 +40,9 @@ def isUUID(uid):
         return False
     
 def get_object(obj_name):
-    loc_path = os.path.join(os.getcwd(), "data", "misp-objects", "objects")
+    path = Path(os.getcwd())
+    parent_path = path.parent.absolute()
+    loc_path = os.path.join(parent_path, "misp_modules", "lib", "misp-objects", "objects")
     if os.path.isdir(loc_path):
         with open(os.path.join(loc_path, obj_name, "definition.json"), "r") as read_json:
             loc_json = json.load(read_json)
