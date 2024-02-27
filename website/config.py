@@ -21,15 +21,9 @@ class TestingConfig(Config):
     SQLALCHEMY_DATABASE_URI = "sqlite:///misp-module-test.sqlite"
     WTF_CSRF_ENABLED = False
 
-    @classmethod
-    def init_app(cls, app):
-        print('THIS APP IS IN TESTING MODE.  \
-                YOU SHOULD NOT SEE THIS IN PRODUCTION.')
-
 
 config = {
     'development': DevelopmentConfig,
     'testing': TestingConfig,
-    # 'production': ProductionConfig,
     'default': DevelopmentConfig
 }
