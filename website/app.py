@@ -4,6 +4,18 @@ from flask import render_template
 import os
 from app.utils.init_modules import create_modules_db
 
+import signal
+import sys
+import subprocess
+
+def signal_handler(sig, frame):
+    path = os.path.join(os.getcwd(), "launch.sh")
+    req = [path, "-ks"]
+    subprocess.call(req)
+    sys.exit(0)
+
+signal.signal(signal.SIGINT, signal_handler)
+
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-i", "--init_db", help="Initialise the db if it not exist", action="store_true")

@@ -1,8 +1,18 @@
 #!/bin/bash
+isscripted=`screen -ls | egrep '[0-9]+.misp_mod' | cut -d. -f1`
 
+function killscript {
+    if  [ $isscripted ]; then
+		screen -X -S misp_mod quit
+    fi
+}
 
 function launch {
     export FLASKENV="development"
+    killscript
+    screen -dmS "misp_mod"
+    screen -S "misp_mod" -X screen -t "misp_modules_server" bash -c "../env/bin/misp-modules -l 127.0.0.1; read x"
+    sleep 2
     python3 app.py -m
     python3 app.py
 }
@@ -30,6 +40,8 @@ if [ "$1" ]; then
 		-r | --reload_db )          reload_db;
                                         ;;
         -t | --test )               test;
+                                        ;;                                
+        -ks | --killscript )        killscript;
     esac
     shift
 else
