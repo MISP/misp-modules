@@ -8,7 +8,7 @@ body {
 
 main
  {
-    overflow-x: auto;
+    overflow-x: hidden;
  }
 span#goTop{
   position: fixed;
