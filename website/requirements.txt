@@ -6,7 +6,6 @@ Flask-WTF
 Flask-Migrate
 WTForms
 Werkzeug==2.3.8
-Flask-Migrate
 flask-restx
 python-dateutil
 schedule

@@ -2,11 +2,9 @@
 
 Use all modules with a dedicate website without any MISP
 
-![home](https://github.com/MISP/misp-modules/blob/main/doc/home_misp_module.png?raw=true)
+![home](https://github.com/MISP/misp-modules/blob/main/website/doc/home_misp_module.png?raw=true)
 
-![query](https://github.com/MISP/misp-modules/blob/main/doc/query_misp_module.png?raw=true)
-
-
+![query](https://github.com/MISP/misp-modules/blob/main/website/doc/query_misp_module.png?raw=true)
 
 ## Installation
 
@@ -20,8 +18,6 @@ pip install -r requirements.txt
 git submodule init && git submodule update   ## Initialize misp-objects submodule
 python3 app.py -i                            ## Initialize db
 ```
-
-
 
 ## Config
 
