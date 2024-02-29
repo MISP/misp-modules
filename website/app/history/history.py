@@ -1,6 +1,7 @@
 import json
-from flask import Flask, Blueprint, render_template, request, jsonify
+from flask import Flask, Blueprint, render_template, request, jsonify, session as sess
 from . import history_core as HistoryModel
+from ..utils.utils import admin_user_active
 
 history_blueprint = Blueprint(
     'history',
@@ -13,6 +14,7 @@ history_blueprint = Blueprint(
 @history_blueprint.route("/history", methods=["GET"])
 def history():
     """View all history"""
+    sess["admin_user"] = admin_user_active()
     return render_template("history.html")
 
 @history_blueprint.route("/get_history", methods=["GET"])
@@ -25,6 +27,7 @@ def get_history():
 @history_blueprint.route("/history_session", methods=["GET"])
 def history_session():
     """View all history"""
+    sess["admin_user"] = admin_user_active()
     return render_template("history_session.html", tree_view=False)
 
 @history_blueprint.route("/get_history_session", methods=["GET"])
@@ -49,6 +52,7 @@ def save_history(sid):
 @history_blueprint.route("/history_tree", methods=["GET"])
 def history_tree():
     """View all history"""
+    sess["admin_user"] = admin_user_active()
     return render_template("history_session.html", tree_view=True)
 
 @history_blueprint.route("/get_history_tree", methods=["GET"])

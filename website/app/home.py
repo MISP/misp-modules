@@ -1,7 +1,9 @@
 import json
-from flask import Flask, Blueprint, render_template, request, jsonify
+from flask import Blueprint, render_template, request, jsonify, session as sess
+from flask_login import current_user
+from . import session_class as SessionModel
 from . import home_core as HomeModel
-from . import session as SessionModel
+from .utils.utils import admin_user_active
 
 home_blueprint = Blueprint(
     'home',
@@ -13,12 +15,14 @@ home_blueprint = Blueprint(
 
 @home_blueprint.route("/")
 def home():
+    sess["admin_user"] = admin_user_active()
     if "query" in request.args:
         return render_template("home.html", query=request.args.get("query"))
     return render_template("home.html")
 
 @home_blueprint.route("/home/<sid>", methods=["GET", "POST"])
 def home_query(sid):
+    sess["admin_user"] = admin_user_active()
     if "query" in request.args:
         query = request.args.get("query")
         return render_template("home.html", query=query, sid=sid)
@@ -26,6 +30,7 @@ def home_query(sid):
 
 @home_blueprint.route("/query/<sid>")
 def query(sid):
+    sess["admin_user"] = admin_user_active()
     session = HomeModel.get_session(sid)
     flag=False
     if session:
@@ -159,38 +164,50 @@ def download(sid):
 
 
 
-
 @home_blueprint.route("/modules_config")
 def modules_config():
     """List all modules for configuration"""
-
-    return render_template("modules_config.html")
+    sess["admin_user"] = admin_user_active()
+    if sess.get("admin_user"):
+        if current_user.is_authenticated:
+            return render_template("modules_config.html")
+    return render_template("404.html")
 
 @home_blueprint.route("/modules_config_data")
 def modules_config_data():
     """List all modules for configuration"""
-
-    modules_config = HomeModel.get_modules_config()
-    return modules_config, 200
+    sess["admin_user"] = admin_user_active()
+    if sess.get("admin_user"):
+        if current_user.is_authenticated:
+            modules_config = HomeModel.get_modules_config()
+            return modules_config, 200
+    return {"message": "Permission denied"}, 403
 
 
 @home_blueprint.route("/change_config", methods=["POST"])
 def change_config():
     """Change configuation for a module"""
-    if "module_name" in request.json["result_dict"]:
-        res = HomeModel.change_config_core(request.json["result_dict"])
-        if res:
-            return {'message': 'Config changed', 'toast_class': "success-subtle"}, 200
-        return {'message': 'Something went wrong', 'toast_class': "danger-subtle"}, 400
-    return {'message': 'Need to pass "module_name"', 'toast_class': "warning-subtle"}, 400
+    sess["admin_user"] = admin_user_active()
+    if sess.get("admin_user"):
+        if current_user.is_authenticated:
+            if "module_name" in request.json["result_dict"]:
+                res = HomeModel.change_config_core(request.json["result_dict"])
+                if res:
+                    return {'message': 'Config changed', 'toast_class': "success-subtle"}, 200
+                return {'message': 'Something went wrong', 'toast_class': "danger-subtle"}, 400
+            return {'message': 'Need to pass "module_name"', 'toast_class': "warning-subtle"}, 400
+    return {'message': 'Permission denied', 'toast_class': "danger-subtle"}, 403
 
 @home_blueprint.route("/change_status", methods=["GET"])
 def change_status():
     """Change the status of a module, active or unactive"""
-    if "module_id" in request.args:
-        res = HomeModel.change_status_core(request.args.get("module_id"))
-        if res:
-            return {'message': 'Module status changed', 'toast_class': "success-subtle"}, 200
-        return {'message': 'Something went wrong', 'toast_class': "danger-subtle"}, 400
-    return {'message': 'Need to pass "module_id"', 'toast_class': "warning-subtle"}, 400
-
+    sess["admin_user"] = admin_user_active()
+    if sess.get("admin_user"):
+        if current_user.is_authenticated:
+            if "module_id" in request.args:
+                res = HomeModel.change_status_core(request.args.get("module_id"))
+                if res:
+                    return {'message': 'Module status changed', 'toast_class': "success-subtle"}, 200
+                return {'message': 'Something went wrong', 'toast_class': "danger-subtle"}, 400
+            return {'message': 'Need to pass "module_id"', 'toast_class': "warning-subtle"}, 400
+    return {'message': 'Permission denied', 'toast_class': "danger-subtle"}, 403

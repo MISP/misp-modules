@@ -31,8 +31,18 @@ Edit `config.py`
 
 - `MISP_MODULE`: url and port where misp-module is running
 
+- `ADMIN_USER`: If True, config page will not be accessible
+
+- `ADMIN_PASSWORD`: Password for Admin user if `ADMIN_USER` is True
+
 ## Launch
 
 ```bash
 ./launch.sh -l
 ```
+
+
+
+## Admin user
+
+If admin user is active, type `/login` in url to access a login page and type the password wrote in `config.py` in `ADMIN_PASSOWRD`.

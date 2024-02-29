@@ -1,5 +1,6 @@
 import json
-from .. import db
+from .. import db, login_manager
+from flask_login import  UserMixin, AnonymousUserMixin
 
 
 class Module(db.Model):
@@ -76,3 +77,30 @@ class Module_Config(db.Model):
     config_id = db.Column(db.Integer, index=True)
     value = db.Column(db.String, index=True)
 
+
+class User(UserMixin, db.Model):
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    first_name = db.Column(db.String(64), index=True)
+    last_name = db.Column(db.String(64), index=True)
+    email = db.Column(db.String(64), unique=True, index=True)
+
+    def to_json(self):
+        return {
+            "id": self.id, 
+            "first_name": self.first_name, 
+            "last_name": self.last_name, 
+            "email": self.email
+        }
+
+class AnonymousUser(AnonymousUserMixin):
+    def is_admin(self):
+        return False
+
+    def read_only(self):
+        return True
+    
+login_manager.anonymous_user = AnonymousUser
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
