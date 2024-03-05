@@ -15,7 +15,7 @@ home_blueprint = Blueprint(
 
 @home_blueprint.route("/")
 def home():
-    sess["admin_user"] = admin_user_active()
+    sess["admin_user"] = bool(admin_user_active())
     if "query" in request.args:
         return render_template("home.html", query=request.args.get("query"))
     return render_template("home.html")
@@ -168,46 +168,60 @@ def download(sid):
 def modules_config():
     """List all modules for configuration"""
     sess["admin_user"] = admin_user_active()
+    flag = True
     if sess.get("admin_user"):
-        if current_user.is_authenticated:
-            return render_template("modules_config.html")
+        if not current_user.is_authenticated:
+            flag = False
+    if flag:
+        return render_template("modules_config.html")
     return render_template("404.html")
-
+    
+    
 @home_blueprint.route("/modules_config_data")
 def modules_config_data():
     """List all modules for configuration"""
     sess["admin_user"] = admin_user_active()
+    flag = True
     if sess.get("admin_user"):
-        if current_user.is_authenticated:
-            modules_config = HomeModel.get_modules_config()
-            return modules_config, 200
+        if not current_user.is_authenticated:
+            flag = False
+    if flag:
+        modules_config = HomeModel.get_modules_config()
+        return modules_config, 200
     return {"message": "Permission denied"}, 403
-
+    
 
 @home_blueprint.route("/change_config", methods=["POST"])
 def change_config():
     """Change configuation for a module"""
     sess["admin_user"] = admin_user_active()
+    flag = True
     if sess.get("admin_user"):
-        if current_user.is_authenticated:
-            if "module_name" in request.json["result_dict"]:
-                res = HomeModel.change_config_core(request.json["result_dict"])
-                if res:
-                    return {'message': 'Config changed', 'toast_class': "success-subtle"}, 200
-                return {'message': 'Something went wrong', 'toast_class': "danger-subtle"}, 400
-            return {'message': 'Need to pass "module_name"', 'toast_class': "warning-subtle"}, 400
+        if not current_user.is_authenticated:
+            flag = False  
+    if flag:
+        if "module_name" in request.json["result_dict"]:
+            res = HomeModel.change_config_core(request.json["result_dict"])
+            if res:
+                return {'message': 'Config changed', 'toast_class': "success-subtle"}, 200
+            return {'message': 'Something went wrong', 'toast_class': "danger-subtle"}, 400
+        return {'message': 'Need to pass "module_name"', 'toast_class': "warning-subtle"}, 400
     return {'message': 'Permission denied', 'toast_class': "danger-subtle"}, 403
 
 @home_blueprint.route("/change_status", methods=["GET"])
 def change_status():
     """Change the status of a module, active or unactive"""
     sess["admin_user"] = admin_user_active()
+    flag = True
     if sess.get("admin_user"):
-        if current_user.is_authenticated:
-            if "module_id" in request.args:
-                res = HomeModel.change_status_core(request.args.get("module_id"))
-                if res:
-                    return {'message': 'Module status changed', 'toast_class': "success-subtle"}, 200
-                return {'message': 'Something went wrong', 'toast_class': "danger-subtle"}, 400
-            return {'message': 'Need to pass "module_id"', 'toast_class': "warning-subtle"}, 400
+        if not current_user.is_authenticated:
+            flag = False
+    # if admin is active and user is logon or if admin is not active
+    if flag:
+        if "module_id" in request.args:
+            res = HomeModel.change_status_core(request.args.get("module_id"))
+            if res:
+                return {'message': 'Module status changed', 'toast_class': "success-subtle"}, 200
+            return {'message': 'Something went wrong', 'toast_class': "danger-subtle"}, 400
+        return {'message': 'Need to pass "module_id"', 'toast_class': "warning-subtle"}, 400
     return {'message': 'Permission denied', 'toast_class': "danger-subtle"}, 403

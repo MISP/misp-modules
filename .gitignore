@@ -21,3 +21,4 @@ venv*
 #vscode
 .vscode*
 *.sqlite
+website/conf/config.cfg

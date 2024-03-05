@@ -1,10 +1,15 @@
 import os
+import random
 import uuid
 import json
 import requests
 # import jsonschema
-from config import Config
+from conf.config import Config
 from pathlib import Path
+import configparser
+config = configparser.ConfigParser()
+CONF_PATH = os.path.join(os.getcwd(), "conf", "config.cfg")
+config.read(CONF_PATH)
 
 MODULES = []
 
@@ -51,9 +56,19 @@ def get_object(obj_name):
 
 
 def admin_user_active():
-    return Config.ADMIN_USER
+    config.read(CONF_PATH)
+    return config.getboolean("ADMIN", "ADMIN_USER")
 
 def admin_password():
-    return Config.ADMIN_PASSWORD
+    return config["ADMIN"]["ADMIN_PASSWORD"]
 
-
+def gen_admin_password():
+    if not admin_password():
+        chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!@$%#[]+-:;_&*().,?0123456789'
+        password = ''
+        for _ in range(20):
+            password += random.choice(chars)
+        print(f"##########################\n##    Admin password    ##\n## {password} ##\n##########################")
+        config["ADMIN"]["ADMIN_PASSWORD"] = password
+        with open(CONF_PATH, "w") as conffile:
+            config.write(conffile)

@@ -35,13 +35,19 @@ Edit `config.py`
 
 - `ADMIN_PASSWORD`: Password for Admin user if `ADMIN_USER` is True
 
+
+
+Rename `config.cfg.sample` to `config.cfg` then edit it:
+
+- `ADMIN_USER`: If True, config page will not be accessible
+
+- `ADMIN_PASSWORD`: Password for Admin user if `ADMIN_USER` is True
+
 ## Launch
 
 ```bash
 ./launch.sh -l
 ```
-
-
 
 ## Admin user
 

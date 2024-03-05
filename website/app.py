@@ -7,6 +7,7 @@ from app.utils.init_modules import create_modules_db
 import signal
 import sys
 import subprocess
+from app.utils.utils import gen_admin_password
 
 def signal_handler(sig, frame):
     path = os.path.join(os.getcwd(), "launch.sh")
@@ -47,4 +48,5 @@ elif args.create_module:
     with app.app_context():
         create_modules_db()
 else:
+    gen_admin_password()
     app.run(host=app.config.get("FLASK_URL"), port=app.config.get("FLASK_PORT"))
