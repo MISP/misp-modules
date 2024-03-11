@@ -1,5 +1,5 @@
 import json
-from .utils.utils import query_get_module
+from .utils.utils import isUUID, query_get_module
 from . import db
 from .db_class.db import History, Module, Config, Module_Config, Session_db, History_Tree
 from flask import session as sess
@@ -150,14 +150,7 @@ def get_history():
 
 def create_new_session_tree(current_session, parent_id):
     loc_session = get_session(parent_id)
-    loc_json = {
-        "uuid": loc_session.uuid,
-        "modules": json.loads(loc_session.modules_list),
-        "query": loc_session.query_enter,
-        "input": loc_session.input_query,
-        "query_date": loc_session.query_date.strftime('%Y-%m-%d %H:%M'),
-        "config": json.loads(loc_session.config_module)
-    }
+    
     loc_json_child = {
         "uuid": current_session.uuid,
         "modules": current_session.modules_list,
@@ -165,12 +158,20 @@ def create_new_session_tree(current_session, parent_id):
         "input": current_session.input_query,
         "query_date": current_session.query_date.strftime('%Y-%m-%d'),
         "config": current_session.config_module,
-        "children": []
+        "children": list()
+    }
+    loc_json = {
+        "uuid": loc_session.uuid,
+        "modules": json.loads(loc_session.modules_list),
+        "query": loc_session.query_enter,
+        "input": loc_session.input_query,
+        "query_date": loc_session.query_date.strftime('%Y-%m-%d %H:%M'),
+        "config": json.loads(loc_session.config_module),
+        "children" : [loc_json_child]
     }
 
     sess["current_query"] = loc_session.uuid
     sess[sess.get("current_query")] = loc_json
-    sess[sess.get("current_query")]["children"] = [loc_json_child]
 
 def util_set_flask_session(parent_id, loc_session, current_session):
     if parent_id == loc_session["uuid"]:
@@ -201,9 +202,34 @@ def set_flask_session(current_session, parent_id):
         if not current_query or current_query not in sess:
             create_new_session_tree(current_session, parent_id)
         else:
-            # sess["uuid"]
-            loc_session = sess.get(sess.get("current_query"))
+            ## Check in current query
+            loc_session = sess.get(current_query)
             if not "children" in loc_session:
                 loc_session["children"] = list()
+            ## If not in current query, current query change for an other one
             if not util_set_flask_session(parent_id, loc_session, current_session):
-                create_new_session_tree(current_session, parent_id)
+                # sess["uuid"]
+                for q in sess:
+                    if isUUID(q) and not q == current_query:
+                        loc_session = sess.get(q)
+                        if not "children" in loc_session:
+                            loc_session["children"] = list()
+                        if util_set_flask_session(parent_id, loc_session, current_session):
+                            sess["current_query"] = q
+                            flag = False
+                            break
+                if flag:
+                    create_new_session_tree(current_session, parent_id)
+    else:
+        loc_json = {
+            "uuid": current_session.uuid,
+            "modules": current_session.modules_list,
+            "query": current_session.query,
+            "input": current_session.input_query,
+            "query_date": current_session.query_date.strftime('%Y-%m-%d %H:%M'),
+            "config": current_session.config_module,
+            "children": list()
+        }
+
+        sess["current_query"] = current_session.uuid
+        sess[sess.get("current_query")] = loc_json

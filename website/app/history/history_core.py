@@ -31,15 +31,14 @@ def get_history_session():
         # It's already save in history
         # Only parent-child tree structure is in flask session
         current_query_value = sess.get(current_query)
-        if current_query_value and current_query_value["children"]:
+        if current_query_value:
             loc_list.append(current_query_value)
     for q in sess:
         if isUUID(q):
             # If query have no children then don't display it
             q_value = sess.get(q)
-            if q_value["children"]:
-                if not q == current_query:
-                    loc_list.append(q_value)
+            if not q == current_query:
+                loc_list.append(q_value)
 
     return loc_list
 
@@ -47,7 +46,7 @@ def get_current_query_history():
     current_query = sess.get("current_query")
     if current_query:
         current_query_value = sess.get(current_query)
-        if current_query_value and current_query_value["children"]:
+        if current_query_value:
             return current_query_value
     return {}
 
@@ -163,9 +162,8 @@ def remove_node_session(node_uuid):
             if q_value["uuid"] == node_uuid:
                 loc = i
                 break
-            else:
-                if q_value["children"]:
-                    return util_remove_node_session(node_uuid, q_value, sess[keys_list[i]])
+            elif q_value["children"]:
+                return util_remove_node_session(node_uuid, q_value, sess[keys_list[i]])
     if loc:
         del sess[keys_list[i]]
 
