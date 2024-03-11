@@ -14,7 +14,21 @@
     <div class="btn-group" style="float: right;" role="group" aria-label="Basic mixed styles example">
         <a style="float: right;" class="btn btn-primary" href="/" title="Do a new query with no relation with this one">New query</a>
         <a style="float: right;" class="btn btn-secondary" href="/?query={{query}}" title="New query with same name">Query</a>
-      </div>
+        <div class="dropdown" style="float: right;">
+            <button class="btn btn-primary dropdown-toggle" title="New query with same parameters" style="border-radius: 0;" data-bs-toggle="dropdown" aria-expanded="false" data-bs-auto-close="outside">
+                Query as same
+            </button>
+            <div class="dropdown-menu p-4" style="min-width: 200px;">
+                <div class="mb-3">
+                    <label for="query_as_params" class="form-label">To query:</label>
+                    <input type="email" class="form-control" id="query_as_params" placeholder="{{query}}">
+                    <div id="query_as_params_error" style="color:brown"></div>
+                </div>
+                <button type="submit" class="btn btn-primary btn-sm" @click="query_as_params()" style="border-radius: 50px;">Query</button>
+            </div>
+        </div>
+    </div>
+    
     
 
     <div class="card card-body">
@@ -341,6 +355,7 @@ Value: [[misp_attr]]
                 history.value = loc
             }
 
+            // query 'value' with same parameters with a parent
             async function query_as_same(value){
                 let result_dict = {"modules": query_info.value["modules"], 
                                     "input": query_info.value["input_query"],
@@ -358,6 +373,33 @@ Value: [[misp_attr]]
                     let loc = await res.json()
                     await nextTick()
                     window.location.href="/query/" + loc['id']
+                }
+            }
+
+            // query 'value' with same parameters without a parent
+             async function query_as_params(){
+                let loc = $("#query_as_params").val()
+                $("#query_as_params_error").text("")
+                if(loc){
+                    let result_dict = {"modules": query_info.value["modules"], 
+                                        "input": query_info.value["input_query"],
+                                        "query": loc,
+                                        "config": {},
+                                        "same_query_id": sid.value,
+                                        "parent_id": ""
+                                    }
+                    const res = await fetch('/run_modules',{
+                                    headers: { "X-CSRFToken": $("#csrf_token").val(), "Content-Type": "application/json" },
+                                    method: "POST",
+                                    body: JSON.stringify(result_dict)
+                                })
+                    if(await res.status == 201){
+                        let loc = await res.json()
+                        await nextTick()
+                        window.location.href="/query/" + loc['id']
+                    }
+                }else{
+                    $("#query_as_params_error").text("Please give value")
                 }
             }
 
@@ -382,7 +424,8 @@ Value: [[misp_attr]]
                 parseMispObject,
                 parseMispAttr,
                 active_tab,
-                query_as_same
+                query_as_same,
+                query_as_params
             }
         }
     }).mount('.container-fluid')

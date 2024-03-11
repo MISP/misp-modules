@@ -104,6 +104,8 @@ def run_modules():
             if "modules" in request.json:
                 if "query_as_same" in request.json:
                     session = SessionModel.Session_class(request.json, query_as_same=True, parent_id=request.json["parent_id"])
+                elif "query_as_params" in request.json:
+                    session = SessionModel.Session_class(request.json, query_as_same=True, parent_id=request.json["same_query_id"])
                 else:
                     session = SessionModel.Session_class(request.json)
                 HomeModel.set_flask_session(session, request.json["parent_id"])
