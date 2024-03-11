@@ -81,25 +81,22 @@ def save_history_core(sid):
         # Doesn't already exist
         history_tree_db = History_Tree.query.filter_by(session_uuid=session["uuid"]).first()
         if not history_tree_db:
-            if "children" in session and session["children"]:
-                # Get all children before add to db
-                loc_dict = util_save_history(session)
-                h = History_Tree(
-                    session_uuid = session["uuid"],
-                    tree=json.dumps(loc_dict)
-                )
-                db.session.add(h)
-                db.session.commit()
-                return {"message": "History Save", 'toast_class': "success-subtle"}
-            return {"message": "No children", 'toast_class': "warning-subtle"}
+            # Get all children before add to db
+            loc_dict = util_save_history(session)
+            h = History_Tree(
+                session_uuid = session["uuid"],
+                tree=json.dumps(loc_dict)
+            )
+            db.session.add(h)
+            db.session.commit()
+            return {"message": "History Save", 'toast_class': "success-subtle"}
         # Save same session but with new value
         elif not json.loads(history_tree_db.tree) == session:
-            if "children" in session and session["children"]:
-                # Get all children before add to db
-                loc_dict = util_save_history(session)
-                history_tree_db.tree = json.dumps(loc_dict)
-                db.session.commit()
-                return {"message": "History updated", 'toast_class': "success-subtle"}
+            # Get all children before add to db
+            loc_dict = util_save_history(session)
+            history_tree_db.tree = json.dumps(loc_dict)
+            db.session.commit()
+            return {"message": "History updated", 'toast_class': "success-subtle"}
         return {"message": "History already saved", 'toast_class': "warning-subtle"}
     return {"message": "Session not found", 'toast_class': "danger-subtle"}
 
