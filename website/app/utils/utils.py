@@ -72,3 +72,6 @@ def gen_admin_password():
         config["ADMIN"]["ADMIN_PASSWORD"] = password
         with open(CONF_PATH, "w") as conffile:
             config.write(conffile)
+
+def get_limit_queries():
+    return Config.QUERIES_LIMIT

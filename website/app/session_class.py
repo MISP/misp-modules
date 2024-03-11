@@ -3,7 +3,7 @@ import json
 from queue import Queue
 from threading import Thread
 from uuid import uuid4
-from .utils.utils import query_post_query, query_get_module, get_object
+from .utils.utils import query_post_query, query_get_module, get_object, get_limit_queries
 from . import home_core as HomeModel
 import uuid
 from . import db
@@ -179,7 +179,7 @@ class Session_class:
 
         histories = History.query.all()
         
-        while len(histories) > 200:
+        while len(histories) > get_limit_queries():
             history = History.query.order_by(History.id).all()
             session = Session_db.query.filter_by(id=history[0].session_id)
             if not History_Tree.query.filter_by(session_uuid=session.uuid):

@@ -4,6 +4,8 @@ class Config:
     FLASK_URL = '127.0.0.1'
     FLASK_PORT = 7008
     MISP_MODULE = '127.0.0.1:6666'
+    
+    QUERIES_LIMIT = 200
 
 class DevelopmentConfig(Config):
     DEBUG = True
