@@ -3,10 +3,12 @@
 [![Python package](https://github.com/MISP/misp-modules/actions/workflows/python-package.yml/badge.svg)](https://github.com/MISP/misp-modules/actions/workflows/python-package.yml)[![Coverage Status](https://coveralls.io/repos/github/MISP/misp-modules/badge.svg?branch=main)](https://coveralls.io/github/MISP/misp-modules?branch=main)
 [![codecov](https://codecov.io/gh/MISP/misp-modules/branch/main/graph/badge.svg)](https://codecov.io/gh/MISP/misp-modules)
 
-MISP modules are autonomous modules that can be used to extend [MISP](https://github.com/MISP/MISP) for new services such as expansion, import and export.
+MISP modules are autonomous modules that can be used to extend [MISP](https://github.com/MISP/MISP) for new services such as expansion, import, export and workflow action.
+
+MISP modules can be also installed and used without MISP as a [standalone tool accessible via a convenient web interface](./website).
 
 The modules are written in Python 3 following a simple API interface. The objective is to ease the extensions of MISP functionalities
-without modifying core components. The API is available via a simple REST API which is independent from MISP installation or configuration.
+without modifying core components. The API is available via a simple REST API which is independent from MISP installation or configuration and can be used with other tools.
 
 For more information: [Extending MISP with Python modules](https://www.misp-project.org/misp-training/3.1-misp-modules.pdf) slides from [MISP training](https://github.com/MISP/misp-training).
 
