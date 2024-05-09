@@ -1582,6 +1582,26 @@ Module to cache web pages of analysis reports, OSINT sources. The module returns
 
 -----
 
+#### [stairwell](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/stairwell.py)
+
+<img src=logos/stairwell.png height=60>
+
+An expansion module to enrich hash observables with the Stairwell API.
+- **features**:
+>This module takes a file hash as input and queries the Stairwell API. It will create a misp-object with the additional enrichment intel.
+- **input**:
+>MD5, SHA1, or SHA256
+- **output**:
+>A stairwell misp-object with additional enrichment intel.
+- **references**:
+>https://docs.stairwell.com
+- **requirements**:
+>- json
+>- pymisp
+>- requests
+
+-----
+
 #### [stix2_pattern_syntax_validator](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/stix2_pattern_syntax_validator.py)
 
 <img src=logos/stix.png height=60>

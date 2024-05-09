@@ -83,6 +83,7 @@ For more information: [Extending MISP with Python modules](https://www.misp-proj
 * [Socialscan](misp_modules/modules/expansion/socialscan.py) - a hover module to check if an email address or a username is used on different online platforms, using the [socialscan](https://github.com/iojw/socialscan) python library
 * [SophosLabs Intelix](misp_modules/modules/expansion/sophoslabs_intelix.py) - SophosLabs Intelix is an API for Threat Intelligence and Analysis (free tier available). [SophosLabs](https://aws.amazon.com/marketplace/pp/B07SLZPMCS)
 * [sourcecache](misp_modules/modules/expansion/sourcecache.py) - a module to cache a specific link from a MISP instance.
+* [stairwell](misp_modules/modules/expansion/stairwell.py) - an expansion module to enrich hash observables with the Stairwell API
 * [STIX2 pattern syntax validator](misp_modules/modules/expansion/stix2_pattern_syntax_validator.py) - a module to check a STIX2 pattern syntax.
 * [ThreatCrowd](misp_modules/modules/expansion/threatcrowd.py) - an expansion module for [ThreatCrowd](https://www.threatcrowd.org/).
 * [threatminer](misp_modules/modules/expansion/threatminer.py) - an expansion module to expand from [ThreatMiner](https://www.threatminer.org/).
@@ -577,7 +578,7 @@ cd ../
 
 ## Documentation
 
-In order to provide documentation about some modules that require specific input / output / configuration, the [doc](doc) directory contains detailed information about the general purpose, requirements, features, input and ouput of each of these modules:
+In order to provide documentation about some modules that require specific input / output / configuration, the [index.md](docs/index.md) file within the [docs](docs) directory contains detailed information about the general purpose, requirements, features, input and ouput of each of these modules:
 
 - ***description** - quick description of the general purpose of the module, as the one given by the moduleinfo
 - **requirements** - special libraries needed to make the module work

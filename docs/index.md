@@ -65,6 +65,7 @@ For more information: [Extending MISP with Python modules](https://www.circl.lu/
 * [Sigma queries](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/sigma_queries.py) - Experimental expansion module querying a sigma rule to convert it into all the available SIEM signatures.
 * [Sigma syntax validator](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/sigma_syntax_validator.py) - Sigma syntax validator.
 * [sourcecache](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/sourcecache.py) - a module to cache a specific link from a MISP instance.
+* [stairwell](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/stairwell.py) - an expansion module to enrich hash observables with the Stairwell API
 * [STIX2 pattern syntax validator](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/stix2_pattern_syntax_validator.py) - a module to check a STIX2 pattern syntax.
 * [ThreatCrowd](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/threatcrowd.py) - an expansion module for [ThreatCrowd](https://www.threatcrowd.org/).
 * [threatminer](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/threatminer.py) - an expansion module to expand from [ThreatMiner](https://www.threatminer.org/).
