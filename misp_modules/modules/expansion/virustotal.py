@@ -4,7 +4,7 @@ from . import check_input_attribute, standard_error_message
 from pymisp import MISPAttribute, MISPEvent, MISPObject
 
 misperrors = {'error': 'Error'}
-mispattributes = {'input': ['hostname', 'domain', "ip-src", "ip-dst", "md5", "sha1", "sha256", "url"],
+mispattributes = {'input': ['hostname', 'domain', "ip-src", "ip-dst", "md5", "sha1", "sha256", "url", "ip-src|port", "ip-dst|port"],
                   'format': 'misp_standard'}
 
 # possible module-types: 'expansion', 'hover' or both
@@ -29,7 +29,8 @@ class VirusTotalParser:
         self.input_types_mapping = {'ip-src': self.parse_ip, 'ip-dst': self.parse_ip,
                                     'domain': self.parse_domain, 'hostname': self.parse_domain,
                                     'md5': self.parse_hash, 'sha1': self.parse_hash,
-                                    'sha256': self.parse_hash, 'url': self.parse_url}
+                                    'sha256': self.parse_hash, 'url': self.parse_url,
+                                    'ip-src|port': self.parse_ip_port, 'ip-dst|port': self.parse_ip_port}
         self.proxies = None
 
     @staticmethod
@@ -164,6 +165,9 @@ class VirusTotalParser:
 
         self.misp_event.add_object(**file_object)
         return file_object.uuid
+    def parse_ip_port(self, ipport: str) -> str:
+        ip = ipport.split('|')[0]
+        self.parse_ip(ip)
 
     def parse_ip(self, ip: str) -> str:
         ip_report = self.client.get_object(f'/ip_addresses/{ip}')
