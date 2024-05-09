@@ -8,7 +8,7 @@ mispattributes = {'input': ['hostname', 'domain', "ip-src", "ip-dst", "md5", "sh
                   'format': 'misp_standard'}
 
 # possible module-types: 'expansion', 'hover' or both
-moduleinfo = {'version': '5', 'author': 'Hannah Ward',
+moduleinfo = {'version': '6', 'author': 'Hannah Ward',
               'description': 'Enrich observables with the VirusTotal v3 API',
               'module-type': ['expansion']}
 
@@ -51,7 +51,11 @@ class VirusTotalParser:
     def add_vt_report(self, report: vt.Object) -> str:
         analysis = report.get('last_analysis_stats')
         total = self.get_total_analysis(analysis, report.get('known_distributors'))
-        permalink = f'https://www.virustotal.com/gui/{report.type}/{report.id}'
+        if report.type == 'ip_address':
+            rtype = 'ip-address'
+        else:
+            rtype = report.type
+        permalink = f'https://www.virustotal.com/gui/{rtype}/{report.id}'
 
         vt_object = MISPObject('virustotal-report')
         vt_object.add_attribute('permalink', type='link', value=permalink)
