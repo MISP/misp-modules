@@ -260,7 +260,7 @@ Module to expand country codes.
 
 An expansion module to query the CVE search API with a cpe code to get its related vulnerabilities.
 - **features**:
->The module takes a cpe attribute as input and queries the CVE search API to get its related vulnerabilities.  
+>The module takes a cpe attribute as input and queries the CVE search API to get its related vulnerabilities.
 >The list of vulnerabilities is then parsed and returned as vulnerability objects.
 >
 >Users can use their own CVE search API url by defining a value to the custom_API_URL parameter. If no custom API url is given, the default cve.circl.lu api url is used.
@@ -640,6 +640,7 @@ Module to query a local copy of Maxmind's Geolite database.
 #### [google_search](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/google_search.py)
 
 <img src=logos/google.png height=60>
+
 - **descrption**:
 >A hover module to get information about an url using a Google search.
 - **features**:
@@ -652,6 +653,27 @@ Module to query a local copy of Maxmind's Geolite database.
 >https://github.com/abenassi/Google-Search-API
 - **requirements**:
 >The python Google Search API library
+
+-----
+
+#### [google_threat_intelligence](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/google_threat_intelligence.py)
+
+<img src=logos/google_threat_intelligence.png height=80>
+
+- **description**:
+An expansion module to have the observable's threat score assessed by Google Threat Intelligence.
+- **features**:
+>The module gives the Google Threat Intelligence assessment including a verdict for the given obsevable. [Example screeshot](https://github.com/MISP/MISP/assets/4747608/e275db2f-bb1e-4413-8cc0-ec3cb05e0414)
+]
+- **input**:
+>'hostname', 'domain', 'ip-src', 'ip-dst', 'md5', 'sha1', 'sha256', 'url'.
+- **output**:
+>Text fields containing the threat score, the severity, the verdict and the threat label of the observable inspected.
+- **references**:
+>https://gtidocs.virustotal.com/reference
+- **requirements**:
+>- pymisp
+>- vt
 
 -----
 
@@ -745,7 +767,7 @@ Expansion module to fetch the html content from an url and convert it into markd
 HYAS Insight integration to MISP provides direct, high volume access to HYAS Insight data. It enables investigators and analysts to understand and defend against cyber adversaries and their infrastructure.
 - **features**:
 >This Module takes the IP Address, Domain, URL, Email, Phone Number, MD5, SHA1, Sha256, SHA512 MISP Attributes as input to query the HYAS Insight API.
-> The results of the HYAS Insight API are than are then returned and parsed into Hyas Insight Objects. 
+> The results of the HYAS Insight API are than are then returned and parsed into Hyas Insight Objects.
 >
 >An API key is required to submit queries to the HYAS Insight API.
 >
@@ -819,9 +841,9 @@ Module to access intelmqs eventdb.
 
 An expansion module to query IP2Location.io to gather more information on a given IP address.
 - **features**:
->The module takes an IP address attribute as input and queries the IP2Location.io API.  
->Free plan user will get the basic geolocation informaiton, and different subsription plan will get more information on the IP address. 
-> Refer to [pricing page](https://www.ip2location.io/pricing) for more information on data available for each plan. 
+>The module takes an IP address attribute as input and queries the IP2Location.io API.
+>Free plan user will get the basic geolocation informaiton, and different subsription plan will get more information on the IP address.
+> Refer to [pricing page](https://www.ip2location.io/pricing) for more information on data available for each plan.
 >
 >More information on the responses content is available in the [documentation](https://www.ip2location.io/ip2location-documentation).
 - **input**:
@@ -857,7 +879,7 @@ Module to query an IP ASN history service (https://github.com/D4-project/IPASN-H
 
 An expansion module to query ipinfo.io to gather more information on a given IP address.
 - **features**:
->The module takes an IP address attribute as input and queries the ipinfo.io API.  
+>The module takes an IP address attribute as input and queries the ipinfo.io API.
 >The geolocation information on the IP address is always returned.
 >
 >Depending on the subscription plan, the API returns different pieces of information then:
@@ -883,7 +905,7 @@ An expansion module to query ipinfo.io to gather more information on a given IP 
 IPQualityScore MISP Expansion Module for IP reputation, Email Validation, Phone Number Validation, Malicious Domain and Malicious URL Scanner.
 - **features**:
 >This Module takes the IP Address, Domain, URL, Email and Phone Number MISP Attributes as input to query the IPQualityScore API.
-> The results of the IPQualityScore API are than returned as IPQS Fraud and Risk Scoring Object. 
+> The results of the IPQualityScore API are than returned as IPQS Fraud and Risk Scoring Object.
 > The object contains a copy of the enriched attribute with added tags presenting the verdict based on fraud score,risk score and other attributes from IPQualityScore.
 - **input**:
 >A MISP attribute of type IP Address(ip-src, ip-dst), Domain(hostname, domain), URL(url, uri), Email Address(email, email-src, email-dst, target-email, whois-registrant-email) and Phone Number(phone-number, whois-registrant-phone).
@@ -1222,7 +1244,7 @@ Module to get information from AlienVault OTX.
 An expansion module to query the CIRCL Passive SSH.
 - **features**:
 >The module queries the Passive SSH service from CIRCL.
-> 
+>
 > The module can be used an hover module but also an expansion model to add related MISP objects.
 >
 - **input**:
@@ -1945,7 +1967,7 @@ Module to query a local instance of uwhois (https://github.com/rafiot/uwhoisd).
 <img src=logos/whoisfreaks.png height=60>
 
 An expansion module for https://whoisfreaks.com/ that will provide an enriched analysis of the provided domain, including WHOIS and DNS information.
-Our Whois service, DNS Lookup API, and SSL analysis, equips organizations with comprehensive threat intelligence and attack surface analysis capabilities for enhanced security. 
+Our Whois service, DNS Lookup API, and SSL analysis, equips organizations with comprehensive threat intelligence and attack surface analysis capabilities for enhanced security.
 Explore our website's product section at https://whoisfreaks.com/ for a wide range of additional services catering to threat intelligence and attack surface analysis needs.
 - **features**:
 >The module takes a domain as input and queries the Whoisfreaks API with it.
@@ -2084,7 +2106,7 @@ Module to process a query on Yeti.
 > - https://github.com/sebdraven/pyeti
 - **requirements**:
 > - pyeti
-> - API key 
+> - API key
 
 -----
 
@@ -2241,7 +2263,7 @@ Simple export of a MISP event to PDF.
 >  'Activate_galaxy_description' is a boolean (True or void) to activate the description of event related galaxies.
 >  'Activate_related_events' is a boolean (True or void) to activate the description of related event. Be aware this might leak information on confidential events linked to the current event !
 >  'Activate_internationalization_fonts' is a boolean (True or void) to activate Noto fonts instead of default fonts (Helvetica). This allows the support of CJK alphabet. Be sure to have followed the procedure to download Noto fonts (~70Mo) in the right place (/tools/pdf_fonts/Noto_TTF), to allow PyMisp to find and use them during PDF generation.
->  'Custom_fonts_path' is a text (path or void) to the TTF file of your choice, to create the PDF with it. Be aware the PDF won't support bold/italic/special style anymore with this option 
+>  'Custom_fonts_path' is a text (path or void) to the TTF file of your choice, to create the PDF with it. Be aware the PDF won't support bold/italic/special style anymore with this option
 - **input**:
 >MISP Event
 - **output**:
