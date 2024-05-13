@@ -17,7 +17,6 @@
 from urllib import parse
 import vt
 import pymisp
-import logging
 
 
 MISP_ATTRIBUTES = {
@@ -57,8 +56,6 @@ DEFAULT_RESULTS_LIMIT = 10
 class GoogleThreatIntelligenceParser:
     """Main parser class to create the MISP event."""
     def __init__(self, client: vt.Client, limit: int) -> None:
-        with open('/tmp/vtlog.txt','wb') as f:
-          f.write('XXXLOG2')
         self.client = client
         self.limit = limit or DEFAULT_RESULTS_LIMIT
         self.misp_event = pymisp.MISPEvent()
@@ -224,8 +221,6 @@ def get_proxy_settings(config: dict) -> dict:
 
 def dict_handler(request: dict):
     """MISP entry point fo the module."""
-    with open('/tmp/vtlog.txt','wb') as f:
-        f.write('XXXLOG1')
     if not request.get('config') or not request['config'].get('apikey'):
         return {
             'error': ('A Google Threat Intelligence api '
@@ -260,8 +255,6 @@ def dict_handler(request: dict):
         return {'error': ex.message}
     except KeyError as ex:
         return {'error': str(ex)}
-    with open('/tmp/vtlog.txt','wb') as f:
-        f.write('XXXLOG2')
 
     return parser.get_results()
 
