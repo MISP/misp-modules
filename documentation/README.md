@@ -658,7 +658,7 @@ Module to query a local copy of Maxmind's Geolite database.
 
 #### [google_threat_intelligence](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/google_threat_intelligence.py)
 
-<img src=logos/google_threat_intelligence.png height=80>
+<img src=logos/google_threat_intelligence.png height=60>
 
 - **description**:
 An expansion module to have the observable's threat score assessed by Google Threat Intelligence.
