@@ -36,7 +36,8 @@ MISP_ATTRIBUTES = {
 MODULE_INFO = {
     'version': '1',
     'author': 'Google Threat Intelligence team',
-    'description': '',
+    'description': ('An expansion module to have the observable\'s threat'
+                    ' score assessed by Google Threat Intelligence.'),
     'module-type': ['expansion'],
     'config': [
         'apikey',
