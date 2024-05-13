@@ -92,7 +92,7 @@ class TestExpansions(unittest.TestCase):
 
         query = {'module': 'apiosintds', 'ip-dst': '10.10.10.10'}
         response = self.misp_modules_post(query)
-        
+
         try:
             self.assertTrue(self.get_values(response).startswith('IoC 10.10.10.10'))
         except AssertionError:
