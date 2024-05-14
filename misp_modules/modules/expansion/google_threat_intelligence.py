@@ -52,8 +52,6 @@ MODULE_INFO = {
 DEFAULT_RESULTS_LIMIT = 10
 
 
-
-
 class GoogleThreatIntelligenceParser:
     """Main parser class to create the MISP event."""
     def __init__(self, client: vt.Client, limit: int) -> None:
