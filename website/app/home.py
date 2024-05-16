@@ -1,9 +1,10 @@
+import ast
 import json
-from flask import Blueprint, render_template, request, jsonify, session as sess
+from flask import Blueprint, redirect, render_template, request, jsonify, session as sess
 from flask_login import current_user
 from . import session_class as SessionModel
 from . import home_core as HomeModel
-from .utils.utils import admin_user_active
+from .utils.utils import admin_user_active, FLOWINTEL_URL
 
 home_blueprint = Blueprint(
     'home',
@@ -13,18 +14,35 @@ home_blueprint = Blueprint(
 )
 
 
-@home_blueprint.route("/")
+@home_blueprint.route("/", methods=["GET", "POST"])
 def home():
+    try:
+        del sess["query"]
+    except:
+        pass
     sess["admin_user"] = bool(admin_user_active())
     if "query" in request.args:
-        return render_template("home.html", query=request.args.get("query"))
+        sess["query"] = ast.literal_eval(request.args.get("query"))
+    if "query" in request.form:
+        sess["query"] = json.loads(request.form.get("query"))
     return render_template("home.html")
+
+@home_blueprint.route("/get_query", methods=['GET', 'POST'])
+def get_query():
+    """Get result from flowintel"""
+    if "query" in sess:
+        return {"query": sess.get("query")}
+    return {"message": "No query"}
 
 @home_blueprint.route("/home/<sid>", methods=["GET", "POST"])
 def home_query(sid):
+    try:
+        del sess["query"]
+    except:
+        pass
     sess["admin_user"] = admin_user_active()
     if "query" in request.args:
-        query = request.args.get("query")
+        sess["query"] = [request.args.get("query")]
         return render_template("home.html", query=query, sid=sid)
     return render_template("404.html")
 
@@ -33,21 +51,28 @@ def query(sid):
     sess["admin_user"] = admin_user_active()
     session = HomeModel.get_session(sid)
     flag=False
+    modules_list = []
     if session:
         flag = True
-        query_loc = session.query_enter
+        query_loc = json.loads(session.query_enter)
+        modules_list = json.loads(session.modules_list)
     else:
         for s in SessionModel.sessions:
             if s.uuid == sid:
                 flag = True
                 query_loc = s.query
                 session=s
+                modules_list = session.modules_list
+    query_str = ", ".join(query_loc)
+    if len(query_str) > 40:
+        query_str = query_str[0:40] + "..."
     if flag:
         return render_template("query.html", 
                                query=query_loc, 
+                               query_str=query_str,
                                sid=sid, 
                                input_query=session.input_query, 
-                               modules=json.loads(session.modules_list), 
+                               modules=modules_list, 
                                query_date=session.query_date.strftime('%Y-%m-%d %H:%M'))
     return render_template("404.html")
 
@@ -60,18 +85,20 @@ def get_query_info(sid):
     flag=False
     if session:
         flag = True
-        query_loc = session.query_enter
+        query_loc = json.loads(session.query_enter)
+        modules_list = json.loads(session.modules_list)
     else:
         for s in SessionModel.sessions:
             if s.uuid == sid:
                 flag = True
                 query_loc = s.query
+                modules_list = s.modules_list
                 session=s
     if flag:
         loc_dict = {
             "query": query_loc,
             "input_query": session.input_query,
-            "modules": json.loads(session.modules_list), 
+            "modules": modules_list, 
             "query_date": session.query_date.strftime('%Y-%m-%d %H:%M')
             }
         return loc_dict
@@ -227,3 +254,9 @@ def change_status():
             return {'message': 'Something went wrong', 'toast_class': "danger-subtle"}, 400
         return {'message': 'Need to pass "module_id"', 'toast_class': "warning-subtle"}, 400
     return {'message': 'Permission denied', 'toast_class': "danger-subtle"}, 403
+
+
+@home_blueprint.route("/flowintel_url")
+def flowintel_url():
+    """send result to flowintel-cm"""
+    return {"url": f"{FLOWINTEL_URL}/analyzer/recieve_result"}, 200

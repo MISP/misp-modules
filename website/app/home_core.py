@@ -163,7 +163,7 @@ def create_new_session_tree(current_session, parent_id):
     loc_json = {
         "uuid": loc_session.uuid,
         "modules": json.loads(loc_session.modules_list),
-        "query": loc_session.query_enter,
+        "query": json.loads(loc_session.query_enter),
         "input": loc_session.input_query,
         "query_date": loc_session.query_date.strftime('%Y-%m-%d %H:%M'),
         "config": json.loads(loc_session.config_module),

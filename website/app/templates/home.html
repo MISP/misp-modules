@@ -19,10 +19,15 @@
         </div>
         <div class="col-11">
             <div style="width:50%; transform: translate(50%, 0);">
-                <div>
-                    <input type="hidden" id="parent_id" value="{{sid}}">
-                    <input type="text" value="{{query}}" id="process-query" placeholder="Enter here..." autofocus class="form-control" style="border-radius: 5px;" />
-                </div>
+                <template v-for="elem in cp_entries">
+                    <div style="margin-top: 10px;">
+                        <input type="hidden" id="parent_id" value="{{sid}}">
+                        <input type="text" v-if="queries" :value="queries[elem-1]" :id="'process-query-'+elem" placeholder="Enter here..." autofocus class="form-control" style="border-radius: 5px;" />
+                        <input type="text" v-else :id="'process-query-'+elem" placeholder="Enter here..." autofocus class="form-control" style="border-radius: 5px;" />
+                    </div>
+                </template>
+                <button @click="add_entry()" class="btn btn-secondary" style="margin-top: 10px;">Add new entry</button>
+                <button @click="delete_entry()" class="btn btn-danger" style="margin-top: 10px;">Delete entry</button>
                 <span v-if="status_site" style="color: brown;" id="status">[[status_site]]</span>
             </div>
         
@@ -86,14 +91,35 @@
 
             const progress = ref(0)
 
-            const current_query = ref()
+            const current_query = ref([])
             const status_site = ref()
 
             const config_query = ref([])
 
+            const cp_entries = ref(1)
+            const queries = ref()
+
+
+            async function fetchQuery(){
+                const res = await fetch('/get_query')
+                let loc = await res.json()
+                if("message" in loc){
+                    queries.value = false
+                }else{
+                    queries.value = loc["query"]
+                    cp_entries.value = queries.value.length
+                }
+            }
+            fetchQuery()
+
 
             async function actionQuery(){
-                current_query.value = $("#process-query").val()
+                current_query.value = []
+                for(let i=1;i<=cp_entries.value;i++){
+                    let loc_query_res = $("#process-query-"+i).val()
+                    if(loc_query_res)
+                        current_query.value.push(loc_query_res)
+                }
                 if (!current_query.value) {
                     status_site.value = '↖ You need to type something'
                     window.scrollTo(0, 0);
@@ -178,16 +204,6 @@
                         width: '50%'
                     })
                 }
-                if (!$('.select2-expansion').hasClass("select2-hidden-accessible")) {
-                        $('.select2-expansion').select2({
-                            theme: 'bootstrap-5'
-                        })
-                }
-                if (!$('.select2-hover').hasClass("select2-hidden-accessible")) {
-                    $('.select2-hover').select2({
-                        theme: 'bootstrap-5'
-                    })
-                }
 
                 $('#input_select').on('change.select2', async function (e) {
                     attr_selected.value = $(this).select2('data').map(item => item.id)[0]
@@ -199,7 +215,8 @@
 
                     if (!$('.select2-modules').hasClass("select2-hidden-accessible")) {
                         $('.select2-modules').select2({
-                            theme: 'bootstrap-5'
+                            theme: 'bootstrap-5',
+                            closeOnSelect: false
                         })
                         $('#modules_select').on('change.select2', async function (e) {
                             let loc_list = $(this).select2('data').map(item => item.id)
@@ -242,6 +259,13 @@
                 return loc
             }
 
+            function add_entry(){
+                cp_entries.value += 1
+            }
+            function delete_entry(){
+                cp_entries.value -= 1
+            }
+
 
             return {
                 message_list,
@@ -251,9 +275,13 @@
                 attr_selected,
                 status_site,
                 config_query,
+                cp_entries,
+                queries,
                 actionQuery,
                 pairedList,
                 checked_attr,
+                add_entry,
+                delete_entry,
                 generateCoreFormatUI
             }
         }
