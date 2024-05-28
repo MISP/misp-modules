@@ -58,9 +58,14 @@
                     </select>
                 </div>
             </template>
+
+            <div title="Configure modules even if a configuration as already been given" style="margin-top: 10px; transform: translate(25%, 0);">
+                <input type="checkbox" id="own_config" name="own_config" @click="own_config()" style="margin-right: 5px;">
+                <label for="own_config">Configure all modules </label>
+            </div>
         
-            <!-- Display in case a module as reauest_on_query activate -->
-            <div v-if="config_query.length" style="margin-top: 10px; padding: 5px" class="row">
+            <!-- Display in case a module as request_on_query activate -->
+            <div v-if="config_query.length" style="margin-top: 10px; padding: 6px" class="row">
                 <h4>Config</h4>
                 <div class="card col-4" style="margin-top: 10px; padding: 15px" v-for="module in config_query">
                     <h4>[[module.name]]</h4>
@@ -98,6 +103,8 @@
 
             const cp_entries = ref(1)
             const queries = ref()
+
+            let own_config_bool = false
 
 
             async function fetchQuery(){
@@ -224,7 +231,10 @@
                             for(let el in loc_list){
                                 for(let index in modules_list.value){
                                     if(modules_list.value[index].name == loc_list[el]){
-                                        if(modules_list.value[index].request_on_query){
+                                        if (own_config_bool){
+                                            config_query.value.push(modules_list.value[index])
+                                        }
+                                        else if(modules_list.value[index].request_on_query){
                                             config_query.value.push(modules_list.value[index])
                                         }
                                         break
@@ -232,7 +242,7 @@
                                 }
                             }
                         })
-                    }                    
+                    }
                 })
 
                 $('#input_select').on('select2:open', function (e) {
@@ -266,6 +276,36 @@
                 cp_entries.value -= 1
             }
 
+            
+            function own_config(){
+                own_config_bool = !own_config_bool
+                if(own_config_bool){
+                    let loc_list = $('#modules_select').val()
+                    config_query.value = []
+                    for(let el in loc_list){
+                        for(let index in modules_list.value){
+                            if(modules_list.value[index].name == loc_list[el]){
+                                config_query.value.push(modules_list.value[index])
+                                break
+                            }
+                        }
+                    }
+                }else{
+                    let loc_list = $('#modules_select').val()
+                    config_query.value = []
+                    for(let el in loc_list){
+                        for(let index in modules_list.value){
+                            if(modules_list.value[index].name == loc_list[el]){
+                                if(modules_list.value[index].request_on_query){
+                                    config_query.value.push(modules_list.value[index])
+                                }
+                                break
+                            }
+                        }
+                    }
+                }
+            }
+
 
             return {
                 message_list,
@@ -282,7 +322,8 @@
                 checked_attr,
                 add_entry,
                 delete_entry,
-                generateCoreFormatUI
+                generateCoreFormatUI,
+                own_config
             }
         }
     }).mount('.container-fluid')
