@@ -3,7 +3,7 @@ aiohttp>=3.9.0
 aiosignal==1.3.1 ; python_version >= '3.7'
 antlr4-python3-runtime==4.9.3
 anyio==3.6.2 ; python_full_version >= '3.6.2'
-git+https://github.com/davidonzo/apiosintDS@misp
+apiosintDS==2.0.3
 appdirs==1.4.4
 argcomplete==3.0.8 ; python_version >= '3.6'
 argparse==1.4.0
