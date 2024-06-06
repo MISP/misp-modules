@@ -1579,6 +1579,25 @@ Module to cache web pages of analysis reports, OSINT sources. The module returns
 
 -----
 
+#### [stairwell](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/stairwell.py)
+
+<img src=../logos/stairwell.png height=60>
+
+Module to query the Stairwell API to get additional information about the input hash attribute
+- **features**:
+>The module takes a hash attribute as input and queries Stariwell's API to fetch additional data about it. The result, if the payload is observed in Stariwell, is a file object describing the file the input hash is related to.
+- **input**:
+>A hash attribute (md5, sha1, sha256).
+- **output**:
+>File object related to the input attribute found on Stairwell platform.
+- **references**:
+> - https://stairwell.com
+> - https://docs.stairwell.com
+- **requirements**:
+>Access to Stairwell platform (apikey)
+
+-----
+
 #### [stix2_pattern_syntax_validator](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/stix2_pattern_syntax_validator.py)
 
 <img src=../logos/stix.png height=60>
@@ -1898,6 +1917,27 @@ An expansion hover module to expand information about CVE id using Vulners API.
 - **requirements**:
 > - Vulners python library
 > - An access to the Vulners API
+
+-----
+
+#### [vysion](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/vysion.py)
+
+<img src=../logos/vysion.png height=60>
+
+Module to enrich the information by making use of the Vysion API.
+- **features**:
+>This module gets correlated information from our dark web intelligence database. With this you will get several objects containing information related to, for example, an organization victim of a ransomware attack.
+- **input**:
+>MISP Attribute which include: company(target-org), country, info.
+- **output**:
+>MISP objects containing title, link to our webapp and TOR, i2p or clearnet URLs.
+- **references**:
+> - https://vysion.ai/
+> - https://developers.vysion.ai/
+> - https://github.com/ByronLabs/vysion-cti/tree/main
+- **requirements**:
+> - Vysion python library
+> - Vysion API Key
 
 -----
 

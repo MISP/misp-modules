@@ -1586,19 +1586,18 @@ Module to cache web pages of analysis reports, OSINT sources. The module returns
 
 <img src=logos/stairwell.png height=60>
 
-An expansion module to enrich hash observables with the Stairwell API.
+Module to query the Stairwell API to get additional information about the input hash attribute
 - **features**:
->This module takes a file hash as input and queries the Stairwell API. It will create a misp-object with the additional enrichment intel.
+>The module takes a hash attribute as input and queries Stariwell's API to fetch additional data about it. The result, if the payload is observed in Stariwell, is a file object describing the file the input hash is related to.
 - **input**:
->MD5, SHA1, or SHA256
+>A hash attribute (md5, sha1, sha256).
 - **output**:
->A stairwell misp-object with additional enrichment intel.
+>File object related to the input attribute found on Stairwell platform.
 - **references**:
->https://docs.stairwell.com
+> - https://stairwell.com
+> - https://docs.stairwell.com
 - **requirements**:
->- json
->- pymisp
->- requests
+>Access to Stairwell platform (apikey)
 
 -----
 
@@ -1924,23 +1923,24 @@ An expansion hover module to expand information about CVE id using Vulners API.
 
 -----
 
-#### [Vysion](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/vysion.py)
+#### [vysion](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/vysion.py)
 
 <img src=logos/vysion.png height=60>
 
 Module to enrich the information by making use of the Vysion API.
 - **features**:
 >This module gets correlated information from our dark web intelligence database. With this you will get several objects containing information related to, for example, an organization victim of a ransomware attack.
->MISP objects containing title, link to our webapp and TOR, i2p or clearnet URLs.
 - **input**:
 >MISP Attribute which include: company(target-org), country, info.
 - **output**:
 >MISP objects containing title, link to our webapp and TOR, i2p or clearnet URLs.
 - **references**:
->https://vysion.ai/
+> - https://vysion.ai/
+> - https://developers.vysion.ai/
+> - https://github.com/ByronLabs/vysion-cti/tree/main
 - **requirements**:
-> Vysion python library
-> Vysion API Key
+> - Vysion python library
+> - Vysion API Key
 
 -----
 
