@@ -8,7 +8,7 @@
     <br> <br>
     <input type="hidden" id="share" value="{{sid}}">
     <div id="top" style="display: ruby; margin-top: 40px;">
-        <h2>{{query}}</h2>
+        <h2 title="{{', '.join(query)}}">{{query_str}}</h2>
     </div>
 
     <div class="btn-group" style="float: right;" role="group" aria-label="Basic mixed styles example">
@@ -21,7 +21,7 @@
             <div class="dropdown-menu p-4" style="min-width: 200px;">
                 <div class="mb-3">
                     <label for="query_as_params" class="form-label">To query:</label>
-                    <input type="email" class="form-control" id="query_as_params" placeholder="{{query}}">
+                    <input type="email" class="form-control" id="query_as_params" placeholder="{{', '.join(query)}}">
                     <div id="query_as_params_error" style="color:brown"></div>
                 </div>
                 <button type="submit" class="btn btn-primary btn-sm" @click="query_as_params()" style="border-radius: 50px;">Query</button>
@@ -54,9 +54,12 @@
         </div>
     </div>
     <span v-if="status_site" style="margin-left: 5px; font-size: 13px; float: right;">[[status_site]]</span>
+    <br>
+    <button class="btn btn-secondary btn-sm" @click="send_flowintel_cm_all()" title="sendd all result to Flowintel-cm" style="float: right;">Flowintel-cm all</button>
 
     <br/>
 
+    <!-- Offcanvas to navigate throw current search tree -->
     <button class="btn btn-outline-primary" style="position: fixed; right: 0px; margin-top:30px" title="Session history" data-bs-toggle="offcanvas" data-bs-target="#offcanvasScrolling" aria-controls="offcanvasScrolling">
         <i class="fa-solid fa-bars"></i>
     </button>
@@ -71,7 +74,7 @@
         </div>
         <div class="offcanvas-body">
             <ul>
-                <li><a :href="'/query/'+history.uuid" :title="'Attribute: \n' +history.input+ '\n\nModules: \n' + history.modules">[[history.query]]</a></li>
+                <li v-if="history.query"><a :href="'/query/'+history.uuid" :title="'Attribute: \n' +history.input+ '\n\nModules: \n' + history.modules">[[history.query.join(", ")]]</a></li>
                 <ul>
                     <template v-for="child in history.children">
                         <history_view :history="child"></history_view>
@@ -96,166 +99,163 @@
     </ul>
 
     <div class="row" style="margin-bottom: 50px;">
-        <div class="col-10">          
-            <template v-if="tab_list == 'visual'">
-                <div data-bs-spy="scroll" data-bs-target="#list-result" data-bs-smooth-scroll="true" class="scrollspy-example" tabindex="0">
-                    <div class="accordion" v-if="Object.keys(modules_res).length" style="width: 95%">
-                        <div class="accordion-item" :id="'list-item-'+key" v-for="result, key in modules_res">
-                            <template v-if="!('error' in result)">
-                                <h2 class="accordion-header">
-                                    <button class="accordion-button" data-bs-toggle="collapse" :data-bs-target="'#panelsStayOpen-'+key" aria-expanded="true" :aria-controls="'panelsStayOpen-'+key">
-                                        [[key]]
-                                    </button>
-                                </h2>
-                                <div :id="'panelsStayOpen-'+key" class="accordion-collapse collapse show">
-                                    <div class="accordion-body" >
-                                        <template v-if="'Object' in result.results">
-                                            <template v-for="obj in result.results.Object">
-                                                <div v-html="parseMispObject(obj, '/home/{{sid}}?query=', query_as_same)[0].outerHTML"></div>
-                                            </template>
+        <div class="col-10">
+            <div class="accordion" v-if="Object.keys(modules_res).length" style="width: 95%">
+                <div class="accordion-item" :id="'list-item-'+key_query" v-for="ele, key_query in modules_res">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button" data-bs-toggle="collapse" :data-bs-target="'#panelsStayOpenMain-'+key_query" aria-expanded="true" :aria-controls="'panelsStayOpenMain-'+key_query">
+                            [[key_query]]
+                        </button>
+                    </h2>
+                    <div :id="'panelsStayOpenMain-'+key_query" class="accordion-collapse collapse show">
+                        <button class="btn btn-secondary" @click="send_flowintel_cm(key_query)" title="Send this result to Flowintel-cm" style="margin-top: 10px;margin-left: 10px;">Flowintel-cm</button>
+                        <div class="accordion" style="padding: 25px">
+                            <div class="accordion-item" :id="'list-item-'+key_query+'-'+key" v-for="result, key in ele">
+                                <template v-if="!('error' in result)">
+                                    <h2 class="accordion-header">
+                                        <button class="accordion-button" style="height: 40px;" data-bs-toggle="collapse" :data-bs-target="'#panelsStayOpen-'+key_query+'-'+key" aria-expanded="true" :aria-controls="'panelsStayOpen-'+key">
+                                            [[key]]
+                                        </button>
+                                    </h2>
+                                    <div :id="'panelsStayOpen-'+key_query+'-'+key" class="accordion-collapse collapse show">
+                                        <!-- visual part -->
+                                        <template v-if="tab_list == 'visual'">
+                                            <div class="accordion-body" >
+                                                <template v-if="'Object' in result.results">
+                                                    <template v-for="obj in result.results.Object">
+                                                        <div v-html="parseMispObject(obj, '/home/{{sid}}?query=', query_as_same)[0].outerHTML"></div>
+                                                    </template>
+                                                </template>
+        
+                                                <template v-else>
+                                                    <template v-for="misp_attrs, key_loop in result.results">
+                                                        <div v-for="misp_attr in misp_attrs.values" class="accordion-body" v-html="parseMispAttr(misp_attr, misp_attrs.types, key_loop, '/home/{{sid}}?query=', query_as_same)[0].outerHTML"></div>
+                                                    </template>
+                                                </template>
+                                            </div>
                                         </template>
-
-                                        <template v-else>
-                                            <!-- <div class="accordion-body" v-html="generateCoreFormatUI(result)[0].outerHTML"></div> -->
-                                            <template v-for="misp_attrs, key_loop in result.results">
-                                                <div v-for="misp_attr in misp_attrs.values" class="accordion-body" v-html="parseMispAttr(misp_attr, misp_attrs.types, key_loop, '/home/{{sid}}?query=', query_as_same)[0].outerHTML"></div>
-                                            </template>
+                                        <!-- json part -->
+                                        <template v-if="tab_list == 'json'">
+                                            <div class="btn-group" role="group" style="padding: 5px; margin-left: 5px; margin-top: 5px;">
+                                                <a class="btn btn-primary" :href="`/download/${sid}?module=${key}`" title="Download the json" >Download</a>
+                                            </div>
+                                            <div class="accordion-body" v-html="generateCoreFormatUI(result)[0].outerHTML"></div>
                                         </template>
-                                    </div>
-                                </div>
-                            </template>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Errors Part -->
-                <hr style="margin-top: 50px; width: 95%">
-                <h3 id="errors_part">Errors</h3>
-                <div data-bs-spy="scroll" data-bs-target="#list-error" data-bs-smooth-scroll="true" class="scrollspy-example" tabindex="0">
-                    <div class="accordion" style="width: 95%">
-                        <div class="accordion-item" :id="'list-item-'+key" v-for="result, key in modules_res">
-                            <template v-if="'error' in result">
-                                <h2 class="accordion-header">
-                                    <button class="accordion-button" type="button" data-bs-toggle="collapse" :data-bs-target="'#panelsStayOpen-'+key" aria-expanded="true" :aria-controls="'panelsStayOpen-'+key">
-                                        [[key]]
-                                        <span style="margin-left: 5px;" title="Error">❌</span>
-                                    </button>
-                                </h2>
-                                <div :id="'panelsStayOpen-'+key" class="accordion-collapse collapse show">
-                                    <div class="accordion-body" v-html="generateCoreFormatUI(result)[0].outerHTML"></div>
-                                </div>
-                            </template>
-                        </div>
-                    </div>
-                </div>
-            </template>
-
-            <template v-else-if="tab_list == 'json'">
-                <div v-if="Object.keys(modules_res).length">
-                        <h3 id="results_part">Results</h3>
-                        <div data-bs-spy="scroll" data-bs-target="#list-result" data-bs-smooth-scroll="true" class="scrollspy-example" tabindex="0">
-                            <div class="accordion" style="width: 95%">
-                                <div class="accordion-item" :id="'list-item-'+key" v-for="result, key in modules_res">
-                                    <template v-if="!('error' in result)">
-                                        <h2 class="accordion-header">
-                                            <button class="accordion-button" data-bs-toggle="collapse" :data-bs-target="'#panelsStayOpen-'+key" aria-expanded="true" :aria-controls="'panelsStayOpen-'+key">
-                                                [[key]]
-                                            </button>
-                                        </h2>
-                                        <div :id="'panelsStayOpen-'+key" class="accordion-collapse collapse show">
-                                            <a class="btn btn-primary" :href="`/download/${sid}?module=${key}`" title="Download the json" style="padding: 5px; margin-left: 5px; margin-top: 5px;">Download</a>
-                                            <div class="accordion-body" v-html="generateCoreFormatUI(result)[0].outerHTML"></div>
-                                        </div>
-                                    </template>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Errors Part -->
-                        <hr style="margin-top: 50px; width: 95%">
-                        <h3 id="errors_part">Errors</h3>
-                        <div data-bs-spy="scroll" data-bs-target="#list-error" data-bs-smooth-scroll="true" class="scrollspy-example" tabindex="0">
-                            <div class="accordion" style="width: 95%">
-                                <div class="accordion-item" :id="'list-item-'+key" v-for="result, key in modules_res">
-                                    <template v-if="'error' in result">
-                                        <h2 class="accordion-header">
-                                            <button class="accordion-button" type="button" data-bs-toggle="collapse" :data-bs-target="'#panelsStayOpen-'+key" aria-expanded="true" :aria-controls="'panelsStayOpen-'+key">
-                                                [[key]]
-                                                <span style="margin-left: 5px;" title="Error">❌</span>
-                                            </button>
-                                        </h2>
-                                        <div :id="'panelsStayOpen-'+key" class="accordion-collapse collapse show">
-                                            <div class="accordion-body" v-html="generateCoreFormatUI(result)[0].outerHTML"></div>
-                                        </div>
-                                    </template>
-                                </div>
-                            </div>
-                        </div>
-                </div>
-            </template>
-
-            <template v-else-if="tab_list == 'markdown'">
-                <div v-if="Object.keys(modules_res).length" class="accordion" style="width: 95%">
-                    <div class="accordion-item" :id="'list-item-'+key" v-for="result, key in modules_res">
-                        <template v-if="!('error' in result)">
-                            <h2 class="accordion-header">
-                                <button class="accordion-button" type="button" data-bs-toggle="collapse" :data-bs-target="'#panelsStayOpen-'+key" aria-expanded="true" :aria-controls="'panelsStayOpen-'+key">
-                                    [[key]]
-                                </button>
-                            </h2>
-                            <div :id="'panelsStayOpen-'+key" class="accordion-collapse collapse show">
-                                <div class="accordion-body row">
-                                    <template v-if="'Object' in result.results">
-                                        <template v-for="obj, key_obj in result.results.Object">
-                                            <pre>
+                                        <!-- markdown part -->
+                                        <template v-if="tab_list == 'markdown'">
+                                            <div class="accordion-body">
+                                                <template v-if="'Object' in result.results">
+                                                    <template v-for="obj, key_obj in result.results.Object">
+                                                        <pre>
 #### [[obj.name]]
 <template v-for="attr, key_attr in obj.Attribute">
 ###### [[attr.object_relation]]
 Type: [[attr.type]]
 Value: [[attr.value]]
 </template>
-                                            </pre>
-                                            <hr>
-                                        </template>
-                                    </template>
-                                    <template v-else>
-                                        <template v-for="misp_attrs, key_loop in result.results">
-                                            <template v-for="misp_attr in misp_attrs.values">
-                                                <pre>
+                                                        </pre>
+                                                        <hr>
+                                                    </template>
+                                                </template>
+                                                <template v-else>
+                                                    <template v-for="misp_attrs, key_loop in result.results">
+                                                        <template v-for="misp_attr in misp_attrs.values">
+                                                            <pre>
 #### Attr [[key_loop +1]]
 Type: [[misp_attrs.types.join(", ")]]
 Value: [[misp_attr]]
-                                                </pre>
-                                            </template>
+                                                            </pre>
+                                                        </template>
+                                                    </template>
+                                                </template>
+                                            </div>
                                         </template>
-                                    </template>
-                                </div>
+                                    </div>
+                                </template> <!-- Not error -->
                             </div>
+                        </div> <!-- Accordion -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Errors Part -->
+            <hr style="margin-top: 50px; width: 95%">
+            <h3 id="errors_part">Errors</h3>
+            <div class="accordion" style="width: 95%">
+                <div class="accordion-item" :id="'list-item-'+key_query" v-for="ele, key_query in modules_res">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" data-bs-toggle="collapse" :data-bs-target="'#panelsStayOpenMainError-'+key_query" aria-expanded="false" :aria-controls="'panelsStayOpenMainError-'+key_query">
+                            [[key_query]]
+                        </button>
+                    </h2>
+                    <div :id="'panelsStayOpenMainError-'+key_query" class="accordion-collapse collapse">
+                        <div class="accordion" style="padding: 25px">
+                            <div class="accordion-item" :id="'list-item-'+key_query+'-'+key" v-for="result, key in ele">
+                                <template v-if="'error' in result">
+                                    <h2 class="accordion-header">
+                                        <button class="accordion-button" style="height: 40px;" data-bs-toggle="collapse" :data-bs-target="'#panelsStayOpenError-'+key_query+'-'+key" aria-expanded="false" :aria-controls="'panelsStayOpenError-'+key_query+'-'+key">
+                                            [[key]]
+                                            <span style="margin-left: 5px;" title="Error">❌</span>
+                                        </button>
+                                    </h2>
+                                    <div :id="'panelsStayOpenError-'+key_query+'-'+key" class="accordion-collapse collapse">
+                                        <template v-if="tab_list == 'visual' || tasb_list == 'json'">
+                                            <div class="accordion-body" v-html="generateCoreFormatUI(result)[0].outerHTML"></div>
+                                        </template>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- right menu -->
+        <div id="list-result" class="list-group col-2" style="position: fixed; right: 0px;">            
+            <template v-for="result, key in modules_res">
+                <a class="btn btn-outline-primary" data-bs-toggle="collapse" :href="'#collapse-menu-'+key" role="button" aria-expanded="false" :aria-controls="'collapse-menu-'+key">
+                    <template v-if="key.length > 20">
+                        [[key.substring(0, 21)]]...
+                    </template>
+                    <template v-else>
+                        [[key]]
+                    </template>
+                </a>
+                <div class="collapse" :id="'collapse-menu-'+key">
+                    <div class="card card-body">
+                        <template v-for="res, key_sub in result">
+                            <a class="list-group-item list-group-item-action" v-if="!('error' in res)" :href="'#list-item-'+key+'-'+key_sub">[[key_sub]]</a>
                         </template>
                     </div>
                 </div>
             </template>
-        </div>
-
-        <div id="list-result" class="list-group col-2" style="position: fixed; right: 0px;">
-            <a class="list-group-item list-group-item-action" v-if="tab_list == 'json'" style="background-color: #0d6efd; color:white" href="#results_part">Results</a>
-            
-            <template v-for="result, key in modules_res">
-                <a class="list-group-item list-group-item-action" v-if="!('error' in result)" :href="'#list-item-'+key">[[key]]</a>
-            </template>
             
             <template v-if="tab_list == 'json' || tab_list == 'visual'">
-                <a class="list-group-item list-group-item-action" style="background-color: #0d6efd; color:white" href="#errors_part">Errors</a>
-                <div id="list-error" class="list-group">
-                    <template v-for="result, key in modules_res">
-                        <a class="list-group-item list-group-item-action" v-if="'error' in result" :href="'#list-item-'+key" style="border-radius: 0;">[[key]]</a>
-                    </template>
-                </div>
+                <a class="btn btn-primary" style="background-color: #0d6efd; color:white" href="#errors_part">Errors</a>
+                <template v-for="result, key in modules_res">
+                    <a class="btn btn-outline-primary" data-bs-toggle="collapse" :href="'#collapse-menu-error-'+key" role="button" aria-expanded="false" :aria-controls="'collapse-menu-error-'+key">
+                        <template v-if="key.length > 20">
+                            [[key.substring(0, 21)]]...
+                        </template>
+                        <template v-else>
+                            [[key]]
+                        </template>
+                    </a>
+                    <div class="collapse" :id="'collapse-menu-error-'+key">
+                        <div class="card card-body">
+                            <template v-for="res, key_sub in result">
+                                <a class="list-group-item list-group-item-action" v-if="'error' in res" :href="'#list-item-'+key+'-'+key_sub">[[key_sub]]</a>
+                            </template>
+                        </div>
+                    </div>
+                </template>
             </template>
-        </div>          
+        </div>
     </div>
 
     <span id="goTop">[<a href="#top">Go Back Top</a>]</span>
+    <div id="insert_form"></div>
 {% endblock %}
 
 {% block script %}
@@ -359,7 +359,7 @@ Value: [[misp_attr]]
             async function query_as_same(value){
                 let result_dict = {"modules": query_info.value["modules"], 
                                     "input": query_info.value["input_query"],
-                                    "query": value,
+                                    "query": [value],
                                     "parent_id": sid.value,
                                     "query_as_same": true,
                                     "config": {}
@@ -379,6 +379,7 @@ Value: [[misp_attr]]
             // query 'value' with same parameters without a parent
              async function query_as_params(){
                 let loc = $("#query_as_params").val()
+                loc = loc.split(', ')
                 $("#query_as_params_error").text("")
                 if(loc){
                     let result_dict = {"modules": query_info.value["modules"], 
@@ -403,6 +404,29 @@ Value: [[misp_attr]]
                 }
             }
 
+            async function sender_flowintel(to_return){
+                const res = await fetch('/flowintel_url')
+                let loc = await res.json()
+                const flowintel_cm_url = loc["url"]
+
+                $('#insert_form').append(
+                    $('<form>').attr({"action": flowintel_cm_url, "name": "flowintel", "method": "post", "style": "display:none"}).append(
+                        $("<input>").attr({"type": "text", "name": "result"}).val(JSON.stringify(to_return))
+                    )
+                );
+                document.forms['flowintel'].submit();
+            }
+
+            async function send_flowintel_cm(key){
+                let to_return = {}
+                to_return[key] = modules_res.value[key]
+                sender_flowintel(to_return)
+            }
+
+            async function send_flowintel_cm_all(){
+                sender_flowintel(modules_res.value)
+            }
+
             onMounted(() => {
                 queryInfo()
                 actionQuery()
@@ -425,7 +449,9 @@ Value: [[misp_attr]]
                 parseMispAttr,
                 active_tab,
                 query_as_same,
-                query_as_params
+                query_as_params,
+                send_flowintel_cm,
+                send_flowintel_cm_all
             }
         }
     }).mount('.container-fluid')

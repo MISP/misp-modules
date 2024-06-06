@@ -146,8 +146,8 @@ def util_remove_node_session(node_uuid, parent, parent_path):
         child = parent["children"][i]
         if child["uuid"] == node_uuid:
             del parent_path["children"][i]
-            return
-        elif child["children"]:
+            return True
+        elif "children" in child and child["children"]:
             return util_remove_node_session(node_uuid, child, parent_path["children"][i])
 
 def remove_node_session(node_uuid):
@@ -160,7 +160,9 @@ def remove_node_session(node_uuid):
                 loc = i
                 break
             elif q_value["children"]:
-                return util_remove_node_session(node_uuid, q_value, sess[keys_list[i]])
+                if util_remove_node_session(node_uuid, q_value, sess[keys_list[i]]):
+                    loc = i
+                    break
     if loc:
         del sess[keys_list[i]]
 

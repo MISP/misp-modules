@@ -64,9 +64,12 @@ class Session_class:
 
     def start(self):
         """Start all worker"""
-        for i in range(len(self.modules_list)):
-            #need the index and the url in each queue item.
-            self.jobs.put((i, self.modules_list[i]))
+        cp = 0
+        for i in self.query:
+            for j in self.modules_list:
+                self.jobs.put((cp, i, j))
+                cp += 1
+        #need the index and the url in each queue item.
         for _ in range(self.thread_count):
             worker = Thread(target=self.process)
             worker.daemon = True
@@ -111,44 +114,44 @@ class Session_class:
 
             modules = query_get_module()
             loc_query = {}
+            self.result[work[1]] = dict()
             # If Misp format
             for module in modules:
-                if module["name"] == work[1]:
+                if module["name"] == work[2]:
                     if "format" in module["mispattributes"]:
                         loc_query = {
                             "type": self.input_query,
-                            "value": self.query,
+                            "value": work[1],
                             "uuid": str(uuid.uuid4())
                         }
                     break
             
             loc_config = {}
-            if work[1] in self.config_module:
-                loc_config = self.config_module[work[1]]
+            if work[2] in self.config_module:
+                loc_config = self.config_module[work[2]]
                 
             if loc_query:
-                send_to = {"module": work[1], "attribute": loc_query, "config": loc_config}
+                send_to = {"module": work[2], "attribute": loc_query, "config": loc_config}
             else:
-                send_to = {"module": work[1], self.input_query: self.query, "config": loc_config}
+                send_to = {"module": work[2], self.input_query: work[1], "config": loc_config}
             res = query_post_query(send_to)
 
             ## Sort attr in object by ui-priority
-            if "results" in res:
-                if "Object" in res["results"]:
-                    for obj in res["results"]["Object"]:
-                        loc_obj = get_object(obj["name"])
-                        if loc_obj:
-                            for attr in obj["Attribute"]:
-                                attr["ui-priority"] = loc_obj["attributes"][attr["object_relation"]]["ui-priority"]
-                            
-                            # After adding 'ui-priority'
-                            obj["Attribute"].sort(key=lambda x: x["ui-priority"], reverse=True)
+            if res:
+                if "results" in res:
+                    if "Object" in res["results"]:
+                        for obj in res["results"]["Object"]:
+                            loc_obj = get_object(obj["name"])
+                            if loc_obj:
+                                for attr in obj["Attribute"]:
+                                    attr["ui-priority"] = loc_obj["attributes"][attr["object_relation"]]["ui-priority"]
+                                
+                                # After adding 'ui-priority'
+                                obj["Attribute"].sort(key=lambda x: x["ui-priority"], reverse=True)
                     
-
-            # print(res)
-            if "error" in res:
+            if res and "error" in res:
                 self.nb_errors += 1
-            self.result[work[1]] = res
+            self.result[work[1]][work[2]] = res
 
             self.jobs.task_done()
         return True
@@ -161,7 +164,7 @@ class Session_class:
         s = Session_db(
             uuid=str(self.uuid),
             modules_list=json.dumps(self.modules_list),
-            query_enter=self.query,
+            query_enter=json.dumps(self.query),
             input_query=self.input_query,
             config_module=json.dumps(self.config_module),
             result=json.dumps(self.result),

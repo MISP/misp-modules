@@ -20,7 +20,8 @@ __all__ = ['cuckoo_submit', 'vmray_submit', 'bgpranking', 'circl_passivedns', 'c
            'trustar_enrich', 'recordedfuture', 'html_to_markdown', 'socialscan', 'passive-ssh',
            'qintel_qsentry', 'mwdb', 'hashlookup', 'mmdb_lookup', 'ipqs_fraud_and_risk_scoring',
            'clamav', 'jinja_template_rendering','hyasinsight', 'variotdbs', 'crowdsec',
-           'extract_url_components', 'ipinfo', 'whoisfreaks', 'ip2locationio', 'vysion', 'stairwell']
+           'extract_url_components', 'ipinfo', 'whoisfreaks', 'ip2locationio', 'vysion', 'stairwell',
+           'google_threat_intelligence']
 
 
 minimum_required_fields = ('type', 'uuid', 'value')

@@ -38,7 +38,7 @@ class Session_db(db.Model):
             "id": self.id,
             "uuid": self.uuid,
             "modules": json.loads(self.modules_list),
-            "query_enter": self.query_enter,
+            "query_enter": json.loads(self.query_enter),
             "input_query": self.input_query,
             "config_module": json.loads(self.config_module),
             "result": json.loads(self.result),
@@ -51,7 +51,7 @@ class Session_db(db.Model):
         json_dict = {
             "uuid": self.uuid,
             "modules": json.loads(self.modules_list),
-            "query": self.query_enter,
+            "query": json.loads(self.query_enter),
             "input": self.input_query,
             "query_date": self.query_date.strftime('%Y-%m-%d %H:%M')
         }

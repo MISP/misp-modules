@@ -37,6 +37,7 @@ def create_app():
     app.register_blueprint(home_blueprint, url_prefix="/")
     app.register_blueprint(history_blueprint, url_prefix="/")
     app.register_blueprint(account_blueprint, url_prefix="/")
+    csrf.exempt(home_blueprint)
 
     return app
     

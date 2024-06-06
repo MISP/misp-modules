@@ -10,13 +10,15 @@ function parseMispObject(misp_object, query_url, functionToCall){
                 if(query_url){
                     $query=$("<a>").attr("href", query_url+v.value).text("query").css("margin-left", "10px")
                 }
-                // `_${functionToCall.name}('${v.value}')` refer to 'window._query_as_same = query_as_same' in my vue file
-                $query_same = $("<button>").attr({"onclick": `_${functionToCall.name}('${v.value}')`, 
-                              "title": "Query this value with the same attribute and modules as the main query",
-                              "class": "btn btn-link"
-                            })
-                        .text("query as same")
-                        .css({"margin-left": "10px", "padding": "0", "--bs-btn-border-width": "0"})
+                if(functionToCall){
+                    // `_${functionToCall.name}('${v.value}')` refer to 'window._query_as_same = query_as_same' in my vue file
+                    $query_same = $("<button>").attr({"onclick": `_${functionToCall.name}('${v.value}')`, 
+                                "title": "Query this value with the same attribute and modules as the main query",
+                                "class": "btn btn-link"
+                                })
+                            .text("query as same")
+                            .css({"margin-left": "10px", "padding": "0", "--bs-btn-border-width": "0"})
+                }
             }
             
             $container.append(
@@ -74,12 +76,14 @@ function parseMispAttr(misp_attr, misp_types, key, query_url, query_as_same){
             $query=$("<a>").attr("href", query_url+misp_attr).text("query").css("margin-left", "10px")
         }
         // `_${functionToCall.name}('${misp_attr}')` refer to 'window._query_as_same = query_as_same' in my vue file
-        $query_same = $("<button>").attr({"onclick": `_${query_as_same.name}('${misp_attr}')`, 
-                        "title": "Query this value with the same attribute and modules as the main query",
-                        "class": "btn btn-link"
-                    })
-                .text("query as same")
-                .css({"margin-left": "10px", "padding": "0", "--bs-btn-border-width": "0"})
+        if(query_as_same){
+            $query_same = $("<button>").attr({"onclick": `_${query_as_same.name}('${misp_attr}')`, 
+                            "title": "Query this value with the same attribute and modules as the main query",
+                            "class": "btn btn-link"
+                        })
+                    .text("query as same")
+                    .css({"margin-left": "10px", "padding": "0", "--bs-btn-border-width": "0"})
+        }
     }
 
 

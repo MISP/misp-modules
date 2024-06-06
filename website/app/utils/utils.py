@@ -12,6 +12,7 @@ CONF_PATH = os.path.join(os.getcwd(), "conf", "config.cfg")
 config.read(CONF_PATH)
 
 MODULES = []
+FLOWINTEL_URL = Config.FLOWINTEL_URL
 
 def query_get_module(headers={'Content-type': 'application/json'}):
     global MODULES

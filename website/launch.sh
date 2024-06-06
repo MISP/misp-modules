@@ -11,7 +11,7 @@ function launch {
     export FLASKENV="development"
     killscript
     screen -dmS "misp_mod"
-    screen -S "misp_mod" -X screen -t "misp_modules_server" bash -c "../env/bin/misp-modules -l 127.0.0.1; read x"
+    screen -S "misp_mod" -X screen -t "misp_modules_server" bash -c "misp-modules -l 127.0.0.1; read x"
     sleep 2
     python3 app.py -m
     python3 app.py
