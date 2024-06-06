@@ -45,6 +45,7 @@ For more information: [Extending MISP with Python modules](https://www.misp-proj
 * [GeoIP](misp_modules/modules/expansion/geoip_country.py) - a hover and expansion module to get GeoIP information from geolite/maxmind.
 * [GeoIP_City](misp_modules/modules/expansion/geoip_city.py) - a hover and expansion module to get GeoIP City information from geolite/maxmind.
 * [GeoIP_ASN](misp_modules/modules/expansion/geoip_asn.py) - a hover and expansion module to get GeoIP ASN information from geolite/maxmind.
+* [Google Threat Intelligence] (https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/google_threat_intelligence.py) - An expansion module to have the observable's threat score assessed by Google Threat Intelligence.
 * [GreyNoise](misp_modules/modules/expansion/greynoise.py) - a hover and expansion module to get IP and CVE information from GreyNoise.
 * [hashdd](misp_modules/modules/expansion/hashdd.py) - a hover module to check file hashes against [hashdd.com](http://www.hashdd.com) including NSLR dataset.
 * [Hashlookup](misp_modules/modules/expansion/hashlookup.py) - An expansion module to enrich a file hash with hashlookup.circl.lu services (NSRL and other sources)

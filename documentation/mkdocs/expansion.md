@@ -652,6 +652,27 @@ Module to query a local copy of Maxmind's Geolite database.
 
 -----
 
+#### [google_threat_intelligence](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/google_threat_intelligence.py)
+
+<img src=../logos/google_threat_intelligence.png height=60>
+
+An expansion module to have the observable's threat score assessed by Google Threat Intelligence.
+- **features**:
+>GTI assessment for the given observable, this include information about level of severity, a clear verdict (malicious, suspicious, undetected and bening) and additional information provided by the Mandiant expertise combined with the VirusTotal database.
+>
+>[Output example screeshot](https://github.com/MISP/MISP/assets/4747608/e275db2f-bb1e-4413-8cc0-ec3cb05e0414)
+- **input**:
+>A domain, hash (md5, sha1, sha256 or sha512), hostname or IP address attribute.
+- **output**:
+>Text fields containing the threat score, the severity, the verdict and the threat label of the observable inspected.
+- **references**:
+> - https://www.virustotal.com/
+> - https://gtidocs.virustotal.com/reference
+- **requirements**:
+>An access to the Google Threat Intelligence API (apikey), with a high request rate limit.
+
+-----
+
 #### [greynoise](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/greynoise.py)
 
 <img src=../logos/greynoise.png height=60>
