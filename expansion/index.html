@@ -22,7 +22,7 @@
       
       
       <link rel="icon" href="../img/favicon.ico">
-      <meta name="generator" content="mkdocs-1.6.0, mkdocs-material-9.5.21">
+      <meta name="generator" content="mkdocs-1.6.0, mkdocs-material-9.5.25">
     
     
       
@@ -30,7 +30,7 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.66ac8b77.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.6543a935.min.css">
       
         
         <link rel="stylesheet" href="../assets/stylesheets/palette.06af60db.min.css">
@@ -562,6 +562,15 @@
   <a href="#google_search" class="md-nav__link">
     <span class="md-ellipsis">
       google_search
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#google_threat_intelligence" class="md-nav__link">
+    <span class="md-ellipsis">
+      google_threat_intelligence
     </span>
   </a>
   
@@ -1647,6 +1656,15 @@
   <a href="#google_search" class="md-nav__link">
     <span class="md-ellipsis">
       google_search
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#google_threat_intelligence" class="md-nav__link">
+    <span class="md-ellipsis">
+      google_threat_intelligence
     </span>
   </a>
   
@@ -2871,6 +2889,24 @@ Text containing the result of a Google search on the input url.
 <a href="https://github.com/abenassi/Google-Search-API">https://github.com/abenassi/Google-Search-API</a>
 - <strong>requirements</strong>:
 The python Google Search API library</p>
+</blockquote>
+<hr />
+<h4 id="google_threat_intelligence"><a href="https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/google_threat_intelligence.py">google_threat_intelligence</a><a class="headerlink" href="#google_threat_intelligence" title="Permanent link">&para;</a></h4>
+<p><img src=../logos/google_threat_intelligence.png height=60></p>
+<p>An expansion module to have the observable's threat score assessed by Google Threat Intelligence.
+- <strong>features</strong>:</p>
+<blockquote>
+<p>GTI assessment for the given observable, this include information about level of severity, a clear verdict (malicious, suspicious, undetected and bening) and additional information provided by the Mandiant expertise combined with the VirusTotal database.</p>
+<p><a href="https://github.com/MISP/MISP/assets/4747608/e275db2f-bb1e-4413-8cc0-ec3cb05e0414">Output example screeshot</a>
+- <strong>input</strong>:
+A domain, hash (md5, sha1, sha256 or sha512), hostname or IP address attribute.
+- <strong>output</strong>:
+Text fields containing the threat score, the severity, the verdict and the threat label of the observable inspected.
+- <strong>references</strong>:
+- <a href="https://www.virustotal.com/">https://www.virustotal.com/</a>
+- <a href="https://gtidocs.virustotal.com/reference">https://gtidocs.virustotal.com/reference</a>
+- <strong>requirements</strong>:
+An access to the Google Threat Intelligence API (apikey), with a high request rate limit.</p>
 </blockquote>
 <hr />
 <h4 id="greynoise"><a href="https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/greynoise.py">greynoise</a><a class="headerlink" href="#greynoise" title="Permanent link">&para;</a></h4>
@@ -4267,7 +4303,7 @@ MISP attributes and objects fetched from the Yeti instances.
     <script id="__config" type="application/json">{"base": "..", "features": [], "search": "../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
-      <script src="../assets/javascripts/bundle.a7c05c9e.min.js"></script>
+      <script src="../assets/javascripts/bundle.081f42fc.min.js"></script>
       
     
   </body>
