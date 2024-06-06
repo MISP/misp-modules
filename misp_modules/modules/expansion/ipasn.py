@@ -6,10 +6,8 @@ from pyipasnhistory import IPASNHistory
 from pymisp import MISPAttribute, MISPEvent, MISPObject
 
 misperrors = {'error': 'Error'}
-mispattributes = {'input': ['ip-src', 'ip-dst'], 'format': 'misp_standard'}
-moduleinfo = {'version': '0.2', 'author': 'Raphaël Vinot',
-              'description': 'Query an IP ASN history service (https://github.com/CIRCL/IP-ASN-history.git)',
-              'module-type': ['expansion', 'hover']}
+mispattributes = {'input': ['ip-src', 'ip-dst', 'ip'], 'format': 'misp_standard'}
+moduleinfo = {'version': '0.3', 'author': 'Raphaël Vinot', 'description': 'Query an IP ASN history service (https://github.com/D4-project/IPASN-History?tab=readme-ov-file)', 'module-type': ['expansion', 'hover']}
 
 
 def parse_result(attribute, values):
@@ -18,7 +16,6 @@ def parse_result(attribute, values):
     initial_attribute.from_dict(**attribute)
     event.add_attribute(**initial_attribute)
     mapping = {'asn': ('AS', 'asn'), 'prefix': ('ip-src', 'subnet-announced')}
-    print(values)
     for last_seen, response in values['response'].items():
         asn = MISPObject('asn')
         asn.add_attribute('last-seen', **{'type': 'datetime', 'value': last_seen})
@@ -39,6 +36,9 @@ def handler(q=False):
         return {'error': f'{standard_error_message}, which should contain at least a type, a value and an uuid.'}
     if request['attribute']['type'] not in mispattributes['input']:
         return {'error': 'Unsupported attribute type.'}
+    if request['attribute']['type'] == 'ip':
+        request['attribute']['type'] = 'ip-src'
+
     toquery = request['attribute']['value']
 
     ipasn = IPASNHistory()
