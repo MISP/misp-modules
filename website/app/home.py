@@ -1,10 +1,10 @@
 import ast
 import json
-from flask import Blueprint, redirect, render_template, request, jsonify, session as sess
+from flask import Blueprint, render_template, request, jsonify, session as sess
 from flask_login import current_user
 from . import session_class as SessionModel
 from . import home_core as HomeModel
-from .utils.utils import admin_user_active, FLOWINTEL_URL
+from .utils.utils import admin_user_active
 
 home_blueprint = Blueprint(
     'home',
@@ -255,8 +255,3 @@ def change_status():
         return {'message': 'Need to pass "module_id"', 'toast_class': "warning-subtle"}, 400
     return {'message': 'Permission denied', 'toast_class': "danger-subtle"}, 403
 
-
-@home_blueprint.route("/flowintel_url")
-def flowintel_url():
-    """send result to flowintel-cm"""
-    return {"url": f"{FLOWINTEL_URL}/analyzer/recieve_result"}, 200

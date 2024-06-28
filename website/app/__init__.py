@@ -34,9 +34,11 @@ def create_app():
     from .home import home_blueprint
     from .history.history import history_blueprint
     from .account.account import account_blueprint
+    from .external_tools.external_tools import external_tools_blueprint
     app.register_blueprint(home_blueprint, url_prefix="/")
     app.register_blueprint(history_blueprint, url_prefix="/")
     app.register_blueprint(account_blueprint, url_prefix="/")
+    app.register_blueprint(external_tools_blueprint, url_prefix="/")
     csrf.exempt(home_blueprint)
 
     return app

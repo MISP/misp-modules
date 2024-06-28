@@ -91,6 +91,20 @@ class User(UserMixin, db.Model):
             "last_name": self.last_name, 
             "email": self.email
         }
+    
+class ExternalTools(db.Model):
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    name = db.Column(db.String(64), index=True)
+    url = db.Column(db.String)
+    is_active = db.Column(db.Boolean)
+
+    def to_json(self):
+        return {
+            "id": self.id, 
+            "url": self.url,
+            "name": self.name,
+            "is_active": self.is_active
+        }
 
 class AnonymousUser(AnonymousUserMixin):
     def is_admin(self):
