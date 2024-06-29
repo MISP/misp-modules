@@ -4,7 +4,7 @@ import dns.resolver
 misperrors = {'error': 'Error'}
 mispattributes = {'input': ['hostname', 'domain', 'domain|ip'], 'output': ['ip-src',
                                                                            'ip-dst']}
-moduleinfo = {'version': '0.2', 'author': 'Alexandre Dulaunoy',
+moduleinfo = {'version': '0.3', 'author': 'Alexandre Dulaunoy',
               'description': 'Simple DNS expansion service to resolve IP address from MISP attributes',
               'module-type': ['expansion', 'hover']}
 
@@ -43,8 +43,8 @@ def handler(q=False):
     except dns.exception.Timeout:
         misperrors['error'] = "Timeout"
         return misperrors
-    except Exception:
-        misperrors['error'] = "DNS resolving error"
+    except Exception as e:
+        misperrors['error'] = f'DNS resolving error {e}'
         return misperrors
 
     r = {'results': [{'types': mispattributes['output'],

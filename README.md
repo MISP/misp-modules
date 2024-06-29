@@ -3,10 +3,12 @@
 [![Python package](https://github.com/MISP/misp-modules/actions/workflows/python-package.yml/badge.svg)](https://github.com/MISP/misp-modules/actions/workflows/python-package.yml)[![Coverage Status](https://coveralls.io/repos/github/MISP/misp-modules/badge.svg?branch=main)](https://coveralls.io/github/MISP/misp-modules?branch=main)
 [![codecov](https://codecov.io/gh/MISP/misp-modules/branch/main/graph/badge.svg)](https://codecov.io/gh/MISP/misp-modules)
 
-MISP modules are autonomous modules that can be used to extend [MISP](https://github.com/MISP/MISP) for new services such as expansion, import and export.
+MISP modules are autonomous modules that can be used to extend [MISP](https://github.com/MISP/MISP) for new services such as expansion, import, export and workflow action.
+
+MISP modules can be also installed and used without MISP as a [standalone tool accessible via a convenient web interface](./website).
 
 The modules are written in Python 3 following a simple API interface. The objective is to ease the extensions of MISP functionalities
-without modifying core components. The API is available via a simple REST API which is independent from MISP installation or configuration.
+without modifying core components. The API is available via a simple REST API which is independent from MISP installation or configuration and can be used with other tools.
 
 For more information: [Extending MISP with Python modules](https://www.misp-project.org/misp-training/3.1-misp-modules.pdf) slides from [MISP training](https://github.com/MISP/misp-training).
 
@@ -43,8 +45,10 @@ For more information: [Extending MISP with Python modules](https://www.misp-proj
 * [GeoIP](misp_modules/modules/expansion/geoip_country.py) - a hover and expansion module to get GeoIP information from geolite/maxmind.
 * [GeoIP_City](misp_modules/modules/expansion/geoip_city.py) - a hover and expansion module to get GeoIP City information from geolite/maxmind.
 * [GeoIP_ASN](misp_modules/modules/expansion/geoip_asn.py) - a hover and expansion module to get GeoIP ASN information from geolite/maxmind.
+* [Google Threat Intelligence] (https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/google_threat_intelligence.py) - An expansion module to have the observable's threat score assessed by Google Threat Intelligence.
 * [GreyNoise](misp_modules/modules/expansion/greynoise.py) - a hover and expansion module to get IP and CVE information from GreyNoise.
 * [hashdd](misp_modules/modules/expansion/hashdd.py) - a hover module to check file hashes against [hashdd.com](http://www.hashdd.com) including NSLR dataset.
+* [Hashlookup](misp_modules/modules/expansion/hashlookup.py) - An expansion module to enrich a file hash with hashlookup.circl.lu services (NSRL and other sources)
 * [hibp](misp_modules/modules/expansion/hibp.py) - a hover module to lookup against Have I Been Pwned?
 * [html_to_markdown](misp_modules/modules/expansion/html_to_markdown.py) - Simple HTML to markdown converter
 * [HYAS Insight](misp_modules/modules/expansion/hyasinsight.py) - a hover and expansion module to get information from [HYAS Insight](https://www.hyas.com/hyas-insight).
@@ -82,6 +86,7 @@ For more information: [Extending MISP with Python modules](https://www.misp-proj
 * [Socialscan](misp_modules/modules/expansion/socialscan.py) - a hover module to check if an email address or a username is used on different online platforms, using the [socialscan](https://github.com/iojw/socialscan) python library
 * [SophosLabs Intelix](misp_modules/modules/expansion/sophoslabs_intelix.py) - SophosLabs Intelix is an API for Threat Intelligence and Analysis (free tier available). [SophosLabs](https://aws.amazon.com/marketplace/pp/B07SLZPMCS)
 * [sourcecache](misp_modules/modules/expansion/sourcecache.py) - a module to cache a specific link from a MISP instance.
+* [stairwell](misp_modules/modules/expansion/stairwell.py) - an expansion module to enrich hash observables with the Stairwell API
 * [STIX2 pattern syntax validator](misp_modules/modules/expansion/stix2_pattern_syntax_validator.py) - a module to check a STIX2 pattern syntax.
 * [ThreatCrowd](misp_modules/modules/expansion/threatcrowd.py) - an expansion module for [ThreatCrowd](https://www.threatcrowd.org/).
 * [threatminer](misp_modules/modules/expansion/threatminer.py) - an expansion module to expand from [ThreatMiner](https://www.threatminer.org/).
@@ -576,7 +581,7 @@ cd ../
 
 ## Documentation
 
-In order to provide documentation about some modules that require specific input / output / configuration, the [doc](doc) directory contains detailed information about the general purpose, requirements, features, input and ouput of each of these modules:
+In order to provide documentation about some modules that require specific input / output / configuration, the [index.md](docs/index.md) file within the [docs](docs) directory contains detailed information about the general purpose, requirements, features, input and ouput of each of these modules:
 
 - ***description** - quick description of the general purpose of the module, as the one given by the moduleinfo
 - **requirements** - special libraries needed to make the module work

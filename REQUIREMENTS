@@ -1,9 +1,8 @@
--i https://pypi.org/simple
-aiohttp==3.8.4
+aiohttp>=3.9.0
 aiosignal==1.3.1 ; python_version >= '3.7'
 antlr4-python3-runtime==4.9.3
 anyio==3.6.2 ; python_full_version >= '3.6.2'
-git+https://github.com/davidonzo/apiosintDS@misp
+apiosintDS==2.0.3
 appdirs==1.4.4
 argcomplete==3.0.8 ; python_version >= '3.6'
 argparse==1.4.0
@@ -18,7 +17,7 @@ beautifulsoup4==4.12.2
 bidict==0.22.1 ; python_version >= '3.7'
 blockchain==1.4.4
 censys==2.2.2
-certifi==2023.5.7 ; python_version >= '3.6'
+certifi>=2023.7.22 ; python_version >= '3.6'
 cffi==1.15.1
 chardet==5.1.0
 charset-normalizer==3.1.0 ; python_full_version >= '3.7.0'
@@ -30,7 +29,7 @@ colorclass==2.2.2 ; python_version >= '2.6'
 compressed-rtf==1.0.6
 configparser==5.3.0 ; python_version >= '3.7'
 crowdstrike-falconpy==1.2.15
-cryptography==40.0.2 ; python_version >= '3.6'
+cryptography>=41.0.2 ; python_version >= '3.6'
 dateparser==1.1.8 ; python_version >= '3.7'
 decorator==5.1.1 ; python_version >= '3.5'
 deprecated==1.2.14 ; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3'
@@ -96,7 +95,7 @@ pandas-ods-reader==0.1.4
 passivetotal==2.5.9
 pcodedmp==1.2.6
 pdftotext==2.2.2
-pillow==9.5.0
+pillow>=10.2.0
 pkgutil-resolve-name==1.3.10 ; python_version < '3.9'
 progressbar2==4.2.0 ; python_full_version >= '3.7.0'
 psutil==5.9.5 ; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3'
@@ -104,8 +103,8 @@ publicsuffixlist==0.10.0.20230828 ; python_version >= '2.6'
 git+https://github.com/D4-project/BGP-Ranking.git/@68de39f6c5196f796055c1ac34504054d688aa59#egg=pybgpranking&subdirectory=client
 pycountry==22.3.5
 pycparser==2.21
-pycryptodome==3.18.0 ; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4'
-pycryptodomex==3.17 ; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4'
+pycryptodome==3.19.1 ; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4'
+pycryptodomex==3.19.1 ; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4'
 pydeep2==0.5.1
 git+https://github.com/sebdraven/pydnstrails@48c1f740025c51289f43a24863d1845ff12fd21a#egg=pydnstrails
 pyeupi==1.1
@@ -152,6 +151,7 @@ sigmatools==0.19.1
 sigmf==1.1.1
 simplejson==3.19.1 ; python_version >= '2.5' and python_version not in '3.0, 3.1, 3.2, 3.3'
 six==1.16.0 ; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3'
+slack-sdk==3.27.1
 sniffio==1.3.0 ; python_version >= '3.7'
 socialscan==1.4
 socketio-client==0.5.7.4
@@ -173,7 +173,6 @@ unicodecsv==0.14.1
 url-normalize==1.4.3 ; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4, 3.5'
 urlarchiver==0.2
 urllib3==1.26.15 ; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4, 3.5'
-validators==0.14.0
 vt-graph-api==2.2.0
 vt-py==0.17.5
 vulners==2.0.10

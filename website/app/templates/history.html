@@ -1,0 +1,106 @@
+<!-- 
+    Author: David Cruciani
+-->
+
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1 id="top">History</h1>
+
+    <hr>
+    <br>
+    <!-- pagination -->
+    <nav aria-label="Page navigation example" v-if="history && history.nb_pages > 1">
+        <ul class="pagination">
+            <li :class="{'page-item': true, 'disabled': current_page == 1}">
+                <button class="page-link" @click="get_history(Math.max(1, current_page-1))">Previous</button>
+            </li>
+            <template v-for="cp in history.nb_pages">
+                <li :class="{'page-item': true, 'active': current_page==cp}"><button class="page-link" @click="get_history(cp)">[[cp]]</button></li>
+            </template>
+            <li :class="{'page-item': true, 'disabled': current_page == history.nb_pages}">
+                <button class="page-link" @click="get_history(Math.min(current_page+1, history.nb_pages))">Next</button>
+            </li>
+        </ul>
+    </nav>
+    <!-- pagination -->
+    
+    <div v-if="history">
+        <template v-for="h in history.history">
+            <div class="list-group" style="margin-bottom: 20px;">
+                <a :href="'/query/'+h.uuid" class="list-group-item list-group-item-action">
+                    <div class="d-flex w-100 justify-content-between">
+                        <h5 class="mb-1">[[h.query.join(", ")]]</h5>
+                        <small><i>[[h.uuid]]</i></small>
+                    </div>
+                    <p class="mb-1" style="color: green;"><u>Input Attribute</u>:</p>
+                    <div>[[h.input]]</div>
+                    <br>
+                    <p class="mb-1" style="color: #2000ff;"><u>Modules</u>:</p>
+                    <div>
+                        [[h.modules.join(", ")]]
+                    </div>
+        
+                    
+                    <div class="d-flex w-100 justify-content-between">
+                        <div></div>
+                        <small><i>[[h.query_date]]</i></small>
+                    </div>
+                </a>
+            </div>
+        </template>
+    </div>
+    
+    <!-- pagination -->
+    <nav aria-label="Page navigation example" v-if="history && history.nb_pages > 1">
+        <ul class="pagination">
+            <li :class="{'page-item': true, 'disabled': current_page == 1}">
+                <button class="page-link" @click="get_history(Math.max(1, current_page-1))">Previous</button>
+            </li>
+            <template v-for="cp in history.nb_pages">
+                <li :class="{'page-item': true, 'active': current_page==cp}"><button class="page-link" @click="get_history(cp)">[[cp]]</button></li>
+            </template>
+            <li :class="{'page-item': true, 'disabled': current_page == history.nb_pages}">
+                <button class="page-link" @click="get_history(Math.min(current_page+1, history.nb_pages))">Next</button>
+            </li>
+        </ul>
+    </nav>
+    <!-- pagination -->
+    
+    <span id="goTop">[<a href="#top">Go Back Top</a>]</span>
+{% endblock %}
+
+{% block script %}
+<script type="module">
+    const { createApp, ref, onMounted, nextTick, defineComponent} = Vue
+    import {message_list} from '/static/js/toaster.js'
+    import history_view from '/static/js/history/history_view.js'
+    createApp({
+        delimiters: ['[[', ']]'],
+        components: {
+            history_view
+        },
+        setup() {
+            const history = ref({})
+            const current_page = ref(1)
+
+            async function get_history(page){
+                let res = await fetch("/get_history?page=" + page)
+                let loc = await res.json()
+                history.value = loc
+                current_page.value = page
+            }
+            get_history(1)
+
+
+            return {
+                message_list,
+                history,
+                current_page,
+                get_history
+            }
+        }
+    }).mount('.container-fluid')
+
+</script>
+{% endblock %}

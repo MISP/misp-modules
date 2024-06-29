@@ -1,0 +1,332 @@
+<!-- 
+    Author: David Cruciani
+-->
+
+{% extends 'base.html' %}
+
+{% block content %}
+    <div>
+        <header>
+        </header>
+        <h1>MISP Modules</h1>
+    </div>
+
+    <hr>
+    <br>
+    <div class="row">
+        <div class="col-1">
+            <button style="position: fixed; top: 35%" class="btn btn-primary" @click="actionQuery()">Query</button>
+        </div>
+        <div class="col-11">
+            <div style="width:50%; transform: translate(50%, 0);">
+                <template v-for="elem in cp_entries">
+                    <div style="margin-top: 10px;">
+                        <input type="hidden" id="parent_id" value="{{sid}}">
+                        <input type="text" v-if="queries" :value="queries[elem-1]" :id="'process-query-'+elem" placeholder="Enter here..." autofocus class="form-control" style="border-radius: 5px;" />
+                        <input type="text" v-else :id="'process-query-'+elem" placeholder="Enter here..." autofocus class="form-control" style="border-radius: 5px;" />
+                    </div>
+                </template>
+                <button @click="add_entry()" class="btn btn-secondary" style="margin-top: 10px;">Add new entry</button>
+                <button @click="delete_entry()" class="btn btn-danger" style="margin-top: 10px;">Delete entry</button>
+                <span v-if="status_site" style="color: brown;" id="status">[[status_site]]</span>
+            </div>
+        
+            <br>
+            <!-- Attributes selection -->
+            <div v-if="misp_attributes_list.length" style="margin-top: 10px; transform: translate(25%, 0);">
+                <div>
+                    <h4>Input Attributes</h4>
+                </div>
+                <div>
+                    <select data-placeholder="Input" class="select2-input form-control" name="input_select" id="input_select">
+                        <option value="None">--</option>
+                        <template v-for="attributes in misp_attributes_list">
+                            <option :value="attributes">[[attributes]]</option>
+                        </template>
+                    </select>
+                </div>
+            </div>
+        
+            <!-- Results modules selection -->
+            <template v-if="modules_list.length">
+                <div v-if="attr_selected.length" style="margin-top: 10px; width: 50%; transform: translate(50%, 0);">
+                    <h4>Modules</h4>
+                    <select data-placeholder="Modules" class="select2-modules form-control" multiple name="modules_select" id="modules_select">
+                        <template v-for="key in modules_list">
+                            <option v-if="checked_attr(key.mispattributes.input)" :value="key.name" :title="key.meta.description">[[key.name]]</option>
+                        </template>
+                    </select>
+                </div>
+            </template>
+
+            <div title="Configure modules even if a configuration as already been given" style="margin-top: 10px; transform: translate(25%, 0);">
+                <input type="checkbox" id="own_config" name="own_config" @click="own_config()" style="margin-right: 5px;">
+                <label for="own_config">Configure all modules </label>
+            </div>
+        
+            <!-- Display in case a module as request_on_query activate -->
+            <div v-if="config_query.length" style="margin-top: 10px; padding: 6px" class="row">
+                <h4>Config</h4>
+                <div class="card col-4" style="margin-top: 10px; padding: 15px" v-for="module in config_query">
+                    <h4>[[module.name]]</h4>
+                    <div v-for="conf in module.meta.config" class="mb-3">
+                        <label :for="'form-'+conf+'-'+module.name" class="form-label">[[conf]]</label>
+                        <input type="text" class="form-control" :id="'form-'+conf+'-'+module.name">
+                        <span style="color: brown;" :id="'error-'+conf+'-'+module.name"></span>
+                    </div>
+                </div>
+            </div>
+        
+            <br/>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block script %}
+<script type="module">
+    const { createApp, ref, onMounted, nextTick, defineComponent} = Vue
+    import {message_list} from '/static/js/toaster.js'
+    createApp({
+        delimiters: ['[[', ']]'],
+        setup() {
+            const modules_list = ref([])
+            const misp_attributes_list = ref({})
+            const attr_selected = ref([])
+
+            const progress = ref(0)
+
+            const current_query = ref([])
+            const status_site = ref()
+
+            const config_query = ref([])
+
+            const cp_entries = ref(1)
+            const queries = ref()
+
+            let own_config_bool = false
+
+
+            async function fetchQuery(){
+                const res = await fetch('/get_query')
+                let loc = await res.json()
+                if("message" in loc){
+                    queries.value = false
+                }else{
+                    queries.value = loc["query"]
+                    cp_entries.value = queries.value.length
+                }
+            }
+            fetchQuery()
+
+
+            async function actionQuery(){
+                current_query.value = []
+                for(let i=1;i<=cp_entries.value;i++){
+                    let loc_query_res = $("#process-query-"+i).val()
+                    if(loc_query_res)
+                        current_query.value.push(loc_query_res)
+                }
+                if (!current_query.value) {
+                    status_site.value = '↖ You need to type something'
+                    window.scrollTo(0, 0);
+                    return
+                }else{
+                    status_site.value = ""
+                }
+
+                progress.value = 0
+                let error_flag = false
+
+                let loc = undefined
+                if($("#input_select").val() != "None"){
+                    loc = $("#input_select").val()
+                }
+
+                let loc_modules = undefined
+                if($("#modules_select").val().length){
+                    loc_modules = $("#modules_select").val()
+                }
+
+                let result_dict = {"modules": loc_modules, 
+                                    "input": loc,
+                                    "query": current_query.value,
+                                    "parent_id": $("#parent_id").val()
+                                }
+                result_dict["config"] = {}
+                for(let el in config_query.value){
+                    result_dict["config"][config_query.value[el].name] = {}
+                    for(let conf in config_query.value[el].meta.config){
+                        $("#error-"+config_query.value[el].meta.config[conf]+"-"+config_query.value[el].name).text("")
+                        let loc = $("#form-"+config_query.value[el].meta.config[conf]+"-"+config_query.value[el].name).val()
+                        if(!loc){
+                            error_flag = true
+                            $("#error-"+config_query.value[el].meta.config[conf]+"-"+config_query.value[el].name).text("Please enter value")
+                        }else{
+                            result_dict["config"][config_query.value[el].name][config_query.value[el].meta.config[conf]] = loc
+                        }
+                    }
+                }
+                if(!error_flag){
+                    const res = await fetch('/run_modules',{
+                                    headers: { "X-CSRFToken": $("#csrf_token").val(), "Content-Type": "application/json" },
+                                    method: "POST",
+                                    body: JSON.stringify(result_dict)
+                                })
+                    if(await res.status == 201){
+                        let loc = await res.json()
+                        await nextTick()
+                        window.location.href="/query/" + loc['id']
+                    }else{
+                        let loc = await res.json()
+                        status_site.value = loc['message'] || 'Something went wrong'
+
+                        if(status_site.value.includes("]")){
+                            status_site.value = status_site.value.split("]")[1]
+                        }
+                    }
+                }
+            }
+
+
+            async function query_modules(){
+                let res = await fetch("/get_modules")
+                let loc = await res.json()
+                modules_list.value = loc
+
+                await query_misp_attributes()
+            }
+            query_modules()
+
+            async function query_misp_attributes(){
+                let res = await fetch("/get_list_misp_attributes")
+                let loc = await res.json()
+                misp_attributes_list.value = loc
+
+                await nextTick()
+
+                if (!$('.select2-input').hasClass("select2-hidden-accessible")) {
+                    $('.select2-input').select2({
+                        theme: 'bootstrap-5',
+                        width: '50%'
+                    })
+                }
+
+                $('#input_select').on('change.select2', async function (e) {
+                    attr_selected.value = $(this).select2('data').map(item => item.id)[0]
+                    if(attr_selected.value == 'None' ){
+                        attr_selected.value = []
+                    }
+
+                    await nextTick()
+
+                    if (!$('.select2-modules').hasClass("select2-hidden-accessible")) {
+                        $('.select2-modules').select2({
+                            theme: 'bootstrap-5',
+                            closeOnSelect: false
+                        })
+                        $('#modules_select').on('change.select2', async function (e) {
+                            let loc_list = $(this).select2('data').map(item => item.id)
+                            config_query.value = []
+                            for(let el in loc_list){
+                                for(let index in modules_list.value){
+                                    if(modules_list.value[index].name == loc_list[el]){
+                                        if (own_config_bool){
+                                            config_query.value.push(modules_list.value[index])
+                                        }
+                                        else if(modules_list.value[index].request_on_query){
+                                            config_query.value.push(modules_list.value[index])
+                                        }
+                                        break
+                                    }
+                                }
+                            }
+                        })
+                    }
+                })
+
+                $('#input_select').on('select2:open', function (e) {
+                    document.querySelector('.select2-search__field').focus();
+                })
+            }
+
+            function pairedList() {
+                let pairs = [];
+                for (let i = 0; i < this.items.length; i += 2) {
+                    pairs.push(this.items.slice(i, i + 2));
+                }
+                return pairs;
+            }
+
+            function checked_attr(arr1){
+                let loc = arr1.includes(attr_selected.value)
+                if(!loc && attr_selected.value == 'ip'){
+                    loc = arr1.includes('ip-dst')
+                    if(!loc && attr_selected.value == 'ip'){
+                        loc = arr1.includes('ip-src')
+                    }
+                }
+                return loc
+            }
+
+            function add_entry(){
+                cp_entries.value += 1
+            }
+            function delete_entry(){
+                cp_entries.value -= 1
+            }
+
+            
+            function own_config(){
+                own_config_bool = !own_config_bool
+                if(own_config_bool){
+                    let loc_list = $('#modules_select').val()
+                    config_query.value = []
+                    for(let el in loc_list){
+                        for(let index in modules_list.value){
+                            if(modules_list.value[index].name == loc_list[el]){
+                                config_query.value.push(modules_list.value[index])
+                                break
+                            }
+                        }
+                    }
+                }else{
+                    let loc_list = $('#modules_select').val()
+                    config_query.value = []
+                    for(let el in loc_list){
+                        for(let index in modules_list.value){
+                            if(modules_list.value[index].name == loc_list[el]){
+                                if(modules_list.value[index].request_on_query){
+                                    config_query.value.push(modules_list.value[index])
+                                }
+                                break
+                            }
+                        }
+                    }
+                }
+            }
+
+
+            return {
+                message_list,
+                progress,
+                modules_list,
+                misp_attributes_list,
+                attr_selected,
+                status_site,
+                config_query,
+                cp_entries,
+                queries,
+                actionQuery,
+                pairedList,
+                checked_attr,
+                add_entry,
+                delete_entry,
+                generateCoreFormatUI,
+                own_config
+            }
+        }
+    }).mount('.container-fluid')
+
+</script>
+{% endblock %}
