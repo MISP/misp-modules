@@ -12,16 +12,16 @@
     </div>
 
     <div class="btn-group" style="float: right;" role="group" aria-label="Basic mixed styles example">
-        <a style="float: right;" class="btn btn-primary" href="/" title="Do a new query with no relation with this one">New query</a>
+        <a style="float: right;" class="btn btn-primary" href="/" title="Do a new query with no relation with this one"><i class="fa-solid fa-plus"></i> New query</a>
         <a style="float: right;" class="btn btn-secondary" href="/?query={{query}}" title="New query with same name">Query</a>
         <div class="dropdown" style="float: right;">
             <button class="btn btn-primary dropdown-toggle" title="New query with same parameters" style="border-radius: 0;" data-bs-toggle="dropdown" aria-expanded="false" data-bs-auto-close="outside">
-                Query as same
+                <i class="fa-solid fa-recycle"></i>
             </button>
             <div class="dropdown-menu p-4" style="min-width: 200px;">
                 <div class="mb-3">
                     <label for="query_as_params" class="form-label">To query:</label>
-                    <input type="email" class="form-control" id="query_as_params" placeholder="{{', '.join(query)}}">
+                    <input type="email" class="form-control" id="query_as_params" value="{{', '.join(query)}}">
                     <div id="query_as_params_error" style="color:brown"></div>
                 </div>
                 <button type="submit" class="btn btn-primary btn-sm" @click="query_as_params()" style="border-radius: 50px;">Query</button>

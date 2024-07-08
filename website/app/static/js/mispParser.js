@@ -8,7 +8,9 @@ function parseMispObject(misp_object, query_url, functionToCall){
 
             if(v.type != 'counter' && v.type != 'datetime'){
                 if(query_url){
-                    $query=$("<a>").attr("href", query_url+v.value).text("query").css("margin-left", "10px")
+                    $query=$("<a>").attr({"href": query_url+v.value, "title": "Query this value with new attributes or modules"})
+                                .text("query")
+                                .css("margin-left", "10px")
                 }
                 if(functionToCall){
                     // `_${functionToCall.name}('${v.value}')` refer to 'window._query_as_same = query_as_same' in my vue file
@@ -16,7 +18,8 @@ function parseMispObject(misp_object, query_url, functionToCall){
                                 "title": "Query this value with the same attribute and modules as the main query",
                                 "class": "btn btn-link"
                                 })
-                            .text("query as same")
+                            // .text("query as same")
+                            .append($("<i>").attr("class", "fa-solid fa-recycle"))
                             .css({"margin-left": "10px", "padding": "0", "--bs-btn-border-width": "0"})
                 }
             }
@@ -45,8 +48,8 @@ function parseMispObject(misp_object, query_url, functionToCall){
                             "margin-left": "0.5em",
                         }),
                         $("<div>").text("Value: "+ v.value),
-                        $query,
-                        $query_same
+                        $query_same,
+                        $query
                     )
                 )
             )
