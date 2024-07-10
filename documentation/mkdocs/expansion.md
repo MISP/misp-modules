@@ -1784,7 +1784,7 @@ Module to get advanced information from virustotal.
 >MISP attributes and objects resulting from the parsing of the VirusTotal report concerning the input attribute.
 - **references**:
 > - https://www.virustotal.com/
-> - https://developers.virustotal.com/reference
+> - https://docs.virustotal.com/reference/overview
 - **requirements**:
 >An access to the VirusTotal API (apikey), with a high request rate limit.
 
@@ -1809,7 +1809,7 @@ Module to get information from VirusTotal.
 >MISP attributes and objects resulting from the parsing of the VirusTotal report concerning the input attribute.
 - **references**:
 > - https://www.virustotal.com
-> - https://developers.virustotal.com/reference
+> - https://docs.virustotal.com/reference/overview
 - **requirements**:
 >An access to the VirusTotal API (apikey)
 
