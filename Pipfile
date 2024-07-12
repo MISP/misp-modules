@@ -10,6 +10,10 @@ pytest = "*"
 flake8 = "*"
 
 [packages]
+numpy = "<2.0.0"
+matplotlib = "*"
+sigmf = "*"
+pysafebrowsing = "*"
 dnspython = "*"
 requests = { extras = ["security"], version = "*" }
 urlarchiver = "*"
@@ -79,4 +83,4 @@ openpyxl = "*"
 slack-sdk = "3.27.1"
 
 [requires]
-python_version = "3.7"
+python_version = "3.12"
