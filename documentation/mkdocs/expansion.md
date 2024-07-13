@@ -1941,27 +1941,6 @@ An expansion hover module to expand information about CVE id using Vulners API.
 
 -----
 
-#### [vysion](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/vysion.py)
-
-<img src=../logos/vysion.png height=60>
-
-Module to enrich the information by making use of the Vysion API.
-- **features**:
->This module gets correlated information from our dark web intelligence database. With this you will get several objects containing information related to, for example, an organization victim of a ransomware attack.
-- **input**:
->MISP Attribute which include: company(target-org), country, info.
-- **output**:
->MISP objects containing title, link to our webapp and TOR, i2p or clearnet URLs.
-- **references**:
-> - https://vysion.ai/
-> - https://developers.vysion.ai/
-> - https://github.com/ByronLabs/vysion-cti/tree/main
-- **requirements**:
-> - Vysion python library
-> - Vysion API Key
-
------
-
 #### [whois](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/whois.py)
 
 Module to query a local instance of uwhois (https://github.com/rafiot/uwhoisd).
