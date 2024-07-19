@@ -1117,15 +1117,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#vysion" class="md-nav__link">
-    <span class="md-ellipsis">
-      vysion
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#whois" class="md-nav__link">
     <span class="md-ellipsis">
       whois
@@ -2205,15 +2196,6 @@
   <a href="#vulners" class="md-nav__link">
     <span class="md-ellipsis">
       vulners
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#vysion" class="md-nav__link">
-    <span class="md-ellipsis">
-      vysion
     </span>
   </a>
   
@@ -3959,7 +3941,7 @@ A domain, hash (md5, sha1, sha256 or sha512), hostname or IP address attribute.
 MISP attributes and objects resulting from the parsing of the VirusTotal report concerning the input attribute.
 - <strong>references</strong>:
 - <a href="https://www.virustotal.com/">https://www.virustotal.com/</a>
-- <a href="https://developers.virustotal.com/reference">https://developers.virustotal.com/reference</a>
+- <a href="https://docs.virustotal.com/reference/overview">https://docs.virustotal.com/reference/overview</a>
 - <strong>requirements</strong>:
 An access to the VirusTotal API (apikey), with a high request rate limit.</p>
 </blockquote>
@@ -3979,7 +3961,7 @@ A domain, hostname, ip, url or hash (md5, sha1, sha256 or sha512) attribute.
 MISP attributes and objects resulting from the parsing of the VirusTotal report concerning the input attribute.
 - <strong>references</strong>:
 - <a href="https://www.virustotal.com">https://www.virustotal.com</a>
-- <a href="https://developers.virustotal.com/reference">https://developers.virustotal.com/reference</a>
+- <a href="https://docs.virustotal.com/reference/overview">https://docs.virustotal.com/reference/overview</a>
 - <strong>requirements</strong>:
 An access to the VirusTotal API (apikey)</p>
 </blockquote>
@@ -4056,25 +4038,6 @@ Text giving additional information about the CVE in input.
 - <strong>requirements</strong>:
 - Vulners python library
 - An access to the Vulners API</p>
-</blockquote>
-<hr />
-<h4 id="vysion"><a href="https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/vysion.py">vysion</a><a class="headerlink" href="#vysion" title="Permanent link">&para;</a></h4>
-<p><img src=../logos/vysion.png height=60></p>
-<p>Module to enrich the information by making use of the Vysion API.
-- <strong>features</strong>:</p>
-<blockquote>
-<p>This module gets correlated information from our dark web intelligence database. With this you will get several objects containing information related to, for example, an organization victim of a ransomware attack.
-- <strong>input</strong>:
-MISP Attribute which include: company(target-org), country, info.
-- <strong>output</strong>:
-MISP objects containing title, link to our webapp and TOR, i2p or clearnet URLs.
-- <strong>references</strong>:
-- <a href="https://vysion.ai/">https://vysion.ai/</a>
-- <a href="https://developers.vysion.ai/">https://developers.vysion.ai/</a>
-- <a href="https://github.com/ByronLabs/vysion-cti/tree/main">https://github.com/ByronLabs/vysion-cti/tree/main</a>
-- <strong>requirements</strong>:
-- Vysion python library
-- Vysion API Key</p>
 </blockquote>
 <hr />
 <h4 id="whois"><a href="https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/whois.py">whois</a><a class="headerlink" href="#whois" title="Permanent link">&para;</a></h4>
