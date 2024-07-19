@@ -36,7 +36,9 @@ def handler(q=False):
     num_sheets = len(doc.sheets)
     try:
         for i in range(0, num_sheets):
-            ods = pandas_ods_reader.algo.read_data(pandas_ods_reader.parsers.ods, ods_file, i, headers=False)
+            rows = pandas_ods_reader.parsers.ods.get_rows(doc, i)
+            ods = pandas_ods_reader.algo.parse_data(pandas_ods_reader.parsers.ods, rows, headers=False, columns=[], skiprows=0)
+            ods = pandas_ods_reader.utils.sanitize_df(ods)
             ods_content = ods_content + "\n" + ods.to_string(max_rows=None)
         return {'results': [{'types': ['freetext'], 'values': ods_content, 'comment': ".ods-to-text from file " + filename},
                             {'types': ['text'], 'values': ods_content, 'comment': ".ods-to-text from file " + filename}]}
