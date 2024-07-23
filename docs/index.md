@@ -38,6 +38,7 @@ For more information: [Extending MISP with Python modules](https://www.circl.lu/
 * [EQL](misp_modules/modules/expansion/eql.py) - an expansion module to generate event query language (EQL) from an attribute. [Event Query Language](https://eql.readthedocs.io/en/latest/)
 * [Farsight DNSDB Passive DNS](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/farsight_passivedns.py) - a hover and expansion module to expand hostname and IP addresses with passive DNS information.
 * [GeoIP](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/geoip_country.py) - a hover and expansion module to get GeoIP information from geolite/maxmind.
+* [Google Threat Intelligence] (https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/google_threat_intelligence.py) - An expansion module to have the observable's threat score assessed by Google Threat Intelligence.
 * [Greynoise](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/greynoise.py) - a hover to get information from greynoise.
 * [hashdd](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/hashdd.py) - a hover module to check file hashes against [hashdd.com](http://www.hashdd.com) including NSLR dataset.
 * [hibp](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/hibp.py) - a hover module to lookup against Have I Been Pwned?
@@ -70,12 +71,11 @@ For more information: [Extending MISP with Python modules](https://www.circl.lu/
 * [threatminer](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/threatminer.py) - an expansion module to expand from [ThreatMiner](https://www.threatminer.org/).
 * [urlhaus](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/urlhaus.py) - Query urlhaus to get additional data about a domain, hash, hostname, ip or url.
 * [urlscan](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/urlscan.py) - an expansion module to query [urlscan.io](https://urlscan.io).
-* [virustotal](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/virustotal.py) - an expansion module to query the [VirusTotal](https://www.virustotal.com/gui/home) API with a high request rate limit required. (More details about the API: [here](https://developers.virustotal.com/reference))
-* [virustotal_public](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/virustotal_public.py) - an expansion module to query the [VirusTotal](https://www.virustotal.com/gui/home) API with a public key and a low request rate limit. (More details about the API: [here](https://developers.virustotal.com/reference))
+* [virustotal](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/virustotal.py) - an expansion module to query the [VirusTotal](https://www.virustotal.com/gui/home) API with a high request rate limit required. (More details about the API: [here](https://docs.virustotal.com/reference/overview))
+* [virustotal_public](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/virustotal_public.py) - an expansion module to query the [VirusTotal](https://www.virustotal.com/gui/home) API with a public key and a low request rate limit. (More details about the API: [here](https://docs.virustotal.com/reference/overview))
 * [VMray](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/vmray_submit.py) - a module to submit a sample to VMray.
 * [VulnDB](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/vulndb.py) - a module to query [VulnDB](https://www.riskbasedsecurity.com/).
 * [Vulners](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/vulners.py) - an expansion module to expand information about CVEs using Vulners API.
-* [Vysion](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/vysion.py) - an expansion module to add dark web intelligence using Vysion API.
 * [whois](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/whois.py) - a module to query a local instance of [uwhois](https://github.com/rafiot/uwhoisd).
 * [wikidata](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/wiki.py) - a [wikidata](https://www.wikidata.org) expansion module.
 * [xforce](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/xforceexchange.py) - an IBM X-Force Exchange expansion module.

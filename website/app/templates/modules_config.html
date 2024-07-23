@@ -1,0 +1,181 @@
+<!-- 
+    Author: David Cruciani
+-->
+
+{% extends 'base.html' %}
+
+{% block content %}
+    <div id="top"> <h1>Modules Config</h1> </div>
+    <small>[[modules_config.length]] modules found</small>
+    <hr>
+    
+
+    <div style="width:50%; transform: translate(50%, 0);">
+        <div>
+            <input type="search" @input="onInput" id="search_modules" placeholder="Search modules" autofocus class="form-control" style="border-radius: 5px;" />
+        </div>
+    </div>
+    <br>
+
+    <div class="row" style="margin-bottom: 100px;">
+        <div class="col" style="flex: 0 0 50%">
+            <div class="list-group">
+                <div v-for="module in modules_config" style="display:flex; ">
+                    <input v-if="module.is_active || module.is_active == null" type="checkbox" style="margin-right: 5px;" checked @click="change_status(module)">
+                    <input v-else type="checkbox" style="margin-right: 5px;" @click="change_status(module)">
+                    <a class="list-group-item list-group-item-action" style="border-radius: 10px;" :title="module.description" @click="display_config(module)">
+                        [[module.name]]
+                        <i v-if="!module.config.length" style="color: brown;">No config</i>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <!-- Right panel -->
+        <div v-if="Object.keys(current_config).length" class="side-panel-config">
+            <div class="round-button" title="close" style="margin-top: 3px;">
+                <div class="round-button-circle">
+                    <a @click="close_panel()" class="round-button">x</a>
+                </div>
+            </div>
+            <br>
+            <h4>[[ current_config['module_name'] ]]</h4>
+            <i>
+                <small>
+                    Attributes: [[current_config['input_attr'].join(", ")]]
+                </small> 
+            </i>
+            <template v-for="conf, key in current_config">
+                <div class="mb-3" v-if="key != 'module_name' && !current_config['request_on_query'] && key != 'request_on_query' && key != 'input_attr'">
+                    <label :for="'form-'+key" class="form-label">[[key]]</label>
+                    <input type="text" class="form-control" :id="'form-'+key+'-'+current_config['module_name']" :value="conf">
+                </div>
+            </template>
+            <div class="mb-3" v-if="Object.keys(current_config).length > 3">
+                <label :for="'form-'+current_config['module_name']+'-checkbox'" class="form-label">Request for config on query</label>
+                <div>
+                    <input type="checkbox" :checked="current_config['request_on_query']" @click="check_request_on_query()" :id="'form-'+current_config['module_name']+'-checkbox'">
+                </div>
+            </div>
+            <button v-if="Object.keys(current_config).length > 3" class="btn btn-primary" @click="change_config()">Save</button>
+        </div>
+    </div>
+    
+    <span id="goTop">[<a href="#top">Go Back Top</a>]</span>
+{% endblock %}
+
+{% block script %}
+<script type="module">
+    const { createApp, ref, onMounted, nextTick, defineComponent} = Vue
+    import {display_toast, message_list} from '/static/js/toaster.js'
+    createApp({
+        delimiters: ['[[', ']]'],
+        setup() {
+            const modules_config = ref({})
+            const current_config = ref({})
+            let loc_modules = {}
+
+            async function query_modules(){
+                let res = await fetch("/modules_config_data")
+                let loc = await res.json()
+                modules_config.value = loc
+                loc_modules = modules_config.value
+            }
+            query_modules()
+
+            async function display_config(module){
+                current_config.value = {}
+                if(module.config.length){
+                    for(let i in module.config){
+                        for(let j in module.config[i]){
+                            if(module.config[i][j]){
+                                current_config.value[j] = module.config[i][j]
+                            }else{
+                                current_config.value[j] = null
+                            }
+                        }
+                    }
+                    current_config.value["request_on_query"] = module.request_on_query
+                }
+                current_config.value["module_name"] = module.name
+                current_config.value["input_attr"] = module.input_attr
+            }
+
+            function close_panel(){
+                current_config.value = {}
+            }
+
+            async function change_config(){
+                let result_dict = {}
+                for(let key in current_config.value){
+                    if(key != "module_name" && key != "request_on_query" && key != "input_attr"){
+                        let loc = $("#form-"+key+"-"+current_config.value["module_name"]).val()
+                        result_dict[key] = loc
+                        current_config.value[key] = loc
+
+                        for(let i in modules_config.value){
+                            if(modules_config.value[i].name == current_config.value["module_name"] ){
+                                for(let j in modules_config.value[i].config){
+                                    for(let k in modules_config.value[i].config[j]){
+                                        if(k == key){
+                                            modules_config.value[i].config[j][k] = loc
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                result_dict["module_name"] = current_config.value["module_name"]
+                result_dict["request_on_query"] = current_config.value["request_on_query"]
+
+                const res = await fetch('/change_config',{
+                                    headers: { "X-CSRFToken": $("#csrf_token").val(), "Content-Type": "application/json" },
+                                    method: "POST",
+                                    body: JSON.stringify({
+                                        result_dict
+                                    })
+                                })
+                display_toast(res)
+            }
+
+            async function change_status(module){
+                let res = await fetch("/change_status?module_id="+module.id)
+                if(await res.status_code == 200){
+                    module.is_active = !module.is_active
+                }
+                display_toast(res)
+            }
+
+            function check_request_on_query(){
+                current_config.value["request_on_query"] = !current_config.value["request_on_query"]
+            }
+
+
+            function onInput(e){
+				modules_config.value = []
+				if(e.target.value){
+                    modules_config.value = loc_modules.filter((module) => {
+                        return module.name.toLowerCase().includes(e.target.value.toLowerCase())
+                    })
+				}else{
+                    modules_config.value = loc_modules
+                }
+			}
+
+
+            return {
+                message_list,
+                modules_config,
+                current_config,
+                display_config,
+                close_panel,
+                change_config,
+                change_status,
+                check_request_on_query,
+                onInput
+            }
+        }
+    }).mount('.container-fluid')
+
+</script>
+{% endblock %}

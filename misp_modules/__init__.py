@@ -294,7 +294,8 @@ def main():
 
     application = tornado.web.Application(service)
     try:
-        application.listen(args.port, address=args.listen)
+        server = tornado.httpserver.HTTPServer(application, max_buffer_size=1073741824)  # buffer size increase when large MISP event are submitted - GH issue 662
+        server.listen(args.port, args.listen)
     except Exception as e:
         if e.errno == 98:
             pids = psutil.pids()

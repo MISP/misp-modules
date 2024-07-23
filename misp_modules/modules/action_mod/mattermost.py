@@ -25,6 +25,7 @@ moduleconfig = {
             'type': 'large_string',
             'description': 'The template to be used to generate the message to be posted',
             'value': 'The **template** will be rendered using *Jinja2*!',
+            'jinja_supported': True,
         },
     },
     # Blocking modules break the exection of the current of action

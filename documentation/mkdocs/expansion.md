@@ -652,6 +652,27 @@ Module to query a local copy of Maxmind's Geolite database.
 
 -----
 
+#### [google_threat_intelligence](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/google_threat_intelligence.py)
+
+<img src=../logos/google_threat_intelligence.png height=60>
+
+An expansion module to have the observable's threat score assessed by Google Threat Intelligence.
+- **features**:
+>GTI assessment for the given observable, this include information about level of severity, a clear verdict (malicious, suspicious, undetected and bening) and additional information provided by the Mandiant expertise combined with the VirusTotal database.
+>
+>[Output example screeshot](https://github.com/MISP/MISP/assets/4747608/e275db2f-bb1e-4413-8cc0-ec3cb05e0414)
+- **input**:
+>A domain, hash (md5, sha1, sha256 or sha512), hostname or IP address attribute.
+- **output**:
+>Text fields containing the threat score, the severity, the verdict and the threat label of the observable inspected.
+- **references**:
+> - https://www.virustotal.com/
+> - https://gtidocs.virustotal.com/reference
+- **requirements**:
+>An access to the Google Threat Intelligence API (apikey), with a high request rate limit.
+
+-----
+
 #### [greynoise](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/greynoise.py)
 
 <img src=../logos/greynoise.png height=60>
@@ -1579,6 +1600,25 @@ Module to cache web pages of analysis reports, OSINT sources. The module returns
 
 -----
 
+#### [stairwell](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/stairwell.py)
+
+<img src=../logos/stairwell.png height=60>
+
+Module to query the Stairwell API to get additional information about the input hash attribute
+- **features**:
+>The module takes a hash attribute as input and queries Stariwell's API to fetch additional data about it. The result, if the payload is observed in Stariwell, is a file object describing the file the input hash is related to.
+- **input**:
+>A hash attribute (md5, sha1, sha256).
+- **output**:
+>File object related to the input attribute found on Stairwell platform.
+- **references**:
+> - https://stairwell.com
+> - https://docs.stairwell.com
+- **requirements**:
+>Access to Stairwell platform (apikey)
+
+-----
+
 #### [stix2_pattern_syntax_validator](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/stix2_pattern_syntax_validator.py)
 
 <img src=../logos/stix.png height=60>
@@ -1784,7 +1824,7 @@ Module to get advanced information from virustotal.
 >MISP attributes and objects resulting from the parsing of the VirusTotal report concerning the input attribute.
 - **references**:
 > - https://www.virustotal.com/
-> - https://developers.virustotal.com/reference
+> - https://docs.virustotal.com/reference/overview
 - **requirements**:
 >An access to the VirusTotal API (apikey), with a high request rate limit.
 
@@ -1809,7 +1849,7 @@ Module to get information from VirusTotal.
 >MISP attributes and objects resulting from the parsing of the VirusTotal report concerning the input attribute.
 - **references**:
 > - https://www.virustotal.com
-> - https://developers.virustotal.com/reference
+> - https://docs.virustotal.com/reference/overview
 - **requirements**:
 >An access to the VirusTotal API (apikey)
 
