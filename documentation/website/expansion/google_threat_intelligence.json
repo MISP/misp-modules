@@ -10,5 +10,5 @@
         "https://www.virustotal.com/",
         "https://gtidocs.virustotal.com/reference"
     ],
-    "features": "GTI assessment for the given observable, this include information about level of severity, a clear verdict (malicious, suspicious, undetected and bening) and additional information provided by the Mandiant expertise combined with the VirusTotal database.\n\n[Output example screeshot](https://github.com/MISP/MISP/assets/4747608/e275db2f-bb1e-4413-8cc0-ec3cb05e0414)"
+    "features": "GTI assessment for the given observable, this include information about level of severity, a clear verdict (malicious, suspicious, undetected and benign) and additional information provided by the Mandiant expertise combined with the VirusTotal database.\n\n[Output example screeshot](https://github.com/MISP/MISP/assets/4747608/e275db2f-bb1e-4413-8cc0-ec3cb05e0414)"
 }
