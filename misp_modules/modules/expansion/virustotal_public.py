@@ -80,7 +80,7 @@ class VirusTotalParser:
             misp_object.add_attribute('ip', type='ip-dst', value=report.id)
         elif report.type == 'url':
             misp_object = MISPObject('url')
-            misp_object.add_attribute('url', type='url', value=report.url)
+            misp_object.add_attribute('url', type='url', value=report.id)
         misp_object.add_reference(vt_uuid, 'analyzed-with')
         return misp_object
 
