@@ -72,6 +72,17 @@ class GoogleThreatIntelligenceParser:
         }
         self.proxies = None
 
+    @staticmethod
+    def get_total_analysis(analysis: dict,
+                           known_distributors: dict = None) -> int:
+        """Get total """
+        if not analysis:
+            return 0
+        count = sum([analysis['undetected'],
+                     analysis['suspicious'],
+                     analysis['harmless']])
+        return count if known_distributors else count + analysis['malicious']
+
     def query_api(self, attribute: dict) -> None:
         """Get data from the API and parse it."""
         self.attribute.from_dict(**attribute)
@@ -91,19 +102,19 @@ class GoogleThreatIntelligenceParser:
         report = report.to_dict()
         permalink = ('https://www.virustotal.com/gui/'
                      f"{report['type']}/{report['id']}")
-        report_object = pymisp.MISPObject('Google-Threat-Intel-report')
+        report_object = pymisp.MISPObject('google-threat-intelligence-report')
         report_object.add_attribute('permalink', type='link', value=permalink)
         report_object.add_attribute(
-            'Threat Score', type='text',
+            'threat-score', type='text',
             value=get_key(
                 report, 'attributes.gti_assessment.threat_score.value'))
         report_object.add_attribute(
-            'Verdict', type='text',
+            'verdict', type='text',
             value=get_key(
                 report, 'attributes.gti_assessment.verdict.value').replace(
                     'VERDICT_', ''))
         report_object.add_attribute(
-            'Severity', type='text',
+            'severity', type='text',
             value=get_key(
                 report, 'attributes.gti_assessment.severity.value').replace(
                     'SEVERITY_', ''))
@@ -112,6 +123,13 @@ class GoogleThreatIntelligenceParser:
             value=get_key(
                 report, ('attributes.popular_threat_classification'
                          '.suggested_threat_label')))
+        analysis = report.get('last_analysis_stats')
+        total = self.get_total_analysis(analysis,
+                                        report.get('known_distributors'))
+        detection_ratio = f"{analysis['malicious']}/{total}" if analysis else '-/-'
+        report_object.add_attribute(
+            'detection-ratio', type='text',
+            value=detection_ratio, disable_correlation=True)
         self.misp_event.add_object(**report_object)
         return report_object.uuid
 
@@ -162,7 +180,7 @@ class GoogleThreatIntelligenceParser:
         url_report = self.client.get_object(f'/urls/{url_id}')
 
         url_object = pymisp.MISPObject('url')
-        url_object.add_attribute('url', type='url', value=url_report.url)
+        url_object.add_attribute('url', type='url', value=url_report.id)
 
         report_uuid = self.create_gti_report_object(url_report)
         url_object.add_reference(report_uuid, 'analyzed-with')
