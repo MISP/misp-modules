@@ -168,7 +168,7 @@ url-normalize==1.4.3; python_version >= '2.7' and python_version not in '3.0, 3.
 urlarchiver==0.2
 urllib3==2.2.2; python_version >= '3.8'
 vt-graph-api==2.2.0
-vt-py==0.18.2; python_full_version >= '3.7.0'
+vt-py==0.18.3; python_full_version >= '3.7.0'
 vulners==2.1.7; python_version >= '3.8'
 vysion== 2.0.2; python_version >= '3.8'
 wand==0.6.13
