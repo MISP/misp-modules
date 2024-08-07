@@ -123,9 +123,9 @@ class GoogleThreatIntelligenceParser:
             value=get_key(
                 report, ('attributes.popular_threat_classification'
                          '.suggested_threat_label')))
-        analysis = report.get('last_analysis_stats')
-        total = self.get_total_analysis(analysis,
-                                        report.get('known_distributors'))
+        analysis = report.get_key('attributes.last_analysis_stats')
+        total = self.get_total_analysis(
+            analysis, report.get_key('attributes.known_distributors'))
         detection_ratio = f"{analysis['malicious']}/{total}" if analysis else '-/-'
         report_object.add_attribute(
             'detection-ratio', type='text',
