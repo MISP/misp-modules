@@ -20,6 +20,8 @@ mispattributes = {
         "btc",
         "phone-number",
         "target-org",
+        "xmr",
+        "dash",
     ],
     "format": "misp_standard",
 }
