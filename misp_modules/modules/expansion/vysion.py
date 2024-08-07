@@ -151,17 +151,21 @@ def handler(q=False):
         if attribute_type == "email":
             result = client.find_email(attribute_value)
         elif attribute_type == "domain":
-            result = client.search(attribute_value) 
+            result = client.find_url(attribute_value) 
         elif attribute_type == "url":
             result = client.find_url(attribute_value)
         elif attribute_type == "text":
             result = client.search(attribute_value)
         elif attribute_type == "target-org":
             result = client.search(attribute_value)
-        elif attribute_type == "btc":
-            result = client.search(attribute_value)
         elif attribute_type == "phone-number":
             result = client.search(attribute_value)
+        elif attribute_type == "btc":
+            result = client.find_wallet("BTC",attribute_value)
+        elif attribute_type == "xmr":
+            result = client.find_wallet("XMR",attribute_value)
+        elif attribute_type == "dash":
+            result = client.find_wallet("DASH",attribute_value)
 
         if result is None:
             return {"results": {}}
