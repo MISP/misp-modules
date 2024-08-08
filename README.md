@@ -100,6 +100,7 @@ For more information: [Extending MISP with Python modules](https://www.misp-proj
 * [VMware NSX](misp_modules/modules/expansion/vmware_nsx.py) - a module to enrich a file or URL with VMware NSX Defender.
 * [VulnDB](misp_modules/modules/expansion/vulndb.py) - a module to query [VulnDB](https://www.riskbasedsecurity.com/).
 * [Vulners](misp_modules/modules/expansion/vulners.py) - an expansion module to expand information about CVEs using Vulners API.
+* [Vysion](misp_modules/modules/expansion/vysion.py) - an expansion module to add dark web intelligence using Vysion API.
 * [whois](misp_modules/modules/expansion/whois.py) - a module to query a local instance of [uwhois](https://github.com/rafiot/uwhoisd).
 * [whoisfreaks](misp_modules/modules/expansion/whoisfreaks.py) - An expansion module for [whoisfreaks](https://whoisfreaks.com/) that will provide an enriched analysis of the provided domain, including WHOIS and DNS information.
 * [wikidata](misp_modules/modules/expansion/wiki.py) - a [wikidata](https://www.wikidata.org) expansion module.
