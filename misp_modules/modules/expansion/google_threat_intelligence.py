@@ -117,19 +117,20 @@ class GoogleThreatIntelligenceParser:
                                 type='text',
                                 value=ratio,
                                 disable_correlation=True)
+        report_dict = report.to_dict()
         gti_object.add_attribute(
             'threat-score', type='text',
-            value=get_key(
-                report, 'attributes.gti_assessment.threat_score.value'))
+            value=get_key(report_dict,
+                          'attributes.gti_assessment.threat_score.value'))
         gti_object.add_attribute(
             'verdict', type='text',
-            value=get_key(
-                report, 'attributes.gti_assessment.verdict.value').replace(
+            value=get_key(report_dict,
+                          'attributes.gti_assessment.verdict.value').replace(
                     'VERDICT_', ''))
         gti_object.add_attribute(
             'severity', type='text',
-            value=get_key(
-                report, 'attributes.gti_assessment.severity.value').replace(
+            value=get_key(report_dict,
+                          'attributes.gti_assessment.severity.value').replace(
                     'SEVERITY_', ''))
         self.misp_event.add_object(**gti_object)
         return gti_object.uuid
