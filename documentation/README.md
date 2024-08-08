@@ -1953,7 +1953,7 @@ Module to enrich the information by making use of the Vysion API.
 >This module gets correlated information from our dark web intelligence database. With this you will get several objects containing information related to, for example, an organization victim of a ransomware attack.
 >MISP objects containing title, link to our webapp and TOR, i2p or clearnet URLs.
 - **input**:
->MISP Attribute which include: company(target-org), country, info.
+>MISP Attribute which include: company(target-org), country, info, BTC, XMR and DASH address.
 - **output**:
 >MISP objects containing title, link to our webapp and TOR, i2p or clearnet URLs.
 - **references**:

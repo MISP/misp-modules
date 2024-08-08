@@ -5,7 +5,7 @@
         "Vysion python library",
         "Vysion API Key"
     ],
-    "input": "MISP Attribute which include: company(target-org), country, info.",
+    "input": "company(target-org), country, info, BTC, XMR and DASH address.",
     "output": "MISP objects containing title, link to our webapp and TOR, i2p or clearnet URLs.",
     "references": [
         "https://vysion.ai/",
