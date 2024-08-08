@@ -8,6 +8,7 @@ import vysion.client as vysion
 
 import vysion.dto as dto
 from vysion.dto.util import MISPProcessor
+from . import standard_error_message
 
 misperrors = {"error": "Error"}
 mispattributes = {
