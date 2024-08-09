@@ -2808,6 +2808,15 @@
             "markers": "python_version >= '3.8'",
             "version": "==2.2.0"
         },
+        "vysion": {
+            "hashes": [
+                "sha256:30cda68a53c3f6bd6abef5579f3b40fd1f515f28f6cabf8433d162b13612d324",
+                "sha256:f52dc4532591ea2fafc87d708711aa65329c8b65e582d541e09bea19c40f8557"
+            ],
+            "index": "pypi",
+            "markers": "python_full_version >= '3.8.0' and python_full_version < '4.0.0'",
+            "version": "==2.0.7"
+        },
         "wand": {
             "hashes": [
                 "sha256:e5dda0ac2204a40c29ef5c4cb310770c95d3d05c37b1379e69c94ea79d7d19c0",
