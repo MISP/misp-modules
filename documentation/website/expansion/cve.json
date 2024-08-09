@@ -4,7 +4,7 @@
     "input": "Vulnerability attribute.",
     "output": "Text giving information about the CVE related to the Vulnerability.",
     "references": [
-        "https://cve.circl.lu/",
+        "https://vulnerability.circl.lu/",
         "https://cve.mitre.org/"
     ],
     "features": "The module takes a vulnerability attribute as input and queries the CIRCL CVE search API to get information about the vulnerability as it is described in the list of CVEs."

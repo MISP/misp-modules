@@ -15,6 +15,7 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from email.header import Header
 
+
 class TestModules(unittest.TestCase):
 
     def setUp(self):
@@ -30,8 +31,31 @@ class TestModules(unittest.TestCase):
     def test_cve(self):
         with open('tests/bodycve.json', 'r') as f:
             response = requests.post(self.url + "query", data=f.read())
+            expected_response = {
+                'results': [
+                    {
+                        'types': ['text'],
+                        'values': 'Stack-based buffer overflow in Microsoft Office XP SP3, Office 2003 SP3, Office 2007 SP2, Office 2010, Office 2004 and 2008 for Mac, Office for Mac 2011, and Open XML File Format Converter for Mac allows remote attackers to execute arbitrary code via crafted RTF data, aka "RTF Stack Buffer Overflow Vulnerability."'
+                    }
+                ]
+            }
+            self.assertDictEqual(response.json(), expected_response)
             print(response.json())
             response.connection.close()
+
+    def test_invalid_cve(self):
+        response = requests.post(self.url + "query", data='{"module": "cve", "vulnerability": "CVE-INVALID"}')
+        expected_response = {
+            'results': [
+                {
+                    'types': ['text'],
+                    'values': 'Non existing CVE'
+                }
+            ]
+        }
+        self.assertDictEqual(response.json(), expected_response)
+        print(response.json())
+        response.connection.close()
 
     def test_dns(self):
         with open('tests/body.json', 'r') as f:
