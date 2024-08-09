@@ -81,6 +81,7 @@ Jinja2 = ">=3.1.2"
 mattermostdriver = "7.3.2"
 openpyxl = "*"
 slack-sdk = "3.27.1"
+vysion = "*"
 
 [requires]
 python_version = "3.12"
