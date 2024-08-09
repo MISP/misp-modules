@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
 import json
-import sys
 from pathlib import Path
 
 module_types = ['expansion', 'export_mod', 'import_mod']

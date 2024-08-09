@@ -10,6 +10,7 @@ import os
 
 LiveCI = True
 
+
 class TestExpansions(unittest.TestCase):
 
     def setUp(self):
@@ -235,10 +236,10 @@ class TestExpansions(unittest.TestCase):
     def test_censys(self):
         module_name = "censys_enrich"
         query = {
-                    "attribute": {"type" : "ip-dst", "value": "8.8.8.8", "uuid": ""},
-		            "module": module_name,
-		            "config": {}
-                 }
+            "attribute": {"type": "ip-dst", "value": "8.8.8.8", "uuid": ""},
+            "module": module_name,
+            "config": {}
+        }
         if module_name in self.configs:
             query['config'] = self.configs[module_name]
             response = self.misp_modules_post(query)
@@ -339,7 +340,6 @@ class TestExpansions(unittest.TestCase):
         else:
             response = self.misp_modules_post(query)
             self.assertEqual(self.get_errors(response), 'IPQualityScore apikey is missing')
-
 
     def test_macaddess_io(self):
         module_name = 'macaddress_io'
@@ -778,10 +778,3 @@ class TestExpansions(unittest.TestCase):
         query = {"module": "yara_syntax_validator", "yara": 'import "hash"\r\nrule MD5 {\r\n\tcondition:\r\n\t\thash.md5(0, filesize) == "b2a5abfeef9e36964281a31e17b57c97"\r\n}'}
         response = self.misp_modules_post(query)
         self.assertEqual(self.get_values(response), 'Syntax valid')
-
-    @unittest.skip("Not developed yet")
-    def test_yara_export(self):
-        query = {"module": "yara_export"}
-        response = self.misp_modules_post(query)
-        expected_result = ''
-        self.assertEqual(self.get_values(response), expected_result)

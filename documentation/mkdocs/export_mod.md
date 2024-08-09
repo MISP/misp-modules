@@ -245,3 +245,22 @@ This module is used to create a VirusTotal Graph from a MISP event.
 >vt_graph_api, the python library to query the VirusTotal graph API
 
 -----
+
+#### [yara_export](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/yara_export.py)
+
+<img src=../logos/yara.png height=60>
+
+This module is used to export MISP events to YARA.
+- **features**:
+>The module will dynamically generate YARA rules for attributes that are marked as to IDS. Basic metadata about the event is added to the rule.
+>Attributes that are already YARA rules are also exported, with a rewritten rule name.
+- **input**:
+>Attributes and Objects.
+- **output**:
+>A YARA file that can be used with the YARA scanning tool.
+- **references**:
+>https://virustotal.github.io/yara/
+- **requirements**:
+>yara-python python library
+
+-----
