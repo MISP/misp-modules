@@ -2977,12 +2977,12 @@
         },
         "vysion": {
             "hashes": [
-                "sha256:865f28234e8f39a86f54ceb5e9bb3dad223774698f510c9803575d4c6a89444b",
-                "sha256:92af580c90bddc2149b5f3be0b96985e426c1f7e7225557a52da5893b139037e"
+                "sha256:30cda68a53c3f6bd6abef5579f3b40fd1f515f28f6cabf8433d162b13612d324",
+                "sha256:f52dc4532591ea2fafc87d708711aa65329c8b65e582d541e09bea19c40f8557"
             ],
             "index": "pypi",
             "markers": "python_full_version >= '3.8.0' and python_full_version < '4.0.0'",
-            "version": "==2.0.6"
+            "version": "==2.0.7"
         },
         "wand": {
             "hashes": [
