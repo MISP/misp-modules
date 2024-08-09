@@ -92,7 +92,7 @@ class TestExpansions(unittest.TestCase):
 
         query = {'module': 'apiosintds', 'ip-dst': '10.10.10.10'}
         response = self.misp_modules_post(query)
-        
+
         try:
             self.assertTrue(self.get_values(response).startswith('IoC 10.10.10.10'))
         except AssertionError:
@@ -192,7 +192,7 @@ class TestExpansions(unittest.TestCase):
             self.assertIn(self.get_values(response), results)
 
     def test_cve(self):
-        query = {"module": "cve", "vulnerability": "CVE-2010-4444", "config": {"custom_API": "https://cve.circl.lu/api/cve/"}}
+        query = {"module": "cve", "vulnerability": "CVE-2010-4444", "config": {"custom_API": "https://vulnerability.circl.lu/api/cve/"}}
         response = self.misp_modules_post(query)
         self.assertTrue(self.get_values(response).startswith("Unspecified vulnerability in Oracle Sun Java System Access Manager"))
 
@@ -548,6 +548,7 @@ class TestExpansions(unittest.TestCase):
         query = {"module": "stix2_pattern_syntax_validator", "stix2-pattern": "[ipv4-addr:value = '8.8.8.8']"}
         response = self.misp_modules_post(query)
         self.assertEqual(self.get_values(response), 'Syntax valid')
+
     def test_threatcrowd(self):
         if LiveCI:
             return True
@@ -589,6 +590,7 @@ class TestExpansions(unittest.TestCase):
             response = self.misp_modules_post(query)
             self.assertTrue(self.get_values(response), result)
 
+    @unittest.skip("Service doesn't work")
     def test_urlhaus(self):
         query_types = ('domain', 'ip-src', 'sha256', 'url')
         query_values = ('www.bestwpdesign.com', '79.118.195.239',
@@ -768,9 +770,18 @@ class TestExpansions(unittest.TestCase):
     def test_yara_query(self):
         query = {"module": "yara_query", "md5": "b2a5abfeef9e36964281a31e17b57c97"}
         response = self.misp_modules_post(query)
-        self.assertEqual(self.get_values(response), 'import "hash"\r\nrule MD5 {\r\n\tcondition:\r\n\t\thash.md5(0, filesize) == "b2a5abfeef9e36964281a31e17b57c97"\r\n}')
+        expected_result = 'import "hash"\r\nrule MD5 {\r\n\tcondition:\r\n\t\thash.md5(0, filesize) == "b2a5abfeef9e36964281a31e17b57c97"\r\n}'
+
+        self.assertEqual(self.get_values(response), expected_result)
 
     def test_yara_validator(self):
         query = {"module": "yara_syntax_validator", "yara": 'import "hash"\r\nrule MD5 {\r\n\tcondition:\r\n\t\thash.md5(0, filesize) == "b2a5abfeef9e36964281a31e17b57c97"\r\n}'}
         response = self.misp_modules_post(query)
         self.assertEqual(self.get_values(response), 'Syntax valid')
+
+    @unittest.skip("Not developed yet")
+    def test_yara_export(self):
+        query = {"module": "yara_export"}
+        response = self.misp_modules_post(query)
+        expected_result = ''
+        self.assertEqual(self.get_values(response), expected_result)
