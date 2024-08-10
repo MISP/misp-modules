@@ -34,7 +34,7 @@ class TestExports(unittest.TestCase):
             modules = [module["name"] for module in response.json()]
             # list modules in the export_mod folder
             export_mod_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'misp_modules', 'modules', "export_mod")
-            module_files = [file[:-3] for file in os.listdir(export_mod_path) if file.endswith(".py") if file != "__init__.py"]
+            module_files = [file[:-3] for file in os.listdir(export_mod_path) if file.endswith(".py") if file not in ['__init__.py', 'testexport.py']]
             for module in module_files:
                 self.assertIn(module, modules)
         finally:

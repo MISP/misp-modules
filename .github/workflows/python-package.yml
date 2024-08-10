@@ -18,7 +18,18 @@ jobs:
     steps:
     - name: Install packages
       run: |
-        sudo apt-get install libpoppler-cpp-dev libzbar0 tesseract-ocr yara
+        sudo apt-get install libpoppler-cpp-dev libzbar0 tesseract-ocr
+    - name: Compile and install yara
+      run: |
+        sudo apt-get install automake libtool make gcc pkg-config
+        wget https://github.com/VirusTotal/yara/archive/refs/tags/v4.5.0.tar.gz
+        tar xzf *.tar.gz
+        pushd yara-*
+        ./bootstrap.sh
+        ./configure
+        make
+        sudo make install
+        popd
     - uses: actions/checkout@v4
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v5
