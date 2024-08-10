@@ -1,4 +1,3 @@
-"""Test module for the ThreatConnect Export module"""
 import base64
 import csv
 import io
@@ -35,8 +34,11 @@ class TestExports(unittest.TestCase):
             # list modules in the export_mod folder
             export_mod_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'misp_modules', 'modules', "export_mod")
             module_files = [file[:-3] for file in os.listdir(export_mod_path) if file.endswith(".py") if file not in ['__init__.py', 'testexport.py']]
+            missing = []
             for module in module_files:
-                self.assertIn(module, modules)
+                if module not in modules:
+                    missing.append(module)
+            self.assertEqual(missing, [], f"Missing modules in __init__: {missing}")
         finally:
             response.connection.close()
 

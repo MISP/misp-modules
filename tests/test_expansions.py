@@ -88,6 +88,22 @@ class TestExpansions(unittest.TestCase):
                 return values[0] if isinstance(values, list) else values
         return data['results'][0]['values']
 
+    def test_introspection(self):
+        """checks if all expansion modules are offered through the misp-modules service"""
+        try:
+            response = requests.get(self.url + "modules")
+            modules = [module["name"] for module in response.json()]
+            # list modules in the export_mod folder
+            export_mod_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'misp_modules', 'modules', "expansion")
+            module_files = [file[:-3] for file in os.listdir(export_mod_path) if file.endswith(".py") if file not in ['__init__.py']]
+            missing = []
+            for module in module_files:
+                if module not in modules:
+                    missing.append(module)
+            self.assertEqual(missing, [], f"Missing modules in __init__: {missing}")
+        finally:
+            response.connection.close()
+
     def test_apiosintds(self):
         self.skipTest("apiosintds is probably broken")
 

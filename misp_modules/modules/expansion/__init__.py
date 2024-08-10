@@ -17,11 +17,13 @@ __all__ = ['cuckoo_submit', 'vmray_submit', 'bgpranking', 'circl_passivedns', 'c
            'virustotal_public', 'apiosintds', 'urlscan', 'securitytrails', 'apivoid',
            'assemblyline_submit', 'assemblyline_query', 'ransomcoindb', 'malwarebazaar',
            'lastline_query', 'lastline_submit', 'sophoslabs_intelix', 'cytomic_orion', 'censys_enrich',
-           'trustar_enrich', 'recordedfuture', 'html_to_markdown', 'socialscan', 'passive-ssh',
+           'trustar_enrich', 'recordedfuture', 'html_to_markdown', 'socialscan', 'passive_ssh',
            'qintel_qsentry', 'mwdb', 'hashlookup', 'mmdb_lookup', 'ipqs_fraud_and_risk_scoring',
-           'clamav', 'jinja_template_rendering','hyasinsight', 'variotdbs', 'crowdsec',
+           'clamav', 'jinja_template_rendering', 'hyasinsight', 'variotdbs', 'crowdsec',
            'extract_url_components', 'ipinfo', 'whoisfreaks', 'ip2locationio', 'stairwell',
-           'google_threat_intelligence', 'vulnerability_lookup', 'vysion']
+           'google_threat_intelligence', 'vulnerability_lookup', 'vysion', 'mcafee_insights_enrich',
+           'threatfox', 'yeti', 'abuseipdb', 'vmware_nsx', 'sigmf_expand', 'google_safe_browsing',
+           'google_search']
 
 
 minimum_required_fields = ('type', 'uuid', 'value')
