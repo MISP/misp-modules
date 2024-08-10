@@ -1,6 +1,6 @@
 ## How to add your own MISP modules?
 
-Create your module in [misp_modules/modules/expansion/](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/), [misp_modules/modules/export_mod/](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/export_mod/), or [misp_modules/modules/import_mod/](https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/import_mod/). The module should have at minimum three functions:
+Create your module in [misp_modules/modules/expansion/](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/), [misp_modules/modules/export_mod/](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/), or [misp_modules/modules/import_mod/](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/). The module should have at minimum three functions:
 
 * **introspection** function that returns a dict of the supported attributes (input and output) by your expansion module.
 * **handler** function which accepts a JSON document to expand the values and return a dictionary of the expanded values.
@@ -309,22 +309,27 @@ Recommended     Plugin.Import_ocr_enabled       true   Enable or disable the ocr
 
 In this same menu set any other plugin settings that are required for testing.
 
+## Install misp-module on an offline instance.
+First, you need to grab all necessary packages for example like this :
 
+Use pip wheel to create an archive
+~~~
+mkdir misp-modules-offline
+pip3 wheel -r REQUIREMENTS shodan --wheel-dir=./misp-modules-offline
+tar -cjvf misp-module-bundeled.tar.bz2 ./misp-modules-offline/*
+~~~
+On offline machine :
+~~~
+mkdir misp-modules-bundle
+tar xvf misp-module-bundeled.tar.bz2 -C misp-modules-bundle
+cd misp-modules-bundle
+ls -1|while read line; do sudo pip3 install --force-reinstall --ignore-installed --upgrade --no-index --no-deps ${line};done
+~~~
+Next you can follow standard install procedure.
 
-## Documentation
+## How to contribute your own module?
 
-In order to provide documentation about some modules that require specific input / output / configuration, the [doc](https://github.com/MISP/misp-modules/tree/master/doc) directory contains detailed information about the general purpose, requirements, features, input and output of each of these modules:
-
-- ***description** - quick description of the general purpose of the module, as the one given by the moduleinfo
-- **requirements** - special libraries needed to make the module work
-- **features** - description of the way to use the module, with the required MISP features to make the module give the intended result
-- **references** - link(s) giving additional information about the format concerned in the module
-- **input** - description of the format of data used in input
-- **output** - description of the format given as the result of the module execution
-
-In addition to the module documentation please add your module to [docs/index.md](https://github.com/MISP/misp-modules/tree/master/docs/index.md).
-
-There are also [complementary slides](https://www.misp-project.org/misp-training/3.1-misp-modules.pdf) for the creation of MISP modules.
+Fork the project, add your module, test it and make a pull-request. Modules can be also private as you can add a module in your own MISP installation.
 
 
 ## Tips for developers creating modules
@@ -334,7 +339,7 @@ Download a pre-built virtual image from the [MISP training materials](https://ww
 - Create a Host-Only adapter in VirtualBox
 - Set your Misp OVA to that Host-Only adapter
 - Start the virtual machine
-- Get the IP address of the virutal machine
+- Get the IP address of the virtual machine
 - SSH into the machine (Login info on training page)
 - Go into the misp-modules directory
 
@@ -352,16 +357,18 @@ sudo git checkout MyModBranch
 
 Remove the contents of the build directory and re-install misp-modules.
 
-~~~python
+~~~bash
 sudo rm -fr build/*
-sudo pip3 install --upgrade .
+sudo -u www-data /var/www/MISP/venv/bin/pip install --upgrade .
 ~~~
 
 SSH in with a different terminal and run `misp-modules` with debugging enabled.
 
-~~~python
-sudo killall misp-modules
-misp-modules -d
+~~~bash
+# In case misp-modules is not a service do:
+# sudo killall misp-modules
+sudo systemctl disable --now misp-modules
+sudo -u www-data /var/www/MISP/venv/bin/misp-modules -d
 ~~~
 
 
@@ -372,3 +379,17 @@ cd tests/
 curl -s http://127.0.0.1:6666/query -H "Content-Type: application/json" --data @MY_TEST_FILE.json -X POST
 cd ../
 ~~~
+
+## Documentation
+
+In order to provide documentation about some modules that require specific input / output / configuration, the [index.md](docs/index.md) file within the [docs](docs) directory contains detailed information about the general purpose, requirements, features, input and ouput of each of these modules:
+
+- ***description** - quick description of the general purpose of the module, as the one given by the moduleinfo
+- **requirements** - special libraries needed to make the module work
+- **features** - description of the way to use the module, with the required MISP features to make the module give the intended result
+- **references** - link(s) giving additional information about the format concerned in the module
+- **input** - description of the format of data used in input
+- **output** - description of the format given as the result of the module execution
+
+## Licenses
+For further Information see also the [license file](license/).
