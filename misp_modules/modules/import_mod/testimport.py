@@ -25,9 +25,19 @@ userConfig = {
 
 inputSource = ['file', 'paste']
 
-moduleinfo = {'version': '0.2', 'author': 'Andras Iklody',
-              'description': 'Simple CSV import tool with mapable columns',
-              'module-type': ['import']}
+moduleinfo = {
+    'version': '0.2',
+    'author': 'Andras Iklody',
+    'description': 'Simple CSV import tool with mapable columns',
+    'module-type': ['import'],
+    'name': 'CSV Test Import',
+    'logo': '',
+    'requirements': [],
+    'features': '',
+    'references': [],
+    'input': '',
+    'output': '',
+}
 
 moduleconfig = []
 

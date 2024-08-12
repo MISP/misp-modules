@@ -7,9 +7,19 @@ import pytesseract
 misperrors = {'error': 'Error'}
 mispattributes = {'input': ['attachment'],
                   'output': ['freetext']}
-moduleinfo = {'version': '0.2', 'author': 'Sascha Rommelfangen',
-              'description': 'OCR decoder',
-              'module-type': ['expansion']}
+moduleinfo = {
+    'version': '0.2',
+    'author': 'Sascha Rommelfangen',
+    'description': 'Module to process some optical character recognition on pictures.',
+    'module-type': ['expansion'],
+    'name': 'OCR Enrich',
+    'logo': '',
+    'requirements': ['cv2: The OpenCV python library.'],
+    'features': 'The module takes an attachment attributes as input and process some optical character recognition on it. The text found is then passed to the Freetext importer to extract potential IoCs.',
+    'references': [],
+    'input': 'A picture attachment.',
+    'output': 'Text and freetext fetched from the input picture.',
+}
 
 moduleconfig = []
 

@@ -24,10 +24,17 @@ userConfig = {
 inputSource = []
 
 moduleinfo = {
-    "version": "0.1",
-    "author": "Stefano Ortolani",
-    "description": "Import a Lastline report from an analysis link.",
-    "module-type": ["import"]
+    'version': '0.1',
+    'author': 'Stefano Ortolani',
+    'description': 'Deprecation notice: this module will be deprecated by December 2021, please use vmware_nsx module.\n\nModule to import and parse reports from Lastline analysis links.',
+    'module-type': ['import'],
+    'name': 'Lastline Import',
+    'logo': 'lastline.png',
+    'requirements': [],
+    'features': 'The module requires a Lastline Portal `username` and `password`.\nThe module uses the new format and it is able to return MISP attributes and objects.\nThe module returns the same results as the [lastline_query](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/lastline_query.py) expansion module.',
+    'references': ['https://www.lastline.com'],
+    'input': 'Link to a Lastline analysis.',
+    'output': 'MISP attributes and objects parsed from the analysis report.',
 }
 
 moduleconfig = [

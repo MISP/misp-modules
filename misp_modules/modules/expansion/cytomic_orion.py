@@ -15,9 +15,19 @@ import sys
 
 misperrors = {'error': 'Error'}
 mispattributes = {'input': ['md5'], 'format': 'misp_standard'}
-moduleinfo = {'version': '0.3', 'author': 'Koen Van Impe',
-              'description': 'an expansion module to enrich attributes in MISP and share indicators of compromise with Cytomic Orion',
-              'module-type': ['expansion']}
+moduleinfo = {
+    'version': '0.3',
+    'author': 'Koen Van Impe',
+    'description': 'An expansion module to enrich attributes in MISP by quering the Cytomic Orion API',
+    'module-type': ['expansion'],
+    'name': 'Cytomic Orion Lookup',
+    'logo': 'cytomic_orion.png',
+    'requirements': ['Access (license) to Cytomic Orion'],
+    'features': 'This module takes an MD5 hash and searches for occurrences of this hash in the Cytomic Orion database. Returns observed files and machines.',
+    'references': ['https://www.vanimpe.eu/2020/03/10/integrating-misp-and-cytomic-orion/', 'https://www.cytomicmodel.com/solutions/'],
+    'input': 'MD5, hash of the sample / malware to search for.',
+    'output': 'MISP objects with sightings of the hash in Cytomic Orion. Includes files and machines.',
+}
 moduleconfig = ['api_url', 'token_url', 'clientid', 'clientsecret', 'clientsecret', 'username', 'password', 'upload_timeframe', 'upload_tag', 'delete_tag', 'upload_ttlDays', 'upload_threat_level_id', 'limit_upload_events', 'limit_upload_attributes']
 # There are more config settings in this module than used by the enrichment
 # There is also a PyMISP module which reuses the module config, and requires additional configuration, for example used for pushing indicators to the API

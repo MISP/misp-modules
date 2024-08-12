@@ -6,9 +6,19 @@ from pymisp import MISPEvent, MISPObject
 
 misperrors = {'error': 'Error'}
 mispattributes = {'input': ['md5', 'sha1', 'sha256'], 'format': 'misp_standard'}
-moduleinfo = {'version': '2', 'author': 'Alexandre Dulaunoy',
-              'description': 'An expansion module to enrich a file hash with hashlookup.circl.lu services (NSRL and other sources)',
-              'module-type': ['expansion', 'hover']}
+moduleinfo = {
+    'version': '2',
+    'author': 'Alexandre Dulaunoy',
+    'description': 'An expansion module to query the CIRCL hashlookup services to find it if a hash is part of a known set such as NSRL.',
+    'module-type': ['expansion', 'hover'],
+    'name': 'CIRCL Hashlookup Lookup',
+    'logo': 'circl.png',
+    'requirements': [],
+    'features': 'The module takes file hashes as input such as a MD5 or SHA1.\n It queries the public CIRCL.lu hashlookup service and return all the hits if the hashes are known in an existing dataset. The module can be configured with a custom hashlookup url if required.\n The module can be used an hover module but also an expansion model to add related MISP objects.\n',
+    'references': ['https://www.circl.lu/services/hashlookup/'],
+    'input': 'File hashes (MD5, SHA1)',
+    'output': 'Object with the filename associated hashes if the hash is part of a known set.',
+}
 moduleconfig = ["custom_API"]
 hashlookup_url = 'https://hashlookup.circl.lu/'
 

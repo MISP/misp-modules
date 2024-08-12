@@ -3,9 +3,20 @@ from . import check_input_attribute, standard_error_message
 from pymisp import MISPAttribute, MISPEvent, MISPObject
 
 mispattributes = {'input': ['hostname', 'domain', 'ip-src', 'ip-dst', 'ip-src|port', 'ip-dst|port'], 'format': 'misp_standard'}
-moduleinfo = {'version': '0.2', 'author': 'Alexandre Dulaunoy',
-              'description': 'Module to access CIRCL Passive DNS',
-              'module-type': ['expansion', 'hover']}
+moduleinfo = {
+    'version': '0.2',
+    'author': 'Alexandre Dulaunoy',
+    'description': 'Module to access CIRCL Passive DNS.',
+    'module-type': ['expansion', 'hover'],
+    'name': 'CIRCL Passive DNS',
+    'logo': 'passivedns.png',
+    'requirements': ['pypdns: Passive DNS python library', 'A CIRCL passive DNS account with username & password'],
+    'features': 'This module takes a hostname, domain or ip-address (ip-src or ip-dst) attribute as input, and queries the CIRCL Passive DNS REST API to get the asssociated passive dns entries and return them as MISP objects.\n\nTo make it work a username and a password are thus required to authenticate to the CIRCL Passive DNS API.',
+    'references': ['https://www.circl.lu/services/passive-dns/', 'https://datatracker.ietf.org/doc/draft-dulaunoy-dnsop-passive-dns-cof/'],
+    'input': 'Hostname, domain, or ip-address attribute.',
+    'output': '',
+    'ouput': 'Passive DNS objects related to the input attribute.',
+}
 moduleconfig = ['username', 'password']
 
 

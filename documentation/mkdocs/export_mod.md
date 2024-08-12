@@ -1,10 +1,15 @@
 
-#### [cef_export](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/cef_export.py)
+#### [CEF Export](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/cef_export.py)
 
 Module to export a MISP event in CEF format.
 - **features**:
 >The module takes a MISP event in input, to look every attribute. Each attribute matching with some predefined types is then exported in Common Event Format.
 >Thus, there is no particular feature concerning MISP Events since any event can be exported. However, 4 configuration parameters recognized by CEF format are required and should be provided by users before exporting data: the device vendor, product and version, as well as the default severity of data.
+- **config**:
+> - Default_Severity
+> - Device_Vendor
+> - Device_Product
+> - Device_Version
 - **input**:
 >MISP Event attributes
 - **output**:
@@ -14,13 +19,19 @@ Module to export a MISP event in CEF format.
 
 -----
 
-#### [cisco_firesight_manager_ACL_rule_export](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/cisco_firesight_manager_ACL_rule_export.py)
+#### [Cisco fireSIGHT blockrule Export](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/cisco_firesight_manager_ACL_rule_export.py)
 
 <img src=../logos/cisco.png height=60>
 
 Module to export malicious network activity attributes to Cisco fireSIGHT manager block rules.
 - **features**:
 >The module goes through the attributes to find all the network activity ones in order to create block rules for the Cisco fireSIGHT manager.
+- **config**:
+> - fmc_ip_addr
+> - fmc_login
+> - fmc_pass
+> - domain_id
+> - acpolicy_id
 - **input**:
 >Network activity attributes (IPs, URLs).
 - **output**:
@@ -30,13 +41,15 @@ Module to export malicious network activity attributes to Cisco fireSIGHT manage
 
 -----
 
-#### [defender_endpoint_export](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/defender_endpoint_export.py)
+#### [Microsoft Defender for Endpoint KQL Export](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/defender_endpoint_export.py)
 
 <img src=../logos/defender_endpoint.png height=60>
 
 Defender for Endpoint KQL hunting query export module
 - **features**:
 >This module export an event as Defender for Endpoint KQL queries that can then be used in your own python3 or Powershell tool. If you are using Microsoft Sentinel, you can directly connect your MISP instance to Sentinel and then create queries using the `ThreatIntelligenceIndicator` table to match events against imported IOC.
+- **config**:
+>Period
 - **input**:
 >MISP Event attributes
 - **output**:
@@ -46,7 +59,7 @@ Defender for Endpoint KQL hunting query export module
 
 -----
 
-#### [goamlexport](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/goamlexport.py)
+#### [GoAML Export](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/goamlexport.py)
 
 <img src=../logos/goAML.jpg height=60>
 
@@ -70,23 +83,29 @@ This module is used to export MISP events containing transaction objects into Go
 >	- 'entity': Entity owning the bank account - optional.
 >- person:
 >	- 'address': Address of a person - optional.
+- **config**:
+>rentity_id
 - **input**:
 >MISP objects (transaction, bank-account, person, legal-entity, geolocation), with references, describing financial transactions and their origin and target.
 - **output**:
 >GoAML format file, describing financial transactions, with their origin and target (bank accounts, persons or entities).
 - **references**:
 >http://goaml.unodc.org/
+- **require_standard_format**:
+>True
 - **requirements**:
 > - PyMISP
 > - MISP objects
 
 -----
 
-#### [liteexport](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/liteexport.py)
+#### [Lite Export](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/liteexport.py)
 
 Lite export of a MISP event.
 - **features**:
 >This module is simply producing a json MISP event format file, but exporting only Attributes from the Event. Thus, MISP Events exported with this module should have attributes that are not internal references, otherwise the resulting event would be empty.
+- **config**:
+>indent_json_export
 - **input**:
 >MISP Event attributes
 - **output**:
@@ -94,11 +113,11 @@ Lite export of a MISP event.
 
 -----
 
-#### [mass_eql_export](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/mass_eql_export.py)
+#### [EQL Query Export](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/mass_eql_export.py)
 
 <img src=../logos/eql.png height=60>
 
-Mass EQL query export for a MISP event.
+Export MISP event in Event Query Language
 - **features**:
 >This module produces EQL queries for all relevant attributes in a MISP event.
 - **input**:
@@ -110,13 +129,15 @@ Mass EQL query export for a MISP event.
 
 -----
 
-#### [nexthinkexport](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/nexthinkexport.py)
+#### [Nexthink NXQL Export](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/nexthinkexport.py)
 
 <img src=../logos/nexthink.svg height=60>
 
 Nexthink NXQL query export module
 - **features**:
 >This module export an event as Nexthink NXQL queries that can then be used in your own python3 tool or from wget/powershell
+- **config**:
+>Period
 - **input**:
 >MISP Event attributes
 - **output**:
@@ -126,7 +147,7 @@ Nexthink NXQL query export module
 
 -----
 
-#### [osqueryexport](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/osqueryexport.py)
+#### [OSQuery Export](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/osqueryexport.py)
 
 <img src=../logos/osquery.png height=60>
 
@@ -140,7 +161,7 @@ OSQuery export of a MISP event.
 
 -----
 
-#### [pdfexport](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/pdfexport.py)
+#### [Event to PDF Export](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/pdfexport.py)
 
 Simple export of a MISP event to PDF.
 - **features**:
@@ -151,25 +172,29 @@ Simple export of a MISP event to PDF.
 >  'Activate_related_events' is a boolean (True or void) to activate the description of related event. Be aware this might leak information on confidential events linked to the current event !
 >  'Activate_internationalization_fonts' is a boolean (True or void) to activate Noto fonts instead of default fonts (Helvetica). This allows the support of CJK alphabet. Be sure to have followed the procedure to download Noto fonts (~70Mo) in the right place (/tools/pdf_fonts/Noto_TTF), to allow PyMisp to find and use them during PDF generation.
 >  'Custom_fonts_path' is a text (path or void) to the TTF file of your choice, to create the PDF with it. Be aware the PDF won't support bold/italic/special style anymore with this option 
+- **config**:
+> - MISP_base_url_for_dynamic_link
+> - MISP_name_for_metadata
+> - Activate_textual_description
+> - Activate_galaxy_description
+> - Activate_related_events
+> - Activate_internationalization_fonts
+> - Custom_fonts_path
 - **input**:
 >MISP Event
 - **output**:
 >MISP Event in a PDF file.
 - **references**:
 >https://acrobat.adobe.com/us/en/acrobat/about-adobe-pdf.html
+- **require_standard_format**:
+>True
 - **requirements**:
 > - PyMISP
 > - reportlab
 
 -----
 
-#### [testexport](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/testexport.py)
-
-Skeleton export module.
-
------
-
-#### [threatStream_misp_export](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/threatStream_misp_export.py)
+#### [ThreatStream Export](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/threatStream_misp_export.py)
 
 <img src=../logos/threatstream.png height=60>
 
@@ -188,7 +213,7 @@ Module to export a structured CSV file for uploading to threatStream.
 
 -----
 
-#### [threat_connect_export](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/threat_connect_export.py)
+#### [ThreadConnect Export](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/threat_connect_export.py)
 
 <img src=../logos/threatconnect.png height=60>
 
@@ -196,6 +221,8 @@ Module to export a structured CSV file for uploading to ThreatConnect.
 - **features**:
 >The module takes a MISP event in input, to look every attribute. Each attribute matching with some predefined types is then exported in a CSV format recognized by ThreatConnect.
 >Users should then provide, as module configuration, the source of data they export, because it is required by the output format.
+- **config**:
+>Default_Source
 - **input**:
 >MISP Event attributes
 - **output**:
@@ -207,13 +234,19 @@ Module to export a structured CSV file for uploading to ThreatConnect.
 
 -----
 
-#### [virustotal_collections](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/virustotal_collections.py)
+#### [VirusTotal Collections Export](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/virustotal_collections.py)
 
 <img src=../logos/virustotal.png height=60>
 
 Creates a VT Collection from an event iocs.
 - **features**:
 >This export module which takes advantage of a new endpoint in VT APIv3 to create VT Collections from IOCs contained in a MISP event. With this module users will be able to create a collection just using the Download as... button.
+- **config**:
+> - vt_api_key
+> - proxy_host
+> - proxy_port
+> - proxy_username
+> - proxy_password
 - **input**:
 >A domain, hash (md5, sha1, sha256 or sha512), hostname, url or IP address attribute.
 - **output**:
@@ -226,7 +259,7 @@ Creates a VT Collection from an event iocs.
 
 -----
 
-#### [vt_graph](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/vt_graph.py)
+#### [VirusTotal Graph Export](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/vt_graph.py)
 
 <img src=../logos/virustotal.png height=60>
 
@@ -235,6 +268,16 @@ This module is used to create a VirusTotal Graph from a MISP event.
 >The module takes the MISP event as input and queries the VirusTotal Graph API to create a new graph out of the event.
 >
 >Once the graph is ready, we get the url of it, which is returned so we can view it on VirusTotal.
+- **config**:
+> - vt_api_key
+> - fetch_information
+> - private
+> - fetch_vt_enterprise
+> - expand_one_level
+> - user_editors
+> - user_viewers
+> - group_editors
+> - group_viewers
 - **input**:
 >A MISP event.
 - **output**:
@@ -246,7 +289,7 @@ This module is used to create a VirusTotal Graph from a MISP event.
 
 -----
 
-#### [yara_export](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/yara_export.py)
+#### [YARA Rule Export](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/yara_export.py)
 
 <img src=../logos/yara.png height=60>
 

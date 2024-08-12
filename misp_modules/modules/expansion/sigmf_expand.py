@@ -26,9 +26,19 @@ log.addHandler(sh)
 misperrors = {'error': 'Error'}
 mispattributes = {'input': ['sigmf-recording', 'sigmf-archive'], 'output': [
     'MISP objects'], 'format': 'misp_standard'}
-moduleinfo = {'version': '0.1', 'author': 'Luciano Righetti',
-              'description': 'Expands a SigMF Recording object into a SigMF Expanded Recording object, extracts a SigMF archive into a SigMF Recording object.',
-              'module-type': ['expansion']}
+moduleinfo = {
+    'version': '0.1',
+    'author': 'Luciano Righetti',
+    'description': 'Expands a SigMF Recording object into a SigMF Expanded Recording object, extracts a SigMF archive into a SigMF Recording object.',
+    'module-type': ['expansion'],
+    'name': 'SigMF Expansion',
+    'logo': '',
+    'requirements': [],
+    'features': '',
+    'references': [],
+    'input': '',
+    'output': '',
+}
 
 
 def get_samples(data_bytes, data_type) -> np.ndarray:

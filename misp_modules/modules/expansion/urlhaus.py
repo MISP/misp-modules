@@ -8,9 +8,19 @@ misperrors = {'error': 'Error'}
 mispattributes = {'input': ['domain', 'hostname', 'ip-src', 'ip-dst', 'md5', 'sha256', 'url'],
                   'output': ['url', 'filename', 'md5', 'sha256'],
                   'format': 'misp_standard'}
-moduleinfo = {'version': '0.1', 'author': 'Christian Studer',
-              'description': 'Query of the URLhaus API to get additional information about some attributes.',
-              'module-type': ['expansion', 'hover']}
+moduleinfo = {
+    'version': '0.1',
+    'author': 'Christian Studer',
+    'description': 'Query of the URLhaus API to get additional information about the input attribute.',
+    'module-type': ['expansion', 'hover'],
+    'name': 'URLhaus Lookup',
+    'logo': 'urlhaus.png',
+    'requirements': [],
+    'features': 'Module using the new format of modules able to return attributes and objects.\n\nThe module takes one of the attribute type specified as input, and query the URLhaus API with it. If any result is returned by the API, attributes and objects are created accordingly.',
+    'references': ['https://urlhaus.abuse.ch/'],
+    'input': 'A domain, hostname, url, ip, md5 or sha256 attribute.',
+    'output': 'MISP attributes & objects fetched from the result of the URLhaus API query.',
+}
 moduleconfig = []
 
 file_keys = ('filename', 'response_size', 'response_md5', 'response_sha256')

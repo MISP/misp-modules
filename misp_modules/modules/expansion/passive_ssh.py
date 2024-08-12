@@ -9,9 +9,19 @@ misperrors = {'error': 'Error'}
 mispattributes = {'input': ['ip-src', 'ip-dst', 'ssh-fingerprint'],
                   'format': 'misp_standard'}
 
-moduleinfo = {'version': '1', 'author': 'Jean-Louis Huynen',
-              'description': 'An expansion module to enrich, SSH key fingerprints and IP addresses with information collected by passive-ssh',
-              'module-type': ['expansion', 'hover']}
+moduleinfo = {
+    'version': '1',
+    'author': 'Jean-Louis Huynen',
+    'description': 'An expansion module to enrich, SSH key fingerprints and IP addresses with information collected by passive-ssh',
+    'module-type': ['expansion', 'hover'],
+    'name': 'Passive SSH Enrichment',
+    'logo': '',
+    'requirements': [],
+    'features': '',
+    'references': [],
+    'input': '',
+    'output': '',
+}
 
 moduleconfig = ["custom_api_url", "api_user", "api_key"]
 

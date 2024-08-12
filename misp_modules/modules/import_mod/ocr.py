@@ -18,9 +18,19 @@ userConfig = {}
 
 inputSource = ['file']
 
-moduleinfo = {'version': '0.2', 'author': 'Alexandre Dulaunoy',
-              'description': 'Optical Character Recognition (OCR) module for MISP',
-              'module-type': ['import']}
+moduleinfo = {
+    'version': '0.2',
+    'author': 'Alexandre Dulaunoy',
+    'description': 'Optical Character Recognition (OCR) module for MISP.',
+    'module-type': ['import'],
+    'name': 'OCR Import',
+    'logo': '',
+    'requirements': [],
+    'features': 'The module tries to recognize some text from an image and import the result as a freetext attribute, there is then no special feature asked to users to make it work.',
+    'references': [],
+    'input': 'Image',
+    'output': 'freetext MISP attribute',
+}
 
 moduleconfig = []
 

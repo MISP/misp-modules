@@ -9,9 +9,19 @@ import logging
 misperrors = {'error': 'Error'}
 mispattributes = {'input': ['attachment'],
                   'output': ['freetext', 'text']}
-moduleinfo = {'version': '0.1', 'author': 'Sascha Rommelfangen',
-              'description': '.ods to freetext-import IOC extractor',
-              'module-type': ['expansion']}
+moduleinfo = {
+    'version': '0.1',
+    'author': 'Sascha Rommelfangen',
+    'description': 'Module to extract freetext from a .ods document.',
+    'module-type': ['expansion'],
+    'name': 'ODS Enrich',
+    'logo': 'ods.png',
+    'requirements': ['ezodf: Python package to create/manipulate OpenDocumentFormat files.', 'pandas_ods_reader: Python library to read in ODS files.'],
+    'features': 'The module reads the text contained in a .ods document. The result is passed to the freetext import parser so IoCs can be extracted out of it.',
+    'references': [],
+    'input': 'Attachment attribute containing a .ods document.',
+    'output': 'Text and freetext parsed from the document.',
+}
 
 moduleconfig = []
 

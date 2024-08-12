@@ -5,9 +5,19 @@ from jinja2.sandbox import SandboxedEnvironment
 
 misperrors = {'error': 'Error'}
 mispattributes = {'input': ['text'], 'output': ['text']}
-moduleinfo = {'version': '0.1', 'author': 'Sami Mokaddem',
-              'description': 'Render the template with the data passed',
-              'module-type': ['expansion']}
+moduleinfo = {
+    'version': '0.1',
+    'author': 'Sami Mokaddem',
+    'description': 'Render the template with the data passed',
+    'module-type': ['expansion'],
+    'name': 'Ninja Template Rendering',
+    'logo': '',
+    'requirements': [],
+    'features': '',
+    'references': [],
+    'input': '',
+    'output': '',
+}
 
 default_template = '- Default template -'
 

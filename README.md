@@ -12,131 +12,167 @@ without modifying core components. The API is available via a simple REST API wh
 
 For more information: [Extending MISP with Python modules](https://www.misp-project.org/misp-training/3.1-misp-modules.pdf) slides from [MISP training](https://github.com/MISP/misp-training).
 
-## Existing MISP modules
+# Existing MISP modules
 
-### Expansion modules
-* [apiosintDS](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/apiosintds.py) - a hover and expansion module to query the [OSINT.digitalside.it](https://osint.digitalside.it) API. [Documentation](https://apiosintds.readthedocs.io/en/latest/userguidemisp.html).
-* [API Void](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/apivoid.py) - an expansion and hover module to query API Void with a domain attribute.
-* [AssemblyLine submit](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/assemblyline_submit.py) - an expansion module to submit samples and urls to AssemblyLine.
-* [AssemblyLine query](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/assemblyline_query.py) - an expansion module to query AssemblyLine and parse the full submission report.
-* [Backscatter.io](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/backscatter_io.py) - a hover and expansion module to expand an IP address with mass-scanning observations.
-* [BGP Ranking](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/bgpranking.py) - a hover and expansion module to expand an AS number with the ASN description, its history, and position in BGP Ranking.
-* [RansomcoinDB check](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/ransomcoindb.py) - An expansion hover module to query the [ransomcoinDB](https://ransomcoindb.concinnity-risks.com): it contains mapping between BTC addresses and malware hashes. Enrich MISP by querying for BTC -> hash or hash -> BTC addresses.
-* [BTC scam check](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/btc_scam_check.py) - An expansion hover module to instantly check if a BTC address has been abused.
-* [BTC transactions](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/btc_steroids.py) - An expansion hover module to get a blockchain balance and the transactions from a BTC address in MISP.
-* [Censys-enrich](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/censys_enrich.py) - An expansion and module to retrieve information from censys.io about a particular IP or certificate.
-* [CIRCL Passive DNS](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/circl_passivedns.py) - a hover and expansion module to expand hostname and IP addresses with passive DNS information.
-* [CIRCL Passive SSL](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/circl_passivessl.py) - a hover and expansion module to expand IP addresses with the X.509 certificates seen.
-* [countrycode](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/countrycode.py) - a hover module to tell you what country a URL belongs to.
-* [CrowdSec](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/crowdsec.py) - a hover module to expand using CrowdSec's CTI API.
-* [CrowdStrike Falcon](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/crowdstrike_falcon.py) - an expansion module to expand using CrowdStrike Falcon Intel Indicator API.
-* [CPE](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/cpe.py) - An expansion module to query the CVE Search API with a cpe code, to get its related vulnerabilities.
-* [CVE](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/cve.py) - a hover module to give more information about a vulnerability (CVE).
-* [CVE advanced](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/cve_advanced.py) - An expansion module to query the CIRCL CVE search API for more information about a vulnerability (CVE).
-* [Cuckoo submit](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/cuckoo_submit.py) - A hover module to submit malware sample, url, attachment, domain to Cuckoo Sandbox.
-* [Cytomic Orion](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/cytomic_orion.py) - An expansion module to enrich attributes in MISP and share indicators of compromise with Cytomic Orion.
-* [DBL Spamhaus](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/dbl_spamhaus.py) - a hover module to check Spamhaus DBL for a domain name.
-* [DNS](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/dns.py) - a simple module to resolve MISP attributes like hostname and domain to expand IP addresses attributes.
-* [docx-enrich](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/docx_enrich.py) - an enrichment module to get text out of Word document into MISP (using free-text parser).
-* [DomainTools](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/domaintools.py) - a hover and expansion module to get information from [DomainTools](http://www.domaintools.com/) whois.
-* [EQL](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/eql.py) - an expansion module to generate event query language (EQL) from an attribute. [Event Query Language](https://eql.readthedocs.io/en/latest/)
-* [EUPI](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/eupi.py) - a hover and expansion module to get information about an URL from the [Phishing Initiative project](https://phishing-initiative.eu/?lang=en).
-* [Farsight DNSDB Passive DNS](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/farsight_passivedns.py) - a hover and expansion module to expand hostname and IP addresses with passive DNS information.
-* [GeoIP](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/geoip_country.py) - a hover and expansion module to get GeoIP information from geolite/maxmind.
-* [GeoIP_City](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/geoip_city.py) - a hover and expansion module to get GeoIP City information from geolite/maxmind.
-* [GeoIP_ASN](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/geoip_asn.py) - a hover and expansion module to get GeoIP ASN information from geolite/maxmind.
-* [Google Threat Intelligence] (https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/google_threat_intelligence.py) - An expansion module to have the observable's threat score assessed by Google Threat Intelligence.
-* [GreyNoise](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/greynoise.py) - a hover and expansion module to get IP and CVE information from GreyNoise.
-* [hashdd](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/hashdd.py) - a hover module to check file hashes against [hashdd.com](http://www.hashdd.com) including NSLR dataset.
-* [Hashlookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/hashlookup.py) - An expansion module to enrich a file hash with hashlookup.circl.lu services (NSRL and other sources)
-* [hibp](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/hibp.py) - a hover module to lookup against Have I Been Pwned?
-* [html_to_markdown](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/html_to_markdown.py) - Simple HTML to markdown converter
-* [HYAS Insight](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/hyasinsight.py) - a hover and expansion module to get information from [HYAS Insight](https://www.hyas.com/hyas-insight).
-* [intel471](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/intel471.py) - an expansion module to get info from [Intel471](https://intel471.com).
-* [IP2Location.io](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/ip2locationio.py) - an expansion module to get additional information on an IP address using the IP2Location.io API
-* [IPASN](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/ipasn.py) - a hover and expansion to get the BGP ASN of an IP address.
-* [ipinfo.io](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/ipinfo.py) - an expansion module to get additional information on an IP address using the ipinfo.io API
-* [iprep](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/iprep.py) - an expansion module to get IP reputation from packetmail.net.
-* [Joe Sandbox submit](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/joesandbox_submit.py) - Submit files and URLs to Joe Sandbox.
-* [Joe Sandbox query](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/joesandbox_query.py) - Query Joe Sandbox with the link of an analysis and get the parsed data.
-* [Lastline submit](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/lastline_submit.py) - Submit files and URLs to Lastline.
-* [Lastline query](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/lastline_query.py) - Query Lastline with the link to an analysis and parse the report.
-* [macaddress.io](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/macaddress_io.py) - a hover module to retrieve vendor details and other information regarding a given MAC address or an OUI from [MAC address Vendor Lookup](https://macaddress.io). See [integration tutorial here](https://macaddress.io/integrations/MISP-module).
-* [macvendors](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/macvendors.py) - a hover module to retrieve mac vendor information.
-* [MALWAREbazaar](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/malwarebazaar.py) - an expansion module to query MALWAREbazaar with some payload.
-* [McAfee MVISION Insights](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/mcafee_insights_enrich.py) - an expansion module enrich IOCs with McAfee MVISION Insights.
-* [Mmdb server lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/mmdb_lookup.py) - an expansion module to enrich an ip with geolocation information from an mmdb server such as ip.circl.lu.
-* [ocr-enrich](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/ocr_enrich.py) - an enrichment module to get OCRized data from images into MISP.
-* [ods-enrich](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/ods_enrich.py) - an enrichment module to get text out of OpenOffice spreadsheet document into MISP (using free-text parser).
-* [odt-enrich](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/odt_enrich.py) - an enrichment module to get text out of OpenOffice document into MISP (using free-text parser).
-* [onyphe](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/onyphe.py) - a modules to process queries on Onyphe.
-* [onyphe_full](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/onyphe_full.py) - a modules to process full queries on Onyphe.
-* [OTX](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/otx.py) - an expansion module for [OTX](https://otx.alienvault.com/).
-* [passivetotal](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/passivetotal.py) - a [passivetotal](https://www.passivetotal.org/) module that queries a number of different PassiveTotal datasets.
-* [pdf-enrich](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/pdf_enrich.py) - an enrichment module to extract text from PDF into MISP (using free-text parser).
-* [pptx-enrich](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/pptx_enrich.py) - an enrichment module to get text out of PowerPoint document into MISP (using free-text parser).
-* [qrcode](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/qrcode.py) - a module decode QR code, barcode and similar codes from an image and enrich with the decoded values.
-* [rbl](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/rbl.py) - a module to get RBL (Real-Time Blackhost List) values from an attribute.
-* [recordedfuture](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/recordedfuture.py) - a hover and expansion module for enriching MISP attributes with threat intelligence from Recorded Future.
-* [reversedns](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/reversedns.py) - Simple Reverse DNS expansion service to resolve reverse DNS from MISP attributes.
-* [securitytrails](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/securitytrails.py) - an expansion module for [securitytrails](https://securitytrails.com/).
-* [shodan](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/shodan.py) - a minimal [shodan](https://www.shodan.io/) expansion module.
-* [Sigma queries](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/sigma_queries.py) - Experimental expansion module querying a sigma rule to convert it into all the available SIEM signatures.
-* [Sigma syntax validator](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/sigma_syntax_validator.py) - Sigma syntax validator.
-* [Socialscan](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/socialscan.py) - a hover module to check if an email address or a username is used on different online platforms, using the [socialscan](https://github.com/iojw/socialscan) python library
-* [SophosLabs Intelix](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/sophoslabs_intelix.py) - SophosLabs Intelix is an API for Threat Intelligence and Analysis (free tier available). [SophosLabs](https://aws.amazon.com/marketplace/pp/B07SLZPMCS)
-* [sourcecache](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/sourcecache.py) - a module to cache a specific link from a MISP instance.
-* [stairwell](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/stairwell.py) - an expansion module to enrich hash observables with the Stairwell API
-* [STIX2 pattern syntax validator](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/stix2_pattern_syntax_validator.py) - a module to check a STIX2 pattern syntax.
-* [ThreatCrowd](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/threatcrowd.py) - an expansion module for [ThreatCrowd](https://www.threatcrowd.org/).
-* [threatminer](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/threatminer.py) - an expansion module to expand from [ThreatMiner](https://www.threatminer.org/).
-* [TruSTAR Enrich](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/trustar_enrich.py) - an expansion module to enrich MISP data with [TruSTAR](https://www.trustar.co/).
-* [urlhaus](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/urlhaus.py) - Query urlhaus to get additional data about a domain, hash, hostname, ip or url.
-* [urlscan](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/urlscan.py) - an expansion module to query [urlscan.io](https://urlscan.io).
-* [variotdbs](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/variotdbs.py) - an expansion module to query the [VARIoT db](https://www.variotdbs.pl) API to get more information about a Vulnerability
-* [virustotal](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/virustotal.py) - an expansion module to query the [VirusTotal](https://www.virustotal.com/gui/home) API with a high request rate limit required. (More details about the API: [here](https://docs.virustotal.com/reference/overview))
-* [virustotal_public](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/virustotal_public.py) - an expansion module to query the [VirusTotal](https://www.virustotal.com/gui/home) API with a public key and a low request rate limit. (More details about the API: [here](https://docs.virustotal.com/reference/overview))
-* [VMray](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/vmray_submit.py) - a module to submit a sample to VMray.
-* [VMware NSX](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/vmware_nsx.py) - a module to enrich a file or URL with VMware NSX Defender.
-* [VulnDB](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/vulndb.py) - a module to query [VulnDB](https://www.riskbasedsecurity.com/).
-* [Vulners](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/vulners.py) - an expansion module to expand information about CVEs using Vulners API.
-* [Vysion](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/vysion.py) - an expansion module to add dark web intelligence using Vysion API.
-* [whois](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/whois.py) - a module to query a local instance of [uwhois](https://github.com/rafiot/uwhoisd).
-* [whoisfreaks](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/whoisfreaks.py) - An expansion module for [whoisfreaks](https://whoisfreaks.com/) that will provide an enriched analysis of the provided domain, including WHOIS and DNS information.
-* [wikidata](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/wiki.py) - a [wikidata](https://www.wikidata.org) expansion module.
-* [xforce](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/xforceexchange.py) - an IBM X-Force Exchange expansion module.
-* [xlsx-enrich](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/xlsx_enrich.py) - an enrichment module to get text out of an Excel document into MISP (using free-text parser).
-* [YARA query](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/yara_query.py) - a module to create YARA rules from single hash attributes.
-* [YARA syntax validator](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/yara_syntax_validator.py) - YARA syntax validator.
+## Expansion Modules
+* [Abuse IPDB](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/abuseipdb.py) - AbuseIPDB MISP expansion module
+* [OSINT DigitalSide](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/apiosintds.py) - On demand query API for OSINT.digitalside.it project.
+* [APIVoid](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/apivoid.py) - Module to query APIVoid with some domain attributes.
+* [AssemblyLine Query](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/assemblyline_query.py) - A module tu query the AssemblyLine API with a submission ID to get the submission report and parse it.
+* [AssemblyLine Submit](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/assemblyline_submit.py) - A module to submit samples and URLs to AssemblyLine for advanced analysis, and return the link of the submission.
+* [Backscatter.io](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/backscatter_io.py) - Backscatter.io module to bring mass-scanning observations into MISP.
+* [BGP Ranking](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/bgpranking.py) - Query BGP Ranking to get the ranking of an Autonomous System number.
+* [BTC Scam Check](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/btc_scam_check.py) - An expansion hover module to query a special dns blacklist to check if a bitcoin address has been abused.
+* [BTC Steroids](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/btc_steroids.py) - An expansion hover module to get a blockchain balance from a BTC address in MISP.
+* [Censys Enrich](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/censys_enrich.py) - An expansion module to enrich attributes in MISP by quering the censys.io API
+* [CIRCL Passive DNS](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/circl_passivedns.py) - Module to access CIRCL Passive DNS.
+* [CIRCL Passive SSL](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/circl_passivessl.py) - Modules to access CIRCL Passive SSL.
+* [ClaamAV](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/clamav.py) - Submit file to ClamAV
+* [Cluster25 Expand](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/cluster25_expand.py) - Module to query Cluster25 CTI.
+* [Country Code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/countrycode.py) - Module to expand country codes.
+* [CPE Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/cpe.py) - An expansion module to query the CVE search API with a cpe code to get its related vulnerabilities.
+* [CrowdSec CTI](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/crowdsec.py) - Hover module to lookup an IP in CrowdSec's CTI
+* [CrowdStrike Falcon](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/crowdstrike_falcon.py) - Module to query CrowdStrike Falcon.
+* [Cuckoo Submit](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/cuckoo_submit.py) - Submit files and URLs to Cuckoo Sandbox
+* [CVE Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/cve.py) - An expansion hover module to expand information about CVE id.
+* [CVE Advanced Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/cve_advanced.py) - An expansion module to query the CIRCL CVE search API for more information about a vulnerability (CVE).
+* [Cytomic Orion Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/cytomic_orion.py) - An expansion module to enrich attributes in MISP by quering the Cytomic Orion API
+* [DBL Spamhaus Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/dbl_spamhaus.py) - Checks Spamhaus DBL for a domain name.
+* [DNS Resolver](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/dns.py) - jj
+* [DOCX Enrich](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/docx_enrich.py) - Module to extract freetext from a .docx document.
+* [DomainTools Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/domaintools.py) - DomainTools MISP expansion module.
+* [EQL Query Generator](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/eql.py) - EQL query generation for a MISP attribute.
+* [EUPI Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/eupi.py) - A module to query the Phishing Initiative service (https://phishing-initiative.lu).
+* [URL Components Extractor](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/extract_url_components.py) - Extract URL components
+* [Farsight DNSDB Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/farsight_passivedns.py) - Module to access Farsight DNSDB Passive DNS.
+* [GeoIP ASN Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/geoip_asn.py) - Query a local copy of the Maxmind Geolite ASN database (MMDB format)
+* [GeoIP City Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/geoip_city.py) - An expansion module to query a local copy of Maxmind's Geolite database with an IP address, in order to get information about the city where it is located.
+* [GeoIP Country Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/geoip_country.py) - Query a local copy of Maxminds Geolite database, updated for MMDB format
+* [Google Safe Browsing Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/google_safe_browsing.py) - Google safe browsing expansion module
+* [Google Search](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/google_search.py) - An expansion hover module to expand google search information about an URL
+* [Google Threat Intelligence Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/google_threat_intelligence.py) - An expansion module to have the observable's threat score assessed by Google Threat Intelligence.
+* [GreyNoise Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/greynoise.py) - Module to query IP and CVE information from GreyNoise
+* [Hashdd Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/hashdd.py) - A hover module to check hashes against hashdd.com including NSLR dataset.
+* [CIRCL Hashlookup Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/hashlookup.py) - An expansion module to query the CIRCL hashlookup services to find it if a hash is part of a known set such as NSRL.
+* [Have I Been Pwned Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/hibp.py) - Module to access haveibeenpwned.com API.
+* [HTML to Markdown](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/html_to_markdown.py) - Expansion module to fetch the html content from an url and convert it into markdown.
+* [HYAS Insight Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/hyasinsight.py) - HYAS Insight integration to MISP provides direct, high volume access to HYAS Insight data. It enables investigators and analysts to understand and defend against cyber adversaries and their infrastructure.
+* [Intel471 Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/intel471.py) - Module to access Intel 471
+* [IP2Location.io Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/ip2locationio.py) - An expansion module to query IP2Location.io to gather more information on a given IP address.
+* [IPASN-History Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/ipasn.py) - Module to query an IP ASN history service (https://github.com/D4-project/IPASN-History).
+* [IPInfo.io Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/ipinfo.py) - An expansion module to query ipinfo.io to gather more information on a given IP address.
+* [IPQualityScore Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/ipqs_fraud_and_risk_scoring.py) - IPQualityScore MISP Expansion Module for IP reputation, Email Validation, Phone Number Validation, Malicious Domain and Malicious URL Scanner.
+* [IPRep Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/iprep.py) - Module to query IPRep data for IP addresses.
+* [Ninja Template Rendering](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/jinja_template_rendering.py) - Render the template with the data passed
+* [Joe Sandbox Import](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/joesandbox_query.py) - Query Joe Sandbox API with a submission url to get the json report and extract its data that is parsed and converted into MISP attributes and objects.
+* [Joe Sandbox Submit](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/joesandbox_submit.py) - A module to submit files or URLs to Joe Sandbox for an advanced analysis, and return the link of the submission.
+* [Lastline Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/lastline_query.py) - Deprecation notice: this module will be deprecated by December 2021, please use vmware_nsx module.
 
-### Export modules
+Query Lastline with an analysis link and parse the report into MISP attributes and objects.
+* [Lastline Submit](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/lastline_submit.py) - Deprecation notice: this module will be deprecated by December 2021, please use vmware_nsx module.
 
-* [CEF](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/cef_export.py) - module to export Common Event Format (CEF).
-* [Cisco FireSight Manager ACL rule](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/cisco_firesight_manager_ACL_rule_export.py) - module to export as rule for the Cisco FireSight manager ACL.
-* [GoAML export](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/goamlexport.py) - module to export in [GoAML format](http://goaml.unodc.org/goaml/en/index.html).
-* [Lite Export](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/liteexport.py) - module to export a lite event.
-* [PDF export](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/pdfexport.py) - module to export an event in PDF.
-* [Mass EQL Export](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/mass_eql_export.py) - module to export applicable attributes from an event to a mass EQL query.
-* [Nexthink query format](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/nexthinkexport.py) - module to export in Nexthink query format.
-* [osquery](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/osqueryexport.py) - module to export in [osquery](https://osquery.io/) query format.
-* [ThreatConnect](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/threat_connect_export.py) - module to export in ThreatConnect CSV format.
-* [ThreatStream](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/threatStream_misp_export.py) - module to export in ThreatStream format.
-* [VirusTotal Graph](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/vt_graph.py) - Module to create a VirusTotal graph out of an event.
+Module to submit a file or URL to Lastline.
+* [Macaddress.io Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/macaddress_io.py) - MISP hover module for macaddress.io
+* [Macvendors Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/macvendors.py) - Module to access Macvendors API.
+* [Malware Bazaar Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/malwarebazaar.py) - Query Malware Bazaar to get additional information about the input hash.
+* [McAfee MVISION Insights Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/mcafee_insights_enrich.py) - Lookup McAfee MVISION Insights Details
+* [GeoIP Enrichment](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/mmdb_lookup.py) - A hover and expansion module to enrich an ip with geolocation and ASN information from an mmdb server instance, such as CIRCL's ip.circl.lu.
+* [MWDB Submit](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/mwdb.py) - Module to push malware samples to a MWDB instance
+* [OCR Enrich](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/ocr_enrich.py) - Module to process some optical character recognition on pictures.
+* [ODS Enrich](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/ods_enrich.py) - Module to extract freetext from a .ods document.
+* [ODT Enrich](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/odt_enrich.py) - Module to extract freetext from a .odt document.
+* [Onyphe Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/onyphe.py) - Module to process a query on Onyphe.
+* [Onyphe Full Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/onyphe_full.py) - Module to process a full query on Onyphe.
+* [AlienVault OTX Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/otx.py) - Module to get information from AlienVault OTX.
+* [Passive SSH Enrichment](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/passive_ssh.py) - An expansion module to enrich, SSH key fingerprints and IP addresses with information collected by passive-ssh
+* [PassiveTotal Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/passivetotal.py) - The PassiveTotal MISP expansion module brings the datasets derived from Internet scanning directly into your MISP instance. This module supports passive DNS, historic SSL, WHOIS, and host attributes. In order to use the module, you must have a valid PassiveTotal account username and API key. Registration is free and can be done by visiting https://www.passivetotal.org/register
+* [PDF Enrich](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/pdf_enrich.py) - Module to extract freetext from a PDF document.
+* [PPTX Enrich](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/pptx_enrich.py) - Module to extract freetext from a .pptx document.
+* [Qintel QSentry Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/qintel_qsentry.py) - A hover and expansion module which queries Qintel QSentry for ip reputation data
+* [QR Code Decode](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/qrcode.py) - Module to decode QR codes.
+* [RandomcoinDB Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/ransomcoindb.py) - Module to access the ransomcoinDB (see https://ransomcoindb.concinnity-risks.com)
+* [Real-time Blackhost Lists Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/rbl.py) - Module to check an IPv4 address against known RBLs.
+* [Recorded Future Enrich](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/recordedfuture.py) - Module to enrich attributes with threat intelligence from Recorded Future.
+* [Reverse DNS](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/reversedns.py) - Simple Reverse DNS expansion service to resolve reverse DNS from MISP attributes.
+* [SecurityTrails Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/securitytrails.py) - An expansion modules for SecurityTrails.
+* [Shodan Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/shodan.py) - Module to query on Shodan.
+* [Sigma Rule Converter](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/sigma_queries.py) - An expansion hover module to display the result of sigma queries.
+* [Sigma Syntax Validator](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/sigma_syntax_validator.py) - An expansion hover module to perform a syntax check on sigma rules.
+* [SigMF Expansion](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/sigmf_expand.py) - Expands a SigMF Recording object into a SigMF Expanded Recording object, extracts a SigMF archive into a SigMF Recording object.
+* [Socialscan Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/socialscan.py) - A hover module to get information on the availability of an email address or username on some online platforms.
+* [SophosLabs Intelix Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/sophoslabs_intelix.py) - An expansion module to query the Sophoslabs intelix API to get additional information about an ip address, url, domain or sha256 attribute.
+* [URL Archiver](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/sourcecache.py) - Module to cache web pages of analysis reports, OSINT sources. The module returns a link of the cached page.
+* [Stairwell Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/stairwell.py) - Module to query the Stairwell API to get additional information about the input hash attribute
+* [STIX2 Pattern Syntax Validator](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/stix2_pattern_syntax_validator.py) - An expansion hover module to perform a syntax check on stix2 patterns.
+* [ThreatCrowd Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/threatcrowd.py) - Module to get information from ThreatCrowd.
+* [ThreadFox Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/threatfox.py) - Module to search for an IOC on ThreatFox by abuse.ch.
+* [ThreatMiner Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/threatminer.py) - Module to get information from ThreatMiner.
+* [TruSTAR Enrich](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/trustar_enrich.py) - Module to get enrich indicators with TruSTAR.
+* [URLhaus Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/urlhaus.py) - Query of the URLhaus API to get additional information about the input attribute.
+* [URLScan Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/urlscan.py) - An expansion module to query urlscan.io.
+* [VARIoT db Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/variotdbs.py) - An expansion module to query the VARIoT db API for more information about a vulnerability.
+* [VirusTotal v3 Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/virustotal.py) - Enrich observables with the VirusTotal v3 API
+* [VirusTotal Public API Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/virustotal_public.py) - Enrich observables with the VirusTotal v3 public API
+* [VMRay Submit](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/vmray_submit.py) - Module to submit a sample to VMRay.
+* [VMware NSX Defender Enrich](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/vmware_nsx.py) - Module to enrich a file or URL with VMware NSX Defender.
+* [VulnDB Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/vulndb.py) - Module to query VulnDB (RiskBasedSecurity.com).
+* [Vulnerability Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/vulnerability_lookup.py) - An expansion module to query Vulnerability Lookup
+* [Vulners Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/vulners.py) - An expansion hover module to expand information about CVE id using Vulners API.
+* [Vysion Enrich](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/vysion.py) - Module to enrich the information by making use of the Vysion API.
+* [Whois Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/whois.py) - Module to query a local instance of uwhois (https://github.com/rafiot/uwhoisd).
+* [WhoisFreaks Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/whoisfreaks.py) - An expansion module for https://whoisfreaks.com/ that will provide an enriched analysis of the provided domain, including WHOIS and DNS information.
+* [Wikidata Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/wiki.py) - An expansion hover module to extract information from Wikidata to have additional information about particular term for analysis.
+* [IBM X-Force Exchange Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/xforceexchange.py) - An expansion module for IBM X-Force Exchange.
+* [XLXS Enrich](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/xlsx_enrich.py) - Module to extract freetext from a .xlsx document.
+* [YARA Rule Generator](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/yara_query.py) - jj
+* [YARA Syntax Validator](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/yara_syntax_validator.py) - An expansion hover module to perform a syntax check on if yara rules are valid or not.
+* [Yeti Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/yeti.py) - Module to process a query on Yeti.
 
-### Import modules
+## Export Modules
+* [CEF Export](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/cef_export.py) - Module to export a MISP event in CEF format.
+* [Cisco fireSIGHT blockrule Export](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/cisco_firesight_manager_ACL_rule_export.py) - Module to export malicious network activity attributes to Cisco fireSIGHT manager block rules.
+* [Microsoft Defender for Endpoint KQL Export](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/defender_endpoint_export.py) - Defender for Endpoint KQL hunting query export module
+* [GoAML Export](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/goamlexport.py) - This module is used to export MISP events containing transaction objects into GoAML format.
+* [Lite Export](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/liteexport.py) - Lite export of a MISP event.
+* [EQL Query Export](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/mass_eql_export.py) - Export MISP event in Event Query Language
+* [Nexthink NXQL Export](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/nexthinkexport.py) - Nexthink NXQL query export module
+* [OSQuery Export](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/osqueryexport.py) - OSQuery export of a MISP event.
+* [Event to PDF Export](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/pdfexport.py) - Simple export of a MISP event to PDF.
+* [ThreatStream Export](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/threatStream_misp_export.py) - Module to export a structured CSV file for uploading to threatStream.
+* [ThreadConnect Export](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/threat_connect_export.py) - Module to export a structured CSV file for uploading to ThreatConnect.
+* [VirusTotal Collections Export](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/virustotal_collections.py) - Creates a VT Collection from an event iocs.
+* [VirusTotal Graph Export](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/vt_graph.py) - This module is used to create a VirusTotal Graph from a MISP event.
+* [YARA Rule Export](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/yara_export.py) - This module is used to export MISP events to YARA.
 
-* [CSV import](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/csvimport.py) - Customizable CSV import module.
-* [Cuckoo JSON](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/cuckooimport.py) - Cuckoo JSON import.
-* [Email Import](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/email_import.py) - Email import module for MISP to import basic metadata.
-* [GoAML import](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/goamlimport.py) - Module to import [GoAML](http://goaml.unodc.org/goaml/en/index.html) XML format.
-* [Joe Sandbox import](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/joe_import.py) - Parse data from a Joe Sandbox json report.
-* [Lastline import](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/lastline_import.py) - Module to import Lastline analysis reports.
-* [OCR](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/ocr.py) - Optical Character Recognition (OCR) module for MISP to import attributes from images, scan or faxes.
-* [OpenIOC](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/openiocimport.py) - OpenIOC import based on PyMISP library.
-* [ThreatAnalyzer](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/threatanalyzer_import.py) - An import module to process ThreatAnalyzer archive.zip/analysis.json sandbox exports.
-* [VMRay](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/vmray_import.py) - An import module to process VMRay export.
+## Import Modules
+* [PDNS COF Importer](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/cof2misp.py) - Passive DNS Common Output Format (COF) MISP importer
+* [CSV Import](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/csvimport.py) - Module to import MISP attributes from a csv file.
+* [Cuckoo Sandbox Import](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/cuckooimport.py) - Module to import Cuckoo JSON.
+* [Email Import](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/email_import.py) - Email import module for MISP
+* [GoAML Import](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/goamlimport.py) - Module to import MISP objects about financial transactions from GoAML files.
+* [Import Blueprint](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/import_blueprint.py) - Generic blueprint to be copy-pasted to quickly boostrap creation of import module.
+* [Joe Sandbox Import](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/joe_import.py) - A module to import data from a Joe Sandbox analysis json report.
+* [Lastline Import](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/lastline_import.py) - Deprecation notice: this module will be deprecated by December 2021, please use vmware_nsx module.
 
-## How to install and start MISP modules in a Python virtualenv? (recommended)
+Module to import and parse reports from Lastline analysis links.
+* [MISP JSON Import](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/mispjson.py) - Module to import MISP JSON format for merging MISP events.
+* [OCR Import](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/ocr.py) - Optical Character Recognition (OCR) module for MISP.
+* [OpenIOC Import](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/openiocimport.py) - Module to import OpenIOC packages.
+* [TAXII 2.1 Import](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/taxii21.py) - Import content from a TAXII 2.1 server
+* [ThreadAnalyzer Sandbox Import](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/threatanalyzer_import.py) - Module to import ThreatAnalyzer archive.zip / analysis.json files.
+* [URL Import](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/url_import.py) - Simple URL import tool with Faup
+* [VMRay API Import](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/vmray_import.py) - Module to import VMRay (VTI) results.
+* [VMRay Summary JSON Import](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/vmray_summary_json_import.py) - Import a VMRay Summary JSON report.
+
+## Action Modules
+* [Mattermost](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/action_mod/mattermost.py) - Simplistic module to send message to a Mattermost channel.
+* [Slack](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/action_mod/slack.py) - Simplistic module to send messages to a Slack channel.
+* [Test action](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/action_mod/testaction.py) - This module is merely a test, always returning true. Triggers on event publishing.
+
+
+# Installation
+
+## How to install and start MISP modules (in a Python virtualenv)? (recommended)
 
 ***Be sure to run the latest version of `pip`***. To install the latest version of pip, `pip install --upgrade pip` will do the job.
 
@@ -336,7 +372,7 @@ ls -1|while read line; do sudo pip3 install --force-reinstall --ignore-installed
 ~~~
 Next you can follow standard install procedure.
 
-## How to add your own MISP modules?
+# How to add your own MISP modules?
 
 Create your module in [misp_modules/modules/expansion/](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/), [misp_modules/modules/export_mod/](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/), or [misp_modules/modules/import_mod/](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/). The module should have at minimum three functions:
 
@@ -647,11 +683,27 @@ Recommended     Plugin.Import_ocr_enabled       true   Enable or disable the ocr
 
 In this same menu set any other plugin settings that are required for testing.
 
+## Install misp-module on an offline instance.
+First, you need to grab all necessary packages for example like this :
+
+Use pip wheel to create an archive
+~~~
+mkdir misp-modules-offline
+pip3 wheel -r REQUIREMENTS shodan --wheel-dir=./misp-modules-offline
+tar -cjvf misp-module-bundeled.tar.bz2 ./misp-modules-offline/*
+~~~
+On offline machine :
+~~~
+mkdir misp-modules-bundle
+tar xvf misp-module-bundeled.tar.bz2 -C misp-modules-bundle
+cd misp-modules-bundle
+ls -1|while read line; do sudo pip3 install --force-reinstall --ignore-installed --upgrade --no-index --no-deps ${line};done
+~~~
+Next you can follow standard install procedure.
 
 ## How to contribute your own module?
 
 Fork the project, add your module, test it and make a pull-request. Modules can be also private as you can add a module in your own MISP installation.
-For further information please see [Contribute](contribute/).
 
 
 ## Tips for developers creating modules

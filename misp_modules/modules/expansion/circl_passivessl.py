@@ -4,9 +4,19 @@ from . import check_input_attribute, standard_error_message
 from pymisp import MISPAttribute, MISPEvent, MISPObject
 
 mispattributes = {'input': ['ip-src', 'ip-dst', 'ip-src|port', 'ip-dst|port'], 'format': 'misp_standard'}
-moduleinfo = {'version': '0.2', 'author': 'Raphaël Vinot',
-              'description': 'Module to access CIRCL Passive SSL',
-              'module-type': ['expansion', 'hover']}
+moduleinfo = {
+    'version': '0.2',
+    'author': 'Raphaël Vinot',
+    'description': 'Modules to access CIRCL Passive SSL.',
+    'module-type': ['expansion', 'hover'],
+    'name': 'CIRCL Passive SSL',
+    'logo': 'passivessl.png',
+    'requirements': ['pypssl: Passive SSL python library', 'A CIRCL passive SSL account with username & password'],
+    'features': 'This module takes an ip-address (ip-src or ip-dst) attribute as input, and queries the CIRCL Passive SSL REST API to gather the related certificates and return the corresponding MISP objects.\n\nTo make it work a username and a password are required to authenticate to the CIRCL Passive SSL API.',
+    'references': ['https://www.circl.lu/services/passive-ssl/'],
+    'input': 'IP address attribute.',
+    'output': 'x509 certificate objects seen by the IP address(es).',
+}
 moduleconfig = ['username', 'password']
 
 

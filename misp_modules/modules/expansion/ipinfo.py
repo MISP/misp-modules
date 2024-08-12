@@ -10,8 +10,15 @@ mispattributes = {
 moduleinfo = {
     'version': 1,
     'author': 'Christian Studer',
-    'description': 'An expansion module to query ipinfo.io for additional information on an IP address',
-    'module-type': ['expansion', 'hover']
+    'description': 'An expansion module to query ipinfo.io to gather more information on a given IP address.',
+    'module-type': ['expansion', 'hover'],
+    'name': 'IPInfo.io Lookup',
+    'logo': 'ipinfo.png',
+    'requirements': ['An ipinfo.io token'],
+    'features': 'The module takes an IP address attribute as input and queries the ipinfo.io API.  \nThe geolocation information on the IP address is always returned.\n\nDepending on the subscription plan, the API returns different pieces of information then:\n- With a basic plan (free) you get the AS number and the AS organisation name concatenated in the `org` field.\n- With a paid subscription, the AS information is returned in the `asn` field with additional AS information, and depending on which plan the user has, you can also get information on the privacy method used to protect the IP address, the related domains, or the point of contact related to the IP address in case of an abuse.\n\nMore information on the responses content is available in the [documentation](https://ipinfo.io/developers).',
+    'references': ['https://ipinfo.io/developers'],
+    'input': 'IP address attribute.',
+    'output': 'Additional information on the IP address, like its geolocation, the autonomous system it is included in, and the related domain(s).',
 }
 moduleconfig = ['token']
 
@@ -87,7 +94,7 @@ def handler(q=False):
         asn.add_attribute('asn', as_value)
         asn.add_attribute('description', ' '.join(description))
         misp_event.add_object(asn)
-    
+
 
     # Return the results in MISP format
     event = json.loads(misp_event.to_json())

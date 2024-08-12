@@ -29,10 +29,17 @@ mispattributes = {
 
 # possible module-types: 'expansion', 'hover' or both
 moduleinfo = {
-    "version": "1",
-    "author": "Byron Labs",
-    "description": "Enrich observables with the Vysion API",
-    "module-type": ["expansion"],
+    'version': '1',
+    'author': 'Byron Labs',
+    'description': 'Module to enrich the information by making use of the Vysion API.',
+    'module-type': ['expansion'],
+    'name': 'Vysion Enrich',
+    'logo': 'vysion.png',
+    'requirements': ['Vysion python library', 'Vysion API Key'],
+    'features': "This module gets correlated information from Byron Labs' dark web intelligence database. With this you will get several objects containing information related to, for example, an organization victim of a ransomware attack.",
+    'references': ['https://vysion.ai/', 'https://developers.vysion.ai/', 'https://github.com/ByronLabs/vysion-cti/tree/main'],
+    'input': 'company(target-org), country, info, BTC, XMR and DASH address.',
+    'output': 'MISP objects containing title, link to our webapp and TOR, i2p or clearnet URLs.',
 }
 
 # config fields that your code expects from the site admin
@@ -154,7 +161,7 @@ def handler(q=False):
         if attribute_type == "email":
             result = client.find_email(attribute_value)
         elif attribute_type == "domain":
-            result = client.find_url(attribute_value) 
+            result = client.find_url(attribute_value)
         elif attribute_type == "url":
             result = client.find_url(attribute_value)
         elif attribute_type == "text":
@@ -188,7 +195,7 @@ def handler(q=False):
                 "Attribute": [
                     json.loads(attribute.to_json())
                     for attribute in misp_event.attributes
-                ], 
+                ],
                 "Tag": [
                     json.loads(tag.to_json())
                     for tag in misp_event.tags

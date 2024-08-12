@@ -1,9 +1,13 @@
-## How to install and start MISP modules (in a Python virtualenv)?
+## How to install and start MISP modules (in a Python virtualenv)? (recommended)
+
+***Be sure to run the latest version of `pip`***. To install the latest version of pip, `pip install --upgrade pip` will do the job.
 
 ~~~~bash
 SUDO_WWW="sudo -u www-data"
 
 sudo apt-get install -y \
+  python3-dev \
+  python3-pip \
   git \
   libpq5 \
   libjpeg-dev \
@@ -15,9 +19,10 @@ sudo apt-get install -y \
   libzbar0 \
   libzbar-dev \
   libfuzzy-dev \
-  libcaca-dev
+  libcaca-dev \
+  build-essential
 
-# BEGIN with virtualenv:   
+# BEGIN with virtualenv:
 $SUDO_WWW virtualenv -p python3 /var/www/MISP/venv
 # END with virtualenv
 
@@ -45,12 +50,12 @@ sudo ldconfig
 
 cd ../../misp-modules
 
-# BEGIN with virtualenv: 
+# BEGIN with virtualenv:
 $SUDO_WWW  /var/www/MISP/venv/bin/pip install -I -r REQUIREMENTS
 $SUDO_WWW  /var/www/MISP/venv/bin/pip install .
 # END with virtualenv
 
-# BEGIN without virtualenv: 
+# BEGIN without virtualenv:
 sudo pip install -I -r REQUIREMENTS
 sudo pip install .
 # END without virtualenv
@@ -59,16 +64,18 @@ sudo pip install .
 sudo cp etc/systemd/system/misp-modules.service /etc/systemd/system/
 sudo systemctl daemon-reload
 sudo systemctl enable --now misp-modules
-/var/www/MISP/venv/bin/misp-modules -l 127.0.0.1 -s & #to start the modules
+sudo service misp-modules start  # or
+/var/www/MISP/venv/bin/misp-modules -l 127.0.0.1 -s & # to start the modules manually
 ~~~~
 
 ## How to install and start MISP modules on RHEL-based distributions ?
 
-As of this writing, the official RHEL repositories only contain Ruby 2.0.0 and Ruby 2.1 or higher is required. As such, this guide installs Ruby 2.2 from the SCL repository.
+As of this writing, the official RHEL repositories only contain Ruby 2.0.0 and Ruby 2.1 or higher is required. As such, this guide installs Ruby 2.2 from the [SCL](https://access.redhat.com/documentation/en-us/red_hat_software_collections/3/html/3.2_release_notes/chap-installation#sect-Installation-Subscribe) repository.
 
 ~~~~bash
 SUDO_WWW="sudo -u apache"
 sudo yum install \
+  rh-python36 \
   rh-ruby22 \
   openjpeg-devel \
   rubygem-rouge \
@@ -80,8 +87,8 @@ sudo yum install \
   poppler-cpp-devel \
   python-devel \
   redhat-rpm-config
-cd /usr/local/src/
-sudo git clone https://github.com/MISP/misp-modules.git
+cd /var/www/MISP
+$SUDO_WWW git clone https://github.com/MISP/misp-modules.git
 cd misp-modules
 $SUDO_WWW /usr/bin/scl enable rh-python36 "virtualenv -p python3 /var/www/MISP/venv"
 $SUDO_WWW /var/www/MISP/venv/bin/pip install -U -I -r REQUIREMENTS
@@ -99,7 +106,7 @@ After=misp-workers.service
 Type=simple
 User=apache
 Group=apache
-ExecStart=/usr/bin/scl enable rh-python36 rh-ruby22  '/var/www/MISP/venv/bin/misp-modules –l 127.0.0.1 –s'
+ExecStart=/usr/bin/scl enable rh-python36 rh-ruby22  '/var/www/MISP/venv/bin/misp-modules -l 127.0.0.1 -s'
 Restart=always
 RestartSec=10
 
@@ -107,8 +114,8 @@ RestartSec=10
 WantedBy=multi-user.target" | sudo tee /etc/systemd/system/misp-modules.service
 ~~~~
 
-The After=misp-workers.service must be changed or removed if you have not created a misp-workers service. Then, enable the misp-modules service and start it:
-
+The `After=misp-workers.service` must be changed or removed if you have not created a misp-workers service.
+Then, enable the misp-modules service and start it:
 ~~~~bash
 systemctl daemon-reload
 systemctl enable --now misp-modules
@@ -147,20 +154,20 @@ services:
   misp-modules:
     # https://hub.docker.com/r/dcso/misp-dockerized-misp-modules
     image: dcso/misp-dockerized-misp-modules:3
-    
+
     # Local image:
     #image: misp-modules
     #build:
     #  context: docker/
-    
+
     environment:
       # Redis
       REDIS_BACKEND: misp-redis
       REDIS_PORT: "6379"
       REDIS_DATABASE: "245"
       # System PROXY (OPTIONAL)
-      http_proxy: 
-      https_proxy: 
+      http_proxy:
+      https_proxy:
       no_proxy: 0.0.0.0
       # Timezone (OPTIONAL)
       TZ: Europe/Berlin

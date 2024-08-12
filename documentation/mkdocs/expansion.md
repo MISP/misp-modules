@@ -1,5 +1,17 @@
 
-#### [apiosintds](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/apiosintds.py)
+#### [Abuse IPDB](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/abuseipdb.py)
+
+AbuseIPDB MISP expansion module
+- **features**:
+>
+- **config**:
+> - api_key
+> - max_age_in_days
+> - abuse_threshold
+
+-----
+
+#### [OSINT DigitalSide](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/apiosintds.py)
 
 On demand query API for OSINT.digitalside.it project.
 - **features**:
@@ -8,6 +20,13 @@ On demand query API for OSINT.digitalside.it project.
 >The result of the query is then parsed to extract additional hashes or urls. A module parameters also allows to parse the hashes related to the urls.
 >
 >Furthermore, it is possible to cache the urls and hashes collected over the last 7 days by OSINT.digitalside.it
+- **config**:
+> - STIX2_details
+> - import_related
+> - cache
+> - cache_directory
+> - cache_timeout_h
+> - local_directory
 - **input**:
 >A domain, ip, url or hash attribute.
 - **output**:
@@ -19,7 +38,7 @@ On demand query API for OSINT.digitalside.it project.
 
 -----
 
-#### [apivoid](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/apivoid.py)
+#### [APIVoid](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/apivoid.py)
 
 <img src=../logos/apivoid.png height=60>
 
@@ -28,6 +47,8 @@ Module to query APIVoid with some domain attributes.
 >This module takes a domain name and queries API Void to get the related DNS records and the SSL certificates. It returns then those pieces of data as MISP objects that can be added to the event.
 >
 >To make it work, a valid API key and enough credits to proceed 2 queries (0.06 + 0.07 credits) are required.
+- **config**:
+>apikey
 - **input**:
 >A domain attribute.
 - **output**:
@@ -39,7 +60,7 @@ Module to query APIVoid with some domain attributes.
 
 -----
 
-#### [assemblyline_query](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/assemblyline_query.py)
+#### [AssemblyLine Query](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/assemblyline_query.py)
 
 <img src=../logos/assemblyline.png height=60>
 
@@ -50,6 +71,12 @@ A module tu query the AssemblyLine API with a submission ID to get the submissio
 >The submission ID extracted from the submission link is then used to query AssemblyLine and get the full submission report. This report is parsed to extract file objects and the associated IPs, domains or URLs the files are connecting to.
 >
 >Some more data may be parsed in the future.
+- **config**:
+> - apiurl
+> - user_id
+> - apikey
+> - password
+> - verifyssl
 - **input**:
 >Link of an AssemblyLine submission report.
 - **output**:
@@ -61,7 +88,7 @@ A module tu query the AssemblyLine API with a submission ID to get the submissio
 
 -----
 
-#### [assemblyline_submit](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/assemblyline_submit.py)
+#### [AssemblyLine Submit](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/assemblyline_submit.py)
 
 <img src=../logos/assemblyline.png height=60>
 
@@ -70,6 +97,12 @@ A module to submit samples and URLs to AssemblyLine for advanced analysis, and r
 >The module requires the address of the AssemblyLine server you want to query as well as your credentials used for this instance. Credentials include the user-ID and an API key or the password associated to the user-ID.
 >
 >If the sample or url is correctly submitted, you get then the link of the submission.
+- **config**:
+> - apiurl
+> - user_id
+> - apikey
+> - password
+> - verifyssl
 - **input**:
 >Sample, or url to submit to AssemblyLine.
 - **output**:
@@ -81,13 +114,15 @@ A module to submit samples and URLs to AssemblyLine for advanced analysis, and r
 
 -----
 
-#### [backscatter_io](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/backscatter_io.py)
+#### [Backscatter.io](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/backscatter_io.py)
 
 <img src=../logos/backscatter_io.png height=60>
 
-Query backscatter.io (https://backscatter.io/).
+Backscatter.io module to bring mass-scanning observations into MISP.
 - **features**:
 >The module takes a source or destination IP address as input and displays the information known by backscatter.io.
+- **config**:
+>api_key
 - **input**:
 >IP addresses.
 - **output**:
@@ -99,9 +134,9 @@ Query backscatter.io (https://backscatter.io/).
 
 -----
 
-#### [bgpranking](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/bgpranking.py)
+#### [BGP Ranking](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/bgpranking.py)
 
-Query BGP Ranking (https://bgpranking-ng.circl.lu/).
+Query BGP Ranking to get the ranking of an Autonomous System number.
 - **features**:
 >The module takes an AS number attribute as input and displays its description as well as its ranking position in BGP Ranking for a given day.
 - **input**:
@@ -115,7 +150,7 @@ Query BGP Ranking (https://bgpranking-ng.circl.lu/).
 
 -----
 
-#### [btc_scam_check](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/btc_scam_check.py)
+#### [BTC Scam Check](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/btc_scam_check.py)
 
 <img src=../logos/bitcoin.png height=60>
 
@@ -133,11 +168,13 @@ An expansion hover module to query a special dns blacklist to check if a bitcoin
 
 -----
 
-#### [btc_steroids](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/btc_steroids.py)
+#### [BTC Steroids](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/btc_steroids.py)
 
 <img src=../logos/bitcoin.png height=60>
 
 An expansion hover module to get a blockchain balance from a BTC address in MISP.
+- **features**:
+>
 - **input**:
 >btc address attribute.
 - **output**:
@@ -145,11 +182,14 @@ An expansion hover module to get a blockchain balance from a BTC address in MISP
 
 -----
 
-#### [censys_enrich](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/censys_enrich.py)
+#### [Censys Enrich](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/censys_enrich.py)
 
 An expansion module to enrich attributes in MISP by quering the censys.io API
 - **features**:
 >This module takes an IP, hostname or a certificate fingerprint and attempts to enrich it by querying the Censys API.
+- **config**:
+> - api_id
+> - api_secret
 - **input**:
 >IP, domain or certificate fingerprint (md5, sha1 or sha256)
 - **output**:
@@ -161,7 +201,7 @@ An expansion module to enrich attributes in MISP by quering the censys.io API
 
 -----
 
-#### [circl_passivedns](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/circl_passivedns.py)
+#### [CIRCL Passive DNS](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/circl_passivedns.py)
 
 <img src=../logos/passivedns.png height=60>
 
@@ -170,6 +210,9 @@ Module to access CIRCL Passive DNS.
 >This module takes a hostname, domain or ip-address (ip-src or ip-dst) attribute as input, and queries the CIRCL Passive DNS REST API to get the asssociated passive dns entries and return them as MISP objects.
 >
 >To make it work a username and a password are thus required to authenticate to the CIRCL Passive DNS API.
+- **config**:
+> - username
+> - password
 - **input**:
 >Hostname, domain, or ip-address attribute.
 - **ouput**:
@@ -183,7 +226,7 @@ Module to access CIRCL Passive DNS.
 
 -----
 
-#### [circl_passivessl](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/circl_passivessl.py)
+#### [CIRCL Passive SSL](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/circl_passivessl.py)
 
 <img src=../logos/passivessl.png height=60>
 
@@ -192,6 +235,9 @@ Modules to access CIRCL Passive SSL.
 >This module takes an ip-address (ip-src or ip-dst) attribute as input, and queries the CIRCL Passive SSL REST API to gather the related certificates and return the corresponding MISP objects.
 >
 >To make it work a username and a password are required to authenticate to the CIRCL Passive SSL API.
+- **config**:
+> - username
+> - password
 - **input**:
 >IP address attribute.
 - **output**:
@@ -204,7 +250,17 @@ Modules to access CIRCL Passive SSL.
 
 -----
 
-#### [cluster25_expand](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/cluster25_expand.py)
+#### [ClaamAV](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/clamav.py)
+
+Submit file to ClamAV
+- **features**:
+>
+- **config**:
+>connection
+
+-----
+
+#### [Cluster25 Expand](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/cluster25_expand.py)
 
 <img src=../logos/cluster25.png height=60>
 
@@ -212,6 +268,10 @@ Module to query Cluster25 CTI.
 - **features**:
 >This module takes a MISP attribute value as input to query the Cluster25CTI API. The result is then mapped into compatible MISP Objects and relative attributes.
 >
+- **config**:
+> - api_id
+> - apikey
+> - base_url
 - **input**:
 >An Indicator value of type included in the following list:
 >- domain
@@ -237,7 +297,7 @@ Module to query Cluster25 CTI.
 
 -----
 
-#### [countrycode](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/countrycode.py)
+#### [Country Code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/countrycode.py)
 
 Module to expand country codes.
 - **features**:
@@ -251,7 +311,7 @@ Module to expand country codes.
 
 -----
 
-#### [cpe](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/cpe.py)
+#### [CPE Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/cpe.py)
 
 <img src=../logos/cve.png height=60>
 
@@ -263,6 +323,9 @@ An expansion module to query the CVE search API with a cpe code to get its relat
 >Users can use their own CVE search API url by defining a value to the custom_API_URL parameter. If no custom API url is given, the default vulnerability.circl.lu api url is used.
 >
 >In order to limit the amount of data returned by CVE serach, users can also the limit parameter. With the limit set, the API returns only the requested number of vulnerabilities, sorted from the highest cvss score to the lowest one.
+- **config**:
+> - custom_API_URL
+> - limit
 - **input**:
 >CPE attribute.
 - **output**:
@@ -272,13 +335,15 @@ An expansion module to query the CVE search API with a cpe code to get its relat
 
 -----
 
-#### [crowdsec](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/crowdsec.py)
+#### [CrowdSec CTI](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/crowdsec.py)
 
 <img src=../logos/crowdsec.png height=60>
 
 Hover module to lookup an IP in CrowdSec's CTI
 - **features**:
 >This module enables IP lookup from CrowdSec CTI API. It provides information about the IP, such as what kind of attacks it has been participant of as seen by CrowdSec's network. It also includes enrichment by CrowdSec like background noise score, aggressivity over time etc.
+- **config**:
+>api_key
 - **input**:
 >An IP address.
 - **output**:
@@ -292,15 +357,18 @@ Hover module to lookup an IP in CrowdSec's CTI
 
 -----
 
-#### [crowdstrike_falcon](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/crowdstrike_falcon.py)
+#### [CrowdStrike Falcon](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/crowdstrike_falcon.py)
 
 <img src=../logos/crowdstrike.png height=60>
 
-Module to query Crowdstrike Falcon.
+Module to query CrowdStrike Falcon.
 - **features**:
 >This module takes a MISP attribute as input to query a CrowdStrike Falcon API. The API returns then the result of the query with some types we map into compatible types we add as MISP attributes.
 >
 >Please note that composite attributes composed by at least one of the input types mentionned below (domains, IPs, hostnames) are also supported.
+- **config**:
+> - api_id
+> - apikey
 - **input**:
 >A MISP attribute included in the following list:
 >- domain
@@ -346,14 +414,17 @@ Module to query Crowdstrike Falcon.
 
 -----
 
-#### [cuckoo_submit](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/cuckoo_submit.py)
+#### [Cuckoo Submit](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/cuckoo_submit.py)
 
 <img src=../logos/cuckoo.png height=60>
 
-An expansion module to submit files and URLs to Cuckoo Sandbox.
+Submit files and URLs to Cuckoo Sandbox
 - **features**:
 >The module takes a malware-sample, attachment, url or domain and submits it to Cuckoo Sandbox.
 > The returned task id can be used to retrieve results when the analysis completed.
+- **config**:
+> - api_url
+> - api_key
 - **input**:
 >A malware-sample or attachment for files. A url or domain for URLs.
 - **output**:
@@ -366,13 +437,15 @@ An expansion module to submit files and URLs to Cuckoo Sandbox.
 
 -----
 
-#### [cve](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/cve.py)
+#### [CVE Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/cve.py)
 
 <img src=../logos/cve.png height=60>
 
 An expansion hover module to expand information about CVE id.
 - **features**:
 >The module takes a vulnerability attribute as input and queries the CIRCL CVE search API to get information about the vulnerability as it is described in the list of CVEs.
+- **config**:
+>custom_API
 - **input**:
 >Vulnerability attribute.
 - **output**:
@@ -383,7 +456,7 @@ An expansion hover module to expand information about CVE id.
 
 -----
 
-#### [cve_advanced](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/cve_advanced.py)
+#### [CVE Advanced Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/cve_advanced.py)
 
 <img src=../logos/cve.png height=60>
 
@@ -394,6 +467,8 @@ An expansion module to query the CIRCL CVE search API for more information about
 >The result of the query is then parsed to return additional information about the vulnerability, like its cvss score or some references, as well as the potential related weaknesses and attack patterns.
 >
 >The vulnerability additional data is returned in a vulnerability MISP object, and the related additional information are put into weakness and attack-pattern MISP objects.
+- **config**:
+>custom_API
 - **input**:
 >Vulnerability attribute.
 - **output**:
@@ -404,13 +479,28 @@ An expansion module to query the CIRCL CVE search API for more information about
 
 -----
 
-#### [cytomic_orion](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/cytomic_orion.py)
+#### [Cytomic Orion Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/cytomic_orion.py)
 
 <img src=../logos/cytomic_orion.png height=60>
 
 An expansion module to enrich attributes in MISP by quering the Cytomic Orion API
 - **features**:
 >This module takes an MD5 hash and searches for occurrences of this hash in the Cytomic Orion database. Returns observed files and machines.
+- **config**:
+> - api_url
+> - token_url
+> - clientid
+> - clientsecret
+> - clientsecret
+> - username
+> - password
+> - upload_timeframe
+> - upload_tag
+> - delete_tag
+> - upload_ttlDays
+> - upload_threat_level_id
+> - limit_upload_events
+> - limit_upload_attributes
 - **input**:
 >MD5, hash of the sample / malware to search for.
 - **output**:
@@ -423,11 +513,11 @@ An expansion module to enrich attributes in MISP by quering the Cytomic Orion AP
 
 -----
 
-#### [dbl_spamhaus](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/dbl_spamhaus.py)
+#### [DBL Spamhaus Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/dbl_spamhaus.py)
 
 <img src=../logos/spamhaus.jpg height=60>
 
-Module to check Spamhaus DBL for a domain name.
+Checks Spamhaus DBL for a domain name.
 - **features**:
 >This modules takes a domain or a hostname in input and queries the Domain Block List provided by Spamhaus to determine what kind of domain it is.
 >
@@ -445,15 +535,17 @@ Module to check Spamhaus DBL for a domain name.
 
 -----
 
-#### [dns](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/dns.py)
+#### [DNS Resolver](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/dns.py)
 
-A simple DNS expansion service to resolve IP address from domain MISP attributes.
+jj
 - **features**:
 >The module takes a domain of hostname attribute as input, and tries to resolve it. If no error is encountered, the IP address that resolves the domain is returned, otherwise the origin of the error is displayed.
 >
 >The address of the DNS resolver to use is also configurable, but if no configuration is set, we use the Google public DNS address (8.8.8.8).
 >
 >Please note that composite MISP attributes containing domain or hostname are supported as well.
+- **config**:
+>nameserver
 - **input**:
 >Domain or hostname attribute.
 - **output**:
@@ -463,7 +555,7 @@ A simple DNS expansion service to resolve IP address from domain MISP attributes
 
 -----
 
-#### [docx_enrich](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/docx_enrich.py)
+#### [DOCX Enrich](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/docx_enrich.py)
 
 <img src=../logos/docx.png height=60>
 
@@ -479,7 +571,7 @@ Module to extract freetext from a .docx document.
 
 -----
 
-#### [domaintools](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/domaintools.py)
+#### [DomainTools Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/domaintools.py)
 
 <img src=../logos/domaintools.png height=60>
 
@@ -488,6 +580,9 @@ DomainTools MISP expansion module.
 >This module takes a MISP attribute as input to query the Domaintools API. The API returns then the result of the query with some types we map into compatible types we add as MISP attributes.
 >
 >Please note that composite attributes composed by at least one of the input types mentionned below (domains, IPs, hostnames) are also supported.
+- **config**:
+> - username
+> - api_key
 - **input**:
 >A MISP attribute included in the following list:
 >- domain
@@ -517,7 +612,7 @@ DomainTools MISP expansion module.
 
 -----
 
-#### [eql](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/eql.py)
+#### [EQL Query Generator](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/eql.py)
 
 <img src=../logos/eql.png height=60>
 
@@ -533,7 +628,7 @@ EQL query generation for a MISP attribute.
 
 -----
 
-#### [eupi](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/eupi.py)
+#### [EUPI Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/eupi.py)
 
 <img src=../logos/eupi.png height=60>
 
@@ -542,6 +637,9 @@ A module to query the Phishing Initiative service (https://phishing-initiative.l
 >This module takes a domain, hostname or url MISP attribute as input to query the Phishing Initiative API. The API returns then the result of the query with some information about the value queried.
 >
 >Please note that composite attributes containing domain or hostname are also supported.
+- **config**:
+> - apikey
+> - url
 - **input**:
 >A domain, hostname or url MISP attribute.
 - **output**:
@@ -554,7 +652,15 @@ A module to query the Phishing Initiative service (https://phishing-initiative.l
 
 -----
 
-#### [farsight_passivedns](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/farsight_passivedns.py)
+#### [URL Components Extractor](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/extract_url_components.py)
+
+Extract URL components
+- **features**:
+>
+
+-----
+
+#### [Farsight DNSDB Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/farsight_passivedns.py)
 
 <img src=../logos/farsight.png height=60>
 
@@ -566,6 +672,11 @@ Module to access Farsight DNSDB Passive DNS.
 >An API key is required to submit queries to the API.
 >  It is also possible to define a custom server URL, and to set a limit of results to get.
 >  This limit is set for each lookup, which means we can have an up to the limit number of passive-dns objects resulting from an rdata query about an IP address, but an up to the limit number of passive-dns objects for each lookup queries about a domain or a hostname (== twice the limit).
+- **config**:
+> - apikey
+> - server
+> - limit
+> - flex_queries
 - **input**:
 >A domain, hostname or IP address MISP attribute.
 - **output**:
@@ -578,13 +689,17 @@ Module to access Farsight DNSDB Passive DNS.
 
 -----
 
-#### [geoip_asn](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/geoip_asn.py)
+#### [GeoIP ASN Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/geoip_asn.py)
 
 <img src=../logos/maxmind.png height=60>
-- **descrption**:
->An expansion module to query a local copy of Maxmind's Geolite database with an IP address, in order to get information about its related AS number.
+
+Query a local copy of the Maxmind Geolite ASN database (MMDB format)
 - **features**:
 >The module takes an IP address attribute as input and queries a local copy of the Maxmind's Geolite database to get information about the related AS number.
+- **config**:
+>local_geolite_db
+- **descrption**:
+>An expansion module to query a local copy of Maxmind's Geolite database with an IP address, in order to get information about its related AS number.
 - **input**:
 >An IP address MISP attribute.
 - **output**:
@@ -596,13 +711,15 @@ Module to access Farsight DNSDB Passive DNS.
 
 -----
 
-#### [geoip_city](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/geoip_city.py)
+#### [GeoIP City Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/geoip_city.py)
 
 <img src=../logos/maxmind.png height=60>
 
 An expansion module to query a local copy of Maxmind's Geolite database with an IP address, in order to get information about the city where it is located.
 - **features**:
 >The module takes an IP address attribute as input and queries a local copy of the Maxmind's Geolite database to get information about the city where this IP address is located.
+- **config**:
+>local_geolite_db
 - **input**:
 >An IP address MISP attribute.
 - **output**:
@@ -614,15 +731,17 @@ An expansion module to query a local copy of Maxmind's Geolite database with an 
 
 -----
 
-#### [geoip_country](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/geoip_country.py)
+#### [GeoIP Country Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/geoip_country.py)
 
 <img src=../logos/maxmind.png height=60>
 
-Module to query a local copy of Maxmind's Geolite database.
+Query a local copy of Maxminds Geolite database, updated for MMDB format
 - **features**:
 >This module takes an IP address MISP attribute as input and queries a local copy of the Maxmind's Geolite database to get information about the location of this IP address.
 >
 >Please note that composite attributes domain|ip are also supported.
+- **config**:
+>local_geolite_db
 - **input**:
 >An IP address MISP Attribute.
 - **output**:
@@ -634,11 +753,21 @@ Module to query a local copy of Maxmind's Geolite database.
 
 -----
 
-#### [google_search](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/google_search.py)
+#### [Google Safe Browsing Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/google_safe_browsing.py)
+
+Google safe browsing expansion module
+- **features**:
+>
+- **config**:
+>api_key
+
+-----
+
+#### [Google Search](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/google_search.py)
 
 <img src=../logos/google.png height=60>
-- **descrption**:
->A hover module to get information about an url using a Google search.
+
+An expansion hover module to expand google search information about an URL
 - **features**:
 >The module takes an url as input to query the Google search API. The result of the query is then return as raw text.
 - **input**:
@@ -652,7 +781,7 @@ Module to query a local copy of Maxmind's Geolite database.
 
 -----
 
-#### [google_threat_intelligence](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/google_threat_intelligence.py)
+#### [Google Threat Intelligence Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/google_threat_intelligence.py)
 
 <img src=../logos/google_threat_intelligence.png height=60>
 
@@ -661,6 +790,13 @@ An expansion module to have the observable's threat score assessed by Google Thr
 >GTI assessment for the given observable, this include information about level of severity, a clear verdict (malicious, suspicious, undetected and benign) and additional information provided by the Mandiant expertise combined with the VirusTotal database.
 >
 >[Output example screeshot](https://github.com/MISP/MISP/assets/4747608/e275db2f-bb1e-4413-8cc0-ec3cb05e0414)
+- **config**:
+> - apikey
+> - event_limit
+> - proxy_host
+> - proxy_port
+> - proxy_username
+> - proxy_password
 - **input**:
 >A domain, hash (md5, sha1, sha256 or sha512), hostname or IP address attribute.
 - **output**:
@@ -673,13 +809,16 @@ An expansion module to have the observable's threat score assessed by Google Thr
 
 -----
 
-#### [greynoise](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/greynoise.py)
+#### [GreyNoise Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/greynoise.py)
 
 <img src=../logos/greynoise.png height=60>
 
 Module to query IP and CVE information from GreyNoise
 - **features**:
 >This module supports: 1) Query an IP from GreyNoise to see if it is internet background noise or a common business service 2) Query a CVE from GreyNoise to see the total number of internet scanners looking for the CVE in the last 7 days.
+- **config**:
+> - api_key
+> - api_type
 - **input**:
 >An IP address or CVE ID
 - **output**:
@@ -693,7 +832,7 @@ Module to query IP and CVE information from GreyNoise
 
 -----
 
-#### [hashdd](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/hashdd.py)
+#### [Hashdd Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/hashdd.py)
 
 A hover module to check hashes against hashdd.com including NSLR dataset.
 - **features**:
@@ -707,7 +846,7 @@ A hover module to check hashes against hashdd.com including NSLR dataset.
 
 -----
 
-#### [hashlookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/hashlookup.py)
+#### [CIRCL Hashlookup Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/hashlookup.py)
 
 <img src=../logos/circl.png height=60>
 
@@ -717,6 +856,8 @@ An expansion module to query the CIRCL hashlookup services to find it if a hash 
 > It queries the public CIRCL.lu hashlookup service and return all the hits if the hashes are known in an existing dataset. The module can be configured with a custom hashlookup url if required.
 > The module can be used an hover module but also an expansion model to add related MISP objects.
 >
+- **config**:
+>custom_API
 - **input**:
 >File hashes (MD5, SHA1)
 - **output**:
@@ -726,13 +867,15 @@ An expansion module to query the CIRCL hashlookup services to find it if a hash 
 
 -----
 
-#### [hibp](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/hibp.py)
+#### [Have I Been Pwned Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/hibp.py)
 
 <img src=../logos/hibp.png height=60>
 
 Module to access haveibeenpwned.com API.
 - **features**:
 >The module takes an email address as input and queries haveibeenpwned.com API to find additional information about it. This additional information actually tells if any account using the email address has already been compromised in a data breach.
+- **config**:
+>api_key
 - **input**:
 >An email address
 - **output**:
@@ -742,7 +885,7 @@ Module to access haveibeenpwned.com API.
 
 -----
 
-#### [html_to_markdown](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/html_to_markdown.py)
+#### [HTML to Markdown](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/html_to_markdown.py)
 
 Expansion module to fetch the html content from an url and convert it into markdown.
 - **features**:
@@ -756,7 +899,7 @@ Expansion module to fetch the html content from an url and convert it into markd
 
 -----
 
-#### [hyasinsight](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/hyasinsight.py)
+#### [HYAS Insight Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/hyasinsight.py)
 
 <img src=../logos/hyas.png height=60>
 
@@ -767,6 +910,8 @@ HYAS Insight integration to MISP provides direct, high volume access to HYAS Ins
 >
 >An API key is required to submit queries to the HYAS Insight API.
 >
+- **config**:
+>apikey
 - **input**:
 >A MISP attribute of type IP Address(ip-src, ip-dst), Domain(hostname, domain), Email Address(email, email-src, email-dst, target-email, whois-registrant-email), Phone Number(phone-number, whois-registrant-phone), MDS(md5, x509-fingerprint-md5, ja3-fingerprint-md5, hassh-md5, hasshserver-md5), SHA1(sha1, x509-fingerprint-sha1), SHA256(sha256, x509-fingerprint-sha256), SHA512(sha512)
 - **output**:
@@ -778,13 +923,18 @@ HYAS Insight integration to MISP provides direct, high volume access to HYAS Ins
 
 -----
 
-#### [intel471](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/intel471.py)
+#### [Intel471 Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/intel471.py)
 
 <img src=../logos/intel471.png height=60>
-- **descrption**:
->An expansion module to query Intel471 in order to get additional information about a domain, ip address, email address, url or hash.
+
+Module to access Intel 471
 - **features**:
 >The module uses the Intel471 python library to query the Intel471 API with the value of the input attribute. The result of the query is then returned as freetext so the Freetext import parses it.
+- **config**:
+> - email
+> - authkey
+- **descrption**:
+>An expansion module to query Intel471 in order to get additional information about a domain, ip address, email address, url or hash.
 - **input**:
 >A MISP attribute whose type is included in the following list:
 >- hostname
@@ -809,29 +959,7 @@ HYAS Insight integration to MISP provides direct, high volume access to HYAS Ins
 
 -----
 
-#### [intelmq_eventdb](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/intelmq_eventdb.py)
-
-<img src=../logos/intelmq.png height=60>
-
-Module to access intelmqs eventdb.
-- **features**:
->/!\ EXPERIMENTAL MODULE, some features may not work /!\
->
->This module takes a domain, hostname, IP address or Autonomous system MISP attribute as input to query the IntelMQ database. The result of the query gives then additional information about the input.
-- **input**:
->A hostname, domain, IP address or AS attribute.
-- **output**:
->Text giving information about the input using IntelMQ database.
-- **references**:
-> - https://github.com/certtools/intelmq
-> - https://intelmq.readthedocs.io/en/latest/Developers-Guide/
-- **requirements**:
-> - psycopg2: Python library to support PostgreSQL
-> - An access to the IntelMQ database (username, password, hostname and database reference)
-
------
-
-#### [ip2locationio](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/ip2locationio.py)
+#### [IP2Location.io Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/ip2locationio.py)
 
 <img src=../logos/ip2locationio.png height=60>
 
@@ -842,6 +970,8 @@ An expansion module to query IP2Location.io to gather more information on a give
 > Refer to [pricing page](https://www.ip2location.io/pricing) for more information on data available for each plan. 
 >
 >More information on the responses content is available in the [documentation](https://www.ip2location.io/ip2location-documentation).
+- **config**:
+>key
 - **input**:
 >IP address attribute.
 - **output**:
@@ -853,7 +983,7 @@ An expansion module to query IP2Location.io to gather more information on a give
 
 -----
 
-#### [ipasn](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/ipasn.py)
+#### [IPASN-History Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/ipasn.py)
 
 Module to query an IP ASN history service (https://github.com/D4-project/IPASN-History).
 - **features**:
@@ -869,7 +999,7 @@ Module to query an IP ASN history service (https://github.com/D4-project/IPASN-H
 
 -----
 
-#### [ipinfo](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/ipinfo.py)
+#### [IPInfo.io Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/ipinfo.py)
 
 <img src=../logos/ipinfo.png height=60>
 
@@ -883,6 +1013,8 @@ An expansion module to query ipinfo.io to gather more information on a given IP 
 >- With a paid subscription, the AS information is returned in the `asn` field with additional AS information, and depending on which plan the user has, you can also get information on the privacy method used to protect the IP address, the related domains, or the point of contact related to the IP address in case of an abuse.
 >
 >More information on the responses content is available in the [documentation](https://ipinfo.io/developers).
+- **config**:
+>token
 - **input**:
 >IP address attribute.
 - **output**:
@@ -894,7 +1026,7 @@ An expansion module to query ipinfo.io to gather more information on a given IP 
 
 -----
 
-#### [ipqs_fraud_and_risk_scoring](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/ipqs_fraud_and_risk_scoring.py)
+#### [IPQualityScore Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/ipqs_fraud_and_risk_scoring.py)
 
 <img src=../logos/ipqualityscore.png height=60>
 
@@ -903,6 +1035,8 @@ IPQualityScore MISP Expansion Module for IP reputation, Email Validation, Phone 
 >This Module takes the IP Address, Domain, URL, Email and Phone Number MISP Attributes as input to query the IPQualityScore API.
 > The results of the IPQualityScore API are than returned as IPQS Fraud and Risk Scoring Object. 
 > The object contains a copy of the enriched attribute with added tags presenting the verdict based on fraud score,risk score and other attributes from IPQualityScore.
+- **config**:
+>apikey
 - **input**:
 >A MISP attribute of type IP Address(ip-src, ip-dst), Domain(hostname, domain), URL(url, uri), Email Address(email, email-src, email-dst, target-email, whois-registrant-email) and Phone Number(phone-number, whois-registrant-phone).
 - **output**:
@@ -914,11 +1048,13 @@ IPQualityScore MISP Expansion Module for IP reputation, Email Validation, Phone 
 
 -----
 
-#### [iprep](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/iprep.py)
+#### [IPRep Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/iprep.py)
 
 Module to query IPRep data for IP addresses.
 - **features**:
 >This module takes an IP address attribute as input and queries the database from packetmail.net to get some information about the reputation of the IP.
+- **config**:
+>apikey
 - **input**:
 >An IP address MISP attribute.
 - **output**:
@@ -930,13 +1066,19 @@ Module to query IPRep data for IP addresses.
 
 -----
 
-#### [joesandbox_query](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/joesandbox_query.py)
+#### [Ninja Template Rendering](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/jinja_template_rendering.py)
+
+Render the template with the data passed
+- **features**:
+>
+
+-----
+
+#### [Joe Sandbox Import](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/joesandbox_query.py)
 
 <img src=../logos/joesandbox.png height=60>
 
 Query Joe Sandbox API with a submission url to get the json report and extract its data that is parsed and converted into MISP attributes and objects.
-
-This url can by the way come from the result of the [joesandbox_submit expansion module](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/joesandbox_submit.py).
 - **features**:
 >Module using the new format of modules able to return attributes and objects.
 >
@@ -945,6 +1087,11 @@ This url can by the way come from the result of the [joesandbox_submit expansion
 >Even if the introspection will allow all kinds of links to call this module, obviously only the ones presenting a sample or url submission in the Joe Sandbox API will return results.
 >
 >To make it work you will need to fill the 'apikey' configuration with your Joe Sandbox API key and provide a valid link as input.
+- **config**:
+> - apiurl
+> - apikey
+> - import_executable
+> - import_mitre_attack
 - **input**:
 >Link of a Joe Sandbox sample or url submission.
 - **output**:
@@ -957,7 +1104,7 @@ This url can by the way come from the result of the [joesandbox_submit expansion
 
 -----
 
-#### [joesandbox_submit](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/joesandbox_submit.py)
+#### [Joe Sandbox Submit](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/joesandbox_submit.py)
 
 <img src=../logos/joesandbox.png height=60>
 
@@ -966,6 +1113,12 @@ A module to submit files or URLs to Joe Sandbox for an advanced analysis, and re
 >The module requires a Joe Sandbox API key to submit files or URL, and returns the link of the submitted analysis.
 >
 >It is then possible, when the analysis is completed, to query the Joe Sandbox API to get the data related to the analysis, using the [joesandbox_query module](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/joesandbox_query.py) directly on this submission link.
+- **config**:
+> - apiurl
+> - apikey
+> - accept-tac
+> - report-cache
+> - systems
 - **input**:
 >Sample, url (or domain) to submit to Joe Sandbox for an advanced analysis.
 - **output**:
@@ -978,18 +1131,21 @@ A module to submit files or URLs to Joe Sandbox for an advanced analysis, and re
 
 -----
 
-#### [lastline_query](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/lastline_query.py)
+#### [Lastline Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/lastline_query.py)
 
 <img src=../logos/lastline.png height=60>
 
 Deprecation notice: this module will be deprecated by December 2021, please use vmware_nsx module.
 
 Query Lastline with an analysis link and parse the report into MISP attributes and objects.
-The analysis link can also be retrieved from the output of the [lastline_submit](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/lastline_submit.py) expansion module.
 - **features**:
 >The module requires a Lastline Portal `username` and `password`.
 >The module uses the new format and it is able to return MISP attributes and objects.
 >The module returns the same results as the [lastline_import](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/lastline_import.py) import module.
+- **config**:
+> - username
+> - password
+> - verify_ssl
 - **input**:
 >Link to a Lastline analysis.
 - **output**:
@@ -999,7 +1155,7 @@ The analysis link can also be retrieved from the output of the [lastline_submit]
 
 -----
 
-#### [lastline_submit](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/lastline_submit.py)
+#### [Lastline Submit](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/lastline_submit.py)
 
 <img src=../logos/lastline.png height=60>
 
@@ -1009,6 +1165,10 @@ Module to submit a file or URL to Lastline.
 - **features**:
 >The module requires a Lastline Analysis `api_token` and `key`.
 >When the analysis is completed, it is possible to import the generated report by feeding the analysis link to the [lastline_query](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/lastline_query.py) module.
+- **config**:
+> - url
+> - api_token
+> - key
 - **input**:
 >File or URL to submit to Lastline.
 - **output**:
@@ -1018,7 +1178,7 @@ Module to submit a file or URL to Lastline.
 
 -----
 
-#### [macaddress_io](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/macaddress_io.py)
+#### [Macaddress.io Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/macaddress_io.py)
 
 <img src=../logos/macaddress_io.png height=60>
 
@@ -1030,6 +1190,8 @@ MISP hover module for macaddress.io
 >- MAC address details
 >- Vendor details
 >- Block details
+- **config**:
+>api_key
 - **input**:
 >MAC address MISP attribute.
 - **output**:
@@ -1043,13 +1205,15 @@ MISP hover module for macaddress.io
 
 -----
 
-#### [macvendors](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/macvendors.py)
+#### [Macvendors Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/macvendors.py)
 
 <img src=../logos/macvendors.png height=60>
 
 Module to access Macvendors API.
 - **features**:
 >The module takes a MAC address as input and queries macvendors.com for some information about it. The API returns the name of the vendor related to the address.
+- **config**:
+>user-agent
 - **input**:
 >A MAC address.
 - **output**:
@@ -1060,9 +1224,9 @@ Module to access Macvendors API.
 
 -----
 
-#### [malwarebazaar](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/malwarebazaar.py)
+#### [Malware Bazaar Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/malwarebazaar.py)
 
-Query the MALWAREbazaar API to get additional information about the input hash attribute.
+Query Malware Bazaar to get additional information about the input hash.
 - **features**:
 >The module takes a hash attribute as input and queries MALWAREbazaar's API to fetch additional data about it. The result, if the payload is known on the databases, is at least one file object describing the file the input hash is related to.
 >
@@ -1076,7 +1240,19 @@ Query the MALWAREbazaar API to get additional information about the input hash a
 
 -----
 
-#### [mmdb_lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/mmdb_lookup.py)
+#### [McAfee MVISION Insights Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/mcafee_insights_enrich.py)
+
+Lookup McAfee MVISION Insights Details
+- **features**:
+>
+- **config**:
+> - api_key
+> - client_id
+> - client_secret
+
+-----
+
+#### [GeoIP Enrichment](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/mmdb_lookup.py)
 
 <img src=../logos/circl.png height=60>
 
@@ -1085,6 +1261,9 @@ A hover and expansion module to enrich an ip with geolocation and ASN informatio
 >The module takes an IP address related attribute as input.
 > It queries the public CIRCL.lu mmdb-server instance, available at ip.circl.lu, by default. The module can be configured with a custom mmdb server url if required.
 > It is also possible to filter results on 1 db_source by configuring db_source_filter.
+- **config**:
+> - custom_API
+> - db_source_filter
 - **input**:
 >An IP address attribute (for example ip-src or ip-src|port).
 - **output**:
@@ -1095,11 +1274,18 @@ A hover and expansion module to enrich an ip with geolocation and ASN informatio
 
 -----
 
-#### [mwdb](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/mwdb.py)
+#### [MWDB Submit](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/mwdb.py)
 
 Module to push malware samples to a MWDB instance
 - **features**:
 >An expansion module to push malware samples to a MWDB (https://github.com/CERT-Polska/mwdb-core) instance. This module does not push samples to a sandbox. This can be achieved via Karton (connected to the MWDB). Does: * Upload of attachment or malware sample to MWDB * Tags of events and/or attributes are added to MWDB. * Comment of the MISP attribute is added to MWDB. * A link back to the MISP event is added to MWDB via the MWDB attribute.  * A link to the MWDB attribute is added as an enrichted attribute to the MISP event.
+- **config**:
+> - mwdb_apikey
+> - mwdb_url
+> - mwdb_misp_attribute
+> - mwdb_public
+> - include_tags_event
+> - include_tags_attribute
 - **input**:
 >Attachment or malware sample
 - **output**:
@@ -1109,7 +1295,7 @@ Module to push malware samples to a MWDB instance
 
 -----
 
-#### [ocr_enrich](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/ocr_enrich.py)
+#### [OCR Enrich](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/ocr_enrich.py)
 
 Module to process some optical character recognition on pictures.
 - **features**:
@@ -1123,7 +1309,7 @@ Module to process some optical character recognition on pictures.
 
 -----
 
-#### [ods_enrich](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/ods_enrich.py)
+#### [ODS Enrich](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/ods_enrich.py)
 
 <img src=../logos/ods.png height=60>
 
@@ -1140,7 +1326,7 @@ Module to extract freetext from a .ods document.
 
 -----
 
-#### [odt_enrich](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/odt_enrich.py)
+#### [ODT Enrich](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/odt_enrich.py)
 
 <img src=../logos/odt.png height=60>
 
@@ -1156,13 +1342,15 @@ Module to extract freetext from a .odt document.
 
 -----
 
-#### [onyphe](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/onyphe.py)
+#### [Onyphe Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/onyphe.py)
 
 <img src=../logos/onyphe.jpg height=60>
 
 Module to process a query on Onyphe.
 - **features**:
 >This module takes a domain, hostname, or IP address attribute as input in order to query the Onyphe API. Data fetched from the query is then parsed and MISP attributes are extracted.
+- **config**:
+>apikey
 - **input**:
 >A domain, hostname or IP address MISP attribute.
 - **output**:
@@ -1176,7 +1364,7 @@ Module to process a query on Onyphe.
 
 -----
 
-#### [onyphe_full](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/onyphe_full.py)
+#### [Onyphe Full Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/onyphe_full.py)
 
 <img src=../logos/onyphe.jpg height=60>
 
@@ -1185,6 +1373,8 @@ Module to process a full query on Onyphe.
 >This module takes a domain, hostname, or IP address attribute as input in order to query the Onyphe API. Data fetched from the query is then parsed and MISP attributes are extracted.
 >
 >The parsing is here more advanced than the one on onyphe module, and is returning more attributes, since more fields of the query result are watched and parsed.
+- **config**:
+>apikey
 - **input**:
 >A domain, hostname or IP address MISP attribute.
 - **output**:
@@ -1198,13 +1388,15 @@ Module to process a full query on Onyphe.
 
 -----
 
-#### [otx](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/otx.py)
+#### [AlienVault OTX Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/otx.py)
 
 <img src=../logos/otx.png height=60>
 
 Module to get information from AlienVault OTX.
 - **features**:
 >This module takes a MISP attribute as input to query the OTX Alienvault API. The API returns then the result of the query with some types we map into compatible types we add as MISP attributes.
+- **config**:
+>apikey
 - **input**:
 >A MISP attribute included in the following list:
 >- hostname
@@ -1233,32 +1425,28 @@ Module to get information from AlienVault OTX.
 
 -----
 
-#### [passivessh](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/passivessh.py)
+#### [Passive SSH Enrichment](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/passive_ssh.py)
 
-<img src=../logos/passivessh.png height=60>
-
-An expansion module to query the CIRCL Passive SSH.
+An expansion module to enrich, SSH key fingerprints and IP addresses with information collected by passive-ssh
 - **features**:
->The module queries the Passive SSH service from CIRCL.
-> 
-> The module can be used an hover module but also an expansion model to add related MISP objects.
 >
-- **input**:
->IP addresses or SSH fingerprints
-- **output**:
->SSH key materials, complementary IP addresses with similar SSH key materials
-- **references**:
->https://github.com/D4-project/passive-ssh
+- **config**:
+> - custom_api_url
+> - api_user
+> - api_key
 
 -----
 
-#### [passivetotal](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/passivetotal.py)
+#### [PassiveTotal Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/passivetotal.py)
 
 <img src=../logos/passivetotal.png height=60>
 
-
+The PassiveTotal MISP expansion module brings the datasets derived from Internet scanning directly into your MISP instance. This module supports passive DNS, historic SSL, WHOIS, and host attributes. In order to use the module, you must have a valid PassiveTotal account username and API key. Registration is free and can be done by visiting https://www.passivetotal.org/register
 - **features**:
 >The PassiveTotal MISP expansion module brings the datasets derived from Internet scanning directly into your MISP instance. This module supports passive DNS, historic SSL, WHOIS, and host attributes. In order to use the module, you must have a valid PassiveTotal account username and API key. Registration is free and can be done by visiting https://www.passivetotal.org/register
+- **config**:
+> - username
+> - api_key
 - **input**:
 >A MISP attribute included in the following list:
 >- hostname
@@ -1303,7 +1491,7 @@ An expansion module to query the CIRCL Passive SSH.
 
 -----
 
-#### [pdf_enrich](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/pdf_enrich.py)
+#### [PDF Enrich](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/pdf_enrich.py)
 
 <img src=../logos/pdf.jpg height=60>
 
@@ -1319,7 +1507,7 @@ Module to extract freetext from a PDF document.
 
 -----
 
-#### [pptx_enrich](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/pptx_enrich.py)
+#### [PPTX Enrich](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/pptx_enrich.py)
 
 <img src=../logos/pptx.png height=60>
 
@@ -1335,13 +1523,16 @@ Module to extract freetext from a .pptx document.
 
 -----
 
-#### [qintel_qsentry](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/qintel_qsentry.py)
+#### [Qintel QSentry Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/qintel_qsentry.py)
 
 <img src=../logos/qintel.png height=60>
 
 A hover and expansion module which queries Qintel QSentry for ip reputation data
 - **features**:
 >This module takes an ip-address (ip-src or ip-dst) attribute as input, and queries the Qintel QSentry API to retrieve ip reputation data
+- **config**:
+> - token
+> - remote
 - **input**:
 >ip address attribute
 - **ouput**:
@@ -1353,7 +1544,7 @@ A hover and expansion module which queries Qintel QSentry for ip reputation data
 
 -----
 
-#### [qrcode](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/qrcode.py)
+#### [QR Code Decode](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/qrcode.py)
 
 Module to decode QR codes.
 - **features**:
@@ -1368,13 +1559,17 @@ Module to decode QR codes.
 
 -----
 
-#### [ransomcoindb](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/ransomcoindb.py)
-- **descrption**:
->Module to access the ransomcoinDB with a hash or btc address attribute and get the associated btc address of hashes.
+#### [RandomcoinDB Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/ransomcoindb.py)
+
+Module to access the ransomcoinDB (see https://ransomcoindb.concinnity-risks.com)
 - **features**:
 >The module takes either a hash attribute or a btc attribute as input to query the ransomcoinDB API for some additional data.
 >
 >If the input is a btc address, we will get the associated hashes returned in a file MISP object. If we query ransomcoinDB with a hash, the response contains the associated btc addresses returned as single MISP btc attributes.
+- **config**:
+>api-key
+- **descrption**:
+>Module to access the ransomcoinDB with a hash or btc address attribute and get the associated btc address of hashes.
 - **input**:
 >A hash (md5, sha1 or sha256) or btc attribute.
 - **output**:
@@ -1386,13 +1581,15 @@ Module to decode QR codes.
 
 -----
 
-#### [rbl](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/rbl.py)
+#### [Real-time Blackhost Lists Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/rbl.py)
 
 Module to check an IPv4 address against known RBLs.
 - **features**:
 >This module takes an IP address attribute as input and queries multiple know Real-time Blackhost Lists to check if they have already seen this IP address.
 >
 >We display then all the information we get from those different sources.
+- **config**:
+>timeout
 - **input**:
 >IP address attribute.
 - **output**:
@@ -1404,13 +1601,19 @@ Module to check an IPv4 address against known RBLs.
 
 -----
 
-#### [recordedfuture](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/recordedfuture.py)
+#### [Recorded Future Enrich](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/recordedfuture.py)
 
 <img src=../logos/recordedfuture.png height=60>
 
 Module to enrich attributes with threat intelligence from Recorded Future.
 - **features**:
 >Enrich an attribute to add a custom enrichment object to the event. The object contains a copy of the enriched attribute with added tags presenting risk score and triggered risk rules from Recorded Future. Malware and Threat Actors related to the enriched indicator in Recorded Future is matched against MISP's galaxy clusters and applied as galaxy tags. The custom enrichment object also includes a list of related indicators from Recorded Future (IP's, domains, hashes, URL's and vulnerabilities) added as additional attributes.
+- **config**:
+> - token
+> - proxy_host
+> - proxy_port
+> - proxy_username
+> - proxy_password
 - **input**:
 >A MISP attribute of one of the following types: ip, ip-src, ip-dst, domain, hostname, md5, sha1, sha256, uri, url, vulnerability, weakness.
 - **output**:
@@ -1422,7 +1625,7 @@ Module to enrich attributes with threat intelligence from Recorded Future.
 
 -----
 
-#### [reversedns](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/reversedns.py)
+#### [Reverse DNS](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/reversedns.py)
 
 Simple Reverse DNS expansion service to resolve reverse DNS from MISP attributes.
 - **features**:
@@ -1431,6 +1634,8 @@ Simple Reverse DNS expansion service to resolve reverse DNS from MISP attributes
 >The address of the DNS resolver to use is also configurable, but if no configuration is set, we use the Google public DNS address (8.8.8.8).
 >
 >Please note that composite MISP attributes containing IP addresses are supported as well.
+- **config**:
+>nameserver
 - **input**:
 >An IP address attribute.
 - **output**:
@@ -1440,7 +1645,7 @@ Simple Reverse DNS expansion service to resolve reverse DNS from MISP attributes
 
 -----
 
-#### [securitytrails](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/securitytrails.py)
+#### [SecurityTrails Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/securitytrails.py)
 
 <img src=../logos/securitytrails.png height=60>
 
@@ -1451,6 +1656,8 @@ An expansion modules for SecurityTrails.
 >Multiple parsing operations are then processed on the result of the query to extract a much information as possible.
 >
 >From this data extracted are then mapped MISP attributes.
+- **config**:
+>apikey
 - **input**:
 >A domain, hostname or IP address attribute.
 - **output**:
@@ -1474,13 +1681,15 @@ An expansion modules for SecurityTrails.
 
 -----
 
-#### [shodan](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/shodan.py)
+#### [Shodan Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/shodan.py)
 
 <img src=../logos/shodan.png height=60>
 
 Module to query on Shodan.
 - **features**:
 >The module takes an IP address as input and queries the Shodan API to get some additional data about it.
+- **config**:
+>apikey
 - **input**:
 >An IP address MISP attribute.
 - **output**:
@@ -1493,7 +1702,7 @@ Module to query on Shodan.
 
 -----
 
-#### [sigma_queries](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/sigma_queries.py)
+#### [Sigma Rule Converter](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/sigma_queries.py)
 
 <img src=../logos/sigma.png height=60>
 
@@ -1511,7 +1720,7 @@ An expansion hover module to display the result of sigma queries.
 
 -----
 
-#### [sigma_syntax_validator](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/sigma_syntax_validator.py)
+#### [Sigma Syntax Validator](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/sigma_syntax_validator.py)
 
 <img src=../logos/sigma.png height=60>
 
@@ -1532,25 +1741,15 @@ An expansion hover module to perform a syntax check on sigma rules.
 
 -----
 
-#### [sigmf-expand](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/sigmf-expand.py)
+#### [SigMF Expansion](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/sigmf_expand.py)
 
-Enrichs a SigMF Recording or extracts a SigMF Archive into a SigMF Recording.
+Expands a SigMF Recording object into a SigMF Expanded Recording object, extracts a SigMF archive into a SigMF Recording object.
 - **features**:
->This module can be used to expand a SigMF Recording object into a SigMF Expanded Recording object with a waterfall plot or to extract a SigMF Archive object into a SigMF Recording objet.
-- **input**:
->Object of sigmf-archive or sigmf-recording template.
-- **output**:
->Object of sigmf-expanded-recording or sigmf-recording template.
-- **references**:
->https://github.com/sigmf/SigMF
-- **requirements**:
-> - matplotlib: For plotting the waterfall plot of the recording.
-> - numpy: For the waterfall plot of the recording.
-> - sigmf: For validating SigMF files.
+>
 
 -----
 
-#### [socialscan](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/socialscan.py)
+#### [Socialscan Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/socialscan.py)
 
 A hover module to get information on the availability of an email address or username on some online platforms.
 - **features**:
@@ -1566,13 +1765,16 @@ A hover module to get information on the availability of an email address or use
 
 -----
 
-#### [sophoslabs_intelix](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/sophoslabs_intelix.py)
+#### [SophosLabs Intelix Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/sophoslabs_intelix.py)
 
 <img src=../logos/sophoslabs_intelix.svg height=60>
 
 An expansion module to query the Sophoslabs intelix API to get additional information about an ip address, url, domain or sha256 attribute.
 - **features**:
 >The module takes an ip address, url, domain or sha256 attribute and queries the SophosLabs Intelix API with the attribute value. The result of this query is a SophosLabs Intelix hash report, or an ip or url lookup, that is then parsed and returned in a MISP object.
+- **config**:
+> - client_id
+> - client_secret
 - **input**:
 >An ip address, url, domain or sha256 attribute.
 - **output**:
@@ -1584,11 +1786,13 @@ An expansion module to query the Sophoslabs intelix API to get additional inform
 
 -----
 
-#### [sourcecache](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/sourcecache.py)
+#### [URL Archiver](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/sourcecache.py)
 
 Module to cache web pages of analysis reports, OSINT sources. The module returns a link of the cached page.
 - **features**:
 >This module takes a link or url attribute as input and caches the related web page. It returns then a link of the cached page.
+- **config**:
+>archivepath
 - **input**:
 >A link or url attribute.
 - **output**:
@@ -1600,13 +1804,15 @@ Module to cache web pages of analysis reports, OSINT sources. The module returns
 
 -----
 
-#### [stairwell](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/stairwell.py)
+#### [Stairwell Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/stairwell.py)
 
 <img src=../logos/stairwell.png height=60>
 
 Module to query the Stairwell API to get additional information about the input hash attribute
 - **features**:
 >The module takes a hash attribute as input and queries Stariwell's API to fetch additional data about it. The result, if the payload is observed in Stariwell, is a file object describing the file the input hash is related to.
+- **config**:
+>apikey
 - **input**:
 >A hash attribute (md5, sha1, sha256).
 - **output**:
@@ -1619,7 +1825,7 @@ Module to query the Stairwell API to get additional information about the input 
 
 -----
 
-#### [stix2_pattern_syntax_validator](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/stix2_pattern_syntax_validator.py)
+#### [STIX2 Pattern Syntax Validator](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/stix2_pattern_syntax_validator.py)
 
 <img src=../logos/stix.png height=60>
 
@@ -1639,7 +1845,7 @@ An expansion hover module to perform a syntax check on stix2 patterns.
 
 -----
 
-#### [threatcrowd](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/threatcrowd.py)
+#### [ThreatCrowd Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/threatcrowd.py)
 
 <img src=../logos/threatcrowd.png height=60>
 
@@ -1676,7 +1882,15 @@ Module to get information from ThreatCrowd.
 
 -----
 
-#### [threatminer](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/threatminer.py)
+#### [ThreadFox Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/threatfox.py)
+
+Module to search for an IOC on ThreatFox by abuse.ch.
+- **features**:
+>
+
+-----
+
+#### [ThreatMiner Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/threatminer.py)
 
 <img src=../logos/threatminer.png height=60>
 
@@ -1716,7 +1930,7 @@ Module to get information from ThreatMiner.
 
 -----
 
-#### [trustar_enrich](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/trustar_enrich.py)
+#### [TruSTAR Enrich](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/trustar_enrich.py)
 
 <img src=../logos/trustar.png height=60>
 
@@ -1725,6 +1939,10 @@ Module to get enrich indicators with TruSTAR.
 >This module enriches MISP attributes with scoring and metadata from TruSTAR.
 >
 >The TruSTAR indicator summary is appended to the attributes along with links to any associated reports.
+- **config**:
+> - user_api_key
+> - user_api_secret
+> - enclave_ids
 - **input**:
 >Any of the following MISP attributes:
 >- btc
@@ -1745,7 +1963,7 @@ Module to get enrich indicators with TruSTAR.
 
 -----
 
-#### [urlhaus](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/urlhaus.py)
+#### [URLhaus Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/urlhaus.py)
 
 <img src=../logos/urlhaus.png height=60>
 
@@ -1763,7 +1981,7 @@ Query of the URLhaus API to get additional information about the input attribute
 
 -----
 
-#### [urlscan](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/urlscan.py)
+#### [URLScan Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/urlscan.py)
 
 <img src=../logos/urlscan.jpg height=60>
 
@@ -1772,6 +1990,8 @@ An expansion module to query urlscan.io.
 >This module takes a MISP attribute as input and queries urlscan.io with it.
 >
 >The result of this query is then parsed and some data is mapped into MISP attributes in order to enrich the input attribute.
+- **config**:
+>apikey
 - **input**:
 >A domain, hostname or url attribute.
 - **output**:
@@ -1783,7 +2003,7 @@ An expansion module to query urlscan.io.
 
 -----
 
-#### [variotdbs](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/variotdbs.py)
+#### [VARIoT db Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/variotdbs.py)
 
 <img src=../logos/variot.png height=60>
 
@@ -1794,6 +2014,8 @@ An expansion module to query the VARIoT db API for more information about a vuln
 >The `vuln` endpoint is queried first to look for additional information about the vulnerability itself.
 >
 >The `exploits` endpoint is also queried then to look for the information of the potential related exploits, which are parsed and added to the results using the `exploit` object template.
+- **config**:
+>API_key
 - **input**:
 >Vulnerability attribute.
 - **output**:
@@ -1805,11 +2027,11 @@ An expansion module to query the VARIoT db API for more information about a vuln
 
 -----
 
-#### [virustotal](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/virustotal.py)
+#### [VirusTotal v3 Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/virustotal.py)
 
 <img src=../logos/virustotal.png height=60>
 
-Module to get advanced information from virustotal.
+Enrich observables with the VirusTotal v3 API
 - **features**:
 >New format of modules able to return attributes and objects.
 >
@@ -1818,6 +2040,13 @@ Module to get advanced information from virustotal.
 >Compared to the [standard VirusTotal expansion module](https://github.com/MISP/misp-modules/blob/main/misp_modules/modules/expansion/virustotal_public.py), this module is made for advanced parsing of VirusTotal report, with a recursive analysis of the elements found after the first request.
 >
 >Thus, it requires a higher request rate limit to avoid the API to return a 204 error (Request rate limit exceeded), and the data parsed from the different requests are returned as MISP attributes and objects, with the corresponding relations between each one of them.
+- **config**:
+> - apikey
+> - event_limit
+> - proxy_host
+> - proxy_port
+> - proxy_username
+> - proxy_password
 - **input**:
 >A domain, hash (md5, sha1, sha256 or sha512), hostname or IP address attribute.
 - **output**:
@@ -1830,11 +2059,11 @@ Module to get advanced information from virustotal.
 
 -----
 
-#### [virustotal_public](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/virustotal_public.py)
+#### [VirusTotal Public API Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/virustotal_public.py)
 
 <img src=../logos/virustotal.png height=60>
 
-Module to get information from VirusTotal.
+Enrich observables with the VirusTotal v3 public API
 - **features**:
 >New format of modules able to return attributes and objects.
 >
@@ -1843,6 +2072,12 @@ Module to get information from VirusTotal.
 >Compared to the [more advanced VirusTotal expansion module](https://github.com/MISP/misp-modules/blob/main/misp_modules/modules/expansion/virustotal.py), this module is made for VirusTotal users who have a low request rate limit.
 >
 >Thus, it only queries the API once and returns the results that is parsed into MISP attributes and objects.
+- **config**:
+> - apikey
+> - proxy_host
+> - proxy_port
+> - proxy_username
+> - proxy_password
 - **input**:
 >A domain, hostname, ip, url or hash (md5, sha1, sha256 or sha512) attribute.
 - **output**:
@@ -1855,7 +2090,7 @@ Module to get information from VirusTotal.
 
 -----
 
-#### [vmray_submit](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/vmray_submit.py)
+#### [VMRay Submit](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/vmray_submit.py)
 
 <img src=../logos/vmray.png height=60>
 
@@ -1864,6 +2099,12 @@ Module to submit a sample to VMRay.
 >This module takes an attachment or malware-sample attribute as input to query the VMRay API.
 >
 >The sample contained within the attribute in then enriched with data from VMRay mapped into MISP attributes.
+- **config**:
+> - apikey
+> - url
+> - shareable
+> - do_not_reanalyze
+> - do_not_include_vmrayjobids
 - **input**:
 >An attachment or malware-sample attribute.
 - **output**:
@@ -1880,7 +2121,7 @@ Module to submit a sample to VMRay.
 
 -----
 
-#### [vmware_nsx](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/vmware_nsx.py)
+#### [VMware NSX Defender Enrich](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/vmware_nsx.py)
 
 <img src=../logos/vmware_nsx.png height=60>
 
@@ -1889,6 +2130,15 @@ Module to enrich a file or URL with VMware NSX Defender.
 >This module takes an IoC such as file hash, file attachment, malware-sample or url as input to query VMware NSX Defender.
 >
 >The IoC is then enriched with data from VMware NSX Defender.
+- **config**:
+> - analysis_url
+> - analysis_verify_ssl
+> - analysis_key
+> - analysis_api_token
+> - vt_key
+> - misp_url
+> - misp_verify_ssl
+> - misp_key
 - **input**:
 >File hash, attachment or URL to be enriched with VMware NSX Defender.
 - **output**:
@@ -1900,7 +2150,7 @@ Module to enrich a file or URL with VMware NSX Defender.
 
 -----
 
-#### [vulndb](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/vulndb.py)
+#### [VulnDB Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/vulndb.py)
 
 <img src=../logos/vulndb.png height=60>
 
@@ -1909,6 +2159,15 @@ Module to query VulnDB (RiskBasedSecurity.com).
 >This module takes a vulnerability attribute as input and queries VulnDB in order to get some additional data about it.
 >
 >The API gives the result of the query which can be displayed in the screen, and/or mapped into MISP attributes to add in the event.
+- **config**:
+> - apikey
+> - apisecret
+> - discard_dates
+> - discard_external_references
+> - discard_cvss
+> - discard_productinformation
+> - discard_classification
+> - discard_cpe
 - **input**:
 >A vulnerability attribute.
 - **output**:
@@ -1920,7 +2179,15 @@ Module to query VulnDB (RiskBasedSecurity.com).
 
 -----
 
-#### [vulners](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/vulners.py)
+#### [Vulnerability Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/vulnerability_lookup.py)
+
+An expansion module to query Vulnerability Lookup
+- **features**:
+>
+
+-----
+
+#### [Vulners Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/vulners.py)
 
 <img src=../logos/vulners.png height=60>
 
@@ -1929,6 +2196,8 @@ An expansion hover module to expand information about CVE id using Vulners API.
 >This module takes a vulnerability attribute as input and queries the Vulners API in order to get some additional data about it.
 >
 >The API then returns details about the vulnerability.
+- **config**:
+>apikey
 - **input**:
 >A vulnerability attribute.
 - **output**:
@@ -1941,13 +2210,20 @@ An expansion hover module to expand information about CVE id using Vulners API.
 
 -----
 
-#### [vysion](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/vysion.py)
+#### [Vysion Enrich](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/vysion.py)
 
 <img src=../logos/vysion.png height=60>
 
 Module to enrich the information by making use of the Vysion API.
 - **features**:
 >This module gets correlated information from Byron Labs' dark web intelligence database. With this you will get several objects containing information related to, for example, an organization victim of a ransomware attack.
+- **config**:
+> - apikey
+> - event_limit
+> - proxy_host
+> - proxy_port
+> - proxy_username
+> - proxy_password
 - **input**:
 >company(target-org), country, info, BTC, XMR and DASH address.
 - **output**:
@@ -1962,11 +2238,14 @@ Module to enrich the information by making use of the Vysion API.
 
 -----
 
-#### [whois](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/whois.py)
+#### [Whois Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/whois.py)
 
 Module to query a local instance of uwhois (https://github.com/rafiot/uwhoisd).
 - **features**:
 >This module takes a domain or IP address attribute as input and queries a 'Univseral Whois proxy server' to get the correct details of the Whois query on the input value (check the references for more details about this whois server).
+- **config**:
+> - server
+> - port
 - **input**:
 >A domain or IP address attribute.
 - **output**:
@@ -1978,19 +2257,19 @@ Module to query a local instance of uwhois (https://github.com/rafiot/uwhoisd).
 
 -----
 
-#### [whoisfreaks](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/whoisfreaks.py)
+#### [WhoisFreaks Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/whoisfreaks.py)
 
 <img src=../logos/whoisfreaks.png height=60>
 
 An expansion module for https://whoisfreaks.com/ that will provide an enriched analysis of the provided domain, including WHOIS and DNS information.
-Our Whois service, DNS Lookup API, and SSL analysis, equips organizations with comprehensive threat intelligence and attack surface analysis capabilities for enhanced security. 
-Explore our website's product section at https://whoisfreaks.com/ for a wide range of additional services catering to threat intelligence and attack surface analysis needs.
 - **features**:
 >The module takes a domain as input and queries the Whoisfreaks API with it.
 >
 >Some parsing operations are then processed on the result of the query to extract as much information as possible.
 >
 >After this we map the extracted data to MISP attributes.
+- **config**:
+>apikey
 - **input**:
 >A domain whose Data is required
 - **output**:
@@ -2010,7 +2289,7 @@ Explore our website's product section at https://whoisfreaks.com/ for a wide ran
 
 -----
 
-#### [wiki](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/wiki.py)
+#### [Wikidata Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/wiki.py)
 
 <img src=../logos/wikidata.png height=60>
 
@@ -2028,13 +2307,16 @@ An expansion hover module to extract information from Wikidata to have additiona
 
 -----
 
-#### [xforceexchange](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/xforceexchange.py)
+#### [IBM X-Force Exchange Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/xforceexchange.py)
 
 <img src=../logos/xforce.png height=60>
 
 An expansion module for IBM X-Force Exchange.
 - **features**:
 >This module takes a MISP attribute as input to query the X-Force API. The API returns then additional information known in their threats data, that is mapped into MISP attributes.
+- **config**:
+> - apikey
+> - apipassword
 - **input**:
 >A MISP attribute included in the following list:
 >- ip-src
@@ -2052,7 +2334,7 @@ An expansion module for IBM X-Force Exchange.
 
 -----
 
-#### [xlsx_enrich](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/xlsx_enrich.py)
+#### [XLXS Enrich](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/xlsx_enrich.py)
 
 <img src=../logos/xlsx.png height=60>
 
@@ -2068,11 +2350,11 @@ Module to extract freetext from a .xlsx document.
 
 -----
 
-#### [yara_query](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/yara_query.py)
+#### [YARA Rule Generator](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/yara_query.py)
 
 <img src=../logos/yara.png height=60>
 
-An expansion & hover module to translate any hash attribute into a yara rule.
+jj
 - **features**:
 >The module takes a hash attribute (md5, sha1, sha256, imphash) as input, and is returning a YARA rule from it. This YARA rule is also validated using the same method as in 'yara_syntax_validator' module.
 >Both hover and expansion functionalities are supported with this module, where the hover part is displaying the resulting YARA rule and the expansion part allows you to add the rule as a new attribute, as usual with expansion modules.
@@ -2083,12 +2365,14 @@ An expansion & hover module to translate any hash attribute into a yara rule.
 - **references**:
 > - https://virustotal.github.io/yara/
 > - https://github.com/virustotal/yara-python
+- **require_standard_format**:
+>True
 - **requirements**:
 >yara-python python library
 
 -----
 
-#### [yara_syntax_validator](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/yara_syntax_validator.py)
+#### [YARA Syntax Validator](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/yara_syntax_validator.py)
 
 <img src=../logos/yara.png height=60>
 
@@ -2106,13 +2390,16 @@ An expansion hover module to perform a syntax check on if yara rules are valid o
 
 -----
 
-#### [yeti](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/yeti.py)
+#### [Yeti Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/yeti.py)
 
 <img src=../logos/yeti.png height=60>
 
 Module to process a query on Yeti.
 - **features**:
 >This module add context and links between observables using yeti
+- **config**:
+> - apikey
+> - url
 - **input**:
 >A domain, hostname,IP, sha256,sha1, md5, url of MISP attribute.
 - **output**:

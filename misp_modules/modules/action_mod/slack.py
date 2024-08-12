@@ -36,9 +36,19 @@ moduleconfig = {
 # For blocking modules, the actual boolean value determines whether we break execution
 returns = 'boolean'
 
-moduleinfo = {'version': '0.1', 'author': 'goodlandsecurity',
-              'description': 'Simplistic module to send messages to a Slack channel.',
-              'module-type': ['action']}
+moduleinfo = {
+    'version': '0.1',
+    'author': 'goodlandsecurity',
+    'description': 'Simplistic module to send messages to a Slack channel.',
+    'module-type': ['action'],
+    'name': 'Slack',
+    'logo': '',
+    'requirements': [],
+    'features': '',
+    'references': [],
+    'input': '',
+    'output': ''
+}
 
 
 def create_post(request):

@@ -5,10 +5,19 @@ from pymisp import MISPEvent, MISPObject
 
 misperrors = {'error': 'Error'}
 mispattributes = {'input': ['ip-src', 'ip-src|port', 'ip-dst', 'ip-dst|port'], 'format': 'misp_standard'}
-moduleinfo = {'version': '1', 'author': 'Jeroen Pinoy',
-              'description': "An expansion module to enrich an ip with geolocation and asn information from an mmdb server "
-                             "such as ip.circl.lu.",
-              'module-type': ['expansion', 'hover']}
+moduleinfo = {
+    'version': '1',
+    'author': 'Jeroen Pinoy',
+    'description': "A hover and expansion module to enrich an ip with geolocation and ASN information from an mmdb server instance, such as CIRCL's ip.circl.lu.",
+    'module-type': ['expansion', 'hover'],
+    'name': 'GeoIP Enrichment',
+    'logo': 'circl.png',
+    'requirements': [],
+    'features': 'The module takes an IP address related attribute as input.\n It queries the public CIRCL.lu mmdb-server instance, available at ip.circl.lu, by default. The module can be configured with a custom mmdb server url if required.\n It is also possible to filter results on 1 db_source by configuring db_source_filter.',
+    'references': ['https://data.public.lu/fr/datasets/geo-open-ip-address-geolocation-per-country-in-mmdb-format/', 'https://github.com/adulau/mmdb-server'],
+    'input': 'An IP address attribute (for example ip-src or ip-src|port).',
+    'output': 'Geolocation and asn objects.',
+}
 moduleconfig = ["custom_API", "db_source_filter"]
 mmdblookup_url = 'https://ip.circl.lu/'
 

@@ -10,6 +10,7 @@ misp_modules.egg-info/
 docs/expansion*
 docs/import_mod*
 docs/export_mod*
+docs/action_mod*
 site*
 
 #pycharm env

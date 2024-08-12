@@ -18,13 +18,24 @@ mispattributes = {
 }
 
 
-moduleinfo = {'version': '0.1', 'author': 'Sami Mokaddem',
-              'description': 'Generic blueprint to be copy-pasted to quickly boostrap creation of import module.',
-              'module-type': ['import']}
+moduleinfo = {
+    'version': '0.1',
+    'author': 'Sami Mokaddem',
+    'description': 'Simple URL import tool with Faup',
+    'module-type': ['import'],
+    'name': 'URL Import',
+    'logo': '',
+    'requirements': [],
+    'features': '',
+    'references': [],
+    'input': '',
+    'output': '',
+}
 
 moduleconfig = []
 
 fp = Faup()
+
 
 def generateData(event, data, config):
     for url in data.splitlines():

@@ -24,9 +24,19 @@ mispattributes = {
                'whois-registrar', 'whois-creation-date', 'domain']
 }
 
-moduleinfo = {'version': '1', 'author': 'Sebastien Larinier @sebdraven',
-              'description': 'Query on securitytrails.com',
-              'module-type': ['expansion', 'hover']}
+moduleinfo = {
+    'version': '1',
+    'author': 'Sebastien Larinier @sebdraven',
+    'description': 'An expansion modules for SecurityTrails.',
+    'module-type': ['expansion', 'hover'],
+    'name': 'SecurityTrails Lookup',
+    'logo': 'securitytrails.png',
+    'requirements': ['dnstrails python library', 'An access to the SecurityTrails API (apikey)'],
+    'features': 'The module takes a domain, hostname or IP address attribute as input and queries the SecurityTrails API with it.\n\nMultiple parsing operations are then processed on the result of the query to extract a much information as possible.\n\nFrom this data extracted are then mapped MISP attributes.',
+    'references': ['https://securitytrails.com/'],
+    'input': 'A domain, hostname or IP address attribute.',
+    'output': 'MISP attributes resulting from the query on SecurityTrails API, included in the following list:\n- hostname\n- domain\n- ip-src\n- ip-dst\n- dns-soa-email\n- whois-registrant-email\n- whois-registrant-phone\n- whois-registrant-name\n- whois-registrar\n- whois-creation-date\n- domain',
+}
 
 # config fields that your code expects from the site admin
 moduleconfig = ['apikey']

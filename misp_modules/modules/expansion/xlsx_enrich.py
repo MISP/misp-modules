@@ -7,9 +7,19 @@ import io
 misperrors = {'error': 'Error'}
 mispattributes = {'input': ['attachment'],
                   'output': ['freetext', 'text']}
-moduleinfo = {'version': '0.1', 'author': 'Sascha Rommelfangen',
-              'description': '.xlsx to freetext-import IOC extractor',
-              'module-type': ['expansion']}
+moduleinfo = {
+    'version': '0.1',
+    'author': 'Sascha Rommelfangen',
+    'description': 'Module to extract freetext from a .xlsx document.',
+    'module-type': ['expansion'],
+    'name': 'XLXS Enrich',
+    'logo': 'xlsx.png',
+    'requirements': ['pandas: Python library to perform data analysis, time series and statistics.'],
+    'features': 'The module reads the text contained in a .xlsx document. The result is passed to the freetext import parser so IoCs can be extracted out of it.',
+    'references': [],
+    'input': 'Attachment attribute containing a .xlsx document.',
+    'output': 'Text and freetext parsed from the document.',
+}
 
 moduleconfig = []
 

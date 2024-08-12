@@ -3,7 +3,19 @@ import requests
 
 misperrors = {'error': 'Error'}
 mispattributes = {'input': ['md5'], 'output': ['text']}
-moduleinfo = {'version': '0.2', 'author': 'Alexandre Dulaunoy', 'description': 'An expansion module to check hashes against hashdd.com including NSLR dataset.', 'module-type': ['hover']}
+moduleinfo = {
+    'version': '0.2',
+    'author': 'Alexandre Dulaunoy',
+    'description': 'A hover module to check hashes against hashdd.com including NSLR dataset.',
+    'module-type': ['hover'],
+    'name': 'Hashdd Lookup',
+    'logo': '',
+    'requirements': [],
+    'features': 'This module takes a hash attribute as input to check its known level, using the hashdd API. This information is then displayed.',
+    'references': ['https://hashdd.com/'],
+    'input': 'A hash MISP attribute (md5).',
+    'output': 'Text describing the known level of the hash in the hashdd databases.',
+}
 moduleconfig = []
 hashddapi_url = 'https://api.hashdd.com/v1/knownlevel/nsrl/'
 

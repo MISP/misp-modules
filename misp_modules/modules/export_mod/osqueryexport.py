@@ -22,9 +22,19 @@ outputFileExtension = 'conf'
 responseType = 'application/txt'
 
 
-moduleinfo = {'version': '1.0', 'author': 'Julien Bachmann, Hacknowledge',
-              'description': 'OSQuery query export module',
-              'module-type': ['export']}
+moduleinfo = {
+    'version': '1.0',
+    'author': 'Julien Bachmann, Hacknowledge',
+    'description': 'OSQuery export of a MISP event.',
+    'module-type': ['export'],
+    'name': 'OSQuery Export',
+    'logo': 'osquery.png',
+    'requirements': [],
+    'features': 'This module export an event as osquery queries that can be used in packs or in fleet management solution like Kolide.',
+    'references': [],
+    'input': 'MISP Event attributes',
+    'output': 'osquery SQL queries',
+}
 
 
 def handle_regkey(value):

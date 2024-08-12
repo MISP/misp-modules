@@ -8,9 +8,19 @@ from pymisp import MISPAttribute, MISPEvent, MISPObject
 misperrors = {'error': 'Error'}
 mispattributes = {'input': ['link'], 'format': 'misp_standard'}
 
-moduleinfo = {'version': '1', 'author': 'Christian Studer',
-              'description': 'Query AssemblyLine with a report URL to get the parsed data.',
-              'module-type': ['expansion']}
+moduleinfo = {
+    'version': '1',
+    'author': 'Christian Studer',
+    'description': 'A module tu query the AssemblyLine API with a submission ID to get the submission report and parse it.',
+    'module-type': ['expansion'],
+    'name': 'AssemblyLine Query',
+    'logo': 'assemblyline.png',
+    'requirements': ['assemblyline_client: Python library to query the AssemblyLine rest API.'],
+    'features': 'The module requires the address of the AssemblyLine server you want to query as well as your credentials used for this instance. Credentials include the used-ID and an API key or the password associated to the user-ID.\n\nThe submission ID extracted from the submission link is then used to query AssemblyLine and get the full submission report. This report is parsed to extract file objects and the associated IPs, domains or URLs the files are connecting to.\n\nSome more data may be parsed in the future.',
+    'references': ['https://www.cyber.gc.ca/en/assemblyline'],
+    'input': 'Link of an AssemblyLine submission report.',
+    'output': 'MISP attributes & objects parsed from the AssemblyLine submission.',
+}
 moduleconfig = ["apiurl", "user_id", "apikey", "password", "verifyssl"]
 
 

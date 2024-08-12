@@ -24,9 +24,19 @@ outputFileExtension = 'yara'
 responseType = 'text/plain'
 
 
-moduleinfo = {'version': '0.1', 'author': 'Christophe Vandeplas',
-              'description': 'Yara export module',
-              'module-type': ['export']}
+moduleinfo = {
+    'version': '0.1',
+    'author': 'Christophe Vandeplas',
+    'description': 'This module is used to export MISP events to YARA.',
+    'module-type': ['export'],
+    'name': 'YARA Rule Export',
+    'logo': 'yara.png',
+    'requirements': ['yara-python python library'],
+    'features': 'The module will dynamically generate YARA rules for attributes that are marked as to IDS. Basic metadata about the event is added to the rule.\nAttributes that are already YARA rules are also exported, with a rewritten rule name.',
+    'references': ['https://virustotal.github.io/yara/'],
+    'input': 'Attributes and Objects.',
+    'output': 'A YARA file that can be used with the YARA scanning tool.',
+}
 
 
 class YaraRule():
@@ -109,7 +119,7 @@ def handle_combined(yara_rules: list, yr: YaraRule, attribute: dict):
         pass
 
 
-def handle_yara(yara_rules: list, yr: YaraRule, attribute):
+def handle_yara(yara_rules: list, yr: YaraRule, attribute: dict):
     # do not check for to_ids, as we want to always export the Yara rule
     # split out as a separate rule, and rewrite the rule name
     value = re.sub('^[ \t]*rule ', 'rule MISP_e{}_'.format(attribute['event_id']), attribute['value'], flags=re.MULTILINE)
@@ -141,9 +151,8 @@ def handle_yara(yara_rules: list, yr: YaraRule, attribute):
     # compile the yara rule to confirm it's validity
     try:
         yara.compile(source=value)
-    except yara.SyntaxError:
-        return
-    except yara.Error:
+    except Exception:
+        # skip rules that do not compile
         return
 
     # all checks done, add the rule
@@ -151,13 +160,13 @@ def handle_yara(yara_rules: list, yr: YaraRule, attribute):
     return
 
 
-def handle_malware_sample(yara_rules: list, yr: YaraRule, attribute):
+def handle_malware_sample(yara_rules: list, yr: YaraRule, attribute: dict):
     if not attribute['to_ids']:  # skip non IDS attributes
         return
     handle_combined(yara_rules, yr, 'filename|md5', attribute['value'])
 
 
-def handle_meta(yara_rules: list, yr: YaraRule, attribute):
+def handle_meta(yara_rules: list, yr: YaraRule, attribute: dict):
     yr.add_meta(attribute['type'], attribute['value'])
     return
 

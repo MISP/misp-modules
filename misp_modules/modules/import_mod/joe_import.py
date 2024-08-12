@@ -17,9 +17,19 @@ userConfig = {
 
 inputSource = ['file']
 
-moduleinfo = {'version': '0.2', 'author': 'Christian Studer',
-              'description': 'Import for Joe Sandbox JSON reports',
-              'module-type': ['import']}
+moduleinfo = {
+    'version': '0.2',
+    'author': 'Christian Studer',
+    'description': 'A module to import data from a Joe Sandbox analysis json report.',
+    'module-type': ['import'],
+    'name': 'Joe Sandbox Import',
+    'logo': 'joesandbox.png',
+    'requirements': [],
+    'features': 'Module using the new format of modules able to return attributes and objects.\n\nThe module returns the same results as the expansion module [joesandbox_query](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/joesandbox_query.py) using the submission link of the analysis to get the json report.',
+    'references': ['https://www.joesecurity.org', 'https://www.joesandbox.com/'],
+    'input': 'Json report of a Joe Sandbox analysis.',
+    'output': 'MISP attributes & objects parsed from the analysis report.',
+}
 
 moduleconfig = []
 

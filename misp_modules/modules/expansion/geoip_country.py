@@ -15,9 +15,19 @@ misperrors = {'error': 'Error'}
 mispattributes = {'input': ['ip-src', 'ip-dst', 'domain|ip'], 'output': ['freetext']}
 moduleconfig = ['local_geolite_db']
 # possible module-types: 'expansion', 'hover' or both
-moduleinfo = {'version': '0.2', 'author': 'Andreas Muehlemann',
-              'description': 'Query a local copy of Maxminds Geolite database, updated for MMDB format',
-              'module-type': ['expansion', 'hover']}
+moduleinfo = {
+    'version': '0.2',
+    'author': 'Andreas Muehlemann',
+    'description': 'Query a local copy of Maxminds Geolite database, updated for MMDB format',
+    'module-type': ['expansion', 'hover'],
+    'name': 'GeoIP Country Lookup',
+    'logo': 'maxmind.png',
+    'requirements': ["A local copy of Maxmind's Geolite database"],
+    'features': "This module takes an IP address MISP attribute as input and queries a local copy of the Maxmind's Geolite database to get information about the location of this IP address.\n\nPlease note that composite attributes domain|ip are also supported.",
+    'references': ['https://www.maxmind.com/en/home'],
+    'input': 'An IP address MISP Attribute.',
+    'output': 'Text containing information about the location of the IP address.',
+}
 
 
 def handler(q=False):

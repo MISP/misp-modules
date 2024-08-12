@@ -1,4 +1,6 @@
-## How to install and start MISP modules (in a Python virtualenv)?
+## How to install and start MISP modules (in a Python virtualenv)? (recommended)
+
+***Be sure to run the latest version of `pip`***. To install the latest version of pip, `pip install --upgrade pip` will do the job.
 
 ~~~~bash
 SUDO_WWW="sudo -u www-data"

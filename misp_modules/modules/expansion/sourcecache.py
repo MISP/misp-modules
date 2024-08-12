@@ -3,7 +3,19 @@ from url_archiver import url_archiver
 
 misperrors = {'error': 'Error'}
 mispattributes = {'input': ['link', 'url'], 'output': ['attachment', 'malware-sample']}
-moduleinfo = {'version': '0.1', 'author': 'Alexandre Dulaunoy', 'description': 'Module to cache web pages of analysis reports, OSINT sources. The module returns a link of the cached page.', 'module-type': ['expansion']}
+moduleinfo = {
+    'version': '0.1',
+    'author': 'Alexandre Dulaunoy',
+    'description': 'Module to cache web pages of analysis reports, OSINT sources. The module returns a link of the cached page.',
+    'module-type': ['expansion'],
+    'name': 'URL Archiver',
+    'logo': '',
+    'requirements': ['urlarchiver: python library to fetch and archive URL on the file-system'],
+    'features': 'This module takes a link or url attribute as input and caches the related web page. It returns then a link of the cached page.',
+    'references': ['https://github.com/adulau/url_archiver'],
+    'input': 'A link or url attribute.',
+    'output': 'A malware-sample attribute describing the cached page.',
+}
 moduleconfig = ['archivepath']
 
 

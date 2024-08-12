@@ -5,9 +5,19 @@ from pyfaup.faup import Faup
 
 misperrors = {'error': 'Error'}
 mispattributes = {'input': ['url'], 'format': 'misp_standard'}
-moduleinfo = {'version': '1', 'author': 'MISP Team',
-              'description': "Extract URL components",
-              'module-type': ['expansion', 'hover']}
+moduleinfo = {
+    'version': '1',
+    'author': 'MISP Team',
+    'description': 'Extract URL components',
+    'module-type': ['expansion', 'hover'],
+    'name': 'URL Components Extractor',
+    'logo': '',
+    'requirements': [],
+    'features': '',
+    'references': [],
+    'input': '',
+    'output': '',
+}
 moduleconfig = []
 
 
@@ -50,16 +60,16 @@ def handler(q=False):
     if not request.get('attribute') or not check_input_attribute(request['attribute']):
         return {'error': f'{standard_error_message}, which should contain at least a type, a value and an uuid.'}
     attribute = request['attribute']
-    
-    if attribute['type'] not in mispattributes['input']:
-        return {'error': 'Bad attribute type'} 
 
-    url = attribute['value'] 
+    if attribute['type'] not in mispattributes['input']:
+        return {'error': 'Bad attribute type'}
+
+    url = attribute['value']
     urlObject = createObjectFromURL(url)
 
     event = createEvent(urlObject, attribute['uuid'], attribute)
     event = json.loads(event.to_json())
-    
+
     result = {'results': {'Object': event['Object']}}
     return result
 

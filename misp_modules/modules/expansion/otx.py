@@ -8,9 +8,19 @@ mispattributes = {'input': ["hostname", "domain", "ip-src", "ip-dst", "md5", "sh
                   }
 
 # possible module-types: 'expansion', 'hover' or both
-moduleinfo = {'version': '1', 'author': 'chrisdoman',
-              'description': 'Get information from AlienVault OTX',
-              'module-type': ['expansion']}
+moduleinfo = {
+    'version': '1',
+    'author': 'chrisdoman',
+    'description': 'Module to get information from AlienVault OTX.',
+    'module-type': ['expansion'],
+    'name': 'AlienVault OTX Lookup',
+    'logo': 'otx.png',
+    'requirements': ['An access to the OTX API (apikey)'],
+    'features': 'This module takes a MISP attribute as input to query the OTX Alienvault API. The API returns then the result of the query with some types we map into compatible types we add as MISP attributes.',
+    'references': ['https://www.alienvault.com/open-threat-exchange'],
+    'input': 'A MISP attribute included in the following list:\n- hostname\n- domain\n- ip-src\n- ip-dst\n- md5\n- sha1\n- sha256\n- sha512',
+    'output': 'MISP attributes mapped from the result of the query on OTX, included in the following list:\n- domain\n- ip-src\n- ip-dst\n- text\n- md5\n- sha1\n- sha256\n- sha512\n- email',
+}
 
 # We're not actually using the API key yet
 moduleconfig = ["apikey"]

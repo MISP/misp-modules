@@ -28,8 +28,19 @@ misperrors = {'error': 'Error'}
 moduleconfig = ['api_id', 'api_secret']
 mispattributes = {'input': ['ip-src', 'ip-dst', 'domain', 'hostname', 'hostname|port', 'domain|ip', 'ip-dst|port', 'ip-src|port',
                   'x509-fingerprint-md5', 'x509-fingerprint-sha1', 'x509-fingerprint-sha256'], 'format': 'misp_standard'}
-moduleinfo = {'version': '0.1', 'author': 'Loïc Fortemps',
-              'description': 'Censys.io expansion module', 'module-type': ['expansion', 'hover']}
+moduleinfo = {
+    'version': '0.1',
+    'author': 'Loïc Fortemps',
+    'description': 'An expansion module to enrich attributes in MISP by quering the censys.io API',
+    'module-type': ['expansion', 'hover'],
+    'name': 'Censys Enrich',
+    'logo': '',
+    'requirements': ['API credentials to censys.io'],
+    'features': 'This module takes an IP, hostname or a certificate fingerprint and attempts to enrich it by querying the Censys API.',
+    'references': ['https://www.censys.io'],
+    'input': 'IP, domain or certificate fingerprint (md5, sha1 or sha256)',
+    'output': 'MISP objects retrieved from censys, including open ports, ASN, Location of the IP, x509 details',
+}
 
 api_id = None
 api_secret = None

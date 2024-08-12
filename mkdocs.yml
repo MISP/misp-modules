@@ -16,7 +16,7 @@ edit_uri: edit/main/docs/
 use_directory_urls: true
 
 # Copyright
-copyright: "Copyright &copy; 2019-2023 MISP Project"
+copyright: "Copyright &copy; 2019-2024 MISP Project"
 
 # Options
 extra:
@@ -87,6 +87,7 @@ nav:
       - Expansion Modules: expansion.md
       - Export Modules: export_mod.md
       - Import Modules: import_mod.md
+      - Action Modules: action_mod.md
     - Install Guides: install.md
     - Contribute: contribute.md
     #   - 'Ubuntu 18.04': 'INSTALL.ubuntu1804.md'

@@ -8,9 +8,19 @@ from pymisp import MISPAttribute, MISPEvent, MISPObject
 
 misperrors = {'error': 'Error'}
 mispattributes = {'input': ['AS'], 'format': 'misp_standard'}
-moduleinfo = {'version': '0.1', 'author': 'Raphaël Vinot',
-              'description': 'Query BGP Ranking to get the ranking of an Autonomous System number.',
-              'module-type': ['expansion', 'hover']}
+moduleinfo = {
+    'version': '0.1',
+    'author': 'Raphaël Vinot',
+    'description': 'Query BGP Ranking to get the ranking of an Autonomous System number.',
+    'module-type': ['expansion', 'hover'],
+    'name': 'BGP Ranking',
+    'logo': '',
+    'requirements': ['pybgpranking python library'],
+    'features': 'The module takes an AS number attribute as input and displays its description as well as its ranking position in BGP Ranking for a given day.',
+    'references': ['https://github.com/D4-project/BGP-Ranking/'],
+    'input': 'Autonomous system number.',
+    'output': 'An asn object with its related bgp-ranking object.',
+}
 
 
 def handler(q=False):

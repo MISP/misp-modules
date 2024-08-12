@@ -17,10 +17,17 @@ logger.setLevel(logging.INFO)
 misperrors = {"error": "Error"}
 mispattributes = {"input": ["ip-src", "ip-dst", "vulnerability"], "format": "misp_standard"}
 moduleinfo = {
-    "version": "1.2",
-    "author": "Brad Chiappetta <brad@greynoise.io>",
-    "description": "Used to query IP and CVE intel from GreyNoise",
-    "module-type": ["expansion", "hover"],
+    'version': '1.2',
+    'author': 'Brad Chiappetta <brad@greynoise.io>',
+    'description': 'Module to query IP and CVE information from GreyNoise',
+    'module-type': ['expansion', 'hover'],
+    'name': 'GreyNoise Lookup',
+    'logo': 'greynoise.png',
+    'requirements': ['A Greynoise API key. Both Enterprise (Paid) and Community (Free) API keys are supported, however Community API users will only be able to perform IP lookups.'],
+    'features': 'This module supports: 1) Query an IP from GreyNoise to see if it is internet background noise or a common business service 2) Query a CVE from GreyNoise to see the total number of internet scanners looking for the CVE in the last 7 days.',
+    'references': ['https://greynoise.io/', 'https://docs.greyniose.io/', 'https://www.greynoise.io/viz/account/'],
+    'input': 'An IP address or CVE ID',
+    'output': 'IP Lookup information or CVE scanning profile for past 7 days',
 }
 moduleconfig = ["api_key", "api_type"]
 

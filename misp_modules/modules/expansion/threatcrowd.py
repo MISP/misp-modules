@@ -8,9 +8,19 @@ mispattributes = {'input': ["hostname", "domain", "ip-src", "ip-dst", "md5", "sh
                   }
 
 # possible module-types: 'expansion', 'hover' or both
-moduleinfo = {'version': '1', 'author': 'chrisdoman',
-              'description': 'Get information from ThreatCrowd',
-              'module-type': ['expansion']}
+moduleinfo = {
+    'version': '1',
+    'author': 'chrisdoman',
+    'description': 'Module to get information from ThreatCrowd.',
+    'module-type': ['expansion'],
+    'name': 'ThreatCrowd Lookup',
+    'logo': 'threatcrowd.png',
+    'requirements': [],
+    'features': 'This module takes a MISP attribute as input and queries ThreatCrowd with it.\n\nThe result of this query is then parsed and some data is mapped into MISP attributes in order to enrich the input attribute.',
+    'references': ['https://www.threatcrowd.org/'],
+    'input': 'A MISP attribute included in the following list:\n- hostname\n- domain\n- ip-src\n- ip-dst\n- md5\n- sha1\n- sha256\n- sha512\n- whois-registrant-email',
+    'output': 'MISP attributes mapped from the result of the query on ThreatCrowd, included in the following list:\n- domain\n- ip-src\n- ip-dst\n- text\n- md5\n- sha1\n- sha256\n- sha512\n- hostname\n- whois-registrant-email',
+}
 
 moduleconfig = []
 

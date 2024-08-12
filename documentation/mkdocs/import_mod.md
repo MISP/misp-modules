@@ -1,5 +1,5 @@
 
-#### [cof2misp](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/cof2misp.py)
+#### [PDNS COF Importer](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/cof2misp.py)
 
 Passive DNS Common Output Format (COF) MISP importer
 - **features**:
@@ -15,7 +15,7 @@ Passive DNS Common Output Format (COF) MISP importer
 
 -----
 
-#### [csvimport](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/csvimport.py)
+#### [CSV Import](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/csvimport.py)
 
 Module to import MISP attributes from a csv file.
 - **features**:
@@ -36,13 +36,13 @@ Module to import MISP attributes from a csv file.
 
 -----
 
-#### [cuckooimport](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/cuckooimport.py)
+#### [Cuckoo Sandbox Import](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/cuckooimport.py)
 
 <img src=../logos/cuckoo.png height=60>
 
 Module to import Cuckoo JSON.
 - **features**:
->The module simply imports MISP Attributes from a Cuckoo JSON format file. There is thus no special feature to make it work.
+>Import a Cuckoo archive (zipfile or bzip2 tarball), either downloaded manually or exported from the API (/tasks/report/<task_id>/all).
 - **input**:
 >Cuckoo JSON file
 - **output**:
@@ -53,12 +53,16 @@ Module to import Cuckoo JSON.
 
 -----
 
-#### [email_import](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/email_import.py)
+#### [Email Import](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/email_import.py)
 
-Module to import emails in MISP.
+Email import module for MISP
 - **features**:
 >This module can be used to import e-mail text as well as attachments and urls.
 >3 configuration parameters are then used to unzip attachments, guess zip attachment passwords, and extract urls: set each one of them to True or False to process or not the respective corresponding actions.
+- **config**:
+> - unzip_attachments
+> - guess_zip_attachment_passwords
+> - extract_urls
 - **input**:
 >E-mail file
 - **output**:
@@ -66,7 +70,7 @@ Module to import emails in MISP.
 
 -----
 
-#### [goamlimport](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/goamlimport.py)
+#### [GoAML Import](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/goamlimport.py)
 
 <img src=../logos/goAML.jpg height=60>
 
@@ -84,7 +88,15 @@ Module to import MISP objects about financial transactions from GoAML files.
 
 -----
 
-#### [joe_import](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/joe_import.py)
+#### [Import Blueprint](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/import_blueprint.py)
+
+Generic blueprint to be copy-pasted to quickly boostrap creation of import module.
+- **features**:
+>
+
+-----
+
+#### [Joe Sandbox Import](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/joe_import.py)
 
 <img src=../logos/joesandbox.png height=60>
 
@@ -103,7 +115,7 @@ A module to import data from a Joe Sandbox analysis json report.
 
 -----
 
-#### [lastline_import](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/lastline_import.py)
+#### [Lastline Import](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/lastline_import.py)
 
 <img src=../logos/lastline.png height=60>
 
@@ -114,6 +126,10 @@ Module to import and parse reports from Lastline analysis links.
 >The module requires a Lastline Portal `username` and `password`.
 >The module uses the new format and it is able to return MISP attributes and objects.
 >The module returns the same results as the [lastline_query](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/lastline_query.py) expansion module.
+- **config**:
+> - username
+> - password
+> - verify_ssl
 - **input**:
 >Link to a Lastline analysis.
 - **output**:
@@ -123,7 +139,7 @@ Module to import and parse reports from Lastline analysis links.
 
 -----
 
-#### [mispjson](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/mispjson.py)
+#### [MISP JSON Import](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/mispjson.py)
 
 Module to import MISP JSON format for merging MISP events.
 - **features**:
@@ -135,7 +151,7 @@ Module to import MISP JSON format for merging MISP events.
 
 -----
 
-#### [ocr](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/ocr.py)
+#### [OCR Import](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/ocr.py)
 
 Optical Character Recognition (OCR) module for MISP.
 - **features**:
@@ -147,7 +163,7 @@ Optical Character Recognition (OCR) module for MISP.
 
 -----
 
-#### [openiocimport](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/openiocimport.py)
+#### [OpenIOC Import](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/openiocimport.py)
 
 Module to import OpenIOC packages.
 - **features**:
@@ -163,7 +179,17 @@ Module to import OpenIOC packages.
 
 -----
 
-#### [threatanalyzer_import](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/threatanalyzer_import.py)
+#### [TAXII 2.1 Import](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/taxii21.py)
+
+Import content from a TAXII 2.1 server
+- **features**:
+>
+- **config**:
+>stix_object_limit
+
+-----
+
+#### [ThreadAnalyzer Sandbox Import](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/threatanalyzer_import.py)
 
 Module to import ThreatAnalyzer archive.zip / analysis.json files.
 - **features**:
@@ -178,7 +204,15 @@ Module to import ThreatAnalyzer archive.zip / analysis.json files.
 
 -----
 
-#### [vmray_import](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/vmray_import.py)
+#### [URL Import](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/url_import.py)
+
+Simple URL import tool with Faup
+- **features**:
+>
+
+-----
+
+#### [VMRay API Import](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/vmray_import.py)
 
 <img src=../logos/vmray.png height=60>
 
@@ -186,6 +220,12 @@ Module to import VMRay (VTI) results.
 - **features**:
 >The module imports MISP Attributes from VMRay format, using the VMRay api.
 >Users should then provide as the module configuration the API Key as well as the server url in order to fetch their data to import.
+- **config**:
+> - apikey
+> - url
+> - disable_tags
+> - disable_misp_objects
+> - ignore_analysis_finished
 - **input**:
 >VMRay format
 - **output**:
@@ -194,5 +234,15 @@ Module to import VMRay (VTI) results.
 >https://www.vmray.com/
 - **requirements**:
 >vmray_rest_api
+
+-----
+
+#### [VMRay Summary JSON Import](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/vmray_summary_json_import.py)
+
+Import a VMRay Summary JSON report.
+- **features**:
+>
+- **config**:
+>disable_tags
 
 -----

@@ -20,42 +20,52 @@ inputSource = ['event']
 outputFileExtension = 'kql'
 responseType = 'application/txt'
 
-moduleinfo = {'version': '1.1', 'author': 'Julien Bachmann, Hacknowledge, Maik Wuerth',
-              'description': 'Defender for Endpoint KQL hunting query export module',
-              'module-type': ['export']}
+moduleinfo = {
+    'version': '1.1',
+    'author': 'Julien Bachmann, Hacknowledge, Maik Wuerth',
+    'description': 'Defender for Endpoint KQL hunting query export module',
+    'module-type': ['export'],
+    'name': 'Microsoft Defender for Endpoint KQL Export',
+    'logo': 'defender_endpoint.png',
+    'requirements': [],
+    'features': 'This module export an event as Defender for Endpoint KQL queries that can then be used in your own python3 or Powershell tool. If you are using Microsoft Sentinel, you can directly connect your MISP instance to Sentinel and then create queries using the `ThreatIntelligenceIndicator` table to match events against imported IOC.',
+    'references': ['https://docs.microsoft.com/en-us/windows/security/threat-protection/microsoft-defender-atp/advanced-hunting-schema-reference'],
+    'input': 'MISP Event attributes',
+    'output': 'Defender for Endpoint KQL queries',
+}
 
 
 def handle_sha256(value, period):
     query = f"""find in (DeviceEvents, DeviceAlertEvents,AlertInfo, AlertEvidence,  DeviceFileEvents, DeviceImageLoadEvents, DeviceProcessEvents)
-        where (SHA256 == '{value}' or InitiatingProcessSHA1 == '{value}') and 
+        where (SHA256 == '{value}' or InitiatingProcessSHA1 == '{value}') and
         Timestamp between(ago({period}) .. now())"""
     return query.replace('\n', ' ')
 
 
 def handle_sha1(value, period):
     query = f"""find in (DeviceEvents, DeviceAlertEvents, AlertInfo, AlertEvidence, DeviceFileEvents, DeviceImageLoadEvents, DeviceProcessEvents)
-        where (SHA1 == '{value}' or InitiatingProcessSHA1 == '{value}') and 
+        where (SHA1 == '{value}' or InitiatingProcessSHA1 == '{value}') and
         Timestamp between(ago({period}) .. now())"""
     return query.replace('\n', ' ')
 
 
 def handle_md5(value, period):
     query = f"""find in (DeviceEvents, DeviceAlertEvents, AlertInfo, AlertEvidence, DeviceFileEvents, DeviceImageLoadEvents, DeviceProcessEvents)
-        where (MD5 == '{value}' or InitiatingProcessMD5 == '{value}') and 
+        where (MD5 == '{value}' or InitiatingProcessMD5 == '{value}') and
         Timestamp between(ago({period}) .. now())"""
     return query.replace('\n', ' ')
 
 
 def handle_domain(value, period):
     query = f"""find in (DeviceAlertEvents, AlertInfo, AlertEvidence, DeviceNetworkEvents)
-        where RemoteUrl contains '{value}' and 
+        where RemoteUrl contains '{value}' and
         Timestamp between(ago({period}) .. now())"""
     return query.replace('\n', ' ')
 
 
 def handle_ip(value, period):
     query = f"""find in (DeviceAlertEvents, AlertInfo, AlertEvidence, DeviceNetworkEvents)
-        where RemoteIP == '{value}' and 
+        where RemoteIP == '{value}' and
         Timestamp between(ago({period}) .. now())"""
     return query.replace('\n', ' ')
 

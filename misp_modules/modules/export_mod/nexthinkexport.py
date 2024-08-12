@@ -21,9 +21,19 @@ inputSource = ['event']
 outputFileExtension = 'nxql'
 responseType = 'application/txt'
 
-moduleinfo = {'version': '1.0', 'author': 'Julien Bachmann, Hacknowledge',
-              'description': 'Nexthink NXQL query export module',
-              'module-type': ['export']}
+moduleinfo = {
+    'version': '1.0',
+    'author': 'Julien Bachmann, Hacknowledge',
+    'description': 'Nexthink NXQL query export module',
+    'module-type': ['export'],
+    'name': 'Nexthink NXQL Export',
+    'logo': 'nexthink.svg',
+    'requirements': [],
+    'features': 'This module export an event as Nexthink NXQL queries that can then be used in your own python3 tool or from wget/powershell',
+    'references': ['https://doc.nexthink.com/Documentation/Nexthink/latest/APIAndIntegrations/IntroducingtheWebAPIV2'],
+    'input': 'MISP Event attributes',
+    'output': 'Nexthink NXQL queries',
+}
 
 
 def handle_sha1(value, period):

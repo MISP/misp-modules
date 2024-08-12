@@ -9,9 +9,19 @@ except ImportError:
 
 misperrors = {'error': 'Error'}
 mispattributes = {'input': ['ip-src', 'ip-dst'], 'output': ['text']}
-moduleinfo = {'version': '0.2', 'author': 'Christian Studer',
-              'description': 'Check an IPv4 address against known RBLs.',
-              'module-type': ['expansion', 'hover']}
+moduleinfo = {
+    'version': '0.2',
+    'author': 'Christian Studer',
+    'description': 'Module to check an IPv4 address against known RBLs.',
+    'module-type': ['expansion', 'hover'],
+    'name': 'Real-time Blackhost Lists Lookup',
+    'logo': '',
+    'requirements': ['dnspython3: DNS python3 library'],
+    'features': 'This module takes an IP address attribute as input and queries multiple know Real-time Blackhost Lists to check if they have already seen this IP address.\n\nWe display then all the information we get from those different sources.',
+    'references': ['[RBLs list](https://github.com/MISP/misp-modules/blob/8817de476572a10a9c9d03258ec81ca70f3d926d/misp_modules/modules/expansion/rbl.py#L20)'],
+    'input': 'IP address attribute.',
+    'output': 'Text with additional data from Real-time Blackhost Lists about the IP address.',
+}
 moduleconfig = ['timeout']
 
 rbls = (

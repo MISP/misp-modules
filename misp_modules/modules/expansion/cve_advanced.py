@@ -6,9 +6,19 @@ from pymisp import MISPAttribute, MISPEvent, MISPObject
 
 misperrors = {'error': 'Error'}
 mispattributes = {'input': ['vulnerability'], 'format': 'misp_standard'}
-moduleinfo = {'version': '2', 'author': 'Christian Studer',
-              'description': 'An expansion module to enrich a CVE attribute with the vulnerability information.',
-              'module-type': ['expansion', 'hover']}
+moduleinfo = {
+    'version': '2',
+    'author': 'Christian Studer',
+    'description': 'An expansion module to query the CIRCL CVE search API for more information about a vulnerability (CVE).',
+    'module-type': ['expansion', 'hover'],
+    'name': 'CVE Advanced Lookup',
+    'logo': 'cve.png',
+    'requirements': [],
+    'features': 'The module takes a vulnerability attribute as input and queries the CIRCL CVE search API to gather additional information.\n\nThe result of the query is then parsed to return additional information about the vulnerability, like its cvss score or some references, as well as the potential related weaknesses and attack patterns.\n\nThe vulnerability additional data is returned in a vulnerability MISP object, and the related additional information are put into weakness and attack-pattern MISP objects.',
+    'references': ['https://vulnerability.circl.lu', 'https://cve/mitre.org/'],
+    'input': 'Vulnerability attribute.',
+    'output': 'Additional information about the vulnerability, such as its cvss score, some references, or the related weaknesses and attack patterns.',
+}
 moduleconfig = ["custom_API"]
 cveapi_url = 'https://cvepremium.circl.lu/api/'
 

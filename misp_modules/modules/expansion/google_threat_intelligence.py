@@ -19,7 +19,7 @@ import vt
 import pymisp
 
 
-MISP_ATTRIBUTES = {
+mispattributes = {
     'input': [
         'hostname',
         'domain',
@@ -33,20 +33,19 @@ MISP_ATTRIBUTES = {
     'format': 'misp_standard',
 }
 
-MODULE_INFO = {
+moduleinfo = {
     'version': '2',
     'author': 'Google Threat Intelligence team',
-    'description': ('An expansion module to have the observable\'s threat'
-                    ' score assessed by Google Threat Intelligence.'),
+    'description': "An expansion module to have the observable's threat score assessed by Google Threat Intelligence.",
     'module-type': ['expansion'],
-    'config': [
-        'apikey',
-        'event_limit',
-        'proxy_host',
-        'proxy_port',
-        'proxy_username',
-        'proxy_password'
-    ]
+    'name': 'Google Threat Intelligence Lookup',
+    'config': ['apikey', 'event_limit', 'proxy_host', 'proxy_port', 'proxy_username', 'proxy_password'],
+    'logo': 'google_threat_intelligence.png',
+    'requirements': ['An access to the Google Threat Intelligence API (apikey), with a high request rate limit.'],
+    'features': 'GTI assessment for the given observable, this include information about level of severity, a clear verdict (malicious, suspicious, undetected and benign) and additional information provided by the Mandiant expertise combined with the VirusTotal database.\n\n[Output example screeshot](https://github.com/MISP/MISP/assets/4747608/e275db2f-bb1e-4413-8cc0-ec3cb05e0414)',
+    'references': ['https://www.virustotal.com/', 'https://gtidocs.virustotal.com/reference'],
+    'input': 'A domain, hash (md5, sha1, sha256 or sha512), hostname or IP address attribute.',
+    'output': 'Text fields containing the threat score, the severity, the verdict and the threat label of the observable inspected.',
 }
 
 DEFAULT_RESULTS_LIMIT = 10
@@ -392,12 +391,12 @@ def dict_handler(request: dict):
 
 def introspection():
     """Returns the module input attributes required."""
-    return MISP_ATTRIBUTES
+    return mispattributes
 
 
 def version():
     """Returns the module metadata."""
-    return MODULE_INFO
+    return moduleinfo
 
 
 if __name__ == '__main__':

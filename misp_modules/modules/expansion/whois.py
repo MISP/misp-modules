@@ -8,9 +8,19 @@ except ImportError:
 
 misperrors = {'error': 'Error'}
 mispattributes = {'input': ['domain', 'ip-src', 'ip-dst'], 'output': ['freetext']}
-moduleinfo = {'version': '0.1', 'author': 'Raphaël Vinot',
-              'description': 'Query a local instance of uwhois (https://github.com/rafiot/uwhoisd)',
-              'module-type': ['expansion']}
+moduleinfo = {
+    'version': '0.1',
+    'author': 'Raphaël Vinot',
+    'description': 'Module to query a local instance of uwhois (https://github.com/rafiot/uwhoisd).',
+    'module-type': ['expansion'],
+    'name': 'Whois Lookup',
+    'logo': '',
+    'requirements': ['uwhois: A whois python library'],
+    'features': "This module takes a domain or IP address attribute as input and queries a 'Univseral Whois proxy server' to get the correct details of the Whois query on the input value (check the references for more details about this whois server).",
+    'references': ['https://github.com/rafiot/uwhoisd'],
+    'input': 'A domain or IP address attribute.',
+    'output': 'Text describing the result of a whois request for the input value.',
+}
 
 moduleconfig = ['server', 'port']
 

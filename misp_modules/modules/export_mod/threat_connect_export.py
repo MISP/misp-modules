@@ -13,10 +13,17 @@ import logging
 misperrors = {"error": "Error"}
 
 moduleinfo = {
-    "version": "0.1",
-    "author": "CenturyLink CIRT",
-    "description": "Export a structured CSV file for uploading to ThreatConnect",
-    "module-type": ["export"]
+    'version': '0.1',
+    'author': 'CenturyLink CIRT',
+    'description': 'Module to export a structured CSV file for uploading to ThreatConnect.',
+    'module-type': ['export'],
+    'name': 'ThreadConnect Export',
+    'logo': 'threatconnect.png',
+    'requirements': ['csv'],
+    'features': 'The module takes a MISP event in input, to look every attribute. Each attribute matching with some predefined types is then exported in a CSV format recognized by ThreatConnect.\nUsers should then provide, as module configuration, the source of data they export, because it is required by the output format.',
+    'references': ['https://www.threatconnect.com'],
+    'input': 'MISP Event attributes',
+    'output': 'ThreatConnect CSV format file',
 }
 
 # config fields expected from the MISP administrator
