@@ -54,7 +54,7 @@ moduleconfig = [
 
 LOGGER = logging.getLogger("vysion")
 LOGGER.setLevel(logging.INFO)
-LOGGER.info("Starting Vysion")
+LOGGER.debug("Starting Vysion")
 
 DEFAULT_RESULTS_LIMIT = 10
 

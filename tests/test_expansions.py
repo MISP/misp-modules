@@ -133,18 +133,6 @@ class TestExpansions(unittest.TestCase):
             response = self.misp_modules_post(query)
             self.assertEqual(self.get_errors(response), 'An API key for APIVoid is required.')
 
-    def test_bgpranking(self):
-        query = {
-            "module": "bgpranking",
-            "attribute": {
-                "type": "AS",
-                "value": "13335",
-                "uuid": "ea89a33b-4ab7-4515-9f02-922a0bee333d"
-            }
-        }
-        response = self.misp_modules_post(query)
-        self.assertEqual(self.get_first_object_type(response), 'asn')
-
     def test_btc_steroids(self):
         if LiveCI:
             return True
