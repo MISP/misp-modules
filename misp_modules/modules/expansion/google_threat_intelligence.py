@@ -364,7 +364,7 @@ def dict_handler(request: dict):
                       ' uuid.')
         }
 
-    if request['attribute']['type'] not in MISP_ATTRIBUTES['input']:
+    if request['attribute']['type'] not in mispattributes['input']:
         return {'error': 'Unsupported attribute type.'}
 
     event_limit = request['config'].get('event_limit')

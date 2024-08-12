@@ -47,7 +47,9 @@ class TestModules(unittest.TestCase):
                 for module in module_files:
                     if module not in modules_api:
                         issues_found.append(f"Missing module {module} in {d}/__init__.py.")
-            self.assertEqual(issues_found, [], f"Found issues: \n{'\n- '.join(issues_found)}")
+
+            error_message = '\n- '.join(issues_found)
+            self.assertEqual(issues_found, [], f"Found issues: \n{error_message}")
         finally:
             response.connection.close()
 
@@ -88,7 +90,8 @@ class TestModules(unittest.TestCase):
                     continue
 
         sys.path.remove(str(root_path / 'misp_modules' / 'lib'))
-        self.assertEqual(issues_found, [], f"Found issues: \n{'\n- '.join(issues_found)}")
+        error_message = '\n- '.join(issues_found)
+        self.assertEqual(issues_found, [], f"Found issues: \n{error_message}")
 
     def test_cve(self):
         with open('tests/bodycve.json', 'r') as f:

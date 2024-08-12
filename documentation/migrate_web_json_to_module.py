@@ -80,7 +80,8 @@ if __name__ == '__main__':
                 # write back to python file
                 new_moduleinfo_text = ['moduleinfo = {']
                 for k, v in moduleinfo.items():
-                    new_moduleinfo_text.append(f"    '{k}': {repr(v).replace('\\', '\\\\')},")
+                    v_updated = repr(v).replace('\\', '\\\\')
+                    new_moduleinfo_text.append(f"    '{k}': {v_updated},")
                 new_moduleinfo_text.append('}')
 
                 python_content_new, cnt = re.subn(re_pattern, '\n'.join(new_moduleinfo_text), python_content, re.MULTILINE | re.DOTALL)
