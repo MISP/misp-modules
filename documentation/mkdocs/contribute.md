@@ -384,7 +384,7 @@ cd ../
 
 In order to provide documentation about some modules that require specific input / output / configuration, the [index.md](docs/index.md) file within the [docs](docs) directory contains detailed information about the general purpose, requirements, features, input and ouput of each of these modules:
 
-- ***description** - quick description of the general purpose of the module, as the one given by the moduleinfo
+- **description** - quick description of the general purpose of the module, as the one given by the moduleinfo
 - **requirements** - special libraries needed to make the module work
 - **features** - description of the way to use the module, with the required MISP features to make the module give the intended result
 - **references** - link(s) giving additional information about the format concerned in the module

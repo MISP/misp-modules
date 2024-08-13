@@ -84,10 +84,10 @@ markdown_extensions:
 nav:
     - Home: 'index.md'
     - Modules:
+      - Action Modules: action_mod.md
       - Expansion Modules: expansion.md
       - Export Modules: export_mod.md
       - Import Modules: import_mod.md
-      - Action Modules: action_mod.md
     - Install Guides: install.md
     - Contribute: contribute.md
     #   - 'Ubuntu 18.04': 'INSTALL.ubuntu1804.md'

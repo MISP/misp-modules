@@ -7,6 +7,7 @@ import copy
 module_types = ['expansion', 'export_mod', 'import_mod', 'action_mod']
 titles = ['Expansion Modules', 'Export Modules', 'Import Modules', 'Action Modules']
 githublink = 'https://github.com/MISP/misp-modules/tree/main/misp_modules/modules'
+githubiolink = 'https://misp.github.io/misp-modules'
 
 moduleinfo_to_ignore = ['module-type', 'author', 'version']
 
@@ -63,6 +64,7 @@ def generate_doc(module_type, root_path, logo_path='logos'):
             markdown.append(f"\n<img src={logo} height=60>\n")
         if 'description' in moduleinfo:
             markdown.append(f"\n{moduleinfo.pop('description')}\n")
+        markdown.append(f"[[source code]({githubref})]\n")
         if 'features' in moduleinfo:
             markdown.append(get_single_value('features', str(moduleinfo.pop('features')).replace('\n', '\n>')))
         for field, value in sorted(moduleinfo.items()):
@@ -78,27 +80,26 @@ def generate_doc(module_type, root_path, logo_path='logos'):
 
 def generate_index_doc(module_type, root_path):
     markdown = []
-    githubpath = f'{githublink}/{module_type}'
     for module_name, moduleinfo in get_all_moduleinfo()[module_type].items():
         module_name_pretty = moduleinfo.get('name')
         if module_name_pretty == '':
             module_name_pretty = module_name
 
-        githubref = f'{githubpath}/{module_name}.py'
+        anchor_ref = f"{githubiolink}/{module_type}/#{module_name_pretty.replace(' ', '-').lower()}"
         description_without_newlines = moduleinfo.get("description").replace('\n', ' ')
-        markdown.append(f'* [{module_name_pretty}]({githubref}) - {description_without_newlines}\n')
+        markdown.append(f'* [{module_name_pretty}]({anchor_ref}) - {description_without_newlines}\n')
     return markdown
 
 
 def get_single_value(field, value):
-    return f"- **{field}**:\n>{value}\n"
+    return f"\n- **{field}**:\n>{value}\n"
 
 
 def handle_list(field, values):
     if len(values) == 1:
         return get_single_value(field, values[0])
     values = '\n> - '.join(values)
-    return f"- **{field}**:\n> - {values}\n"
+    return f"\n- **{field}**:\n> - {values}\n"
 
 
 def write_doc_for_readme(root_path):
@@ -150,33 +151,18 @@ def update_readme(root_path):
     new_doc = []
     skip = False
     for line in old_readme:
-        if skip and not line.startswith('# Existing MISP modules') and not line.startswith('# How to add your own MISP modules?') and not line.startswith('# Installation'):  # find next title
+        if skip and not line.startswith('# List of MISP modules'):  # find next title
             continue   # skip lines, as we're in the block that we're auto-generating
 
         new_doc.append(line)
 
-        if line.startswith('# Existing MISP modules'):
+        if line.startswith('# List of MISP modules'):
             skip = True
             # generate the updated content
             for _path, title in zip(module_types, titles):
                 new_doc.append(f'\n## {title}\n')
                 new_doc.extend(generate_index_doc(_path, root_path))
             new_doc.append('\n\n')
-
-        elif line.startswith('# How to add your own MISP modules?'):
-            skip = True
-            # copy over the contribute.md file
-            with open(root_path / 'documentation' / 'mkdocs' / 'contribute.md', 'r') as f:
-                f.readline()  # skip the title
-                new_doc.extend(f.readlines())
-
-        elif line.startswith('# Installation'):
-            skip = True
-            new_doc.append('\n')
-            # copy over the install.md file
-            with open(root_path / 'documentation' / 'mkdocs' / 'install.md', 'r') as f:
-                new_doc.extend(f.readlines())
-            new_doc.append('\n')
 
     with open(root_path / 'README.md', 'w') as w:
         w.write(''.join(new_doc))
