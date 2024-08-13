@@ -2,37 +2,42 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://www.misp-project.org/</loc>
-         <lastmod>2024-07-23</lastmod>
+         <lastmod>2024-08-13</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://www.misp-project.org/action_mod/</loc>
+         <lastmod>2024-08-13</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://www.misp-project.org/contribute/</loc>
-         <lastmod>2024-07-23</lastmod>
+         <lastmod>2024-08-13</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://www.misp-project.org/expansion/</loc>
-         <lastmod>2024-07-23</lastmod>
+         <lastmod>2024-08-13</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://www.misp-project.org/export_mod/</loc>
-         <lastmod>2024-07-23</lastmod>
+         <lastmod>2024-08-13</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://www.misp-project.org/import_mod/</loc>
-         <lastmod>2024-07-23</lastmod>
+         <lastmod>2024-08-13</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://www.misp-project.org/install/</loc>
-         <lastmod>2024-07-23</lastmod>
+         <lastmod>2024-08-13</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://www.misp-project.org/license/</loc>
-         <lastmod>2024-07-23</lastmod>
+         <lastmod>2024-08-13</lastmod>
          <changefreq>daily</changefreq>
     </url>
 </urlset>

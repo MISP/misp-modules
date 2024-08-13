@@ -12,22 +12,28 @@
         <meta name="author" content="MISP Project">
       
       
+        <link rel="canonical" href="https://www.misp-project.org/action_mod/">
       
       
+        <link rel="prev" href="../import_mod/">
       
-      <link rel="icon" href="/img/favicon.ico">
+      
+        <link rel="next" href="../install/">
+      
+      
+      <link rel="icon" href="../img/favicon.ico">
       <meta name="generator" content="mkdocs-1.6.0, mkdocs-material-9.5.25">
     
     
       
-        <title>MISP Modules Documentation</title>
+        <title>Action Modules - MISP Modules Documentation</title>
       
     
     
-      <link rel="stylesheet" href="/assets/stylesheets/main.6543a935.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.6543a935.min.css">
       
         
-        <link rel="stylesheet" href="/assets/stylesheets/palette.06af60db.min.css">
+        <link rel="stylesheet" href="../assets/stylesheets/palette.06af60db.min.css">
       
       
 
@@ -46,7 +52,7 @@
       
     
     
-    <script>__md_scope=new URL("/",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -69,6 +75,11 @@
     <label class="md-overlay" for="__drawer"></label>
     <div data-md-component="skip">
       
+        
+        <a href="#mattermost" class="md-skip">
+          Skip to content
+        </a>
+      
     </div>
     <div data-md-component="announce">
       
@@ -81,9 +92,9 @@
 
 <header class="md-header md-header--shadow" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="/." title="MISP Modules Documentation" class="md-header__button md-logo" aria-label="MISP Modules Documentation" data-md-component="logo">
+    <a href=".." title="MISP Modules Documentation" class="md-header__button md-logo" aria-label="MISP Modules Documentation" data-md-component="logo">
       
-  <img src="/img/misp.png" alt="logo">
+  <img src="../img/misp.png" alt="logo">
 
     </a>
     <label class="md-header__button md-icon" for="__drawer">
@@ -100,7 +111,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              
+              Action Modules
             
           </span>
         </div>
@@ -150,9 +161,9 @@
 
 <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="/." title="MISP Modules Documentation" class="md-nav__button md-logo" aria-label="MISP Modules Documentation" data-md-component="logo">
+    <a href=".." title="MISP Modules Documentation" class="md-nav__button md-logo" aria-label="MISP Modules Documentation" data-md-component="logo">
       
-  <img src="/img/misp.png" alt="logo">
+  <img src="../img/misp.png" alt="logo">
 
     </a>
     MISP Modules Documentation
@@ -179,7 +190,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/." class="md-nav__link">
+      <a href=".." class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -196,17 +207,19 @@
       
   
   
+    
   
   
+  
     
     
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
         
           
           <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
@@ -220,7 +233,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_2">
             <span class="md-nav__icon md-icon"></span>
             Modules
@@ -234,7 +247,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/expansion/" class="md-nav__link">
+      <a href="../expansion/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -255,7 +268,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/export_mod/" class="md-nav__link">
+      <a href="../export_mod/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -276,7 +289,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/import_mod/" class="md-nav__link">
+      <a href="../import_mod/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -294,10 +307,28 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="/action_mod/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Action Modules
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   <span class="md-ellipsis">
@@ -306,6 +337,51 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#mattermost" class="md-nav__link">
+    <span class="md-ellipsis">
+      Mattermost
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#slack" class="md-nav__link">
+    <span class="md-ellipsis">
+      Slack
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#test-action" class="md-nav__link">
+    <span class="md-ellipsis">
+      Test action
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -325,7 +401,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/install/" class="md-nav__link">
+      <a href="../install/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -345,7 +421,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/contribute/" class="md-nav__link">
+      <a href="../contribute/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -400,7 +476,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/license/" class="md-nav__link">
+      <a href="../license/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -439,6 +515,41 @@
   
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#mattermost" class="md-nav__link">
+    <span class="md-ellipsis">
+      Mattermost
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#slack" class="md-nav__link">
+    <span class="md-ellipsis">
+      Slack
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#test-action" class="md-nav__link">
+    <span class="md-ellipsis">
+      Test action
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -449,8 +560,57 @@
             <div class="md-content" data-md-component="content">
               <article class="md-content__inner md-typeset">
                 
-  <h1>404 - Not found</h1>
+                  
 
+  
+  
+
+
+  <h1>Action Modules</h1>
+
+<h4 id="mattermost"><a href="https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/action_mod/mattermost.py">Mattermost</a><a class="headerlink" href="#mattermost" title="Permanent link">&para;</a></h4>
+<p>Simplistic module to send message to a Mattermost channel.
+- <strong>features</strong>:</p>
+<blockquote>
+<ul>
+<li><strong>config</strong>:
+{'params': {'mattermost_hostname': {'type': 'string', 'description': 'The Mattermost domain or URL', 'value': 'example.mattermost.com'}, 'bot_access_token': {'type': 'string', 'description': 'Access token generated when you created the bot account'}, 'channel_id': {'type': 'string', 'description': 'The channel you added the bot to'}, 'message_template': {'type': 'large_string', 'description': 'The template to be used to generate the message to be posted', 'value': 'The <strong>template</strong> will be rendered using <em>Jinja2</em>!', 'jinja_supported': True}}, 'blocking': False, 'support_filters': True, 'expect_misp_core_format': False}</li>
+</ul>
+</blockquote>
+<hr />
+<h4 id="slack"><a href="https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/action_mod/slack.py">Slack</a><a class="headerlink" href="#slack" title="Permanent link">&para;</a></h4>
+<p>Simplistic module to send messages to a Slack channel.
+- <strong>features</strong>:</p>
+<blockquote>
+<ul>
+<li><strong>config</strong>:
+{'params': {'slack_bot_token': {'type': 'string', 'description': 'The Slack bot token generated when you created the bot account'}, 'channel_id': {'type': 'string', 'description': 'The channel ID you want to post messages to'}, 'message_template': {'type': 'large_string', 'description': 'The template to be used to generate the message to be posted', 'value': 'The <strong>template</strong> will be rendered using <em>Jinja2</em>!', 'jinja_supported': True}}, 'blocking': False, 'support_filters': True, 'expect_misp_core_format': False}</li>
+</ul>
+</blockquote>
+<hr />
+<h4 id="test-action"><a href="https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/action_mod/testaction.py">Test action</a><a class="headerlink" href="#test-action" title="Permanent link">&para;</a></h4>
+<p>This module is merely a test, always returning true. Triggers on event publishing.
+- <strong>features</strong>:</p>
+<blockquote>
+<ul>
+<li><strong>config</strong>:
+{'params': {'foo': {'type': 'string', 'description': 'blablabla', 'value': 'xyz'}, 'Data extraction path': {'type': 'hash_path', 'description': 'Only post content extracted from this path', 'value': 'Attribute.{n}.AttributeTag.{n}.Tag.name'}}, 'blocking': False, 'support_filters': False, 'expect_misp_core_format': False}</li>
+</ul>
+</blockquote>
+<hr />
+
+
+
+
+
+
+
+
+
+
+
+
+                
               </article>
             </div>
           
@@ -514,10 +674,10 @@
     </div>
     
     
-    <script id="__config" type="application/json">{"base": "/", "features": [], "search": "/assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    <script id="__config" type="application/json">{"base": "..", "features": [], "search": "../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
-      <script src="/assets/javascripts/bundle.081f42fc.min.js"></script>
+      <script src="../assets/javascripts/bundle.081f42fc.min.js"></script>
       
     
   </body>

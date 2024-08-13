@@ -301,6 +301,27 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../action_mod/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Action Modules
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -485,9 +506,18 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#documentation" class="md-nav__link">
+  <a href="#install-misp-module-on-an-offline-instance" class="md-nav__link">
     <span class="md-ellipsis">
-      Documentation
+      Install misp-module on an offline instance.
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-to-contribute-your-own-module" class="md-nav__link">
+    <span class="md-ellipsis">
+      How to contribute your own module?
     </span>
   </a>
   
@@ -497,6 +527,24 @@
   <a href="#tips-for-developers-creating-modules" class="md-nav__link">
     <span class="md-ellipsis">
       Tips for developers creating modules
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#documentation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Documentation
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#licenses" class="md-nav__link">
+    <span class="md-ellipsis">
+      Licenses
     </span>
   </a>
   
@@ -706,9 +754,18 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#documentation" class="md-nav__link">
+  <a href="#install-misp-module-on-an-offline-instance" class="md-nav__link">
     <span class="md-ellipsis">
-      Documentation
+      Install misp-module on an offline instance.
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-to-contribute-your-own-module" class="md-nav__link">
+    <span class="md-ellipsis">
+      How to contribute your own module?
     </span>
   </a>
   
@@ -718,6 +775,24 @@
   <a href="#tips-for-developers-creating-modules" class="md-nav__link">
     <span class="md-ellipsis">
       Tips for developers creating modules
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#documentation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Documentation
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#licenses" class="md-nav__link">
+    <span class="md-ellipsis">
+      Licenses
     </span>
   </a>
   
@@ -744,7 +819,7 @@
   <h1>Contribute</h1>
 
 <h2 id="how-to-add-your-own-misp-modules">How to add your own MISP modules?<a class="headerlink" href="#how-to-add-your-own-misp-modules" title="Permanent link">&para;</a></h2>
-<p>Create your module in <a href="https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/expansion/">misp_modules/modules/expansion/</a>, <a href="https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/export_mod/">misp_modules/modules/export_mod/</a>, or <a href="https://github.com/MISP/misp-modules/tree/master/misp_modules/modules/import_mod/">misp_modules/modules/import_mod/</a>. The module should have at minimum three functions:</p>
+<p>Create your module in <a href="https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/">misp_modules/modules/expansion/</a>, <a href="https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/">misp_modules/modules/export_mod/</a>, or <a href="https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/">misp_modules/modules/import_mod/</a>. The module should have at minimum three functions:</p>
 <ul>
 <li><strong>introspection</strong> function that returns a dict of the supported attributes (input and output) by your expansion module.</li>
 <li><strong>handler</strong> function which accepts a JSON document to expand the values and return a dictionary of the expanded values.</li>
@@ -984,25 +1059,29 @@ Recommended     Plugin.Import_ocr_enabled       true   Enable or disable the ocr
 </code></pre></div>
 <h3 id="set-any-other-required-settings-for-your-module">Set any other required settings for your module<a class="headerlink" href="#set-any-other-required-settings-for-your-module" title="Permanent link">&para;</a></h3>
 <p>In this same menu set any other plugin settings that are required for testing.</p>
-<h2 id="documentation">Documentation<a class="headerlink" href="#documentation" title="Permanent link">&para;</a></h2>
-<p>In order to provide documentation about some modules that require specific input / output / configuration, the <a href="https://github.com/MISP/misp-modules/tree/master/doc">doc</a> directory contains detailed information about the general purpose, requirements, features, input and output of each of these modules:</p>
-<ul>
-<li>***description** - quick description of the general purpose of the module, as the one given by the moduleinfo</li>
-<li><strong>requirements</strong> - special libraries needed to make the module work</li>
-<li><strong>features</strong> - description of the way to use the module, with the required MISP features to make the module give the intended result</li>
-<li><strong>references</strong> - link(s) giving additional information about the format concerned in the module</li>
-<li><strong>input</strong> - description of the format of data used in input</li>
-<li><strong>output</strong> - description of the format given as the result of the module execution</li>
-</ul>
-<p>In addition to the module documentation please add your module to <a href="https://github.com/MISP/misp-modules/tree/master/docs/index.md">docs/index.md</a>.</p>
-<p>There are also <a href="https://www.misp-project.org/misp-training/3.1-misp-modules.pdf">complementary slides</a> for the creation of MISP modules.</p>
+<h2 id="install-misp-module-on-an-offline-instance">Install misp-module on an offline instance.<a class="headerlink" href="#install-misp-module-on-an-offline-instance" title="Permanent link">&para;</a></h2>
+<p>First, you need to grab all necessary packages for example like this :</p>
+<p>Use pip wheel to create an archive
+<div class="highlight"><pre><span></span><code>mkdir misp-modules-offline
+pip3 wheel -r REQUIREMENTS shodan --wheel-dir=./misp-modules-offline
+tar -cjvf misp-module-bundeled.tar.bz2 ./misp-modules-offline/*
+</code></pre></div>
+On offline machine :
+<div class="highlight"><pre><span></span><code>mkdir misp-modules-bundle
+tar xvf misp-module-bundeled.tar.bz2 -C misp-modules-bundle
+cd misp-modules-bundle
+ls -1|while read line; do sudo pip3 install --force-reinstall --ignore-installed --upgrade --no-index --no-deps ${line};done
+</code></pre></div>
+Next you can follow standard install procedure.</p>
+<h2 id="how-to-contribute-your-own-module">How to contribute your own module?<a class="headerlink" href="#how-to-contribute-your-own-module" title="Permanent link">&para;</a></h2>
+<p>Fork the project, add your module, test it and make a pull-request. Modules can be also private as you can add a module in your own MISP installation.</p>
 <h2 id="tips-for-developers-creating-modules">Tips for developers creating modules<a class="headerlink" href="#tips-for-developers-creating-modules" title="Permanent link">&para;</a></h2>
 <p>Download a pre-built virtual image from the <a href="https://www.circl.lu/services/misp-training-materials/">MISP training materials</a>.</p>
 <ul>
 <li>Create a Host-Only adapter in VirtualBox</li>
 <li>Set your Misp OVA to that Host-Only adapter</li>
 <li>Start the virtual machine</li>
-<li>Get the IP address of the virutal machine</li>
+<li>Get the IP address of the virtual machine</li>
 <li>SSH into the machine (Login info on training page)</li>
 <li>Go into the misp-modules directory</li>
 </ul>
@@ -1014,18 +1093,32 @@ sudo<span class="w"> </span>git<span class="w"> </span>pull
 sudo<span class="w"> </span>git<span class="w"> </span>checkout<span class="w"> </span>MyModBranch
 </code></pre></div>
 <p>Remove the contents of the build directory and re-install misp-modules.</p>
-<div class="highlight"><pre><span></span><code><span class="n">sudo</span> <span class="n">rm</span> <span class="o">-</span><span class="n">fr</span> <span class="n">build</span><span class="o">/*</span>
-<span class="n">sudo</span> <span class="n">pip3</span> <span class="n">install</span> <span class="o">--</span><span class="n">upgrade</span> <span class="o">.</span>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>rm<span class="w"> </span>-fr<span class="w"> </span>build/*
+sudo<span class="w"> </span>-u<span class="w"> </span>www-data<span class="w"> </span>/var/www/MISP/venv/bin/pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>.
 </code></pre></div>
 <p>SSH in with a different terminal and run <code>misp-modules</code> with debugging enabled.</p>
-<div class="highlight"><pre><span></span><code><span class="n">sudo</span> <span class="n">killall</span> <span class="n">misp</span><span class="o">-</span><span class="n">modules</span>
-<span class="n">misp</span><span class="o">-</span><span class="n">modules</span> <span class="o">-</span><span class="n">d</span>
+<div class="highlight"><pre><span></span><code><span class="c1"># In case misp-modules is not a service do:</span>
+<span class="c1"># sudo killall misp-modules</span>
+sudo<span class="w"> </span>systemctl<span class="w"> </span>disable<span class="w"> </span>--now<span class="w"> </span>misp-modules
+sudo<span class="w"> </span>-u<span class="w"> </span>www-data<span class="w"> </span>/var/www/MISP/venv/bin/misp-modules<span class="w"> </span>-d
 </code></pre></div>
 <p>In your original terminal you can now run your tests manually and see any errors that arrive</p>
 <div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>tests/
 curl<span class="w"> </span>-s<span class="w"> </span>http://127.0.0.1:6666/query<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Content-Type: application/json&quot;</span><span class="w"> </span>--data<span class="w"> </span>@MY_TEST_FILE.json<span class="w"> </span>-X<span class="w"> </span>POST
 <span class="nb">cd</span><span class="w"> </span>../
 </code></pre></div>
+<h2 id="documentation">Documentation<a class="headerlink" href="#documentation" title="Permanent link">&para;</a></h2>
+<p>In order to provide documentation about some modules that require specific input / output / configuration, the <a href="docs/index.md">index.md</a> file within the <a href="docs">docs</a> directory contains detailed information about the general purpose, requirements, features, input and ouput of each of these modules:</p>
+<ul>
+<li>***description** - quick description of the general purpose of the module, as the one given by the moduleinfo</li>
+<li><strong>requirements</strong> - special libraries needed to make the module work</li>
+<li><strong>features</strong> - description of the way to use the module, with the required MISP features to make the module give the intended result</li>
+<li><strong>references</strong> - link(s) giving additional information about the format concerned in the module</li>
+<li><strong>input</strong> - description of the format of data used in input</li>
+<li><strong>output</strong> - description of the format given as the result of the module execution</li>
+</ul>
+<h2 id="licenses">Licenses<a class="headerlink" href="#licenses" title="Permanent link">&para;</a></h2>
+<p>For further Information see also the <a href="license/">license file</a>.</p>
 
 
 
@@ -1055,7 +1148,7 @@ curl<span class="w"> </span>-s<span class="w"> </span>http://127.0.0.1:6666/quer
       <div class="md-copyright">
   
     <div class="md-copyright__highlight">
-      Copyright &copy; 2019-2023 MISP Project
+      Copyright &copy; 2019-2024 MISP Project
     </div>
   
   
