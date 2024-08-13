@@ -66,12 +66,8 @@ For more information: [Extending MISP with Python modules](https://www.misp-proj
 * [Ninja Template Rendering](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/jinja_template_rendering.py) - Render the template with the data passed
 * [Joe Sandbox Import](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/joesandbox_query.py) - Query Joe Sandbox API with a submission url to get the json report and extract its data that is parsed and converted into MISP attributes and objects.
 * [Joe Sandbox Submit](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/joesandbox_submit.py) - A module to submit files or URLs to Joe Sandbox for an advanced analysis, and return the link of the submission.
-* [Lastline Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/lastline_query.py) - Deprecation notice: this module will be deprecated by December 2021, please use vmware_nsx module.
-
-Query Lastline with an analysis link and parse the report into MISP attributes and objects.
-* [Lastline Submit](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/lastline_submit.py) - Deprecation notice: this module will be deprecated by December 2021, please use vmware_nsx module.
-
-Module to submit a file or URL to Lastline.
+* [Lastline Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/lastline_query.py) - Deprecation notice: this module will be deprecated by December 2021, please use vmware_nsx module.  Query Lastline with an analysis link and parse the report into MISP attributes and objects.
+* [Lastline Submit](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/lastline_submit.py) - Deprecation notice: this module will be deprecated by December 2021, please use vmware_nsx module.  Module to submit a file or URL to Lastline.
 * [Macaddress.io Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/macaddress_io.py) - MISP hover module for macaddress.io
 * [Macvendors Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/macvendors.py) - Module to access Macvendors API.
 * [Malware Bazaar Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/malwarebazaar.py) - Query Malware Bazaar to get additional information about the input hash.
@@ -152,9 +148,7 @@ Module to submit a file or URL to Lastline.
 * [GoAML Import](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/goamlimport.py) - Module to import MISP objects about financial transactions from GoAML files.
 * [Import Blueprint](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/import_blueprint.py) - Generic blueprint to be copy-pasted to quickly boostrap creation of import module.
 * [Joe Sandbox Import](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/joe_import.py) - A module to import data from a Joe Sandbox analysis json report.
-* [Lastline Import](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/lastline_import.py) - Deprecation notice: this module will be deprecated by December 2021, please use vmware_nsx module.
-
-Module to import and parse reports from Lastline analysis links.
+* [Lastline Import](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/lastline_import.py) - Deprecation notice: this module will be deprecated by December 2021, please use vmware_nsx module.  Module to import and parse reports from Lastline analysis links.
 * [MISP JSON Import](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/mispjson.py) - Module to import MISP JSON format for merging MISP events.
 * [OCR Import](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/ocr.py) - Optical Character Recognition (OCR) module for MISP.
 * [OpenIOC Import](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/openiocimport.py) - Module to import OpenIOC packages.

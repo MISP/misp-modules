@@ -50,7 +50,10 @@ def generate_doc(module_type, root_path, logo_path='logos'):
         for i in moduleinfo_to_ignore:
             moduleinfo.pop(i)
 
-        module_name_pretty = moduleinfo.pop('name')
+        try:
+            module_name_pretty = moduleinfo.pop('name')
+        except KeyError:
+            exit(f"ERROR: Issue with module {module_name} - no field 'name' provided")
         if module_name_pretty == '':
             module_name_pretty = module_name
 
@@ -82,7 +85,7 @@ def generate_index_doc(module_type, root_path):
             module_name_pretty = module_name
 
         githubref = f'{githubpath}/{module_name}.py'
-        markdown.append(f'* [{module_name_pretty}]({githubref}) - {moduleinfo.get("description")}\n')
+        markdown.append(f'* [{module_name_pretty}]({githubref}) - {moduleinfo.get("description").replace('\n', ' ')}\n')
     return markdown
 
 
