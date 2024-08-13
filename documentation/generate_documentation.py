@@ -85,7 +85,8 @@ def generate_index_doc(module_type, root_path):
             module_name_pretty = module_name
 
         githubref = f'{githubpath}/{module_name}.py'
-        markdown.append(f'* [{module_name_pretty}]({githubref}) - {moduleinfo.get("description").replace('\n', ' ')}\n')
+        description_without_newlines = moduleinfo.get("description").replace('\n', ' ')
+        markdown.append(f'* [{module_name_pretty}]({githubref}) - {description_without_newlines}\n')
     return markdown
 
 
