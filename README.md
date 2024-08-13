@@ -13,15 +13,15 @@ without modifying core components. The API is available via a simple REST API wh
 For more information: [Extending MISP with Python modules](https://www.misp-project.org/misp-training/3.1-misp-modules.pdf) slides from [MISP training](https://github.com/MISP/misp-training).
 
 # Installation
-Installation instructions can be found in the [installation documentation](docs/install.md).
+Installation instructions can be found in the [installation documentation](https://misp.github.io/misp-modules/install/).
 
 # How to add your own MISP modules?
 Developing a MISP module yourself is fairly easy. Start with a template or existing module and continue from there. \
-More information can be found in the [contribute](docs/contribute.md) section of the documentation.
+More information can be found in the [contribute](https://misp.github.io/misp-modules/contribute/) section of the documentation.
 
 # Documentation
 
-In order to provide documentation about some modules that require specific input / output / configuration, the [index.md](docs/index.md) file within the [docs](docs) directory contains detailed information about the general purpose, requirements, features, input and ouput of each of these modules:
+In order to provide documentation about some modules that require specific input / output / configuration, the [documentation](https://misp.github.io/misp-modules/) contains detailed information about the general purpose, requirements, features, input and ouput of each of these modules:
 
 - ***description** - quick description of the general purpose of the module, as the one given by the moduleinfo
 - **requirements** - special libraries needed to make the module work
@@ -31,7 +31,7 @@ In order to provide documentation about some modules that require specific input
 - **output** - description of the format given as the result of the module execution
 
 ## Licenses
-For further Information see the [license file](docs/license.md).
+For further Information see the [license file](https://misp.github.io/misp-modules/license/).
 
 # List of MISP modules
 
