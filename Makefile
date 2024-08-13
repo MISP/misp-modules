@@ -3,6 +3,7 @@
 .PHONY: prepare_docs generate_docs ci_generate_docs test_docs
 
 prepare_docs:
+	pip3 install .
 	cd documentation; python3 generate_documentation.py
 	mkdir -p docs/expansion/logos docs/export_mod/logos docs/import_mod/logos
 	mkdir -p docs/logos
