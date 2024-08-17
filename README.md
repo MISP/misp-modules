@@ -131,7 +131,7 @@ For further Information see the [license file](https://misp.github.io/misp-modul
 * [URLScan Lookup](https://misp.github.io/misp-modules/expansion/#urlscan-lookup) - An expansion module to query urlscan.io.
 * [VARIoT db Lookup](https://misp.github.io/misp-modules/expansion/#variot-db-lookup) - An expansion module to query the VARIoT db API for more information about a vulnerability.
 * [VirusTotal v3 Lookup](https://misp.github.io/misp-modules/expansion/#virustotal-v3-lookup) - Enrich observables with the VirusTotal v3 API
-* [VirusTotal Public API Lookup](https://misp.github.io/misp-modules/expansion/#virustotal-public-api-lookup) - Module to push malware samples to VirusTotal
+* [VirusTotal Public API Lookup](https://misp.github.io/misp-modules/expansion/#virustotal-public-api-lookup) - Enrich observables with the VirusTotal v3 public API
 * [VirusTotal Upload](https://misp.github.io/misp-modules/expansion/#virustotal-upload) - Module to push malware samples to VirusTotal v3 public API
 * [VMRay Submit](https://misp.github.io/misp-modules/expansion/#vmray-submit) - Module to submit a sample to VMRay.
 * [VMware NSX Defender Enrich](https://misp.github.io/misp-modules/expansion/#vmware-nsx-defender-enrich) - Module to enrich a file or URL with VMware NSX Defender.
