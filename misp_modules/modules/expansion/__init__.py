@@ -23,7 +23,7 @@ __all__ = ['cuckoo_submit', 'vmray_submit', 'bgpranking', 'circl_passivedns', 'c
            'extract_url_components', 'ipinfo', 'whoisfreaks', 'ip2locationio', 'stairwell',
            'google_threat_intelligence', 'vulnerability_lookup', 'vysion', 'mcafee_insights_enrich',
            'threatfox', 'yeti', 'abuseipdb', 'vmware_nsx', 'sigmf_expand', 'google_safe_browsing',
-           'google_search']
+           'google_search', 'triage_submit', 'virustotal_upload', 'malshare_upload' ]
 
 
 minimum_required_fields = ('type', 'uuid', 'value')
