@@ -1,0 +1,92 @@
+name: Test Python package
+
+on:
+
+  push:
+    branches: [ main ]
+
+  pull_request:
+    branches: [ main ]
+
+jobs:
+
+  docs:
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install packages
+        run: sudo apt-get install libpoppler-cpp-dev libzbar0 tesseract-ocr yara
+
+      - name: Install poetry
+        run: pipx install poetry
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.12
+          cache: 'poetry'
+
+      - name: Install dependencies
+        run: poetry install --with docs
+
+      - name: Build docs
+        run: make generate_docs
+
+  test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
+
+    steps:
+    
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install packages
+        run: sudo apt-get install libpoppler-cpp-dev libzbar0 tesseract-ocr yara
+
+      - name: Install poetry
+        run: pipx install poetry
+  
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: 'poetry'
+
+      - name: Install dependencies
+        run: poetry install --with test
+
+      - name: Build package
+        run: poetry build
+
+      - name: Lint with flake8
+        run: |
+          # stop the build if there are Python syntax errors or undefined names
+          poetry run flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+          # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
+          poetry run flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+
+      - name: Run server in background
+        run: poetry run misp-modules -l 127.0.0.1 -s 2>error.log &
+
+      - name: Sleep for 10 seconds
+        run: sleep 10s
+        shell: bash
+
+      - name: Check if server is running
+        run: curl -sS localhost:6666/healthcheck
+
+      - name: Test package
+        run: poetry run pytest
+
+      - name: Show error log
+        if: always()
+        run: cat error.log

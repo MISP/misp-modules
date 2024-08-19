@@ -105,7 +105,10 @@ vysion = "*"
 wand = "*"
 xlrd = "*"
 
-[tool.poetry.group.dev.dependencies]
+[tool.poetry.group.test]
+optional = true
+
+[tool.poetry.group.test.dependencies]
 codecov = "*"
 flake8 = "*"
 nose = "*"
