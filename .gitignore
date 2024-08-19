@@ -24,3 +24,4 @@ venv*
 .vscode*
 *.sqlite
 website/conf/config.cfg
+wheels

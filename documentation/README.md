@@ -175,28 +175,6 @@ Backscatter.io module to bring mass-scanning observations into MISP.
 
 -----
 
-#### [BGP Ranking](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/bgpranking.py)
-
-Query BGP Ranking to get the ranking of an Autonomous System number.
-[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/bgpranking.py)]
-
-- **features**:
->The module takes an AS number attribute as input and displays its description as well as its ranking position in BGP Ranking for a given day.
-
-- **input**:
->Autonomous system number.
-
-- **output**:
->An asn object with its related bgp-ranking object.
-
-- **references**:
->https://github.com/D4-project/BGP-Ranking/
-
-- **requirements**:
->pybgpranking python library
-
------
-
 #### [BTC Scam Check](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/btc_scam_check.py)
 
 <img src=logos/bitcoin.png height=60>
@@ -2840,32 +2818,6 @@ Module to enrich the information by making use of the Vysion API.
 - **requirements**:
 > - Vysion python library
 > - Vysion API Key
-
------
-
-#### [Whois Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/whois.py)
-
-Module to query a local instance of uwhois (https://github.com/rafiot/uwhoisd).
-[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/whois.py)]
-
-- **features**:
->This module takes a domain or IP address attribute as input and queries a 'Univseral Whois proxy server' to get the correct details of the Whois query on the input value (check the references for more details about this whois server).
-
-- **config**:
-> - server
-> - port
-
-- **input**:
->A domain or IP address attribute.
-
-- **output**:
->Text describing the result of a whois request for the input value.
-
-- **references**:
->https://github.com/rafiot/uwhoisd
-
-- **requirements**:
->uwhois: A whois python library
 
 -----
 

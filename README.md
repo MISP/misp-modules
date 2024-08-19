@@ -42,7 +42,6 @@ For further Information see the [license file](https://misp.github.io/misp-modul
 * [AssemblyLine Query](https://misp.github.io/misp-modules/expansion/#assemblyline-query) - A module tu query the AssemblyLine API with a submission ID to get the submission report and parse it.
 * [AssemblyLine Submit](https://misp.github.io/misp-modules/expansion/#assemblyline-submit) - A module to submit samples and URLs to AssemblyLine for advanced analysis, and return the link of the submission.
 * [Backscatter.io](https://misp.github.io/misp-modules/expansion/#backscatter.io) - Backscatter.io module to bring mass-scanning observations into MISP.
-* [BGP Ranking](https://misp.github.io/misp-modules/expansion/#bgp-ranking) - Query BGP Ranking to get the ranking of an Autonomous System number.
 * [BTC Scam Check](https://misp.github.io/misp-modules/expansion/#btc-scam-check) - An expansion hover module to query a special dns blacklist to check if a bitcoin address has been abused.
 * [BTC Steroids](https://misp.github.io/misp-modules/expansion/#btc-steroids) - An expansion hover module to get a blockchain balance from a BTC address in MISP.
 * [Censys Enrich](https://misp.github.io/misp-modules/expansion/#censys-enrich) - An expansion module to enrich attributes in MISP by quering the censys.io API
@@ -136,7 +135,6 @@ For further Information see the [license file](https://misp.github.io/misp-modul
 * [Vulnerability Lookup](https://misp.github.io/misp-modules/expansion/#vulnerability-lookup) - An expansion module to query Vulnerability Lookup
 * [Vulners Lookup](https://misp.github.io/misp-modules/expansion/#vulners-lookup) - An expansion hover module to expand information about CVE id using Vulners API.
 * [Vysion Enrich](https://misp.github.io/misp-modules/expansion/#vysion-enrich) - Module to enrich the information by making use of the Vysion API.
-* [Whois Lookup](https://misp.github.io/misp-modules/expansion/#whois-lookup) - Module to query a local instance of uwhois (https://github.com/rafiot/uwhoisd).
 * [WhoisFreaks Lookup](https://misp.github.io/misp-modules/expansion/#whoisfreaks-lookup) - An expansion module for https://whoisfreaks.com/ that will provide an enriched analysis of the provided domain, including WHOIS and DNS information.
 * [Wikidata Lookup](https://misp.github.io/misp-modules/expansion/#wikidata-lookup) - An expansion hover module to extract information from Wikidata to have additional information about particular term for analysis.
 * [IBM X-Force Exchange Lookup](https://misp.github.io/misp-modules/expansion/#ibm-x-force-exchange-lookup) - An expansion module for IBM X-Force Exchange.
