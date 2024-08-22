@@ -15,6 +15,7 @@ moduleinfo = {
     'module-type': ['expansion'],
     'name': 'VirusTotal Upload',
     'requirements': ['requests library'],
+    'logo': 'virustotal.png'
 }
 
 moduleconfig = ['virustotal_apikey']

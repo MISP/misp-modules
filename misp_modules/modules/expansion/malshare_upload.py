@@ -16,6 +16,7 @@ moduleinfo = {
     'module-type': ['expansion'],
     'name': 'MalShare Upload',
     'requirements': ['requests library'],
+    'logo': ''
 }
 
 moduleconfig = ['malshare_apikey']

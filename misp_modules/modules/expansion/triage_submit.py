@@ -12,6 +12,7 @@ moduleinfo = {
     'description': 'Module to submit samples to tria.ge',
     'module-type': ['expansion', 'hover'],
     'name': 'Triage Submit',
+    'logo': ''
 }
 
 moduleconfig = ['apikey', 'url_mode']
