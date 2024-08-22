@@ -292,7 +292,7 @@ Value: [[misp_attr]]
 {% block script %}
 <script type="module">
     const { createApp, ref, onMounted, nextTick} = Vue
-    import {message_list} from '/static/js/toaster.js'
+    import {message_list, display_toast} from '/static/js/toaster.js'
     import history_view from '/static/js/history/history_tree_query.js'
     createApp({
         delimiters: ['[[', ']]'],
@@ -460,14 +460,13 @@ Value: [[misp_attr]]
                         to_return = modules_res.value
                     }
 
-                    $('#insert_form').append(
-                        $('<form>').attr(
-                            {"action": external_tools.value[tool_selected].url, "name": "external_tools_form", "method": "post", "style": "display:none"}).append(
-                                $("<input>").attr({"type": "text", "name": "results"}).val(JSON.stringify(to_return)
-                            )
-                        )
-                    );
-                    document.forms['external_tools_form'].submit();
+                    const res = await fetch('/submit_external_tool',{
+                                    headers: { "X-CSRFToken": $("#csrf_token").val(), "Content-Type": "application/json" },
+                                    method: "POST",
+                                    body: JSON.stringify({"results": JSON.stringify(to_return), "external_tool_id": external_tools.value[tool_selected].id})
+                                })
+
+                    display_toast(res)
                 }
             }
 

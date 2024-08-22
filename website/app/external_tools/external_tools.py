@@ -61,10 +61,12 @@ def change_config():
     if "tool_id" in request.json["result_dict"] and request.json["result_dict"]["tool_id"]:
         if "tool_name" in request.json["result_dict"] and request.json["result_dict"]["tool_name"]:
             if "tool_url" in request.json["result_dict"] and request.json["result_dict"]["tool_url"]:
-                res = ToolModel.change_config_core(request.json["result_dict"])
-                if res:
-                    return {'message': 'Config changed', 'toast_class': "success-subtle"}, 200
-                return {'message': 'Something went wrong', 'toast_class': "danger-subtle"}, 400
+                if "tool_api_key" in request.json["result_dict"] and request.json["result_dict"]["tool_api_key"]:
+                    res = ToolModel.change_config_core(request.json["result_dict"])
+                    if res:
+                        return {'message': 'Config changed', 'toast_class': "success-subtle"}, 200
+                    return {'message': 'Something went wrong', 'toast_class': "danger-subtle"}, 400
+                return {'message': 'Need to pass "tool_api_key"', 'toast_class': "warning-subtle"}, 400
             return {'message': 'Need to pass "tool_url"', 'toast_class': "warning-subtle"}, 400
         return {'message': 'Need to pass "tool_name"', 'toast_class': "warning-subtle"}, 400
     return {'message': 'Need to pass "tool_id"', 'toast_class': "warning-subtle"}, 400

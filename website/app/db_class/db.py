@@ -96,6 +96,7 @@ class ExternalTools(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String(64), index=True)
     url = db.Column(db.String)
+    api_key = db.Column(db.String(60), index=True)
     is_active = db.Column(db.Boolean)
 
     def to_json(self):
@@ -103,6 +104,7 @@ class ExternalTools(db.Model):
             "id": self.id, 
             "url": self.url,
             "name": self.name,
+            "api_key": self.api_key,
             "is_active": self.is_active
         }
 

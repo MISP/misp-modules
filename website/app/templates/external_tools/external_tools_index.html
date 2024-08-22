@@ -53,6 +53,11 @@
                 <input type="text" class="form-control" :id="'form-url-'+current_config.tool_id" :value="current_config.tool_url">
                 <span style="color: brown" :id="'error-url-'+current_config.tool_id"></span>
             </div>
+            <div class="mb-3">
+                <label :for="'form-api-key-'+current_config.tool_id" class="form-label">API key: </label>
+                <input type="text" class="form-control" :id="'form-api-key-'+current_config.tool_id" :value="current_config.tool_api_key">
+                <span style="color: brown" :id="'error-api-key-'+current_config.tool_id"></span>
+            </div>
             <button class="btn btn-primary" @click="change_config()">Save</button>
             <button class="btn btn-danger" @click="delete_tool()" style="margin-left: 5px;">Delete</button>
         </div>
@@ -86,6 +91,7 @@
                     current_config.value["tool_name"] = tool.name
                     current_config.value["tool_url"] = tool.url
                     current_config.value["tool_id"] = tool.id
+                    current_config.value["tool_api_key"] = tool.api_key
                 }
 
                 function close_panel(){
@@ -95,6 +101,7 @@
                 async function change_config(){
                     $("#error-name-"+current_config.value["tool_id"]).text("")
                     $("#error-url-"+current_config.value["tool_id"]).text("")
+                    $("#error-url-"+current_config.value["tool_api_key"]).text("")
                     let result_dict = {}
                     result_dict["tool_id"] = current_config.value["tool_id"]
 
@@ -108,6 +115,11 @@
                         $("#error-url-"+current_config.value["tool_id"]).text('Cannot be empty')
                         return
                     }
+                    let loc_api_key = $("#form-api-key-"+current_config.value["tool_id"]).val()
+                    if(!loc_api_key){
+                        $("#error-api-key-"+current_config.value["tool_id"]).text('Cannot be empty')
+                        return
+                    }
 
                     // Update result_dict and current_config
                     result_dict["tool_name"] = loc_name
@@ -115,12 +127,16 @@
 
                     result_dict["tool_url"] = loc_url
                     current_config.value["tool_url"] = loc_url
+
+                    result_dict["tool_api_key"] = loc_api_key
+                    current_config.value["tool_api_key"] = loc_api_key
                     
                     // Update list of tools with new value for current tool
                     for(let i in tools_config.value){
                         if(tools_config.value[i].id == current_config.value["tool_id"] ){
                             tools_config.value[i].name = loc_name
                             tools_config.value[i].url = loc_url
+                            tools_config.value[i].api_key = loc_api_key
                         }
                     }
 

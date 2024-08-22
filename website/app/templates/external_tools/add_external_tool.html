@@ -26,6 +26,15 @@
             {%endif%}
         </div>
     </div>
+    <div class="row">
+        <div class="mb-3 w-50">
+            {{form.api_key.label(class_="col-form-label")}}:
+            {{form.api_key(class_="form-control")}}
+            {% if form.api_key.errors %}
+                <div style="color: red;">{{form.api_key.errors[0] | safe}}</div>
+            {%endif%}
+        </div>
+    </div>
     
     {{form.submit(class='btn btn-primary')}}
 </form>
