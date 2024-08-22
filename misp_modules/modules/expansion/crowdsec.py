@@ -12,6 +12,13 @@ moduleinfo = {
     "author": "Shivam Sandbhor <shivam@crowdsec.net>",
     "description": "Module to access CrowdSec CTI API.",
     "module-type": ["hover", "expansion"],
+    "name": "CrowdSec CTI",
+    "logo": "crowdsec.png",
+    "requirements": ["A CrowdSec CTI API key. Get yours by following https://docs.crowdsec.net/docs/cti_api/getting_started/#getting-an-api-key"],
+    "features": "This module enables IP lookup from CrowdSec CTI API. It provides information about the IP, such as what kind of attacks it has been participant of as seen by CrowdSec's network. It also includes enrichment by CrowdSec like background noise score, aggressivity over time etc.",
+    "references": ["https://www.crowdsec.net/", "https://docs.crowdsec.net/docs/cti_api/getting_started", "https://app.crowdsec.net/"],
+    "input": "An IP address.",
+    "output": "IP Lookup information from CrowdSec CTI API",
 }
 moduleconfig = [
     "api_key",
