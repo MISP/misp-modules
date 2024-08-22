@@ -114,6 +114,7 @@ For more information: [Extending MISP with Python modules](https://www.misp-proj
 * [Vulnerability Lookup](https://misp.github.io/misp-modules/expansion/#vulnerability-lookup) - An expansion module to query Vulnerability Lookup
 * [Vulners Lookup](https://misp.github.io/misp-modules/expansion/#vulners-lookup) - An expansion hover module to expand information about CVE id using Vulners API.
 * [Vysion Enrich](https://misp.github.io/misp-modules/expansion/#vysion-enrich) - Module to enrich the information by making use of the Vysion API.
+* [Whois Lookup](https://misp.github.io/misp-modules/expansion/#whois-lookup) - Module to query a local instance of uwhois (https://github.com/rafiot/uwhoisd).
 * [WhoisFreaks Lookup](https://misp.github.io/misp-modules/expansion/#whoisfreaks-lookup) - An expansion module for https://whoisfreaks.com/ that will provide an enriched analysis of the provided domain, including WHOIS and DNS information.
 * [Wikidata Lookup](https://misp.github.io/misp-modules/expansion/#wikidata-lookup) - An expansion hover module to extract information from Wikidata to have additional information about particular term for analysis.
 * [IBM X-Force Exchange Lookup](https://misp.github.io/misp-modules/expansion/#ibm-x-force-exchange-lookup) - An expansion module for IBM X-Force Exchange.

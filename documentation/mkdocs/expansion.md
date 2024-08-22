@@ -2818,6 +2818,32 @@ Module to enrich the information by making use of the Vysion API.
 
 -----
 
+#### [Whois Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/whois.py)
+
+Module to query a local instance of uwhois (https://github.com/rafiot/uwhoisd).
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/whois.py)]
+
+- **features**:
+>This module takes a domain or IP address attribute as input and queries a 'Univseral Whois proxy server' to get the correct details of the Whois query on the input value (check the references for more details about this whois server).
+
+- **config**:
+> - server
+> - port
+
+- **input**:
+>A domain or IP address attribute.
+
+- **output**:
+>Text describing the result of a whois request for the input value.
+
+- **references**:
+>https://github.com/Lookyloo/uwhoisd
+
+- **requirements**:
+>uwhois: A whois python library
+
+-----
+
 #### [WhoisFreaks Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/whoisfreaks.py)
 
 <img src=../logos/whoisfreaks.png height=60>

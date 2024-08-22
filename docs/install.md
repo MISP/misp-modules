@@ -1,6 +1,3 @@
-IMPORTANT NOTE: we will soon be publishing `misp-modules` on PyPI.
-
-
 ## Install from pip
 
 It is strongly recommended to use a virtual environment (see here for instructions https://docs.python.org/3/tutorial/venv.html).
@@ -10,6 +7,8 @@ Once the virtual environment is loaded just use the command:
 ~~~~bash
 pip install misp-modules
 ~~~~
+
+Note: this install method might not yet be available.
 
 
 ## Install from cloned repository
@@ -83,7 +82,7 @@ Inside you will find three targets:
 
 - `test-docs`: run a local server exposing the newly built documentation.
 
-Note that you can either run the targets using `poetry` (default), or using the `squidfunk/mkdocs-material` by setting the environment variable `USE_DOCKER=true`.
+Note: you can either run the targets using `poetry` (default), or using the Docker image `squidfunk/mkdocs-material` by setting the environment variable `USE_DOCKER=true`.
 
 
 ## Run MISP modules
@@ -93,7 +92,7 @@ If you installed it using pip, you just need to execute the command `misp-module
 
 ## Run MISP modules in Docker
 
-You can find an up-to-date container image and related documentation at the following repository:m https://github.com/MISP/misp-docker 
+You can find an up-to-date container image and related documentation at the following repository: https://github.com/MISP/misp-docker .
 
 
 ## Install misp-module on an offline instance
@@ -137,7 +136,13 @@ Just follow those instructions but replace the package `misp-modules` with `-r r
 
 Before doing so you need to generate the `requirements.txt` file. Due to the fact we are still supporting Python 3.8 and that Poetry still has some limitations (soon to be resolved) you need to need to replace the line `python = ">=3.8.*,<3.13"` inside `pyproject.toml` with your exact version (just run `python --version`).
 
-Once you have done that, run the following commands to generate your very own `requirements.txt`.
+The following `sed` command does everything for you.
+
+~~~~bash
+sed -i "s/^python = .*/python = \"$(python -c 'import platform; print(platform.python_version())')\"/" pyproject.toml
+~~~~
+
+Then, run the following commands to generate your very own `requirements.txt`.
 
 ~~~~bash
 poetry lock
@@ -145,3 +150,10 @@ poetry install
 poetry self add poetry-plugin-export
 poetry export --without-hashes -f requirements.txt -o requirements.txt
 ~~~~
+
+Note that `misp-modules` will not be part of the `requirements.txt` file and you will need to create the wheel yourself:
+
+~~~~bash
+poetry build --output ./wheels
+~~~~
+
