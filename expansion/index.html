@@ -796,6 +796,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#malshare-upload" class="md-nav__link">
+    <span class="md-ellipsis">
+      MalShare Upload
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#malware-bazaar-lookup" class="md-nav__link">
     <span class="md-ellipsis">
       Malware Bazaar Lookup
@@ -1093,6 +1102,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#triage-submit" class="md-nav__link">
+    <span class="md-ellipsis">
+      Triage Submit
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#trustar-enrich" class="md-nav__link">
     <span class="md-ellipsis">
       TruSTAR Enrich
@@ -1141,6 +1159,15 @@
   <a href="#virustotal-public-api-lookup" class="md-nav__link">
     <span class="md-ellipsis">
       VirusTotal Public API Lookup
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#virustotal-upload" class="md-nav__link">
+    <span class="md-ellipsis">
+      VirusTotal Upload
     </span>
   </a>
   
@@ -1944,6 +1971,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#malshare-upload" class="md-nav__link">
+    <span class="md-ellipsis">
+      MalShare Upload
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#malware-bazaar-lookup" class="md-nav__link">
     <span class="md-ellipsis">
       Malware Bazaar Lookup
@@ -2241,6 +2277,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#triage-submit" class="md-nav__link">
+    <span class="md-ellipsis">
+      Triage Submit
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#trustar-enrich" class="md-nav__link">
     <span class="md-ellipsis">
       TruSTAR Enrich
@@ -2289,6 +2334,15 @@
   <a href="#virustotal-public-api-lookup" class="md-nav__link">
     <span class="md-ellipsis">
       VirusTotal Public API Lookup
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#virustotal-upload" class="md-nav__link">
+    <span class="md-ellipsis">
+      VirusTotal Upload
     </span>
   </a>
   
@@ -4744,6 +4798,24 @@ When the analysis is completed, it is possible to import the generated report by
 </li>
 </ul>
 <hr />
+<h4 id="malshare-upload"><a href="https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/malshare_upload.py">MalShare Upload</a><a class="headerlink" href="#malshare-upload" title="Permanent link">&para;</a></h4>
+<p>Module to push malware samples to MalShare
+[<a href="https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/malshare_upload.py">source code</a>]</p>
+<ul>
+<li>
+<p><strong>config</strong>:</p>
+<blockquote>
+<p>malshare_apikey</p>
+</blockquote>
+</li>
+<li>
+<p><strong>requirements</strong>:</p>
+<blockquote>
+<p>requests library</p>
+</blockquote>
+</li>
+</ul>
+<hr />
 <h4 id="malware-bazaar-lookup"><a href="https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/malwarebazaar.py">Malware Bazaar Lookup</a><a class="headerlink" href="#malware-bazaar-lookup" title="Permanent link">&para;</a></h4>
 <p>Query Malware Bazaar to get additional information about the input hash.
 [<a href="https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/malwarebazaar.py">source code</a>]</p>
@@ -6072,6 +6144,19 @@ It is also possible to filter results on 1 db_source by configuring db_source_fi
 </li>
 </ul>
 <hr />
+<h4 id="triage-submit"><a href="https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/triage_submit.py">Triage Submit</a><a class="headerlink" href="#triage-submit" title="Permanent link">&para;</a></h4>
+<p>Module to submit samples to tria.ge
+[<a href="https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/triage_submit.py">source code</a>]</p>
+<ul>
+<li><strong>config</strong>:<blockquote>
+<ul>
+<li>apikey</li>
+<li>url_mode</li>
+</ul>
+</blockquote>
+</li>
+</ul>
+<hr />
 <h4 id="trustar-enrich"><a href="https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/trustar_enrich.py">TruSTAR Enrich</a><a class="headerlink" href="#trustar-enrich" title="Permanent link">&para;</a></h4>
 <p><img src=../logos/trustar.png height=60></p>
 <p>Module to get enrich indicators with TruSTAR.
@@ -6353,6 +6438,25 @@ It is also possible to filter results on 1 db_source by configuring db_source_fi
 <p><strong>requirements</strong>:</p>
 <blockquote>
 <p>An access to the VirusTotal API (apikey)</p>
+</blockquote>
+</li>
+</ul>
+<hr />
+<h4 id="virustotal-upload"><a href="https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/virustotal_upload.py">VirusTotal Upload</a><a class="headerlink" href="#virustotal-upload" title="Permanent link">&para;</a></h4>
+<p><img src=../logos/virustotal.png height=60></p>
+<p>Module to push malware samples to VirusTotal
+[<a href="https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/virustotal_upload.py">source code</a>]</p>
+<ul>
+<li>
+<p><strong>config</strong>:</p>
+<blockquote>
+<p>virustotal_apikey</p>
+</blockquote>
+</li>
+<li>
+<p><strong>requirements</strong>:</p>
+<blockquote>
+<p>requests library</p>
 </blockquote>
 </li>
 </ul>
