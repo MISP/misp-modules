@@ -179,8 +179,10 @@ def download(sid):
         if sess:
             loc = json.loads(sess.result)
             module = request.args.get("module")
-            if module in loc:
-                return jsonify(loc[module]), 200, {'Content-Disposition': f'attachment; filename={sess.query_enter.replace(".", "_")}-{module}.json'}
+            query = request.args.get("query")
+            if query in loc:
+                if module in loc[query]:
+                    return jsonify(loc[query][module]), 200, {'Content-Disposition': f'attachment; filename={query}-{module}.json'}
             return {"message": "Module not in result", "toast_class": "danger-subtle"}, 400
         else:
             for s in SessionModel.sessions:
@@ -188,7 +190,7 @@ def download(sid):
                     module = request.args.get("module")
                     if module in s.result:
                         return jsonify(s.result[module]), 200, {'Content-Disposition': f'attachment; filename={s.query}-{module}.json'}
-                    return {"message": "Module not in result", "toast_class": "danger-subtle"}, 400
+                    return {"message": "Module not in result ", "toast_class": "danger-subtle"}, 400
         return {"message": "Session not found", 'toast_class': "danger-subtle"}, 404
     return {"message": "Need to pass a module", "toast_class": "warning-subtle"}, 400
 

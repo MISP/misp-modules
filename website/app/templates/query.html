@@ -168,7 +168,7 @@
                                         <!-- json part -->
                                         <template v-if="tab_list == 'json'">
                                             <div class="btn-group" role="group" style="padding: 5px; margin-left: 5px; margin-top: 5px;">
-                                                <a class="btn btn-primary" :href="`/download/${sid}?module=${key}`" title="Download the json" >Download</a>
+                                                <a class="btn btn-primary" :href="`/download/${sid}?query=${key_query}&module=${key}`" title="Download the json" >Download</a>
                                             </div>
                                             <div class="accordion-body" v-html="generateCoreFormatUI(result)[0].outerHTML"></div>
                                         </template>
