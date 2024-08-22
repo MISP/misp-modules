@@ -16,10 +16,11 @@ moduleinfo = {
     'module-type': ['expansion'],
     'name': 'MalShare Upload',
     'requirements': ['requests library'],
-    'logo': ''
+    'logo': '',
 }
 
 moduleconfig = ['malshare_apikey']
+
 
 def handler(q=False):
     if q is False:
@@ -54,41 +55,52 @@ def handler(q=False):
 
     try:
         url = "https://malshare.com/api.php"
-        params = {
-            'api_key': malshare_apikey,
-            'action': 'upload'
-        }
+        params = {'api_key': malshare_apikey, 'action': 'upload'}
         files = {"upload": (sample_filename, data)}
         response = requests.post(url, params=params, files=files)
         response.raise_for_status()
-        
+
         response_text = response.text.strip()
-        
+
         # Calculate SHA256 of the file
         sha256 = hashlib.sha256(data).hexdigest()
-        
+
         if response_text.startswith("Success"):
             # If upload was successful or file already exists
-            malshare_link = f"https://malshare.com/sample.php?action=detail&hash={sha256}"
+            malshare_link = (
+                f"https://malshare.com/sample.php?action=detail&hash={sha256}"
+            )
         elif "sample already exists" in response_text:
             # If file already exists, extract SHA256 from response
             match = re.search(r'([a-fA-F0-9]{64})', response_text)
             if match:
                 sha256 = match.group(1)
-            malshare_link = f"https://malshare.com/sample.php?action=detail&hash={sha256}"
+            malshare_link = (
+                f"https://malshare.com/sample.php?action=detail&hash={sha256}"
+            )
         else:
             # If there's any other error
             raise Exception(f"Upload failed: {response_text}")
-        
+
     except Exception as e:
         misperrors['error'] = f"Unable to send sample to MalShare: {str(e)}"
         return misperrors
 
-    r = {'results': [{'types': 'link', 'values': malshare_link, 'comment': 'Link to MalShare analysis'}]}
+    r = {
+        'results': [
+            {
+                'types': 'link',
+                'values': malshare_link,
+                'comment': 'Link to MalShare analysis',
+            }
+        ]
+    }
     return r
+
 
 def introspection():
     return mispattributes
+
 
 def version():
     moduleinfo['config'] = moduleconfig

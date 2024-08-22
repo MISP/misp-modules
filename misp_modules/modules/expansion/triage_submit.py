@@ -12,15 +12,16 @@ moduleinfo = {
     'description': 'Module to submit samples to tria.ge',
     'module-type': ['expansion', 'hover'],
     'name': 'Triage Submit',
-    'logo': ''
+    'logo': '',
 }
 
 moduleconfig = ['apikey', 'url_mode']
 
+
 def handler(q=False):
     if q is False:
         return False
-    
+
     request = json.loads(q)
 
     if request.get('config', {}).get('apikey') is None:
@@ -30,9 +31,7 @@ def handler(q=False):
     api_key = request['config']['apikey']
     url_mode = request['config'].get('url_mode', 'submit')  # 'submit' or 'fetch'
     base_url = 'https://tria.ge/api/v0/samples'
-    headers = {
-        'Authorization': f'Bearer {api_key}'
-    }
+    headers = {'Authorization': f'Bearer {api_key}'}
 
     if 'attachment' in request:
         data = request['data']
@@ -49,6 +48,7 @@ def handler(q=False):
         misperrors['error'] = 'Unsupported input type'
         return misperrors
 
+
 def submit_file(headers, base_url, data, filename, is_malware_sample=False):
     try:
         if is_malware_sample:
@@ -62,15 +62,24 @@ def submit_file(headers, base_url, data, filename, is_malware_sample=False):
         response = requests.post(base_url, headers=headers, files=files)
         response.raise_for_status()
         result = response.json()
-        
+
         sample_id = result['id']
         sample_url = f'https://tria.ge/{sample_id}'
-        
-        return {'results': [{'types': 'link', 'values': sample_url, 'comment': 'Link to tria.ge analysis'}]}
-    
+
+        return {
+            'results': [
+                {
+                    'types': 'link',
+                    'values': sample_url,
+                    'comment': 'Link to tria.ge analysis',
+                }
+            ]
+        }
+
     except Exception as e:
         misperrors['error'] = f'Error submitting to tria.ge: {str(e)}'
         return misperrors
+
 
 def submit_url(headers, base_url, url, mode):
     try:
@@ -78,22 +87,32 @@ def submit_url(headers, base_url, url, mode):
             data = {'kind': 'fetch', 'url': url}
         else:  # submit
             data = {'kind': 'url', 'url': url}
-        
+
         response = requests.post(base_url, headers=headers, json=data)
         response.raise_for_status()
         result = response.json()
-        
+
         sample_id = result['id']
         sample_url = f'https://tria.ge/{sample_id}'
-        
-        return {'results': [{'types': 'link', 'values': sample_url, 'comment': f'Link to tria.ge analysis ({mode} mode)'}]}
-    
+
+        return {
+            'results': [
+                {
+                    'types': 'link',
+                    'values': sample_url,
+                    'comment': f'Link to tria.ge analysis ({mode} mode)',
+                }
+            ]
+        }
+
     except Exception as e:
         misperrors['error'] = f'Error submitting to tria.ge: {str(e)}'
         return misperrors
 
+
 def introspection():
     return mispattributes
+
 
 def version():
     moduleinfo['config'] = moduleconfig
