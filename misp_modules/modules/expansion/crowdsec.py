@@ -1,3 +1,4 @@
+import ipaddress
 import json
 
 import pycountry
@@ -14,9 +15,15 @@ moduleinfo = {
     "module-type": ["hover", "expansion"],
     "name": "CrowdSec CTI",
     "logo": "crowdsec.png",
-    "requirements": ["A CrowdSec CTI API key. Get yours by following https://docs.crowdsec.net/docs/cti_api/getting_started/#getting-an-api-key"],
+    "requirements": [
+        "A CrowdSec CTI API key. Get yours by following https://docs.crowdsec.net/docs/cti_api/getting_started/#getting-an-api-key"
+    ],
     "features": "This module enables IP lookup from CrowdSec CTI API. It provides information about the IP, such as what kind of attacks it has been participant of as seen by CrowdSec's network. It also includes enrichment by CrowdSec like background noise score, aggressivity over time etc.",
-    "references": ["https://www.crowdsec.net/", "https://docs.crowdsec.net/docs/cti_api/getting_started", "https://app.crowdsec.net/"],
+    "references": [
+        "https://www.crowdsec.net/",
+        "https://docs.crowdsec.net/docs/cti_api/getting_started",
+        "https://app.crowdsec.net/",
+    ],
     "input": "An IP address.",
     "output": "IP Lookup information from CrowdSec CTI API",
 }
@@ -28,168 +35,6 @@ moduleconfig = [
     "add_mitre_technique_tag",
     "add_cve_tag",
 ]
-
-crowdsec_template = {
-    "attributes": {
-        "as-name": {
-            "categories": ["Network activity", "External analysis"],
-            "description": "Autonomous system name",
-            "disable_correlation": True,
-            "misp-attribute": "text",
-            "multiple": True,
-            "ui-priority": 0,
-        },
-        "as-num": {
-            "categories": ["Network activity", "External analysis"],
-            "description": "Autonomous system number",
-            "disable_correlation": True,
-            "misp-attribute": "AS",
-            "multiple": True,
-            "ui-priority": 0,
-        },
-        "attack-details": {
-            "description": "Triggered scenarios",
-            "disable_correlation": True,
-            "misp-attribute": "text",
-            "ui-priority": 1,
-        },
-        "background-noise": {
-            "description": "High background noise scores highlight untargeted, mild threat mass-attacks",
-            "disable_correlation": True,
-            "misp-attribute": "float",
-            "ui-priority": 1,
-        },
-        "behaviors": {
-            "description": "Attack categories",
-            "disable_correlation": True,
-            "misp-attribute": "text",
-            "multiple": True,
-            "ui-priority": 1,
-        },
-        "city": {
-            "description": "City of origin",
-            "disable_correlation": True,
-            "misp-attribute": "text",
-            "ui-priority": 1,
-        },
-        "classifications": {
-            "description": "Classification category of the IP address",
-            "disable_correlation": True,
-            "misp-attribute": "text",
-            "multiple": True,
-            "ui-priority": 1,
-        },
-        "country": {
-            "description": "Country of origin",
-            "disable_correlation": True,
-            "misp-attribute": "text",
-            "ui-priority": 1,
-        },
-        "country-code": {
-            "description": "Country Code",
-            "disable_correlation": True,
-            "misp-attribute": "text",
-            "ui-priority": 0,
-        },
-        "cves": {
-            "description": "CVEs",
-            "disable_correlation": True,
-            "misp-attribute": "text",
-            "multiple": True,
-            "ui-priority": 1,
-        },
-        "dst-port": {
-            "categories": ["Network activity", "External analysis"],
-            "description": "Destination port",
-            "disable_correlation": True,
-            "misp-attribute": "port",
-            "multiple": True,
-            "ui-priority": 1,
-        },
-        "false-positives": {
-            "description": "False positive category of the IP address",
-            "disable_correlation": True,
-            "misp-attribute": "text",
-            "multiple": True,
-            "ui-priority": 1,
-        },
-        "ip": {
-            "categories": ["Network activity", "External analysis"],
-            "description": "IP Address",
-            "misp-attribute": "ip-src",
-            "ui-priority": 1,
-        },
-        "ip-range": {
-            "categories": ["Network activity", "External analysis"],
-            "description": "destination IP address",
-            "misp-attribute": "text",
-            "ui-priority": 1,
-        },
-        "ip-range-score": {
-            "categories": ["Network activity", "External analysis"],
-            "description": "destination IP address",
-            "disable_correlation": True,
-            "misp-attribute": "float",
-            "ui-priority": 1,
-        },
-        "latitude": {
-            "description": "Latitude of origin",
-            "disable_correlation": True,
-            "misp-attribute": "float",
-            "ui-priority": 1,
-        },
-        "longitude": {
-            "description": "Longitude of origin",
-            "disable_correlation": True,
-            "misp-attribute": "float",
-            "ui-priority": 1,
-        },
-        "mitre-techniques": {
-            "description": "MITRE ATT&CK techniques",
-            "disable_correlation": True,
-            "misp-attribute": "text",
-            "multiple": True,
-            "ui-priority": 1,
-        },
-        "reputation": {
-            "description": "IP reputation",
-            "disable_correlation": True,
-            "misp-attribute": "text",
-            "multiple": False,
-            "ui-priority": 1,
-        },
-        "reverse-dns": {
-            "categories": ["Network activity", "External analysis"],
-            "description": "Reverse DNS name",
-            "misp-attribute": "hostname",
-            "ui-priority": 1,
-        },
-        "scores": {
-            "description": "Scores",
-            "disable_correlation": True,
-            "misp-attribute": "text",
-            "ui-priority": 1,
-        },
-        "target-countries": {
-            "description": "Target countries (top 10)",
-            "disable_correlation": True,
-            "misp-attribute": "text",
-            "ui-priority": 1,
-        },
-        "trust": {
-            "description": "Trust level",
-            "disable_correlation": True,
-            "misp-attribute": "float",
-            "ui-priority": 1,
-        },
-    },
-    "description": "CrowdSec Threat Intelligence - IP CTI search",
-    "meta-category": "network",
-    "name": "crowdsec-ip-context",
-    "requiredOneOf": ["ip"],
-    "uuid": "0f0a6def-a351-4d3b-9868-d732f6f4666f",
-    "version": 4,
-}
 
 
 def handler(q=False):
@@ -232,12 +77,19 @@ def _get_boolean_config(request_data, config: str, default_config: bool):
 def _handler_v2(request_data):
     attribute = request_data["attribute"]
     ip = attribute["value"]
+    # Validate IP
+    try:
+        ipaddress.ip_address(ip)
+    except ValueError:
+        return {
+            "error": f"IP ({ip}) is not valid for calling CrowdSec CTI. Please provide a valid IP address."
+        }
 
     crowdsec_cti = requests.get(
         f"https://cti.api.crowdsec.net/v2/smoke/{ip}",
         headers={
             "x-api-key": request_data["config"]["api_key"],
-            "User-Agent": "crowdsec-misp/v2.1.0",
+            "User-Agent": "crowdsec-misp/v2.1.1",
         },
     )
     crowdsec_cti.raise_for_status()
@@ -255,9 +107,7 @@ def _handler_v2(request_data):
 
     misp_event = MISPEvent()
     misp_attribute = misp_event.add_attribute(**attribute)
-    crowdsec_context_object = MISPObject(
-        "crowdsec-ip-context", misp_objects_template_custom=crowdsec_template
-    )
+    crowdsec_context_object = MISPObject("crowdsec-ip-context")
     crowdsec_context_object.from_dict(
         first_seen=crowdsec_cti["history"]["first_seen"],
         last_seen=crowdsec_cti["history"]["last_seen"],
