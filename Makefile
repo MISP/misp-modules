@@ -17,7 +17,7 @@ USE_DOCKER ?=
 
 prepare_docs:
 	@echo "Preparing documentation."
-	poetry install --only docs
+	poetry install --with docs,unstable
 	poetry run python $(DOCS_SRC_DIR)/generate_documentation.py
 	mkdir -p $(DOCS_DIST_DIR)/logos
 	mkdir -p $(DOCS_DIST_DIR)/expansion/logos

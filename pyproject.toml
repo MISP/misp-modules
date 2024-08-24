@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "misp-modules"
-version = "2.4.195"
+version = "2.4.196"
 description = "MISP modules are autonomous modules that can be used for expansion and other services in MISP"
 authors = ["Alexandre Dulaunoy <alexandre.dulaunoy@circl.lu>"]
 license = "AGPL-3.0-only"
@@ -54,7 +54,6 @@ crowdstrike-falconpy = "*"
 dnsdb2 = "*"
 domaintools_api = "*"
 geoip2 = "*"
-google-search-api = { git = "https://github.com/abenassi/Google-Search-API" }
 greynoise = "*"
 jbxapi = "*"
 maclookup = "*"
@@ -65,21 +64,18 @@ mwdblib = "*"
 ndjson = "*"
 np = "*"
 oauth2 = "*"
-odtreader = { git = "https://github.com/cartertemm/ODTReader.git" }
 opencv-python = "*"
 openpyxl = "*"
 passivetotal = "*"
 pdftotext = "*"
 pycountry = "*"
-pydnstrails = { git = "https://github.com/sebdraven/pydnstrails.git" }
 pyeti-python3 = "*"
 pyeupi = "*"
 pyfaup = "*"
 pygeoip = "*"
-pyintel471 = { git = "https://github.com/MISP/PyIntel471.git" }
+pyintel471 = "*"
 pyipasnhistory = "*"
 pymisp = { version = "*", extras = ["fileobjects", "openioc", "pdfexport", "email", "url"] }
-pyonyphe = { git = "https://github.com/sebdraven/pyonyphe.git" }
 pypdns = "*"
 pypssl = "*"
 pysafebrowsing = "*"
@@ -96,7 +92,6 @@ sparqlwrapper = "*"
 stix2 = "*"
 tau-clients = "*"
 taxii2-client = "*"
-trustar = { git = "https://github.com/SteveClement/trustar-python.git" }
 urlarchiver = "*"
 vt-graph-api = "*"
 vt-py = "*"
@@ -121,3 +116,13 @@ optional = true
 mkdocs = "*"
 mkdocs-material = "*"
 markdown_include = "*"
+
+[tool.poetry.group.unstable]
+optional = true
+
+[tool.poetry.group.unstable.dependencies]
+odtreader = { git = "https://github.com/cartertemm/ODTReader.git" }
+google-search-api = { git = "https://github.com/abenassi/Google-Search-API" }
+trustar = { git = "https://github.com/SteveClement/trustar-python.git" }
+pydnstrails = { git = "https://github.com/sebdraven/pydnstrails.git" }
+pyonyphe = { git = "https://github.com/sebdraven/pyonyphe.git" }
