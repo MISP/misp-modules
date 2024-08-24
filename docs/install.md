@@ -165,9 +165,8 @@ Then, run the following commands to generate your very own `requirements.txt`.
 
 ~~~~bash
 poetry lock
-poetry install --with unstable
 poetry self add poetry-plugin-export
-poetry export --without-hashes -f requirements.txt -o requirements.txt
+poetry export --with unstable --without-hashes -f requirements.txt -o requirements.txt
 ~~~~
 
 Note that `misp-modules` will not be part of the `requirements.txt` file and you will need to create the wheel yourself:
