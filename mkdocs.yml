@@ -82,7 +82,7 @@ markdown_extensions:
   - pymdownx.tilde
 
 nav:
-    - Home: 'index.md'
+    - Home: index.md
     - Modules:
       - Action Modules: action_mod.md
       - Expansion Modules: expansion.md

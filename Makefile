@@ -20,10 +20,12 @@ prepare_docs:
 	poetry install --with docs,unstable
 	poetry run python $(DOCS_SRC_DIR)/generate_documentation.py
 	mkdir -p $(DOCS_DIST_DIR)/logos
+	mkdir -p $(DOCS_DIST_DIR)/img
 	mkdir -p $(DOCS_DIST_DIR)/expansion/logos
 	mkdir -p $(DOCS_DIST_DIR)/export_mod/logos
 	mkdir -p $(DOCS_DIST_DIR)/import_mod/logos
 	cp -R $(DOCS_SRC_DIR)/logos/* $(DOCS_DIST_DIR)/logos
+	cp -R $(DOCS_SRC_DIR)/img/* $(DOCS_DIST_DIR)/img
 	cp -R $(DOCS_SRC_DIR)/logos/* $(DOCS_DIST_DIR)/expansion/logos
 	cp -R $(DOCS_SRC_DIR)/logos/* $(DOCS_DIST_DIR)/export_mod/logos
 	cp -R $(DOCS_SRC_DIR)/logos/* $(DOCS_DIST_DIR)/import_mod/logos

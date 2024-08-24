@@ -8,7 +8,24 @@ Once the virtual environment is loaded just use the command:
 pip install misp-modules
 ~~~~
 
-Note: this install method might not yet be available.
+Note that the dependencies will require a number of system packages installed. On Ubuntu these packages are `libpoppler-cpp-dev`, `libzbar0`, and `tesseract-ocr`. For an updated list, check the github action used to test the build inside `.github/workflows`.
+
+Because PyPI does not support git for direct dependencies, the following packages will not be installed by default `otdreader`, `google-search-api`, `trustar`, `pydnstrails`, `pyonyphe`. You can either install them manually or let the modules depending on them gracefully fail.
+
+~~~~bash
+pip install \
+	git+https://github.com/cartertemm/ODTReader.git \
+	git+https://github.com/abenassi/Google-Search-API \
+	git+https://github.com/SteveClement/trustar-python.git \
+	git+https://github.com/sebdraven/pydnstrails.git \
+	git+https://github.com/sebdraven/pyonyphe.git
+~~~~
+
+You can now run `misp-modules` by invoking it (you might need to reload the virtual environment to update the search path used for executables).
+
+~~~~bash
+misp-modules
+~~~~
 
 
 ## Install from cloned repository
@@ -20,8 +37,10 @@ Once `poetry` is installed, you can clone the repository and install `misp-modul
 ~~~~bash
 git clone https://github.com/MISP/misp-modules.git && cd misp-modules
 git submodule update --init
-poetry install
+poetry install --with unstable
 ~~~~
+
+The switch `--with unstable` will also install dependencies available only on `git` repositories (which are manually installed when using pip).
 
 Note that the dependencies will require a number of system packages installed. On Ubuntu these packages are `libpoppler-cpp-dev`, `libzbar0`, and `tesseract-ocr`. For an updated list, check the github action used to test the build inside `.github/workflows`.
 
@@ -58,7 +77,7 @@ systemctl enable --now misp-modules
 To run tests you need to install misp-modules from the cloned repository, run the server, and then run the tests. You can do all these step with `poetry`.
 
 ~~~~bash
-poetry install
+poetry install --with unstable
 poetry run misp-modules
 ~~~~
 
@@ -123,7 +142,7 @@ You have two choices, the first approach uses `poetry export` to export the enti
 This is quite straightforward but it assumes your target system is relatively similar (same distribution, architecture, libaries).
 
 ~~~~bash
-poetry install
+poetry install --with unstable
 poetry self add poetry-plugin-bundle
 poetry bundle venv /destination/path/
 ~~~~
@@ -146,9 +165,8 @@ Then, run the following commands to generate your very own `requirements.txt`.
 
 ~~~~bash
 poetry lock
-poetry install
 poetry self add poetry-plugin-export
-poetry export --without-hashes -f requirements.txt -o requirements.txt
+poetry export --with unstable --without-hashes -f requirements.txt -o requirements.txt
 ~~~~
 
 Note that `misp-modules` will not be part of the `requirements.txt` file and you will need to create the wheel yourself:

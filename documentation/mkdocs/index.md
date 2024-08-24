@@ -1,6 +1,6 @@
 # Home
 
-[![Build status](https://github.com/MISP/misp-modules/actions/workflows/python-package.yml/badge.svg)](https://github.com/MISP/misp-modules/actions/workflows/python-package.yml)[![Coverage Status](https://coveralls.io/repos/github/MISP/misp-modules/badge.svg?branch=main)](https://coveralls.io/github/MISP/misp-modules?branch=main)
+[![Build status](https://github.com/MISP/misp-modules/actions/workflows/test-package.yml/badge.svg)](https://github.com/MISP/misp-modules/actions/workflows/test-package.yml)[![Coverage Status](https://coveralls.io/repos/github/MISP/misp-modules/badge.svg?branch=main)](https://coveralls.io/github/MISP/misp-modules?branch=main)
 [![codecov](https://codecov.io/gh/MISP/misp-modules/branch/main/graph/badge.svg)](https://codecov.io/gh/MISP/misp-modules)
 
 MISP modules are autonomous modules that can be used to extend [MISP](https://github.com/MISP/MISP) for new services such as expansion, import, export and workflow action.
@@ -30,7 +30,7 @@ For more information: [Extending MISP with Python modules](https://www.misp-proj
 * [Cluster25 Expand](https://misp.github.io/misp-modules/expansion/#cluster25-expand) - Module to query Cluster25 CTI.
 * [Country Code](https://misp.github.io/misp-modules/expansion/#country-code) - Module to expand country codes.
 * [CPE Lookup](https://misp.github.io/misp-modules/expansion/#cpe-lookup) - An expansion module to query the CVE search API with a cpe code to get its related vulnerabilities.
-* [CrowdSec CTI](https://misp.github.io/misp-modules/expansion/#crowdsec-cti) - Hover module to lookup an IP in CrowdSec's CTI
+* [CrowdSec CTI](https://misp.github.io/misp-modules/expansion/#crowdsec-cti) - Module to access CrowdSec CTI API.
 * [CrowdStrike Falcon](https://misp.github.io/misp-modules/expansion/#crowdstrike-falcon) - Module to query CrowdStrike Falcon.
 * [Cuckoo Submit](https://misp.github.io/misp-modules/expansion/#cuckoo-submit) - Submit files and URLs to Cuckoo Sandbox
 * [CVE Lookup](https://misp.github.io/misp-modules/expansion/#cve-lookup) - An expansion hover module to expand information about CVE id.
@@ -69,6 +69,7 @@ For more information: [Extending MISP with Python modules](https://www.misp-proj
 * [Lastline Submit](https://misp.github.io/misp-modules/expansion/#lastline-submit) - Deprecation notice: this module will be deprecated by December 2021, please use vmware_nsx module.  Module to submit a file or URL to Lastline.
 * [Macaddress.io Lookup](https://misp.github.io/misp-modules/expansion/#macaddress.io-lookup) - MISP hover module for macaddress.io
 * [Macvendors Lookup](https://misp.github.io/misp-modules/expansion/#macvendors-lookup) - Module to access Macvendors API.
+* [MalShare Upload](https://misp.github.io/misp-modules/expansion/#malshare-upload) - Module to push malware samples to MalShare
 * [Malware Bazaar Lookup](https://misp.github.io/misp-modules/expansion/#malware-bazaar-lookup) - Query Malware Bazaar to get additional information about the input hash.
 * [McAfee MVISION Insights Lookup](https://misp.github.io/misp-modules/expansion/#mcafee-mvision-insights-lookup) - Lookup McAfee MVISION Insights Details
 * [GeoIP Enrichment](https://misp.github.io/misp-modules/expansion/#geoip-enrichment) - A hover and expansion module to enrich an ip with geolocation and ASN information from an mmdb server instance, such as CIRCL's ip.circl.lu.
@@ -102,12 +103,14 @@ For more information: [Extending MISP with Python modules](https://www.misp-proj
 * [ThreatCrowd Lookup](https://misp.github.io/misp-modules/expansion/#threatcrowd-lookup) - Module to get information from ThreatCrowd.
 * [ThreadFox Lookup](https://misp.github.io/misp-modules/expansion/#threadfox-lookup) - Module to search for an IOC on ThreatFox by abuse.ch.
 * [ThreatMiner Lookup](https://misp.github.io/misp-modules/expansion/#threatminer-lookup) - Module to get information from ThreatMiner.
+* [Triage Submit](https://misp.github.io/misp-modules/expansion/#triage-submit) - Module to submit samples to tria.ge
 * [TruSTAR Enrich](https://misp.github.io/misp-modules/expansion/#trustar-enrich) - Module to get enrich indicators with TruSTAR.
 * [URLhaus Lookup](https://misp.github.io/misp-modules/expansion/#urlhaus-lookup) - Query of the URLhaus API to get additional information about the input attribute.
 * [URLScan Lookup](https://misp.github.io/misp-modules/expansion/#urlscan-lookup) - An expansion module to query urlscan.io.
 * [VARIoT db Lookup](https://misp.github.io/misp-modules/expansion/#variot-db-lookup) - An expansion module to query the VARIoT db API for more information about a vulnerability.
 * [VirusTotal v3 Lookup](https://misp.github.io/misp-modules/expansion/#virustotal-v3-lookup) - Enrich observables with the VirusTotal v3 API
 * [VirusTotal Public API Lookup](https://misp.github.io/misp-modules/expansion/#virustotal-public-api-lookup) - Enrich observables with the VirusTotal v3 public API
+* [VirusTotal Upload](https://misp.github.io/misp-modules/expansion/#virustotal-upload) - Module to push malware samples to VirusTotal
 * [VMRay Submit](https://misp.github.io/misp-modules/expansion/#vmray-submit) - Module to submit a sample to VMRay.
 * [VMware NSX Defender Enrich](https://misp.github.io/misp-modules/expansion/#vmware-nsx-defender-enrich) - Module to enrich a file or URL with VMware NSX Defender.
 * [VulnDB Lookup](https://misp.github.io/misp-modules/expansion/#vulndb-lookup) - Module to query VulnDB (RiskBasedSecurity.com).

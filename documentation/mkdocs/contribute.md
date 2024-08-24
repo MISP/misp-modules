@@ -382,7 +382,7 @@ cd ../
 
 ## Documentation
 
-In order to provide documentation about some modules that require specific input / output / configuration, the [index.md](docs/index.md) file within the [docs](docs) directory contains detailed information about the general purpose, requirements, features, input and ouput of each of these modules:
+In order to provide documentation about some modules that require specific input / output / configuration, the [index.md](index.md) file contains detailed information about the general purpose, requirements, features, input and ouput of each of these modules:
 
 - **description** - quick description of the general purpose of the module, as the one given by the moduleinfo
 - **requirements** - special libraries needed to make the module work

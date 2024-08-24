@@ -412,14 +412,19 @@ An expansion module to query the CVE search API with a cpe code to get its relat
 
 <img src=../logos/crowdsec.png height=60>
 
-Hover module to lookup an IP in CrowdSec's CTI
+Module to access CrowdSec CTI API.
 [[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/crowdsec.py)]
 
 - **features**:
 >This module enables IP lookup from CrowdSec CTI API. It provides information about the IP, such as what kind of attacks it has been participant of as seen by CrowdSec's network. It also includes enrichment by CrowdSec like background noise score, aggressivity over time etc.
 
 - **config**:
->api_key
+> - api_key
+> - add_reputation_tag
+> - add_behavior_tag
+> - add_classification_tag
+> - add_mitre_technique_tag
+> - add_cve_tag
 
 - **input**:
 >An IP address.
@@ -1539,26 +1544,16 @@ Module to access Macvendors API.
 
 -----
 
-#### [Malshare Upload](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/malshare_upload.py)
+#### [MalShare Upload](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/malshare_upload.py)
 
-Module to push malware samples to MalShare.com
+Module to push malware samples to MalShare
 [[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/malshare_upload.py)]
 
-- **features**:
->The module requires a MalShare API key to upload files,  and returns the link of the MalShare analysis.
-
 - **config**:
->api_key
+>malshare_apikey
 
-- **input**:
->Attachment or malware sample
-
-- **output**:
->Link attribute that points to the sample at the MalShare analysis instance.
-
-- **references**:
-> - https://malshare.com/
-> - https://malshare.com/doc.php
+- **requirements**:
+>requests library
 
 -----
 
@@ -2455,8 +2450,6 @@ Module to get information from ThreatMiner.
 - **references**:
 >https://www.threatminer.org/
 
-
-
 -----
 
 #### [Triage Submit](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/triage_submit.py)
@@ -2464,32 +2457,9 @@ Module to get information from ThreatMiner.
 Module to submit samples to tria.ge
 [[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/triage_submit.py)]
 
-- **features**:
-> Upload files, and returns the link of the uploaded analysis.
->
->The module can submit URLs to retrieve and analyze them directly in the browser or fetch and execute files in the sandbox.
-
-
 - **config**:
->apikey
->
->url_mode ( 'submit' or 'fetch' ) 
-
-- **input**:
->A MISP attribute included in the following list:
->- Attachment
->- malware-sample
->- url
-
-- **output**:
->Link attribute that points to the sample at the Triage analysis instance.
-
-- **references**:
-> - https://tria.ge/
-> - https://tria.ge/docs/cloud-api/submit/
-
-- **requirements**:
->An access to the Triage API (apikey)
+> - apikey
+> - url_mode
 
 -----
 
@@ -2690,34 +2660,20 @@ Enrich observables with the VirusTotal v3 public API
 - **requirements**:
 >An access to the VirusTotal API (apikey)
 
-
 -----
 
 #### [VirusTotal Upload](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/virustotal_upload.py)
 
 <img src=../logos/virustotal.png height=60>
 
-Module to push malware samples to VirusTotal v3 public API
+Module to push malware samples to VirusTotal
 [[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/virustotal_upload.py)]
 
-- **features**:
->The module requires a VirusTotal API key to Upload files, and returns the link of the uploaded analysis.
-
 - **config**:
-> - apikey
-
-- **input**:
->Attachment or malware sample
-
-- **output**:
->Link attribute that points to the sample at the VirusTotal analysis instance.
-
-- **references**:
-> - https://www.virustotal.com
-> - https://docs.virustotal.com/reference/overview
+>virustotal_apikey
 
 - **requirements**:
->An access to the VirusTotal API (apikey)
+>requests library
 
 -----
 

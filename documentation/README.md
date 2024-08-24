@@ -415,14 +415,19 @@ An expansion module to query the CVE search API with a cpe code to get its relat
 
 <img src=logos/crowdsec.png height=60>
 
-Hover module to lookup an IP in CrowdSec's CTI
+Module to access CrowdSec CTI API.
 [[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/crowdsec.py)]
 
 - **features**:
 >This module enables IP lookup from CrowdSec CTI API. It provides information about the IP, such as what kind of attacks it has been participant of as seen by CrowdSec's network. It also includes enrichment by CrowdSec like background noise score, aggressivity over time etc.
 
 - **config**:
->api_key
+> - api_key
+> - add_reputation_tag
+> - add_behavior_tag
+> - add_classification_tag
+> - add_mitre_technique_tag
+> - add_cve_tag
 
 - **input**:
 >An IP address.
@@ -1542,6 +1547,19 @@ Module to access Macvendors API.
 
 -----
 
+#### [MalShare Upload](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/malshare_upload.py)
+
+Module to push malware samples to MalShare
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/malshare_upload.py)]
+
+- **config**:
+>malshare_apikey
+
+- **requirements**:
+>requests library
+
+-----
+
 #### [Malware Bazaar Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/malwarebazaar.py)
 
 Query Malware Bazaar to get additional information about the input hash.
@@ -2437,6 +2455,17 @@ Module to get information from ThreatMiner.
 
 -----
 
+#### [Triage Submit](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/triage_submit.py)
+
+Module to submit samples to tria.ge
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/triage_submit.py)]
+
+- **config**:
+> - apikey
+> - url_mode
+
+-----
+
 #### [TruSTAR Enrich](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/trustar_enrich.py)
 
 <img src=logos/trustar.png height=60>
@@ -2633,6 +2662,21 @@ Enrich observables with the VirusTotal v3 public API
 
 - **requirements**:
 >An access to the VirusTotal API (apikey)
+
+-----
+
+#### [VirusTotal Upload](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/virustotal_upload.py)
+
+<img src=logos/virustotal.png height=60>
+
+Module to push malware samples to VirusTotal
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/virustotal_upload.py)]
+
+- **config**:
+>virustotal_apikey
+
+- **requirements**:
+>requests library
 
 -----
 
