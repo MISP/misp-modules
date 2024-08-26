@@ -57,7 +57,7 @@ Description=MISP modules
 Type=simple
 User=apache
 Group=apache
-ExecStart='/path/to/venv/bin/misp-modules -l 127.0.0.1 -s'
+ExecStart=/path/to/venv/bin/misp-modules -l 127.0.0.1 -s
 Restart=always
 RestartSec=10
 
