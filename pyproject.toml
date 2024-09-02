@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "misp-modules"
-version = "2.4.196"
+version = "2.4.197"
 description = "MISP modules are autonomous modules that can be used for expansion and other services in MISP"
 authors = ["Alexandre Dulaunoy <alexandre.dulaunoy@circl.lu>"]
 license = "AGPL-3.0-only"
