@@ -286,7 +286,10 @@ def dict_handler(request: dict):
         parser = VirusTotalParser(client, int(event_limit) if event_limit else None)
         parser.query_api(attribute)
     except vt.APIError as ex:
-        misperrors['error'] = ex.message
+        if ex.code == 'ForbiddenError':
+            misperrors['error'] = 'ForbiddenError'
+        else:
+            misperrors['error'] = ex.message
         return misperrors
 
     return parser.get_result()
