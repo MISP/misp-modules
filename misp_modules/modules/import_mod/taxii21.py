@@ -23,9 +23,19 @@ class ConfigError(Exception):
 
 misperrors = {'error': 'Error'}
 
-moduleinfo = {'version': '0.1', 'author': 'Abc',
-              'description': 'Import content from a TAXII 2.1 server',
-              'module-type': ['import']}
+moduleinfo = {
+    'version': '0.1',
+    'author': 'Abc',
+    'description': 'Import content from a TAXII 2.1 server',
+    'module-type': ['import'],
+    'name': 'TAXII 2.1 Import',
+    'logo': '',
+    'requirements': [],
+    'features': '',
+    'references': [],
+    'input': '',
+    'output': '',
+}
 
 mispattributes = {
     'inputSource': [],

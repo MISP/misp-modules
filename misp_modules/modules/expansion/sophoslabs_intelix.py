@@ -5,10 +5,19 @@ from . import check_input_attribute, checking_error, standard_error_message
 from pymisp import MISPEvent, MISPObject
 from urllib.parse import quote
 
-moduleinfo = {'version': '1.0',
-              'author': 'Ben Verschaeren',
-              'description': 'SOPHOSLabs Intelix Integration',
-              'module-type': ['expansion']}
+moduleinfo = {
+    'version': '1.0',
+    'author': 'Ben Verschaeren',
+    'description': 'An expansion module to query the Sophoslabs intelix API to get additional information about an ip address, url, domain or sha256 attribute.',
+    'module-type': ['expansion'],
+    'name': 'SophosLabs Intelix Lookup',
+    'logo': 'sophoslabs_intelix.svg',
+    'requirements': ['A client_id and client_secret pair to authenticate to the SophosLabs Intelix API'],
+    'features': 'The module takes an ip address, url, domain or sha256 attribute and queries the SophosLabs Intelix API with the attribute value. The result of this query is a SophosLabs Intelix hash report, or an ip or url lookup, that is then parsed and returned in a MISP object.',
+    'references': ['https://aws.amazon.com/marketplace/pp/B07SLZPMCS'],
+    'input': 'An ip address, url, domain or sha256 attribute.',
+    'output': 'SophosLabs Intelix report and lookup objects',
+}
 
 moduleconfig = ['client_id', 'client_secret']
 

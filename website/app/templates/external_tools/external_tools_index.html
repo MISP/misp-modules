@@ -1,0 +1,205 @@
+<!-- 
+    Author: David Cruciani
+-->
+
+{% extends 'base.html' %}
+
+{% block content %}
+    <div style="display: flex;">
+        <h2>External tools</h2>
+        <span style="margin-top: 4px; margin-left: 7px;">
+            <a class="btn btn-primary btn-sm" href="/add_external_tool" title="Add a new external tool"><i class="fa-solid fa-plus"></i></a>
+        </span>
+    </div>
+    <hr>
+
+    <div id="top"></div>
+
+    <div style="width:50%; transform: translate(50%, 0);">
+        <div>
+            <input type="search" @input="onInput" placeholder="Search tools" autofocus class="form-control" style="border-radius: 5px;" />
+        </div>
+    </div>
+    <br>
+
+    <div class="row" style="margin-bottom: 100px;">
+        <div class="col" style="flex: 0 0 50%">
+            <div class="list-group">
+                <div v-for="tool in tools_config" style="display:flex; ">
+                    <input v-if="tool.is_active || tool.is_active == null" type="checkbox" style="margin-right: 5px;" checked @click="change_status(tool)">
+                    <input v-else type="checkbox" style="margin-right: 5px;" @click="change_status(tool)">
+                    <a class="list-group-item list-group-item-action" style="border-radius: 10px;" :title="tool.description" @click="display_config(tool)">
+                        [[tool.name]]
+                    </a>
+                </div>
+            </div>
+        </div>
+        <!-- Right panel -->
+        <div v-if="Object.keys(current_config).length" class="side-panel-config">
+            <div class="round-button" title="close" style="margin-top: 3px;">
+                <div class="round-button-circle">
+                    <a @click="close_panel()" class="round-button">x</a>
+                </div>
+            </div>
+            <br>
+            <h4>[[ current_config.tool_name ]]</h4>
+            <div class="mb-3">
+                <label :for="'form-name-'+current_config.tool_id" class="form-label">Name: </label>
+                <input type="text" class="form-control" :id="'form-name-'+current_config.tool_id" :value="current_config.tool_name">
+                <span style="color: brown" :id="'error-name-'+current_config.tool_id"></span>
+            </div>
+            <div class="mb-3">
+                <label :for="'form-url-'+current_config.tool_id" class="form-label">Url: </label>
+                <input type="text" class="form-control" :id="'form-url-'+current_config.tool_id" :value="current_config.tool_url">
+                <span style="color: brown" :id="'error-url-'+current_config.tool_id"></span>
+            </div>
+            <div class="mb-3">
+                <label :for="'form-api-key-'+current_config.tool_id" class="form-label">API key: </label>
+                <input type="text" class="form-control" :id="'form-api-key-'+current_config.tool_id" :value="current_config.tool_api_key">
+                <span style="color: brown" :id="'error-api-key-'+current_config.tool_id"></span>
+            </div>
+            <button class="btn btn-primary" @click="change_config()">Save</button>
+            <button class="btn btn-danger" @click="delete_tool()" style="margin-left: 5px;">Delete</button>
+        </div>
+    </div>
+    <span id="goTop">[<a href="#top">Go Back Top</a>]</span>
+{% endblock %}
+
+
+{% block script %}
+    <script type="module">
+        const { createApp, ref, onMounted, nextTick } = Vue
+        import {display_toast, message_list} from '/static/js/toaster.js'
+
+        createApp({
+            delimiters: ['[[', ']]'],
+            setup() {
+                const tools_config = ref({})
+                const current_config = ref({})
+                let loc_tools = {}
+
+                async function query_tools(){
+                    let res = await fetch("/external_tools/list")
+                    let loc = await res.json()
+                    tools_config.value = loc
+                    loc_tools = tools_config.value
+                }
+                query_tools()
+
+                async function display_config(tool){
+                    current_config.value = {}
+                    current_config.value["tool_name"] = tool.name
+                    current_config.value["tool_url"] = tool.url
+                    current_config.value["tool_id"] = tool.id
+                    current_config.value["tool_api_key"] = tool.api_key
+                }
+
+                function close_panel(){
+                    current_config.value = {}
+                }
+
+                async function change_config(){
+                    $("#error-name-"+current_config.value["tool_id"]).text("")
+                    $("#error-url-"+current_config.value["tool_id"]).text("")
+                    $("#error-url-"+current_config.value["tool_api_key"]).text("")
+                    let result_dict = {}
+                    result_dict["tool_id"] = current_config.value["tool_id"]
+
+                    let loc_name = $("#form-name-"+current_config.value["tool_id"]).val()
+                    if(!loc_name){
+                        $("#error-name-"+current_config.value["tool_id"]).text('Cannot be empty')
+                        return
+                    }
+                    let loc_url = $("#form-url-"+current_config.value["tool_id"]).val()
+                    if(!loc_url){
+                        $("#error-url-"+current_config.value["tool_id"]).text('Cannot be empty')
+                        return
+                    }
+                    let loc_api_key = $("#form-api-key-"+current_config.value["tool_id"]).val()
+                    if(!loc_api_key){
+                        $("#error-api-key-"+current_config.value["tool_id"]).text('Cannot be empty')
+                        return
+                    }
+
+                    // Update result_dict and current_config
+                    result_dict["tool_name"] = loc_name
+                    current_config.value["tool_name"] = loc_name
+
+                    result_dict["tool_url"] = loc_url
+                    current_config.value["tool_url"] = loc_url
+
+                    result_dict["tool_api_key"] = loc_api_key
+                    current_config.value["tool_api_key"] = loc_api_key
+                    
+                    // Update list of tools with new value for current tool
+                    for(let i in tools_config.value){
+                        if(tools_config.value[i].id == current_config.value["tool_id"] ){
+                            tools_config.value[i].name = loc_name
+                            tools_config.value[i].url = loc_url
+                            tools_config.value[i].api_key = loc_api_key
+                        }
+                    }
+
+                    const res = await fetch('/external_tools/change_config',{
+                                        headers: { "X-CSRFToken": $("#csrf_token").val(), "Content-Type": "application/json" },
+                                        method: "POST",
+                                        body: JSON.stringify({
+                                            result_dict
+                                        })
+                                    })
+                    display_toast(res)
+                }
+
+                async function change_status(tool){
+                    let res = await fetch("/external_tools/change_status?tool_id="+tool.id)
+                    if(await res.status_code == 200){
+                        tool.is_active = !tool.is_active
+                    }
+                    display_toast(res)
+                }
+
+                function onInput(e){
+                    tools_config.value = []
+                    if(e.target.value){
+                        tools_config.value = loc_tools.filter((tool) => {
+                            return tool.name.toLowerCase().includes(e.target.value.toLowerCase())
+                        })
+                    }else{
+                        tools_config.value = loc_tools
+                    }
+                }
+
+                async function delete_tool(){
+                    let loc_id = current_config.value["tool_id"]
+                    let res = await fetch("/external_tools/"+loc_id+"/delete_tool")
+                    if(await res.status_code == 200){
+                        current_config.value = {}
+                        let index 
+                        for(let i in tools_config.value){
+                            if(tools_config.value[i].id == loc_id){
+                                index = i
+                                break
+                            }
+                        }
+                        delete tools_config.value[index]
+                    }
+                    display_toast(res)
+                }
+
+
+                return {
+                    message_list,
+                    tools_config,
+                    current_config,
+                    display_config,
+                    close_panel,
+                    change_config,
+                    change_status,
+                    onInput,
+                    delete_tool
+                }
+            }
+        }).mount('.container-fluid')
+
+    </script>
+{% endblock %}

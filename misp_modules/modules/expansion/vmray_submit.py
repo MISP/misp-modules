@@ -23,9 +23,19 @@ from _vmray.rest_api import VMRayRESTAPI
 
 misperrors = {'error': 'Error'}
 mispattributes = {'input': ['attachment', 'malware-sample'], 'output': ['text', 'sha1', 'sha256', 'md5', 'link']}
-moduleinfo = {'version': '0.3', 'author': 'Koen Van Impe',
-              'description': 'Submit a sample to VMRay',
-              'module-type': ['expansion']}
+moduleinfo = {
+    'version': '0.3',
+    'author': 'Koen Van Impe',
+    'description': 'Module to submit a sample to VMRay.',
+    'module-type': ['expansion'],
+    'name': 'VMRay Submit',
+    'logo': 'vmray.png',
+    'requirements': ['An access to the VMRay API (apikey & url)'],
+    'features': 'This module takes an attachment or malware-sample attribute as input to query the VMRay API.\n\nThe sample contained within the attribute in then enriched with data from VMRay mapped into MISP attributes.',
+    'references': ['https://www.vmray.com/'],
+    'input': 'An attachment or malware-sample attribute.',
+    'output': 'MISP attributes mapped from the result of the query on VMRay API, included in the following list:\n- text\n- sha1\n- sha256\n- md5\n- link',
+}
 moduleconfig = ['apikey', 'url', 'shareable', 'do_not_reanalyze', 'do_not_include_vmrayjobids']
 
 

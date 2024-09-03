@@ -67,8 +67,15 @@ mispattributes = {
 moduleinfo = {
     'version': '0.1',
     'author': 'Mike Champ',
-    'description': '',
-    'module-type': ['expansion', 'hover']
+    'description': 'HYAS Insight integration to MISP provides direct, high volume access to HYAS Insight data. It enables investigators and analysts to understand and defend against cyber adversaries and their infrastructure.',
+    'module-type': ['expansion', 'hover'],
+    'name': 'HYAS Insight Lookup',
+    'logo': 'hyas.png',
+    'requirements': ['A HYAS Insight API Key.'],
+    'features': 'This Module takes the IP Address, Domain, URL, Email, Phone Number, MD5, SHA1, Sha256, SHA512 MISP Attributes as input to query the HYAS Insight API.\n The results of the HYAS Insight API are than are then returned and parsed into Hyas Insight Objects. \n\nAn API key is required to submit queries to the HYAS Insight API.\n',
+    'references': ['https://www.hyas.com/hyas-insight/'],
+    'input': 'A MISP attribute of type IP Address(ip-src, ip-dst), Domain(hostname, domain), Email Address(email, email-src, email-dst, target-email, whois-registrant-email), Phone Number(phone-number, whois-registrant-phone), MDS(md5, x509-fingerprint-md5, ja3-fingerprint-md5, hassh-md5, hasshserver-md5), SHA1(sha1, x509-fingerprint-sha1), SHA256(sha256, x509-fingerprint-sha256), SHA512(sha512)',
+    'output': 'Hyas Insight objects, resulting from the query on the HYAS Insight API.',
 }
 moduleconfig = ['apikey']
 TIMEOUT = 60

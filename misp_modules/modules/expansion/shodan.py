@@ -12,9 +12,19 @@ from pymisp import MISPAttribute, MISPEvent, MISPObject
 misperrors = {'error': 'Error'}
 mispattributes = {'input': ['ip-src', 'ip-dst'],
                   'format': 'misp_standard'}
-moduleinfo = {'version': '0.2', 'author': 'Raphaël Vinot',
-              'description': 'Query on Shodan',
-              'module-type': ['expansion']}
+moduleinfo = {
+    'version': '0.2',
+    'author': 'Raphaël Vinot',
+    'description': 'Module to query on Shodan.',
+    'module-type': ['expansion'],
+    'name': 'Shodan Lookup',
+    'logo': 'shodan.png',
+    'requirements': ['shodan python library', 'An access to the Shodan API (apikey)'],
+    'features': 'The module takes an IP address as input and queries the Shodan API to get some additional data about it.',
+    'references': ['https://www.shodan.io/'],
+    'input': 'An IP address MISP attribute.',
+    'output': 'Text with additional data about the input, resulting from the query on Shodan.',
+}
 
 moduleconfig = ['apikey']
 

@@ -3,10 +3,10 @@ import sys
 
 sys.path.append('{}/lib'.format('/'.join((os.path.realpath(__file__)).split('/')[:-3])))
 
-__all__ = ['cuckoo_submit', 'vmray_submit', 'bgpranking', 'circl_passivedns', 'circl_passivessl',
+__all__ = ['cuckoo_submit', 'vmray_submit', 'circl_passivedns', 'circl_passivessl',
            'cluster25_expand', 'countrycode', 'cve', 'cve_advanced', 'cpe', 'dns', 'btc_steroids', 'domaintools',
            'eupi', 'eql', 'farsight_passivedns', 'ipasn', 'passivetotal', 'sourcecache', 'virustotal',
-           'whois', 'shodan', 'reversedns', 'geoip_asn', 'geoip_city', 'geoip_country', 'wiki', 'iprep',
+           'shodan', 'reversedns', 'geoip_asn', 'geoip_city', 'geoip_country', 'wiki', 'iprep',
            'threatminer', 'otx', 'threatcrowd', 'vulndb', 'crowdstrike_falcon',
            'yara_syntax_validator', 'hashdd', 'onyphe', 'onyphe_full', 'rbl',
            'xforceexchange', 'sigma_syntax_validator', 'stix2_pattern_syntax_validator',
@@ -17,10 +17,13 @@ __all__ = ['cuckoo_submit', 'vmray_submit', 'bgpranking', 'circl_passivedns', 'c
            'virustotal_public', 'apiosintds', 'urlscan', 'securitytrails', 'apivoid',
            'assemblyline_submit', 'assemblyline_query', 'ransomcoindb', 'malwarebazaar',
            'lastline_query', 'lastline_submit', 'sophoslabs_intelix', 'cytomic_orion', 'censys_enrich',
-           'trustar_enrich', 'recordedfuture', 'html_to_markdown', 'socialscan', 'passive-ssh',
+           'trustar_enrich', 'recordedfuture', 'html_to_markdown', 'socialscan', 'passive_ssh',
            'qintel_qsentry', 'mwdb', 'hashlookup', 'mmdb_lookup', 'ipqs_fraud_and_risk_scoring',
-           'clamav', 'jinja_template_rendering','hyasinsight', 'variotdbs', 'crowdsec',
-           'extract_url_components', 'ipinfo', 'whoisfreaks', 'ip2locationio', 'vysion', 'stairwell']
+           'clamav', 'jinja_template_rendering', 'hyasinsight', 'variotdbs', 'crowdsec',
+           'extract_url_components', 'ipinfo', 'whoisfreaks', 'ip2locationio', 'stairwell',
+           'google_threat_intelligence', 'vulnerability_lookup', 'vysion', 'mcafee_insights_enrich',
+           'threatfox', 'yeti', 'abuseipdb', 'vmware_nsx', 'sigmf_expand', 'google_safe_browsing',
+           'google_search', 'whois', 'triage_submit', 'virustotal_upload', 'malshare_upload' ]
 
 
 minimum_required_fields = ('type', 'uuid', 'value')

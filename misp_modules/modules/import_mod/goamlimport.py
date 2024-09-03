@@ -5,9 +5,19 @@ import xml.etree.ElementTree as ET
 from pymisp import MISPEvent, MISPObject
 
 misperrors = {'error': 'Error'}
-moduleinfo = {'version': 1, 'author': 'Christian Studer',
-              'description': 'Import from GoAML',
-              'module-type': ['import']}
+moduleinfo = {
+    'version': 1,
+    'author': 'Christian Studer',
+    'description': 'Module to import MISP objects about financial transactions from GoAML files.',
+    'module-type': ['import'],
+    'name': 'GoAML Import',
+    'logo': 'goAML.jpg',
+    'requirements': ['PyMISP'],
+    'features': 'Unlike the GoAML export module, there is here no special feature to import data from GoAML external files, since the module will import MISP Objects with their References on its own, as it is required for the export module to rebuild a valid GoAML document.',
+    'references': 'http://goaml.unodc.org/',
+    'input': 'GoAML format file, describing financial transactions, with their origin and target (bank accounts, persons or entities).',
+    'output': 'MISP objects (transaction, bank-account, person, legal-entity, geolocation), with references, describing financial transactions and their origin and target.',
+}
 moduleconfig = []
 mispattributes = {'inputSource': ['file'], 'output': ['MISP objects'],
                   'format': 'misp_standard'}

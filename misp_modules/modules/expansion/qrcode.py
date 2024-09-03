@@ -8,9 +8,19 @@ import np
 misperrors = {'error': 'Error'}
 mispattributes = {'input': ['attachment'],
                   'output': ['url', 'btc']}
-moduleinfo = {'version': '0.1', 'author': 'Sascha Rommelfangen',
-              'description': 'QR code decoder',
-              'module-type': ['expansion', 'hover']}
+moduleinfo = {
+    'version': '0.1',
+    'author': 'Sascha Rommelfangen',
+    'description': 'Module to decode QR codes.',
+    'module-type': ['expansion', 'hover'],
+    'name': 'QR Code Decode',
+    'logo': '',
+    'requirements': ['cv2: The OpenCV python library.', 'pyzbar: Python library to read QR codes.'],
+    'features': 'The module reads the QR code and returns the related address, which can be an URL or a bitcoin address.',
+    'references': [],
+    'input': 'A QR code stored as attachment attribute.',
+    'output': 'The URL or bitcoin address the QR code is pointing to.',
+}
 
 debug = True
 debug_prefix = "[DEBUG] QR Code module: "

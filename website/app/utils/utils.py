@@ -3,7 +3,6 @@ import random
 import uuid
 import json
 import requests
-# import jsonschema
 from conf.config import Config
 from pathlib import Path
 import configparser

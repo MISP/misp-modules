@@ -42,9 +42,15 @@ mispattributes = {
 moduleinfo = {
     'version': '0.1',
     'author': 'David Mackler',
-    'description': 'IPQualityScore MISP Expansion Module for IP reputation, Email Validation, Phone Number Validation,'
-                   'Malicious Domain and Malicious URL Scanner.',
-    'module-type': ['expansion', 'hover']
+    'description': 'IPQualityScore MISP Expansion Module for IP reputation, Email Validation, Phone Number Validation, Malicious Domain and Malicious URL Scanner.',
+    'module-type': ['expansion', 'hover'],
+    'name': 'IPQualityScore Lookup',
+    'logo': 'ipqualityscore.png',
+    'requirements': ['A IPQualityScore API Key.'],
+    'features': 'This Module takes the IP Address, Domain, URL, Email and Phone Number MISP Attributes as input to query the IPQualityScore API.\n The results of the IPQualityScore API are than returned as IPQS Fraud and Risk Scoring Object. \n The object contains a copy of the enriched attribute with added tags presenting the verdict based on fraud score,risk score and other attributes from IPQualityScore.',
+    'references': ['https://www.ipqualityscore.com/'],
+    'input': 'A MISP attribute of type IP Address(ip-src, ip-dst), Domain(hostname, domain), URL(url, uri), Email Address(email, email-src, email-dst, target-email, whois-registrant-email) and Phone Number(phone-number, whois-registrant-phone).',
+    'output': 'IPQualityScore object, resulting from the query on the IPQualityScore API.',
 }
 moduleconfig = ['apikey']
 
@@ -584,7 +590,7 @@ def handler(q=False):
         misperrors['error'] = 'IPQualityScore apikey is missing'
         return misperrors
     apikey = request['config'].get('apikey')
-    # check attribute is added to the event   
+    # check attribute is added to the event
     if not request.get('attribute') or not check_input_attribute(request['attribute']):
         return {'error': f'{standard_error_message}, which should contain at least a type, a value and an uuid.'}
 

@@ -36,8 +36,15 @@ mispattributes = {
 moduleinfo = {
     'version': '0.5',
     'author': 'Christophe Vandeplas',
-    'description': 'Module to access Farsight DNSDB Passive DNS',
-    'module-type': ['expansion', 'hover']
+    'description': 'Module to access Farsight DNSDB Passive DNS.',
+    'module-type': ['expansion', 'hover'],
+    'name': 'Farsight DNSDB Lookup',
+    'logo': 'farsight.png',
+    'requirements': ['An access to the Farsight Passive DNS API (apikey)'],
+    'features': 'This module takes a domain, hostname or IP address MISP attribute as input to query the Farsight Passive DNS API.\n  The results of rdata and rrset lookups are then returned and parsed into passive-dns objects.\n\nAn API key is required to submit queries to the API.\n  It is also possible to define a custom server URL, and to set a limit of results to get.\n  This limit is set for each lookup, which means we can have an up to the limit number of passive-dns objects resulting from an rdata query about an IP address, but an up to the limit number of passive-dns objects for each lookup queries about a domain or a hostname (== twice the limit).',
+    'references': ['https://www.farsightsecurity.com/', 'https://docs.dnsdb.info/dnsdb-api/'],
+    'input': 'A domain, hostname or IP address MISP attribute.',
+    'output': 'Passive-dns objects, resulting from the query on the Farsight Passive DNS API.',
 }
 moduleconfig = ['apikey', 'server', 'limit', 'flex_queries']
 

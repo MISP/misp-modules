@@ -4,10 +4,19 @@ import time
 
 misperrors = {'error': 'Error'}
 mispattributes = {'input': ['btc'], 'output': ['text']}
-moduleinfo = {'version': '0.1', 'author': 'Sascha Rommelfangen',
-              'description': 'BTC expansion service to \
-                              get quick information from MISP attributes',
-              'module-type': ['hover']}
+moduleinfo = {
+    'version': '0.1',
+    'author': 'Sascha Rommelfangen',
+    'description': 'An expansion hover module to get a blockchain balance from a BTC address in MISP.',
+    'module-type': ['hover'],
+    'name': 'BTC Steroids',
+    'logo': 'bitcoin.png',
+    'requirements': [],
+    'features': '',
+    'references': [],
+    'input': 'btc address attribute.',
+    'output': 'Text to describe the blockchain balance and the transactions related to the btc address in input.',
+}
 
 moduleconfig = []
 

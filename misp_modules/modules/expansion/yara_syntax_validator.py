@@ -6,7 +6,19 @@ except (OSError, ImportError):
 
 misperrors = {'error': 'Error'}
 mispattributes = {'input': ['yara'], 'output': ['text']}
-moduleinfo = {'version': '0.1', 'author': 'Dennis Rand', 'description': 'An expansion hover module to perform a syntax check on if yara rules are valid or not.', 'module-type': ['hover']}
+moduleinfo = {
+    'version': '0.1',
+    'author': 'Dennis Rand',
+    'description': 'An expansion hover module to perform a syntax check on if yara rules are valid or not.',
+    'module-type': ['hover'],
+    'name': 'YARA Syntax Validator',
+    'logo': 'yara.png',
+    'requirements': ['yara_python python library'],
+    'features': 'This modules simply takes a YARA rule as input, and checks its syntax. It returns then a confirmation if the syntax is valid, otherwise the syntax error is displayed.',
+    'references': ['http://virustotal.github.io/yara/'],
+    'input': 'YARA rule attribute.',
+    'output': 'Text to inform users if their rule is valid.',
+}
 moduleconfig = []
 
 

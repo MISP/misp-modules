@@ -12,9 +12,19 @@ mispattributes = {
     'input': ["btc", "domain", "email-src", "filename", "hostname", "ip-src", "ip-dst", "malware-type", "md5", "sha1",
               "sha256", "url"], 'format': 'misp_standard'}
 
-moduleinfo = {'version': "0.1", 'author': "Jesse Hedden",
-              'description': "Enrich data with TruSTAR",
-              'module-type': ["hover", "expansion"]}
+moduleinfo = {
+    'version': '0.1',
+    'author': 'Jesse Hedden',
+    'description': 'Module to get enrich indicators with TruSTAR.',
+    'module-type': ['hover', 'expansion'],
+    'name': 'TruSTAR Enrich',
+    'logo': 'trustar.png',
+    'requirements': [],
+    'features': 'This module enriches MISP attributes with scoring and metadata from TruSTAR.\n\nThe TruSTAR indicator summary is appended to the attributes along with links to any associated reports.',
+    'references': ['https://docs.trustar.co/api/v13/indicators/get_indicator_summaries.html'],
+    'input': 'Any of the following MISP attributes:\n- btc\n- domain\n- email-src\n- filename\n- hostname\n- ip-src\n- ip-dst\n- md5\n- sha1\n- sha256\n- url',
+    'output': 'MISP attributes enriched with indicator summary data from the TruSTAR API. Data includes a severity level score and additional source and scoring info.',
+}
 
 moduleconfig = ["user_api_key", "user_api_secret", "enclave_ids"]
 

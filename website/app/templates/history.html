@@ -30,7 +30,7 @@
             <div class="list-group" style="margin-bottom: 20px;">
                 <a :href="'/query/'+h.uuid" class="list-group-item list-group-item-action">
                     <div class="d-flex w-100 justify-content-between">
-                        <h5 class="mb-1">[[h.query]]</h5>
+                        <h5 class="mb-1">[[h.query.join(", ")]]</h5>
                         <small><i>[[h.uuid]]</i></small>
                     </div>
                     <p class="mb-1" style="color: green;"><u>Input Attribute</u>:</p>

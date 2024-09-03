@@ -10,6 +10,7 @@ import os
 
 LiveCI = True
 
+
 class TestExpansions(unittest.TestCase):
 
     def setUp(self):
@@ -87,12 +88,28 @@ class TestExpansions(unittest.TestCase):
                 return values[0] if isinstance(values, list) else values
         return data['results'][0]['values']
 
+    def test_introspection(self):
+        """checks if all expansion modules are offered through the misp-modules service"""
+        try:
+            response = requests.get(self.url + "modules")
+            modules = [module["name"] for module in response.json()]
+            # list modules in the export_mod folder
+            export_mod_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'misp_modules', 'modules', "expansion")
+            module_files = [file[:-3] for file in os.listdir(export_mod_path) if file.endswith(".py") if file not in ['__init__.py']]
+            missing = []
+            for module in module_files:
+                if module not in modules:
+                    missing.append(module)
+            self.assertEqual(missing, [], f"Missing modules in __init__: {missing}")
+        finally:
+            response.connection.close()
+
     def test_apiosintds(self):
         self.skipTest("apiosintds is probably broken")
 
         query = {'module': 'apiosintds', 'ip-dst': '10.10.10.10'}
         response = self.misp_modules_post(query)
-        
+
         try:
             self.assertTrue(self.get_values(response).startswith('IoC 10.10.10.10'))
         except AssertionError:
@@ -115,18 +132,6 @@ class TestExpansions(unittest.TestCase):
         else:
             response = self.misp_modules_post(query)
             self.assertEqual(self.get_errors(response), 'An API key for APIVoid is required.')
-
-    def test_bgpranking(self):
-        query = {
-            "module": "bgpranking",
-            "attribute": {
-                "type": "AS",
-                "value": "13335",
-                "uuid": "ea89a33b-4ab7-4515-9f02-922a0bee333d"
-            }
-        }
-        response = self.misp_modules_post(query)
-        self.assertEqual(self.get_first_object_type(response), 'asn')
 
     def test_btc_steroids(self):
         if LiveCI:
@@ -192,7 +197,7 @@ class TestExpansions(unittest.TestCase):
             self.assertIn(self.get_values(response), results)
 
     def test_cve(self):
-        query = {"module": "cve", "vulnerability": "CVE-2010-4444", "config": {"custom_API": "https://cve.circl.lu/api/cve/"}}
+        query = {"module": "cve", "vulnerability": "CVE-2010-4444", "config": {"custom_API": "https://vulnerability.circl.lu/api/cve/"}}
         response = self.misp_modules_post(query)
         self.assertTrue(self.get_values(response).startswith("Unspecified vulnerability in Oracle Sun Java System Access Manager"))
 
@@ -235,10 +240,10 @@ class TestExpansions(unittest.TestCase):
     def test_censys(self):
         module_name = "censys_enrich"
         query = {
-                    "attribute": {"type" : "ip-dst", "value": "8.8.8.8", "uuid": ""},
-		            "module": module_name,
-		            "config": {}
-                 }
+            "attribute": {"type": "ip-dst", "value": "8.8.8.8", "uuid": ""},
+            "module": module_name,
+            "config": {}
+        }
         if module_name in self.configs:
             query['config'] = self.configs[module_name]
             response = self.misp_modules_post(query)
@@ -339,7 +344,6 @@ class TestExpansions(unittest.TestCase):
         else:
             response = self.misp_modules_post(query)
             self.assertEqual(self.get_errors(response), 'IPQualityScore apikey is missing')
-
 
     def test_macaddess_io(self):
         module_name = 'macaddress_io'
@@ -548,6 +552,7 @@ class TestExpansions(unittest.TestCase):
         query = {"module": "stix2_pattern_syntax_validator", "stix2-pattern": "[ipv4-addr:value = '8.8.8.8']"}
         response = self.misp_modules_post(query)
         self.assertEqual(self.get_values(response), 'Syntax valid')
+
     def test_threatcrowd(self):
         if LiveCI:
             return True
@@ -589,6 +594,7 @@ class TestExpansions(unittest.TestCase):
             response = self.misp_modules_post(query)
             self.assertTrue(self.get_values(response), result)
 
+    @unittest.skip("Service doesn't work")
     def test_urlhaus(self):
         query_types = ('domain', 'ip-src', 'sha256', 'url')
         query_values = ('www.bestwpdesign.com', '79.118.195.239',
@@ -768,7 +774,9 @@ class TestExpansions(unittest.TestCase):
     def test_yara_query(self):
         query = {"module": "yara_query", "md5": "b2a5abfeef9e36964281a31e17b57c97"}
         response = self.misp_modules_post(query)
-        self.assertEqual(self.get_values(response), 'import "hash"\r\nrule MD5 {\r\n\tcondition:\r\n\t\thash.md5(0, filesize) == "b2a5abfeef9e36964281a31e17b57c97"\r\n}')
+        expected_result = 'import "hash"\r\nrule MD5 {\r\n\tcondition:\r\n\t\thash.md5(0, filesize) == "b2a5abfeef9e36964281a31e17b57c97"\r\n}'
+
+        self.assertEqual(self.get_values(response), expected_result)
 
     def test_yara_validator(self):
         query = {"module": "yara_syntax_validator", "yara": 'import "hash"\r\nrule MD5 {\r\n\tcondition:\r\n\t\thash.md5(0, filesize) == "b2a5abfeef9e36964281a31e17b57c97"\r\n}'}

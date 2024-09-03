@@ -4,10 +4,10 @@ This module provides rules that helps MISP importers to connect MISP attributes
 between them using VirusTotal relationship. Check all available relationship
 here:
 
-- File: https://developers.virustotal.com/v3/reference/#files-relationships
-- URL: https://developers.virustotal.com/v3/reference/#urls-relationships
-- Domain: https://developers.virustotal.com/v3/reference/#domains-relationships
-- IP: https://developers.virustotal.com/v3/reference/#ip-relationships
+- File: https://docs.virustotal.com/reference/files#relationships
+- URL: https://docs.virustotal.com/reference/url-object#relationships
+- Domain: https://docs.virustotal.com/reference/domains-object#relationships
+- IP: https://docs.virustotal.com/reference/ip-object#relationships
 """
 
 

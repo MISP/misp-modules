@@ -5,9 +5,19 @@ from pyeupi import PyEUPI
 
 misperrors = {'error': 'Error'}
 mispattributes = {'input': ['hostname', 'domain', 'url'], 'output': ['freetext']}
-moduleinfo = {'version': '0.1', 'author': 'Raphaël Vinot',
-              'description': 'Query the Phishing Initiative service (https://phishing-initiative.lu)',
-              'module-type': ['expansion', 'hover']}
+moduleinfo = {
+    'version': '0.1',
+    'author': 'Raphaël Vinot',
+    'description': 'A module to query the Phishing Initiative service (https://phishing-initiative.lu).',
+    'module-type': ['expansion', 'hover'],
+    'name': 'EUPI Lookup',
+    'logo': 'eupi.png',
+    'requirements': ['pyeupi: eupi python library', 'An access to the Phishing Initiative API (apikey & url)'],
+    'features': 'This module takes a domain, hostname or url MISP attribute as input to query the Phishing Initiative API. The API returns then the result of the query with some information about the value queried.\n\nPlease note that composite attributes containing domain or hostname are also supported.',
+    'references': ['https://phishing-initiative.eu/?lang=en'],
+    'input': 'A domain, hostname or url MISP attribute.',
+    'output': 'Text containing information about the input, resulting from the query on Phishing Initiative.',
+}
 
 moduleconfig = ['apikey', 'url']
 

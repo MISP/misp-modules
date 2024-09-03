@@ -16,5 +16,7 @@ __all__ = [
     'cof2misp',
     'joe_import',
     'taxii21',
-    'url_import'
+    'url_import',
+    'vmray_summary_json_import',
+    'import_blueprint'
 ]

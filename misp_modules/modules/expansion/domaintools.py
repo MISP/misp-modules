@@ -29,7 +29,14 @@ moduleinfo = {
     'version': '0.1',
     'author': 'Raphaël Vinot',
     'description': 'DomainTools MISP expansion module.',
-    'module-type': ['expansion', 'hover']
+    'module-type': ['expansion', 'hover'],
+    'name': 'DomainTools Lookup',
+    'logo': 'domaintools.png',
+    'requirements': ['Domaintools python library', 'A Domaintools API access (username & apikey)'],
+    'features': 'This module takes a MISP attribute as input to query the Domaintools API. The API returns then the result of the query with some types we map into compatible types we add as MISP attributes.\n\nPlease note that composite attributes composed by at least one of the input types mentionned below (domains, IPs, hostnames) are also supported.',
+    'references': ['https://www.domaintools.com/'],
+    'input': 'A MISP attribute included in the following list:\n- domain\n- hostname\n- email-src\n- email-dst\n- target-email\n- whois-registrant-email\n- whois-registrant-name\n- whois-registrant-phone\n- ip-src\n- ip-dst',
+    'output': 'MISP attributes mapped after the Domaintools API has been queried, included in the following list:\n- whois-registrant-email\n- whois-registrant-phone\n- whois-registrant-name\n- whois-registrar\n- whois-creation-date\n- text\n- domain',
 }
 
 moduleconfig = ['username', 'api_key']

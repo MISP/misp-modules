@@ -8,9 +8,19 @@ mispattributes = {'input': ['hostname', 'domain', "ip-src", "ip-dst", "md5", "sh
                   'format': 'misp_standard'}
 
 # possible module-types: 'expansion', 'hover' or both
-moduleinfo = {'version': '6', 'author': 'Hannah Ward',
-              'description': 'Enrich observables with the VirusTotal v3 API',
-              'module-type': ['expansion']}
+moduleinfo = {
+    'version': '6',
+    'author': 'Hannah Ward',
+    'description': 'Enrich observables with the VirusTotal v3 API',
+    'module-type': ['expansion'],
+    'name': 'VirusTotal v3 Lookup',
+    'logo': 'virustotal.png',
+    'requirements': ['An access to the VirusTotal API (apikey), with a high request rate limit.'],
+    'features': 'New format of modules able to return attributes and objects.\n\nA module to take a MISP attribute as input and query the VirusTotal API to get additional data about it.\n\nCompared to the [standard VirusTotal expansion module](https://github.com/MISP/misp-modules/blob/main/misp_modules/modules/expansion/virustotal_public.py), this module is made for advanced parsing of VirusTotal report, with a recursive analysis of the elements found after the first request.\n\nThus, it requires a higher request rate limit to avoid the API to return a 204 error (Request rate limit exceeded), and the data parsed from the different requests are returned as MISP attributes and objects, with the corresponding relations between each one of them.',
+    'references': ['https://www.virustotal.com/', 'https://docs.virustotal.com/reference/overview'],
+    'input': 'A domain, hash (md5, sha1, sha256 or sha512), hostname or IP address attribute.',
+    'output': 'MISP attributes and objects resulting from the parsing of the VirusTotal report concerning the input attribute.',
+}
 
 # config fields that your code expects from the site admin
 moduleconfig = ["apikey", "event_limit", 'proxy_host', 'proxy_port', 'proxy_username', 'proxy_password']
@@ -84,7 +94,7 @@ class VirusTotalParser:
             misp_object.add_attribute('ip', type='ip-dst', value=report.id)
         elif report.type == 'url':
             misp_object = MISPObject('url')
-            misp_object.add_attribute('url', type='url', value=report.url)
+            misp_object.add_attribute('url', type='url', value=report.id)
         misp_object.add_reference(vt_uuid, 'analyzed-with')
         return misp_object
 

@@ -18,10 +18,19 @@ misperrors = {'error': 'Error'}
 mispattributes = {'inputSource': ['file'], 'output': ['MISP objects'],
                   'format': 'misp_standard'}
 
-moduleinfo = {'version': '0.2',
-              'author': 'Seamus Tuohy, Raphaël Vinot',
-              'description': 'Email import module for MISP',
-              'module-type': ['import']}
+moduleinfo = {
+    'version': '0.2',
+    'author': 'Seamus Tuohy, Raphaël Vinot',
+    'description': 'Email import module for MISP',
+    'module-type': ['import'],
+    'name': 'Email Import',
+    'requirements': [],
+    'features': 'This module can be used to import e-mail text as well as attachments and urls.\n3 configuration parameters are then used to unzip attachments, guess zip attachment passwords, and extract urls: set each one of them to True or False to process or not the respective corresponding actions.',
+    'references': [],
+    'input': 'E-mail file',
+    'output': 'MISP Event attributes',
+    'logo': '',
+}
 
 # unzip_attachments : Unzip all zip files that are not password protected
 # guess_zip_attachment_passwords : This attempts to unzip all password protected zip files using all the strings found in the email body and subject

@@ -1,5 +1,4 @@
 import json
-from ._utils import utils
 
 misperrors = {'error': 'Error'}
 
@@ -31,9 +30,19 @@ moduleconfig = {
 # For blocking modules the actual boolean value determines whether we break execution
 returns = 'boolean'
 
-moduleinfo = {'version': '0.1', 'author': 'Andras Iklody',
-              'description': 'This module is merely a test, always returning true. Triggers on event publishing.',
-              'module-type': ['action']}
+moduleinfo = {
+    'version': '0.1',
+    'author': 'Andras Iklody',
+    'description': 'This module is merely a test, always returning true. Triggers on event publishing.',
+    'module-type': ['action'],
+    'name': 'Test action',
+    'logo': '',
+    'requirements': [],
+    'features': '',
+    'references': [],
+    'input': '',
+    'output': ''
+}
 
 
 def handler(q=False):

@@ -8,8 +8,15 @@ mispattributes = {'input': ['cpe'], 'format': 'misp_standard'}
 moduleinfo = {
     'version': '2',
     'author': 'Christian Studer',
-    'description': 'An expansion module to enrich a CPE attribute with its related vulnerabilities.',
-    'module-type': ['expansion', 'hover']
+    'description': 'An expansion module to query the CVE search API with a cpe code to get its related vulnerabilities.',
+    'module-type': ['expansion', 'hover'],
+    'name': 'CPE Lookup',
+    'logo': 'cve.png',
+    'requirements': [],
+    'features': 'The module takes a cpe attribute as input and queries the CVE search API to get its related vulnerabilities.  \nThe list of vulnerabilities is then parsed and returned as vulnerability objects.\n\nUsers can use their own CVE search API url by defining a value to the custom_API_URL parameter. If no custom API url is given, the default vulnerability.circl.lu api url is used.\n\nIn order to limit the amount of data returned by CVE serach, users can also the limit parameter. With the limit set, the API returns only the requested number of vulnerabilities, sorted from the highest cvss score to the lowest one.',
+    'references': ['https://vulnerability.circl.lu/api/'],
+    'input': 'CPE attribute.',
+    'output': 'The vulnerabilities related to the CPE.',
 }
 moduleconfig = ["custom_API_URL", "limit"]
 cveapi_url = 'https://cvepremium.circl.lu/api/query'

@@ -3,10 +3,19 @@ import base64
 
 misperrors = {'error': 'Error'}
 
-moduleinfo = {'version': '1',
-              'author': 'TM',
-              'description': 'export lite',
-              'module-type': ['export']}
+moduleinfo = {
+    'version': '1',
+    'author': 'TM',
+    'description': 'Lite export of a MISP event.',
+    'module-type': ['export'],
+    'name': 'Lite Export',
+    'logo': '',
+    'requirements': [],
+    'features': 'This module is simply producing a json MISP event format file, but exporting only Attributes from the Event. Thus, MISP Events exported with this module should have attributes that are not internal references, otherwise the resulting event would be empty.',
+    'references': [],
+    'input': 'MISP Event attributes',
+    'output': 'Lite MISP Event',
+}
 
 moduleconfig = ["indent_json_export"]
 

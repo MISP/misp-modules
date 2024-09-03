@@ -9,8 +9,19 @@ except ImportError:
 
 misperrors = {'error': 'Error'}
 mispattributes = {'input': ['sigma'], 'output': ['text']}
-moduleinfo = {'version': '0.1', 'author': 'Christian Studer', 'module-type': ['expansion', 'hover'],
-              'description': 'An expansion hover module to display the result of sigma queries.'}
+moduleinfo = {
+    'version': '0.1',
+    'author': 'Christian Studer',
+    'module-type': ['expansion', 'hover'],
+    'name': 'Sigma Rule Converter',
+    'description': 'An expansion hover module to display the result of sigma queries.',
+    'logo': 'sigma.png',
+    'requirements': ['Sigma python library'],
+    'features': 'This module takes a Sigma rule attribute as input and tries all the different queries available to convert it into different formats recognized by SIEMs.',
+    'references': ['https://github.com/Neo23x0/sigma/wiki'],
+    'input': 'A Sigma attribute.',
+    'output': 'Text displaying results of queries on the Sigma attribute.',
+}
 moduleconfig = []
 sigma_targets = ('es-dsl', 'es-qs', 'graylog', 'kibana', 'xpack-watcher', 'logpoint', 'splunk', 'grep', 'mdatp', 'splunkxml', 'arcsight', 'qualys')
 

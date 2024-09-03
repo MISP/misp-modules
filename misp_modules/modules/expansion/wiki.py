@@ -3,7 +3,19 @@ from SPARQLWrapper import SPARQLWrapper, JSON
 
 misperrors = {'error': 'Error'}
 mispattributes = {'input': ['text'], 'output': ['text']}
-moduleinfo = {'version': '0.2', 'author': 'Roman Graf', 'description': 'An expansion hover module to extract information from Wikidata to have additional information about particular term for analysis.', 'module-type': ['hover']}
+moduleinfo = {
+    'version': '0.2',
+    'author': 'Roman Graf',
+    'description': 'An expansion hover module to extract information from Wikidata to have additional information about particular term for analysis.',
+    'module-type': ['hover'],
+    'name': 'Wikidata Lookup',
+    'logo': 'wikidata.png',
+    'requirements': ['SPARQLWrapper python library'],
+    'features': 'This module takes a text attribute as input and queries the Wikidata API. If the text attribute is clear enough to define a specific term, the API returns a wikidata link in response.',
+    'references': ['https://www.wikidata.org'],
+    'input': 'Text attribute.',
+    'output': 'Text attribute.',
+}
 moduleconfig = []
 # sample query text 'Microsoft' should provide Wikidata link https://www.wikidata.org/wiki/Q2283 in response
 wiki_api_url = 'https://query.wikidata.org/bigdata/namespace/wdq/sparql'

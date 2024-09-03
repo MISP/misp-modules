@@ -7,9 +7,19 @@ import io
 misperrors = {'error': 'Error'}
 mispattributes = {'input': ['attachment'],
                   'output': ['freetext', 'text']}
-moduleinfo = {'version': '0.1', 'author': 'Sascha Rommelfangen',
-              'description': 'PDF to freetext-import IOC extractor',
-              'module-type': ['expansion']}
+moduleinfo = {
+    'version': '0.1',
+    'author': 'Sascha Rommelfangen',
+    'description': 'Module to extract freetext from a PDF document.',
+    'module-type': ['expansion'],
+    'name': 'PDF Enrich',
+    'logo': 'pdf.jpg',
+    'requirements': ['pdftotext: Python library to extract text from PDF.'],
+    'features': 'The module reads the text contained in a PDF document. The result is passed to the freetext import parser so IoCs can be extracted out of it.',
+    'references': [],
+    'input': 'Attachment attribute containing a PDF document.',
+    'output': 'Text and freetext parsed from the document.',
+}
 
 moduleconfig = []
 

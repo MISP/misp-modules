@@ -15,9 +15,19 @@ userConfig = {'not save ioc': {'type': 'Boolean',
 
 inputSource = ['file']
 
-moduleinfo = {'version': '0.1', 'author': 'Raphaël Vinot',
-              'description': 'Import OpenIOC package',
-              'module-type': ['import']}
+moduleinfo = {
+    'version': '0.1',
+    'author': 'Raphaël Vinot',
+    'description': 'Module to import OpenIOC packages.',
+    'module-type': ['import'],
+    'name': 'OpenIOC Import',
+    'logo': '',
+    'requirements': ['PyMISP'],
+    'features': 'The module imports MISP Attributes from OpenIOC packages, there is then no special feature for users to make it work.',
+    'references': ['https://www.fireeye.com/blog/threat-research/2013/10/openioc-basics.html'],
+    'input': 'OpenIOC packages',
+    'output': 'MISP Event attributes',
+}
 
 moduleconfig = []
 

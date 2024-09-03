@@ -43,7 +43,14 @@ moduleinfo = {
     'version': '1.0',
     'author': 'VirusTotal',
     'description': 'Creates a VT Collection from an event iocs.',
-    'module-type': ['export']
+    'module-type': ['export'],
+    'name': 'VirusTotal Collections Export',
+    'logo': 'virustotal.png',
+    'requirements': ['An access to the VirusTotal API (apikey).'],
+    'features': 'This export module which takes advantage of a new endpoint in VT APIv3 to create VT Collections from IOCs contained in a MISP event. With this module users will be able to create a collection just using the Download as... button.',
+    'references': ['https://www.virustotal.com/', 'https://blog.virustotal.com/2021/11/introducing-virustotal-collections.html'],
+    'input': 'A domain, hash (md5, sha1, sha256 or sha512), hostname, url or IP address attribute.',
+    'output': 'A VirusTotal collection in VT.',
 }
 
 moduleconfig = [

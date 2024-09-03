@@ -5,9 +5,19 @@ from bs4 import BeautifulSoup
 
 misperrors = {'error': 'Error'}
 mispattributes = {'input': ['url'], 'output': ['text']}
-moduleinfo = {'version': '0.1', 'author': 'Sami Mokaddem',
-              'description': 'Simple HTML fetcher',
-              'module-type': ['expansion']}
+moduleinfo = {
+    'version': '0.1',
+    'author': 'Sami Mokaddem',
+    'description': 'Expansion module to fetch the html content from an url and convert it into markdown.',
+    'module-type': ['expansion'],
+    'name': 'HTML to Markdown',
+    'logo': '',
+    'requirements': ['The markdownify python library'],
+    'features': 'The module take an URL as input and the HTML content is fetched from it. This content is then converted into markdown that is returned as text.',
+    'references': [],
+    'input': 'URL attribute.',
+    'output': 'Markdown content converted from the HTML fetched from the url.',
+}
 
 
 def fetchHTML(url):

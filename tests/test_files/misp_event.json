@@ -69,6 +69,22 @@
         "value": "google.com|127.0.0.1",
         "AttributeTag": [],
         "ShadowAttribute": []
+    }, {
+        "id": "164192",
+        "type": "yara",
+        "category": "Artifacts dropped",
+        "to_ids": false,
+        "uuid": "59430251-e6a4-4900-b78b-060dc0a81112",
+        "event_id": "625",
+        "distribution": "5",
+        "timestamp": "1497563729",
+        "comment": "Test data",
+        "sharing_group_id": "0",
+        "deleted": false,
+        "disable_correlation": false,
+        "value": "rule MetadataExample\n{\n    meta:\n        my_identifier_1 = \"Some string data\"\n        my_identifier_2 = 24\n        my_identifier_3 = true\n\n    strings:\n        $my_text_string = \"text here\"\n        $my_hex_string = { E2 34 A1 C8 23 FB }\n\n    condition:\n        $my_text_string or $my_hex_string\n}",
+        "AttributeTag": [],
+        "ShadowAttribute": []
     }],
     "ShadowAttribute": [],
     "EventTag": [{

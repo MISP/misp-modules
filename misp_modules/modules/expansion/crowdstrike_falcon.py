@@ -3,10 +3,19 @@ from . import check_input_attribute, standard_error_message
 from falconpy import Intel
 from pymisp import MISPAttribute, MISPEvent
 
-moduleinfo = {'version': '0.2',
-              'author': 'Christophe Vandeplas',
-              'description': 'Module to query CrowdStrike Falcon.',
-              'module-type': ['expansion', 'hover']}
+moduleinfo = {
+    'version': '0.2',
+    'author': 'Christophe Vandeplas',
+    'description': 'Module to query CrowdStrike Falcon.',
+    'module-type': ['expansion', 'hover'],
+    'name': 'CrowdStrike Falcon',
+    'logo': 'crowdstrike.png',
+    'requirements': ['A CrowdStrike API access (API id & key)'],
+    'features': 'This module takes a MISP attribute as input to query a CrowdStrike Falcon API. The API returns then the result of the query with some types we map into compatible types we add as MISP attributes.\n\nPlease note that composite attributes composed by at least one of the input types mentionned below (domains, IPs, hostnames) are also supported.',
+    'references': ['https://www.crowdstrike.com/products/crowdstrike-falcon-faq/'],
+    'input': 'A MISP attribute included in the following list:\n- domain\n- email-attachment\n- email-dst\n- email-reply-to\n- email-src\n- email-subject\n- filename\n- hostname\n- ip-src\n- ip-dst\n- md5\n- mutex\n- regkey\n- sha1\n- sha256\n- uri\n- url\n- user-agent\n- whois-registrant-email\n- x509-fingerprint-md5',
+    'output': 'MISP attributes mapped after the CrowdStrike API has been queried, included in the following list:\n- hostname\n- email-src\n- email-subject\n- filename\n- md5\n- sha1\n- sha256\n- ip-dst\n- ip-dst\n- mutex\n- regkey\n- url\n- user-agent\n- x509-fingerprint-md5',
+}
 moduleconfig = ['api_id', 'apikey']
 misperrors = {'error': 'Error'}
 misp_type_in = ['domain', 'email-attachment', 'email-dst', 'email-reply-to', 'email-src', 'email-subject',

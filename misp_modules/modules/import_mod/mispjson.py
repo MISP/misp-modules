@@ -6,9 +6,19 @@ userConfig = {}
 
 inputSource = ['file']
 
-moduleinfo = {'version': '0.1', 'author': 'Richard van den Berg',
-              'description': 'MISP JSON format import module for merging MISP events',
-              'module-type': ['import']}
+moduleinfo = {
+    'version': '0.1',
+    'author': 'Richard van den Berg',
+    'description': 'Module to import MISP JSON format for merging MISP events.',
+    'module-type': ['import'],
+    'name': 'MISP JSON Import',
+    'logo': '',
+    'requirements': [],
+    'features': 'The module simply imports MISP Attributes from an other MISP Event in order to merge events together. There is thus no special feature to make it work.',
+    'references': [],
+    'input': 'MISP Event',
+    'output': 'MISP Event attributes',
+}
 
 moduleconfig = []
 

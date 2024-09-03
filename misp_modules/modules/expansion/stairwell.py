@@ -19,8 +19,15 @@ mispattributes = {
 moduleinfo = {
     'version': '0.1',
     'author': 'goodlandsecurity',
-    'description': 'Enrich hash observables with the Stairwell API',
-    'module-type': ['expansion']
+    'description': 'Module to query the Stairwell API to get additional information about the input hash attribute',
+    'module-type': ['expansion'],
+    'name': 'Stairwell Lookup',
+    'logo': 'stairwell.png',
+    'requirements': ['Access to Stairwell platform (apikey)'],
+    'features': "The module takes a hash attribute as input and queries Stariwell's API to fetch additional data about it. The result, if the payload is observed in Stariwell, is a file object describing the file the input hash is related to.",
+    'references': ['https://stairwell.com', 'https://docs.stairwell.com'],
+    'input': 'A hash attribute (md5, sha1, sha256).',
+    'output': 'File object related to the input attribute found on Stairwell platform.',
 }
 moduleconfig = ["apikey"]
 

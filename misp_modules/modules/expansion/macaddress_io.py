@@ -14,7 +14,14 @@ moduleinfo = {
     'version': '1.0',
     'author': 'CodeLine OY - macaddress.io',
     'description': 'MISP hover module for macaddress.io',
-    'module-type': ['hover']
+    'module-type': ['hover'],
+    'name': 'Macaddress.io Lookup',
+    'logo': 'macaddress_io.png',
+    'requirements': ['maclookup: macaddress.io python library', 'An access to the macaddress.io API (apikey)'],
+    'features': 'This module takes a MAC address attribute as input and queries macaddress.io for additional information.\n\nThis information contains data about:\n- MAC address details\n- Vendor details\n- Block details',
+    'references': ['https://macaddress.io/', 'https://github.com/CodeLineFi/maclookup-python'],
+    'input': 'MAC address MISP attribute.',
+    'output': 'Text containing information on the MAC address fetched from a query on macaddress.io.',
 }
 
 moduleconfig = ['api_key']

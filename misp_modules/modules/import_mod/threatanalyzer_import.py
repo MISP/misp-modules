@@ -15,9 +15,19 @@ misperrors = {'error': 'Error'}
 userConfig = {}
 inputSource = ['file']
 
-moduleinfo = {'version': '0.10', 'author': 'Christophe Vandeplas',
-              'description': 'Import for ThreatAnalyzer archive.zip/analysis.json files',
-              'module-type': ['import']}
+moduleinfo = {
+    'version': '0.10',
+    'author': 'Christophe Vandeplas',
+    'description': 'Module to import ThreatAnalyzer archive.zip / analysis.json files.',
+    'module-type': ['import'],
+    'name': 'ThreadAnalyzer Sandbox Import',
+    'logo': '',
+    'requirements': [],
+    'features': 'The module imports MISP Attributes from a ThreatAnalyzer format file. This file can be either ZIP, or JSON format.\nThere is by the way no special feature for users to make the module work.',
+    'references': ['https://www.threattrack.com/malware-analysis.aspx'],
+    'input': 'ThreatAnalyzer format file',
+    'output': 'MISP Event attributes',
+}
 
 moduleconfig = []
 log = logging.getLogger('misp-modules')

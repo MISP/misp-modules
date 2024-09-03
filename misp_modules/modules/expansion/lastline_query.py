@@ -22,10 +22,17 @@ mispattributes = {
 }
 
 moduleinfo = {
-    "version": "0.1",
-    "author": "Stefano Ortolani",
-    "description": "Get a Lastline report from an analysis link.",
-    "module-type": ["expansion"],
+    'version': '0.1',
+    'author': 'Stefano Ortolani',
+    'description': 'Deprecation notice: this module will be deprecated by December 2021, please use vmware_nsx module.\n\nQuery Lastline with an analysis link and parse the report into MISP attributes and objects.',
+    'module-type': ['expansion'],
+    'name': 'Lastline Lookup',
+    'logo': 'lastline.png',
+    'requirements': [],
+    'features': 'The module requires a Lastline Portal `username` and `password`.\nThe module uses the new format and it is able to return MISP attributes and objects.\nThe module returns the same results as the [lastline_import](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/lastline_import.py) import module.',
+    'references': ['https://www.lastline.com'],
+    'input': 'Link to a Lastline analysis.',
+    'output': 'MISP attributes and objects parsed from the analysis report.',
 }
 
 moduleconfig = [

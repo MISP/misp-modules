@@ -39,6 +39,17 @@
                             <i class="fa-solid fa-gear fa-fw me-3"></i><span>Config</span>
                         </a>
                     {%endif%}
+                    {% if session.admin_user %}
+                        {% if current_user.is_authenticated %}
+                            <a style="margin-top: 30px;" href="/external_tools" class="list-group-item list-group-item-action text-nowrap">
+                                <i class="fa-solid fa-link fa-fw me-3"></i><span>External tools</span>
+                            </a>
+                        {%endif%}
+                    {%else%}
+                        <a style="margin-top: 30px;" href="/external_tools" class="list-group-item list-group-item-action text-nowrap">
+                            <i class="fa-solid fa-link fa-fw me-3"></i><span>External tools</span>
+                        </a>
+                    {%endif%}
                 </div>
             </div>
         </div>

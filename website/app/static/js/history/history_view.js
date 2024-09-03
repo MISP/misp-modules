@@ -48,7 +48,7 @@ export default {
 
 			<ul class="list-group list-group-horizontal" style="padding-top: 5px;">
 				<li class="list-group-item">
-					<h5>[[history.query]]</h5>
+					<h5>[[history.query.join(", ")]]</h5>
 				</li>
 				<li class="list-group-item">
 					<h5 style="color: brown"><u>Input Attributes</u></h5>
@@ -69,7 +69,7 @@ export default {
 		<div class="collapse" :id="'collapse'+history.uuid" style="width: 70%; margin-left: 30px">
 			<div class="card card-body">
 				<div class="d-flex w-100 justify-content-between">
-					<h5 class="mb-1">[[history.query]]</h5>
+					<h5 class="mb-1">[[history.query.join(", ")]]</h5>
 					<small><i>[[history.uuid]]</i></small>
 				</div>
 				<p class="mb-1" style="color: green;"><u>Input Attribute</u>:</p>

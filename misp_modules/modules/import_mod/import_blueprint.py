@@ -31,12 +31,21 @@ mispattributes = {
 }
 
 
-moduleinfo = {'version': '0.1', 'author': 'Sami Mokaddem',
-              'description': 'Generic blueprint to be copy-pasted to quickly boostrap creation of import module.',
-              'module-type': ['import']}
+moduleinfo = {
+    'version': '0.1',
+    'author': 'Sami Mokaddem',
+    'description': 'Generic blueprint to be copy-pasted to quickly boostrap creation of import module.',
+    'module-type': ['import'],
+    'name': 'Import Blueprint',
+    'logo': '',
+    'requirements': [],
+    'features': '',
+    'references': [],
+    'input': '',
+    'output': '',
+}
 
 moduleconfig = []
-
 
 
 def generateData(event, data, config):

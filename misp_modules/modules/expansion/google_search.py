@@ -8,8 +8,19 @@ except ImportError:
 
 misperrors = {'error': 'Error'}
 mispattributes = {'input': ['url'], 'output': ['text']}
-moduleinfo = {'author': 'Oun & Gindt', 'module-type': ['hover'],
-              'description': 'An expansion hover module to expand google search information about an URL'}
+moduleinfo = {
+    'author': 'Oun & Gindt',
+    'module-type': ['hover'],
+    'name': 'Google Search',
+    'description': 'An expansion hover module to expand google search information about an URL',
+    'version': '1.0',
+    'logo': 'google.png',
+    'requirements': ['The python Google Search API library'],
+    'features': 'The module takes an url as input to query the Google search API. The result of the query is then return as raw text.',
+    'references': ['https://github.com/abenassi/Google-Search-API'],
+    'input': 'An url attribute.',
+    'output': 'Text containing the result of a Google search on the input url.',
+}
 
 
 def sleep(retry):

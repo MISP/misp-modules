@@ -20,9 +20,17 @@ sh.setFormatter(fmt)
 log.addHandler(sh)
 
 moduleinfo = {
-    "version": "0.1", "author": "Evert Kors",
-    "description": "Submit files and URLs to Cuckoo Sandbox",
-    "module-type": ["expansion", "hover"]
+    'version': '0.1',
+    'author': 'Evert Kors',
+    'description': 'Submit files and URLs to Cuckoo Sandbox',
+    'module-type': ['expansion', 'hover'],
+    'name': 'Cuckoo Submit',
+    'logo': 'cuckoo.png',
+    'requirements': ['Access to a Cuckoo Sandbox API and an API key if the API requires it. (api_url and api_key)'],
+    'features': 'The module takes a malware-sample, attachment, url or domain and submits it to Cuckoo Sandbox.\n The returned task id can be used to retrieve results when the analysis completed.',
+    'references': ['https://cuckoosandbox.org/', 'https://cuckoo.sh/docs/'],
+    'input': 'A malware-sample or attachment for files. A url or domain for URLs.',
+    'output': "A text field containing 'Cuckoo task id: <id>'",
 }
 misperrors = {"error": "Error"}
 moduleconfig = ["api_url", "api_key"]

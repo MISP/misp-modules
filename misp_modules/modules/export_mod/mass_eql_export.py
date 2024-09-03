@@ -9,10 +9,17 @@ import logging
 misperrors = {"error": "Error"}
 
 moduleinfo = {
-    "version": "0.1",
-    "author": "92 COS DOM",
-    "description": "Export MISP event in Event Query Language",
-    "module-type": ["export"]
+    'version': '0.1',
+    'author': '92 COS DOM',
+    'description': 'Export MISP event in Event Query Language',
+    'module-type': ['export'],
+    'name': 'EQL Query Export',
+    'logo': 'eql.png',
+    'requirements': [],
+    'features': 'This module produces EQL queries for all relevant attributes in a MISP event.',
+    'references': ['https://eql.readthedocs.io/en/latest/'],
+    'input': 'MISP Event attributes',
+    'output': 'Text file containing one or more EQL queries',
 }
 
 # Map of MISP fields => Endgame fields
