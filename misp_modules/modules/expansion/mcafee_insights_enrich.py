@@ -14,9 +14,19 @@ mispattributes = {'input': ["md5", "sha1", "sha256"],
                   'format': 'misp_standard'}
 
 # possible module-types: 'expansion', 'hover' or both
-moduleinfo = {'version': '1', 'author': 'Martin Ohl',
-              'description': 'Lookup McAfee MVISION Insights Details',
-              'module-type': ['hover']}
+moduleinfo = {
+    'version': '1',
+    'author': 'Martin Ohl',
+    'description': 'Lookup McAfee MVISION Insights Details',
+    'module-type': ['hover'],
+    'name': 'McAfee MVISION Insights Lookup',
+    'logo': '',
+    'requirements': [],
+    'features': '',
+    'references': [],
+    'input': '',
+    'output': '',
+}
 
 # config fields that your code expects from the site admin
 moduleconfig = ['api_key', 'client_id', 'client_secret']

@@ -12,9 +12,19 @@ except ImportError:
 
 misperrors = {'error': 'Error'}
 mispattributes = {'input': ['btc'], 'output': ['text']}
-moduleinfo = {'version': '0.1', 'author': 'Christian Studer',
-              'description': 'Checks if a BTC address has been abused.',
-              'module-type': ['hover']}
+moduleinfo = {
+    'version': '0.1',
+    'author': 'Christian Studer',
+    'description': 'An expansion hover module to query a special dns blacklist to check if a bitcoin address has been abused.',
+    'module-type': ['hover'],
+    'name': 'BTC Scam Check',
+    'logo': 'bitcoin.png',
+    'requirements': ['dnspython3: dns python library'],
+    'features': 'The module queries a dns blacklist directly with the bitcoin address and get a response if the address has been abused.',
+    'references': ['https://btcblack.it/'],
+    'input': 'btc address attribute.',
+    'output': 'Text to indicate if the BTC address has been abused.',
+}
 moduleconfig = []
 
 url = 'bl.btcblack.it'

@@ -15,9 +15,19 @@ except ImportError:
 
 misperrors = {'error': 'Error'}
 mispattributes = {'input': ['domain', 'domain|ip', 'hostname', 'hostname|port'], 'output': ['text']}
-moduleinfo = {'version': '0.1', 'author': 'Christian Studer',
-              'description': 'Checks Spamhaus DBL for a domain name.',
-              'module-type': ['expansion', 'hover']}
+moduleinfo = {
+    'version': '0.1',
+    'author': 'Christian Studer',
+    'description': 'Checks Spamhaus DBL for a domain name.',
+    'module-type': ['expansion', 'hover'],
+    'name': 'DBL Spamhaus Lookup',
+    'logo': 'spamhaus.jpg',
+    'requirements': ['dnspython3: DNS python3 library'],
+    'features': 'This modules takes a domain or a hostname in input and queries the Domain Block List provided by Spamhaus to determine what kind of domain it is.\n\nDBL then returns a response code corresponding to a certain classification of the domain we display. If the queried domain is not in the list, it is also mentionned.\n\nPlease note that composite MISP attributes containing domain or hostname are supported as well.',
+    'references': ['https://www.spamhaus.org/faq/section/Spamhaus%20DBL'],
+    'input': 'Domain or hostname attribute.',
+    'output': 'Information about the nature of the input.',
+}
 moduleconfig = []
 
 dbl = 'dbl.spamhaus.org'

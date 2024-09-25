@@ -5,8 +5,19 @@ from assemblyline_client import Client, ClientError
 from urllib.parse import urljoin
 
 
-moduleinfo = {"version": 1, "author": "Christian Studer", "module-type": ["expansion"],
-              "description": "Submit files or URLs to AssemblyLine"}
+moduleinfo = {
+    'version': 1,
+    'author': 'Christian Studer',
+    'module-type': ['expansion'],
+    'name': 'AssemblyLine Submit',
+    'description': 'A module to submit samples and URLs to AssemblyLine for advanced analysis, and return the link of the submission.',
+    'logo': 'assemblyline.png',
+    'requirements': ['assemblyline_client: Python library to query the AssemblyLine rest API.'],
+    'features': 'The module requires the address of the AssemblyLine server you want to query as well as your credentials used for this instance. Credentials include the user-ID and an API key or the password associated to the user-ID.\n\nIf the sample or url is correctly submitted, you get then the link of the submission.',
+    'references': ['https://www.cyber.gc.ca/en/assemblyline'],
+    'input': 'Sample, or url to submit to AssemblyLine.',
+    'output': 'Link of the report generated in AssemblyLine.',
+}
 moduleconfig = ["apiurl", "user_id", "apikey", "password", "verifyssl"]
 mispattributes = {"input": ["attachment", "malware-sample", "url"],
                   "output": ["link"]}

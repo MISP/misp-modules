@@ -15,9 +15,20 @@ misperrors = {'error': 'Error'}
 mispattributes = {'input': ['ip-src', 'ip-dst', 'domain|ip'], 'output': ['freetext']}
 moduleconfig = ['local_geolite_db']
 # possible module-types: 'expansion', 'hover' or both
-moduleinfo = {'version': '0.1', 'author': 'GlennHD',
-              'description': 'Query a local copy of the Maxmind Geolite ASN database (MMDB format)',
-              'module-type': ['expansion', 'hover']}
+moduleinfo = {
+    'version': '0.1',
+    'author': 'GlennHD',
+    'description': 'Query a local copy of the Maxmind Geolite ASN database (MMDB format)',
+    'module-type': ['expansion', 'hover'],
+    'name': 'GeoIP ASN Lookup',
+    'logo': 'maxmind.png',
+    'requirements': ["A local copy of Maxmind's Geolite database"],
+    'features': "The module takes an IP address attribute as input and queries a local copy of the Maxmind's Geolite database to get information about the related AS number.",
+    'references': ['https://www.maxmind.com/en/home'],
+    'input': 'An IP address MISP attribute.',
+    'output': 'Text containing information about the AS number of the IP address.',
+    'descrption': "An expansion module to query a local copy of Maxmind's Geolite database with an IP address, in order to get information about its related AS number.",
+}
 
 
 def handler(q=False):

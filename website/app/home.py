@@ -2,9 +2,11 @@ import ast
 import json
 from flask import Blueprint, render_template, request, jsonify, session as sess
 from flask_login import current_user
+import requests
 from . import session_class as SessionModel
 from . import home_core as HomeModel
 from .utils.utils import admin_user_active
+from .external_tools import external_tools_core as ToolModel
 
 home_blueprint = Blueprint(
     'home',
@@ -177,8 +179,10 @@ def download(sid):
         if sess:
             loc = json.loads(sess.result)
             module = request.args.get("module")
-            if module in loc:
-                return jsonify(loc[module]), 200, {'Content-Disposition': f'attachment; filename={sess.query_enter.replace(".", "_")}-{module}.json'}
+            query = request.args.get("query")
+            if query in loc:
+                if module in loc[query]:
+                    return jsonify(loc[query][module]), 200, {'Content-Disposition': f'attachment; filename={query}-{module}.json'}
             return {"message": "Module not in result", "toast_class": "danger-subtle"}, 400
         else:
             for s in SessionModel.sessions:
@@ -186,7 +190,7 @@ def download(sid):
                     module = request.args.get("module")
                     if module in s.result:
                         return jsonify(s.result[module]), 200, {'Content-Disposition': f'attachment; filename={s.query}-{module}.json'}
-                    return {"message": "Module not in result", "toast_class": "danger-subtle"}, 400
+                    return {"message": "Module not in result ", "toast_class": "danger-subtle"}, 400
         return {"message": "Session not found", 'toast_class': "danger-subtle"}, 404
     return {"message": "Need to pass a module", "toast_class": "warning-subtle"}, 400
 
@@ -255,3 +259,19 @@ def change_status():
         return {'message': 'Need to pass "module_id"', 'toast_class': "warning-subtle"}, 400
     return {'message': 'Permission denied', 'toast_class': "danger-subtle"}, 403
 
+
+@home_blueprint.route("/submit_external_tool", methods=["GET", "POST"])
+def submit_external_tool():
+    """Submit result to an external tool"""
+    sess["admin_user"] = admin_user_active()
+    flag = True
+    if sess.get("admin_user"):
+        if not current_user.is_authenticated:
+            flag = False
+    # if admin is active and user is logon or if admin is not active
+    if flag:
+        ext = ToolModel.get_tool(request.json["external_tool_id"])
+        if HomeModel.submit_external_tool(request.json["results"], ext):
+            return {'message': f'Send to {ext.name} successfully', 'toast_class': "success-subtle"}, 200
+        return {'message': 'Something went wrong', 'toast_class': "danger-subtle"}, 400
+    return {'message': 'Permission denied', 'toast_class': "danger-subtle"}, 403

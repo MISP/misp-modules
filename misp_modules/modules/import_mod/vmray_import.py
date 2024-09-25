@@ -20,9 +20,19 @@ from _vmray.parser import VMRayParser, VMRayParseError
 
 misperrors = {'error': 'Error'}
 
-moduleinfo = {'version': '0.4', 'author': 'Jens Thom (VMRay), Koen van Impe',
-              'description': 'Import VMRay analysis results from a server',
-              'module-type': ['import']}
+moduleinfo = {
+    'version': '0.4',
+    'author': 'Jens Thom (VMRay), Koen van Impe',
+    'description': 'Module to import VMRay (VTI) results.',
+    'module-type': ['import'],
+    'name': 'VMRay API Import',
+    'logo': 'vmray.png',
+    'requirements': ['vmray_rest_api'],
+    'features': 'The module imports MISP Attributes from VMRay format, using the VMRay api.\nUsers should then provide as the module configuration the API Key as well as the server url in order to fetch their data to import.',
+    'references': ['https://www.vmray.com/'],
+    'input': 'VMRay format',
+    'output': 'MISP Event attributes',
+}
 
 mispattributes = {
     'inputSource': [],

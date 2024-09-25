@@ -7,9 +7,19 @@ import io
 misperrors = {'error': 'Error'}
 mispattributes = {'input': ['attachment'],
                   'output': ['freetext', 'text']}
-moduleinfo = {'version': '0.1', 'author': 'Sascha Rommelfangen',
-              'description': '.docx to freetext-import IOC extractor',
-              'module-type': ['expansion']}
+moduleinfo = {
+    'version': '0.1',
+    'author': 'Sascha Rommelfangen',
+    'description': 'Module to extract freetext from a .docx document.',
+    'module-type': ['expansion'],
+    'name': 'DOCX Enrich',
+    'logo': 'docx.png',
+    'requirements': ['docx python library'],
+    'features': 'The module reads the text contained in a .docx document. The result is passed to the freetext import parser so IoCs can be extracted out of it.',
+    'references': [],
+    'input': 'Attachment attribute containing a .docx document.',
+    'output': 'Text and freetext parsed from the document.',
+}
 
 moduleconfig = []
 

@@ -8,15 +8,26 @@ copyright = """
   This file is part of the ransomwarecoindDB project and licensed under the AGPL 3.0 license
 """
 
-__version__ = 0.1
-
 
 debug = False
 
 misperrors = {'error': 'Error'}
 # mispattributes = {'input': ['sha1', 'sha256', 'md5', 'btc', 'xmr', 'dash' ], 'output': ['btc', 'sha1', 'sha256', 'md5', 'freetext']}
 mispattributes = {'input': ['sha1', 'sha256', 'md5', 'btc'], 'output': ['btc', 'sha1', 'sha256', 'md5', 'freetext'], 'format': 'misp_standard'}
-moduleinfo = {'version': __version__, 'author': 'Aaron Kaplan', 'description': 'Module to access the ransomcoinDB (see https://ransomcoindb.concinnity-risks.com)', 'module-type': ['expansion', 'hover']}
+moduleinfo = {
+    'version': '0.1',
+    'author': 'Aaron Kaplan',
+    'description': 'Module to access the ransomcoinDB (see https://ransomcoindb.concinnity-risks.com)',
+    'module-type': ['expansion', 'hover'],
+    'name': 'RandomcoinDB Lookup',
+    'logo': '',
+    'requirements': ['A ransomcoinDB API key.'],
+    'features': 'The module takes either a hash attribute or a btc attribute as input to query the ransomcoinDB API for some additional data.\n\nIf the input is a btc address, we will get the associated hashes returned in a file MISP object. If we query ransomcoinDB with a hash, the response contains the associated btc addresses returned as single MISP btc attributes.',
+    'references': ['https://ransomcoindb.concinnity-risks.com'],
+    'input': 'A hash (md5, sha1 or sha256) or btc attribute.',
+    'output': 'Hashes associated to a btc address or btc addresses associated to a hash.',
+    'descrption': 'Module to access the ransomcoinDB with a hash or btc address attribute and get the associated btc address of hashes.',
+}
 moduleconfig = ['api-key']
 
 

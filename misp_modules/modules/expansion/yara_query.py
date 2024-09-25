@@ -6,10 +6,20 @@ except (OSError, ImportError):
     print("yara is missing, use 'pip3 install -I -r REQUIREMENTS' from the root of this repository to install it.")
 
 misperrors = {'error': 'Error'}
-moduleinfo = {'version': '1', 'author': 'Christian STUDER',
-              'description': 'Yara export for hashes.',
-              'module-type': ['expansion', 'hover'],
-              'require_standard_format': True}
+moduleinfo = {
+    'version': '1',
+    'author': 'Christian STUDER',
+    'description': 'jj',
+    'module-type': ['expansion', 'hover'],
+    'name': 'YARA Rule Generator',
+    'require_standard_format': True,
+    'logo': 'yara.png',
+    'requirements': ['yara-python python library'],
+    'features': "The module takes a hash attribute (md5, sha1, sha256, imphash) as input, and is returning a YARA rule from it. This YARA rule is also validated using the same method as in 'yara_syntax_validator' module.\nBoth hover and expansion functionalities are supported with this module, where the hover part is displaying the resulting YARA rule and the expansion part allows you to add the rule as a new attribute, as usual with expansion modules.",
+    'references': ['https://virustotal.github.io/yara/', 'https://github.com/virustotal/yara-python'],
+    'input': 'MISP Hash attribute (md5, sha1, sha256, imphash, or any of the composite attribute with filename and one of the previous hash type).',
+    'output': 'YARA rule.',
+}
 moduleconfig = []
 mispattributes = {'input': ['md5', 'sha1', 'sha256', 'filename|md5', 'filename|sha1', 'filename|sha256', 'imphash'], 'output': ['yara']}
 

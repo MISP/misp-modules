@@ -12,8 +12,15 @@ misperrors = {
 moduleinfo = {
     'version': '0.1',
     'author': 'VirusTotal',
-    'description': 'Send event to VirusTotal Graph',
-    'module-type': ['export']
+    'description': 'This module is used to create a VirusTotal Graph from a MISP event.',
+    'module-type': ['export'],
+    'name': 'VirusTotal Graph Export',
+    'logo': 'virustotal.png',
+    'requirements': ['vt_graph_api, the python library to query the VirusTotal graph API'],
+    'features': 'The module takes the MISP event as input and queries the VirusTotal Graph API to create a new graph out of the event.\n\nOnce the graph is ready, we get the url of it, which is returned so we can view it on VirusTotal.',
+    'references': ['https://www.virustotal.com/gui/graph-overview'],
+    'input': 'A MISP event.',
+    'output': 'Link of the VirusTotal Graph created for the event.',
 }
 mispattributes = {
     'input': [

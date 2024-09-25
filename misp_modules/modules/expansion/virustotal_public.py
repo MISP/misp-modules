@@ -8,9 +8,19 @@ from pymisp import MISPAttribute, MISPEvent, MISPObject
 misperrors = {'error': 'Error'}
 mispattributes = {'input': ['hostname', 'domain', "ip-src", "ip-dst", "md5", "sha1", "sha256", "url"],
                   'format': 'misp_standard'}
-moduleinfo = {'version': '2', 'author': 'Christian Studer',
-              'description': 'Enrich observables with the VirusTotal v3 public API',
-              'module-type': ['expansion', 'hover']}
+moduleinfo = {
+    'version': '2',
+    'author': 'Christian Studer',
+    'description': 'Enrich observables with the VirusTotal v3 public API',
+    'module-type': ['expansion', 'hover'],
+    'name': 'VirusTotal Public API Lookup',
+    'logo': 'virustotal.png',
+    'requirements': ['An access to the VirusTotal API (apikey)'],
+    'features': 'New format of modules able to return attributes and objects.\n\nA module to take a MISP attribute as input and query the VirusTotal API to get additional data about it.\n\nCompared to the [more advanced VirusTotal expansion module](https://github.com/MISP/misp-modules/blob/main/misp_modules/modules/expansion/virustotal.py), this module is made for VirusTotal users who have a low request rate limit.\n\nThus, it only queries the API once and returns the results that is parsed into MISP attributes and objects.',
+    'references': ['https://www.virustotal.com', 'https://docs.virustotal.com/reference/overview'],
+    'input': 'A domain, hostname, ip, url or hash (md5, sha1, sha256 or sha512) attribute.',
+    'output': 'MISP attributes and objects resulting from the parsing of the VirusTotal report concerning the input attribute.',
+}
 
 moduleconfig = ['apikey', 'proxy_host', 'proxy_port', 'proxy_username', 'proxy_password']
 
@@ -80,7 +90,7 @@ class VirusTotalParser:
             misp_object.add_attribute('ip', type='ip-dst', value=report.id)
         elif report.type == 'url':
             misp_object = MISPObject('url')
-            misp_object.add_attribute('url', type='url', value=report.url)
+            misp_object.add_attribute('url', type='url', value=report.id)
         misp_object.add_reference(vt_uuid, 'analyzed-with')
         return misp_object
 

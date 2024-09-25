@@ -4,7 +4,19 @@ import json
 
 misperrors = {'error': 'Error'}
 mispattributes = {'input': ['md5', 'sha1', 'sha256', 'domain', 'url', 'email-src', 'ip-dst|port', 'ip-src|port'], 'output': ['text']}
-moduleinfo = {'version': '0.1', 'author': 'Corsin Camichel', 'description': 'Module to search for an IOC on ThreatFox by abuse.ch.', 'module-type': ['hover', 'expansion']}
+moduleinfo = {
+    'version': '0.1',
+    'author': 'Corsin Camichel',
+    'description': 'Module to search for an IOC on ThreatFox by abuse.ch.',
+    'module-type': ['hover', 'expansion'],
+    'name': 'ThreadFox Lookup',
+    'logo': '',
+    'requirements': [],
+    'features': '',
+    'references': [],
+    'input': '',
+    'output': '',
+}
 moduleconfig = []
 
 API_URL = "https://threatfox-api.abuse.ch/api/v1/"

@@ -8,9 +8,19 @@ misperrors = {'error': 'Error'}
 
 inputSource = ['link']
 
-moduleinfo = {'version': '0.2', 'author': 'Christian Studer',
-              'description': 'Query Joe Sandbox API with a report URL to get the parsed data.',
-              'module-type': ['expansion']}
+moduleinfo = {
+    'version': '0.2',
+    'author': 'Christian Studer',
+    'description': 'Query Joe Sandbox API with a submission url to get the json report and extract its data that is parsed and converted into MISP attributes and objects.',
+    'module-type': ['expansion'],
+    'name': 'Joe Sandbox Import',
+    'logo': 'joesandbox.png',
+    'requirements': ['jbxapi: Joe Sandbox API python3 library'],
+    'features': "Module using the new format of modules able to return attributes and objects.\n\nThe module returns the same results as the import module [joe_import](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/joe_import.py) taking directly the json report as input.\n\nEven if the introspection will allow all kinds of links to call this module, obviously only the ones presenting a sample or url submission in the Joe Sandbox API will return results.\n\nTo make it work you will need to fill the 'apikey' configuration with your Joe Sandbox API key and provide a valid link as input.",
+    'references': ['https://www.joesecurity.org', 'https://www.joesandbox.com/'],
+    'input': 'Link of a Joe Sandbox sample or url submission.',
+    'output': 'MISP attributes & objects parsed from the analysis report.',
+}
 moduleconfig = ['apiurl', 'apikey', 'import_executable', 'import_mitre_attack']
 
 

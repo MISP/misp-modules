@@ -17,10 +17,15 @@ misperrors = {'error': 'Error'}
 moduleinfo = {
     'version': '1.1',
     'author': 'Pierre-Jean Grenier',
-    'description': "Import a Cuckoo archive (zipfile or bzip2 tarball), "
-                   "either downloaded manually or exported from the "
-                   "API (/tasks/report/{task_id}/all).",
     'module-type': ['import'],
+    'name': 'Cuckoo Sandbox Import',
+    'description': 'Module to import Cuckoo JSON.',
+    'logo': 'cuckoo.png',
+    'requirements': [],
+    'features': 'Import a Cuckoo archive (zipfile or bzip2 tarball), either downloaded manually or exported from the API (/tasks/report/<task_id>/all).',
+    'references': ['https://cuckoosandbox.org/', 'https://github.com/cuckoosandbox/cuckoo'],
+    'input': 'Cuckoo JSON file',
+    'output': 'MISP Event attributes',
 }
 
 moduleconfig = []

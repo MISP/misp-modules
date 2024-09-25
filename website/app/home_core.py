@@ -1,4 +1,6 @@
 import json
+
+import requests
 from .utils.utils import isUUID, query_get_module
 from . import db
 from .db_class.db import History, Module, Config, Module_Config, Session_db, History_Tree
@@ -112,6 +114,13 @@ def change_status_core(module_id):
     module.is_active = not module.is_active
     db.session.commit()
     return True
+
+def submit_external_tool(results, ext_tool):
+    headers = {'Content-Type': 'application/json', "X-API-KEY": ext_tool.api_key, "Origin": "misp-module"}
+    response = requests.post(ext_tool.url, json={"results":results}, headers=headers)
+    if response.status_code == 200:
+        return True
+    return False
 
 
 

@@ -7,7 +7,19 @@ from pymisp import MISPAttribute, MISPEvent, MISPObject
 
 misperrors = {'error': 'Error'}
 mispattributes = {'input': ['ip-src', 'ip-dst', 'ip'], 'format': 'misp_standard'}
-moduleinfo = {'version': '0.3', 'author': 'Raphaël Vinot', 'description': 'Query an IP ASN history service (https://github.com/D4-project/IPASN-History?tab=readme-ov-file)', 'module-type': ['expansion', 'hover']}
+moduleinfo = {
+    'version': '0.3',
+    'author': 'Raphaël Vinot',
+    'description': 'Module to query an IP ASN history service (https://github.com/D4-project/IPASN-History).',
+    'module-type': ['expansion', 'hover'],
+    'name': 'IPASN-History Lookup',
+    'logo': '',
+    'requirements': ['pyipasnhistory: Python library to access IPASN-history instance'],
+    'features': 'This module takes an IP address attribute as input and queries the CIRCL IPASN service. The result of the query is the latest asn related to the IP address, that is returned as a MISP object.',
+    'references': ['https://github.com/D4-project/IPASN-History'],
+    'input': 'An IP address MISP attribute.',
+    'output': 'Asn object(s) objects related to the IP address used as input.',
+}
 
 
 def parse_result(attribute, values):

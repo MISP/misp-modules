@@ -4,7 +4,19 @@ import json
 
 misperrors = {'error': 'Error'}
 mispattributes = {'input': ['email-dst', 'email-src'], 'output': ['text']}
-moduleinfo = {'version': '0.2', 'author': 'Corsin Camichel, Aurélien Schwab', 'description': 'Module to access haveibeenpwned.com API (v3).', 'module-type': ['hover']}
+moduleinfo = {
+    'version': '0.2',
+    'author': 'Corsin Camichel, Aurélien Schwab',
+    'description': 'Module to access haveibeenpwned.com API.',
+    'module-type': ['hover'],
+    'name': 'Have I Been Pwned Lookup',
+    'logo': 'hibp.png',
+    'requirements': [],
+    'features': 'The module takes an email address as input and queries haveibeenpwned.com API to find additional information about it. This additional information actually tells if any account using the email address has already been compromised in a data breach.',
+    'references': ['https://haveibeenpwned.com/'],
+    'input': 'An email address',
+    'output': 'Additional information about the email address.',
+}
 moduleconfig = ['api_key']
 
 haveibeenpwned_api_url = 'https://haveibeenpwned.com/api/v3/breachedaccount/'

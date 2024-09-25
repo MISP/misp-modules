@@ -5,9 +5,19 @@ misperrors = {'error': 'Error'}
 mispattributes = {'input': ['ip-src', 'ip-dst', 'domain|ip'], 'output': ['hostname']}
 
 # possible module-types: 'expansion', 'hover' or both
-moduleinfo = {'version': '0.1', 'author': 'Andreas Muehlemann',
-              'description': 'Simple Reverse DNS expansion service to resolve reverse DNS from MISP attributes',
-              'module-type': ['expansion', 'hover']}
+moduleinfo = {
+    'version': '0.1',
+    'author': 'Andreas Muehlemann',
+    'description': 'Simple Reverse DNS expansion service to resolve reverse DNS from MISP attributes.',
+    'module-type': ['expansion', 'hover'],
+    'name': 'Reverse DNS',
+    'logo': '',
+    'requirements': ['DNS python library'],
+    'features': 'The module takes an IP address as input and tries to find the hostname this IP address is resolved into.\n\nThe address of the DNS resolver to use is also configurable, but if no configuration is set, we use the Google public DNS address (8.8.8.8).\n\nPlease note that composite MISP attributes containing IP addresses are supported as well.',
+    'references': [],
+    'input': 'An IP address attribute.',
+    'output': 'Hostname attribute the input is resolved into.',
+}
 
 # config fields that your code expects from the site admin
 moduleconfig = ['nameserver']

@@ -14,9 +14,19 @@ mispattributes = {'input': ['AS', 'ip-src', 'ip-dst', 'hostname', 'domain', 'sha
                   'format': 'misp_standard'
                   }
 # possible module-types: 'expansion', 'hover' or both
-moduleinfo = {'version': '1', 'author': 'Sebastien Larinier @sebdraven',
-              'description': 'Query on yeti',
-              'module-type': ['expansion', 'hover']}
+moduleinfo = {
+    'version': '1',
+    'author': 'Sebastien Larinier @sebdraven',
+    'description': 'Module to process a query on Yeti.',
+    'module-type': ['expansion', 'hover'],
+    'name': 'Yeti Lookup',
+    'logo': 'yeti.png',
+    'requirements': ['pyeti', 'API key '],
+    'features': 'This module add context and links between observables using yeti',
+    'references': ['https://github.com/yeti-platform/yeti', 'https://github.com/sebdraven/pyeti'],
+    'input': 'A domain, hostname,IP, sha256,sha1, md5, url of MISP attribute.',
+    'output': 'MISP attributes and objects fetched from the Yeti instances.',
+}
 
 moduleconfig = ['apikey', 'url']
 

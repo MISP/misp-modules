@@ -42,11 +42,22 @@ moduleconfig = {
 # For blocking modules the actual boolean value determines whether we break execution
 returns = 'boolean'
 
-moduleinfo = {'version': '0.1', 'author': 'Sami Mokaddem',
-              'description': 'Simplistic module to send message to a Mattermost channel.',
-              'module-type': ['action']}
+moduleinfo = {
+    'version': '0.1',
+    'author': 'Sami Mokaddem',
+    'description': 'Simplistic module to send message to a Mattermost channel.',
+    'module-type': ['action'],
+    'name': 'Mattermost',
+    'logo': '',
+    'requirements': [],
+    'features': '',
+    'references': [],
+    'input': '',
+    'output': ''
+}
 
 f = Faup()
+
 
 def createPost(request):
     params = request['params']

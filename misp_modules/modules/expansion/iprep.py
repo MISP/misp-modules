@@ -6,9 +6,19 @@ import requests
 
 misperrors = {'error': 'Error'}
 mispattributes = {'input': ['ip-src', 'ip-dst'], 'output': ['text']}
-moduleinfo = {'version': '1.0', 'author': 'Keith Faber',
-              'description': 'Query IPRep Data for IP Address',
-              'module-type': ['expansion']}
+moduleinfo = {
+    'version': '1.0',
+    'author': 'Keith Faber',
+    'description': 'Module to query IPRep data for IP addresses.',
+    'module-type': ['expansion'],
+    'name': 'IPRep Lookup',
+    'logo': '',
+    'requirements': ['An access to the packetmail API (apikey)'],
+    'features': 'This module takes an IP address attribute as input and queries the database from packetmail.net to get some information about the reputation of the IP.',
+    'references': ['https://github.com/mahesh557/packetmail'],
+    'input': 'An IP address MISP attribute.',
+    'output': 'Text describing additional information about the input after a query on the IPRep API.',
+}
 
 moduleconfig = ['apikey']
 

@@ -6,9 +6,19 @@ import dns.resolver
 
 misperrors = {'error': 'Error'}
 mispattributes = {'input': ['ip-src', 'ip-dst', 'hostname', 'domain', 'domain|ip'], 'format': 'misp_standard'}
-moduleinfo = {'version': '0.1', 'author': 'Stephanie S',
-              'description': 'AbuseIPDB MISP expansion module',
-              'module-type': ['expansion', 'hover']}
+moduleinfo = {
+    'version': '0.1',
+    'author': 'Stephanie S',
+    'description': 'AbuseIPDB MISP expansion module',
+    'module-type': ['expansion', 'hover'],
+    'name': 'Abuse IPDB',
+    'logo': '',
+    'requirements': [],
+    'features': '',
+    'references': [],
+    'input': '',
+    'output': '',
+}
 
 moduleconfig = ['api_key', 'max_age_in_days', 'abuse_threshold']
 
@@ -52,8 +62,8 @@ def handler(q=False):
 
     else:
         ip = request["attribute"]["value"]
-    
-    api_key = request["config"]["api_key"]   
+
+    api_key = request["config"]["api_key"]
     max_age_in_days = request["config"]["max_age_in_days"]
     api_endpoint = 'https://api.abuseipdb.com/api/v2/check'
     querystring = {
@@ -64,13 +74,13 @@ def handler(q=False):
         'Accept': 'application/json',
         'key': api_key
     }
-    r = {"results": []} 
+    r = {"results": []}
 
     response = requests.request(method='GET', url=api_endpoint, headers=headers, params=querystring)
 
     if (response.status_code == 200):
         response_json = json.loads(response.text)
-        is_whitelisted = response_json['data']['isWhitelisted'] 
+        is_whitelisted = response_json['data']['isWhitelisted']
         is_tor = response_json['data']['isTor']
         is_public = response_json['data']['isPublic']
         abuse_confidence_score = response_json['data']['abuseConfidenceScore']
@@ -112,7 +122,7 @@ def handler(q=False):
             obj.add_attribute('abuse-confidence-score', **{'type': 'counter', 'value': abuse_confidence_score})
             obj.add_reference(request['attribute']['uuid'], "describes")
             event.add_object(obj)
-            
+
             # Avoid serialization issue
             event = json.loads(event.to_json())
 
@@ -120,7 +130,7 @@ def handler(q=False):
         return r
 
     else:
-        try: 
+        try:
             response_json = json.loads(response.text)
             if (response_json['errors']):
                 return {"error": "API not reachable, status code: " + str(response.status_code) + " " + str(response_json['errors'][0]['detail'])}

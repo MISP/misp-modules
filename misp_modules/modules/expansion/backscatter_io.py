@@ -8,9 +8,19 @@ except ImportError:
 
 misperrors = {'error': 'Error'}
 mispattributes = {'input': ['ip-src', 'ip-dst'], 'output': ['freetext']}
-moduleinfo = {'version': '1', 'author': 'brandon@backscatter.io',
-              'description': 'Backscatter.io module to bring mass-scanning observations into MISP.',
-              'module-type': ['expansion', 'hover']}
+moduleinfo = {
+    'version': '1',
+    'author': 'brandon@backscatter.io',
+    'description': 'Backscatter.io module to bring mass-scanning observations into MISP.',
+    'module-type': ['expansion', 'hover'],
+    'name': 'Backscatter.io',
+    'logo': 'backscatter_io.png',
+    'requirements': ['backscatter python library'],
+    'features': 'The module takes a source or destination IP address as input and displays the information known by backscatter.io.',
+    'references': ['https://pypi.org/project/backscatter/'],
+    'input': 'IP addresses.',
+    'output': 'Text containing a history of the IP addresses especially on scanning based on backscatter.io information .',
+}
 moduleconfig = ['api_key']
 query_playbook = [
     {'inputs': ['ip-src', 'ip-dst'],

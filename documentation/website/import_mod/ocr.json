@@ -1,8 +1,0 @@
-{
-    "description": "Optical Character Recognition (OCR) module for MISP.",
-    "requirements": [],
-    "features": "The module tries to recognize some text from an image and import the result as a freetext attribute, there is then no special feature asked to users to make it work.",
-    "references": [],
-    "input": "Image",
-    "output": "freetext MISP attribute"
-}

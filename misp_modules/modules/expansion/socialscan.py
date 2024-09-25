@@ -5,8 +5,15 @@ from socialscan.util import sync_execute_queries
 moduleinfo = {
     'version': '1',
     'author': 'Christian Studer',
-    'description': 'Module to query several online platforms to look for existing accounts.',
-    'module-type': ['hover']
+    'description': 'A hover module to get information on the availability of an email address or username on some online platforms.',
+    'module-type': ['hover'],
+    'name': 'Socialscan Lookup',
+    'logo': '',
+    'requirements': ['The socialscan python library'],
+    'features': 'The module takes an email address or username as input and check its availability on some online platforms. The results for each platform are then returned to see if the email address or the username is used, available or if there is an issue with it.',
+    'references': ['https://github.com/iojw/socialscan'],
+    'input': 'An email address or usename attribute.',
+    'output': 'Text containing information about the availability of an email address or a username in some online platforms.',
 }
 mispattributes = {
     'input': [

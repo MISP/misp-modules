@@ -7,18 +7,20 @@ dist/
 misp_modules.egg-info/
 
 # For MKDOCS
-docs/expansion*
-docs/import_mod*
-docs/export_mod*
-site*
+docs
+docs/*
+site
+site/*
 
 #pycharm env
 .idea/*
 
 #venv
 venv*
+.venv/
 
 #vscode
 .vscode*
 *.sqlite
 website/conf/config.cfg
+wheels

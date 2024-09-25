@@ -31,7 +31,14 @@ moduleinfo = {
     'version': '1.0',
     'author': 'Brandon Dixon',
     'description': 'The PassiveTotal MISP expansion module brings the datasets derived from Internet scanning directly into your MISP instance. This module supports passive DNS, historic SSL, WHOIS, and host attributes. In order to use the module, you must have a valid PassiveTotal account username and API key. Registration is free and can be done by visiting https://www.passivetotal.org/register',
-    'module-type': ['expansion', 'hover']
+    'module-type': ['expansion', 'hover'],
+    'name': 'PassiveTotal Lookup',
+    'logo': 'passivetotal.png',
+    'requirements': ['Passivetotal python library', 'An access to the PassiveTotal API (apikey)'],
+    'features': 'The PassiveTotal MISP expansion module brings the datasets derived from Internet scanning directly into your MISP instance. This module supports passive DNS, historic SSL, WHOIS, and host attributes. In order to use the module, you must have a valid PassiveTotal account username and API key. Registration is free and can be done by visiting https://www.passivetotal.org/register',
+    'references': ['https://www.passivetotal.org/register'],
+    'input': 'A MISP attribute included in the following list:\n- hostname\n- domain\n- ip-src\n- ip-dst\n- x509-fingerprint-sha1\n- email-src\n- email-dst\n- target-email\n- whois-registrant-email\n- whois-registrant-phone\n- text\n- whois-registrant-name\n- whois-registrar\n- whois-creation-date',
+    'output': 'MISP attributes mapped from the result of the query on PassiveTotal, included in the following list:\n- hostname\n- domain\n- ip-src\n- ip-dst\n- x509-fingerprint-sha1\n- email-src\n- email-dst\n- target-email\n- whois-registrant-email\n- whois-registrant-phone\n- text\n- whois-registrant-name\n- whois-registrar\n- whois-creation-date\n- md5\n- sha1\n- sha256\n- link',
 }
 moduleconfig = ['username', 'api_key']
 query_playbook = [

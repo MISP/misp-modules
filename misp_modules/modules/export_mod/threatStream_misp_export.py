@@ -13,10 +13,17 @@ import logging
 misperrors = {"error": "Error"}
 
 moduleinfo = {
-    "version": "1.0",
-    "author": "Robert Nixon, based off of the ThreatConnect MISP Module written by the CenturyLink CIRT",
-    "description": "Export a structured CSV file for uploading to ThreatStream",
-    "module-type": ["export"]
+    'version': '1.0',
+    'author': 'Robert Nixon, based off of the ThreatConnect MISP Module written by the CenturyLink CIRT',
+    'description': 'Module to export a structured CSV file for uploading to threatStream.',
+    'module-type': ['export'],
+    'name': 'ThreatStream Export',
+    'logo': 'threatstream.png',
+    'requirements': ['csv'],
+    'features': 'The module takes a MISP event in input, to look every attribute. Each attribute matching with some predefined types is then exported in a CSV format recognized by ThreatStream.',
+    'references': ['https://www.anomali.com/platform/threatstream', 'https://github.com/threatstream'],
+    'input': 'MISP Event attributes',
+    'output': 'ThreatStream CSV format file',
 }
 
 

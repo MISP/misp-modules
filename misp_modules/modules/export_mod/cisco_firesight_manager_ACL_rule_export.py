@@ -15,9 +15,19 @@ from urllib.parse import quote
 
 misperrors = {'error': 'Error'}
 
-moduleinfo = {'version': '1', 'author': 'Stanislav Klevtsov',
-              'description': 'Export malicious network activity attributes of the MISP event to Cisco firesight manager block rules',
-              'module-type': ['export']}
+moduleinfo = {
+    'version': '1',
+    'author': 'Stanislav Klevtsov',
+    'description': 'Module to export malicious network activity attributes to Cisco fireSIGHT manager block rules.',
+    'module-type': ['export'],
+    'name': 'Cisco fireSIGHT blockrule Export',
+    'logo': 'cisco.png',
+    'requirements': ['Firesight manager console credentials'],
+    'features': 'The module goes through the attributes to find all the network activity ones in order to create block rules for the Cisco fireSIGHT manager.',
+    'references': [],
+    'input': 'Network activity attributes (IPs, URLs).',
+    'output': 'Cisco fireSIGHT manager block rules.',
+}
 
 
 moduleconfig = ['fmc_ip_addr', 'fmc_login', 'fmc_pass', 'domain_id', 'acpolicy_id']

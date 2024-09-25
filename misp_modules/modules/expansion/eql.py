@@ -7,10 +7,17 @@ import logging
 misperrors = {"error": "Error"}
 
 moduleinfo = {
-    "version": "0.1",
-    "author": "92 COS DOM",
-    "description": "Generates EQL queries from events",
-    "module-type": ["expansion"]
+    'version': '0.1',
+    'author': '92 COS DOM',
+    'description': 'EQL query generation for a MISP attribute.',
+    'module-type': ['expansion'],
+    'name': 'EQL Query Generator',
+    'logo': 'eql.png',
+    'requirements': [],
+    'features': 'This module adds a new attribute to a MISP event containing an EQL query for a network or file attribute.',
+    'references': ['https://eql.readthedocs.io/en/latest/'],
+    'input': 'A filename or ip attribute.',
+    'output': 'Attribute containing EQL for a network or file attribute.',
 }
 
 # Map of MISP fields => Endgame fields

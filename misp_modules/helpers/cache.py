@@ -27,12 +27,13 @@ import hashlib
 port = int(os.getenv("REDIS_PORT")) if os.getenv("REDIS_PORT") else 6379
 hostname = os.getenv("REDIS_BACKEND") or '127.0.0.1'
 db = int(os.getenv("REDIS_DATABASE")) if os.getenv("REDIS_DATABASE") else 0
+password = os.getenv("REDIS_PW") or None
 
 
 def selftest(enable=True):
     if not enable:
         return False
-    r = redis.Redis(host=hostname, port=port, db=db)
+    r = redis.Redis(host=hostname, password=password, port=port, db=db)
     try:
         r.ping()
     except Exception:
@@ -42,7 +43,7 @@ def selftest(enable=True):
 def get(modulename=None, query=None, value=None, debug=False):
     if (modulename is None or query is None):
         return False
-    r = redis.Redis(host=hostname, port=port, db=db, decode_responses=True)
+    r = redis.Redis(host=hostname, password=password, port=port, db=db, decode_responses=True)
     h = hashlib.sha1()
     h.update(query.encode('UTF-8'))
     hv = h.hexdigest()
@@ -60,7 +61,7 @@ def get(modulename=None, query=None, value=None, debug=False):
 
 
 def flush():
-    r = redis.StrictRedis(host=hostname, port=port, db=db, decode_responses=True)
+    r = redis.StrictRedis(host=hostname, password=password, port=port, db=db, decode_responses=True)
     returncode = r.flushdb()
     return returncode
 

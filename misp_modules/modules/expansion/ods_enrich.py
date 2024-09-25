@@ -9,9 +9,19 @@ import logging
 misperrors = {'error': 'Error'}
 mispattributes = {'input': ['attachment'],
                   'output': ['freetext', 'text']}
-moduleinfo = {'version': '0.1', 'author': 'Sascha Rommelfangen',
-              'description': '.ods to freetext-import IOC extractor',
-              'module-type': ['expansion']}
+moduleinfo = {
+    'version': '0.1',
+    'author': 'Sascha Rommelfangen',
+    'description': 'Module to extract freetext from a .ods document.',
+    'module-type': ['expansion'],
+    'name': 'ODS Enrich',
+    'logo': 'ods.png',
+    'requirements': ['ezodf: Python package to create/manipulate OpenDocumentFormat files.', 'pandas_ods_reader: Python library to read in ODS files.'],
+    'features': 'The module reads the text contained in a .ods document. The result is passed to the freetext import parser so IoCs can be extracted out of it.',
+    'references': [],
+    'input': 'Attachment attribute containing a .ods document.',
+    'output': 'Text and freetext parsed from the document.',
+}
 
 moduleconfig = []
 
@@ -37,8 +47,11 @@ def handler(q=False):
     try:
         for i in range(0, num_sheets):
             rows = pandas_ods_reader.parsers.ods.get_rows(doc, i)
-            ods = pandas_ods_reader.algo.parse_data(pandas_ods_reader.parsers.ods, rows, headers=False, columns=[], skiprows=0)
-            ods = pandas_ods_reader.utils.sanitize_df(ods)
+            try:
+                ods = pandas_ods_reader.algo.parse_data(pandas_ods_reader.parsers.ods, rows, headers=False, columns=[], skiprows=0)
+                ods = pandas_ods_reader.utils.sanitize_df(ods)
+            except TypeError:
+                ods = pandas_ods_reader.algo.read_data(pandas_ods_reader.parsers.ods, ods_file, i, headers=False)
             ods_content = ods_content + "\n" + ods.to_string(max_rows=None)
         return {'results': [{'types': ['freetext'], 'values': ods_content, 'comment': ".ods-to-text from file " + filename},
                             {'types': ['text'], 'values': ods_content, 'comment': ".ods-to-text from file " + filename}]}

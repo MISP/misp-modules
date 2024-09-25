@@ -4,10 +4,19 @@ import uuid
 from . import check_input_attribute, standard_error_message
 from pymisp import MISPAttribute, MISPEvent, MISPObject
 
-moduleinfo = {'version': '0.1',
-              'author': 'Milo Volpicelli',
-              'description': 'Module to query Cluster25CTI',
-              'module-type': ['expansion', 'hover']}
+moduleinfo = {
+    'version': '0.1',
+    'author': 'Milo Volpicelli',
+    'description': 'Module to query Cluster25 CTI.',
+    'module-type': ['expansion', 'hover'],
+    'name': 'Cluster25 Expand',
+    'logo': 'cluster25.png',
+    'requirements': ['A Cluster25 API access (API id & key)'],
+    'features': 'This module takes a MISP attribute value as input to query the Cluster25CTI API. The result is then mapped into compatible MISP Objects and relative attributes.\n',
+    'references': [''],
+    'input': 'An Indicator value of type included in the following list:\n- domain\n- email-src\n- email-dst\n- filename\n- md5\n- sha1\n- sha256\n- ip-src\n- ip-dst\n- url\n- vulnerability\n- btc\n- xmr\n ja3-fingerprint-md5',
+    'output': 'A series of c25 MISP Objects with colletion of attributes mapped from Cluster25 CTI query result.',
+}
 moduleconfig = ['api_id', 'apikey', 'base_url']
 misperrors = {'error': 'Error'}
 misp_type_in = ['domain', 'email-src', 'email-dst', 'filename', 'md5', 'sha1', 'sha256', 'ip-src', 'ip-dst', 'url',

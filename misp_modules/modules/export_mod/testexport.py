@@ -18,9 +18,19 @@ outputFileExtension = 'txt'
 responseType = 'application/txt'
 
 
-moduleinfo = {'version': '0.1', 'author': 'Andras Iklody',
-              'description': 'Skeleton export module',
-              'module-type': ['export']}
+moduleinfo = {
+    'version': '0.1',
+    'author': 'Andras Iklody',
+    'description': 'Skeleton export module.',
+    'name': 'Test Export',
+    'module-type': ['export'],
+    'logo': '',
+    'requirements': [],
+    'features': '',
+    'references': [],
+    'input': '',
+    'output': '',
+}
 
 
 def handler(q=False):

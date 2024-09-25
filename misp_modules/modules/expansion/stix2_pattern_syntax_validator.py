@@ -6,8 +6,19 @@ except ImportError:
 
 misperrors = {'error': 'Error'}
 mispattributes = {'input': ['stix2-pattern'], 'output': ['text']}
-moduleinfo = {'version': '0.1', 'author': 'Christian Studer', 'module-type': ['hover'],
-              'description': 'An expansion hover module to perform a syntax check on stix2 patterns.'}
+moduleinfo = {
+    'version': '0.1',
+    'author': 'Christian Studer',
+    'module-type': ['hover'],
+    'name': 'STIX2 Pattern Syntax Validator',
+    'description': 'An expansion hover module to perform a syntax check on stix2 patterns.',
+    'logo': 'stix.png',
+    'requirements': ['stix2patterns python library'],
+    'features': 'This module takes a STIX2 pattern attribute as input and performs a syntax check on it.\n\nIt displays then that the rule is valid if it is the case, and the error related to the rule otherwise.',
+    'references': ['[STIX2.0 patterning specifications](http://docs.oasis-open.org/cti/stix/v2.0/cs01/part5-stix-patterning/stix-v2.0-cs01-part5-stix-patterning.html)'],
+    'input': 'A STIX2 pattern attribute.',
+    'output': 'Text describing the validity of the STIX2 pattern.',
+}
 moduleconfig = []
 
 

@@ -8,8 +8,19 @@ except ImportError:
 
 misperrors = {'error': 'Error'}
 mispattributes = {'input': ['sigma'], 'output': ['text']}
-moduleinfo = {'version': '0.1', 'author': 'Christian Studer', 'module-type': ['expansion', 'hover'],
-              'description': 'An expansion hover module to perform a syntax check on sigma rules'}
+moduleinfo = {
+    'version': '0.1',
+    'author': 'Christian Studer',
+    'module-type': ['expansion', 'hover'],
+    'name': 'Sigma Syntax Validator',
+    'description': 'An expansion hover module to perform a syntax check on sigma rules.',
+    'logo': 'sigma.png',
+    'requirements': ['Sigma python library', 'Yaml python library'],
+    'features': 'This module takes a Sigma rule attribute as input and performs a syntax check on it.\n\nIt displays then that the rule is valid if it is the case, and the error related to the rule otherwise.',
+    'references': ['https://github.com/Neo23x0/sigma/wiki'],
+    'input': 'A Sigma attribute.',
+    'output': 'Text describing the validity of the Sigma rule.',
+}
 moduleconfig = []
 
 

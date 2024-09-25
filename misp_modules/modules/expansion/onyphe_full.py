@@ -12,9 +12,19 @@ mispattributes = {'input': ['ip-src', 'ip-dst', 'hostname', 'domain'],
                   'output': ['hostname', 'domain', 'ip-src', 'ip-dst', 'url']}
 
 # possible module-types: 'expansion', 'hover' or both
-moduleinfo = {'version': '1', 'author': 'Sebastien Larinier @sebdraven',
-              'description': 'Query on Onyphe',
-              'module-type': ['expansion', 'hover']}
+moduleinfo = {
+    'version': '1',
+    'author': 'Sebastien Larinier @sebdraven',
+    'description': 'Module to process a full query on Onyphe.',
+    'module-type': ['expansion', 'hover'],
+    'name': 'Onyphe Full Lookup',
+    'logo': 'onyphe.jpg',
+    'requirements': ['onyphe python library', 'An access to the Onyphe API (apikey)'],
+    'features': 'This module takes a domain, hostname, or IP address attribute as input in order to query the Onyphe API. Data fetched from the query is then parsed and MISP attributes are extracted.\n\nThe parsing is here more advanced than the one on onyphe module, and is returning more attributes, since more fields of the query result are watched and parsed.',
+    'references': ['https://www.onyphe.io/', 'https://github.com/sebdraven/pyonyphe'],
+    'input': 'A domain, hostname or IP address MISP attribute.',
+    'output': 'MISP attributes fetched from the Onyphe query.',
+}
 
 # config fields that your code expects from the site admin
 moduleconfig = ['apikey']

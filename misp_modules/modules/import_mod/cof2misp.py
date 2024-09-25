@@ -37,9 +37,19 @@ mispattributes = {'inputSource': ['file'], 'output': ['MISP objects'],
                   'format': 'misp_standard'}
 
 
-moduleinfo = {'version': '0.3', 'author': 'Aaron Kaplan',
-              'description': 'Module to import the passive DNS Common Output Format (COF) and merge as a MISP objet into a MISP event.',
-              'module-type': ['import']}
+moduleinfo = {
+    'version': '0.3',
+    'author': 'Aaron Kaplan',
+    'description': 'Passive DNS Common Output Format (COF) MISP importer',
+    'module-type': ['import'],
+    'name': 'PDNS COF Importer',
+    'requirements': ['PyMISP'],
+    'features': 'Takes as input a valid COF file or the output of the dnsdbflex utility and creates MISP objects for the input.',
+    'references': ['https://tools.ietf.org/id/draft-dulaunoy-dnsop-passive-dns-cof-08.html'],
+    'input': 'Passive DNS output in Common Output Format (COF)',
+    'output': 'MISP objects',
+    'logo': '',
+}
 
 moduleconfig = []
 

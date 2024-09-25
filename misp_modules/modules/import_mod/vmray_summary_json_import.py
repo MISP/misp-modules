@@ -8,10 +8,17 @@ misperrors = {'error': 'Error'}
 moduleconfig = ["disable_tags"]
 
 moduleinfo = {
-    "version": "0.1",
-    "author": "VMRay",
-    "description": "Import a VMRay Summary JSON report.",
-    "module-type": ["import"],
+    'version': '0.1',
+    'author': 'VMRay',
+    'description': 'Import a VMRay Summary JSON report.',
+    'module-type': ['import'],
+    'name': 'VMRay Summary JSON Import',
+    'logo': '',
+    'requirements': [],
+    'features': '',
+    'references': [],
+    'input': '',
+    'output': '',
 }
 
 mispattributes = {

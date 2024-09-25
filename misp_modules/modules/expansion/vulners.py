@@ -3,7 +3,19 @@ import vulners
 
 misperrors = {'error': 'Error'}
 mispattributes = {'input': ['vulnerability'], 'output': ['text']}
-moduleinfo = {'version': '0.1', 'author': 'Igor Ivanov', 'description': 'An expansion hover module to expand information about CVE id using Vulners API.', 'module-type': ['hover']}
+moduleinfo = {
+    'version': '0.1',
+    'author': 'Igor Ivanov',
+    'description': 'An expansion hover module to expand information about CVE id using Vulners API.',
+    'module-type': ['hover'],
+    'name': 'Vulners Lookup',
+    'logo': 'vulners.png',
+    'requirements': ['Vulners python library', 'An access to the Vulners API'],
+    'features': 'This module takes a vulnerability attribute as input and queries the Vulners API in order to get some additional data about it.\n\nThe API then returns details about the vulnerability.',
+    'references': ['https://vulners.com/'],
+    'input': 'A vulnerability attribute.',
+    'output': 'Text giving additional information about the CVE in input.',
+}
 
 # Get API key from https://vulners.com/userinfo
 moduleconfig = ["apikey"]

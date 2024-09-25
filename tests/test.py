@@ -14,6 +14,10 @@ from email.mime.application import MIMEApplication
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from email.header import Header
+from pathlib import Path
+import importlib.util
+import sys
+
 
 class TestModules(unittest.TestCase):
 
@@ -27,11 +31,96 @@ class TestModules(unittest.TestCase):
         print(response.json())
         response.connection.close()
 
+    def test_introspection_module_init(self):
+        """checks if all modules are offered through the misp-modules service"""
+        try:
+            response = requests.get(self.url + "modules")
+            modules_api = [module["name"] for module in response.json()]
+            issues_found = []
+            root_path = Path(__file__).resolve().parent.parent
+            modules_path = root_path / 'misp_modules' / 'modules'
+            for d in os.listdir(modules_path):
+                if d.startswith('__'):
+                    continue
+                mod_d_path = modules_path / d
+                module_files = [file[:-3] for file in os.listdir(mod_d_path) if file.endswith(".py") if file not in ['__init__.py', 'testimport.py']]
+                for module in module_files:
+                    if module not in modules_api:
+                        issues_found.append(f"Missing module {module} in {d}/__init__.py.")
+
+            error_message = '\n- '.join(issues_found)
+            self.assertEqual(issues_found, [], f"Found issues: \n{error_message}")
+        finally:
+            response.connection.close()
+
+    def test_introspection_module_structure(self):
+        moduleinfo_template = {
+            'version': '1.0',
+            'author': '',
+            'module-type': [],
+            'name': '',
+            'description': '',
+            'logo': '',
+            'requirements': [],
+            'features': '',
+            'references': [],
+            'input': '',
+            'output': ''
+        }
+        root_path = Path(__file__).resolve().parent.parent
+        modules_path = root_path / 'misp_modules' / 'modules'
+        issues_found = []
+
+        for d in os.listdir(modules_path):
+            if d.startswith('__'):
+                continue
+
+            d_module = importlib.import_module(f"misp_modules.modules.{d}")
+            for module_name in d_module.__all__:
+                try:
+                    module_package_name = f"misp_modules.modules.{d}.{module_name}"
+                    module = importlib.import_module(module_package_name)
+                    moduleinfo = module.version()
+                    for k in moduleinfo_template.keys():
+                        if k not in moduleinfo:
+                            issues_found.append(f"Module {d}.{module_name}: Key {k} not in moduleinfo.")
+                    # sys.path.remove(str(m.parent))
+                except Exception as e:
+                    issues_found.append(f"Error loading {module_name}: {e}")
+                    continue
+
+        sys.path.remove(str(root_path / 'misp_modules' / 'lib'))
+        error_message = '\n- '.join(issues_found)
+        self.assertEqual(issues_found, [], f"Found issues: \n{error_message}")
+
     def test_cve(self):
         with open('tests/bodycve.json', 'r') as f:
             response = requests.post(self.url + "query", data=f.read())
+            expected_response = {
+                'results': [
+                    {
+                        'types': ['text'],
+                        'values': 'Stack-based buffer overflow in Microsoft Office XP SP3, Office 2003 SP3, Office 2007 SP2, Office 2010, Office 2004 and 2008 for Mac, Office for Mac 2011, and Open XML File Format Converter for Mac allows remote attackers to execute arbitrary code via crafted RTF data, aka "RTF Stack Buffer Overflow Vulnerability."'
+                    }
+                ]
+            }
+            self.assertDictEqual(response.json(), expected_response)
             print(response.json())
             response.connection.close()
+
+    def test_invalid_cve(self):
+        response = requests.post(self.url + "query", data='{"module": "cve", "vulnerability": "CVE-INVALID"}')
+        expected_response = {
+            'results': [
+                {
+                    'types': ['text'],
+                    'values': 'Non existing CVE'
+                }
+            ]
+        }
+        self.assertDictEqual(response.json(), expected_response)
+        print(response.json())
+        response.connection.close()
 
     def test_dns(self):
         with open('tests/body.json', 'r') as f:
@@ -54,8 +143,8 @@ class TestModules(unittest.TestCase):
 
             print("OpenIOC :: {}".format(response))
             values = [x["values"][0] for x in response["results"]]
-            assert("mrxcls.sys" in values)
-            assert("mdmcpq3.PNF" in values)
+            assert ("mrxcls.sys" in values)
+            assert ("mdmcpq3.PNF" in values)
 
     @unittest.skip("Need Rewrite")
     def test_email_headers(self):
@@ -161,7 +250,6 @@ class TestModules(unittest.TestCase):
                 attch_data = base64.b64decode(i["data"])
                 self.assertEqual(attch_data,
                                  b'X5O!P%@AP[4\\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-')
-
 
     @unittest.skip("Need Rewrite")
     def test_email_dont_unpack_compressed_doc_attachments(self):
@@ -322,7 +410,7 @@ class TestModules(unittest.TestCase):
 
     @unittest.skip("Need Rewrite")
     def test_email_body_encoding(self):
-        query = {"module":"email_import"}
+        query = {"module": "email_import"}
         query["config"] = {"unzip_attachments": None,
                            "guess_zip_attachment_passwords": None,
                            "extract_urls": None}
@@ -340,10 +428,9 @@ class TestModules(unittest.TestCase):
                 self.assertNotIn('error', response, response.get('error', ""))
                 self.assertIn('results', response, "No server results found.")
 
-
     @unittest.skip("Need Rewrite")
     def test_email_header_proper_encoding(self):
-        query = {"module":"email_import"}
+        query = {"module": "email_import"}
         query["config"] = {"unzip_attachments": None,
                            "guess_zip_attachment_passwords": None,
                            "extract_urls": None}
@@ -408,7 +495,7 @@ class TestModules(unittest.TestCase):
 
     @unittest.skip("Need Rewrite")
     def test_email_header_malformed_encoding(self):
-        query = {"module":"email_import"}
+        query = {"module": "email_import"}
         query["config"] = {"unzip_attachments": None,
                            "guess_zip_attachment_passwords": None,
                            "extract_urls": None}
@@ -476,7 +563,7 @@ class TestModules(unittest.TestCase):
 
     @unittest.skip("Need Rewrite")
     def test_email_header_CJK_encoding(self):
-        query = {"module":"email_import"}
+        query = {"module": "email_import"}
         query["config"] = {"unzip_attachments": None,
                            "guess_zip_attachment_passwords": None,
                            "extract_urls": None}
@@ -504,7 +591,7 @@ class TestModules(unittest.TestCase):
 
     @unittest.skip("Need Rewrite")
     def test_email_malformed_header_CJK_encoding(self):
-        query = {"module":"email_import"}
+        query = {"module": "email_import"}
         query["config"] = {"unzip_attachments": None,
                            "guess_zip_attachment_passwords": None,
                            "extract_urls": None}
@@ -535,7 +622,7 @@ class TestModules(unittest.TestCase):
 
     @unittest.skip("Need Rewrite")
     def test_email_malformed_header_emoji_encoding(self):
-        query = {"module":"email_import"}
+        query = {"module": "email_import"}
         query["config"] = {"unzip_attachments": None,
                            "guess_zip_attachment_passwords": None,
                            "extract_urls": None}
@@ -576,8 +663,8 @@ class TestModules(unittest.TestCase):
         with open("tests/EICAR.com", "rb") as fp:
             eicar_mime = MIMEApplication(fp.read(), 'com')
             eicar_mime.add_header('Content-Disposition',
-                                      'attachment',
-                                      filename="Emoji Test 👍 checking this")
+                                  'attachment',
+                                  filename="Emoji Test 👍 checking this")
             message.attach(eicar_mime)
         query['data'] = decode_email(message)
         data = json.dumps(query)
@@ -590,7 +677,6 @@ class TestModules(unittest.TestCase):
             if i['type'] == 'malware-sample':
                 attch_data = base64.b64decode(i["data"])
                 self.assertEqual(attch_data, b'X5O!P%@AP[4\\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-')
-
 
     @unittest.skip("Need Rewrite")
     def test_email_attachment_password_in_subject(self):

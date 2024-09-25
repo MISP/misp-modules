@@ -7,9 +7,19 @@ from pymisp import MISPObject
 
 misperrors = {'error': 'Error'}
 mispattributes = {'input': ['vulnerability'], 'format': 'misp_standard'}
-moduleinfo = {'version': '1', 'author': 'Christian Studer',
-              'description': 'An expansion module to query variotdbs.pl',
-              'module-type': ['expansion', 'hover']}
+moduleinfo = {
+    'version': '1',
+    'author': 'Christian Studer',
+    'description': 'An expansion module to query the VARIoT db API for more information about a vulnerability.',
+    'module-type': ['expansion', 'hover'],
+    'name': 'VARIoT db Lookup',
+    'logo': 'variot.png',
+    'requirements': ['A VARIoT db API key (if you do not want to be limited to 100 queries / day)'],
+    'features': 'The module takes a vulnerability attribute as input and queries que VARIoT db API to gather additional information.\n\nThe `vuln` endpoint is queried first to look for additional information about the vulnerability itself.\n\nThe `exploits` endpoint is also queried then to look for the information of the potential related exploits, which are parsed and added to the results using the `exploit` object template.',
+    'references': ['https://www.variotdbs.pl/'],
+    'input': 'Vulnerability attribute.',
+    'output': 'Additional information about the vulnerability, as it is stored on the VARIoT db, about the vulnerability itself, and the potential related exploits.',
+}
 moduleconfig = ['API_key']
 variotdbs_url = 'https://www.variotdbs.pl/api'
 

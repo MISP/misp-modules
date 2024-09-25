@@ -10,8 +10,15 @@ mispattributes = {
 moduleinfo = {
     'version': 1,
     'author': 'IP2Location.io',
-    'description': 'An expansion module to query IP2Location.io for additional information on an IP address',
-    'module-type': ['expansion', 'hover']
+    'description': 'An expansion module to query IP2Location.io to gather more information on a given IP address.',
+    'module-type': ['expansion', 'hover'],
+    'name': 'IP2Location.io Lookup',
+    'logo': 'ip2locationio.png',
+    'requirements': ['An IP2Location.io token'],
+    'features': 'The module takes an IP address attribute as input and queries the IP2Location.io API.  \nFree plan user will get the basic geolocation informaiton, and different subsription plan will get more information on the IP address. \n Refer to [pricing page](https://www.ip2location.io/pricing) for more information on data available for each plan. \n\nMore information on the responses content is available in the [documentation](https://www.ip2location.io/ip2location-documentation).',
+    'references': ['https://www.ip2location.io/ip2location-documentation'],
+    'input': 'IP address attribute.',
+    'output': 'Additional information on the IP address, such as geolocation, proxy and so on. Refer to the Response Format section in https://www.ip2location.io/ip2location-documentation to find out the full format of the data returned.',
 }
 moduleconfig = ['key']
 

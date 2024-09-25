@@ -10,9 +10,19 @@ mispattributes = {
                'whois-registrant-name',
                'whois-registrar', 'whois-creation-date', 'domain']
 }
-moduleinfo = {'version': '1', 'author': 'WhoisFreaks',
-              'description': 'Query on whoisfreaks.com',
-              'module-type': ['expansion', 'hover']}
+moduleinfo = {
+    'version': '1',
+    'author': 'WhoisFreaks',
+    'description': 'An expansion module for https://whoisfreaks.com/ that will provide an enriched analysis of the provided domain, including WHOIS and DNS information.',
+    'module-type': ['expansion', 'hover'],
+    'name': 'WhoisFreaks Lookup',
+    'logo': 'whoisfreaks.png',
+    'requirements': ['An access to the Whoisfreaks API_KEY'],
+    'features': 'The module takes a domain as input and queries the Whoisfreaks API with it.\n\nSome parsing operations are then processed on the result of the query to extract as much information as possible.\n\nAfter this we map the extracted data to MISP attributes.',
+    'references': ['https://whoisfreaks.com/'],
+    'input': 'A domain whose Data is required',
+    'output': 'MISP attributes resulting from the query on Whoisfreaks API, included in the following list:\n- domain\n- dns-soa-email\n- whois-registrant-email\n- whois-registrant-phone\n- whois-registrant-name\n- whois-registrar\n- whois-creation-date\n- domain',
+}
 
 # config fields that your code expects from the site admin
 moduleconfig = ['apikey']
@@ -50,7 +60,7 @@ def handle_domain(apiKey, domain, errors):
     if status_ok:
         if r:
             result_filtered['results'].extend(r)
-            
+
     return result_filtered
 
 
@@ -156,7 +166,7 @@ def expand_dns(apiKey, domain):
                     servers_mx.append(record['target'])
                 elif record['dnsType'] == 'SOA':
                     soa_hostnames.append(record['host'])
-                    
+
             if list_ipv4:
                 r.append({'types': ['domain|ip'],
                           'values': ['%s|%s' % (domain, ipv4) for ipv4 in

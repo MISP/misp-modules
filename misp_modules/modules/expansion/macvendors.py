@@ -3,7 +3,19 @@ import json
 
 misperrors = {'error': 'Error'}
 mispattributes = {'input': ['mac-address'], 'output': ['text']}
-moduleinfo = {'version': '0.1', 'author': 'Aurélien Schwab', 'description': 'Module to access Macvendors API.', 'module-type': ['hover']}
+moduleinfo = {
+    'version': '0.1',
+    'author': 'Aurélien Schwab',
+    'description': 'Module to access Macvendors API.',
+    'module-type': ['hover'],
+    'name': 'Macvendors Lookup',
+    'logo': 'macvendors.png',
+    'requirements': [],
+    'features': 'The module takes a MAC address as input and queries macvendors.com for some information about it. The API returns the name of the vendor related to the address.',
+    'references': ['https://macvendors.com/', 'https://macvendors.com/api'],
+    'input': 'A MAC address.',
+    'output': 'Additional information about the MAC address.',
+}
 moduleconfig = ['user-agent']
 
 macvendors_api_url = 'https://api.macvendors.com/'

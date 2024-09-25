@@ -5,8 +5,20 @@ misperrors = {'error': 'Error'}
 mispattributes = {'input': ['hostname', 'domain', 'url', 'ip-src', 'ip-dst', 'email-src',
                             'email-dst', 'target-email', 'whois-registrant-email',
                             'whois-registrant-name', 'md5', 'sha1', 'sha256'], 'output': ['freetext']}
-moduleinfo = {'version': '0.1', 'author': 'Raphaël Vinot', 'description': 'Module to access Intel 471',
-              'module-type': ['hover', 'expansion']}
+moduleinfo = {
+    'version': '0.1',
+    'author': 'Raphaël Vinot',
+    'description': 'Module to access Intel 471',
+    'module-type': ['hover', 'expansion'],
+    'name': 'Intel471 Lookup',
+    'logo': 'intel471.png',
+    'requirements': ['The intel471 python library'],
+    'features': 'The module uses the Intel471 python library to query the Intel471 API with the value of the input attribute. The result of the query is then returned as freetext so the Freetext import parses it.',
+    'references': ['https://public.intel471.com/'],
+    'input': 'A MISP attribute whose type is included in the following list:\n- hostname\n- domain\n- url\n- ip-src\n- ip-dst\n- email-src\n- email-dst\n- target-email\n- whois-registrant-email\n- whois-registrant-name\n- md5\n- sha1\n- sha256',
+    'output': 'Freetext',
+    'descrption': 'An expansion module to query Intel471 in order to get additional information about a domain, ip address, email address, url or hash.',
+}
 moduleconfig = ['email', 'authkey']
 
 

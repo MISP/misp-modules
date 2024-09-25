@@ -12,8 +12,16 @@ logger.setLevel(logging.DEBUG)
 moduleinfo = {
     'version': '1.0',
     'author': 'Qintel, LLC',
-    'description': 'Query Qintel QSentry for ip intelligence',
-    'module-type': ['hover', 'expansion']
+    'description': 'A hover and expansion module which queries Qintel QSentry for ip reputation data',
+    'module-type': ['hover', 'expansion'],
+    'name': 'Qintel QSentry Lookup',
+    'logo': 'qintel.png',
+    'requirements': ['A Qintel API token'],
+    'features': 'This module takes an ip-address (ip-src or ip-dst) attribute as input, and queries the Qintel QSentry API to retrieve ip reputation data',
+    'references': ['https://www.qintel.com/products/qsentry/'],
+    'input': 'ip address attribute',
+    'output': '',
+    'ouput': 'Objects containing the enriched IP, threat tags, last seen attributes and associated Autonomous System information',
 }
 
 moduleconfig = ['token', 'remote']

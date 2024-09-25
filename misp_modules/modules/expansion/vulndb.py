@@ -26,9 +26,19 @@ misperrors = {'error': 'Error'}
 mispattributes = {
     'input': ['vulnerability'],
     'output': ['text', 'link', 'cpe']}
-moduleinfo = {'version': '0.1', 'author': 'Koen Van Impe',
-              'description': 'Query VulnDB - RiskBasedSecurity.com',
-              'module-type': ['expansion', 'hover']}
+moduleinfo = {
+    'version': '0.1',
+    'author': 'Koen Van Impe',
+    'description': 'Module to query VulnDB (RiskBasedSecurity.com).',
+    'module-type': ['expansion', 'hover'],
+    'name': 'VulnDB Lookup',
+    'logo': 'vulndb.png',
+    'requirements': ['An access to the VulnDB API (apikey, apisecret)'],
+    'features': 'This module takes a vulnerability attribute as input and queries VulnDB in order to get some additional data about it.\n\nThe API gives the result of the query which can be displayed in the screen, and/or mapped into MISP attributes to add in the event.',
+    'references': ['https://vulndb.cyberriskanalytics.com/'],
+    'input': 'A vulnerability attribute.',
+    'output': 'Additional data enriching the CVE input, fetched from VulnDB.',
+}
 
 moduleconfig = ['apikey', 'apisecret', 'discard_dates', 'discard_external_references', 'discard_cvss', 'discard_productinformation', 'discard_classification', 'discard_cpe']
 

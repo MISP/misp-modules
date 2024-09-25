@@ -21,10 +21,17 @@ sh.setFormatter(fmt)
 log.addHandler(sh)
 
 moduleinfo = {
-    "version": "1.0",
-    "author": "Joe Security LLC",
-    "description": "Submit files and URLs to Joe Sandbox",
-    "module-type": ["expansion", "hover"]
+    'version': '1.0',
+    'author': 'Joe Security LLC',
+    'description': 'A module to submit files or URLs to Joe Sandbox for an advanced analysis, and return the link of the submission.',
+    'module-type': ['expansion', 'hover'],
+    'name': 'Joe Sandbox Submit',
+    'logo': 'joesandbox.png',
+    'requirements': ['jbxapi: Joe Sandbox API python3 library'],
+    'features': 'The module requires a Joe Sandbox API key to submit files or URL, and returns the link of the submitted analysis.\n\nIt is then possible, when the analysis is completed, to query the Joe Sandbox API to get the data related to the analysis, using the [joesandbox_query module](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/joesandbox_query.py) directly on this submission link.',
+    'references': ['https://www.joesecurity.org', 'https://www.joesandbox.com/'],
+    'input': 'Sample, url (or domain) to submit to Joe Sandbox for an advanced analysis.',
+    'output': 'Link of the report generated in Joe Sandbox.',
 }
 moduleconfig = [
     "apiurl",

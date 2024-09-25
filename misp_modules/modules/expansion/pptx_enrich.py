@@ -7,9 +7,19 @@ import io
 misperrors = {'error': 'Error'}
 mispattributes = {'input': ['attachment'],
                   'output': ['freetext', 'text']}
-moduleinfo = {'version': '0.1', 'author': 'Sascha Rommelfangen',
-              'description': '.pptx to freetext-import IOC extractor',
-              'module-type': ['expansion']}
+moduleinfo = {
+    'version': '0.1',
+    'author': 'Sascha Rommelfangen',
+    'description': 'Module to extract freetext from a .pptx document.',
+    'module-type': ['expansion'],
+    'name': 'PPTX Enrich',
+    'logo': 'pptx.png',
+    'requirements': ['pptx: Python library to read PowerPoint files.'],
+    'features': 'The module reads the text contained in a .pptx document. The result is passed to the freetext import parser so IoCs can be extracted out of it.',
+    'references': [],
+    'input': 'Attachment attribute containing a .pptx document.',
+    'output': 'Text and freetext parsed from the document.',
+}
 
 moduleconfig = []
 

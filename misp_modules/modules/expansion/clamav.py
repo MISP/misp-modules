@@ -19,10 +19,17 @@ sh.setFormatter(fmt)
 log.addHandler(sh)
 
 moduleinfo = {
-    "version": "0.1",
-    "author": "Jakub Onderka",
-    "description": "Submit file to ClamAV",
-    "module-type": ["expansion"]
+    'version': '0.1',
+    'author': 'Jakub Onderka',
+    'description': 'Submit file to ClamAV',
+    'module-type': ['expansion'],
+    'name': 'ClaamAV',
+    'logo': '',
+    'requirements': [],
+    'features': '',
+    'references': [],
+    'input': '',
+    'output': '',
 }
 moduleconfig = ["connection"]
 mispattributes = {

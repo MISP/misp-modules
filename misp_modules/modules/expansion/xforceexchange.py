@@ -14,9 +14,19 @@ mispattributes = {'input': ['ip-src', 'ip-dst', 'vulnerability', 'md5', 'sha1', 
                   'format': 'misp_standard'}
 
 # possible module-types: 'expansion', 'hover' or both
-moduleinfo = {'version': '2', 'author': 'Joerg Stephan (@johest)',
-              'description': 'IBM X-Force Exchange expansion module',
-              'module-type': ['expansion', 'hover']}
+moduleinfo = {
+    'version': '2',
+    'author': 'Joerg Stephan (@johest)',
+    'description': 'An expansion module for IBM X-Force Exchange.',
+    'module-type': ['expansion', 'hover'],
+    'name': 'IBM X-Force Exchange Lookup',
+    'logo': 'xforce.png',
+    'requirements': ['An access to the X-Force API (apikey)'],
+    'features': 'This module takes a MISP attribute as input to query the X-Force API. The API returns then additional information known in their threats data, that is mapped into MISP attributes.',
+    'references': ['https://exchange.xforce.ibmcloud.com/'],
+    'input': 'A MISP attribute included in the following list:\n- ip-src\n- ip-dst\n- vulnerability\n- md5\n- sha1\n- sha256',
+    'output': 'MISP attributes mapped from the result of the query on X-Force Exchange.',
+}
 
 # config fields that your code expects from the site admin
 moduleconfig = ["apikey", "apipassword"]

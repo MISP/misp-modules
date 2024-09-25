@@ -5,9 +5,19 @@ misperrors = {'error': 'Error'}
 mispattributes = {'input': ['hostname', 'domain']}
 
 # possible module-types: 'expansion', 'hover' or both
-moduleinfo = {'version': '1', 'author': 'Hannah Ward',
-              'description': 'Expand Country Codes',
-              'module-type': ['hover']}
+moduleinfo = {
+    'version': '1',
+    'author': 'Hannah Ward',
+    'description': 'Module to expand country codes.',
+    'module-type': ['hover'],
+    'name': 'Country Code',
+    'logo': '',
+    'requirements': [],
+    'features': 'The module takes a domain or a hostname as input, and returns the country it belongs to.\n\nFor non country domains, a list of the most common possible extensions is used.',
+    'references': [],
+    'input': 'Hostname or domain attribute.',
+    'output': 'Text with the country code the input belongs to.',
+}
 
 # config fields that your code expects from the site admin
 moduleconfig = []

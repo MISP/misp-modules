@@ -5,9 +5,19 @@ from pymisp import MISPAttribute, MISPEvent, MISPObject
 
 misperrors = {'error': 'Error'}
 mispattributes = {'input': ['domain', 'hostname', 'email', 'email-src', 'email-dst', 'email-reply-to', 'dns-soa-email', 'target-email', 'whois-registrant-email'], 'format': 'misp_standard'}
-moduleinfo = {'version': '0.2', 'author': 'Christian Studer',
-              'description': 'On demand query API for APIVoid.',
-              'module-type': ['expansion', 'hover']}
+moduleinfo = {
+    'version': '0.2',
+    'author': 'Christian Studer',
+    'description': 'Module to query APIVoid with some domain attributes.',
+    'module-type': ['expansion', 'hover'],
+    'name': 'APIVoid',
+    'logo': 'apivoid.png',
+    'requirements': ['A valid APIVoid API key with enough credits to proceed 2 queries'],
+    'features': 'This module takes a domain name and queries API Void to get the related DNS records and the SSL certificates. It returns then those pieces of data as MISP objects that can be added to the event.\n\nTo make it work, a valid API key and enough credits to proceed 2 queries (0.06 + 0.07 credits) are required.',
+    'references': ['https://www.apivoid.com/'],
+    'input': 'A domain attribute.',
+    'output': 'DNS records and SSL certificates related to the domain.',
+}
 moduleconfig = ['apikey']
 
 

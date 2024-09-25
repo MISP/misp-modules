@@ -16,7 +16,7 @@ edit_uri: edit/main/docs/
 use_directory_urls: true
 
 # Copyright
-copyright: "Copyright &copy; 2019-2023 MISP Project"
+copyright: "Copyright &copy; 2019-2024 MISP Project"
 
 # Options
 extra:
@@ -82,8 +82,9 @@ markdown_extensions:
   - pymdownx.tilde
 
 nav:
-    - Home: 'index.md'
+    - Home: index.md
     - Modules:
+      - Action Modules: action_mod.md
       - Expansion Modules: expansion.md
       - Export Modules: export_mod.md
       - Import Modules: import_mod.md

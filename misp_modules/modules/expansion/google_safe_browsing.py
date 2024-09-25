@@ -6,9 +6,19 @@ from pysafebrowsing import SafeBrowsing
 
 misperrors = {'error': 'Error'}
 mispattributes = {'input': ['url'], 'format': 'misp_standard'}
-moduleinfo = {'version': '0.1', 'author': 'Stephanie S',
-              'description': 'Google safe browsing expansion module',
-              'module-type': ['expansion', 'hover']}
+moduleinfo = {
+    'version': '0.1',
+    'author': 'Stephanie S',
+    'description': 'Google safe browsing expansion module',
+    'module-type': ['expansion', 'hover'],
+    'name': 'Google Safe Browsing Lookup',
+    'logo': '',
+    'requirements': [],
+    'features': '',
+    'references': [],
+    'input': '',
+    'output': '',
+}
 
 moduleconfig = ['api_key']
 
@@ -24,7 +34,7 @@ def handler(q=False):
     if request['attribute']['type'] not in mispattributes['input']:
         return {'error': 'Unsupported attribute type.'}
 
-    api_key = request["config"]["api_key"] 
+    api_key = request["config"]["api_key"]
     url = request["attribute"]["value"]
 
     s = SafeBrowsing(api_key)
@@ -38,7 +48,7 @@ def handler(q=False):
         if (response[url]['malicious'] != False):
             # gsb threat types: THREAT_TYPE_UNSPECIFIED, MALWARE, SOCIAL_ENGINEERING, UNWANTED_SOFTWARE, POTENTIALLY_HARMFUL_APPLICATION
             gsb_circl_threat_taxonomy = {"MALWARE": 'malware', "SOCIAL_ENGINEERING": 'social-engineering'}
-            
+
             threats = response[url]['threats']
             malicious = response[url]['malicious']
             platforms = response[url]['platforms']
@@ -52,18 +62,18 @@ def handler(q=False):
                     threat_attribute.add_tag(f'circl:incident="{gsb_circl_threat_taxonomy.get(threat)}"')
                 else:
                     threat_attribute.add_tag(f'threat-type:{str(threat).lower()}')
-            obj.add_attribute('platforms', **{'type': 'text', 'value': str(" ".join(platforms))}) 
-   
+            obj.add_attribute('platforms', **{'type': 'text', 'value': str(" ".join(platforms))})
+
         else:
             malicious_attribute = obj.add_attribute('malicious', **{'type': 'boolean', 'value': 0}) # 0 == False
             malicious_attribute.add_tag(f'ioc:artifact-state="not-malicious"')
 
         obj.add_reference(request['attribute']['uuid'], "describes")
         event.add_object(obj)
-        
+
         # Avoid serialization issue
         event = json.loads(event.to_json())
-        return {"results": {'Object': event['Object'], 'Attribute': event['Attribute']}} 
+        return {"results": {'Object': event['Object'], 'Attribute': event['Attribute']}}
 
     except Exception as error:
         return {"error": "An error occurred: " + str(error)}

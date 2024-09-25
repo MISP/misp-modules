@@ -15,8 +15,15 @@ log.addHandler(ch)
 moduleinfo = {
     'version': '0.1',
     'author': 'Dave Johnson',
-    'description': 'Module to query urlscan.io',
-    'module-type': ['expansion']
+    'description': 'An expansion module to query urlscan.io.',
+    'module-type': ['expansion'],
+    'name': 'URLScan Lookup',
+    'logo': 'urlscan.jpg',
+    'requirements': ['An access to the urlscan.io API'],
+    'features': 'This module takes a MISP attribute as input and queries urlscan.io with it.\n\nThe result of this query is then parsed and some data is mapped into MISP attributes in order to enrich the input attribute.',
+    'references': ['https://urlscan.io/'],
+    'input': 'A domain, hostname or url attribute.',
+    'output': 'MISP attributes mapped from the result of the query on urlscan.io.',
 }
 
 moduleconfig = ['apikey']
