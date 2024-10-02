@@ -7,7 +7,7 @@ mispattributes = {'input': ['hostname', 'domain', 'domain|ip'], 'output': ['ip-s
 moduleinfo = {
     'version': '0.3',
     'author': 'Alexandre Dulaunoy',
-    'description': 'jj',
+    'description': 'Simple DNS expansion service to resolve IP address from MISP attributes',
     'module-type': ['expansion', 'hover'],
     'name': 'DNS Resolver',
     'logo': '',
