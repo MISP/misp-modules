@@ -45,6 +45,7 @@ yara-python = "4.5.0"
 numpy = [{version = "1.24.4", python = "3.8.*"}, {version = ">=1.26.4,<2.0.0", python = ">=3.9"}]
 pandas = [{version = "1.5.3", python = "3.8.*"}, {version = ">=2.0.0", python = ">=3.9"}]
 pandas_ods_reader = [{version = "0.1.4", python = "3.8.*"}, {version = ">=1.0.0", python = ">=3.9"}]
+pandoc = "*"
 ## module dependencies
 apiosintds = "*"
 assemblyline_client = "*"
