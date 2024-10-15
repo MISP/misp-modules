@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "misp-modules"
-version = "2.4.197"
+version = "2.4.198"
 description = "MISP modules are autonomous modules that can be used for expansion and other services in MISP"
 authors = ["Alexandre Dulaunoy <alexandre.dulaunoy@circl.lu>"]
 license = "AGPL-3.0-only"
@@ -36,6 +36,7 @@ psutil = "*"
 pyparsing = "*"
 redis = "*"
 tornado = "*"
+urllib3 = ">=1.26,<2"
 ## module dependencies (if a dependency fails loading with '*', pin it here)
 censys = "2.0.9"
 socialscan = "<2.0.0"

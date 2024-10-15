@@ -48,14 +48,20 @@ class PassiveDNSParser:
             self.result = {'error': 'Not found'}
             return
 
-        mapping = {'count': 'counter', 'origin': 'text',
-                   'time_first': 'datetime', 'rrtype': 'text',
-                   'rrname': 'text', 'rdata': 'text',
-                   'time_last': 'datetime'}
+        mapping = {
+            'count': 'counter', 'origin': 'text', 'rrtype': 'text',
+            'rrname': 'text', 'rdata': 'text',
+        }
         for result in results:
             pdns_object = MISPObject('passive-dns')
             for relation, attribute_type in mapping.items():
-                pdns_object.add_attribute(relation, type=attribute_type, value=result[relation])
+                pdns_object.add_attribute(relation, result[relation], type=attribute_type)
+            first_seen = result['time_first']
+            pdns_object.add_attribute('time_first', first_seen, type='datetime')
+            pdns_object.first_seen = first_seen
+            last_seen = result['time_last']
+            pdns_object.add_attribute('time_last', last_seen, type='datetime')
+            pdns_object.last_seen = last_seen
             pdns_object.add_reference(self.attribute.uuid, 'associated-to')
             self.misp_event.add_object(**pdns_object)
 
