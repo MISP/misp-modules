@@ -8,7 +8,11 @@ from pathlib import Path
 import configparser
 config = configparser.ConfigParser()
 CONF_PATH = os.path.join(os.getcwd(), "conf", "config.cfg")
-config.read(CONF_PATH)
+if os.path.isfile(CONF_PATH):
+    config.read(CONF_PATH)
+else:
+    print("[-] No conf file found. Copy config.cfg.sample to config.cfg")
+    exit()
 
 MODULES = []
 
