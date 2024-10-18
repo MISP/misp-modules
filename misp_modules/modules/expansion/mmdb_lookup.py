@@ -9,18 +9,18 @@ moduleinfo = {'version': '1', 'author': 'Jeroen Pinoy',
               'description': "An expansion module to enrich an ip with geolocation and asn information from an mmdb server "
                              "such as ip.circl.lu.",
               'module-type': ['expansion', 'hover']}
-moduleconfig = ["custom_API", "db_source_filter", "max_country_qt"]
+moduleconfig = ["custom_API", "db_source_filter", "max_country_info_qt"]
 mmdblookup_url = 'https://ip.circl.lu/'
 
 
 class MmdbLookupParser():
-    def __init__(self, attribute, mmdblookupresult, api_url, max_country_qt=0):
+    def __init__(self, attribute, mmdblookupresult, api_url, max_country_info_qt=0):
         self.attribute = attribute
         self.mmdblookupresult = mmdblookupresult
         self.api_url = api_url
         self.misp_event = MISPEvent()
         self.misp_event.add_attribute(**attribute)
-        self.max_country_qt = int(max_country_qt)
+        self.max_country_info_qt = int(max_country_info_qt)
 
     def get_result(self):
         event = json.loads(self.misp_event.to_json())
@@ -32,7 +32,7 @@ class MmdbLookupParser():
         country_info_qt = 0
         for result_entry in self.mmdblookupresult:
             if result_entry['country_info']:
-                if (self.max_country_qt == 0) or (self.max_country_qt > 0 and country_info_qt < self.max_country_qt):
+                if (self.max_country_info_qt == 0) or (self.max_country_info_qt > 0 and country_info_qt < self.max_country_info_qt):
                     mmdblookup_object = MISPObject('geolocation')
                     mmdblookup_object.add_attribute('country',
                                                     **{'type': 'text', 'value': result_entry['country_info']['Country']})
@@ -91,9 +91,9 @@ def handler(q=False):
     else:
         misperrors['error'] = 'There is no attribute of type ip-src or ip-dst provided as input'
         return misperrors
-    max_country_qt = request['config'].get('max_country_qt', 0)
-    if max_country_qt is None:
-        max_country_qt = 0
+    max_country_info_qt = request['config'].get('max_country_info_qt', 0)
+    if max_country_info_qt is None:
+        max_country_info_qt = 0
     api_url = check_url(request['config']['custom_API']) if 'config' in request and request['config'].get(
         'custom_API') else mmdblookup_url
     r = requests.get("{}/geolookup/{}".format(api_url, toquery))
@@ -121,7 +121,7 @@ def handler(q=False):
     else:
         misperrors['error'] = 'API not accessible - http status code {} was returned'.format(r.status_code)
         return misperrors
-    parser = MmdbLookupParser(attribute, mmdblookupresult, api_url, max_country_qt)
+    parser = MmdbLookupParser(attribute, mmdblookupresult, api_url, max_country_info_qt)
     parser.parse_mmdblookup_information()
     result = parser.get_result()
     return result
