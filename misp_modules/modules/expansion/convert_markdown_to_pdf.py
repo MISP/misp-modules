@@ -7,7 +7,7 @@ import pandoc
 misperrors = {'error': 'Error'}
 mispattributes = {'input': ['text'], 'output': ['text']}
 moduleinfo = {
-    'version': '0.1',
+    'version': '0.2',
     'author': 'Sami Mokaddem',
     'description': 'Render the markdown (under GFM) into PDF. Requires pandoc (https://pandoc.org/) and wkhtmltopdf (https://wkhtmltopdf.org/).',
     'module-type': ['expansion'],
@@ -20,10 +20,13 @@ moduleinfo = {
     'output': '',
 }
 
+moduleconfig = [
+    'margin',
+]
 
-def convert(markdown):
+
+def convert(markdown, margin='3'):
     doc = pandoc.read(markdown, format='gfm')
-    margin = '3'
     options = [
         '--pdf-engine=wkhtmltopdf',
         f'-V margin-left={margin}',
@@ -45,7 +48,11 @@ def handler(q=False):
     data = json.loads(data)
     markdown = data.get('markdown')
     try:
-        rendered = convert(markdown)
+        margin = '3'
+        if 'config' in request['config']:
+            if request['config'].get('margin'):
+                margin = request['config'].get('margin')
+        rendered = convert(markdown, margin=margin)
     except Exception as e:
         rendered = f'Error: {e}'
 
@@ -59,4 +66,5 @@ def introspection():
 
 
 def version():
+    moduleinfo['config'] = moduleconfig
     return moduleinfo
