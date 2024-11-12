@@ -81,6 +81,10 @@ def lookup_indicator(client, query):
     for request in result['data']['requests']:
         if request['response'].get('failed'):
             if request['response']['failed']['errorText']:
+                if request['response']['failed']['errorText'] == "net::ERR_ABORTED":
+                    continue
+                elif request['response']['failed']['errorText'] == "net::ERR_FAILED":
+                    continue
                 log.debug('The page could not load')
                 r.append(
                     {'error': 'Domain could not be resolved: {}'.format(request['response']['failed']['errorText'])})
