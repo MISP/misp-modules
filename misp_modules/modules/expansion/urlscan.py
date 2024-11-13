@@ -81,9 +81,7 @@ def lookup_indicator(client, query):
     for request in result['data']['requests']:
         if request['response'].get('failed'):
             if request['response']['failed']['errorText']:
-                if request['response']['failed']['errorText'] == "net::ERR_ABORTED":
-                    continue
-                elif request['response']['failed']['errorText'] == "net::ERR_FAILED":
+                if request['response']['failed']['errorText'] in ["net::ERR_ABORTED", "net::ERR_FAILED", "net::ERR_QUIC_PROTOCOL_ERROR"]:
                     continue
                 log.debug('The page could not load')
                 r.append(
@@ -95,14 +93,21 @@ def lookup_indicator(client, query):
             r.append({'types': 'domain',
                       'categories': ['Network activity'],
                       'values': misp_val,
-                      'comment': misp_comment})
+                      'comment': f"{misp_comment} - Domain"})
 
         if result['page'].get('ip'):
             misp_val = result['page']['ip']
             r.append({'types': 'ip-dst',
                       'categories': ['Network activity'],
                       'values': misp_val,
-                      'comment': misp_comment})
+                      'comment': f"{misp_comment} - IP"})
+
+        if result['page'].get('ptr'):
+            misp_val = result['page']['ptr']
+            r.append({'types': 'hostname',
+                      'categories': ['Network activity'],
+                      'values': misp_val,
+                      'comment': f"{misp_comment} - PTR"})
 
         if result['page'].get('country'):
             misp_val = 'country: ' + result['page']['country']
@@ -111,18 +116,40 @@ def lookup_indicator(client, query):
             r.append({'types': 'text',
                       'categories': ['External analysis'],
                       'values': misp_val,
-                      'comment': misp_comment})
+                      'comment': f"{misp_comment} - Country/City"})
 
         if result['page'].get('asn'):
             misp_val = result['page']['asn']
-            r.append({'types': 'AS', 'categories': ['External analysis'], 'values': misp_val, 'comment': misp_comment})
+            r.append({'types': 'AS', 'categories': ['External analysis'], 'values': misp_val, 'comment': f"{misp_comment} - ASN"})
 
         if result['page'].get('asnname'):
             misp_val = result['page']['asnname']
             r.append({'types': 'text',
                       'categories': ['External analysis'],
                       'values': misp_val,
-                      'comment': misp_comment})
+                      'comment': f"{misp_comment} - ASN name"})
+
+        if result['page'].get('tlsIssuer'):
+            misp_val = result['page']['tlsIssuer']
+            r.append({'types': 'text',
+                      'categories': ['External analysis'],
+                      'values': misp_val,
+                      'comment': f"{misp_comment} - TLS Issuer"})
+
+
+        if result['page'].get('title'):
+            misp_val = result['page']['title']
+            r.append({'types': 'text',
+                      'categories': ['External analysis'],
+                      'values': misp_val,
+                      'comment': f"{misp_comment} - Page title"})
+
+        if result['page'].get('server'):
+            misp_val = result['page']['server']
+            r.append({'types': 'text',
+                      'categories': ['External analysis'],
+                      'values': misp_val,
+                      'comment': f"{misp_comment} - Server"})
 
     if result.get('stats'):
         if result['stats'].get('malicious'):
