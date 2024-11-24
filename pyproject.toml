@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "misp-modules"
-version = "2.4.198"
+version = "2.4.199"
 description = "MISP modules are autonomous modules that can be used for expansion and other services in MISP"
 authors = ["Alexandre Dulaunoy <alexandre.dulaunoy@circl.lu>"]
 license = "AGPL-3.0-only"
@@ -30,7 +30,7 @@ misp-modules = "misp_modules:main"
 
 [tool.poetry.dependencies]
 ## platform (pin this to your python version, for 'poetry export' to work)
-python = ">=3.8.*,<3.13"
+python = ">=3.9.*,<3.13"
 ## core dependencies
 psutil = "*"
 pyparsing = "*"
@@ -41,11 +41,9 @@ urllib3 = ">=1.26,<2"
 censys = "2.0.9"
 socialscan = "<2.0.0"
 yara-python = "4.5.0"
-# required to support both python 3.8 and wheel builds on python 3.12
-numpy = [{version = "1.24.4", python = "3.8.*"}, {version = ">=1.26.4,<2.0.0", python = ">=3.9"}]
-pandas = [{version = "1.5.3", python = "3.8.*"}, {version = ">=2.0.0", python = ">=3.9"}]
-pandas_ods_reader = [{version = "0.1.4", python = "3.8.*"}, {version = ">=1.0.0", python = ">=3.9"}]
-pandoc = "*"
+numpy = ">=1.26.4,<2.0.0"
+pandas = ">=2.0.0"
+pandas_ods_reader = ">=1.0.0"
 ## module dependencies
 apiosintds = "*"
 assemblyline_client = "*"
@@ -68,6 +66,7 @@ np = "*"
 oauth2 = "*"
 opencv-python = "*"
 openpyxl = "*"
+pandoc = "*"
 passivetotal = "*"
 pdftotext = "*"
 pycountry = "*"
@@ -86,6 +85,7 @@ python-docx = "*"
 python-pptx = "*"
 pyzbar = "*"
 requests = { version = "*", extras = ["security"] }
+setuptools = "*"
 shodan = "*"
 sigmatools = "*"
 sigmf = "*"
