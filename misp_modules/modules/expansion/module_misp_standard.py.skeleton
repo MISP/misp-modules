@@ -1,0 +1,73 @@
+import json
+from pymisp import MISPEvent
+
+from . import check_input_attribute, standard_error_message
+
+misperrors = {'error': 'Error'}
+mispattributes = {
+    'input': [
+        # 'hostname',
+        # 'domain',
+        # 'ip-dst',
+        # 'url',
+        # Any other Attribute type...
+    ],
+    'format': 'misp_standard'
+}
+
+moduleinfo = {
+    'version': '1',
+    'author': 'MISP',
+    'description': 'MISP module using the MISP standard skeleton',
+    'module-type': [  # possible module-types: 'expansion', 'hover' or both
+        'expansion',
+        'hover'
+    ]
+}
+
+# config fields that your code expects from the site admin
+moduleconfig = [
+    'config_name_1',
+]
+
+
+
+def DO_STUFF(misp_event, attribute):
+    return misp_event
+
+
+def handler(q=False):
+    if q is False:
+        return False
+    request = json.loads(q)
+
+    # Input sanity check
+    if not request.get('attribute') or not check_input_attribute(request['attribute']):
+        return {'error': f'{standard_error_message}, which should contain at least a type, a value and an uuid.'}
+    attribute = request['attribute']
+
+    # Make sure the Attribute's type is one of the expected type
+    if attribute['type'] not in mispattributes['input']:
+        return {'error': 'Unsupported attribute type.'}
+
+    # Use PyMISP to create compatible MISP Format
+    misp_event = MISPEvent()
+    DO_STUFF(misp_event, attribute)
+
+    # Convert to the format understood by MISP
+    results = {}
+    event = misp_event.to_dict()
+    for key in ('Attribute', 'Object', 'EventReport'):
+        if key in event:
+            results[key] = event[key]
+    return {'results': results}
+
+
+def introspection():
+    return mispattributes
+
+
+def version():
+    moduleinfo['config'] = moduleconfig
+    return moduleinfo
+
