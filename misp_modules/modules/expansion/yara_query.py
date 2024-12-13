@@ -9,7 +9,7 @@ misperrors = {'error': 'Error'}
 moduleinfo = {
     'version': '1',
     'author': 'Christian STUDER',
-    'description': 'jj',
+    'description': 'The module takes a hash attribute (md5, sha1, sha256, imphash) as input, and is returning a YARA rule from it.',
     'module-type': ['expansion', 'hover'],
     'name': 'YARA Rule Generator',
     'require_standard_format': True,
