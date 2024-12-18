@@ -31,6 +31,8 @@ def handler(q=False):
         toquery = request['ip-dst']
     elif request.get('ip-src'):
         toquery = request['ip-src']
+    elif request.get('ip'):
+        toquery = request['ip']
     elif request.get('domain|ip'):
         toquery = request['domain|ip'].split('|')[1]
     else:
@@ -38,11 +40,9 @@ def handler(q=False):
 
     # reverse lookup for ip
     revname = reversename.from_address(toquery)
-
     r = resolver.Resolver()
     r.timeout = 2
     r.lifetime = 2
-
     if request.get('config'):
         if request['config'].get('nameserver'):
             nameservers = []
@@ -63,8 +63,7 @@ def handler(q=False):
         misperrors['error'] = "DNS resolving error"
         return misperrors
 
-    r = {'results': [{'types': mispattributes['output'],
-                      'values':[str(answer[0])]}]}
+    r = {'results': [{'types': mispattributes['output'],'values':[str(answer[0])]}]}
     return r
 
 
