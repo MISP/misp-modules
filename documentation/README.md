@@ -363,6 +363,35 @@ Module to query Cluster25 CTI.
 
 -----
 
+#### [Markdown to PDF converter](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/convert_markdown_to_pdf.py)
+
+Render the markdown (under GFM) into PDF. Requires pandoc (https://pandoc.org/), wkhtmltopdf (https://wkhtmltopdf.org/) and mermaid dependencies.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/convert_markdown_to_pdf.py)]
+
+- **features**:
+>
+
+- **references**:
+>
+1. Install pandoc for your distribution
+2. Install wkhtmltopdf
+    - Ensure You have install the version with patched qt
+    - Ensure it supports margin options
+    - You can check the above by inspecting the extended help `wkhtmltopdf --extended-help`
+3. Install mermaid
+    - `npm install --global @mermaid-js/mermaid-cli`
+4. Install the pandoc-mermaid-filter from https://github.com/DavidCruciani/pandoc-mermaid-filter
+    - Easiest is to install the following:
+    ```bash
+        pip3 install git+https://github.com/DavidCruciani/pandoc-mermaid-filter
+    ```
+
+
+- **requirements**:
+>pandoc
+
+-----
+
 #### [Country Code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/countrycode.py)
 
 Module to expand country codes.
@@ -541,25 +570,22 @@ Submit files and URLs to Cuckoo Sandbox
 
 #### [CVE Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/cve.py)
 
-<img src=logos/cve.png height=60>
+<img src=logos/vulnerability_lookyp.png height=60>
 
 An expansion hover module to expand information about CVE id.
 [[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/cve.py)]
 
 - **features**:
->The module takes a vulnerability attribute as input and queries the CIRCL CVE search API to get information about the vulnerability as it is described in the list of CVEs.
-
-- **config**:
->custom_API
+>The module takes a vulnerability attribute as input and queries Vulnerability Lookup to get additional information based on the Vulnerability ID.
 
 - **input**:
 >Vulnerability attribute.
 
 - **output**:
->Text giving information about the CVE related to the Vulnerability.
+>Additional information on the vulnerability, gathered from the Vulnerability Lookup API.
 
 - **references**:
-> - https://vulnerability.circl.lu/
+> - https://cve.circl.lu/
 > - https://cve.mitre.org/
 
 -----
@@ -664,7 +690,7 @@ Checks Spamhaus DBL for a domain name.
 
 #### [DNS Resolver](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/dns.py)
 
-jj
+Simple DNS expansion service to resolve IP address from MISP attributes
 [[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/dns.py)]
 
 - **features**:
@@ -1611,6 +1637,7 @@ A hover and expansion module to enrich an ip with geolocation and ASN informatio
 - **config**:
 > - custom_API
 > - db_source_filter
+> - max_country_info_qt
 
 - **input**:
 >An IP address attribute (for example ip-src or ip-src|port).
@@ -2792,11 +2819,22 @@ Module to query VulnDB (RiskBasedSecurity.com).
 
 #### [Vulnerability Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/vulnerability_lookup.py)
 
+<img src=logos/vulnerability_lookup.png height=60>
+
 An expansion module to query Vulnerability Lookup
 [[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/vulnerability_lookup.py)]
 
 - **features**:
->
+>The module takes a vulnerability attribute as input and queries Vulnerability Lookup to gather additional information based on the Vulnerability ID. The result of the query is then parsed and converted into MISP content which can be added to the original event to enrich the input attribute.
+
+- **input**:
+>Vulnerability Attribute
+
+- **output**:
+>Additional information on the vulnerability, gathered from the Vulnerability Lookup API.
+
+- **references**:
+>https://vulnerability.circl.lu
 
 -----
 
@@ -3013,7 +3051,7 @@ Module to extract freetext from a .xlsx document.
 
 <img src=logos/yara.png height=60>
 
-jj
+The module takes a hash attribute (md5, sha1, sha256, imphash) as input, and is returning a YARA rule from it.
 [[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/yara_query.py)]
 
 - **features**:
