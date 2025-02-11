@@ -14,22 +14,24 @@ mispattributes = {
         # 'url',
         # Any other Attribute type...
     ],
-    'format': 'misp_standard'
+    'format': 'misp_standard',
 }
 
 moduleinfo = {
     'version': '1',
+    'author': 'Sami Mokaddem',
+    'name': 'Onion Lookup',
     'author': 'MISP',
-    'description': 'MISP module using the MISP standard. Uses the onion-lookup service to get information about an onion',
+    'description': 'MISP module using the MISP standard. Uses the onion-lookup service to get information about an onion.',
     'module-type': [  # possible module-types: 'expansion', 'hover' or both
         'expansion',
-        'hover'
-    ]
+        'hover',
+    ],
+    'references': ['https://onion.ail-project.org/'],
 }
 
 # config fields that your code expects from the site admin
-moduleconfig = [
-]
+moduleconfig = []
 
 
 def getDetails(onion_address):
@@ -47,6 +49,8 @@ def getDetails(onion_address):
   ],
 }
 '''
+
+
 def createObject(onion_details):
     misp_object = MISPObject('tor-hiddenservice')
     misp_object.comment = 'custom-comment2'
@@ -60,7 +64,6 @@ def createObject(onion_details):
     for tag in onion_details['tags']:
         onion_address.add_tag(tag)
     return misp_object
-
 
 
 def enrichOnion(misp_event, attribute):
@@ -85,7 +88,9 @@ def handler(q=False):
 
     # Input sanity check
     if not request.get('attribute') or not check_input_attribute(request['attribute']):
-        return {'error': f'{standard_error_message}, which should contain at least a type, a value and an uuid.'}
+        return {
+            'error': f'{standard_error_message}, which should contain at least a type, a value and an uuid.'
+        }
     attribute = request['attribute']
 
     # Make sure the Attribute's type is one of the expected type
@@ -112,4 +117,3 @@ def introspection():
 def version():
     moduleinfo['config'] = moduleconfig
     return moduleinfo
-
