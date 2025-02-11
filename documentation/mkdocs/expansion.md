@@ -1737,6 +1737,18 @@ Module to extract freetext from a .odt document.
 
 -----
 
+#### [Onion Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/onion_lookup.py)
+
+<img src=../logos/onion.png height=60>
+
+MISP module using the MISP standard. Uses the onion-lookup service to get information about an onion.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/onion_lookup.py)]
+
+- **references**:
+>https://onion.ail-project.org/
+
+-----
+
 #### [Onyphe Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/onyphe.py)
 
 <img src=../logos/onyphe.jpg height=60>
