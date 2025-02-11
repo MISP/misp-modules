@@ -28,6 +28,7 @@ moduleinfo = {
         'hover',
     ],
     'references': ['https://onion.ail-project.org/'],
+    'logo': 'onion.png'
 }
 
 # config fields that your code expects from the site admin
