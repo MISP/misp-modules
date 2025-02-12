@@ -4,13 +4,15 @@ Import content from a TAXII 2.1 server.
 import collections
 import itertools
 import json
-import misp_modules.lib.stix2misp
-from pathlib import Path
 import re
-import stix2.v20
+import requests
 import taxii2client
 import taxii2client.exceptions
-import requests
+from pathlib import Path
+from misp_stix_converter import (
+    ExternalSTIX2toMISPParser, InternalSTIX2toMISPParser, _is_stix2_from_misp)
+from stix2.v20 import Bundle as Bundle_v20
+from stix2.v21 import Bundle as Bundle_v21
 
 
 class ConfigError(Exception):
@@ -24,13 +26,13 @@ class ConfigError(Exception):
 misperrors = {'error': 'Error'}
 
 moduleinfo = {
-    'version': '0.1',
+    'version': '0.2',
     'author': 'Abc',
     'description': 'Import content from a TAXII 2.1 server',
     'module-type': ['import'],
     'name': 'TAXII 2.1 Import',
     'logo': '',
-    'requirements': [],
+    'requirements': ['misp-lib-stix2', 'misp-stix'],
     'features': '',
     'references': [],
     'input': '',
@@ -40,7 +42,7 @@ moduleinfo = {
 mispattributes = {
     'inputSource': [],
     'output': ['MISP objects'],
-    'format': 'misp_standard',
+    'format': 'misp_standard'
 }
 
 
@@ -48,6 +50,7 @@ userConfig = {
     "url": {
         "type": "String",
         "message": "A TAXII 2.1 collection URL",
+        "required": True
     },
     "added_after": {
         "type": "String",
@@ -234,9 +237,9 @@ def _get_config(config):
     # STIX->MISP converter currently only supports STIX 2.0, so let's force
     # spec_version="2.0".
     if not spec_version:
-        spec_version = "2.0"
-    elif spec_version != "2.0":
-        raise ConfigError('Only spec_version="2.0" is supported for now.')
+        spec_version = "2.1"
+    if spec_version not in ("2.0", "2.1"):
+       raise ConfigError('Only spec versions "2.0" and "2.1" are valid versions.')
 
     if (username and not password) or (not username and password):
         raise ConfigError(
@@ -307,14 +310,16 @@ def _query_taxii(config):
     # memory usage.
     stix_objects = list(limited_stix_objects)
 
-    # The STIX 2.0 converter wants a 2.0 bundle.  (Hope the TAXII server isn't
-    # returning 2.1 objects!)
-    bundle20 = stix2.v20.Bundle(stix_objects, allow_custom=True)
-
-    converter = misp_modules.lib.stix2misp.ExternalStixParser()
-    converter.handler(
-        bundle20, None, [0, "event", str(_synonymsToTagNames_path)]
+    bundle = (Bundle_v21 if config.spec_version == '2.1' else Bundle_v20)(
+        stix_objects, allow_custom=True
     )
+
+    converter = (
+        InternalSTIX2toMISPParser() if _is_stix2_from_misp(bundle.objects)
+        else ExternalSTIX2toMISPParser()
+    )
+    converter.load_stix_bundle(bundle)
+    converter.parse_stix_bundle(single_event=True)
 
     attributes = [
         _pymisp_to_json_serializable(attr)
