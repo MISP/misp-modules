@@ -20,6 +20,9 @@ moduleinfo = {
     'input': 'An IP address MISP attribute.',
     'output': 'Asn object(s) objects related to the IP address used as input.',
 }
+moduleconfig = [
+    "custom_api"
+]
 
 
 def parse_result(attribute, values):
@@ -53,7 +56,9 @@ def handler(q=False):
 
     toquery = request['attribute']['value']
 
-    ipasn = IPASNHistory()
+    ipasn_url = request["config"].get("custom_api") or "https://ipasnhistory.circl.lu/"
+    
+    ipasn = IPASNHistory(root_url=ipasn_url)
     values = ipasn.query(toquery)
 
     if not values:
@@ -67,4 +72,5 @@ def introspection():
 
 
 def version():
+    moduleinfo["config"] = moduleconfig
     return moduleinfo
