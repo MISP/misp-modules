@@ -17,8 +17,9 @@ userConfig = {
     "analysis_link": {
         "type": "String",
         "errorMessage": "Expected analysis link",
-        "message": "The link to a Lastline analysis"
-    },
+        "message": "The link to a Lastline analysis",
+        "required": True
+    }
 }
 
 inputSource = []

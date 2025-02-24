@@ -99,6 +99,7 @@ For further Information see the [license file](https://misp.github.io/misp-modul
 * [OCR Enrich](https://misp.github.io/misp-modules/expansion/#ocr-enrich) - Module to process some optical character recognition on pictures.
 * [ODS Enrich](https://misp.github.io/misp-modules/expansion/#ods-enrich) - Module to extract freetext from a .ods document.
 * [ODT Enrich](https://misp.github.io/misp-modules/expansion/#odt-enrich) - Module to extract freetext from a .odt document.
+* [Onion Lookup](https://misp.github.io/misp-modules/expansion/#onion-lookup) - MISP module using the MISP standard. Uses the onion-lookup service to get information about an onion.
 * [Onyphe Lookup](https://misp.github.io/misp-modules/expansion/#onyphe-lookup) - Module to process a query on Onyphe.
 * [Onyphe Full Lookup](https://misp.github.io/misp-modules/expansion/#onyphe-full-lookup) - Module to process a full query on Onyphe.
 * [AlienVault OTX Lookup](https://misp.github.io/misp-modules/expansion/#alienvault-otx-lookup) - Module to get information from AlienVault OTX.

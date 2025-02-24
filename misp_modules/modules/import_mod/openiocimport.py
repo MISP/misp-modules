@@ -4,14 +4,17 @@ import base64
 from pymisp.tools import openioc
 
 misperrors = {'error': 'Error'}
-userConfig = {'not save ioc': {'type': 'Boolean',
-                               'message': 'If you check this box, IOC file will not save as an attachment in MISP'
-                               },
-              'default tag': {
-                  'type': 'String',
-                  'message': 'Add tags spaced by a comma (tlp:white,misp:threat-level="no-risk")',
-                  'validation': '0'}
-              }
+userConfig = {
+    'not save ioc': {
+        'type': 'Boolean',
+        'message': 'If you check this box, IOC file will not save as an attachment in MISP'
+    },
+    'default tag': {
+        'type': 'String',
+        'message': 'Add tags spaced by a comma (tlp:white,misp:threat-level="no-risk")',
+        'validation': '0'
+    }
+}
 
 inputSource = ['file']
 

@@ -44,6 +44,7 @@ userConfig = {
     "Sample ID": {
         "type": "Integer",
         "errorMessage": "The VMRay sample ID to download the reports",
+        "required": True
     },
     "VTI": {
         "type": "Boolean",
@@ -57,7 +58,7 @@ userConfig = {
     },
     "Artifacts": {
         "type": "Boolean",
-        "message": "Include other Artifacts",
+        "message": "Include other Artifacts"
     },
     "Analysis Details": {
         "type": "Boolean",
