@@ -24,3 +24,4 @@ venv*
 *.sqlite
 website/conf/config.cfg
 wheels
+requirements.txt
