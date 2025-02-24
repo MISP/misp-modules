@@ -107,7 +107,7 @@ jobs:
         run: python -m pip install poetry
 
       - name: Install dependencies
-        run: poetry install --extras "unstable"
+        run: poetry install --with unstable
 
       - name: Build package
         run: poetry build
@@ -133,6 +133,6 @@ jobs:
         path: dist/
 
     - name: Publish to PyPI
-      uses: pypa/gh-action-pypi-publish@release/v1
+      uses: pypa/gh-action-pypi-publish@release/v1.12
       with:
          skip-existing: true

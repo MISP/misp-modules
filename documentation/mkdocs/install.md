@@ -152,15 +152,6 @@ poetry bundle venv /destination/path/
 This is a bit more convoluted and it is similar to how you would install `misp-modules` on an offline instance.
 
 Just follow those instructions but replace the package `misp-modules` with `-r requirements.txt`.
-
-Before doing so you need to generate the `requirements.txt` file. Due to the fact we are still supporting Python 3.8 and that Poetry still has some limitations (soon to be resolved) you need to need to replace the line `python = ">=3.8.*,<3.13"` inside `pyproject.toml` with your exact version (just run `python --version`).
-
-The following `sed` command does everything for you.
-
-~~~~bash
-sed -i "s/^python = .*/python = \"$(python -c 'import platform; print(platform.python_version())')\"/" pyproject.toml
-~~~~
-
 Then, run the following commands to generate your very own `requirements.txt`.
 
 ~~~~bash

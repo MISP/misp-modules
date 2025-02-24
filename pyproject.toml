@@ -15,7 +15,7 @@ classifiers = [
     "Programming Language :: Python :: 3",
     "Topic :: Security",
 ]
-requires-python = ">=3.9.*,<3.13"
+requires-python = ">=3.9,<3.13"
 dependencies = [
     "psutil",
     "pyparsing",
@@ -98,28 +98,6 @@ Repository = "https://github.com/MISP/misp-modules"
 [project.scripts]
 misp-modules = "misp_modules:main"
 
-[dependency-groups]
-test = [
-    "codecov",
-    "flake8",
-    "nose",
-    "pytest",
-]
-docs = [
-    "mkdocs",
-    "mkdocs-material",
-    "markdown_include",
-]
-
-[project.optional-dependencies]
-unstable = [
-    "odtreader@git+https://github.com/cartertemm/ODTReader.git",
-    "google-search-api@git+https://github.com/abenassi/Google-Search-API",
-    "trustar@git+https://github.com/SteveClement/trustar-python.git",
-    "pydnstrails@git+https://github.com/sebdraven/pydnstrails.git",
-    "pyonyphe@git+https://github.com/sebdraven/pyonyphe.git",
-]
-
 [tool.poetry]
 packages = [{include = "misp_modules"}]
 
@@ -143,6 +121,16 @@ optional = true
 mkdocs = "*"
 mkdocs-material = "*"
 markdown_include = "*"
+
+[tool.poetry.group.unstable]
+optional = true
+
+[tool.poetry.group.unstable.dependencies]
+odtreader = { git = "https://github.com/cartertemm/ODTReader.git" }
+google-search-api = { git = "https://github.com/abenassi/Google-Search-API" }
+trustar = { git = "https://github.com/SteveClement/trustar-python.git" }
+pydnstrails = { git = "https://github.com/sebdraven/pydnstrails.git" }
+pyonyphe = { git = "https://github.com/sebdraven/pyonyphe.git" }
 
 [tool.poetry.requires-plugins]
 poetry-plugin-bundle = ">=1.6"

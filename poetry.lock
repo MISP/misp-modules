@@ -357,7 +357,7 @@ version = "4.12.3"
 description = "Screen-scraping library"
 optional = false
 python-versions = ">=3.6.0"
-groups = ["main"]
+groups = ["main", "unstable"]
 markers = "platform_system == \"Linux\" and platform_machine == \"aarch64\""
 files = [
     {file = "beautifulsoup4-4.12.3-py3-none-any.whl", hash = "sha256:b80878c9f40111313e55da8ba20bdba06d8fa3969fc68304167741bbf9e082ed"},
@@ -468,7 +468,7 @@ version = "2024.8.30"
 description = "Python package for providing Mozilla's CA Bundle."
 optional = false
 python-versions = ">=3.6"
-groups = ["main", "docs", "test"]
+groups = ["main", "docs", "test", "unstable"]
 markers = "platform_system == \"Linux\" and platform_machine == \"aarch64\""
 files = [
     {file = "certifi-2024.8.30-py3-none-any.whl", hash = "sha256:922820b53db7a7257ffbda3f597266d435245903d80737e34f8a45ff3e3230d8"},
@@ -575,7 +575,7 @@ version = "3.4.0"
 description = "The Real First Universal Charset Detector. Open, modern and actively maintained alternative to Chardet."
 optional = false
 python-versions = ">=3.7.0"
-groups = ["main", "docs", "test"]
+groups = ["main", "docs", "test", "unstable"]
 markers = "platform_system == \"Linux\" and platform_machine == \"aarch64\""
 files = [
     {file = "charset_normalizer-3.4.0-cp310-cp310-macosx_10_9_universal2.whl", hash = "sha256:4f9fc98dad6c2eaa32fc3af1417d95b5e3d08aff968df0cd320066def971f9a6"},
@@ -849,7 +849,7 @@ version = "7.1.0"
 description = "Updated configparser from stdlib for earlier Pythons."
 optional = false
 python-versions = ">=3.8"
-groups = ["main"]
+groups = ["main", "unstable"]
 markers = "platform_system == \"Linux\" and platform_machine == \"aarch64\""
 files = [
     {file = "configparser-7.1.0-py3-none-any.whl", hash = "sha256:98e374573c4e10e92399651e3ba1c47a438526d633c44ee96143dec26dad4299"},
@@ -1336,10 +1336,10 @@ files = [
 name = "fake-useragent"
 version = "2.0.3"
 description = "Up-to-date simple useragent faker with real world database"
-optional = true
+optional = false
 python-versions = ">=3.9"
-groups = ["main"]
-markers = "platform_system == \"Linux\" and platform_machine == \"aarch64\" and extra == \"unstable\""
+groups = ["unstable"]
+markers = "platform_system == \"Linux\" and platform_machine == \"aarch64\""
 files = [
     {file = "fake_useragent-2.0.3-py3-none-any.whl", hash = "sha256:8bae50abb72c309a5b3ae2f01a0b82426613fd5c4e2a04dca9332399ec44daa1"},
     {file = "fake_useragent-2.0.3.tar.gz", hash = "sha256:af86a26ef8229efece8fed529b4aeb5b73747d889b60f01cd477b6f301df46e6"},
@@ -1568,7 +1568,7 @@ version = "1.0.0"
 description = "Clean single-source support for Python 3 and 2"
 optional = false
 python-versions = ">=2.6, !=3.0.*, !=3.1.*, !=3.2.*"
-groups = ["main"]
+groups = ["main", "unstable"]
 markers = "platform_system == \"Linux\" and platform_machine == \"aarch64\""
 files = [
     {file = "future-1.0.0-py3-none-any.whl", hash = "sha256:929292d34f5872e70396626ef385ec22355a1fae8ad29e1a734c3e43f9fbc216"},
@@ -1619,10 +1619,10 @@ dev = ["flake8", "markdown", "twine", "wheel"]
 name = "Google-Search-API"
 version = "1.1.14"
 description = "Search in google"
-optional = true
+optional = false
 python-versions = "*"
-groups = ["main"]
-markers = "platform_system == \"Linux\" and platform_machine == \"aarch64\" and extra == \"unstable\""
+groups = ["unstable"]
+markers = "platform_system == \"Linux\" and platform_machine == \"aarch64\""
 files = []
 develop = false
 
@@ -1752,7 +1752,7 @@ version = "3.10"
 description = "Internationalized Domain Names in Applications (IDNA)"
 optional = false
 python-versions = ">=3.6"
-groups = ["main", "docs", "test"]
+groups = ["main", "docs", "test", "unstable"]
 markers = "platform_system == \"Linux\" and platform_machine == \"aarch64\""
 files = [
     {file = "idna-3.10-py3-none-any.whl", hash = "sha256:946d195a0d259cbba61165e88e65941f16e9b36ea6ddb97f00452bae8b1287d3"},
@@ -1793,7 +1793,7 @@ version = "6.4.5"
 description = "Read resources from Python packages"
 optional = false
 python-versions = ">=3.8"
-groups = ["main"]
+groups = ["main", "unstable"]
 markers = "python_version == \"3.9\" or platform_system == \"Linux\" and python_version < \"3.10\" and platform_machine == \"aarch64\""
 files = [
     {file = "importlib_resources-6.4.5-py3-none-any.whl", hash = "sha256:ac29d5f956f01d5e4bb63102a5a19957f1b9175e45649977264a1416783bb717"},
@@ -1958,10 +1958,10 @@ i18n = ["Babel (>=2.7)"]
 name = "json-log-formatter"
 version = "1.1"
 description = "JSON log formatter"
-optional = true
+optional = false
 python-versions = ">=3.6"
-groups = ["main"]
-markers = "platform_system == \"Linux\" and platform_machine == \"aarch64\" and extra == \"unstable\""
+groups = ["unstable"]
+markers = "platform_system == \"Linux\" and platform_machine == \"aarch64\""
 files = [
     {file = "json_log_formatter-1.1.tar.gz", hash = "sha256:fe8fd801c58c1234df86211720921f60149105ef8d1e2a72966bb61da9bed584"},
 ]
@@ -2945,7 +2945,7 @@ version = "6.1.0"
 description = "multidict implementation"
 optional = false
 python-versions = ">=3.8"
-groups = ["main"]
+groups = ["main", "unstable"]
 markers = "platform_system == \"Linux\" and platform_machine == \"aarch64\""
 files = [
     {file = "multidict-6.1.0-cp310-cp310-macosx_10_9_universal2.whl", hash = "sha256:3380252550e372e8511d49481bd836264c009adb826b23fefcc5dd3c69692f60"},
@@ -3170,10 +3170,10 @@ httplib2 = "*"
 name = "ODTReader"
 version = "0.0.3"
 description = "Lightweight python module to allow extracting text from OpenDocument (odt) files."
-optional = true
+optional = false
 python-versions = "*"
-groups = ["main"]
-markers = "platform_system == \"Linux\" and platform_machine == \"aarch64\" and extra == \"unstable\""
+groups = ["unstable"]
+markers = "platform_system == \"Linux\" and platform_machine == \"aarch64\""
 files = []
 develop = false
 
@@ -3705,7 +3705,7 @@ version = "0.2.0"
 description = "Accelerated property cache"
 optional = false
 python-versions = ">=3.8"
-groups = ["main"]
+groups = ["main", "unstable"]
 markers = "platform_system == \"Linux\" and platform_machine == \"aarch64\""
 files = [
     {file = "propcache-0.2.0-cp310-cp310-macosx_10_9_universal2.whl", hash = "sha256:c5869b8fd70b81835a6f187c5fdbe67917a04d7e52b6e7cc4e5fe39d55c39d58"},
@@ -4148,10 +4148,10 @@ files = [
 name = "pydnstrails"
 version = "1.0"
 description = ""
-optional = true
+optional = false
 python-versions = "*"
-groups = ["main"]
-markers = "platform_system == \"Linux\" and platform_machine == \"aarch64\" and extra == \"unstable\""
+groups = ["unstable"]
+markers = "platform_system == \"Linux\" and platform_machine == \"aarch64\""
 files = []
 develop = false
 
@@ -4345,10 +4345,10 @@ virustotal = ["validators (>=0.34.0,<0.35.0)"]
 name = "pyonyphe"
 version = "2.0"
 description = ""
-optional = true
+optional = false
 python-versions = "*"
-groups = ["main"]
-markers = "platform_system == \"Linux\" and platform_machine == \"aarch64\" and extra == \"unstable\""
+groups = ["unstable"]
+markers = "platform_system == \"Linux\" and platform_machine == \"aarch64\""
 files = []
 develop = false
 
@@ -4487,7 +4487,7 @@ version = "2.9.0.post0"
 description = "Extensions to the standard Python datetime module"
 optional = false
 python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,>=2.7"
-groups = ["main", "docs"]
+groups = ["main", "docs", "unstable"]
 markers = "platform_system == \"Linux\" and platform_machine == \"aarch64\""
 files = [
     {file = "python-dateutil-2.9.0.post0.tar.gz", hash = "sha256:37dd54208da7e1cd875388217d5e00ebd4179249f90fb72437e91a35459a0ad3"},
@@ -4618,7 +4618,7 @@ version = "2024.2"
 description = "World timezone definitions, modern and historical"
 optional = false
 python-versions = "*"
-groups = ["main"]
+groups = ["main", "unstable"]
 markers = "platform_system == \"Linux\" and platform_machine == \"aarch64\""
 files = [
     {file = "pytz-2024.2-py2.py3-none-any.whl", hash = "sha256:31c7c1817eb7fae7ca4b8c7ee50c72f93aa2dd863de768e1ef4245d426aa0725"},
@@ -4673,7 +4673,7 @@ version = "6.0.2"
 description = "YAML parser and emitter for Python"
 optional = false
 python-versions = ">=3.8"
-groups = ["main", "docs"]
+groups = ["main", "docs", "unstable"]
 markers = "platform_system == \"Linux\" and platform_machine == \"aarch64\""
 files = [
     {file = "PyYAML-6.0.2-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:0a9a2848a5b7feac301353437eb7d5957887edbf81d56e903999a75a3d743086"},
@@ -4986,7 +4986,7 @@ version = "2.32.3"
 description = "Python HTTP for Humans."
 optional = false
 python-versions = ">=3.8"
-groups = ["main", "docs", "test"]
+groups = ["main", "docs", "test", "unstable"]
 markers = "platform_system == \"Linux\" and platform_machine == \"aarch64\""
 files = [
     {file = "requests-2.32.3-py3-none-any.whl", hash = "sha256:70761cfe03c773ceb22aa2f671b4757976145175cdfca038c02654d061d6dcc6"},
@@ -5286,10 +5286,10 @@ jeepney = ">=0.6"
 name = "selenium"
 version = "2.53.6"
 description = "Python bindings for Selenium"
-optional = true
+optional = false
 python-versions = "*"
-groups = ["main"]
-markers = "platform_system == \"Linux\" and platform_machine == \"aarch64\" and extra == \"unstable\""
+groups = ["unstable"]
+markers = "platform_system == \"Linux\" and platform_machine == \"aarch64\""
 files = [
     {file = "selenium-2.53.6-py2.py3-none-any.whl", hash = "sha256:5071f43daa2e698d60d5633ab0a6630cc68a852b360be99144f1c4c1ace2746c"},
     {file = "selenium-2.53.6.tar.gz", hash = "sha256:f507181f13768d73b98dd9647a466ea5758ef5c7f07b62a285d2bd8de9b27016"},
@@ -5539,7 +5539,7 @@ version = "1.16.0"
 description = "Python 2 and 3 compatibility utilities"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*"
-groups = ["main", "docs"]
+groups = ["main", "docs", "unstable"]
 markers = "platform_system == \"Linux\" and platform_machine == \"aarch64\""
 files = [
     {file = "six-1.16.0-py2.py3-none-any.whl", hash = "sha256:8abb2f1d86890a2dfb989f9a77cfcfd3e47c2a354b01111771326f8aa26e0254"},
@@ -5632,7 +5632,7 @@ version = "2.6"
 description = "A modern CSS selector implementation for Beautiful Soup."
 optional = false
 python-versions = ">=3.8"
-groups = ["main"]
+groups = ["main", "unstable"]
 markers = "platform_system == \"Linux\" and platform_machine == \"aarch64\""
 files = [
     {file = "soupsieve-2.6-py3-none-any.whl", hash = "sha256:e72c4ff06e4fb6e4b5a9f0f55fe6e81514581fca1515028625d0f299c602ccc9"},
@@ -5931,10 +5931,10 @@ telegram = ["requests"]
 name = "trustar"
 version = "0.3.34"
 description = "Python SDK for the TruSTAR REST API"
-optional = true
+optional = false
 python-versions = "*"
-groups = ["main"]
-markers = "platform_system == \"Linux\" and platform_machine == \"aarch64\" and extra == \"unstable\""
+groups = ["unstable"]
+markers = "platform_system == \"Linux\" and platform_machine == \"aarch64\""
 files = []
 develop = false
 
@@ -5981,12 +5981,12 @@ version = "4.12.2"
 description = "Backported and Experimental Type Hints for Python 3.8+"
 optional = false
 python-versions = ">=3.8"
-groups = ["main"]
-markers = "platform_system == \"Linux\" and platform_machine == \"aarch64\""
+groups = ["main", "unstable"]
 files = [
     {file = "typing_extensions-4.12.2-py3-none-any.whl", hash = "sha256:04e5ca0351e0f3f85c6853954072df659d0d13fac324d0072316b67d7794700d"},
     {file = "typing_extensions-4.12.2.tar.gz", hash = "sha256:1a7ead55c7e559dd4dee8856e3a88b41225abfe1ce8df57b7c13915fe121ffb8"},
 ]
+markers = {main = "platform_system == \"Linux\" and platform_machine == \"aarch64\"", unstable = "python_version == \"3.9\" or python_version == \"3.10\" or platform_system == \"Linux\" and python_version <= \"3.10\" and platform_machine == \"aarch64\""}
 
 [[package]]
 name = "tzdata"
@@ -5994,12 +5994,12 @@ version = "2024.2"
 description = "Provider of IANA time zone data"
 optional = false
 python-versions = ">=2"
-groups = ["main"]
-markers = "platform_system == \"Linux\" and platform_machine == \"aarch64\""
+groups = ["main", "unstable"]
 files = [
     {file = "tzdata-2024.2-py2.py3-none-any.whl", hash = "sha256:a48093786cdcde33cad18c2555e8532f34422074448fbc874186f0abd79565cd"},
     {file = "tzdata-2024.2.tar.gz", hash = "sha256:7d85cc416e9382e69095b7bdf4afd9e3880418a2413feec7069d533d6b4e31cc"},
 ]
+markers = {main = "platform_system == \"Linux\" and platform_machine == \"aarch64\"", unstable = "platform_system == \"Windows\""}
 
 [[package]]
 name = "tzlocal"
@@ -6007,7 +6007,7 @@ version = "5.2"
 description = "tzinfo object for the local timezone"
 optional = false
 python-versions = ">=3.8"
-groups = ["main"]
+groups = ["main", "unstable"]
 markers = "platform_system == \"Linux\" and platform_machine == \"aarch64\""
 files = [
     {file = "tzlocal-5.2-py3-none-any.whl", hash = "sha256:49816ef2fe65ea8ac19d19aa7a1ae0551c834303d5014c6d5a62e4cbda8047b8"},
@@ -6024,10 +6024,10 @@ devenv = ["check-manifest", "pytest (>=4.3)", "pytest-cov", "pytest-mock (>=3.3)
 name = "unicodecsv"
 version = "0.14.1"
 description = "Python2's stdlib csv module is nice, but it doesn't support unicode. This module is a drop-in replacement which *does*."
-optional = true
+optional = false
 python-versions = "*"
-groups = ["main"]
-markers = "platform_system == \"Linux\" and platform_machine == \"aarch64\" and extra == \"unstable\""
+groups = ["unstable"]
+markers = "platform_system == \"Linux\" and platform_machine == \"aarch64\""
 files = [
     {file = "unicodecsv-0.14.1.tar.gz", hash = "sha256:018c08037d48649a0412063ff4eda26eaa81eff1546dbffa51fa5293276ff7fc"},
 ]
@@ -6036,10 +6036,10 @@ files = [
 name = "unidecode"
 version = "1.3.8"
 description = "ASCII transliterations of Unicode text"
-optional = true
+optional = false
 python-versions = ">=3.5"
-groups = ["main"]
-markers = "platform_system == \"Linux\" and platform_machine == \"aarch64\" and extra == \"unstable\""
+groups = ["unstable"]
+markers = "platform_system == \"Linux\" and platform_machine == \"aarch64\""
 files = [
     {file = "Unidecode-1.3.8-py3-none-any.whl", hash = "sha256:d130a61ce6696f8148a3bd8fe779c99adeb4b870584eeb9526584e9aa091fd39"},
     {file = "Unidecode-1.3.8.tar.gz", hash = "sha256:cfdb349d46ed3873ece4586b96aa75258726e2fa8ec21d6f00a591d98806c2f4"},
@@ -6083,7 +6083,7 @@ version = "1.26.20"
 description = "HTTP library with thread-safe connection pooling, file post, and more."
 optional = false
 python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,!=3.5.*,>=2.7"
-groups = ["main", "docs", "test"]
+groups = ["main", "docs", "test", "unstable"]
 markers = "platform_system == \"Linux\" and platform_machine == \"aarch64\""
 files = [
     {file = "urllib3-1.26.20-py2.py3-none-any.whl", hash = "sha256:0ed14ccfbf1c30a9072c7ca157e4319b70d65f623e91e7b32fadb2853431016e"},
@@ -6099,10 +6099,10 @@ socks = ["PySocks (>=1.5.6,!=1.5.7,<2.0)"]
 name = "vcrpy"
 version = "7.0.0"
 description = "Automatically mock your HTTP interactions to simplify and speed up testing"
-optional = true
+optional = false
 python-versions = ">=3.9"
-groups = ["main"]
-markers = "platform_system == \"Linux\" and platform_machine == \"aarch64\" and extra == \"unstable\""
+groups = ["unstable"]
+markers = "platform_system == \"Linux\" and platform_machine == \"aarch64\""
 files = [
     {file = "vcrpy-7.0.0-py2.py3-none-any.whl", hash = "sha256:55791e26c18daa363435054d8b35bd41a4ac441b6676167635d1b37a71dbe124"},
     {file = "vcrpy-7.0.0.tar.gz", hash = "sha256:176391ad0425edde1680c5b20738ea3dc7fb942520a48d2993448050986b3a50"},
@@ -6395,7 +6395,7 @@ version = "1.17.0"
 description = "Module for decorators, wrappers and monkey patching."
 optional = false
 python-versions = ">=3.8"
-groups = ["main"]
+groups = ["main", "unstable"]
 markers = "platform_system == \"Linux\" and platform_machine == \"aarch64\""
 files = [
     {file = "wrapt-1.17.0-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:2a0c23b8319848426f305f9cb0c98a6e32ee68a36264f45948ccf8e7d2b941f8"},
@@ -6609,7 +6609,7 @@ version = "1.18.0"
 description = "Yet another URL library"
 optional = false
 python-versions = ">=3.9"
-groups = ["main"]
+groups = ["main", "unstable"]
 markers = "platform_system == \"Linux\" and platform_machine == \"aarch64\""
 files = [
     {file = "yarl-1.18.0-cp310-cp310-macosx_10_9_universal2.whl", hash = "sha256:074fee89caab89a97e18ef5f29060ef61ba3cae6cd77673acc54bfdd3214b7b7"},
@@ -6707,12 +6707,12 @@ version = "3.21.0"
 description = "Backport of pathlib-compatible object wrapper for zip files"
 optional = false
 python-versions = ">=3.9"
-groups = ["main", "docs"]
+groups = ["main", "docs", "unstable"]
 files = [
     {file = "zipp-3.21.0-py3-none-any.whl", hash = "sha256:ac1bbe05fd2991f160ebce24ffbac5f6d11d83dc90891255885223d42b3cd931"},
     {file = "zipp-3.21.0.tar.gz", hash = "sha256:2c9958f6430a2040341a52eb608ed6dd93ef4392e02ffe219417c1b28b5dd1f4"},
 ]
-markers = {main = "python_version == \"3.9\" or python_version == \"3.11\" or python_version == \"3.10\" or platform_system == \"Linux\" and python_version < \"3.12\" and platform_machine == \"aarch64\"", docs = "python_version == \"3.9\" or platform_system == \"Linux\" and python_version < \"3.10\" and platform_machine == \"aarch64\""}
+markers = {main = "python_version == \"3.9\" or python_version == \"3.11\" or python_version == \"3.10\" or platform_system == \"Linux\" and python_version < \"3.12\" and platform_machine == \"aarch64\"", docs = "python_version == \"3.9\" or platform_system == \"Linux\" and python_version < \"3.10\" and platform_machine == \"aarch64\"", unstable = "python_version == \"3.9\" or platform_system == \"Linux\" and python_version < \"3.10\" and platform_machine == \"aarch64\""}
 
 [package.extras]
 check = ["pytest-checkdocs (>=2.4)", "pytest-ruff (>=0.2.1) ; sys_platform != \"cygwin\""]
@@ -6722,10 +6722,7 @@ enabler = ["pytest-enabler (>=2.2)"]
 test = ["big-O", "importlib-resources ; python_version < \"3.9\"", "jaraco.functools", "jaraco.itertools", "jaraco.test", "more-itertools", "pytest (>=6,!=8.1.*)", "pytest-ignore-flaky"]
 type = ["pytest-mypy"]
 
-[extras]
-unstable = ["google-search-api", "odtreader", "pydnstrails", "pyonyphe", "trustar"]
-
 [metadata]
 lock-version = "2.1"
-python-versions = ">=3.9.*,<3.13"
-content-hash = "cba2fe0608747012270b5dad906f503125d67e0d4af99ad89ed052d660bc10a4"
+python-versions = ">=3.9,<3.13"
+content-hash = "91389bc41c858fec57a5181cf5062df5b2f0ce30c6d276f983ea12fb749c3ac3"
