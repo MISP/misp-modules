@@ -3788,6 +3788,10 @@ Import content from a TAXII 2.1 server
 - **config**:
 >stix_object_limit
 
+- **requirements**:
+> - misp-lib-stix2
+> - misp-stix
+
 -----
 
 #### [ThreadAnalyzer Sandbox Import](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/threatanalyzer_import.py)
