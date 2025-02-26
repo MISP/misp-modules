@@ -4197,19 +4197,6 @@ requests = ">=2.31.0,<3.0.0"
 docs = ["Sphinx (<7.2) ; python_version < \"3.9\"", "Sphinx (>=7.2,<8.0) ; python_version >= \"3.9\""]
 
 [[package]]
-name = "pyfaup"
-version = "1.2"
-description = "Python bindings for the faup library"
-optional = false
-python-versions = "*"
-groups = ["main"]
-markers = "platform_system == \"Linux\" and platform_machine == \"aarch64\""
-files = [
-    {file = "pyfaup-1.2-py2.py3-none-any.whl", hash = "sha256:75f96f7da86ffb5402d3fcc2dbf98a511e792cf9100c159e34cdba8996ddc7f9"},
-    {file = "pyfaup-1.2.tar.gz", hash = "sha256:5648bc3ebd80239aec927aedfc218c3a6ff36de636cc53822bfeb70b0869b1e7"},
-]
-
-[[package]]
 name = "pyflakes"
 version = "3.2.0"
 description = "passive checker of Python programs"
@@ -4324,7 +4311,6 @@ lief = {version = ">=0.16.0,<0.17.0", optional = true, markers = "extra == \"fil
 oletools = {version = ">=0.60.1,<0.61.0", optional = true, markers = "extra == \"email\""}
 publicsuffixlist = ">=1.0.2.20241218,<2.0.0.0"
 pydeep2 = {version = ">=0.5.1,<0.6.0", optional = true, markers = "extra == \"fileobjects\""}
-pyfaup = {version = ">=1.2,<2.0", optional = true, markers = "extra == \"url\""}
 python-dateutil = ">=2.9.0.post0,<3.0.0"
 python-magic = {version = ">=0.4.27,<0.5.0", optional = true, markers = "extra == \"fileobjects\""}
 reportlab = {version = ">=4.2.5,<5.0.0", optional = true, markers = "extra == \"pdfexport\""}
@@ -6725,4 +6711,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.9,<3.13"
-content-hash = "91389bc41c858fec57a5181cf5062df5b2f0ce30c6d276f983ea12fb749c3ac3"
+content-hash = "2b3779a53b236f007b2c0e60b9f026e3ef09eef2bb543cea7d0f98b7bdc85891"

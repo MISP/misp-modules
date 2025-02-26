@@ -1,7 +1,7 @@
 import json
 from pymisp import MISPEvent, MISPObject
 from . import check_input_attribute, standard_error_message
-from pyfaup.faup import Faup
+from pymisp.tools._psl_faup import PSLFaup as Faup
 
 misperrors = {'error': 'Error'}
 mispattributes = {'input': ['url'], 'format': 'misp_standard'}

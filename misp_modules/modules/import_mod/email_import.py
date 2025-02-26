@@ -4,11 +4,7 @@ import base64
 import zipfile
 import re
 from html.parser import HTMLParser
-from pymisp.tools import EMailObject, make_binary_objects
-try:
-    from pymisp.tools import URLObject
-except ImportError:
-    raise ImportError('Unable to import URLObject, pyfaup missing')
+from pymisp.tools import EMailObject, make_binary_objects, URLObject
 from io import BytesIO
 from pathlib import Path
 

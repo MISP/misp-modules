@@ -49,47 +49,6 @@ import warnings
 warnings.filterwarnings("ignore", category=SyntaxWarning)
 
 
-LIBFAUP_PATHS = [
-    "/usr/local/lib/",
-    "/usr/lib/",
-    "/opt/local/lib/",
-]
-
-ARCH_TO_EXTENSION = {
-    "linux": "so",
-    "darwin": "dylib",
-}
-
-
-def _get_libfaup_path(lib_path: str) -> str:
-    extension = ARCH_TO_EXTENSION.get(platform.system().lower(), "lib")
-    return f"{lib_path.rstrip('/')}/libfaupl.{extension}"
-    
-
-def _replace_libfaup_path(module_path: str, libfaup_path: str) -> None:
-    with open(module_path, "r") as f:
-        file_data = f.read()
-    file_data = re.sub(r"cdll.LoadLibrary\(.*\)", f"cdll.LoadLibrary(\"{libfaup_path}\")", file_data)
-    with open(module_path, "w") as f:
-        f.write(file_data)
-
-
-def _try_pyfaup_import(lib_path: typing.Optional[str]) -> None:
-    package = pkgutil.get_loader("pyfaup")
-    if not package:
-        return
-    if lib_path:
-        _replace_libfaup_path(package.path, _get_libfaup_path(lib_path))
-    importlib.import_module("pyfaup")
-
-        
-for lib_path in [None, *LIBFAUP_PATHS]:
-    try:
-        _try_pyfaup_import(lib_path)
-        break
-    except OSError:
-        continue
-
 try:
     from .modules import *  # noqa
     HAS_PACKAGE_MODULES = True
