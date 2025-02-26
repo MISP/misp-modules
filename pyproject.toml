@@ -1,6 +1,6 @@
 [project]
 name = "misp-modules"
-version = "2.4.200"
+version = "2.4.201"
 description = "MISP modules are autonomous modules that can be used for expansion and other services in MISP"
 authors = [
     {name = "Alexandre Dulaunoy", email = "alexandre.dulaunoy@circl.lu"}
@@ -59,11 +59,10 @@ dependencies = [
     "pycountry",
     "pyeti-python3",
     "pyeupi",
-    "pyfaup",
     "pygeoip",
     "pyintel471",
     "pyipasnhistory",
-    "pymisp[fileobjects, openioc, pdfexport, email, url]",
+    "pymisp[fileobjects, openioc, pdfexport, email]",
     "pypdns",
     "pypssl",
     "pysafebrowsing",
