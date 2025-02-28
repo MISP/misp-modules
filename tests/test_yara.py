@@ -1,8 +1,8 @@
-
 import json
 import os
-import unittest
 import sys
+import unittest
+
 try:
     import yara
 except (OSError, ImportError):
@@ -11,8 +11,9 @@ except (OSError, ImportError):
 
 class TestYara(unittest.TestCase):
     """Unittest module for yara related modules"""
+
     def setUp(self):
-        self.headers = {'Content-Type': 'application/json'}
+        self.headers = {"Content-Type": "application/json"}
         self.url = "http://127.0.0.1:6666/"
         self.module = "threat_connect_export"
         input_event_path = "%s/test_files/misp_event.json" % os.path.dirname(os.path.realpath(__file__))
@@ -20,7 +21,7 @@ class TestYara(unittest.TestCase):
             self.event = json.load(ifile)
 
     def test_install(self):
-        files = ['tests/yara_hash_module_test.yara', 'tests/yara_pe_module_test.yara']
+        files = ["tests/yara_hash_module_test.yara", "tests/yara_pe_module_test.yara"]
 
         for file_ in files:
             try:

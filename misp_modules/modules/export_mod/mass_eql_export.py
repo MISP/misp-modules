@@ -1,6 +1,7 @@
 """
 Export module for converting MISP events into Endgame EQL queries
 """
+
 import base64
 import io
 import json
@@ -9,37 +10,35 @@ import logging
 misperrors = {"error": "Error"}
 
 moduleinfo = {
-    'version': '0.1',
-    'author': '92 COS DOM',
-    'description': 'Export MISP event in Event Query Language',
-    'module-type': ['export'],
-    'name': 'EQL Query Export',
-    'logo': 'eql.png',
-    'requirements': [],
-    'features': 'This module produces EQL queries for all relevant attributes in a MISP event.',
-    'references': ['https://eql.readthedocs.io/en/latest/'],
-    'input': 'MISP Event attributes',
-    'output': 'Text file containing one or more EQL queries',
+    "version": "0.1",
+    "author": "92 COS DOM",
+    "description": "Export MISP event in Event Query Language",
+    "module-type": ["export"],
+    "name": "EQL Query Export",
+    "logo": "eql.png",
+    "requirements": [],
+    "features": "This module produces EQL queries for all relevant attributes in a MISP event.",
+    "references": ["https://eql.readthedocs.io/en/latest/"],
+    "input": "MISP Event attributes",
+    "output": "Text file containing one or more EQL queries",
 }
 
 # Map of MISP fields => Endgame fields
 fieldmap = {
     "ip-src": "source_address",
     "ip-dst": "destination_address",
-    "filename": "file_name"
+    "filename": "file_name",
 }
 
 # Describe what events have what fields
 event_types = {
     "source_address": "network",
     "destination_address": "network",
-    "file_name": "file"
+    "file_name": "file",
 }
 
 # combine all the MISP fields from fieldmap into one big list
-mispattributes = {
-    "input": list(fieldmap.keys())
-}
+mispattributes = {"input": list(fieldmap.keys())}
 
 
 def handler(q=False):
@@ -74,10 +73,13 @@ def handler(q=False):
         for value in queryDict[query].keys():
             if i != 0:
                 response.write(" or\n")
-            response.write("\t{} == \"{}\"".format(queryDict[query][value], value))
+            response.write('\t{} == "{}"'.format(queryDict[query][value], value))
             i += 1
 
-    return {"response": [], "data": str(base64.b64encode(bytes(response.getvalue(), 'utf-8')), 'utf-8')}
+    return {
+        "response": [],
+        "data": str(base64.b64encode(bytes(response.getvalue(), "utf-8")), "utf-8"),
+    }
 
 
 def introspection():
@@ -91,7 +93,7 @@ def introspection():
         "responseType": "application/txt",
         "outputFileExtension": "txt",
         "userConfig": {},
-        "inputSource": []
+        "inputSource": [],
     }
     return modulesetup
 

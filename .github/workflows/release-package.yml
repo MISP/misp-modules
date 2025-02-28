@@ -107,7 +107,7 @@ jobs:
         run: python -m pip install poetry
 
       - name: Install dependencies
-        run: poetry install --with unstable
+        run: poetry install -E all
 
       - name: Build package
         run: poetry build

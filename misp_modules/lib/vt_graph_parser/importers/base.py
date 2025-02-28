@@ -3,16 +3,26 @@
 This module provides a common method to import graph from misp attributes.
 """
 
-
 import vt_graph_api
 from vt_graph_parser.helpers.rules import MispEventInitialRule
 
 
 def import_misp_graph(
-        misp_attributes, graph_id, vt_api_key, fetch_information, name,
-        private, fetch_vt_enterprise, user_editors, user_viewers, group_editors,
-        group_viewers, use_vt_to_connect_the_graph, max_api_quotas,
-        max_search_depth):
+    misp_attributes,
+    graph_id,
+    vt_api_key,
+    fetch_information,
+    name,
+    private,
+    fetch_vt_enterprise,
+    user_editors,
+    user_viewers,
+    group_editors,
+    group_viewers,
+    use_vt_to_connect_the_graph,
+    max_api_quotas,
+    max_search_depth,
+):
     """Import VirusTotal Graph from MISP.
 
     Args:
@@ -60,38 +70,42 @@ def import_misp_graph(
     # a new graph will be created.
     if not graph_id:
         graph = vt_graph_api.VTGraph(
-            api_key=vt_api_key, name=name, private=private,
-            user_editors=user_editors, user_viewers=user_viewers,
-            group_editors=group_editors, group_viewers=group_viewers)
+            api_key=vt_api_key,
+            name=name,
+            private=private,
+            user_editors=user_editors,
+            user_viewers=user_viewers,
+            group_editors=group_editors,
+            group_viewers=group_viewers,
+        )
     else:
         graph = vt_graph_api.VTGraph.load_graph(graph_id, vt_api_key)
 
-    attributes_to_add = [attr for attr in misp_attributes
-                         if not graph.has_node(attr.value)]
+    attributes_to_add = [attr for attr in misp_attributes if not graph.has_node(attr.value)]
 
-    total_expandable_attrs = max(sum(
-        1 for attr in attributes_to_add
-        if attr.type in vt_graph_api.Node.SUPPORTED_NODE_TYPES),
-        1)
+    total_expandable_attrs = max(
+        sum(1 for attr in attributes_to_add if attr.type in vt_graph_api.Node.SUPPORTED_NODE_TYPES),
+        1,
+    )
 
-    max_quotas_per_search = max(
-        int(max_api_quotas / total_expandable_attrs), 1)
+    max_quotas_per_search = max(int(max_api_quotas / total_expandable_attrs), 1)
 
     previous_node_id = ""
     for attr in attributes_to_add:
         # Add the current attr as node to the graph.
-        added_node = graph.add_node(
-            attr.value, attr.type, fetch_information, fetch_vt_enterprise,
-            attr.label)
+        added_node = graph.add_node(attr.value, attr.type, fetch_information, fetch_vt_enterprise, attr.label)
         # If use_vt_to_connect_the_grap is True the nodes will be connected using
         # VT API.
         if use_vt_to_connect_the_graph:
-            if (attr.type not in vt_graph_api.Node.SUPPORTED_NODE_TYPES and previous_node_id):
+            if attr.type not in vt_graph_api.Node.SUPPORTED_NODE_TYPES and previous_node_id:
                 graph.add_link(previous_node_id, attr.value, "manual")
             else:
                 graph.connect_with_graph(
-                    attr.value, max_quotas_per_search, max_search_depth,
-                    fetch_info_collected_nodes=fetch_information)
+                    attr.value,
+                    max_quotas_per_search,
+                    max_search_depth,
+                    fetch_info_collected_nodes=fetch_information,
+                )
         else:
             rule = rule.resolve_relation(graph, added_node, attr.category)
 

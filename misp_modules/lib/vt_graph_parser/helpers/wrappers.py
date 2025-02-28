@@ -27,7 +27,7 @@ class MispAttribute(object):
         "sha1": "file",
         "sha256": "file",
         "target-user": "victim",
-        "target-email": "email"
+        "target-email": "email",
     }
 
     def __init__(self, misp_type, category, value, label=""):
@@ -52,7 +52,9 @@ class MispAttribute(object):
         self.misp_type = misp_type
 
     def __eq__(self, other):
-        return (isinstance(other, self.__class__) and self.value == other.value and self.type == other.type)
+        return isinstance(other, self.__class__) and self.value == other.value and self.type == other.type
 
     def __repr__(self):
-        return 'MispAttribute("{type}", "{category}", "{value}")'.format(type=self.type, category=self.category, value=self.value)
+        return 'MispAttribute("{type}", "{category}", "{value}")'.format(
+            type=self.type, category=self.category, value=self.value
+        )

@@ -1,32 +1,40 @@
 import json
 import logging
-import requests
-from requests.exceptions import (
-    HTTPError,
-    ProxyError,
-    InvalidURL,
-    ConnectTimeout,
-    ConnectionError,
-)
-from typing import Optional, List, Tuple, Dict
-from . import check_input_attribute, checking_error, standard_error_message
-import platform
 import os
+import platform
+from typing import Dict, List, Optional, Tuple
 from urllib.parse import quote, urlparse
-from pymisp import MISPAttribute, MISPEvent, MISPTag, MISPObject
+
+import requests
+from pymisp import MISPAttribute, MISPEvent, MISPObject, MISPTag
+from requests.exceptions import ConnectionError, ConnectTimeout, HTTPError, InvalidURL, ProxyError
+
+from . import check_input_attribute, checking_error, standard_error_message
 
 moduleinfo = {
-    'version': '2.0.0',
-    'author': 'Recorded Future',
-    'description': 'Module to enrich attributes with threat intelligence from Recorded Future.',
-    'module-type': ['expansion', 'hover'],
-    'name': 'Recorded Future Enrich',
-    'logo': 'recordedfuture.png',
-    'requirements': ['A Recorded Future API token.'],
-    'features': "Enrich an attribute to add a custom enrichment object to the event. The object contains a copy of the enriched attribute with added tags presenting risk score and triggered risk rules from Recorded Future. Malware and Threat Actors related to the enriched indicator in Recorded Future is matched against MISP's galaxy clusters and applied as galaxy tags. The custom enrichment object also includes a list of related indicators from Recorded Future (IP's, domains, hashes, URL's and vulnerabilities) added as additional attributes.",
-    'references': ['https://www.recordedfuture.com/'],
-    'input': 'A MISP attribute of one of the following types: ip, ip-src, ip-dst, domain, hostname, md5, sha1, sha256, uri, url, vulnerability, weakness.',
-    'output': 'A MISP object containing a copy of the enriched attribute with added tags from Recorded Future and a list of new attributes related to the enriched attribute.',
+    "version": "2.0.0",
+    "author": "Recorded Future",
+    "description": "Module to enrich attributes with threat intelligence from Recorded Future.",
+    "module-type": ["expansion", "hover"],
+    "name": "Recorded Future Enrich",
+    "logo": "recordedfuture.png",
+    "requirements": ["A Recorded Future API token."],
+    "features": (
+        "Enrich an attribute to add a custom enrichment object to the event. The object contains a copy of the enriched"
+        " attribute with added tags presenting risk score and triggered risk rules from Recorded Future. Malware and"
+        " Threat Actors related to the enriched indicator in Recorded Future is matched against MISP's galaxy clusters"
+        " and applied as galaxy tags. The custom enrichment object also includes a list of related indicators from"
+        " Recorded Future (IP's, domains, hashes, URL's and vulnerabilities) added as additional attributes."
+    ),
+    "references": ["https://www.recordedfuture.com/"],
+    "input": (
+        "A MISP attribute of one of the following types: ip, ip-src, ip-dst, domain, hostname, md5, sha1, sha256, uri,"
+        " url, vulnerability, weakness."
+    ),
+    "output": (
+        "A MISP object containing a copy of the enriched attribute with added tags from Recorded Future and a list of"
+        " new attributes related to the enriched attribute."
+    ),
 }
 
 moduleconfig = ["token", "proxy_host", "proxy_port", "proxy_username", "proxy_password"]
@@ -87,9 +95,7 @@ class RequestHandler:
         """General get method with proxy error handling."""
         try:
             timeout = 7 if self.proxies else None
-            response = self.session.get(
-                url, headers=headers, proxies=self.proxies, timeout=timeout
-            )
+            response = self.session.get(url, headers=headers, proxies=self.proxies, timeout=timeout)
             response.raise_for_status()
             return response
         except (ConnectTimeout, ProxyError, InvalidURL) as error:
@@ -172,13 +178,9 @@ class GalaxyFinder:
                 try:
                     response = GLOBAL_REQUEST_HANDLER.get(source)
                     name = source.split("/")[-1].split(".")[0]
-                    self.galaxy_clusters.setdefault(related_type, {}).update(
-                        {name: response.json()}
-                    )
+                    self.galaxy_clusters.setdefault(related_type, {}).update({name: response.json()})
                 except ConnectionError as error:
-                    LOGGER.warning(
-                        f"pull_galaxy_cluster failed for source: {source}, with error: {error}."
-                    )
+                    LOGGER.warning(f"pull_galaxy_cluster failed for source: {source}, with error: {error}.")
 
     def find_galaxy_match(self, indicator: str, related_type: str) -> str:
         """Searches the clusters of the related_type for a match with the indicator.
@@ -187,9 +189,7 @@ class GalaxyFinder:
         self.pull_galaxy_cluster(related_type)
         for cluster_name, cluster in self.galaxy_clusters.get(related_type, {}).items():
             for value in cluster["values"]:
-                if indicator in value.get("meta", {}).get(
-                    "synonyms", ""
-                ) or indicator in value.get("value", ""):
+                if indicator in value.get("meta", {}).get("synonyms", "") or indicator in value.get("value", ""):
                     value = value["value"]
                     return f'misp-galaxy:{cluster_name}="{value}"'
         return ""
@@ -252,22 +252,15 @@ class RFEnricher:
         self.enrichment_object.template_uuid = "cbe0ffda-75e5-4c49-833f-093f057652ba"
         self.enrichment_object.template_id = "1"
         self.enrichment_object.description = "Recorded Future Enrichment"
-        setattr(self.enrichment_object, 'meta-category', 'network')
-        description = (
-            "An object containing the enriched attribute and "
-            "related entities from Recorded Future."
-        )
-        self.enrichment_object.from_dict(
-            **{"meta-category": "misc", "description": description, "distribution": 0}
-        )
+        setattr(self.enrichment_object, "meta-category", "network")
+        description = "An object containing the enriched attribute and related entities from Recorded Future."
+        self.enrichment_object.from_dict(**{"meta-category": "misc", "description": description, "distribution": 0})
 
         # Create a copy of enriched attribute to add tags to
         temp_attr = MISPAttribute()
         temp_attr.from_dict(**attribute_props)
         self.enriched_attribute = MISPAttribute()
-        self.enriched_attribute.from_dict(
-            **{"value": temp_attr.value, "type": temp_attr.type, "distribution": 0}
-        )
+        self.enriched_attribute.from_dict(**{"value": temp_attr.value, "type": temp_attr.type, "distribution": 0})
 
         self.related_attributes: List[Tuple[str, MISPAttribute]] = []
         self.color_picker = RFColors()
@@ -322,9 +315,7 @@ class RFEnricher:
         # since RF do not support enriching ip addresses with port
         if self.enriched_attribute.type in ["ip-src|port", "ip-dst|port"]:
             enriched_attribute_value = enriched_attribute_value.split("|")[0]
-        json_response = GLOBAL_REQUEST_HANDLER.rf_lookup(
-            category, enriched_attribute_value
-        )
+        json_response = GLOBAL_REQUEST_HANDLER.rf_lookup(category, enriched_attribute_value)
         response = json.loads(json_response.content)
 
         try:
@@ -356,9 +347,7 @@ class RFEnricher:
                             entity_type = sec_list["type"]["name"]
                             for entity in sec_list["entities"]:
                                 if entity_type in self.galaxy_tag_types:
-                                    galaxy = self.galaxy_finder.find_galaxy_match(
-                                        entity["name"], entity_type
-                                    )
+                                    galaxy = self.galaxy_finder.find_galaxy_match(entity["name"], entity_type)
                                     if galaxy and galaxy not in galaxy_tags:
                                         galaxy_tags.append(galaxy)
                                 else:
@@ -384,9 +373,7 @@ class RFEnricher:
                             # because there can be a huge list of related entities
                             if int(related["count"]) > 4:
                                 indicator = related["entity"]["name"]
-                                galaxy = self.galaxy_finder.find_galaxy_match(
-                                    indicator, related_type
-                                )
+                                galaxy = self.galaxy_finder.find_galaxy_match(indicator, related_type)
                                 # Handle deduplication of galaxy tags
                                 if galaxy and galaxy not in galaxy_tags:
                                     galaxy_tags.append(galaxy)
@@ -446,9 +433,7 @@ class RFEnricher:
 
     def get_results(self) -> dict:
         """Build and return the enrichment results."""
-        self.enrichment_object.add_attribute(
-            "Enriched attribute", **self.enriched_attribute
-        )
+        self.enrichment_object.add_attribute("Enriched attribute", **self.enriched_attribute)
         for related_type, attribute in self.related_attributes:
             self.enrichment_object.add_attribute(related_type, **attribute)
         self.event.add_object(**self.enrichment_object)
@@ -469,8 +454,7 @@ def get_proxy_settings(config: dict) -> Optional[Dict[str, str]]:
     if host:
         if not port:
             misperrors["error"] = (
-                "The recordedfuture_proxy_host config is set, "
-                "please also set the recordedfuture_proxy_port."
+                "The recordedfuture_proxy_host config is set, please also set the recordedfuture_proxy_port."
             )
             raise KeyError
         parsed = urlparse(host)
@@ -509,9 +493,7 @@ def handler(q=False):
     else:
         misperrors["error"] = "Missing Recorded Future token."
         return misperrors
-    if not request.get("attribute") or not check_input_attribute(
-        request["attribute"], requirements=("type", "value")
-    ):
+    if not request.get("attribute") or not check_input_attribute(request["attribute"], requirements=("type", "value")):
         return {"error": f"{standard_error_message}, {checking_error}."}
     if request["attribute"]["type"] not in mispattributes["input"]:
         return {"error": "Unsupported attribute type."}

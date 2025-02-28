@@ -3,9 +3,7 @@
 This module provides parsers for MISP inputs.
 """
 
-
 from vt_graph_parser.helpers.wrappers import MispAttribute
-
 
 MISP_INPUT_ATTR = [
     "hostname",
@@ -19,7 +17,7 @@ MISP_INPUT_ATTR = [
     "filename|md5",
     "filename",
     "target-user",
-    "target-email"
+    "target-email",
 ]
 
 VIRUSTOTAL_GRAPH_LINK_PREFIX = "https://www.virustotal.com/graph/"
@@ -40,22 +38,20 @@ def _parse_data(attributes, objects):
     vt_graph_link = ""
 
     # Get simple MISP event attributes.
-    attributes_data += (
-        [attr for attr in attributes
-         if attr.get("type") in MISP_INPUT_ATTR])
+    attributes_data += [attr for attr in attributes if attr.get("type") in MISP_INPUT_ATTR]
 
     # Get attributes from MISP objects too.
     if objects:
         for object_ in objects:
             object_attrs = object_.get("Attribute", [])
-            attributes_data += (
-                [attr for attr in object_attrs
-                 if attr.get("type") in MISP_INPUT_ATTR])
+            attributes_data += [attr for attr in object_attrs if attr.get("type") in MISP_INPUT_ATTR]
 
     # Check if there is any VirusTotal Graph computed in MISP event.
     vt_graph_links = (
-        attr for attr in attributes if attr.get("type") == "link"
-        and attr.get("value", "").startswith(VIRUSTOTAL_GRAPH_LINK_PREFIX))
+        attr
+        for attr in attributes
+        if attr.get("type") == "link" and attr.get("value", "").startswith(VIRUSTOTAL_GRAPH_LINK_PREFIX)
+    )
 
     # MISP could have more than one VirusTotal Graph, so we will take
     # the last one.
@@ -66,11 +62,8 @@ def _parse_data(attributes, objects):
             current_id = int(link.get("id"))
             vt_graph_link = link.get("value")
 
-    attributes = [
-        MispAttribute(data["type"], data["category"], data["value"])
-        for data in attributes_data]
-    return (attributes,
-            vt_graph_link.replace(VIRUSTOTAL_GRAPH_LINK_PREFIX, ""))
+    attributes = [MispAttribute(data["type"], data["category"], data["value"]) for data in attributes_data]
+    return (attributes, vt_graph_link.replace(VIRUSTOTAL_GRAPH_LINK_PREFIX, ""))
 
 
 def parse_pymisp_response(payload):
