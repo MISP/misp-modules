@@ -1,6 +1,6 @@
 [project]
 name = "misp-modules"
-version = "2.4.201"
+version = "3.0.0"
 description = "MISP modules are autonomous modules that can be used for expansion and other services in MISP"
 authors = [
     {name = "Alexandre Dulaunoy", email = "alexandre.dulaunoy@circl.lu"}
@@ -17,12 +17,23 @@ classifiers = [
 ]
 requires-python = ">=3.9,<3.13"
 dependencies = [
+    ## core dependencies
+    "orjson",
     "psutil",
-    "pyparsing",
     "redis",
     "tornado",
-    "urllib3>=1.26,<2",
-    ## module dependencies (if a dependency fails loading with '*', pin it here)
+    ## minimum dependencies
+    "beautifulsoup4",
+    "jinja2",
+    "markdownify",
+    "pymisp",
+    "publicsuffixlist",
+    "setuptools",
+]
+
+[project.optional-dependencies]
+all = [
+    ## pinned module dependencies
     "censys==2.0.9",
     "socialscan<2.0.0",
     "yara-python==4.5.0",
@@ -42,7 +53,6 @@ dependencies = [
     "greynoise",
     "jbxapi",
     "maclookup",
-    "markdownify",
     "matplotlib",
     "mattermostdriver",
     "misp-lib-stix2>=3.0.1.2",
@@ -79,6 +89,7 @@ dependencies = [
     "sparqlwrapper",
     "tau-clients",
     "taxii2-client",
+    "trustar",
     "urlarchiver",
     "vt-graph-api",
     "vt-py",
@@ -95,7 +106,7 @@ Documentation = "https://misp.github.io/misp-modules"
 Repository = "https://github.com/MISP/misp-modules"
 
 [project.scripts]
-misp-modules = "misp_modules:main"
+misp-modules = "misp_modules.__main__:main"
 
 [tool.poetry]
 packages = [{include = "misp_modules"}]
@@ -108,9 +119,14 @@ build-backend = "poetry.core.masonry.api"
 optional = true
 
 [tool.poetry.group.test.dependencies]
+black = "*"
 codecov = "*"
 flake8 = "*"
+flake8-pyproject = "*"
+ipdb = "*"
+isort = "*"
 nose = "*"
+pre-commit = "*"
 pytest = "*"
 
 [tool.poetry.group.docs]
@@ -121,16 +137,32 @@ mkdocs = "*"
 mkdocs-material = "*"
 markdown_include = "*"
 
-[tool.poetry.group.unstable]
-optional = true
-
-[tool.poetry.group.unstable.dependencies]
-odtreader = { git = "https://github.com/cartertemm/ODTReader.git" }
-google-search-api = { git = "https://github.com/abenassi/Google-Search-API" }
-trustar = { git = "https://github.com/SteveClement/trustar-python.git" }
-pydnstrails = { git = "https://github.com/sebdraven/pydnstrails.git" }
-pyonyphe = { git = "https://github.com/sebdraven/pyonyphe.git" }
-
 [tool.poetry.requires-plugins]
 poetry-plugin-bundle = ">=1.6"
 poetry-plugin-export = ">=1.9"
+
+[tool.black]
+line-length = 120
+target-version = ["py39"]
+preview = true
+enable-unstable-feature = ["string_processing"]
+
+[tool.isort]
+line_length = 120
+profile = "black"
+
+[tool.flake8]
+max-line-length = 120
+exclude = [".git", "__pycache__"]
+extend-ignore = [
+    "E402", "E501", "E712", "E203",
+]
+
+[tool.pytest.ini_options]
+filterwarnings = [
+    "ignore:.*deprecated to return a value that is not None.*:DeprecationWarning:",
+]
+log_cli = true
+log_cli_level = "INFO"
+log_cli_format = "%(asctime)s [%(levelname)8s] %(message)s (%(filename)s:%(lineno)s)"
+log_cli_date_format = "%Y-%m-%d %H:%M:%S"

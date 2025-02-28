@@ -1,45 +1,43 @@
-import json
 import base64
+import json
 
-misperrors = {'error': 'Error'}
+misperrors = {"error": "Error"}
 
 
-userConfig = {
-
-}
+userConfig = {}
 
 moduleconfig = []
 
 # fixed for now, options in the future:
 # event, attribute, event-collection, attribute-collection
-inputSource = ['event']
+inputSource = ["event"]
 
-outputFileExtension = 'txt'
-responseType = 'application/txt'
+outputFileExtension = "txt"
+responseType = "application/txt"
 
 
 moduleinfo = {
-    'version': '0.1',
-    'author': 'Andras Iklody',
-    'description': 'Skeleton export module.',
-    'name': 'Test Export',
-    'module-type': ['export'],
-    'logo': '',
-    'requirements': [],
-    'features': '',
-    'references': [],
-    'input': '',
-    'output': '',
+    "version": "0.1",
+    "author": "Andras Iklody",
+    "description": "Skeleton export module.",
+    "name": "Test Export",
+    "module-type": ["export"],
+    "logo": "",
+    "requirements": [],
+    "features": "",
+    "references": [],
+    "input": "",
+    "output": "",
 }
 
 
 def handler(q=False):
     if q is False:
         return False
-    r = {'results': []}
+    r = {"results": []}
     result = json.loads(q)  # noqa
-    output = ''  # Insert your magic here!
-    r = {"data": base64.b64encode(output.encode('utf-8')).decode('utf-8')}
+    output = ""  # Insert your magic here!
+    r = {"data": base64.b64encode(output.encode("utf-8")).decode("utf-8")}
     return r
 
 
@@ -47,27 +45,27 @@ def introspection():
     modulesetup = {}
     try:
         responseType
-        modulesetup['responseType'] = responseType
+        modulesetup["responseType"] = responseType
     except NameError:
         pass
     try:
         userConfig
-        modulesetup['userConfig'] = userConfig
+        modulesetup["userConfig"] = userConfig
     except NameError:
         pass
     try:
         outputFileExtension
-        modulesetup['outputFileExtension'] = outputFileExtension
+        modulesetup["outputFileExtension"] = outputFileExtension
     except NameError:
         pass
     try:
         inputSource
-        modulesetup['inputSource'] = inputSource
+        modulesetup["inputSource"] = inputSource
     except NameError:
         pass
     return modulesetup
 
 
 def version():
-    moduleinfo['config'] = moduleconfig
+    moduleinfo["config"] = moduleconfig
     return moduleinfo

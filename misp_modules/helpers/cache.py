@@ -19,33 +19,48 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import hashlib
 import os
+import typing
 
 import redis
-import hashlib
 
-port = int(os.getenv("REDIS_PORT")) if os.getenv("REDIS_PORT") else 6379
-hostname = os.getenv("REDIS_BACKEND") or '127.0.0.1'
-db = int(os.getenv("REDIS_DATABASE")) if os.getenv("REDIS_DATABASE") else 0
-password = os.getenv("REDIS_PW") or None
+DEFAULT_HOST = "127.0.0.1"
+DEFAULT_PORT = 6379
+DEFAULT_DATABASE = 0
+DEFAULT_TIMEOUT = 5
 
 
-def selftest(enable=True):
+def create_connection(timeout: int = DEFAULT_TIMEOUT, **kwargs) -> redis.Redis:
+    return redis.Redis(
+        host=os.getenv("REDIS_BACKEND", DEFAULT_HOST),
+        password=os.getenv("REDIS_PW"),
+        port=int(os.getenv("REDIS_PORT", DEFAULT_PORT)),
+        db=int(os.getenv("REDIS_DATABASE", DEFAULT_DATABASE)),
+        socket_timeout=timeout,
+        socket_connect_timeout=timeout,
+        **kwargs,
+    )
+
+
+def selftest(enable: bool = True) -> typing.Union[str, None]:
     if not enable:
-        return False
-    r = redis.Redis(host=hostname, password=password, port=port, db=db)
+        return None
     try:
+        r = create_connection(timeout=3)
         r.ping()
     except Exception:
-        return 'Redis not running or not installed. Helper will be disabled.'
+        return "Redis not running or not installed. Helper will be disabled."
+    else:
+        return None
 
 
 def get(modulename=None, query=None, value=None, debug=False):
-    if (modulename is None or query is None):
+    if modulename is None or query is None:
         return False
-    r = redis.Redis(host=hostname, password=password, port=port, db=db, decode_responses=True)
+    r = create_connection(decode_responses=True)
     h = hashlib.sha1()
-    h.update(query.encode('UTF-8'))
+    h.update(query.encode("UTF-8"))
     hv = h.hexdigest()
     key = "m:{}:{}".format(modulename, hv)
 
@@ -61,24 +76,24 @@ def get(modulename=None, query=None, value=None, debug=False):
 
 
 def flush():
-    r = redis.StrictRedis(host=hostname, password=password, port=port, db=db, decode_responses=True)
-    returncode = r.flushdb()
-    return returncode
+    r = create_connection(decode_responses=True)
+    return r.flushdb()
 
 
 if __name__ == "__main__":
     import sys
+
     if selftest() is not None:
         sys.exit()
     else:
         print("Selftest ok")
     v = get(modulename="testmodule", query="abcdef", value="barfoo", debug=True)
-    if v == 'barfoo':
+    if v == "barfoo":
         print("Cache ok")
     v = get(modulename="testmodule", query="abcdef")
     print(v)
     v = get(modulename="testmodule")
-    if (not v):
+    if not v:
         print("Failed ok")
     if flush():
         print("Cache flushed ok")

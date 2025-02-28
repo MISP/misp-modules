@@ -251,6 +251,16 @@ Import content from a TAXII 2.1 server
 
 -----
 
+#### [CSV Test Import](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/testimport.py)
+
+Simple CSV import tool with mapable columns
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/testimport.py)]
+
+- **features**:
+>
+
+-----
+
 #### [ThreadAnalyzer Sandbox Import](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/threatanalyzer_import.py)
 
 Module to import ThreatAnalyzer archive.zip / analysis.json files.
