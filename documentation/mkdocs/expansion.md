@@ -977,30 +977,6 @@ Google safe browsing expansion module
 
 -----
 
-#### [Google Search](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/google_search.py)
-
-<img src=../logos/google.png height=60>
-
-An expansion hover module to expand google search information about an URL
-[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/google_search.py)]
-
-- **features**:
->The module takes an url as input to query the Google search API. The result of the query is then return as raw text.
-
-- **input**:
->An url attribute.
-
-- **output**:
->Text containing the result of a Google search on the input url.
-
-- **references**:
->https://github.com/abenassi/Google-Search-API
-
-- **requirements**:
->The python Google Search API library
-
------
-
 #### [Google Threat Intelligence Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/google_threat_intelligence.py)
 
 <img src=../logos/google_threat_intelligence.png height=60>
@@ -1268,6 +1244,9 @@ Module to query an IP ASN history service (https://github.com/D4-project/IPASN-H
 
 - **features**:
 >This module takes an IP address attribute as input and queries the CIRCL IPASN service. The result of the query is the latest asn related to the IP address, that is returned as a MISP object.
+
+- **config**:
+>custom_api
 
 - **input**:
 >An IP address MISP attribute.

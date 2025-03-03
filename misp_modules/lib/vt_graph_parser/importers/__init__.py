@@ -3,5 +3,4 @@
 This module provides methods to import graphs from MISP.
 """
 
-
 __all__ = ["base", "pymisp_response"]

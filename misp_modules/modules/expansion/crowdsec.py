@@ -16,9 +16,14 @@ moduleinfo = {
     "name": "CrowdSec CTI",
     "logo": "crowdsec.png",
     "requirements": [
-        "A CrowdSec CTI API key. Get yours by following https://docs.crowdsec.net/docs/cti_api/getting_started/#getting-an-api-key"
+        "A CrowdSec CTI API key. Get yours by following"
+        " https://docs.crowdsec.net/docs/cti_api/getting_started/#getting-an-api-key"
     ],
-    "features": "This module enables IP lookup from CrowdSec CTI API. It provides information about the IP, such as what kind of attacks it has been participant of as seen by CrowdSec's network. It also includes enrichment by CrowdSec like background noise score, aggressivity over time etc.",
+    "features": (
+        "This module enables IP lookup from CrowdSec CTI API. It provides information about the IP, such as what kind"
+        " of attacks it has been participant of as seen by CrowdSec's network. It also includes enrichment by CrowdSec"
+        " like background noise score, aggressivity over time etc."
+    ),
     "references": [
         "https://www.crowdsec.net/",
         "https://docs.crowdsec.net/docs/cti_api/getting_started",
@@ -49,14 +54,10 @@ def handler(q=False):
         return {"error": "Missing CrowdSec API key"}
 
     if not request.get("attribute") or not check_input_attribute(request["attribute"]):
-        return {
-            "error": f"{standard_error_message}, which should contain at least a type, a value and an uuid."
-        }
+        return {"error": f"{standard_error_message}, which should contain at least a type, a value and an uuid."}
 
     if request["attribute"].get("type") not in mispattributes["input"]:
-        return {
-            "error": f"Wrong input type. Please choose on of the following: {', '.join(mispattributes['input'])}"
-        }
+        return {"error": f"Wrong input type. Please choose on of the following: {', '.join(mispattributes['input'])}"}
 
     return _handler_v2(request)
 
@@ -81,9 +82,7 @@ def _handler_v2(request_data):
     try:
         ipaddress.ip_address(ip)
     except ValueError:
-        return {
-            "error": f"IP ({ip}) is not valid for calling CrowdSec CTI. Please provide a valid IP address."
-        }
+        return {"error": f"IP ({ip}) is not valid for calling CrowdSec CTI. Please provide a valid IP address."}
 
     crowdsec_cti = requests.get(
         f"https://cti.api.crowdsec.net/v2/smoke/{ip}",
@@ -97,12 +96,8 @@ def _handler_v2(request_data):
 
     add_reputation_tag = _get_boolean_config(request_data, "add_reputation_tag", True)
     add_behavior_tag = _get_boolean_config(request_data, "add_behavior_tag", True)
-    add_classification_tag = _get_boolean_config(
-        request_data, "add_classification_tag", True
-    )
-    add_mitre_technique_tag = _get_boolean_config(
-        request_data, "add_mitre_technique_tag", True
-    )
+    add_classification_tag = _get_boolean_config(request_data, "add_classification_tag", True)
+    add_mitre_technique_tag = _get_boolean_config(request_data, "add_mitre_technique_tag", True)
     add_cve_tag = _get_boolean_config(request_data, "add_cve_tag", True)
 
     misp_event = MISPEvent()
@@ -119,36 +114,20 @@ def _handler_v2(request_data):
         tag = f'crowdsec:reputation="{reputation}"'
         ip_attribute.add_tag(tag)
     crowdsec_context_object.add_attribute("ip-range", crowdsec_cti["ip_range"])
-    crowdsec_context_object.add_attribute(
-        "ip-range-score", crowdsec_cti["ip_range_score"]
-    )
-    crowdsec_context_object.add_attribute(
-        "country", get_country_name_from_alpha_2(crowdsec_cti["location"]["country"])
-    )
-    crowdsec_context_object.add_attribute(
-        "country-code", crowdsec_cti["location"]["country"]
-    )
+    crowdsec_context_object.add_attribute("ip-range-score", crowdsec_cti["ip_range_score"])
+    crowdsec_context_object.add_attribute("country", get_country_name_from_alpha_2(crowdsec_cti["location"]["country"]))
+    crowdsec_context_object.add_attribute("country-code", crowdsec_cti["location"]["country"])
     if crowdsec_cti["location"].get("city"):
         crowdsec_context_object.add_attribute("city", crowdsec_cti["location"]["city"])
-    crowdsec_context_object.add_attribute(
-        "latitude", crowdsec_cti["location"]["latitude"]
-    )
-    crowdsec_context_object.add_attribute(
-        "longitude", crowdsec_cti["location"]["longitude"]
-    )
+    crowdsec_context_object.add_attribute("latitude", crowdsec_cti["location"]["latitude"])
+    crowdsec_context_object.add_attribute("longitude", crowdsec_cti["location"]["longitude"])
     crowdsec_context_object.add_attribute("as-name", crowdsec_cti["as_name"])
     crowdsec_context_object.add_attribute("as-num", crowdsec_cti["as_num"])
     if crowdsec_cti.get("reverse_dns") is not None:
-        crowdsec_context_object.add_attribute(
-            "reverse-dns", crowdsec_cti["reverse_dns"]
-        )
-    crowdsec_context_object.add_attribute(
-        "background-noise", crowdsec_cti["background_noise_score"]
-    )
+        crowdsec_context_object.add_attribute("reverse-dns", crowdsec_cti["reverse_dns"])
+    crowdsec_context_object.add_attribute("background-noise", crowdsec_cti["background_noise_score"])
     for behavior in crowdsec_cti["behaviors"]:
-        crowdsec_context_object.add_attribute(
-            "behaviors", behavior["label"], comment=behavior["description"]
-        )
+        crowdsec_context_object.add_attribute("behaviors", behavior["label"], comment=behavior["description"])
         if add_behavior_tag:
             tag = f'crowdsec:behavior="{behavior["name"]}"'
             ip_attribute.add_tag(tag)
@@ -178,9 +157,7 @@ def _handler_v2(request_data):
     for feature, values in crowdsec_cti["classifications"].items():
         field = feature[:-1]
         for value in values:
-            crowdsec_context_object.add_attribute(
-                feature, value["label"], comment=value["description"]
-            )
+            crowdsec_context_object.add_attribute(feature, value["label"], comment=value["description"])
             if add_classification_tag:
                 tag = f'crowdsec:{field}="{value["name"]}"'
                 ip_attribute.add_tag(tag)
@@ -193,13 +170,9 @@ def _handler_v2(request_data):
     )
     crowdsec_context_object.add_attribute(
         "target-countries",
-        ", ".join(
-            map(get_country_name_from_alpha_2, crowdsec_cti["target_countries"].keys())
-        ),
+        ", ".join(map(get_country_name_from_alpha_2, crowdsec_cti["target_countries"].keys())),
     )
-    crowdsec_context_object.add_attribute(
-        "trust", crowdsec_cti["scores"]["overall"]["trust"]
-    )
+    crowdsec_context_object.add_attribute("trust", crowdsec_cti["scores"]["overall"]["trust"])
     scores = []
     for time_period, indicators in crowdsec_cti["scores"].items():
         tp = " ".join(map(str.capitalize, time_period.split("_")))
@@ -213,11 +186,7 @@ def _handler_v2(request_data):
     misp_event.add_object(crowdsec_context_object)
 
     event = json.loads(misp_event.to_json())
-    results = {
-        key: event[key]
-        for key in ("Attribute", "Object")
-        if (key in event and event[key])
-    }
+    results = {key: event[key] for key in ("Attribute", "Object") if (key in event and event[key])}
     return {"results": results}
 
 

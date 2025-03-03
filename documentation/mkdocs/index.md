@@ -49,7 +49,6 @@ For more information: [Extending MISP with Python modules](https://www.misp-proj
 * [GeoIP City Lookup](https://misp.github.io/misp-modules/expansion/#geoip-city-lookup) - An expansion module to query a local copy of Maxmind's Geolite database with an IP address, in order to get information about the city where it is located.
 * [GeoIP Country Lookup](https://misp.github.io/misp-modules/expansion/#geoip-country-lookup) - Query a local copy of Maxminds Geolite database, updated for MMDB format
 * [Google Safe Browsing Lookup](https://misp.github.io/misp-modules/expansion/#google-safe-browsing-lookup) - Google safe browsing expansion module
-* [Google Search](https://misp.github.io/misp-modules/expansion/#google-search) - An expansion hover module to expand google search information about an URL
 * [Google Threat Intelligence Lookup](https://misp.github.io/misp-modules/expansion/#google-threat-intelligence-lookup) - An expansion module to have the observable's threat score assessed by Google Threat Intelligence.
 * [GreyNoise Lookup](https://misp.github.io/misp-modules/expansion/#greynoise-lookup) - Module to query IP and CVE information from GreyNoise
 * [Hashdd Lookup](https://misp.github.io/misp-modules/expansion/#hashdd-lookup) - A hover module to check hashes against hashdd.com including NSLR dataset.
@@ -138,6 +137,7 @@ For more information: [Extending MISP with Python modules](https://www.misp-proj
 * [Nexthink NXQL Export](https://misp.github.io/misp-modules/export_mod/#nexthink-nxql-export) - Nexthink NXQL query export module
 * [OSQuery Export](https://misp.github.io/misp-modules/export_mod/#osquery-export) - OSQuery export of a MISP event.
 * [Event to PDF Export](https://misp.github.io/misp-modules/export_mod/#event-to-pdf-export) - Simple export of a MISP event to PDF.
+* [Test Export](https://misp.github.io/misp-modules/export_mod/#test-export) - Skeleton export module.
 * [ThreatStream Export](https://misp.github.io/misp-modules/export_mod/#threatstream-export) - Module to export a structured CSV file for uploading to threatStream.
 * [ThreadConnect Export](https://misp.github.io/misp-modules/export_mod/#threadconnect-export) - Module to export a structured CSV file for uploading to ThreatConnect.
 * [VirusTotal Collections Export](https://misp.github.io/misp-modules/export_mod/#virustotal-collections-export) - Creates a VT Collection from an event iocs.
@@ -157,6 +157,7 @@ For more information: [Extending MISP with Python modules](https://www.misp-proj
 * [OCR Import](https://misp.github.io/misp-modules/import_mod/#ocr-import) - Optical Character Recognition (OCR) module for MISP.
 * [OpenIOC Import](https://misp.github.io/misp-modules/import_mod/#openioc-import) - Module to import OpenIOC packages.
 * [TAXII 2.1 Import](https://misp.github.io/misp-modules/import_mod/#taxii-2.1-import) - Import content from a TAXII 2.1 server
+* [CSV Test Import](https://misp.github.io/misp-modules/import_mod/#csv-test-import) - Simple CSV import tool with mapable columns
 * [ThreadAnalyzer Sandbox Import](https://misp.github.io/misp-modules/import_mod/#threadanalyzer-sandbox-import) - Module to import ThreatAnalyzer archive.zip / analysis.json files.
 * [URL Import](https://misp.github.io/misp-modules/import_mod/#url-import) - Simple URL import tool with Faup
 * [VMRay API Import](https://misp.github.io/misp-modules/import_mod/#vmray-api-import) - Module to import VMRay (VTI) results.

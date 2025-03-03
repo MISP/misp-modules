@@ -2,47 +2,49 @@ import base64
 import io
 import json
 import logging
-import requests
 import sys
 import urllib.parse
 import zipfile
 
+import requests
 from requests.exceptions import RequestException
 
 log = logging.getLogger("cuckoo_submit")
 log.setLevel(logging.DEBUG)
 sh = logging.StreamHandler(sys.stdout)
 sh.setLevel(logging.DEBUG)
-fmt = logging.Formatter(
-    "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-)
+fmt = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 sh.setFormatter(fmt)
 log.addHandler(sh)
 
 moduleinfo = {
-    'version': '0.1',
-    'author': 'Evert Kors',
-    'description': 'Submit files and URLs to Cuckoo Sandbox',
-    'module-type': ['expansion', 'hover'],
-    'name': 'Cuckoo Submit',
-    'logo': 'cuckoo.png',
-    'requirements': ['Access to a Cuckoo Sandbox API and an API key if the API requires it. (api_url and api_key)'],
-    'features': 'The module takes a malware-sample, attachment, url or domain and submits it to Cuckoo Sandbox.\n The returned task id can be used to retrieve results when the analysis completed.',
-    'references': ['https://cuckoosandbox.org/', 'https://cuckoo.sh/docs/'],
-    'input': 'A malware-sample or attachment for files. A url or domain for URLs.',
-    'output': "A text field containing 'Cuckoo task id: <id>'",
+    "version": "0.1",
+    "author": "Evert Kors",
+    "description": "Submit files and URLs to Cuckoo Sandbox",
+    "module-type": ["expansion", "hover"],
+    "name": "Cuckoo Submit",
+    "logo": "cuckoo.png",
+    "requirements": ["Access to a Cuckoo Sandbox API and an API key if the API requires it. (api_url and api_key)"],
+    "features": (
+        "The module takes a malware-sample, attachment, url or domain and submits it to Cuckoo Sandbox.\n The returned"
+        " task id can be used to retrieve results when the analysis completed."
+    ),
+    "references": ["https://cuckoosandbox.org/", "https://cuckoo.sh/docs/"],
+    "input": "A malware-sample or attachment for files. A url or domain for URLs.",
+    "output": "A text field containing 'Cuckoo task id: <id>'",
 }
 misperrors = {"error": "Error"}
 moduleconfig = ["api_url", "api_key"]
 mispattributes = {
     "input": ["attachment", "malware-sample", "url", "domain"],
-    "output": ["text"]
+    "output": ["text"],
 }
 
 
 class APIKeyError(RequestException):
     """Raised if the Cuckoo API returns a 401. This means no or an invalid
     bearer token was supplied."""
+
     pass
 
 
@@ -56,15 +58,14 @@ class CuckooAPI(object):
         self.api_url = api_url
 
     def _post_api(self, endpoint, files=None, data={}):
-        data.update({
-            "owner": "MISP"
-        })
+        data.update({"owner": "MISP"})
 
         try:
             response = requests.post(
                 urllib.parse.urljoin(self.api_url, endpoint),
-                files=files, data=data,
-                headers={"Authorization": "Bearer {}".format(self.api_key)}
+                files=files,
+                data=data,
+                headers={"Authorization": "Bearer {}".format(self.api_key)},
             )
         except RequestException as e:
             log.error("Failed to submit sample to Cuckoo Sandbox. %s", e)
@@ -80,18 +81,14 @@ class CuckooAPI(object):
         return response.json()
 
     def create_task(self, filename, fp):
-        response = self._post_api(
-            "/tasks/create/file", files={"file": (filename, fp)}
-        )
+        response = self._post_api("/tasks/create/file", files={"file": (filename, fp)})
         if not response:
             return False
 
         return response["task_id"]
 
     def create_url(self, url):
-        response = self._post_api(
-            "/tasks/create/url", data={"url": url}
-        )
+        response = self._post_api("/tasks/create/url", data={"url": url})
         if not response:
             return False
 
@@ -134,9 +131,7 @@ def handler(q=False):
             task_id = cuckoo_api.create_url(url)
         elif data and filename:
             log.debug("Submitting file to Cuckoo Sandbox %s", api_url)
-            task_id = cuckoo_api.create_task(
-                filename=filename, fp=io.BytesIO(data)
-            )
+            task_id = cuckoo_api.create_task(filename=filename, fp=io.BytesIO(data))
     except APIKeyError as e:
         misperrors["error"] = "Failed to submit to Cuckoo: {}".format(e)
         return misperrors
@@ -145,11 +140,7 @@ def handler(q=False):
         misperrors["error"] = "File or URL submission failed"
         return misperrors
 
-    return {
-        "results": [
-            {"types": "text", "values": "Cuckoo task id: {}".format(task_id)}
-        ]
-    }
+    return {"results": [{"types": "text", "values": "Cuckoo task id: {}".format(task_id)}]}
 
 
 def introspection():

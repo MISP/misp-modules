@@ -1,43 +1,44 @@
 """
 Export module for converting MISP events into Endgame EQL queries
 """
+
 import json
 import logging
 
 misperrors = {"error": "Error"}
 
 moduleinfo = {
-    'version': '0.1',
-    'author': '92 COS DOM',
-    'description': 'EQL query generation for a MISP attribute.',
-    'module-type': ['expansion'],
-    'name': 'EQL Query Generator',
-    'logo': 'eql.png',
-    'requirements': [],
-    'features': 'This module adds a new attribute to a MISP event containing an EQL query for a network or file attribute.',
-    'references': ['https://eql.readthedocs.io/en/latest/'],
-    'input': 'A filename or ip attribute.',
-    'output': 'Attribute containing EQL for a network or file attribute.',
+    "version": "0.1",
+    "author": "92 COS DOM",
+    "description": "EQL query generation for a MISP attribute.",
+    "module-type": ["expansion"],
+    "name": "EQL Query Generator",
+    "logo": "eql.png",
+    "requirements": [],
+    "features": (
+        "This module adds a new attribute to a MISP event containing an EQL query for a network or file attribute."
+    ),
+    "references": ["https://eql.readthedocs.io/en/latest/"],
+    "input": "A filename or ip attribute.",
+    "output": "Attribute containing EQL for a network or file attribute.",
 }
 
 # Map of MISP fields => Endgame fields
 fieldmap = {
     "ip-src": "source_address",
     "ip-dst": "destination_address",
-    "filename": "file_name"
+    "filename": "file_name",
 }
 
 # Describe what events have what fields
 event_types = {
     "source_address": "network",
     "destination_address": "network",
-    "file_name": "file"
+    "file_name": "file",
 }
 
 # combine all the MISP fields from fieldmap into one big list
-mispattributes = {
-    "input": list(fieldmap.keys())
-}
+mispattributes = {"input": list(fieldmap.keys())}
 
 
 def handler(q=False):
@@ -61,14 +62,21 @@ def handler(q=False):
     if attrType:
         eqlType = fieldmap[attrType]
         event_type = event_types[eqlType]
-        fullEql = "{} where {} == \"{}\"".format(event_type, eqlType, request[attrType])
+        fullEql = '{} where {} == "{}"'.format(event_type, eqlType, request[attrType])
     else:
-        misperrors['error'] = "Unsupported attributes type"
+        misperrors["error"] = "Unsupported attributes type"
         return misperrors
 
     response = []
-    response.append({'types': ['comment'], 'categories': ['External analysis'], 'values': fullEql, 'comment': "Event EQL queries"})
-    return {'results': response}
+    response.append(
+        {
+            "types": ["comment"],
+            "categories": ["External analysis"],
+            "values": fullEql,
+            "comment": "Event EQL queries",
+        }
+    )
+    return {"results": response}
 
 
 def introspection():

@@ -4,17 +4,25 @@ This modules provides a graph importer method for MISP event by using the
 response payload giving by MISP API directly.
 """
 
-
 from vt_graph_parser.helpers.parsers import parse_pymisp_response
 from vt_graph_parser.importers.base import import_misp_graph
 
 
 def from_pymisp_response(
-        payload, vt_api_key, fetch_information=True,
-        private=False, fetch_vt_enterprise=False, user_editors=None,
-        user_viewers=None, group_editors=None, group_viewers=None,
-        use_vt_to_connect_the_graph=False, max_api_quotas=1000,
-        max_search_depth=3, expand_node_one_level=False):
+    payload,
+    vt_api_key,
+    fetch_information=True,
+    private=False,
+    fetch_vt_enterprise=False,
+    user_editors=None,
+    user_viewers=None,
+    group_editors=None,
+    group_viewers=None,
+    use_vt_to_connect_the_graph=False,
+    max_api_quotas=1000,
+    max_search_depth=3,
+    expand_node_one_level=False,
+):
     """Import VirusTotal Graph from MISP JSON file.
 
     Args:
@@ -59,14 +67,25 @@ def from_pymisp_response(
       [vt_graph_api.graph.VTGraph: the imported graph].
     """
     graphs = []
-    for event_payload in payload['data']:
+    for event_payload in payload["data"]:
         misp_attrs, graph_id = parse_pymisp_response(event_payload)
         name = "Graph created from MISP event"
         graph = import_misp_graph(
-            misp_attrs, graph_id, vt_api_key, fetch_information, name,
-            private, fetch_vt_enterprise, user_editors, user_viewers, group_editors,
-            group_viewers, use_vt_to_connect_the_graph, max_api_quotas,
-            max_search_depth)
+            misp_attrs,
+            graph_id,
+            vt_api_key,
+            fetch_information,
+            name,
+            private,
+            fetch_vt_enterprise,
+            user_editors,
+            user_viewers,
+            group_editors,
+            group_viewers,
+            use_vt_to_connect_the_graph,
+            max_api_quotas,
+            max_search_depth,
+        )
         if expand_node_one_level:
             graph.expand_n_level(1)
         graphs.append(graph)
