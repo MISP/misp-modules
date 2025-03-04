@@ -1,5 +1,5 @@
 import json
-from pyfaup.faup import Faup
+from pymisp.tools._psl_faup import PSLFaup as Faup
 from mattermostdriver import Driver
 from ._utils import utils
 

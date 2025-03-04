@@ -1,7 +1,7 @@
 import json
 import base64
 from pymisp import MISPEvent, MISPObject, MISPAttribute
-from pyfaup.faup import Faup
+from pymisp.tools._psl_faup import PSLFaup as Faup
 
 misperrors = {'error': 'Error'}
 userConfig = {

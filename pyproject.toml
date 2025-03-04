@@ -1,107 +1,108 @@
-[build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
-
-[tool.poetry]
+[project]
 name = "misp-modules"
-version = "2.4.199"
+version = "2.4.201"
 description = "MISP modules are autonomous modules that can be used for expansion and other services in MISP"
-authors = ["Alexandre Dulaunoy <alexandre.dulaunoy@circl.lu>"]
-license = "AGPL-3.0-only"
-repository = "https://github.com/MISP/misp-modules"
-documentation = "https://misp.github.io/misp-modules"
-readme = "README.md"
-classifiers=[
-    'License :: OSI Approved :: GNU Affero General Public License v3',
-    'Development Status :: 5 - Production/Stable',
-    'Environment :: Console',
-    'Intended Audience :: Science/Research',
-    'Programming Language :: Python :: 3',
-    'Topic :: Security',
+authors = [
+    {name = "Alexandre Dulaunoy", email = "alexandre.dulaunoy@circl.lu"}
 ]
-packages = [{include = "misp_modules"}]
+license = "AGPL-3.0-only"
+readme = "README.md"
+classifiers = [
+    "License :: OSI Approved :: GNU Affero General Public License v3",
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: Console",
+    "Intended Audience :: Science/Research",
+    "Programming Language :: Python :: 3",
+    "Topic :: Security",
+]
+requires-python = ">=3.9,<3.13"
+dependencies = [
+    "psutil",
+    "pyparsing",
+    "redis",
+    "tornado",
+    "urllib3>=1.26,<2",
+    ## module dependencies (if a dependency fails loading with '*', pin it here)
+    "censys==2.0.9",
+    "socialscan<2.0.0",
+    "yara-python==4.5.0",
+    "numpy>=1.26.4,<2.0.0",
+    "pandas>=2.0.0",
+    "pandas_ods_reader>=1.0.0",
+    ## module dependencies
+    "apiosintds",
+    "assemblyline_client",
+    "backscatter",
+    "blockchain",
+    "clamd",
+    "crowdstrike-falconpy",
+    "dnsdb2",
+    "domaintools_api",
+    "geoip2",
+    "greynoise",
+    "jbxapi",
+    "maclookup",
+    "markdownify",
+    "matplotlib",
+    "mattermostdriver",
+    "misp-lib-stix2>=3.0.1.2",
+    "misp-stix>=2025.1.10",
+    "mwdblib",
+    "ndjson",
+    "np",
+    "oauth2",
+    "opencv-python",
+    "openpyxl",
+    "pandoc",
+    "passivetotal",
+    "pdftotext",
+    "pycountry",
+    "pyeti-python3",
+    "pyeupi",
+    "pygeoip",
+    "pyintel471",
+    "pyipasnhistory",
+    "pymisp[fileobjects, openioc, pdfexport, email]",
+    "pypdns",
+    "pypssl",
+    "pysafebrowsing",
+    "pytesseract",
+    "python-docx",
+    "python-pptx",
+    "pyzbar",
+    "requests[security]",
+    "setuptools",
+    "shodan",
+    "sigmatools",
+    "sigmf",
+    "slack-sdk",
+    "sparqlwrapper",
+    "tau-clients",
+    "taxii2-client",
+    "urlarchiver",
+    "vt-graph-api",
+    "vt-py",
+    "vulners",
+    "vysion",
+    "wand",
+    "xlrd",
+]
 
-[tool.poetry.urls]
-"Bug Tracker" = "https://github.com/MISP/misp-modules/issues"
-"Source" = "https://github.com/MISP/misp-modules"
+[project.urls]
+Issues = "https://github.com/MISP/misp-modules/issues"
+Homepage = "https://github.com/MISP/misp-modules"
+Documentation = "https://misp.github.io/misp-modules"
+Repository = "https://github.com/MISP/misp-modules"
 
-[tool.poetry.scripts]
+[project.scripts]
 misp-modules = "misp_modules:main"
 
-[tool.poetry.dependencies]
-## platform (pin this to your python version, for 'poetry export' to work)
-python = ">=3.9.*,<3.13"
-## core dependencies
-psutil = "*"
-pyparsing = "*"
-redis = "*"
-tornado = "*"
-urllib3 = ">=1.26,<2"
-## module dependencies (if a dependency fails loading with '*', pin it here)
-censys = "2.0.9"
-socialscan = "<2.0.0"
-yara-python = "4.5.0"
-numpy = ">=1.26.4,<2.0.0"
-pandas = ">=2.0.0"
-pandas_ods_reader = ">=1.0.0"
-## module dependencies
-apiosintds = "*"
-assemblyline_client = "*"
-backscatter = "*"
-blockchain = "*"
-clamd = "*"
-crowdstrike-falconpy = "*"
-dnsdb2 = "*"
-domaintools_api = "*"
-geoip2 = "*"
-greynoise = "*"
-jbxapi = "*"
-maclookup = "*"
-markdownify = "*"
-matplotlib = "*"
-mattermostdriver = "*"
-misp-lib-stix2 = "^3.0.1.2"
-misp-stix = "^2025.1.10"
-mwdblib = "*"
-ndjson = "*"
-np = "*"
-oauth2 = "*"
-opencv-python = "*"
-openpyxl = "*"
-pandoc = "*"
-passivetotal = "*"
-pdftotext = "*"
-pycountry = "*"
-pyeti-python3 = "*"
-pyeupi = "*"
-pyfaup = "*"
-pygeoip = "*"
-pyintel471 = "*"
-pyipasnhistory = "*"
-pymisp = { version = "*", extras = ["fileobjects", "openioc", "pdfexport", "email", "url"] }
-pypdns = "*"
-pypssl = "*"
-pysafebrowsing = "*"
-pytesseract = "*"
-python-docx = "*"
-python-pptx = "*"
-pyzbar = "*"
-requests = { version = "*", extras = ["security"] }
-setuptools = "*"
-shodan = "*"
-sigmatools = "*"
-sigmf = "*"
-slack-sdk = "*"
-sparqlwrapper = "*"
-tau-clients = "*"
-taxii2-client = "*"
-urlarchiver = "*"
-vt-graph-api = "*"
-vt-py = "*"
-vulners = "*"
-vysion = "*"
-wand = "*"
-xlrd = "*"
+[tool.poetry]
+packages = [{include = "misp_modules"}]
+
+[build-system]
+requires = ["poetry-core>=2.0"]
+build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.group.test]
 optional = true
@@ -129,3 +130,7 @@ google-search-api = { git = "https://github.com/abenassi/Google-Search-API" }
 trustar = { git = "https://github.com/SteveClement/trustar-python.git" }
 pydnstrails = { git = "https://github.com/sebdraven/pydnstrails.git" }
 pyonyphe = { git = "https://github.com/sebdraven/pyonyphe.git" }
+
+[tool.poetry.requires-plugins]
+poetry-plugin-bundle = ">=1.6"
+poetry-plugin-export = ">=1.9"

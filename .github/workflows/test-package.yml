@@ -108,7 +108,7 @@ jobs:
 
     - name: Publish to Test PyPI
       if: ${{ github.event_name == 'push' }}
-      uses: pypa/gh-action-pypi-publish@release/v1
+      uses: pypa/gh-action-pypi-publish@release/v1.12
       with:
          skip-existing: true
          repository-url: https://test.pypi.org/legacy/

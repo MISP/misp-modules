@@ -103,6 +103,9 @@ def convert(markdown, margin='3'):
         "-V", f"margin-top={margin}",
         "-V", f"margin-bottom={margin}",
         "--pdf-engine-opt=--disable-smart-shrinking",
+        "--pdf-engine-opt=--disable-javascript",
+        "--pdf-engine-opt=--no-images",
+        "--pdf-engine-opt=--disable-local-file-access",
         "--filter=pandoc-mermaid",
         "-f", "json",
         f"/tmp/{randomFn}/input.js"
@@ -158,7 +161,7 @@ def handler(q=False):
     markdown = data.get('markdown')
     try:
         margin = '3'
-        if 'config' in request['config']:
+        if 'config' in request.get('config', []):
             if request['config'].get('margin'):
                 margin = request['config'].get('margin')
         rendered = convert(markdown, margin=margin)
