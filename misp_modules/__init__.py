@@ -19,6 +19,7 @@
 import enum
 import importlib
 import importlib.abc
+import importlib.metadata
 import importlib.resources
 import importlib.util
 import pathlib
@@ -43,6 +44,14 @@ class ModuleType(enum.Enum):
     ACTION_MOD = "action_mod"
 
 
+def get_version() -> str:
+    """Return the version."""
+    try:
+        return importlib.metadata.version("misp-modules")
+    except importlib.metadata.PackageNotFoundError:
+        raise ValueError
+
+
 def is_valid_module(module: importlib.abc.Traversable) -> bool:
     """Whether the reference is a valid module file."""
     if not module.is_file():
@@ -63,15 +72,6 @@ def is_valid_module_type(module_type: importlib.abc.Traversable) -> bool:
     except ValueError:
         return False
     return True
-
-
-def iterate_helpers(
-    helpers_dir: typing.Union[importlib.abc.Traversable, pathlib.Path],
-) -> typing.Generator[importlib.abc.Traversable, None, None]:
-    """Iterate helpers and return helper references."""
-    for helper in helpers_dir.iterdir():
-        if is_valid_module(helper):
-            yield helper
 
 
 def iterate_modules(

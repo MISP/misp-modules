@@ -114,11 +114,22 @@ def init_logger(debug: bool = False) -> None:
     LOGGER.addHandler(handler)
 
 
-class Healthcheck(tornado.web.RequestHandler):
-    """Healthcheck handler."""
+class VersionCheck(tornado.web.RequestHandler):
+    """VersionCheck handler."""
 
     def get(self):
-        LOGGER.debug("MISP Healthcheck request")
+        LOGGER.debug("VersionCheck request")
+        try:
+            self.write(orjson.dumps({"version": misp_modules.get_version()}))
+        except ValueError:
+            self.send_error(500)
+
+
+class HealthCheck(tornado.web.RequestHandler):
+    """HealthCheck handler."""
+
+    def get(self):
+        LOGGER.debug("Healthcheck request")
         self.write(b'{"status": true}')
 
 
@@ -143,7 +154,7 @@ class ListModules(tornado.web.RequestHandler):
         )
 
     def get(self):
-        LOGGER.debug("MISP ListModules request")
+        LOGGER.debug("ListModules request")
         if not self.CACHE:
             self.CACHE = self._build_handlers_data()
         self.write(self.CACHE)
@@ -159,7 +170,7 @@ class QueryModule(tornado.web.RequestHandler):
 
     @tornado_concurrent.run_on_executor
     def run_request(self, module_name, json_payload, dict_payload):
-        LOGGER.debug("MISP QueryModule %s request %s", module_name, json_payload)
+        LOGGER.debug("QueryModule %s request %s", module_name, json_payload)
         try:
             response = MODULES_HANDLERS[module_name].dict_handler(request=dict_payload)
         except AttributeError:
@@ -211,22 +222,6 @@ def main():
     # Load libraries as root modules
     misp_modules.promote_lib_to_root()
 
-    # Load helpers
-    for helper in misp_modules.iterate_helpers(
-        importlib.resources.files(__package__).joinpath(misp_modules.HELPERS_DIR)
-    ):
-        helper_name = os.path.splitext(helper.name)[0]
-        absolute_helper_name = ".".join([__package__, misp_modules.HELPERS_DIR, helper_name])
-        try:
-            imported_helper = importlib.import_module(absolute_helper_name)
-            if test_error := imported_helper.selftest():
-                raise ImportError(test_error)
-        except ImportError as e:
-            LOGGER.warning("Helper %s failed: %s", helper_name, e)
-            continue
-        HELPERS_HANDLERS[helper_name] = imported_helper
-        LOGGER.info("Helper %s loaded", helper_name)
-
     # Load modules
     for module_type, module in misp_modules.iterate_modules(
         importlib.resources.files(__package__).joinpath(misp_modules.MODULES_DIR)
@@ -262,7 +257,8 @@ def main():
                 [
                     (r"/modules", ListModules),
                     (r"/query", QueryModule),
-                    (r"/healthcheck", Healthcheck),
+                    (r"/healthcheck", HealthCheck),
+                    (r"/version", VersionCheck),
                 ]
             ),
             max_buffer_size=MAX_BUFFER_SIZE,

@@ -9,7 +9,7 @@ on:
 jobs:
 
   release:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
 
       - name: Checkout repository
@@ -44,14 +44,14 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
 
   docs:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
 
       - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Install packages
-        run: sudo apt-get install libpoppler-cpp-dev libzbar0 tesseract-ocr yara
+        run: sudo apt-get install libpoppler-cpp-dev
 
       - name: Set up Python 3.12
         uses: actions/setup-python@v5
@@ -73,7 +73,7 @@ jobs:
           path: site/
 
   deploy-gh-pages:
-      runs-on: ubuntu-latest
+      runs-on: ubuntu-24.04
       needs: docs
   
       permissions:
@@ -90,13 +90,13 @@ jobs:
           uses: actions/deploy-pages@v4
 
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Install packages
-        run: sudo apt-get install libpoppler-cpp-dev libzbar0 tesseract-ocr yara
+        run: sudo apt-get install libgl1 libpoppler-cpp-dev libpoppler-cpp0v5 libzbar0 tesseract-ocr
 
       - name: Set up Python 3.12
         uses: actions/setup-python@v5
@@ -119,7 +119,7 @@ jobs:
           path: dist/
 
   publish-to-pypi:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: build
 
     permissions:
