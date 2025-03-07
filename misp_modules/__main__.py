@@ -47,7 +47,6 @@ MAX_BUFFER_SIZE = 1073741824
 
 # Global variables
 MODULES_HANDLERS = {}
-HELPERS_HANDLERS = {}
 LOGGER = logging.getLogger("misp-modules")
 
 # Module that, if present, guarantees that the extra 'all' has been installed
@@ -129,8 +128,8 @@ class HealthCheck(tornado.web.RequestHandler):
     """HealthCheck handler."""
 
     def get(self):
-        LOGGER.debug("Healthcheck request")
-        self.write(b'{"status": true}')
+        LOGGER.debug("HealthCheck request")
+        self.write(orjson.dumps({"status": True}))
 
 
 class ListModules(tornado.web.RequestHandler):
@@ -198,7 +197,6 @@ class QueryModule(tornado.web.RequestHandler):
 
 def main():
     """Init function."""
-    global HELPERS_HANDLERS
     global MODULES_HANDLERS
 
     signal.signal(signal.SIGINT, handle_signal)
