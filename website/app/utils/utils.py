@@ -3,13 +3,16 @@ import random
 import uuid
 import json
 import requests
-# import jsonschema
 from conf.config import Config
 from pathlib import Path
 import configparser
 config = configparser.ConfigParser()
 CONF_PATH = os.path.join(os.getcwd(), "conf", "config.cfg")
-config.read(CONF_PATH)
+if os.path.isfile(CONF_PATH):
+    config.read(CONF_PATH)
+else:
+    print("[-] No conf file found. Copy config.cfg.sample to config.cfg")
+    exit()
 
 MODULES = []
 
@@ -47,7 +50,7 @@ def isUUID(uid):
 def get_object(obj_name):
     path = Path(os.getcwd())
     parent_path = path.parent.absolute()
-    loc_path = os.path.join(parent_path, "misp_modules", "lib", "misp-objects", "objects")
+    loc_path = os.path.join(parent_path, "misp-objects", "objects")
     if os.path.isdir(loc_path):
         with open(os.path.join(loc_path, obj_name, "definition.json"), "r") as read_json:
             loc_json = json.load(read_json)

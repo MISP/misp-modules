@@ -1,0 +1,110 @@
+name: Test Python package
+
+on:
+
+  push:
+    branches: [ main ]
+
+  pull_request:
+    branches: [ main ]
+
+jobs:
+
+  docs:
+    runs-on: ubuntu-24.04
+    steps:
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install packages
+        run: sudo apt-get install libpoppler-cpp-dev
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.12
+
+      - name: Install poetry
+        run: python -m pip install poetry
+
+      - name: Build docs
+        run: make generate_docs
+
+  test:
+    runs-on: ubuntu-24.04
+
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.9", "3.10", "3.11", "3.12"]
+
+    steps:
+    
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install packages
+        run: sudo apt-get install libgl1 libpoppler-cpp-dev libpoppler-cpp0v5 libzbar0 tesseract-ocr
+  
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install poetry
+        run: python -m pip install poetry
+
+      - name: Install dependencies
+        run: poetry install --with test -E all
+
+      - name: Build package
+        run: poetry build
+
+      - name: Lint with flake8
+        run: poetry run flake8 --extend-exclude=misp_modules/lib/,tests/,website/
+
+      - name: Run server in background
+        run: poetry run misp-modules -l 127.0.0.1 2>error.log &
+
+      - name: Sleep for 10 seconds
+        run: sleep 10s
+        shell: bash
+
+      - name: Check if server is running
+        run: curl -sS localhost:6666/healthcheck
+
+      - name: Test package
+        run: poetry run pytest
+
+      - name: Show error log
+        if: always()
+        run: cat error.log
+
+      - name: Upload package artifcat
+        if: ${{ matrix.python-version == '3.12' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: python-package-distributions
+          path: dist/
+
+  publish-to-test-pypi:
+    runs-on: ubuntu-24.04
+    needs: test
+
+    permissions:
+      id-token: write
+    
+    steps:
+    - name: Download dist files
+      uses: actions/download-artifact@v4
+      with:
+        name: python-package-distributions
+        path: dist/
+
+    - name: Publish to Test PyPI
+      if: ${{ github.event_name == 'push' }}
+      uses: pypa/gh-action-pypi-publish@release/v1.12
+      with:
+         skip-existing: true
+         repository-url: https://test.pypi.org/legacy/

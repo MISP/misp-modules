@@ -1,30 +1,43 @@
-import jbxapi
 import base64
 import io
 import json
 import logging
+import re
 import sys
 import zipfile
-import re
-
 from urllib.parse import urljoin
 
+import jbxapi
 
 log = logging.getLogger(__name__)
 log.setLevel(logging.DEBUG)
 sh = logging.StreamHandler(sys.stdout)
 sh.setLevel(logging.DEBUG)
-fmt = logging.Formatter(
-    "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-)
+fmt = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 sh.setFormatter(fmt)
 log.addHandler(sh)
 
 moduleinfo = {
     "version": "1.0",
     "author": "Joe Security LLC",
-    "description": "Submit files and URLs to Joe Sandbox",
-    "module-type": ["expansion", "hover"]
+    "description": (
+        "A module to submit files or URLs to Joe Sandbox for an advanced analysis, and return the link of the"
+        " submission."
+    ),
+    "module-type": ["expansion", "hover"],
+    "name": "Joe Sandbox Submit",
+    "logo": "joesandbox.png",
+    "requirements": ["jbxapi: Joe Sandbox API python3 library"],
+    "features": (
+        "The module requires a Joe Sandbox API key to submit files or URL, and returns the link of the submitted"
+        " analysis.\n\nIt is then possible, when the analysis is completed, to query the Joe Sandbox API to get the"
+        " data related to the analysis, using the [joesandbox_query"
+        " module](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/joesandbox_query.py)"
+        " directly on this submission link."
+    ),
+    "references": ["https://www.joesecurity.org", "https://www.joesandbox.com/"],
+    "input": "Sample, url (or domain) to submit to Joe Sandbox for an advanced analysis.",
+    "output": "Link of the report generated in Joe Sandbox.",
 }
 moduleconfig = [
     "apiurl",
@@ -67,7 +80,12 @@ def handler(q=False):
     if not apikey:
         return {"error": "No API key provided"}
 
-    joe = jbxapi.JoeSandbox(apiurl=apiurl, apikey=apikey, user_agent="MISP joesandbox_submit", accept_tac=accept_tac)
+    joe = jbxapi.JoeSandbox(
+        apiurl=apiurl,
+        apikey=apikey,
+        user_agent="MISP joesandbox_submit",
+        accept_tac=accept_tac,
+    )
 
     try:
         is_url_submission = "url" in request or "domain" in request
@@ -96,11 +114,13 @@ def handler(q=False):
     link_to_analysis = urljoin(apiurl, "../submissions/{}".format(result["submission_id"]))
 
     return {
-        "results": [{
-            "types": "link",
-            "categories": "External analysis",
-            "values": link_to_analysis,
-        }]
+        "results": [
+            {
+                "types": "link",
+                "categories": "External analysis",
+                "values": link_to_analysis,
+            }
+        ]
     }
 
 

@@ -1,9 +1,0 @@
-{
-    "description": "Simple Reverse DNS expansion service to resolve reverse DNS from MISP attributes.",
-    "requirements": [
-        "DNS python library"
-    ],
-    "input": "An IP address attribute.",
-    "output": "Hostname attribute the input is resolved into.",
-    "features": "The module takes an IP address as input and tries to find the hostname this IP address is resolved into.\n\nThe address of the DNS resolver to use is also configurable, but if no configuration is set, we use the Google public DNS address (8.8.8.8).\n\nPlease note that composite MISP attributes containing IP addresses are supported as well."
-}

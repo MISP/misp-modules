@@ -9,28 +9,41 @@
 #                                                    #
 ######################################################
 
-import json
 import base64
+import json
 from urllib.parse import quote
 
-misperrors = {'error': 'Error'}
+misperrors = {"error": "Error"}
 
-moduleinfo = {'version': '1', 'author': 'Stanislav Klevtsov',
-              'description': 'Export malicious network activity attributes of the MISP event to Cisco firesight manager block rules',
-              'module-type': ['export']}
+moduleinfo = {
+    "version": "1",
+    "author": "Stanislav Klevtsov",
+    "description": "Module to export malicious network activity attributes to Cisco fireSIGHT manager block rules.",
+    "module-type": ["export"],
+    "name": "Cisco fireSIGHT blockrule Export",
+    "logo": "cisco.png",
+    "requirements": ["Firesight manager console credentials"],
+    "features": (
+        "The module goes through the attributes to find all the network activity ones in order to create block rules"
+        " for the Cisco fireSIGHT manager."
+    ),
+    "references": [],
+    "input": "Network activity attributes (IPs, URLs).",
+    "output": "Cisco fireSIGHT manager block rules.",
+}
 
 
-moduleconfig = ['fmc_ip_addr', 'fmc_login', 'fmc_pass', 'domain_id', 'acpolicy_id']
+moduleconfig = ["fmc_ip_addr", "fmc_login", "fmc_pass", "domain_id", "acpolicy_id"]
 
 fsmapping = {"ip-dst": "dst", "url": "request"}
 
-mispattributes = {'input': list(fsmapping.keys())}
+mispattributes = {"input": list(fsmapping.keys())}
 
 # options: event, attribute, event-collection, attribute-collection
-inputSource = ['event']
+inputSource = ["event"]
 
-outputFileExtension = 'sh'
-responseType = 'application/txt'
+outputFileExtension = "sh"
+responseType = "application/txt"
 
 # .sh file templates
 SH_FILE_HEADER = """#!/bin/sh\n\n"""
@@ -50,23 +63,23 @@ def handler(q=False):
     if q is False:
         return False
 
-    r = {'results': []}
+    r = {"results": []}
     request = json.loads(q)
 
     if "config" in request:
         config = request["config"]
 
     # check if config is empty
-    if not config['fmc_ip_addr']:
-        config['fmc_ip_addr'] = "0.0.0.0"
-    if not config['fmc_login']:
-        config['fmc_login'] = "login"
-    if not config['fmc_pass']:
-        config['fmc_pass'] = "password"
-    if not config['domain_id']:
-        config['domain_id'] = "SET_FIRESIGHT_DOMAIN_ID"
-    if not config['acpolicy_id']:
-        config['acpolicy_id'] = "SET_FIRESIGHT_ACPOLICY_ID"
+    if not config["fmc_ip_addr"]:
+        config["fmc_ip_addr"] = "0.0.0.0"
+    if not config["fmc_login"]:
+        config["fmc_login"] = "login"
+    if not config["fmc_pass"]:
+        config["fmc_pass"] = "password"
+    if not config["domain_id"]:
+        config["domain_id"] = "SET_FIRESIGHT_DOMAIN_ID"
+    if not config["acpolicy_id"]:
+        config["acpolicy_id"] = "SET_FIRESIGHT_ACPOLICY_ID"
 
     data = request["data"]
     output = ""
@@ -86,27 +99,36 @@ def handler(q=False):
                     if attr["type"] == "ip-dst":
                         ipdst.append(BLOCK_DST_JSON_TMPL.format(ipdst=attr["value"]))
                     else:
-                        urls.append(BLOCK_URL_JSON_TMPL.format(url=quote(attr["value"], safe='@/:;?&=-_.,+!*')))
+                        urls.append(BLOCK_URL_JSON_TMPL.format(url=quote(attr["value"], safe="@/:;?&=-_.,+!*")))
 
     # building the .sh file
     output += SH_FILE_HEADER
-    output += "FIRESIGHT_IP_ADDR='{}'\n".format(config['fmc_ip_addr'])
+    output += "FIRESIGHT_IP_ADDR='{}'\n".format(config["fmc_ip_addr"])
 
-    output += "LOGINPASS_BASE64=`echo -n '{}:{}' | base64`\n".format(config['fmc_login'], config['fmc_pass'])
-    output += "DOMAIN_ID='{}'\n".format(config['domain_id'])
-    output += "ACPOLICY_ID='{}'\n\n".format(config['acpolicy_id'])
+    output += "LOGINPASS_BASE64=`echo -n '{}:{}' | base64`\n".format(config["fmc_login"], config["fmc_pass"])
+    output += "DOMAIN_ID='{}'\n".format(config["domain_id"])
+    output += "ACPOLICY_ID='{}'\n\n".format(config["acpolicy_id"])
 
-    output += "ACC_TOKEN=`curl -X POST -v -k -sD - -o /dev/null -H \"Authorization: Basic $LOGINPASS_BASE64\" -i \"https://$FIRESIGHT_IP_ADDR/api/fmc_platform/v1/auth/generatetoken\" | grep -i x-auth-acc | sed 's/.*:\\ //g' | tr -d '[:space:]' | tr -d '\\n'`\n"
+    output += (
+        'ACC_TOKEN=`curl -X POST -v -k -sD - -o /dev/null -H "Authorization: Basic $LOGINPASS_BASE64" -i'
+        ' "https://$FIRESIGHT_IP_ADDR/api/fmc_platform/v1/auth/generatetoken" | grep -i x-auth-acc | sed \'s/.*:\\'
+        " //g' | tr -d '[:space:]' | tr -d '\\n'`\n"
+    )
 
-    output += BLOCK_JSON_TMPL.format(rule_name="misp_event_{}".format(event_id),
-                                     dst_networks=', '.join(ipdst),
-                                     urls=', '.join(urls),
-                                     event_info_comment=event_info) + "\n"
+    output += (
+        BLOCK_JSON_TMPL.format(
+            rule_name="misp_event_{}".format(event_id),
+            dst_networks=", ".join(ipdst),
+            urls=", ".join(urls),
+            event_info_comment=event_info,
+        )
+        + "\n"
+    )
 
     output += CURL_ADD_RULE_TMPL
     # END building the .sh file
 
-    r = {"data": base64.b64encode(output.encode('utf-8')).decode('utf-8')}
+    r = {"data": base64.b64encode(output.encode("utf-8")).decode("utf-8")}
     return r
 
 
@@ -114,27 +136,27 @@ def introspection():
     modulesetup = {}
     try:
         responseType
-        modulesetup['responseType'] = responseType
+        modulesetup["responseType"] = responseType
     except NameError:
         pass
     try:
         userConfig
-        modulesetup['userConfig'] = userConfig
+        modulesetup["userConfig"] = userConfig
     except NameError:
         pass
     try:
         outputFileExtension
-        modulesetup['outputFileExtension'] = outputFileExtension
+        modulesetup["outputFileExtension"] = outputFileExtension
     except NameError:
         pass
     try:
         inputSource
-        modulesetup['inputSource'] = inputSource
+        modulesetup["inputSource"] = inputSource
     except NameError:
         pass
     return modulesetup
 
 
 def version():
-    moduleinfo['config'] = moduleconfig
+    moduleinfo["config"] = moduleconfig
     return moduleinfo

@@ -38,7 +38,7 @@ class Session_db(db.Model):
             "id": self.id,
             "uuid": self.uuid,
             "modules": json.loads(self.modules_list),
-            "query_enter": self.query_enter,
+            "query_enter": json.loads(self.query_enter),
             "input_query": self.input_query,
             "config_module": json.loads(self.config_module),
             "result": json.loads(self.result),
@@ -51,7 +51,7 @@ class Session_db(db.Model):
         json_dict = {
             "uuid": self.uuid,
             "modules": json.loads(self.modules_list),
-            "query": self.query_enter,
+            "query": json.loads(self.query_enter),
             "input": self.input_query,
             "query_date": self.query_date.strftime('%Y-%m-%d %H:%M')
         }
@@ -90,6 +90,22 @@ class User(UserMixin, db.Model):
             "first_name": self.first_name, 
             "last_name": self.last_name, 
             "email": self.email
+        }
+    
+class ExternalTools(db.Model):
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    name = db.Column(db.String(64), index=True)
+    url = db.Column(db.String)
+    api_key = db.Column(db.String(60), index=True)
+    is_active = db.Column(db.Boolean)
+
+    def to_json(self):
+        return {
+            "id": self.id, 
+            "url": self.url,
+            "name": self.name,
+            "api_key": self.api_key,
+            "is_active": self.is_active
         }
 
 class AnonymousUser(AnonymousUserMixin):

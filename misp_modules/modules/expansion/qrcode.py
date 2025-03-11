@@ -1,23 +1,38 @@
-import json
-from pyzbar import pyzbar
-import cv2
-import re
 import binascii
-import np
+import json
+import re
 
-misperrors = {'error': 'Error'}
-mispattributes = {'input': ['attachment'],
-                  'output': ['url', 'btc']}
-moduleinfo = {'version': '0.1', 'author': 'Sascha Rommelfangen',
-              'description': 'QR code decoder',
-              'module-type': ['expansion', 'hover']}
+import cv2
+import np
+from pyzbar import pyzbar
+
+misperrors = {"error": "Error"}
+mispattributes = {"input": ["attachment"], "output": ["url", "btc"]}
+moduleinfo = {
+    "version": "0.1",
+    "author": "Sascha Rommelfangen",
+    "description": "Module to decode QR codes.",
+    "module-type": ["expansion", "hover"],
+    "name": "QR Code Decode",
+    "logo": "",
+    "requirements": [
+        "cv2: The OpenCV python library.",
+        "pyzbar: Python library to read QR codes.",
+    ],
+    "features": (
+        "The module reads the QR code and returns the related address, which can be an URL or a bitcoin address."
+    ),
+    "references": [],
+    "input": "A QR code stored as attachment attribute.",
+    "output": "The URL or bitcoin address the QR code is pointing to.",
+}
 
 debug = True
 debug_prefix = "[DEBUG] QR Code module: "
 # format example: bitcoin:1GXZ6v7FZzYBEnoRaG77SJxhu7QkvQmFuh?amount=0.15424
 # format example: http://example.com
-cryptocurrencies = ['bitcoin']
-schemas = ['http://', 'https://', 'ftp://']
+cryptocurrencies = ["bitcoin"]
+schemas = ["http://", "https://", "ftp://"]
 moduleconfig = []
 
 
@@ -25,12 +40,12 @@ def handler(q=False):
     if q is False:
         return False
     q = json.loads(q)
-    filename = q['attachment']
+    filename = q["attachment"]
     try:
-        img_array = np.frombuffer(binascii.a2b_base64(q['data']), np.uint8)
+        img_array = np.frombuffer(binascii.a2b_base64(q["data"]), np.uint8)
     except Exception as e:
         err = "Couldn't fetch attachment (JSON 'data' is empty). Are you using the 'Query enrichment' action?"
-        misperrors['error'] = err
+        misperrors["error"] = err
         print(err)
         print(e)
         return misperrors
@@ -48,16 +63,24 @@ def handler(q=False):
         for item in cryptocurrencies:
             if item in result:
                 try:
-                    currency, address, extra = re.split(r'\:|\?', result)
+                    currency, address, extra = re.split(r"\:|\?", result)
                 except Exception as e:
                     print(e)
                 if currency in cryptocurrencies:
                     try:
-                        amount = re.split('=', extra)[1]
+                        amount = re.split("=", extra)[1]
                         if debug:
                             print(debug_prefix + address)
                             print(debug_prefix + amount)
-                        return {'results': [{'types': ['btc'], 'values': address, 'comment': "BTC: " + amount + " from file " + filename}]}
+                        return {
+                            "results": [
+                                {
+                                    "types": ["btc"],
+                                    "values": address,
+                                    "comment": "BTC: " + amount + " from file " + filename,
+                                }
+                            ]
+                        }
                     except Exception as e:
                         print(e)
                 else:
@@ -68,15 +91,31 @@ def handler(q=False):
                     url = result
                     if debug:
                         print(debug_prefix + url)
-                    return {'results': [{'types': ['url'], 'values': url, 'comment': "from QR code of file " + filename}]}
+                    return {
+                        "results": [
+                            {
+                                "types": ["url"],
+                                "values": url,
+                                "comment": "from QR code of file " + filename,
+                            }
+                        ]
+                    }
                 except Exception as e:
                     print(e)
             else:
                 try:
-                    return {'results': [{'types': ['text'], 'values': result, 'comment': "from QR code of file " + filename}]}
+                    return {
+                        "results": [
+                            {
+                                "types": ["text"],
+                                "values": result,
+                                "comment": "from QR code of file " + filename,
+                            }
+                        ]
+                    }
                 except Exception as e:
                     print(e)
-    misperrors['error'] = "Couldn't decode QR code in attachment."
+    misperrors["error"] = "Couldn't decode QR code in attachment."
     return misperrors
 
 
@@ -85,5 +124,5 @@ def introspection():
 
 
 def version():
-    moduleinfo['config'] = moduleconfig
+    moduleinfo["config"] = moduleconfig
     return moduleinfo

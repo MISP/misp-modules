@@ -1,34 +1,44 @@
 #!/usr/bin/env python3
-import json
 import base64
-import zipfile
+import json
 import re
+import zipfile
 from html.parser import HTMLParser
-from pymisp.tools import EMailObject, make_binary_objects
-try:
-    from pymisp.tools import URLObject
-except ImportError:
-    raise ImportError('Unable to import URLObject, pyfaup missing')
 from io import BytesIO
 from pathlib import Path
 
+from pymisp.tools import EMailObject, URLObject, make_binary_objects
 
-misperrors = {'error': 'Error'}
+misperrors = {"error": "Error"}
 
-mispattributes = {'inputSource': ['file'], 'output': ['MISP objects'],
-                  'format': 'misp_standard'}
+mispattributes = {
+    "inputSource": ["file"],
+    "output": ["MISP objects"],
+    "format": "misp_standard",
+}
 
-moduleinfo = {'version': '0.2',
-              'author': 'Seamus Tuohy, Raphaël Vinot',
-              'description': 'Email import module for MISP',
-              'module-type': ['import']}
+moduleinfo = {
+    "version": "0.2",
+    "author": "Seamus Tuohy, Raphaël Vinot",
+    "description": "Email import module for MISP",
+    "module-type": ["import"],
+    "name": "Email Import",
+    "requirements": [],
+    "features": (
+        "This module can be used to import e-mail text as well as attachments and urls.\n3 configuration parameters are"
+        " then used to unzip attachments, guess zip attachment passwords, and extract urls: set each one of them to"
+        " True or False to process or not the respective corresponding actions."
+    ),
+    "references": [],
+    "input": "E-mail file",
+    "output": "MISP Event attributes",
+    "logo": "",
+}
 
 # unzip_attachments : Unzip all zip files that are not password protected
 # guess_zip_attachment_passwords : This attempts to unzip all password protected zip files using all the strings found in the email body and subject
 # extract_urls : This attempts to extract all URL's from text/html parts of the email
-moduleconfig = ["unzip_attachments",
-                "guess_zip_attachment_passwords",
-                "extract_urls"]
+moduleconfig = ["unzip_attachments", "guess_zip_attachment_passwords", "extract_urls"]
 
 
 def dict_handler(request: dict):
@@ -40,7 +50,7 @@ def dict_handler(request: dict):
     # Check if we were given a configuration
     config = request.get("config", {})
     # Don't be picky about how the user chooses to say yes to these
-    acceptable_config_yes = ['y', 'yes', 'true', 't']
+    acceptable_config_yes = ["y", "yes", "true", "t"]
 
     # Do we unzip attachments we find?
     unzip = config.get("unzip_attachments", None)
@@ -64,13 +74,42 @@ def dict_handler(request: dict):
     for attachment_name, attachment in email_object.attachments:
         # Create file objects for the attachments
         if not attachment_name:
-            attachment_name = 'NameMissing.txt'
+            attachment_name = "NameMissing.txt"
 
         temp_filename = Path(attachment_name)
-        zipped_files = ["doc", "docx", "dot", "dotx", "xls", "xlsx", "xlm", "xla",
-                        "xlc", "xlt", "xltx", "xlw", "ppt", "pptx", "pps", "ppsx",
-                        "pot", "potx", "potx", "sldx", "odt", "ods", "odp", "odg",
-                        "odf", "fodt", "fods", "fodp", "fodg", "ott", "uot"]
+        zipped_files = [
+            "doc",
+            "docx",
+            "dot",
+            "dotx",
+            "xls",
+            "xlsx",
+            "xlm",
+            "xla",
+            "xlc",
+            "xlt",
+            "xltx",
+            "xlw",
+            "ppt",
+            "pptx",
+            "pps",
+            "ppsx",
+            "pot",
+            "potx",
+            "potx",
+            "sldx",
+            "odt",
+            "ods",
+            "odp",
+            "odg",
+            "odf",
+            "fodt",
+            "fods",
+            "fodp",
+            "fodg",
+            "ott",
+            "uot",
+        ]
         # Attempt to unzip the attachment and return its files
         if unzip and temp_filename.suffix[1:] not in zipped_files:
             try:
@@ -79,49 +118,66 @@ def dict_handler(request: dict):
                 if zip_pass_crack is True:
                     password = test_zip_passwords(attachment, password_list)
                     if password:
-                        unzip_attachment(attachment_name, attachment, email_object, file_objects, password)
+                        unzip_attachment(
+                            attachment_name,
+                            attachment,
+                            email_object,
+                            file_objects,
+                            password,
+                        )
                     else:  # Inform the analyst that we could not crack password
-                        f_object, main_object, sections = make_binary_objects(pseudofile=attachment, filename=attachment_name, standalone=False)
+                        f_object, main_object, sections = make_binary_objects(
+                            pseudofile=attachment,
+                            filename=attachment_name,
+                            standalone=False,
+                        )
                         f_object.comment = "Encrypted Zip: Password could not be cracked from message"
                         file_objects.append(f_object)
                         file_objects.append(main_object)
                         file_objects += sections
-                        email_object.add_reference(f_object.uuid, 'includes', 'Email attachment')
+                        email_object.add_reference(f_object.uuid, "includes", "Email attachment")
             except zipfile.BadZipFile:  # Attachment is not a zipfile
                 # Just straight add the file
-                f_object, main_object, sections = make_binary_objects(pseudofile=attachment, filename=attachment_name, standalone=False)
+                f_object, main_object, sections = make_binary_objects(
+                    pseudofile=attachment, filename=attachment_name, standalone=False
+                )
                 file_objects.append(f_object)
                 file_objects.append(main_object)
                 file_objects += sections
-                email_object.add_reference(f_object.uuid, 'includes', 'Email attachment')
+                email_object.add_reference(f_object.uuid, "includes", "Email attachment")
         else:
             # Just straight add the file
-            f_object, main_object, sections = make_binary_objects(pseudofile=attachment, filename=attachment_name, standalone=False)
+            f_object, main_object, sections = make_binary_objects(
+                pseudofile=attachment, filename=attachment_name, standalone=False
+            )
             file_objects.append(f_object)
             file_objects.append(main_object)
             file_objects += sections
-            email_object.add_reference(f_object.uuid, 'includes', 'Email attachment')
+            email_object.add_reference(f_object.uuid, "includes", "Email attachment")
 
-    mail_body = email_object.email.get_body(preferencelist=('html', 'plain'))
+    mail_body = email_object.email.get_body(preferencelist=("html", "plain"))
     if extract_urls and mail_body:
-        charset = mail_body.get_content_charset('utf-8')
-        if mail_body.get_content_type() == 'text/html':
+        charset = mail_body.get_content_charset("utf-8")
+        if mail_body.get_content_type() == "text/html":
             url_parser = HTMLURLParser()
-            url_parser.feed(mail_body.get_payload(decode=True).decode(charset, errors='ignore'))
+            url_parser.feed(mail_body.get_payload(decode=True).decode(charset, errors="ignore"))
             urls = url_parser.urls
         else:
-            urls = re.findall(r'https?://(?:[-\w.]|(?:%[\da-fA-F]{2}))+', mail_body.get_payload(decode=True).decode(charset, errors='ignore'))
+            urls = re.findall(
+                r"https?://(?:[-\w.]|(?:%[\da-fA-F]{2}))+",
+                mail_body.get_payload(decode=True).decode(charset, errors="ignore"),
+            )
         for url in urls:
             if not url:
                 continue
             url_object = URLObject(url, standalone=False)
             file_objects.append(url_object)
-            email_object.add_reference(url_object.uuid, 'includes', 'URL in email body')
+            email_object.add_reference(url_object.uuid, "includes", "URL in email body")
 
     objects = [email_object.to_dict()]
     if file_objects:
         objects += [o.to_dict() for o in file_objects if o]
-    r = {'results': {'Object': objects}}
+    r = {"results": {"Object": objects}}
     return r
 
 
@@ -144,18 +200,18 @@ def unzip_attachment(filename, data, email_object, file_objects, password=None):
             comment = f'Extracted from {filename} with password "{password}"'
             password = str.encode(password)  # Byte encoded password required
         else:
-            comment = f'Extracted from {filename}'
+            comment = f"Extracted from {filename}"
         for zip_file_name in zf.namelist():  # Get all files in the zip file
-            with zf.open(zip_file_name, mode='r', pwd=password) as fp:
+            with zf.open(zip_file_name, mode="r", pwd=password) as fp:
                 file_data = BytesIO(fp.read())
-            f_object, main_object, sections = make_binary_objects(pseudofile=file_data,
-                                                                  filename=zip_file_name,
-                                                                  standalone=False)
+            f_object, main_object, sections = make_binary_objects(
+                pseudofile=file_data, filename=zip_file_name, standalone=False
+            )
             f_object.comment = comment
             file_objects.append(f_object)
             file_objects.append(main_object)
             file_objects += sections
-            email_object.add_reference(f_object.uuid, 'includes', 'Email attachment')
+            email_object.add_reference(f_object.uuid, "includes", "Email attachment")
 
 
 def test_zip_passwords(data, test_passwords):
@@ -182,7 +238,7 @@ def test_zip_passwords(data, test_passwords):
 
 
 def get_zip_passwords(message):
-    """ Parse message for possible zip password combinations.
+    """Parse message for possible zip password combinations.
 
     Args:
         message (email.message) Email message object to parse.
@@ -192,12 +248,32 @@ def get_zip_passwords(message):
     malware_passwords = ["infected", "malware"]
     possible_passwords += malware_passwords
     # Commonly used passwords
-    common_passwords = ["123456", "password", "12345678", "qwerty",
-                        "abc123", "123456789", "111111", "1234567",
-                        "iloveyou", "adobe123", "123123", "sunshine",
-                        "1234567890", "letmein", "1234", "monkey",
-                        "shadow", "sunshine", "12345", "password1",
-                        "princess", "azerty", "trustno1", "000000"]
+    common_passwords = [
+        "123456",
+        "password",
+        "12345678",
+        "qwerty",
+        "abc123",
+        "123456789",
+        "111111",
+        "1234567",
+        "iloveyou",
+        "adobe123",
+        "123123",
+        "sunshine",
+        "1234567890",
+        "letmein",
+        "1234",
+        "monkey",
+        "shadow",
+        "sunshine",
+        "12345",
+        "password1",
+        "princess",
+        "azerty",
+        "trustno1",
+        "000000",
+    ]
 
     possible_passwords += common_passwords
 
@@ -208,24 +284,24 @@ def get_zip_passwords(message):
         charset = part.get_content_charset()
         if not charset:
             charset = "utf-8"
-        if part.get_content_type() == 'text/plain':
-            body.append(part.get_payload(decode=True).decode(charset, errors='ignore'))
-        elif part.get_content_type() == 'text/html':
+        if part.get_content_type() == "text/plain":
+            body.append(part.get_payload(decode=True).decode(charset, errors="ignore"))
+        elif part.get_content_type() == "text/html":
             html_parser = HTMLTextParser()
             payload = part.get_payload(decode=True)
             if payload:
-                html_parser.feed(payload.decode(charset, errors='ignore'))
+                html_parser.feed(payload.decode(charset, errors="ignore"))
                 for text in html_parser.text_data:
                     body.append(text)
     raw_text = "\n".join(body).strip()
 
     # Add subject to text corpus to parse
     if "Subject" in message:
-        subject = " " + message.get('Subject')
+        subject = " " + message.get("Subject")
         raw_text += subject
 
     # Grab any strings that are marked off by special chars
-    marking_chars = [["\'", "\'"], ['"', '"'], ['[', ']'], ['(', ')']]
+    marking_chars = [["'", "'"], ['"', '"'], ["[", "]"], ["(", ")"]]
     for char_set in marking_chars:
         regex = re.compile(r"""\{0}([^\{1}]*)\{1}""".format(char_set[0], char_set[1]))
         marked_off = re.findall(regex, raw_text)
@@ -235,7 +311,7 @@ def get_zip_passwords(message):
     individual_words = re.split(r"\s", raw_text)
     # Also get words with basic punctuation stripped out
     # just in case someone places a password in a proper sentence
-    stripped_words = [i.strip('.,;:?!') for i in individual_words]
+    stripped_words = [i.strip(".,;:?!") for i in individual_words]
     unique_words = list(set(individual_words + stripped_words))
     possible_passwords += unique_words
 
@@ -243,7 +319,8 @@ def get_zip_passwords(message):
 
 
 class HTMLTextParser(HTMLParser):
-    """ Parse all text and data from HTML strings."""
+    """Parse all text and data from HTML strings."""
+
     def __init__(self, text_data=None):
         HTMLParser.__init__(self)
         if text_data is None:
@@ -256,7 +333,8 @@ class HTMLTextParser(HTMLParser):
 
 
 class HTMLURLParser(HTMLParser):
-    """ Parse all href targets from HTML strings."""
+    """Parse all href targets from HTML strings."""
+
     def __init__(self, urls=None):
         HTMLParser.__init__(self)
         if urls is None:
@@ -265,10 +343,10 @@ class HTMLURLParser(HTMLParser):
             self.urls = urls
 
     def handle_starttag(self, tag, attrs):
-        if tag == 'a':
-            self.urls.append(dict(attrs).get('href'))
-        if tag == 'img':
-            self.urls.append(dict(attrs).get('src'))
+        if tag == "a":
+            self.urls.append(dict(attrs).get("href"))
+        if tag == "img":
+            self.urls.append(dict(attrs).get("src"))
 
 
 def introspection():
@@ -276,10 +354,10 @@ def introspection():
 
 
 def version():
-    moduleinfo['config'] = moduleconfig
+    moduleinfo["config"] = moduleconfig
     return moduleinfo
 
 
-if __name__ == '__main__':
-    with open('tests/test_no_attach.eml', 'r') as email_file:
+if __name__ == "__main__":
+    with open("tests/test_no_attach.eml", "r") as email_file:
         dict_handler(json.loads(email_file.read()))

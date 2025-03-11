@@ -2,11 +2,7 @@ import ipaddress
 import json
 import logging
 
-
-try:
-    from greynoise import GreyNoise
-except ImportError:
-    print("greynoise module not installed.")
+from greynoise import GreyNoise
 from pymisp import MISPAttribute, MISPEvent, MISPObject
 
 from . import check_input_attribute, standard_error_message
@@ -15,12 +11,33 @@ logger = logging.getLogger("greynoise")
 logger.setLevel(logging.INFO)
 
 misperrors = {"error": "Error"}
-mispattributes = {"input": ["ip-src", "ip-dst", "vulnerability"], "format": "misp_standard"}
+mispattributes = {
+    "input": ["ip-src", "ip-dst", "vulnerability"],
+    "format": "misp_standard",
+}
 moduleinfo = {
     "version": "1.2",
     "author": "Brad Chiappetta <brad@greynoise.io>",
-    "description": "Used to query IP and CVE intel from GreyNoise",
+    "description": "Module to query IP and CVE information from GreyNoise",
     "module-type": ["expansion", "hover"],
+    "name": "GreyNoise Lookup",
+    "logo": "greynoise.png",
+    "requirements": [
+        "A Greynoise API key. Both Enterprise (Paid) and Community (Free) API keys are supported, however Community API"
+        " users will only be able to perform IP lookups."
+    ],
+    "features": (
+        "This module supports: 1) Query an IP from GreyNoise to see if it is internet background noise or a common"
+        " business service 2) Query a CVE from GreyNoise to see the total number of internet scanners looking for the"
+        " CVE in the last 7 days."
+    ),
+    "references": [
+        "https://greynoise.io/",
+        "https://docs.greyniose.io/",
+        "https://www.greynoise.io/viz/account/",
+    ],
+    "input": "An IP address or CVE ID",
+    "output": "IP Lookup information or CVE scanning profile for past 7 days",
 }
 moduleconfig = ["api_key", "api_type"]
 
@@ -69,8 +86,14 @@ class GreyNoiseParser:
             "country_code": {"type": "text", "object_relation": "country-code"},
             "country": {"type": "text", "object_relation": "country"},
             "organization": {"type": "text", "object_relation": "organization"},
-            "destination_country_codes": {"type": "text", "object_relation": "destination-country-codes"},
-            "destination_countries": {"type": "text", "object_relation": "destination-countries"},
+            "destination_country_codes": {
+                "type": "text",
+                "object_relation": "destination-country-codes",
+            },
+            "destination_countries": {
+                "type": "text",
+                "object_relation": "destination-countries",
+            },
             "category": {"type": "text", "object_relation": "category"},
             "rdns": {"type": "text", "object_relation": "rdns"},
         }
@@ -134,7 +157,10 @@ class GreyNoiseParser:
                 for feature, mapping in self.ip_address_metadata_mapping.items():
                     logger.debug(f"Checking metadata feature {feature}")
                     if response["metadata"].get(feature):
-                        if feature in ["destination_countries", "destination_country_codes"]:
+                        if feature in [
+                            "destination_countries",
+                            "destination_country_codes",
+                        ]:
                             response["metadata"][feature] = ", ".join(response["metadata"][feature])
                         attribute = {"value": response["metadata"][feature]}
                         logger.debug(f"Adding Feature: {feature}, Attribute: {attribute}")
@@ -320,7 +346,9 @@ def handler(q=False):
             if "persistent" in request:
                 greynoise_parser.query_greynoise_ip_hover(request["config"]["api_key"], request["config"]["api_type"])
             else:
-                greynoise_parser.query_greynoise_ip_expansion(request["config"]["api_key"], request["config"]["api_type"])
+                greynoise_parser.query_greynoise_ip_expansion(
+                    request["config"]["api_key"], request["config"]["api_type"]
+                )
         except ValueError:
             return {"error": "Not a valid IPv4 address"}
 

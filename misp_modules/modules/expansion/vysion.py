@@ -1,13 +1,13 @@
 import json
-from pymisp import MISPAttribute, MISPEvent
+import logging
 from urllib.parse import urlparse
 
-import logging
-
 import vysion.client as vysion
-
-import vysion.dto as dto
+import vysion.dto
+from pymisp import MISPAttribute, MISPEvent
 from vysion.dto.util import MISPProcessor
+
+from . import standard_error_message
 
 misperrors = {"error": "Error"}
 mispattributes = {
@@ -20,6 +20,8 @@ mispattributes = {
         "btc",
         "phone-number",
         "target-org",
+        "xmr",
+        "dash",
     ],
     "format": "misp_standard",
 }
@@ -28,8 +30,23 @@ mispattributes = {
 moduleinfo = {
     "version": "1",
     "author": "Byron Labs",
-    "description": "Enrich observables with the Vysion API",
+    "description": "Module to enrich the information by making use of the Vysion API.",
     "module-type": ["expansion"],
+    "name": "Vysion Enrich",
+    "logo": "vysion.png",
+    "requirements": ["Vysion python library", "Vysion API Key"],
+    "features": (
+        "This module gets correlated information from Byron Labs' dark web intelligence database. With this you will"
+        " get several objects containing information related to, for example, an organization victim of a ransomware"
+        " attack."
+    ),
+    "references": [
+        "https://vysion.ai/",
+        "https://developers.vysion.ai/",
+        "https://github.com/ByronLabs/vysion-cti/tree/main",
+    ],
+    "input": "company(target-org), country, info, BTC, XMR and DASH address.",
+    "output": "MISP objects containing title, link to our webapp and TOR, i2p or clearnet URLs.",
 }
 
 # config fields that your code expects from the site admin
@@ -44,7 +61,7 @@ moduleconfig = [
 
 LOGGER = logging.getLogger("vysion")
 LOGGER.setLevel(logging.INFO)
-LOGGER.info("Starting Vysion")
+LOGGER.debug("Starting Vysion")
 
 DEFAULT_RESULTS_LIMIT = 10
 
@@ -60,10 +77,7 @@ def get_proxy_settings(config: dict) -> dict:
 
     if host:
         if not port:
-            misperrors["error"] = (
-                "The vysion_proxy_host config is set, "
-                "please also set the vysion_proxy_port."
-            )
+            misperrors["error"] = "The vysion_proxy_host config is set, please also set the vysion_proxy_port."
             raise KeyError
         parsed = urlparse(host)
         if "http" in parsed.scheme:
@@ -76,8 +90,7 @@ def get_proxy_settings(config: dict) -> dict:
         if username:
             if not password:
                 misperrors["error"] = (
-                    "The vysion_proxy_username config is set, "
-                    "please also set the vysion_proxy_password."
+                    "The vysion_proxy_username config is set, please also set the vysion_proxy_password."
                 )
                 raise KeyError
             auth = f"{username}:{password}"
@@ -113,9 +126,7 @@ def handler(q=False):
         return misperrors
 
     if not request.get("attribute"):
-        return {
-            "error": "The request is missing required attribute information, which should contain at least a type, a value, and a UUID."
-        }
+        return {"error": f"{standard_error_message}, which should contain at least a type, a value and an uuid."}
 
     if request["attribute"]["type"] not in mispattributes["input"]:
         return {"error": "Unsupported attribute type."}
@@ -151,24 +162,23 @@ def handler(q=False):
         if attribute_type == "email":
             result = client.find_email(attribute_value)
         elif attribute_type == "domain":
-            result = client.search(attribute_value) 
+            result = client.find_url(attribute_value)
         elif attribute_type == "url":
-            result = client.search(
-                attribute_value
-            )  # TODO result = client.find_url(attribute_value)
+            result = client.find_url(attribute_value)
         elif attribute_type == "text":
             result = client.search(attribute_value)
         elif attribute_type == "target-org":
-            result = client.search(attribute_value, exact=True)
-        elif attribute_type == "btc":
-            result = client.search(attribute_value)  # TODO
+            result = client.search(attribute_value)
         elif attribute_type == "phone-number":
-            result = client.search(attribute_value)  # TODO
+            result = client.search(attribute_value)
+        elif attribute_type == "btc":
+            result = client.find_wallet("BTC", attribute_value)
+        elif attribute_type == "xmr":
+            result = client.find_wallet("XMR", attribute_value)
+        elif attribute_type == "dash":
+            result = client.find_wallet("DASH", attribute_value)
 
         if result is None:
-            return {"results": {}}
-        elif isinstance(result, dto.VysionError):
-            LOGGER.error(str(result))
             return {"results": {}}
 
         p = MISPProcessor()
@@ -180,17 +190,9 @@ def handler(q=False):
 
         return {
             "results": {
-                "Object": [
-                    json.loads(object.to_json()) for object in misp_event.objects
-                ],
-                "Attribute": [
-                    json.loads(attribute.to_json())
-                    for attribute in misp_event.attributes
-                ], 
-                "Tag": [
-                    json.loads(tag.to_json())
-                    for tag in misp_event.tags
-                ]
+                "Object": [json.loads(object.to_json()) for object in misp_event.objects],
+                "Attribute": [json.loads(attribute.to_json()) for attribute in misp_event.attributes],
+                "Tag": [json.loads(tag.to_json()) for tag in misp_event.tags],
             }
         }
 

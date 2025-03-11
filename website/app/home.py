@@ -1,9 +1,12 @@
+import ast
 import json
 from flask import Blueprint, render_template, request, jsonify, session as sess
 from flask_login import current_user
+import requests
 from . import session_class as SessionModel
 from . import home_core as HomeModel
 from .utils.utils import admin_user_active
+from .external_tools import external_tools_core as ToolModel
 
 home_blueprint = Blueprint(
     'home',
@@ -13,18 +16,35 @@ home_blueprint = Blueprint(
 )
 
 
-@home_blueprint.route("/")
+@home_blueprint.route("/", methods=["GET", "POST"])
 def home():
+    try:
+        del sess["query"]
+    except:
+        pass
     sess["admin_user"] = bool(admin_user_active())
     if "query" in request.args:
-        return render_template("home.html", query=request.args.get("query"))
+        sess["query"] = ast.literal_eval(request.args.get("query"))
+    if "query" in request.form:
+        sess["query"] = json.loads(request.form.get("query"))
     return render_template("home.html")
+
+@home_blueprint.route("/get_query", methods=['GET', 'POST'])
+def get_query():
+    """Get result from flowintel"""
+    if "query" in sess:
+        return {"query": sess.get("query")}
+    return {"message": "No query"}
 
 @home_blueprint.route("/home/<sid>", methods=["GET", "POST"])
 def home_query(sid):
+    try:
+        del sess["query"]
+    except:
+        pass
     sess["admin_user"] = admin_user_active()
     if "query" in request.args:
-        query = request.args.get("query")
+        sess["query"] = [request.args.get("query")]
         return render_template("home.html", query=query, sid=sid)
     return render_template("404.html")
 
@@ -33,21 +53,28 @@ def query(sid):
     sess["admin_user"] = admin_user_active()
     session = HomeModel.get_session(sid)
     flag=False
+    modules_list = []
     if session:
         flag = True
-        query_loc = session.query_enter
+        query_loc = json.loads(session.query_enter)
+        modules_list = json.loads(session.modules_list)
     else:
         for s in SessionModel.sessions:
             if s.uuid == sid:
                 flag = True
                 query_loc = s.query
                 session=s
+                modules_list = session.modules_list
+    query_str = ", ".join(query_loc)
+    if len(query_str) > 40:
+        query_str = query_str[0:40] + "..."
     if flag:
         return render_template("query.html", 
                                query=query_loc, 
+                               query_str=query_str,
                                sid=sid, 
                                input_query=session.input_query, 
-                               modules=json.loads(session.modules_list), 
+                               modules=modules_list, 
                                query_date=session.query_date.strftime('%Y-%m-%d %H:%M'))
     return render_template("404.html")
 
@@ -60,18 +87,20 @@ def get_query_info(sid):
     flag=False
     if session:
         flag = True
-        query_loc = session.query_enter
+        query_loc = json.loads(session.query_enter)
+        modules_list = json.loads(session.modules_list)
     else:
         for s in SessionModel.sessions:
             if s.uuid == sid:
                 flag = True
                 query_loc = s.query
+                modules_list = s.modules_list
                 session=s
     if flag:
         loc_dict = {
             "query": query_loc,
             "input_query": session.input_query,
-            "modules": json.loads(session.modules_list), 
+            "modules": modules_list, 
             "query_date": session.query_date.strftime('%Y-%m-%d %H:%M')
             }
         return loc_dict
@@ -150,8 +179,10 @@ def download(sid):
         if sess:
             loc = json.loads(sess.result)
             module = request.args.get("module")
-            if module in loc:
-                return jsonify(loc[module]), 200, {'Content-Disposition': f'attachment; filename={sess.query_enter.replace(".", "_")}-{module}.json'}
+            query = request.args.get("query")
+            if query in loc:
+                if module in loc[query]:
+                    return jsonify(loc[query][module]), 200, {'Content-Disposition': f'attachment; filename={query}-{module}.json'}
             return {"message": "Module not in result", "toast_class": "danger-subtle"}, 400
         else:
             for s in SessionModel.sessions:
@@ -159,7 +190,7 @@ def download(sid):
                     module = request.args.get("module")
                     if module in s.result:
                         return jsonify(s.result[module]), 200, {'Content-Disposition': f'attachment; filename={s.query}-{module}.json'}
-                    return {"message": "Module not in result", "toast_class": "danger-subtle"}, 400
+                    return {"message": "Module not in result ", "toast_class": "danger-subtle"}, 400
         return {"message": "Session not found", 'toast_class': "danger-subtle"}, 404
     return {"message": "Need to pass a module", "toast_class": "warning-subtle"}, 400
 
@@ -226,4 +257,21 @@ def change_status():
                 return {'message': 'Module status changed', 'toast_class': "success-subtle"}, 200
             return {'message': 'Something went wrong', 'toast_class': "danger-subtle"}, 400
         return {'message': 'Need to pass "module_id"', 'toast_class': "warning-subtle"}, 400
+    return {'message': 'Permission denied', 'toast_class': "danger-subtle"}, 403
+
+
+@home_blueprint.route("/submit_external_tool", methods=["GET", "POST"])
+def submit_external_tool():
+    """Submit result to an external tool"""
+    sess["admin_user"] = admin_user_active()
+    flag = True
+    if sess.get("admin_user"):
+        if not current_user.is_authenticated:
+            flag = False
+    # if admin is active and user is logon or if admin is not active
+    if flag:
+        ext = ToolModel.get_tool(request.json["external_tool_id"])
+        if HomeModel.submit_external_tool(request.json["results"], ext):
+            return {'message': f'Send to {ext.name} successfully', 'toast_class': "success-subtle"}, 200
+        return {'message': 'Something went wrong', 'toast_class': "danger-subtle"}, 400
     return {'message': 'Permission denied', 'toast_class': "danger-subtle"}, 403

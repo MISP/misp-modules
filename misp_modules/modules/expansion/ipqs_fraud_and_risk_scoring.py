@@ -1,61 +1,63 @@
 import json
 import logging
+
 import requests
-from requests.exceptions import (
-    HTTPError,
-    ProxyError,
-    InvalidURL,
-    ConnectTimeout
-)
+from pymisp import Distribution, MISPAttribute, MISPEvent, MISPObject, MISPTag
+from requests.exceptions import ConnectTimeout, HTTPError, InvalidURL, ProxyError
+
 from . import check_input_attribute, standard_error_message
-from pymisp import MISPEvent, MISPAttribute, MISPObject, MISPTag, Distribution
 
-ip_query_input_type = [
-    'ip-src',
-    'ip-dst'
-]
-url_query_input_type = [
-    'hostname',
-    'domain',
-    'url',
-    'uri'
-]
+ip_query_input_type = ["ip-src", "ip-dst"]
+url_query_input_type = ["hostname", "domain", "url", "uri"]
 email_query_input_type = [
-    'email',
-    'email-src',
-    'email-dst',
-    'target-email',
-    'whois-registrant-email'
+    "email",
+    "email-src",
+    "email-dst",
+    "target-email",
+    "whois-registrant-email",
 ]
-phone_query_input_type = [
-    'phone-number',
-    'whois-registrant-phone'
-]
+phone_query_input_type = ["phone-number", "whois-registrant-phone"]
 
-misperrors = {
-    'error': 'Error'
-}
+misperrors = {"error": "Error"}
 mispattributes = {
-    'input': ip_query_input_type + url_query_input_type + email_query_input_type + phone_query_input_type,
-    'format': 'misp_standard'
+    "input": ip_query_input_type + url_query_input_type + email_query_input_type + phone_query_input_type,
+    "format": "misp_standard",
 }
 moduleinfo = {
-    'version': '0.1',
-    'author': 'David Mackler',
-    'description': 'IPQualityScore MISP Expansion Module for IP reputation, Email Validation, Phone Number Validation,'
-                   'Malicious Domain and Malicious URL Scanner.',
-    'module-type': ['expansion', 'hover']
+    "version": "0.1",
+    "author": "David Mackler",
+    "description": (
+        "IPQualityScore MISP Expansion Module for IP reputation, Email Validation, Phone Number Validation, Malicious"
+        " Domain and Malicious URL Scanner."
+    ),
+    "module-type": ["expansion", "hover"],
+    "name": "IPQualityScore Lookup",
+    "logo": "ipqualityscore.png",
+    "requirements": ["A IPQualityScore API Key."],
+    "features": (
+        "This Module takes the IP Address, Domain, URL, Email and Phone Number MISP Attributes as input to query the"
+        " IPQualityScore API.\n The results of the IPQualityScore API are than returned as IPQS Fraud and Risk Scoring"
+        " Object. \n The object contains a copy of the enriched attribute with added tags presenting the verdict based"
+        " on fraud score,risk score and other attributes from IPQualityScore."
+    ),
+    "references": ["https://www.ipqualityscore.com/"],
+    "input": (
+        "A MISP attribute of type IP Address(ip-src, ip-dst), Domain(hostname, domain), URL(url, uri), Email"
+        " Address(email, email-src, email-dst, target-email, whois-registrant-email) and Phone Number(phone-number,"
+        " whois-registrant-phone)."
+    ),
+    "output": "IPQualityScore object, resulting from the query on the IPQualityScore API.",
 }
-moduleconfig = ['apikey']
+moduleconfig = ["apikey"]
 
-logger = logging.getLogger('ipqualityscore')
+logger = logging.getLogger("ipqualityscore")
 logger.setLevel(logging.DEBUG)
-BASE_URL = 'https://ipqualityscore.com/api/json'
+BASE_URL = "https://ipqualityscore.com/api/json"
 DEFAULT_DISTRIBUTION_SETTING = Distribution.your_organisation_only.value
-IP_ENRICH = 'ip'
-URL_ENRICH = 'url'
-EMAIL_ENRICH = 'email'
-PHONE_ENRICH = 'phone'
+IP_ENRICH = "ip"
+URL_ENRICH = "url"
+EMAIL_ENRICH = "email"
+PHONE_ENRICH = "phone"
 
 
 class RequestHandler:
@@ -68,9 +70,7 @@ class RequestHandler:
     def get(self, url: str, headers: dict = None, params: dict = None) -> requests.Response:
         """General get method to fetch the response from IPQualityScore."""
         try:
-            response = self.session.get(
-                url, headers=headers, params=params
-            ).json()
+            response = self.session.get(url, headers=headers, params=params).json()
             if str(response["success"]) != "True":
                 msg = response["message"]
                 logger.error(f"Error: {msg}")
@@ -100,11 +100,11 @@ class RequestHandler:
 def parse_attribute(comment, feature, value):
     """Generic Method for parsing the attributes in the object"""
     attribute = {
-        'type': 'text',
-        'value': value,
-        'comment': comment,
-        'distribution': DEFAULT_DISTRIBUTION_SETTING,
-        'object_relation': feature
+        "type": "text",
+        "value": value,
+        "comment": comment,
+        "distribution": DEFAULT_DISTRIBUTION_SETTING,
+        "object_relation": feature,
     }
     return attribute
 
@@ -130,214 +130,215 @@ class IPQualityScoreParser:
         self.attribute = attribute
         self.misp_event = MISPEvent()
         self.misp_event.add_attribute(**attribute)
-        self.ipqs_object = MISPObject('IPQS Fraud and Risk Scoring Object')
+        self.ipqs_object = MISPObject("IPQS Fraud and Risk Scoring Object")
         self.ipqs_object.template_uuid = "57d066e6-6d66-42a7-a1ad-e075e39b2b5e"
         self.ipqs_object.template_id = "1"
         self.ipqs_object.description = "IPQS Fraud and Risk Scoring Data"
-        setattr(self.ipqs_object, 'meta-category', 'network')
-        description = (
-            "An object containing the enriched attribute and "
-            "related entities from IPQualityScore."
-        )
+        setattr(self.ipqs_object, "meta-category", "network")
+        description = "An object containing the enriched attribute and related entities from IPQualityScore."
         self.ipqs_object.from_dict(
-            **{"meta-category": "misc", "description": description, "distribution": DEFAULT_DISTRIBUTION_SETTING}
+            **{
+                "meta-category": "misc",
+                "description": description,
+                "distribution": DEFAULT_DISTRIBUTION_SETTING,
+            }
         )
 
         temp_attr = MISPAttribute()
         temp_attr.from_dict(**attribute)
         self.enriched_attribute = MISPAttribute()
         self.enriched_attribute.from_dict(
-            **{"value": temp_attr.value, "type": temp_attr.type, "distribution": DEFAULT_DISTRIBUTION_SETTING}
+            **{
+                "value": temp_attr.value,
+                "type": temp_attr.type,
+                "distribution": DEFAULT_DISTRIBUTION_SETTING,
+            }
         )
         self.ipqs_object.distribution = DEFAULT_DISTRIBUTION_SETTING
         self.ip_data_items = [
-            'fraud_score',
-            'country_code',
-            'region',
-            'city',
-            'zip_code',
-            'ISP',
-            'ASN',
-            'organization',
-            'is_crawler',
-            'timezone',
-            'mobile',
-            'host',
-            'proxy',
-            'vpn',
-            'tor',
-            'active_vpn',
-            'active_tor',
-            'recent_abuse',
-            'bot_status',
-            'connection_type',
-            'abuse_velocity',
-            'latitude',
-            'longitude'
+            "fraud_score",
+            "country_code",
+            "region",
+            "city",
+            "zip_code",
+            "ISP",
+            "ASN",
+            "organization",
+            "is_crawler",
+            "timezone",
+            "mobile",
+            "host",
+            "proxy",
+            "vpn",
+            "tor",
+            "active_vpn",
+            "active_tor",
+            "recent_abuse",
+            "bot_status",
+            "connection_type",
+            "abuse_velocity",
+            "latitude",
+            "longitude",
         ]
         self.ip_data_items_friendly_names = {
-            'fraud_score': 'IPQS: Fraud Score',
-            'country_code': 'IPQS: Country Code',
-            'region': 'IPQS: Region',
-            'city': 'IPQS: City',
-            'zip_code': 'IPQS: Zip Code',
-            'ISP': 'IPQS: ISP',
-            'ASN': 'IPQS: ASN',
-            'organization': 'IPQS: Organization',
-            'is_crawler': 'IPQS: Is Crawler',
-            'timezone': 'IPQS: Timezone',
-            'mobile': 'IPQS: Mobile',
-            'host': 'IPQS: Host',
-            'proxy': 'IPQS: Proxy',
-            'vpn': 'IPQS: VPN',
-            'tor': 'IPQS: TOR',
-            'active_vpn': 'IPQS: Active VPN',
-            'active_tor': 'IPQS: Active TOR',
-            'recent_abuse': 'IPQS: Recent Abuse',
-            'bot_status': 'IPQS: Bot Status',
-            'connection_type': 'IPQS: Connection Type',
-            'abuse_velocity': 'IPQS: Abuse Velocity',
-            'latitude': 'IPQS: Latitude',
-            'longitude': 'IPQS: Longitude'
+            "fraud_score": "IPQS: Fraud Score",
+            "country_code": "IPQS: Country Code",
+            "region": "IPQS: Region",
+            "city": "IPQS: City",
+            "zip_code": "IPQS: Zip Code",
+            "ISP": "IPQS: ISP",
+            "ASN": "IPQS: ASN",
+            "organization": "IPQS: Organization",
+            "is_crawler": "IPQS: Is Crawler",
+            "timezone": "IPQS: Timezone",
+            "mobile": "IPQS: Mobile",
+            "host": "IPQS: Host",
+            "proxy": "IPQS: Proxy",
+            "vpn": "IPQS: VPN",
+            "tor": "IPQS: TOR",
+            "active_vpn": "IPQS: Active VPN",
+            "active_tor": "IPQS: Active TOR",
+            "recent_abuse": "IPQS: Recent Abuse",
+            "bot_status": "IPQS: Bot Status",
+            "connection_type": "IPQS: Connection Type",
+            "abuse_velocity": "IPQS: Abuse Velocity",
+            "latitude": "IPQS: Latitude",
+            "longitude": "IPQS: Longitude",
         }
         self.url_data_items = [
-            'unsafe',
-            'domain',
-            'ip_address',
-            'server',
-            'domain_rank',
-            'dns_valid',
-            'parking',
-            'spamming',
-            'malware',
-            'phishing',
-            'suspicious',
-            'adult',
-            'risk_score',
-            'category',
-            'domain_age'
+            "unsafe",
+            "domain",
+            "ip_address",
+            "server",
+            "domain_rank",
+            "dns_valid",
+            "parking",
+            "spamming",
+            "malware",
+            "phishing",
+            "suspicious",
+            "adult",
+            "risk_score",
+            "category",
+            "domain_age",
         ]
         self.url_data_items_friendly_names = {
-            'unsafe': 'IPQS: Unsafe',
-            'domain': 'IPQS: Domain',
-            'ip_address': 'IPQS: IP Address',
-            'server': 'IPQS: Server',
-            'domain_rank': 'IPQS: Domain Rank',
-            'dns_valid': 'IPQS: DNS Valid',
-            'parking': 'IPQS: Parking',
-            'spamming': 'IPQS: Spamming',
-            'malware': 'IPQS: Malware',
-            'phishing': 'IPQS: Phishing',
-            'suspicious': 'IPQS: Suspicious',
-            'adult': 'IPQS: Adult',
-            'risk_score': 'IPQS: Risk Score',
-            'category': 'IPQS: Category',
-            'domain_age': 'IPQS: Domain Age'
+            "unsafe": "IPQS: Unsafe",
+            "domain": "IPQS: Domain",
+            "ip_address": "IPQS: IP Address",
+            "server": "IPQS: Server",
+            "domain_rank": "IPQS: Domain Rank",
+            "dns_valid": "IPQS: DNS Valid",
+            "parking": "IPQS: Parking",
+            "spamming": "IPQS: Spamming",
+            "malware": "IPQS: Malware",
+            "phishing": "IPQS: Phishing",
+            "suspicious": "IPQS: Suspicious",
+            "adult": "IPQS: Adult",
+            "risk_score": "IPQS: Risk Score",
+            "category": "IPQS: Category",
+            "domain_age": "IPQS: Domain Age",
         }
         self.email_data_items = [
-            'valid',
-            'disposable',
-            'smtp_score',
-            'overall_score',
-            'first_name',
-            'generic',
-            'common',
-            'dns_valid',
-            'honeypot',
-            'deliverability',
-            'frequent_complainer',
-            'spam_trap_score',
-            'catch_all',
-            'timed_out',
-            'suspect',
-            'recent_abuse',
-            'fraud_score',
-            'suggested_domain',
-            'leaked',
-            'sanitized_email',
-            'domain_age',
-            'first_seen'
+            "valid",
+            "disposable",
+            "smtp_score",
+            "overall_score",
+            "first_name",
+            "generic",
+            "common",
+            "dns_valid",
+            "honeypot",
+            "deliverability",
+            "frequent_complainer",
+            "spam_trap_score",
+            "catch_all",
+            "timed_out",
+            "suspect",
+            "recent_abuse",
+            "fraud_score",
+            "suggested_domain",
+            "leaked",
+            "sanitized_email",
+            "domain_age",
+            "first_seen",
         ]
         self.email_data_items_friendly_names = {
-            'valid': 'IPQS: Valid',
-            'disposable': 'IPQS: Disposable',
-            'smtp_score': 'IPQS: SMTP Score',
-            'overall_score': 'IPQS: Overall Score',
-            'first_name': 'IPQS: First Name',
-            'generic': 'IPQS: Generic',
-            'common': 'IPQS: Common',
-            'dns_valid': 'IPQS: DNS Valid',
-            'honeypot': 'IPQS: Honeypot',
-            'deliverability': 'IPQS: Deliverability',
-            'frequent_complainer': 'IPQS: Frequent Complainer',
-            'spam_trap_score': 'IPQS: Spam Trap Score',
-            'catch_all': 'IPQS: Catch All',
-            'timed_out': 'IPQS: Timed Out',
-            'suspect': 'IPQS: Suspect',
-            'recent_abuse': 'IPQS: Recent Abuse',
-            'fraud_score': 'IPQS: Fraud Score',
-            'suggested_domain': 'IPQS: Suggested Domain',
-            'leaked': 'IPQS: Leaked',
-            'sanitized_email': 'IPQS: Sanitized Email',
-            'domain_age': 'IPQS: Domain Age',
-            'first_seen': 'IPQS: First Seen'
+            "valid": "IPQS: Valid",
+            "disposable": "IPQS: Disposable",
+            "smtp_score": "IPQS: SMTP Score",
+            "overall_score": "IPQS: Overall Score",
+            "first_name": "IPQS: First Name",
+            "generic": "IPQS: Generic",
+            "common": "IPQS: Common",
+            "dns_valid": "IPQS: DNS Valid",
+            "honeypot": "IPQS: Honeypot",
+            "deliverability": "IPQS: Deliverability",
+            "frequent_complainer": "IPQS: Frequent Complainer",
+            "spam_trap_score": "IPQS: Spam Trap Score",
+            "catch_all": "IPQS: Catch All",
+            "timed_out": "IPQS: Timed Out",
+            "suspect": "IPQS: Suspect",
+            "recent_abuse": "IPQS: Recent Abuse",
+            "fraud_score": "IPQS: Fraud Score",
+            "suggested_domain": "IPQS: Suggested Domain",
+            "leaked": "IPQS: Leaked",
+            "sanitized_email": "IPQS: Sanitized Email",
+            "domain_age": "IPQS: Domain Age",
+            "first_seen": "IPQS: First Seen",
         }
         self.phone_data_items = [
-            'formatted',
-            'local_format',
-            'valid',
-            'fraud_score',
-            'recent_abuse',
-            'VOIP',
-            'prepaid',
-            'risky',
-            'active',
-            'carrier',
-            'line_type',
-            'country',
-            'city',
-            'zip_code',
-            'region',
-            'dialing_code',
-            'active_status',
-            'leaked',
-            'name',
-            'timezone',
-            'do_not_call',
+            "formatted",
+            "local_format",
+            "valid",
+            "fraud_score",
+            "recent_abuse",
+            "VOIP",
+            "prepaid",
+            "risky",
+            "active",
+            "carrier",
+            "line_type",
+            "country",
+            "city",
+            "zip_code",
+            "region",
+            "dialing_code",
+            "active_status",
+            "leaked",
+            "name",
+            "timezone",
+            "do_not_call",
         ]
         self.phone_data_items_friendly_names = {
-            'formatted': 'IPQS: Formatted',
-            'local_format': 'IPQS: Local Format',
-            'valid': 'IPQS: Valid',
-            'fraud_score': 'IPQS: Fraud Score',
-            'recent_abuse': 'IPQS: Recent Abuse',
-            'VOIP': 'IPQS: VOIP',
-            'prepaid': 'IPQS: Prepaid',
-            'risky': 'IPQS: Risky',
-            'active': 'IPQS: Active',
-            'carrier': 'IPQS: Carrier',
-            'line_type': 'IPQS: Line Type',
-            'country': 'IPQS: Country',
-            'city': 'IPQS: City',
-            'zip_code': 'IPQS: Zip Code',
-            'region': 'IPQS: Region',
-            'dialing_code': 'IPQS: Dialing Code',
-            'active_status': 'IPQS: Active Status',
-            'leaked': 'IPQS: Leaked',
-            'name': 'IPQS: Name',
-            'timezone': 'IPQS: Timezone',
-            'do_not_call': 'IPQS: Do Not Call',
+            "formatted": "IPQS: Formatted",
+            "local_format": "IPQS: Local Format",
+            "valid": "IPQS: Valid",
+            "fraud_score": "IPQS: Fraud Score",
+            "recent_abuse": "IPQS: Recent Abuse",
+            "VOIP": "IPQS: VOIP",
+            "prepaid": "IPQS: Prepaid",
+            "risky": "IPQS: Risky",
+            "active": "IPQS: Active",
+            "carrier": "IPQS: Carrier",
+            "line_type": "IPQS: Line Type",
+            "country": "IPQS: Country",
+            "city": "IPQS: City",
+            "zip_code": "IPQS: Zip Code",
+            "region": "IPQS: Region",
+            "dialing_code": "IPQS: Dialing Code",
+            "active_status": "IPQS: Active Status",
+            "leaked": "IPQS: Leaked",
+            "name": "IPQS: Name",
+            "timezone": "IPQS: Timezone",
+            "do_not_call": "IPQS: Do Not Call",
         }
         self.timestamp_items_friendly_name = {
-            'human': ' Human',
-            'timestamp': ' Timestamp',
-            'iso': ' ISO'
+            "human": " Human",
+            "timestamp": " Timestamp",
+            "iso": " ISO",
         }
-        self.timestamp_items = [
-            'human',
-            'timestamp',
-            'iso'
-        ]
+        self.timestamp_items = ["human", "timestamp", "iso"]
 
     def criticality_color(self, criticality) -> str:
         """method which maps the color to the criticality level"""
@@ -351,7 +352,7 @@ class IPQualityScoreParser:
             self.invalid: self.rf_red,
             self.disposable: self.rf_red,
             self.malware: self.rf_red,
-            self.phishing: self.rf_red
+            self.phishing: self.rf_red,
         }
         return mapper.get(criticality, self.rf_white)
 
@@ -365,7 +366,7 @@ class IPQualityScoreParser:
         self.enriched_attribute.add_tag(tag)
 
     def ipqs_parser(self, query_response, enrich_type):
-        """ helper method to call the enrichment function according to the type"""
+        """helper method to call the enrichment function according to the type"""
         if enrich_type == IP_ENRICH:
             self.ip_reputation_data(query_response)
         elif enrich_type == URL_ENRICH:
@@ -387,10 +388,8 @@ class IPQualityScoreParser:
                     fraud_score = int(data_item_value)
                     self.ip_address_risk_scoring(fraud_score)
 
-        self.ipqs_object.add_attribute(
-            "Enriched attribute", **self.enriched_attribute
-        )
-        self.ipqs_object.add_reference(self.attribute['uuid'], 'related-to')
+        self.ipqs_object.add_attribute("Enriched attribute", **self.enriched_attribute)
+        self.ipqs_object.add_reference(self.attribute["uuid"], "related-to")
         self.misp_event.add_object(self.ipqs_object)
 
     def ip_address_risk_scoring(self, score):
@@ -422,8 +421,10 @@ class IPQualityScoreParser:
                 data_item_value = ""
                 if url_data_item == "domain_age":
                     for timestamp_item in self.timestamp_items:
-                        data_item = self.url_data_items_friendly_names[url_data_item] + \
-                                    self.timestamp_items_friendly_name[timestamp_item]
+                        data_item = (
+                            self.url_data_items_friendly_names[url_data_item]
+                            + self.timestamp_items_friendly_name[timestamp_item]
+                        )
                         data_item_value = str(query_response[url_data_item][timestamp_item])
                         self.ipqs_object.add_attribute(**parse_attribute(comment, data_item, data_item_value))
                 else:
@@ -439,18 +440,16 @@ class IPQualityScoreParser:
                     risk_score = int(data_item_value)
 
         self.url_risk_scoring(risk_score, malware, phishing)
-        self.ipqs_object.add_attribute(
-            "Enriched attribute", **self.enriched_attribute
-        )
-        self.ipqs_object.add_reference(self.attribute['uuid'], 'related-to')
+        self.ipqs_object.add_attribute("Enriched attribute", **self.enriched_attribute)
+        self.ipqs_object.add_reference(self.attribute["uuid"], "related-to")
         self.misp_event.add_object(self.ipqs_object)
 
     def url_risk_scoring(self, score, malware, phishing):
         """method to create calculate verdict for URL/Domain"""
         risk_criticality = ""
-        if malware == 'True':
+        if malware == "True":
             risk_criticality = self.malware
-        elif phishing == 'True':
+        elif phishing == "True":
             risk_criticality = self.phishing
         elif score >= 90:
             risk_criticality = self.high
@@ -482,8 +481,10 @@ class IPQualityScoreParser:
                     self.ipqs_object.add_attribute(**parse_attribute(comment, data_item, data_item_value))
                 else:
                     for timestamp_item in self.timestamp_items:
-                        data_item = self.email_data_items_friendly_names[email_data_item] + \
-                                    self.timestamp_items_friendly_name[timestamp_item]
+                        data_item = (
+                            self.email_data_items_friendly_names[email_data_item]
+                            + self.timestamp_items_friendly_name[timestamp_item]
+                        )
                         data_item_value = str(query_response[email_data_item][timestamp_item])
                         self.ipqs_object.add_attribute(**parse_attribute(comment, data_item, data_item_value))
 
@@ -495,10 +496,8 @@ class IPQualityScoreParser:
                     fraud_score = int(data_item_value)
 
         self.email_address_risk_scoring(fraud_score, disposable, valid)
-        self.ipqs_object.add_attribute(
-            "Enriched attribute", **self.enriched_attribute
-        )
-        self.ipqs_object.add_reference(self.attribute['uuid'], 'related-to')
+        self.ipqs_object.add_attribute("Enriched attribute", **self.enriched_attribute)
+        self.ipqs_object.add_reference(self.attribute["uuid"], "related-to")
         self.misp_event.add_object(self.ipqs_object)
 
     def email_address_risk_scoring(self, score, disposable, valid):
@@ -539,12 +538,9 @@ class IPQualityScoreParser:
                 if phone_data_item == "fraud_score":
                     fraud_score = int(data_item_value)
 
-
         self.phone_address_risk_scoring(fraud_score, valid, active)
-        self.ipqs_object.add_attribute(
-            "Enriched attribute", **self.enriched_attribute
-        )
-        self.ipqs_object.add_reference(self.attribute['uuid'], 'related-to')
+        self.ipqs_object.add_attribute("Enriched attribute", **self.enriched_attribute)
+        self.ipqs_object.add_reference(self.attribute["uuid"], "related-to")
         self.misp_event.add_object(self.ipqs_object)
 
     def phone_address_risk_scoring(self, score, valid, active):
@@ -569,32 +565,32 @@ class IPQualityScoreParser:
     def get_results(self):
         """returns the dictionary object to MISP Instance"""
         event = json.loads(self.misp_event.to_json())
-        results = {key: event[key] for key in ('Attribute', 'Object')}
-        return {'results': results}
+        results = {key: event[key] for key in ("Attribute", "Object")}
+        return {"results": results}
 
 
 def handler(q=False):
     """The function which accepts a JSON document to expand the values and return a dictionary of the expanded
-    values. """
+    values."""
     if q is False:
         return False
     request = json.loads(q)
     # check if the apikey is provided
-    if not request.get('config') or not request['config'].get('apikey'):
-        misperrors['error'] = 'IPQualityScore apikey is missing'
+    if not request.get("config") or not request["config"].get("apikey"):
+        misperrors["error"] = "IPQualityScore apikey is missing"
         return misperrors
-    apikey = request['config'].get('apikey')
-    # check attribute is added to the event   
-    if not request.get('attribute') or not check_input_attribute(request['attribute']):
-        return {'error': f'{standard_error_message}, which should contain at least a type, a value and an uuid.'}
+    apikey = request["config"].get("apikey")
+    # check attribute is added to the event
+    if not request.get("attribute") or not check_input_attribute(request["attribute"]):
+        return {"error": f"{standard_error_message}, which should contain at least a type, a value and an uuid."}
 
-    attribute = request['attribute']
-    attribute_type = attribute['type']
-    attribute_value = attribute['value']
+    attribute = request["attribute"]
+    attribute_type = attribute["type"]
+    attribute_value = attribute["value"]
 
     # check if the attribute type is supported by IPQualityScore
-    if attribute_type not in mispattributes['input']:
-        return {'error': 'Unsupported attributes type for IPqualityScore Enrichment'}
+    if attribute_type not in mispattributes["input"]:
+        return {"error": "Unsupported attributes type for IPqualityScore Enrichment"}
     request_handler = RequestHandler(apikey)
     enrich_type = ""
     if attribute_type in ip_query_input_type:
@@ -622,6 +618,6 @@ def introspection():
 
 def version():
     """The function that returns a dict with the version and the associated meta-data including potential
-    configurations required of the module. """
-    moduleinfo['config'] = moduleconfig
+    configurations required of the module."""
+    moduleinfo["config"] = moduleconfig
     return moduleinfo

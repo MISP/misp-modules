@@ -7,7 +7,7 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width,initial-scale=1">
-        <title>Flowintel-cm</title>
+        <title>Misp-modules</title>
         <script src="{{ url_for('static',filename='js/popper.min.js') }}"></script>
         <script src="{{ url_for('static',filename='bootstrap-5.3.0/js/bootstrap.min.js') }}"></script>
         <script src="{{ url_for('static',filename='js/jquery.min.js') }}"></script>
@@ -20,71 +20,55 @@
         <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='css/jquery-ui.css') }}">
 
         <style>
-            .bd-placeholder-img {
-                font-size: 1.125rem;
-                text-anchor: middle;
-                -webkit-user-select: none;
-                -moz-user-select: none;
-                user-select: none;
-            }
-
-            @media (min-width: 768px) {
-                .bd-placeholder-img-lg {
-                font-size: 3.5rem;
-                }
-            }
-            html, body {
-            height: 100%;
-            }
-
             body {
-            display: flex;
-            align-items: center;
-            padding-top: 40px;
-            padding-bottom: 40px;
-            background-color: #f5f5f5;
+                background-color: #f5f5f5;
             }
 
             .form-signin {
-            width: 100%;
-            max-width: 330px;
-            padding: 15px;
-            margin: auto;
+                width: 100%;
+                max-width: 330px;
+                padding: 15px;
+
+                top: 25%;
+                left: 40%;
+                position: absolute;
             }
 
             .form-signin .checkbox {
-            font-weight: 400;
+                font-weight: 400;
             }
 
             .form-signin .form-floating:focus-within {
-            z-index: 2;
+                z-index: 2;
             }
 
             .form-signin input[type="email"] {
-            margin-bottom: -1px;
-            border-bottom-right-radius: 0;
-            border-bottom-left-radius: 0;
+                margin-bottom: -1px;
+                border-bottom-right-radius: 0;
+                border-bottom-left-radius: 0;
             }
 
             .form-signin input[type="password"] {
-            margin-bottom: 10px;
-            border-top-left-radius: 0;
-            border-top-right-radius: 0;
+                margin-bottom: 10px;
+                border-top-left-radius: 0;
+                border-top-right-radius: 0;
             }
 
         </style>
     </head>
 
     <body>
-        <main class="form-signin">
+        <main >
             {% include 'macros/_flashes.html' %}
-            {% set flashes = {
-                'error':   get_flashed_messages(category_filter=['form-error']),
-                'warning': get_flashed_messages(category_filter=['form-check-email']),
-                'info':    get_flashed_messages(category_filter=['form-info']),
-                'success': get_flashed_messages(category_filter=['form-success'])
-            } %}
-            <form action="" method="post">
+            <div style="margin-top: 50px;">
+                {% set flashes = {
+                    'error':   get_flashed_messages(category_filter=['form-error']),
+                    'warning': get_flashed_messages(category_filter=['form-check-email']),
+                    'info':    get_flashed_messages(category_filter=['form-info']),
+                    'success': get_flashed_messages(category_filter=['form-success'])
+                } %}
+            </div>
+            <form action="" method="post" class="form-signin">
                 {{ form.hidden_tag() }}
                 <div class="mb-3">
                     {{form.password.label}}:

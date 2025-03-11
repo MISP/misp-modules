@@ -24,7 +24,7 @@
                 <a style="text-decoration: none; color: black;" data-bs-toggle="collapse" :href="'#collapse'+his.uuid" role="button" aria-expanded="false" :aria-controls="'collapse'+his.uuid">
                     <ul class="list-group list-group-horizontal">
                         <li class="list-group-item">
-                            <h4>[[his.query]]</h4>
+                            <h4>[[his.query.join(", ")]]</h4>
                         </li>
                         <li class="list-group-item">
                             <h5 style="color: brown"><u>Input Attributes</u></h5>
@@ -45,7 +45,7 @@
                 <div class="collapse" :id="'collapse'+his.uuid" style="width: 70%; margin-left:30px">
                     <div class="card card-body">
                         <div class="d-flex w-100 justify-content-between">
-                            <h5 class="mb-1">[[his.query]]</h5>
+                            <h5 class="mb-1">[[his.query.join(", ")]]</h5>
                             <small><i>[[his.uuid]]</i></small>
                         </div>
                         <p class="mb-1" style="color: green;"><u>Input Attribute</u>:</p>

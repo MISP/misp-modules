@@ -19,6 +19,8 @@ git submodule init && git submodule update   ## Initialize misp-objects submodul
 python3 app.py -i                            ## Initialize db
 ```
 
+Don't forget to install **misp-modules**...
+
 ## Config
 
 Edit `config.py` 
@@ -34,8 +36,6 @@ Edit `config.py`
 - `ADMIN_USER`: If True, config page will not be accessible
 
 - `ADMIN_PASSWORD`: Password for Admin user if `ADMIN_USER` is True
-
-
 
 Rename `config.cfg.sample` to `config.cfg` then edit it:
 

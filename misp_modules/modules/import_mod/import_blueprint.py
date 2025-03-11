@@ -1,42 +1,43 @@
-import json
 import base64
-from pymisp import MISPEvent, MISPObject, MISPAttribute
+import json
 
-misperrors = {'error': 'Error'}
+from pymisp import MISPEvent
+
+misperrors = {"error": "Error"}
 userConfig = {
-    'number1': {
-        'type': 'Integer',
-        'regex': '/^[0-4]$/i',
-        'errorMessage': 'Expected a number in range [0-4]',
-        'message': 'Column number used for value'
+    "number1": {
+        "type": "Integer",
+        "regex": "/^[0-4]$/i",
+        "errorMessage": "Expected a number in range [0-4]",
+        "message": "Column number used for value",
     },
-    'some_string': {
-        'type': 'String',
-        'message': 'A text field'
-    },
-    'boolean_field': {
-        'type': 'Boolean',
-        'message': 'Boolean field test'
-    },
-    'comment': {
-        'type': 'Integer',
-        'message': 'Column number used for comment'
-    }
+    "some_string": {"type": "String", "message": "A text field"},
+    "boolean_field": {"type": "Boolean", "message": "Boolean field test"},
+    "comment": {"type": "Integer", "message": "Column number used for comment"},
 }
 
 mispattributes = {
-    'inputSource': ['file', 'paste'],
-    'output': ['MISP Format'],
-    'format': 'misp_standard'
+    "inputSource": ["file", "paste"],
+    "output": ["MISP Format"],
+    "format": "misp_standard",
 }
 
 
-moduleinfo = {'version': '0.1', 'author': 'Sami Mokaddem',
-              'description': 'Generic blueprint to be copy-pasted to quickly boostrap creation of import module.',
-              'module-type': ['import']}
+moduleinfo = {
+    "version": "0.1",
+    "author": "Sami Mokaddem",
+    "description": "Generic blueprint to be copy-pasted to quickly boostrap creation of import module.",
+    "module-type": ["import"],
+    "name": "Import Blueprint",
+    "logo": "",
+    "requirements": [],
+    "features": "",
+    "references": [],
+    "input": "",
+    "output": "",
+}
 
 moduleconfig = []
-
 
 
 def generateData(event, data, config):
@@ -62,23 +63,23 @@ def handler(q=False):
 
 
 def getUploadedData(request):
-    return base64.b64decode(request['data']).decode('utf8')
+    return base64.b64decode(request["data"]).decode("utf8")
 
 
 def getPassedConfig(request):
-    return request['config']
+    return request["config"]
 
 
 def introspection():
     modulesetup = mispattributes
     try:
         userConfig
-        modulesetup['userConfig'] = userConfig
+        modulesetup["userConfig"] = userConfig
     except NameError:
         pass
     return modulesetup
 
 
 def version():
-    moduleinfo['config'] = moduleconfig
+    moduleinfo["config"] = moduleconfig
     return moduleinfo

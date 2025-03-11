@@ -1,9 +1,8 @@
 import json
 
-from _vmray.parser import VMRayParser, VMRayParseError
+from _vmray.parser import VMRayParseError, VMRayParser
 
-
-misperrors = {'error': 'Error'}
+misperrors = {"error": "Error"}
 
 moduleconfig = ["disable_tags"]
 
@@ -12,6 +11,13 @@ moduleinfo = {
     "author": "VMRay",
     "description": "Import a VMRay Summary JSON report.",
     "module-type": ["import"],
+    "name": "VMRay Summary JSON Import",
+    "logo": "",
+    "requirements": [],
+    "features": "",
+    "references": [],
+    "input": "",
+    "output": "",
 }
 
 mispattributes = {
@@ -24,18 +30,14 @@ user_config = {
     "Analysis ID": {
         "type": "Boolean",
         "message": "Include Analysis ID",
-        "checked": "True"
+        "checked": "True",
     },
     "VTI": {
         "type": "Boolean",
         "message": "Include VMRay Threat Identifiers",
-        "checked": "True"
+        "checked": "True",
     },
-    "IOCs": {
-        "type": "Boolean",
-        "message": "Include IOCs",
-        "checked": "True"
-    },
+    "IOCs": {"type": "Boolean", "message": "Include IOCs", "checked": "True"},
     "Artifacts": {
         "type": "Boolean",
         "message": "Include other Artifacts",
@@ -47,7 +49,7 @@ user_config = {
     "Attach Report": {
         "type": "Boolean",
         "message": "Include the original imported file as attachment",
-    }
+    },
 }
 
 

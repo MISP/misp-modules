@@ -4,6 +4,7 @@ Export module for converting MISP events into ThreatConnect Structured Import fi
 Source: http://kb.threatconnect.com/customer/en/portal/articles/1912599-using-structured-import/
 Source: http://kb.threatconnect.com/customer/en/portal/articles/2092925-the-threatconnect-data-model/
 """
+
 import base64
 import csv
 import io
@@ -15,8 +16,19 @@ misperrors = {"error": "Error"}
 moduleinfo = {
     "version": "0.1",
     "author": "CenturyLink CIRT",
-    "description": "Export a structured CSV file for uploading to ThreatConnect",
-    "module-type": ["export"]
+    "description": "Module to export a structured CSV file for uploading to ThreatConnect.",
+    "module-type": ["export"],
+    "name": "ThreadConnect Export",
+    "logo": "threatconnect.png",
+    "requirements": ["csv"],
+    "features": (
+        "The module takes a MISP event in input, to look every attribute. Each attribute matching with some predefined"
+        " types is then exported in a CSV format recognized by ThreatConnect.\nUsers should then provide, as module"
+        " configuration, the source of data they export, because it is required by the output format."
+    ),
+    "references": ["https://www.threatconnect.com"],
+    "input": "MISP Event attributes",
+    "output": "ThreatConnect CSV format file",
 }
 
 # config fields expected from the MISP administrator
@@ -37,13 +49,11 @@ fieldmap = {
     "email-dst": "EmailAddress",
     "url": "URL",
     "md5": "File",
-    "filename|md5": "File"
+    "filename|md5": "File",
 }
 
 # combine all the MISP fields from fieldmap into one big list
-mispattributes = {
-    "input": list(fieldmap.keys())
-}
+mispattributes = {"input": list(fieldmap.keys())}
 
 
 def handler(q=False):
@@ -68,27 +78,37 @@ def handler(q=False):
     for event in request["data"]:
         for attribute in event["Attribute"]:
             if attribute["type"] in mispattributes["input"]:
-                logging.debug("Adding %s to structured CSV export of ThreatConnectExport", attribute["value"])
+                logging.debug(
+                    "Adding %s to structured CSV export of ThreatConnectExport",
+                    attribute["value"],
+                )
                 if "|" in attribute["type"]:
                     # if the attribute type has multiple values, line it up with the corresponding ThreatConnect values in fieldmap
                     indicators = tuple(attribute["value"].split("|"))
                     tc_types = tuple(fieldmap[attribute["type"]].split("|"))
                     for i, indicator in enumerate(indicators):
-                        writer.writerow({
-                            "Type": tc_types[i],
-                            "Value": indicator,
-                            "Source": config["Default_Source"],
-                            "Description": attribute["comment"]
-                        })
+                        writer.writerow(
+                            {
+                                "Type": tc_types[i],
+                                "Value": indicator,
+                                "Source": config["Default_Source"],
+                                "Description": attribute["comment"],
+                            }
+                        )
                 else:
-                    writer.writerow({
-                        "Type": fieldmap[attribute["type"]],
-                        "Value": attribute["value"],
-                        "Source": config["Default_Source"],
-                        "Description": attribute["comment"]
-                    })
+                    writer.writerow(
+                        {
+                            "Type": fieldmap[attribute["type"]],
+                            "Value": attribute["value"],
+                            "Source": config["Default_Source"],
+                            "Description": attribute["comment"],
+                        }
+                    )
 
-    return {"response": [], "data": str(base64.b64encode(bytes(response.getvalue(), 'utf-8')), 'utf-8')}
+    return {
+        "response": [],
+        "data": str(base64.b64encode(bytes(response.getvalue(), "utf-8")), "utf-8"),
+    }
 
 
 def introspection():
@@ -102,7 +122,7 @@ def introspection():
         "responseType": "application/txt",
         "outputFileExtension": "csv",
         "userConfig": {},
-        "inputSource": []
+        "inputSource": [],
     }
     return modulesetup
 

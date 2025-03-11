@@ -1,16 +1,19 @@
 """
 Import content from a TAXII 2.1 server.
 """
+
 import collections
 import itertools
 import json
-import misp_modules.lib.stix2misp
-from pathlib import Path
 import re
-import stix2.v20
+from pathlib import Path
+
+import requests
 import taxii2client
 import taxii2client.exceptions
-import requests
+from misp_stix_converter import ExternalSTIX2toMISPParser, InternalSTIX2toMISPParser, _is_stix2_from_misp
+from stix2.v20 import Bundle as Bundle_v20
+from stix2.v21 import Bundle as Bundle_v21
 
 
 class ConfigError(Exception):
@@ -18,19 +21,30 @@ class ConfigError(Exception):
     Represents an error in the config settings for one invocation of this
     module.
     """
+
     pass
 
 
-misperrors = {'error': 'Error'}
+misperrors = {"error": "Error"}
 
-moduleinfo = {'version': '0.1', 'author': 'Abc',
-              'description': 'Import content from a TAXII 2.1 server',
-              'module-type': ['import']}
+moduleinfo = {
+    "version": "0.2",
+    "author": "Abc",
+    "description": "Import content from a TAXII 2.1 server",
+    "module-type": ["import"],
+    "name": "TAXII 2.1 Import",
+    "logo": "",
+    "requirements": ["misp-lib-stix2", "misp-stix"],
+    "features": "",
+    "references": [],
+    "input": "",
+    "output": "",
+}
 
 mispattributes = {
-    'inputSource': [],
-    'output': ['MISP objects'],
-    'format': 'misp_standard',
+    "inputSource": [],
+    "output": ["MISP objects"],
+    "format": "misp_standard",
 }
 
 
@@ -38,41 +52,36 @@ userConfig = {
     "url": {
         "type": "String",
         "message": "A TAXII 2.1 collection URL",
+        "required": True,
     },
     "added_after": {
         "type": "String",
-        "message": "Lower bound on time the object was uploaded to the TAXII server"
+        "message": "Lower bound on time the object was uploaded to the TAXII server",
     },
-    "stix_id": {
-        "type": "String",
-        "message": "STIX ID(s) of objects"
-    },
+    "stix_id": {"type": "String", "message": "STIX ID(s) of objects"},
     "spec_version": {  # TAXII 2.1 specific
         "type": "String",
-        "message": "STIX version(s) of objects"
+        "message": "STIX version(s) of objects",
     },
-    "type": {
-        "type": "String",
-        "message": "STIX type(s) of objects"
-    },
+    "type": {"type": "String", "message": "STIX type(s) of objects"},
     "version": {
         "type": "String",
-        "message": 'Version timestamp(s), or "first"/"last"/"all"'
+        "message": 'Version timestamp(s), or "first"/"last"/"all"',
     },
     # Should we give some user control over this?  It will not be allowed to
     # exceed the admin setting.
     "STIX object limit": {
         "type": "Integer",
-        "message": "Maximum number of STIX objects to process"
+        "message": "Maximum number of STIX objects to process",
     },
     "username": {
         "type": "String",
-        "message": "Username for TAXII server authentication, if necessary"
+        "message": "Username for TAXII server authentication, if necessary",
     },
     "password": {
         "type": "String",
-        "message": "Password for TAXII server authentication, if necessary"
-    }
+        "message": "Password for TAXII server authentication, if necessary",
+    },
 }
 
 # Paging will be handled transparently by this module, so user-defined
@@ -82,9 +91,7 @@ userConfig = {
 # This module will not process more than this number of STIX objects in total
 # from a TAXII server in one module invocation (across all pages), to limit
 # resource consumption.
-moduleconfig = [
-    "stix_object_limit"
-]
+moduleconfig = ["stix_object_limit"]
 
 
 # In case there is neither an admin nor user setting given.
@@ -101,17 +108,20 @@ _synonymsToTagNames_path = Path(__file__).parent / "../../lib/synonymsToTagNames
 
 
 # Collects module config information necessary to perform the TAXII query.
-Config = collections.namedtuple("Config", [
-    "url",
-    "added_after",
-    "id",
-    "spec_version",
-    "type",
-    "version",
-    "stix_object_limit",
-    "username",
-    "password"
-])
+Config = collections.namedtuple(
+    "Config",
+    [
+        "url",
+        "added_after",
+        "id",
+        "spec_version",
+        "type",
+        "version",
+        "stix_object_limit",
+        "username",
+        "password",
+    ],
+)
 
 
 def _pymisp_to_json_serializable(obj):
@@ -201,16 +211,10 @@ def _get_config(config):
         raise ConfigError("A TAXII 2.1 collection URL is required.")
 
     if admin_stix_object_limit < 1:
-        raise ConfigError(
-            "Invalid admin object limit: must be positive: "
-            + str(admin_stix_object_limit)
-        )
+        raise ConfigError("Invalid admin object limit: must be positive: " + str(admin_stix_object_limit))
 
     if stix_object_limit < 1:
-        raise ConfigError(
-            "Invalid object limit: must be positive: "
-            + str(stix_object_limit)
-        )
+        raise ConfigError("Invalid object limit: must be positive: " + str(stix_object_limit))
 
     if id_:
         id_ = _normalize_multi_values(id_)
@@ -224,18 +228,23 @@ def _get_config(config):
     # STIX->MISP converter currently only supports STIX 2.0, so let's force
     # spec_version="2.0".
     if not spec_version:
-        spec_version = "2.0"
-    elif spec_version != "2.0":
-        raise ConfigError('Only spec_version="2.0" is supported for now.')
+        spec_version = "2.1"
+    if spec_version not in ("2.0", "2.1"):
+        raise ConfigError('Only spec versions "2.0" and "2.1" are valid versions.')
 
     if (username and not password) or (not username and password):
-        raise ConfigError(
-            'Both or neither of "username" and "password" are required.'
-        )
+        raise ConfigError('Both or neither of "username" and "password" are required.')
 
     config_obj = Config(
-        url, added_after, id_, spec_version, type_, version_, stix_object_limit,
-        username, password
+        url,
+        added_after,
+        id_,
+        spec_version,
+        type_,
+        version_,
+        stix_object_limit,
+        username,
+        password,
     )
 
     return config_obj
@@ -250,16 +259,12 @@ def _query_taxii(config):
     :return: A dict containing a misp-modules response
     """
 
-    collection = taxii2client.Collection(
-        config.url, user=config.username, password=config.password
-    )
+    collection = taxii2client.Collection(config.url, user=config.username, password=config.password)
 
     # No point in asking for more than our overall limit.
     page_size = min(_PAGE_SIZE, config.stix_object_limit)
 
-    kwargs = {
-        "per_request": page_size
-    }
+    kwargs = {"per_request": page_size}
 
     if config.spec_version:
         kwargs["spec_version"] = config.spec_version
@@ -272,21 +277,13 @@ def _query_taxii(config):
     if config.added_after:
         kwargs["added_after"] = config.added_after
 
-    pages = taxii2client.as_pages(
-        collection.get_objects,
-        **kwargs
-    )
+    pages = taxii2client.as_pages(collection.get_objects, **kwargs)
 
     # Chain all the objects from all pages together...
-    all_stix_objects = itertools.chain.from_iterable(
-        taxii_envelope.get("objects", [])
-        for taxii_envelope in pages
-    )
+    all_stix_objects = itertools.chain.from_iterable(taxii_envelope.get("objects", []) for taxii_envelope in pages)
 
     # And only take the first N objects from that.
-    limited_stix_objects = itertools.islice(
-        all_stix_objects, 0, config.stix_object_limit
-    )
+    limited_stix_objects = itertools.islice(all_stix_objects, 0, config.stix_object_limit)
 
     # Collect into a list.  This is... unfortunate, but I don't think the
     # converter will work incrementally (will it?).  It expects all objects to
@@ -297,37 +294,19 @@ def _query_taxii(config):
     # memory usage.
     stix_objects = list(limited_stix_objects)
 
-    # The STIX 2.0 converter wants a 2.0 bundle.  (Hope the TAXII server isn't
-    # returning 2.1 objects!)
-    bundle20 = stix2.v20.Bundle(stix_objects, allow_custom=True)
+    bundle = (Bundle_v21 if config.spec_version == "2.1" else Bundle_v20)(stix_objects, allow_custom=True)
 
-    converter = misp_modules.lib.stix2misp.ExternalStixParser()
-    converter.handler(
-        bundle20, None, [0, "event", str(_synonymsToTagNames_path)]
-    )
+    converter = InternalSTIX2toMISPParser() if _is_stix2_from_misp(bundle.objects) else ExternalSTIX2toMISPParser()
+    converter.load_stix_bundle(bundle)
+    converter.parse_stix_bundle(single_event=True)
 
-    attributes = [
-        _pymisp_to_json_serializable(attr)
-        for attr in converter.misp_event.attributes
-    ]
+    attributes = [_pymisp_to_json_serializable(attr) for attr in converter.misp_event.attributes]
 
-    objects = [
-        _pymisp_to_json_serializable(obj)
-        for obj in converter.misp_event.objects
-    ]
+    objects = [_pymisp_to_json_serializable(obj) for obj in converter.misp_event.objects]
 
-    tags = [
-        _pymisp_to_json_serializable(tag)
-        for tag in converter.misp_event.tags
-    ]
+    tags = [_pymisp_to_json_serializable(tag) for tag in converter.misp_event.tags]
 
-    result = {
-        "results": {
-            "Attribute": attributes,
-            "Object": objects,
-            "Tag": tags
-        }
-    }
+    result = {"results": {"Attribute": attributes, "Object": objects, "Tag": tags}}
 
     return result
 
@@ -369,5 +348,5 @@ def introspection():
 
 
 def version():
-    moduleinfo['config'] = moduleconfig
+    moduleinfo["config"] = moduleconfig
     return moduleinfo

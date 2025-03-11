@@ -1,192 +1,217 @@
-## How to install and start MISP modules (in a Python virtualenv)?
+## Install from pip
+
+It is strongly recommended to use a virtual environment 
+(see here for instructions https://docs.python.org/3/tutorial/venv.html).
+
+Once the virtual environment is loaded just use the following command for a minimal installation that only 
+allows MISP workflows (and a few other modules) to work:
 
 ~~~~bash
-SUDO_WWW="sudo -u www-data"
-
-sudo apt-get install -y \
-  git \
-  libpq5 \
-  libjpeg-dev \
-  tesseract-ocr \
-  libpoppler-cpp-dev \
-  imagemagick virtualenv \
-  libopencv-dev \
-  zbar-tools \
-  libzbar0 \
-  libzbar-dev \
-  libfuzzy-dev \
-  libcaca-dev
-
-# BEGIN with virtualenv:   
-$SUDO_WWW virtualenv -p python3 /var/www/MISP/venv
-# END with virtualenv
-
-cd /usr/local/src/
-# Ideally you add your user to the staff group and make /usr/local/src group writeable, below follows an example with user misp
-sudo adduser misp staff
-sudo chmod 2775 /usr/local/src
-sudo chown root:staff /usr/local/src
-git clone https://github.com/MISP/misp-modules.git
-git clone git://github.com/stricaud/faup.git faup
-git clone git://github.com/stricaud/gtcaca.git gtcaca
-
-# Install gtcaca/faup
-cd gtcaca
-mkdir -p build
-cd build
-cmake .. && make
-sudo make install
-cd ../../faup
-mkdir -p build
-cd build
-cmake .. && make
-sudo make install
-sudo ldconfig
-
-cd ../../misp-modules
-
-# BEGIN with virtualenv: 
-$SUDO_WWW  /var/www/MISP/venv/bin/pip install -I -r REQUIREMENTS
-$SUDO_WWW  /var/www/MISP/venv/bin/pip install .
-# END with virtualenv
-
-# BEGIN without virtualenv: 
-sudo pip install -I -r REQUIREMENTS
-sudo pip install .
-# END without virtualenv
-
-# Start misp-modules as a service
-sudo cp etc/systemd/system/misp-modules.service /etc/systemd/system/
-sudo systemctl daemon-reload
-sudo systemctl enable --now misp-modules
-/var/www/MISP/venv/bin/misp-modules -l 127.0.0.1 -s & #to start the modules
+pip install misp-modules
 ~~~~
 
-## How to install and start MISP modules on RHEL-based distributions ?
+If you want to install *all* modules you might need a number of system packages installed. 
+On Ubuntu these packages are `libpoppler-cpp-dev`, `libzbar0`, and `tesseract-ocr`. 
 
-As of this writing, the official RHEL repositories only contain Ruby 2.0.0 and Ruby 2.1 or higher is required. As such, this guide installs Ruby 2.2 from the SCL repository.
+For an updated list, check the GitHub action used to test the build inside `.github/workflows`.
+Once you installed those dependencies you can now install the optional `all` extra:
 
 ~~~~bash
-SUDO_WWW="sudo -u apache"
-sudo yum install \
-  rh-ruby22 \
-  openjpeg-devel \
-  rubygem-rouge \
-  rubygem-asciidoctor \
-  zbar-devel \
-  opencv-devel \
-  gcc-c++ \
-  pkgconfig \
-  poppler-cpp-devel \
-  python-devel \
-  redhat-rpm-config
-cd /usr/local/src/
-sudo git clone https://github.com/MISP/misp-modules.git
-cd misp-modules
-$SUDO_WWW /usr/bin/scl enable rh-python36 "virtualenv -p python3 /var/www/MISP/venv"
-$SUDO_WWW /var/www/MISP/venv/bin/pip install -U -I -r REQUIREMENTS
-$SUDO_WWW /var/www/MISP/venv/bin/pip install -U .
+pip install misp-modules[all]
 ~~~~
 
-Create the service file /etc/systemd/system/misp-modules.service :
+You can now run `misp-modules` by invoking it (you might need to reload the virtual environment to update the 
+search path used for executables).
 
 ~~~~bash
-echo "[Unit]
-Description=MISP's modules
-After=misp-workers.service
+misp-modules
+~~~~
+
+As a new feature, you can now run custom MISP modules installed on your system by using the `-c` option.
+
+~~~~bash
+misp-modules -c /path/to/your/module/root/
+~~~~
+
+Note that your module must be sited inside a directory identifying its type 
+(e.g., `expansion`, `import_mod`, `export_mod`, `action_mod`).
+
+For example your module is `custom_module.py` and its type is `expansion` the module's absolute path should be
+`/path/to/your/module/root/expansion/custom_module.py` and the option to pass to `misp-modules` 
+would be `-c /path/to/your/module/root/`.
+
+
+## Install from cloned repository
+
+In this case the only requirement is to install `poetry`.
+
+Normally you just need to run `pip install poetry`, but see here for more alternatives 
+https://python-poetry.org/docs/#installation.
+
+Once `poetry` is installed, you can clone the repository and install `misp-modules` as follows:
+
+~~~~bash
+git clone https://github.com/MISP/misp-modules.git && cd misp-modules
+poetry install
+~~~~
+
+If you want to install *all* modules, just run `poetry install -E all` instead.
+
+Note that the dependencies will require a number of system packages installed.
+On Ubuntu these packages are `libpoppler-cpp-dev`, `libzbar0`, and `tesseract-ocr`.
+
+For an updated list, check the GitHub action used to test the build inside `.github/workflows`.
+
+## Install the systemd unit
+
+To run `misp-modules` as a service on a distribution based on systemd, you need to create the unit as follows 
+and store it in a file `/etc/systemd/system/misp-modules.service`:
+
+~~~~bash
+[Unit]
+Description=MISP modules
 
 [Service]
 Type=simple
 User=apache
 Group=apache
-ExecStart=/usr/bin/scl enable rh-python36 rh-ruby22  '/var/www/MISP/venv/bin/misp-modules –l 127.0.0.1 –s'
+ExecStart=/path/to/venv/bin/misp-modules -l 127.0.0.1
 Restart=always
 RestartSec=10
 
 [Install]
-WantedBy=multi-user.target" | sudo tee /etc/systemd/system/misp-modules.service
+WantedBy=multi-user.target
 ~~~~
 
-The After=misp-workers.service must be changed or removed if you have not created a misp-workers service. Then, enable the misp-modules service and start it:
-
+Then, enable the `misp-modules` service and start it:
 ~~~~bash
 systemctl daemon-reload
 systemctl enable --now misp-modules
 ~~~~
 
-## How to use an MISP modules Docker container
 
-### Docker build
+## Run the tests
 
-~~~~bash
-docker build -t misp-modules \
-    --build-arg BUILD_DATE=$(date -u +"%Y-%m-%d") \
-  docker/
-~~~~
-
-### Docker run
+To run tests you need to install `misp-modules` from the cloned repository, run the server, and then run the tests. 
+You can do all these step with `poetry`.
 
 ~~~~bash
-# Start Redis
-docker run --rm -d --name=misp-redis redis:alpine
-# Start MISP-modules
-docker run \
-    --rm -d --name=misp-modules \
-    -e REDIS_BACKEND=misp-redis \
-    -e REDIS_PORT="6379" \
-    -e REDIS_PW="" \
-    -e REDIS_DATABASE="245" \
-    -e MISP_MODULES_DEBUG="false" \
-    dcso/misp-dockerized-misp-modules
+poetry install --with test -E all
+poetry run misp-modules
 ~~~~
 
-### Docker-compose
+And in another terminal:
 
-~~~~yml
-services:
-  misp-modules:
-    # https://hub.docker.com/r/dcso/misp-dockerized-misp-modules
-    image: dcso/misp-dockerized-misp-modules:3
-    
-    # Local image:
-    #image: misp-modules
-    #build:
-    #  context: docker/
-    
-    environment:
-      # Redis
-      REDIS_BACKEND: misp-redis
-      REDIS_PORT: "6379"
-      REDIS_DATABASE: "245"
-      # System PROXY (OPTIONAL)
-      http_proxy: 
-      https_proxy: 
-      no_proxy: 0.0.0.0
-      # Timezone (OPTIONAL)
-      TZ: Europe/Berlin
-      # MISP-Modules (OPTIONAL)
-      MISP_MODULES_DEBUG: "false"
-      # Logging options (OPTIONAL)
-      LOG_SYSLOG_ENABLED: "no"
-  misp-redis:
-    # https://hub.docker.com/_/redis or alternative https://hub.docker.com/r/dcso/misp-dockerized-redis/
-    image: redis:alpine
+~~~~bash
+poetry run pytest
 ~~~~
 
-## Install misp-module on an offline instance.
-First, you need to grab all necessary packages for example like this :
+## Develop
 
-Use pip wheel to create an archive
-~~~
-mkdir misp-modules-offline
-pip3 wheel -r REQUIREMENTS shodan --wheel-dir=./misp-modules-offline
-tar -cjvf misp-module-bundeled.tar.bz2 ./misp-modules-offline/*
-~~~
-On offline machine :
-~~~
-mkdir misp-modules-bundle
-tar xvf misp-module-bundeled.tar.bz2 -C misp-modules-bundle
-cd misp-modules-bundle
-ls -1|while read line; do sudo pip3 install --force-reinstall --ignore-installed --upgrade --no-index --no-deps ${line};done
-~~~
-Next you can follow standard install procedure.
+If you plan to open a pull request you might want to make sure that `black`, `isort`, and `flake8` are not 
+raising any errors. First of all, install the test dependencies as detailed in the previous section.
+
+Once you have done that you can run each tool using poetry (`poetry run black` for example), 
+but you can also install `pre-commit` to run those tools automatically before each commit just on the files you have 
+edited.
+
+~~~~bash
+pre-commit install
+~~~~
+
+## Build the documentation
+
+To build the documentation you can use the provided `Makefile`.
+Inside you will find three targets:
+
+- `generate_docs`: install the dependency and generate the documentation.
+
+- `generate_docs`: build the documentation using `mkdocs`.
+
+- `deploy`: deploy the documentation using `mkdocs gh-deploy`.
+
+- `test-docs`: run a local server exposing the newly built documentation.
+
+Note: you can either run the targets using `poetry` (default), or using the Docker image `squidfunk/mkdocs-material` 
+by setting the environment variable `USE_DOCKER=true`.
+
+## Run MISP modules
+
+If you installed it using pip, you just need to execute the command `misp-modules` 
+(source the virtual environment a second time to update the search paths).
+
+If you installed it from the cloned repository, just use poetry, i.e., `poetry run misp-modules`.
+
+## Run MISP modules in Docker
+
+You can find an up-to-date container image and related documentation at the following repository: 
+https://github.com/MISP/misp-docker .
+
+## Install misp-module on an offline instance
+
+### Using the PyPI index
+
+Once `misp-modules` is available on PyPI, you can just download all the necessary packages:
+
+~~~~bash
+mkdir wheels
+pip wheel misp-modules --no-cache-dir -w ./wheels
+~~~~
+
+Move the `wheels` directory to the target system, and install them there:
+
+~~~~bash
+pip install --no-cache-dir /wheels/*.whl
+~~~~
+
+Once again, using a virtual environment is recommended.
+
+### Using a local copy
+
+You have two choices, the first approach uses `poetry bundle` to export the entire virtual environment so you can copy 
+and run it on the target system; the second one uses `poetry export` to export a `requirements.txt` file.
+
+#### Using `poetry bundle`
+
+This is quite straightforward, but it assumes your target system is relatively similar 
+(same distribution, architecture, libraries).
+
+~~~~bash
+poetry install
+poetry self add poetry-plugin-bundle
+poetry bundle venv /destination/path/
+~~~~
+
+Remember you can add the `-E all` switch to the `poetry install` command if you want to install all dependencies.
+
+#### Using `poetry export`
+
+This is a bit more convoluted, and it is similar to how you would install `misp-modules` on an online instance.
+
+Run the following commands to generate your very own `requirements.txt`.
+
+~~~~bash
+poetry lock
+poetry self add poetry-plugin-export
+poetry export --without-hashes -f requirements.txt -o requirements.txt
+~~~~
+
+Remember you can add the `-E all` switch to the `poetry export` command if you want to install all dependencies.
+
+Now create the wheels of all the dependencies:
+
+~~~~bash
+pip wheel -r requirements.txt --no-cache-dir -w ./wheels
+~~~~
+
+Note that `misp-modules` will not be part of the `requirements.txt` file, and you will need to create the wheel yourself:
+
+~~~~bash
+poetry build --output ./wheels
+~~~~
+
+Now you can move the wheels to your offline instance, and install them using the following command:
+
+~~~~bash
+pip install --no-cache-dir ./wheels/*.whl
+~~~~

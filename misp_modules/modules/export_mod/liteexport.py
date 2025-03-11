@@ -1,12 +1,25 @@
-import json
 import base64
+import json
 
-misperrors = {'error': 'Error'}
+misperrors = {"error": "Error"}
 
-moduleinfo = {'version': '1',
-              'author': 'TM',
-              'description': 'export lite',
-              'module-type': ['export']}
+moduleinfo = {
+    "version": "1",
+    "author": "TM",
+    "description": "Lite export of a MISP event.",
+    "module-type": ["export"],
+    "name": "Lite Export",
+    "logo": "",
+    "requirements": [],
+    "features": (
+        "This module is simply producing a json MISP event format file, but exporting only Attributes from the Event."
+        " Thus, MISP Events exported with this module should have attributes that are not internal references,"
+        " otherwise the resulting event would be empty."
+    ),
+    "references": [],
+    "input": "MISP Event attributes",
+    "output": "Lite MISP Event",
+}
 
 moduleconfig = ["indent_json_export"]
 
@@ -27,62 +40,66 @@ def handler(q=False):
     else:
         config = {"indent_json_export": None}
 
-    if config['indent_json_export'] is not None:
+    if config["indent_json_export"] is not None:
         try:
-            config['indent_json_export'] = int(config['indent_json_export'])
+            config["indent_json_export"] = int(config["indent_json_export"])
         except Exception:
-            config['indent_json_export'] = None
+            config["indent_json_export"] = None
 
-    if 'data' not in request:
+    if "data" not in request:
         return False
 
     # ~ Misp json structur
-    liteEvent = {'Event': {}}
+    liteEvent = {"Event": {}}
 
-    for evt in request['data']:
-        rawEvent = evt['Event']
-        liteEvent['Event']['info'] = rawEvent['info']
-        liteEvent['Event']['Attribute'] = []
+    for evt in request["data"]:
+        rawEvent = evt["Event"]
+        liteEvent["Event"]["info"] = rawEvent["info"]
+        liteEvent["Event"]["Attribute"] = []
 
-        attrs = evt['Attribute']
+        attrs = evt["Attribute"]
         for attr in attrs:
-            if 'Internal reference' not in attr['category']:
+            if "Internal reference" not in attr["category"]:
                 liteAttr = {}
-                liteAttr['category'] = attr['category']
-                liteAttr['type'] = attr['type']
-                liteAttr['value'] = attr['value']
-                liteEvent['Event']['Attribute'].append(liteAttr)
+                liteAttr["category"] = attr["category"]
+                liteAttr["type"] = attr["type"]
+                liteAttr["value"] = attr["value"]
+                liteEvent["Event"]["Attribute"].append(liteAttr)
 
-    return {'response': [],
-            'data': str(base64.b64encode(bytes(
-                json.dumps(liteEvent, indent=config['indent_json_export']), 'utf-8')), 'utf-8')}
+    return {
+        "response": [],
+        "data": str(
+            base64.b64encode(bytes(json.dumps(liteEvent, indent=config["indent_json_export"]), "utf-8")),
+            "utf-8",
+        ),
+    }
 
 
 def introspection():
     modulesetup = {}
     try:
         responseType
-        modulesetup['responseType'] = responseType
+        modulesetup["responseType"] = responseType
     except NameError:
         pass
     try:
         userConfig
-        modulesetup['userConfig'] = userConfig
+        modulesetup["userConfig"] = userConfig
     except NameError:
         pass
     try:
         outputFileExtension
-        modulesetup['outputFileExtension'] = outputFileExtension
+        modulesetup["outputFileExtension"] = outputFileExtension
     except NameError:
         pass
     try:
         inputSource
-        modulesetup['inputSource'] = inputSource
+        modulesetup["inputSource"] = inputSource
     except NameError:
         pass
     return modulesetup
 
 
 def version():
-    moduleinfo['config'] = moduleconfig
+    moduleinfo["config"] = moduleconfig
     return moduleinfo

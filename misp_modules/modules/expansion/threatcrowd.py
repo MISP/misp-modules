@@ -1,23 +1,65 @@
 import json
-import requests
 import re
 
-misperrors = {'error': 'Error'}
-mispattributes = {'input': ["hostname", "domain", "ip-src", "ip-dst", "md5", "sha1", "sha256", "sha512", "whois-registrant-email"],
-                  'output': ["domain", "ip-src", "ip-dst", "text", "md5", "sha1", "sha256", "sha512", "hostname", "whois-registrant-email"]
-                  }
+import requests
+
+misperrors = {"error": "Error"}
+mispattributes = {
+    "input": [
+        "hostname",
+        "domain",
+        "ip-src",
+        "ip-dst",
+        "md5",
+        "sha1",
+        "sha256",
+        "sha512",
+        "whois-registrant-email",
+    ],
+    "output": [
+        "domain",
+        "ip-src",
+        "ip-dst",
+        "text",
+        "md5",
+        "sha1",
+        "sha256",
+        "sha512",
+        "hostname",
+        "whois-registrant-email",
+    ],
+}
 
 # possible module-types: 'expansion', 'hover' or both
-moduleinfo = {'version': '1', 'author': 'chrisdoman',
-              'description': 'Get information from ThreatCrowd',
-              'module-type': ['expansion']}
+moduleinfo = {
+    "version": "1",
+    "author": "chrisdoman",
+    "description": "Module to get information from ThreatCrowd.",
+    "module-type": ["expansion"],
+    "name": "ThreatCrowd Lookup",
+    "logo": "threatcrowd.png",
+    "requirements": [],
+    "features": (
+        "This module takes a MISP attribute as input and queries ThreatCrowd with it.\n\nThe result of this query is"
+        " then parsed and some data is mapped into MISP attributes in order to enrich the input attribute."
+    ),
+    "references": ["https://www.threatcrowd.org/"],
+    "input": (
+        "A MISP attribute included in the following list:\n- hostname\n- domain\n- ip-src\n- ip-dst\n- md5\n- sha1\n-"
+        " sha256\n- sha512\n- whois-registrant-email"
+    ),
+    "output": (
+        "MISP attributes mapped from the result of the query on ThreatCrowd, included in the following list:\n-"
+        " domain\n- ip-src\n- ip-dst\n- text\n- md5\n- sha1\n- sha256\n- sha512\n- hostname\n- whois-registrant-email"
+    ),
+}
 
 moduleconfig = []
 
 
 # Avoid adding windows update to enrichment etc.
 def isBlacklisted(value):
-    blacklist = ['8.8.8.8', '255.255.255.255', '192.168.56.', 'time.windows.com']
+    blacklist = ["8.8.8.8", "255.255.255.255", "192.168.56.", "time.windows.com"]
 
     for b in blacklist:
         if value in b:
@@ -58,18 +100,18 @@ def handler(q=False):
         r["results"] += getIP(q["ip-dst"])
     if "domain" in q:
         r["results"] += getDomain(q["domain"])
-    if 'hostname' in q:
-        r["results"] += getDomain(q['hostname'])
-    if 'md5' in q:
-        r["results"] += getHash(q['md5'])
-    if 'sha1' in q:
-        r["results"] += getHash(q['sha1'])
-    if 'sha256' in q:
-        r["results"] += getHash(q['sha256'])
-    if 'sha512' in q:
-        r["results"] += getHash(q['sha512'])
-    if 'whois-registrant-email' in q:
-        r["results"] += getEmail(q['whois-registrant-email'])
+    if "hostname" in q:
+        r["results"] += getDomain(q["hostname"])
+    if "md5" in q:
+        r["results"] += getHash(q["md5"])
+    if "sha1" in q:
+        r["results"] += getHash(q["sha1"])
+    if "sha256" in q:
+        r["results"] += getHash(q["sha256"])
+    if "sha512" in q:
+        r["results"] += getHash(q["sha512"])
+    if "whois-registrant-email" in q:
+        r["results"] += getEmail(q["whois-registrant-email"])
 
     uniq = []
     for res in r["results"]:
@@ -156,5 +198,5 @@ def introspection():
 
 
 def version():
-    moduleinfo['config'] = moduleconfig
+    moduleinfo["config"] = moduleconfig
     return moduleinfo

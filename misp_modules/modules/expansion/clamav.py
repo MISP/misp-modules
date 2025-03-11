@@ -3,18 +3,18 @@ import io
 import logging
 import sys
 import zipfile
-import clamd
-from . import check_input_attribute, standard_error_message
 from typing import Optional
+
+import clamd
 from pymisp import MISPEvent, MISPObject
+
+from . import check_input_attribute, standard_error_message
 
 log = logging.getLogger("clamav")
 log.setLevel(logging.DEBUG)
 sh = logging.StreamHandler(sys.stdout)
 sh.setLevel(logging.DEBUG)
-fmt = logging.Formatter(
-    "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-)
+fmt = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 sh.setFormatter(fmt)
 log.addHandler(sh)
 
@@ -22,13 +22,17 @@ moduleinfo = {
     "version": "0.1",
     "author": "Jakub Onderka",
     "description": "Submit file to ClamAV",
-    "module-type": ["expansion"]
+    "module-type": ["expansion"],
+    "name": "ClaamAV",
+    "logo": "",
+    "requirements": [],
+    "features": "",
+    "references": [],
+    "input": "",
+    "output": "",
 }
 moduleconfig = ["connection"]
-mispattributes = {
-    "input": ["attachment", "malware-sample"],
-    "format": "misp_standard"
-}
+mispattributes = {"input": ["attachment", "malware-sample"], "format": "misp_standard"}
 
 
 def create_response(original_attribute: dict, software: str, signature: Optional[str] = None) -> dict:
@@ -43,7 +47,7 @@ def create_response(original_attribute: dict, software: str, signature: Optional
         misp_event.add_object(av_signature_object)
 
     event = misp_event.to_dict()
-    results = {key: event[key] for key in ('Attribute', 'Object') if (key in event and event[key])}
+    results = {key: event[key] for key in ("Attribute", "Object") if (key in event and event[key])}
     return {"results": results}
 
 
@@ -54,7 +58,9 @@ def connect_to_clamav(connection_string: str) -> clamd.ClamdNetworkSocket:
         host, port = connection_string.split(":")
         return clamd.ClamdNetworkSocket(host, int(port))
     else:
-        raise Exception("ClamAV connection string is invalid. It must be unix socket path with 'unix://' prefix or IP:PORT.")
+        raise Exception(
+            "ClamAV connection string is invalid. It must be unix socket path with 'unix://' prefix or IP:PORT."
+        )
 
 
 def dict_handler(request: dict):
@@ -66,8 +72,8 @@ def dict_handler(request: dict):
     if not attribute:
         return {"error": "No attribute provided"}
 
-    if not check_input_attribute(request['attribute']):
-        return {'error': f'{standard_error_message}, which should contain at least a type, a value and an uuid.'}
+    if not check_input_attribute(request["attribute"]):
+        return {"error": f"{standard_error_message}, which should contain at least a type, a value and an uuid."}
 
     if attribute["type"] not in mispattributes["input"]:
         return {"error": "Invalid attribute type provided, expected 'malware-sample' or 'attachment'"}

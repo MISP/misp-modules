@@ -1,40 +1,50 @@
 import json
+
 import requests
 
-misperrors = {'error': 'Error'}
-mispattributes = {'input': ['vulnerability'], 'output': ['text']}
-moduleinfo = {'version': '0.3', 'author': 'Alexandre Dulaunoy', 'description': 'An expansion hover module to expand information about CVE id.', 'module-type': ['hover']}
-moduleconfig = ["custom_API"]
-cveapi_url = 'https://cve.circl.lu/api/cve/'
+from . import check_input_attribute, standard_error_message
+from ._vulnerability_parser.vulnerability_parser import VulnerabilityLookupParser
 
-
-def check_url(url):
-    return "{}/".format(url) if not url.endswith('/') else url
+misperrors = {"error": "Error"}
+mispattributes = {"input": ["vulnerability"], "format": "misp_standard"}
+moduleinfo = {
+    "version": "2",
+    "author": "Alexandre Dulaunoy",
+    "description": "An expansion hover module to expand information about CVE id.",
+    "module-type": ["expansion", "hover"],
+    "name": "CVE Lookup",
+    "logo": "vulnerability_lookyp.png",
+    "requirements": [],
+    "features": (
+        "The module takes a vulnerability attribute as input and queries Vulnerability Lookup to get additional"
+        " information based on the Vulnerability ID."
+    ),
+    "references": ["https://cve.circl.lu/", "https://cve.mitre.org/"],
+    "input": "Vulnerability attribute.",
+    "output": "Additional information on the vulnerability, gathered from the Vulnerability Lookup API.",
+}
+api_url = "https://cve.circl.lu"
 
 
 def handler(q=False):
     if q is False:
         return False
     request = json.loads(q)
-    if not request.get('vulnerability'):
-        misperrors['error'] = 'Vulnerability id missing'
-        return misperrors
-
-    api_url = check_url(request['config']['custom_API']) if request.get('config') and request['config'].get('custom_API') else cveapi_url
-    r = requests.get("{}{}".format(api_url, request.get('vulnerability')))
-    if r.status_code == 200:
-        vulnerability = json.loads(r.text)
-        if vulnerability:
-            if vulnerability.get('summary'):
-                summary = vulnerability['summary']
-        else:
-            summary = 'Non existing CVE'
+    if not check_input_attribute(request.get("attribute", {})):
+        return {"error": f"{standard_error_message}, which should contain at least a type, a value and an UUID."}
+    attribute = request["attribute"]
+    if attribute.get("type") != "vulnerability":
+        return {"error": 'The attribute type should be "vulnerability".'}
+    lookup = requests.get(f"{api_url}/api/vulnerability/{attribute['value']}")
+    if lookup.status_code == 200:
+        vulnerability = lookup.json()
+        if not vulnerability:
+            return {"error": "Non existing vulnerability ID."}
     else:
-        misperrors['error'] = 'API not accessible'
-        return misperrors['error']
-
-    r = {'results': [{'types': mispattributes['output'], 'values': summary}]}
-    return r
+        return {"error": "Vulnerability Lookup API not accessible."}
+    parser = VulnerabilityLookupParser(attribute, api_url)
+    parser.parse_lookup_result(vulnerability)
+    return parser.get_results()
 
 
 def introspection():
@@ -42,5 +52,4 @@ def introspection():
 
 
 def version():
-    moduleinfo['config'] = moduleconfig
     return moduleinfo
