@@ -1,6 +1,6 @@
 [project]
 name = "misp-modules"
-version = "3.0.1"
+version = "3.0.2"
 description = "MISP modules are autonomous modules that can be used for expansion and other services in MISP"
 authors = [
     {name = "Alexandre Dulaunoy", email = "alexandre.dulaunoy@circl.lu"}
@@ -31,17 +31,12 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-all = [
+minimal = [
     ## pinned module dependencies
     "censys==2.0.9",
     "socialscan<2.0.0",
     "yara-python==4.5.0",
-    "numpy>=1.26.4,<2.0.0",
-    "pandas>=2.0.0",
-    "pandas_ods_reader>=1.0.0",
     ## module dependencies
-    "apiosintds",
-    "assemblyline_client",
     "backscatter",
     "blockchain",
     "clamd",
@@ -51,48 +46,91 @@ all = [
     "geoip2",
     "greynoise",
     "jbxapi",
+    "ndjson",    
     "maclookup",
     "matplotlib",
     "mattermostdriver",
-    "misp-lib-stix2>=3.0.1.2",
-    "misp-stix>=2025.1.10",
-    "mwdblib",
-    "ndjson",
-    "np",
     "oauth2",
-    "opencv-python",
-    "openpyxl",
-    "pandoc",
     "passivetotal",
-    "pdftotext",
     "pycountry",
     "pyeti-python3",
+    "pypdns",
+    "pypssl",
     "pyeupi",
     "pygeoip",
     "pyintel471",
     "pyipasnhistory",
-    "pymisp[fileobjects, openioc, pdfexport, email]",
-    "pypdns",
-    "pypssl",
     "pysafebrowsing",
-    "pytesseract",
-    "python-docx",
-    "python-pptx",
-    "pyzbar",
     "requests[security]",
-    "setuptools",
-    "shodan",
-    "sigmatools",
-    "sigmf",
     "slack-sdk",
-    "sparqlwrapper",
-    "tau-clients",
-    "taxii2-client",
-    "trustar",
     "urlarchiver",
     "vt-graph-api",
     "vt-py",
     "vulners",
+]
+
+all = [
+    ## pinned module dependencies
+    "censys==2.0.9",  ## in minimal
+    "socialscan<2.0.0",  ## in minimal
+    "yara-python==4.5.0",  ## in minimal
+    "numpy>=1.26.4,<2.0.0",
+    "pandas>=2.0.0",
+    "pandas_ods_reader>=1.0.0",
+    ## module dependencies
+    "apiosintds",
+    "assemblyline_client",
+    "backscatter",  ## in minimal
+    "blockchain",   ## in minimal
+    "clamd",   ## in minimal
+    "crowdstrike-falconpy",   ## in minimal
+    "dnsdb2",  ## in minimal
+    "domaintools_api",   ## in minimal
+    "geoip2",  ## in minimal
+    "greynoise",  ## in minimal
+    "jbxapi",   ## in minimal
+    "maclookup",  ## in minimal
+    "matplotlib",   ## in minimal
+    "mattermostdriver",   ## in minimal
+    "misp-lib-stix2>=3.0.1.2",
+    "misp-stix>=2025.1.10",
+    "mwdblib",
+    "ndjson",  ## in minimal
+    "np",
+    "oauth2",   ## in minimal
+    "opencv-python",
+    "openpyxl",
+    "pandoc",
+    "passivetotal",   ## in minimal
+    "pdftotext",
+    "pycountry",  ## in minimal
+    "pyeti-python3",  ## in minimal
+    "pyeupi",  ## in minimal
+    "pygeoip",  ## in minimal
+    "pyintel471",  ## in minimal
+    "pyipasnhistory",  ## in minimal
+    "pymisp[fileobjects, openioc, pdfexport, email]",
+    "pypdns",  ## in minimal
+    "pypssl",  ## in minimal
+    "pysafebrowsing",  ## in minimal
+    "pytesseract",
+    "python-docx",
+    "python-pptx",
+    "pyzbar",
+    "requests[security]",  ## in minimal
+    "setuptools",
+    "shodan",
+    "sigmatools",
+    "sigmf",
+    "slack-sdk",  ## in minimal
+    "sparqlwrapper",
+    "tau-clients",
+    "taxii2-client",
+    "trustar",
+    "urlarchiver",   ## in minimal
+    "vt-graph-api",   ## in minimal
+    "vt-py",   ## in minimal
+    "vulners",   ## in minimal
     "vysion",
     "wand",
     "xlrd",
