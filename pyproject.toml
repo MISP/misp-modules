@@ -60,8 +60,8 @@ minimal = [
     "pygeoip",
     "pyintel471",
     "pyipasnhistory",
-    "requests[security]",
     "pysafebrowsing",
+    "requests[security]",
     "slack-sdk",
     "urlarchiver",
     "vt-graph-api",
@@ -71,66 +71,66 @@ minimal = [
 
 all = [
     ## pinned module dependencies
-    "censys==2.0.9",
-    "socialscan<2.0.0",
-    "yara-python==4.5.0",
+    "censys==2.0.9",  ## in minimal
+    "socialscan<2.0.0",  ## in minimal
+    "yara-python==4.5.0",  ## in minimal
     "numpy>=1.26.4,<2.0.0",
     "pandas>=2.0.0",
     "pandas_ods_reader>=1.0.0",
     ## module dependencies
     "apiosintds",
     "assemblyline_client",
-    "backscatter",
-    "blockchain",
-    "clamd",
-    "crowdstrike-falconpy",
-    "dnsdb2",
-    "domaintools_api",
-    "geoip2",
-    "greynoise",
-    "jbxapi",
-    "maclookup",
-    "matplotlib",
-    "mattermostdriver",
+    "backscatter",  ## in minimal
+    "blockchain",   ## in minimal
+    "clamd",   ## in minimal
+    "crowdstrike-falconpy",   ## in minimal
+    "dnsdb2",  ## in minimal
+    "domaintools_api",   ## in minimal
+    "geoip2",  ## in minimal
+    "greynoise",  ## in minimal
+    "jbxapi",   ## in minimal
+    "maclookup",  ## in minimal
+    "matplotlib",   ## in minimal
+    "mattermostdriver",   ## in minimal
     "misp-lib-stix2>=3.0.1.2",
     "misp-stix>=2025.1.10",
     "mwdblib",
-    "ndjson",
+    "ndjson",  ## in minimal
     "np",
-    "oauth2",
+    "oauth2",   ## in minimal
     "opencv-python",
     "openpyxl",
     "pandoc",
-    "passivetotal",
+    "passivetotal",   ## in minimal
     "pdftotext",
-    "pycountry",
-    "pyeti-python3",
-    "pyeupi",
-    "pygeoip",
-    "pyintel471",
-    "pyipasnhistory",
+    "pycountry",  ## in minimal
+    "pyeti-python3",  ## in minimal
+    "pyeupi",  ## in minimal
+    "pygeoip",  ## in minimal
+    "pyintel471",  ## in minimal
+    "pyipasnhistory",  ## in minimal
     "pymisp[fileobjects, openioc, pdfexport, email]",
-    "pypdns",
-    "pypssl",
-    "pysafebrowsing",
+    "pypdns",  ## in minimal
+    "pypssl",  ## in minimal
+    "pysafebrowsing",  ## in minimal
     "pytesseract",
     "python-docx",
     "python-pptx",
     "pyzbar",
-    "requests[security]",
+    "requests[security]",  ## in minimal
     "setuptools",
     "shodan",
     "sigmatools",
     "sigmf",
-    "slack-sdk",
+    "slack-sdk",  ## in minimal
     "sparqlwrapper",
     "tau-clients",
     "taxii2-client",
     "trustar",
-    "urlarchiver",
-    "vt-graph-api",
-    "vt-py",
-    "vulners",
+    "urlarchiver",   ## in minimal
+    "vt-graph-api",   ## in minimal
+    "vt-py",   ## in minimal
+    "vulners",   ## in minimal
     "vysion",
     "wand",
     "xlrd",
