@@ -7420,4 +7420,4 @@ minimal = ["backscatter", "blockchain", "censys", "clamd", "crowdstrike-falconpy
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.9,<3.13"
-content-hash = "eacb8ab877103e1832cb50589114f8d614df75cffe836720bdeea05bc5a61609"
+content-hash = "aee104f326ac300a361cd374a0a4277012d7c78e80e5abee741377e23f796acd"
