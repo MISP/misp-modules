@@ -1,6 +1,6 @@
 [project]
 name = "misp-modules"
-version = "3.0.1"
+version = "3.0.2"
 description = "MISP modules are autonomous modules that can be used for expansion and other services in MISP"
 authors = [
     {name = "Alexandre Dulaunoy", email = "alexandre.dulaunoy@circl.lu"}
@@ -31,6 +31,44 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+minimal = [
+    ## pinned module dependencies
+    "censys==2.0.9",
+    "socialscan<2.0.0",
+    "yara-python==4.5.0",
+    ## module dependencies
+    "backscatter",
+    "blockchain",
+    "clamd",
+    "crowdstrike-falconpy",
+    "dnsdb2",
+    "domaintools_api",
+    "geoip2",
+    "greynoise",
+    "jbxapi",
+    "ndjson",    
+    "maclookup",
+    "matplotlib",
+    "mattermostdriver",
+    "oauth2",
+    "passivetotal",
+    "pycountry",
+    "pyeti-python3",
+    "pypdns",
+    "pypssl",
+    "pyeupi",
+    "pygeoip",
+    "pyintel471",
+    "pyipasnhistory",
+    "requests[security]",
+    "pysafebrowsing",
+    "slack-sdk",
+    "urlarchiver",
+    "vt-graph-api",
+    "vt-py",
+    "vulners",
+]
+
 all = [
     ## pinned module dependencies
     "censys==2.0.9",
