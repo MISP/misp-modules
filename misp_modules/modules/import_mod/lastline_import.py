@@ -8,7 +8,6 @@ import json
 
 import lastline_api
 
-
 misperrors = {
     "error": "Error",
 }
@@ -18,24 +17,32 @@ userConfig = {
         "type": "String",
         "errorMessage": "Expected analysis link",
         "message": "The link to a Lastline analysis",
-        "required": True
+        "required": True,
     }
 }
 
 inputSource = []
 
 moduleinfo = {
-    'version': '0.1',
-    'author': 'Stefano Ortolani',
-    'description': 'Deprecation notice: this module will be deprecated by December 2021, please use vmware_nsx module.\n\nModule to import and parse reports from Lastline analysis links.',
-    'module-type': ['import'],
-    'name': 'Lastline Import',
-    'logo': 'lastline.png',
-    'requirements': [],
-    'features': 'The module requires a Lastline Portal `username` and `password`.\nThe module uses the new format and it is able to return MISP attributes and objects.\nThe module returns the same results as the [lastline_query](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/lastline_query.py) expansion module.',
-    'references': ['https://www.lastline.com'],
-    'input': 'Link to a Lastline analysis.',
-    'output': 'MISP attributes and objects parsed from the analysis report.',
+    "version": "0.1",
+    "author": "Stefano Ortolani",
+    "description": (
+        "Deprecation notice: this module will be deprecated by December 2021, please use vmware_nsx module.\n\nModule"
+        " to import and parse reports from Lastline analysis links."
+    ),
+    "module-type": ["import"],
+    "name": "Lastline Import",
+    "logo": "lastline.png",
+    "requirements": [],
+    "features": (
+        "The module requires a Lastline Portal `username` and `password`.\nThe module uses the new format and it is"
+        " able to return MISP attributes and objects.\nThe module returns the same results as the"
+        " [lastline_query](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/lastline_query.py)"
+        " expansion module."
+    ),
+    "references": ["https://www.lastline.com"],
+    "input": "Link to a Lastline analysis.",
+    "output": "MISP attributes and objects parsed from the analysis report.",
 }
 
 moduleconfig = [
@@ -92,7 +99,11 @@ def handler(q=False):
 
     # Make the API calls
     try:
-        api_client = lastline_api.PortalClient(api_url, auth_data, verify_ssl=config.get('verify_ssl', True).lower() in ("true"))
+        api_client = lastline_api.PortalClient(
+            api_url,
+            auth_data,
+            verify_ssl=config.get("verify_ssl", True).lower() in ("true"),
+        )
         response = api_client.get_progress(task_uuid)
         if response.get("completed") != 1:
             raise ValueError("Analysis is not finished yet.")
@@ -114,9 +125,7 @@ def handler(q=False):
 
     return {
         "results": {
-            key: event_dictionary[key]
-            for key in ("Attribute", "Object", "Tag")
-            if (key in event and event[key])
+            key: event_dictionary[key] for key in ("Attribute", "Object", "Tag") if (key in event and event[key])
         }
     }
 
@@ -139,9 +148,8 @@ if __name__ == "__main__":
             "config": {
                 **a,
                 "analysis_link": (
-                    "https://user.lastline.com/portal#/analyst/task/"
-                    "1fcbcb8f7fb400100772d6a7b62f501b/overview"
-                )
+                    "https://user.lastline.com/portal#/analyst/task/1fcbcb8f7fb400100772d6a7b62f501b/overview"
+                ),
             }
         }
     )
@@ -152,9 +160,8 @@ if __name__ == "__main__":
             "config": {
                 **a,
                 "analysis_link": (
-                    "https://user.lastline.com/portal#/analyst/task/"
-                    "f3c0ae115d51001017ff8da768fa6049/overview"
-                )
+                    "https://user.lastline.com/portal#/analyst/task/f3c0ae115d51001017ff8da768fa6049/overview"
+                ),
             }
         }
     )

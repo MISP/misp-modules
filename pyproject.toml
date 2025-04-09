@@ -1,6 +1,6 @@
 [project]
 name = "misp-modules"
-version = "2.4.201"
+version = "3.0.2"
 description = "MISP modules are autonomous modules that can be used for expansion and other services in MISP"
 authors = [
     {name = "Alexandre Dulaunoy", email = "alexandre.dulaunoy@circl.lu"}
@@ -17,21 +17,26 @@ classifiers = [
 ]
 requires-python = ">=3.9,<3.13"
 dependencies = [
+    ## core dependencies
+    "orjson",
     "psutil",
-    "pyparsing",
-    "redis",
     "tornado",
-    "urllib3>=1.26,<2",
-    ## module dependencies (if a dependency fails loading with '*', pin it here)
+    ## minimum dependencies
+    "beautifulsoup4",
+    "jinja2",
+    "markdownify",
+    "pymisp",
+    "publicsuffixlist",
+    "setuptools",
+]
+
+[project.optional-dependencies]
+minimal = [
+    ## pinned module dependencies
     "censys==2.0.9",
     "socialscan<2.0.0",
     "yara-python==4.5.0",
-    "numpy>=1.26.4,<2.0.0",
-    "pandas>=2.0.0",
-    "pandas_ods_reader>=1.0.0",
     ## module dependencies
-    "apiosintds",
-    "assemblyline_client",
     "backscatter",
     "blockchain",
     "clamd",
@@ -41,48 +46,91 @@ dependencies = [
     "geoip2",
     "greynoise",
     "jbxapi",
+    "ndjson",    
     "maclookup",
-    "markdownify",
     "matplotlib",
     "mattermostdriver",
-    "misp-lib-stix2>=3.0.1.2",
-    "misp-stix>=2025.1.10",
-    "mwdblib",
-    "ndjson",
-    "np",
     "oauth2",
-    "opencv-python",
-    "openpyxl",
-    "pandoc",
     "passivetotal",
-    "pdftotext",
     "pycountry",
     "pyeti-python3",
+    "pypdns",
+    "pypssl",
     "pyeupi",
     "pygeoip",
     "pyintel471",
     "pyipasnhistory",
-    "pymisp[fileobjects, openioc, pdfexport, email]",
-    "pypdns",
-    "pypssl",
     "pysafebrowsing",
-    "pytesseract",
-    "python-docx",
-    "python-pptx",
-    "pyzbar",
     "requests[security]",
-    "setuptools",
-    "shodan",
-    "sigmatools",
-    "sigmf",
     "slack-sdk",
-    "sparqlwrapper",
-    "tau-clients",
-    "taxii2-client",
     "urlarchiver",
     "vt-graph-api",
     "vt-py",
     "vulners",
+]
+
+all = [
+    ## pinned module dependencies
+    "censys==2.0.9",  ## in minimal
+    "socialscan<2.0.0",  ## in minimal
+    "yara-python==4.5.0",  ## in minimal
+    "numpy>=1.26.4,<2.0.0",
+    "pandas>=2.0.0",
+    "pandas_ods_reader>=1.0.0",
+    ## module dependencies
+    "apiosintds",
+    "assemblyline_client",
+    "backscatter",  ## in minimal
+    "blockchain",   ## in minimal
+    "clamd",   ## in minimal
+    "crowdstrike-falconpy",   ## in minimal
+    "dnsdb2",  ## in minimal
+    "domaintools_api",   ## in minimal
+    "geoip2",  ## in minimal
+    "greynoise",  ## in minimal
+    "jbxapi",   ## in minimal
+    "maclookup",  ## in minimal
+    "matplotlib",   ## in minimal
+    "mattermostdriver",   ## in minimal
+    "misp-lib-stix2>=3.0.1.2",
+    "misp-stix>=2025.1.10",
+    "mwdblib",
+    "ndjson",  ## in minimal
+    "np",
+    "oauth2",   ## in minimal
+    "opencv-python",
+    "openpyxl",
+    "pandoc",
+    "passivetotal",   ## in minimal
+    "pdftotext",
+    "pycountry",  ## in minimal
+    "pyeti-python3",  ## in minimal
+    "pyeupi",  ## in minimal
+    "pygeoip",  ## in minimal
+    "pyintel471",  ## in minimal
+    "pyipasnhistory",  ## in minimal
+    "pymisp[fileobjects, openioc, pdfexport, email]",
+    "pypdns",  ## in minimal
+    "pypssl",  ## in minimal
+    "pysafebrowsing",  ## in minimal
+    "pytesseract",
+    "python-docx",
+    "python-pptx",
+    "pyzbar",
+    "requests[security]",  ## in minimal
+    "setuptools",
+    "shodan",
+    "sigmatools",
+    "sigmf",
+    "slack-sdk",  ## in minimal
+    "sparqlwrapper",
+    "tau-clients",
+    "taxii2-client",
+    "trustar",
+    "urlarchiver",   ## in minimal
+    "vt-graph-api",   ## in minimal
+    "vt-py",   ## in minimal
+    "vulners",   ## in minimal
     "vysion",
     "wand",
     "xlrd",
@@ -95,7 +143,7 @@ Documentation = "https://misp.github.io/misp-modules"
 Repository = "https://github.com/MISP/misp-modules"
 
 [project.scripts]
-misp-modules = "misp_modules:main"
+misp-modules = "misp_modules.__main__:main"
 
 [tool.poetry]
 packages = [{include = "misp_modules"}]
@@ -108,9 +156,14 @@ build-backend = "poetry.core.masonry.api"
 optional = true
 
 [tool.poetry.group.test.dependencies]
+black = "*"
 codecov = "*"
 flake8 = "*"
+flake8-pyproject = "*"
+ipdb = "*"
+isort = "*"
 nose = "*"
+pre-commit = "*"
 pytest = "*"
 
 [tool.poetry.group.docs]
@@ -121,16 +174,32 @@ mkdocs = "*"
 mkdocs-material = "*"
 markdown_include = "*"
 
-[tool.poetry.group.unstable]
-optional = true
-
-[tool.poetry.group.unstable.dependencies]
-odtreader = { git = "https://github.com/cartertemm/ODTReader.git" }
-google-search-api = { git = "https://github.com/abenassi/Google-Search-API" }
-trustar = { git = "https://github.com/SteveClement/trustar-python.git" }
-pydnstrails = { git = "https://github.com/sebdraven/pydnstrails.git" }
-pyonyphe = { git = "https://github.com/sebdraven/pyonyphe.git" }
-
 [tool.poetry.requires-plugins]
 poetry-plugin-bundle = ">=1.6"
 poetry-plugin-export = ">=1.9"
+
+[tool.black]
+line-length = 120
+target-version = ["py39"]
+preview = true
+enable-unstable-feature = ["string_processing"]
+
+[tool.isort]
+line_length = 120
+profile = "black"
+
+[tool.flake8]
+max-line-length = 120
+exclude = [".git", "__pycache__"]
+extend-ignore = [
+    "E402", "E501", "E712", "E203",
+]
+
+[tool.pytest.ini_options]
+filterwarnings = [
+    "ignore:.*deprecated to return a value that is not None.*:DeprecationWarning:",
+]
+log_cli = true
+log_cli_level = "INFO"
+log_cli_format = "%(asctime)s [%(levelname)8s] %(message)s (%(filename)s:%(lineno)s)"
+log_cli_date_format = "%Y-%m-%d %H:%M:%S"

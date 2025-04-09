@@ -17,8 +17,8 @@ USE_DOCKER ?=
 
 prepare_docs:
 	@echo "Preparing documentation."
-	poetry install --with docs,unstable
-	poetry run python $(DOCS_SRC_DIR)/generate_documentation.py
+	poetry install --with docs -E all
+	poetry run python $(DOCS_SRC_DIR)/generate.py
 	mkdir -p $(DOCS_DIST_DIR)/logos
 	mkdir -p $(DOCS_DIST_DIR)/img
 	mkdir -p $(DOCS_DIST_DIR)/expansion/logos
@@ -38,7 +38,7 @@ ifeq ($(USE_DOCKER), true)
 	@echo "Generating documentation using '$(MKDOCS_DOCKER_IMAGE)'."
 	docker run --rm -it -v $(PWD):/docs $(MKDOCS_DOCKER_IMAGE) build
 else
-	@echo "Generating docunentation."
+	@echo "Generating documentation."
 	poetry run mkdocs build
 endif
 
@@ -48,7 +48,7 @@ ifeq ($(USE_DOCKER), true)
 	@echo "Deploying documentation using '$(MKDOCS_DOCKER_IMAGE)'."
 	docker run --rm -it -v $(PWD):/docs -v /home/$(whoami)/.docker:/root/.docker:ro $(MKDOCS_DOCKER_IMAGE) gh-deploy
 else
-	@echo "Deploying docunentation."
+	@echo "Deploying documentation."
 	poetry run mkdocs gh-deploy
 endif
 
@@ -58,6 +58,6 @@ ifeq ($(USE_DOCKER), true)
 	@echo "Serving documentation using '$(MKDOCS_DOCKER_IMAGE)'."
 	docker run --rm -it -v $(PWD):/docs -p 8000:8000 $(MKDOCS_DOCKER_IMAGE)
 else
-	@echo "Serving docunentation."
+	@echo "Serving documentation."
 	poetry run mkdocs serve
 endif

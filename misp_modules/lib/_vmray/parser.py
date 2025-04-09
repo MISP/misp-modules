@@ -1,7 +1,6 @@
 import base64
 import json
 import re
-
 from abc import ABC, abstractmethod
 from dataclasses import asdict, dataclass, field
 from enum import Enum
@@ -11,7 +10,6 @@ from typing import Any, Dict, Iterator, List, Optional, Tuple, Union
 from pymisp import MISPAttribute, MISPEvent, MISPObject
 
 from .rest_api import VMRayRESTAPI, VMRayRESTAPIError
-
 
 USER_RE = re.compile(r".:.Users\\(.*?)\\", re.IGNORECASE)
 DOC_RE = re.compile(r".:.DOCUME~1.\\(.*?)\\", re.IGNORECASE)
@@ -88,9 +86,7 @@ class DomainArtifact(Artifact):
         obj = MISPObject(name="domain-ip")
 
         classifications = classifications_to_str(self.classifications)
-        attr = obj.add_attribute(
-            "domain", value=self.domain, to_ids=self.is_ioc, comment=classifications
-        )
+        attr = obj.add_attribute("domain", value=self.domain, to_ids=self.is_ioc, comment=classifications)
         if tag and attr:
             self.tag_artifact_attribute(attr)
 
@@ -123,9 +119,7 @@ class EmailArtifact(Artifact):
     def to_attributes(self) -> Iterator[Attribute]:
         if self.sender:
             classifications = classifications_to_str(self.classifications)
-            yield Attribute(
-                type="email-src", value=self.sender, comment=classifications
-            )
+            yield Attribute(type="email-src", value=self.sender, comment=classifications)
 
         if self.subject:
             yield Attribute(type="email-subject", value=self.subject, to_ids=False)
@@ -138,9 +132,7 @@ class EmailArtifact(Artifact):
 
         if self.sender:
             classifications = classifications_to_str(self.classifications)
-            attr = obj.add_attribute(
-                "from", value=self.sender, to_ids=self.is_ioc, comment=classifications
-            )
+            attr = obj.add_attribute("from", value=self.sender, to_ids=self.is_ioc, comment=classifications)
             if tag and attr:
                 self.tag_artifact_attribute(attr)
 
@@ -212,13 +204,11 @@ class FileArtifact(Artifact):
             ("sha256", self.sha256),
             ("ssdeep", self.ssdeep),
         ]
-        for (key, value) in hashes:
+        for key, value in hashes:
             if not value:
                 continue
 
-            attr = obj.add_attribute(
-                key, value=value, to_ids=self.is_ioc, comment=classifications
-            )
+            attr = obj.add_attribute(key, value=value, to_ids=self.is_ioc, comment=classifications)
 
             if tag and attr:
                 self.tag_artifact_attribute(attr)
@@ -274,9 +264,7 @@ class IpArtifact(Artifact):
         obj = MISPObject(name="ip-port")
 
         classifications = classifications_to_str(self.classifications)
-        attr = obj.add_attribute(
-            "ip", value=self.ip, comment=classifications, to_ids=self.is_ioc
-        )
+        attr = obj.add_attribute("ip", value=self.ip, comment=classifications, to_ids=self.is_ioc)
         if tag and attr:
             self.tag_artifact_attribute(attr)
 
@@ -365,14 +353,10 @@ class ProcessArtifact(Artifact):
             obj.add_attribute("pid", value=self.pid, category="External analysis")
 
         if self.parent_pid:
-            obj.add_attribute(
-                "parent-pid", value=self.parent_pid, category="External analysis"
-            )
+            obj.add_attribute("parent-pid", value=self.parent_pid, category="External analysis")
 
         classifications = classifications_to_str(self.classifications)
-        name_attr = obj.add_attribute(
-            "name", self.filename, category="External analysis", comment=classifications
-        )
+        name_attr = obj.add_attribute("name", self.filename, category="External analysis", comment=classifications)
 
         cmd_attr = obj.add_attribute("command-line", value=self.cmd_line)
 
@@ -417,9 +401,7 @@ class RegistryArtifact(Artifact):
         if self.operations:
             operations = "Operations: " + ", ".join(self.operations)
 
-        attr = obj.add_attribute(
-            "key", value=self.key, to_ids=self.is_ioc, comment=operations
-        )
+        attr = obj.add_attribute("key", value=self.key, to_ids=self.is_ioc, comment=operations)
         if tag and attr:
             self.tag_artifact_attribute(attr)
 
@@ -470,9 +452,7 @@ class UrlArtifact(Artifact):
             self.tag_artifact_attribute(attr)
 
         if self.domain:
-            obj.add_attribute(
-                "domain", self.domain, category="External analysis", to_ids=False
-            )
+            obj.add_attribute("domain", self.domain, category="External analysis", to_ids=False)
 
         for ip in self.ips:
             obj.add_attribute("ip", ip, category="External analysis", to_ids=False)
@@ -558,9 +538,7 @@ class ReportParser(ABC):
 
 
 class Summary(ReportParser):
-    def __init__(
-        self, analysis_id: int, api: VMRayRESTAPI = None, report: Dict[str, Any] = None
-    ):
+    def __init__(self, analysis_id: int, api: VMRayRESTAPI = None, report: Dict[str, Any] = None):
         self.analysis_id = analysis_id
 
         if report:
@@ -767,9 +745,7 @@ class Summary(ReportParser):
         techniques = mitre_attack.get("techniques", [])
 
         for technique in techniques:
-            mitre_attack = MitreAttack(
-                description=technique["description"], id=technique["id"]
-            )
+            mitre_attack = MitreAttack(description=technique["description"], id=technique["id"])
             yield mitre_attack
 
     def sandbox_type(self) -> str:
@@ -799,9 +775,7 @@ class Summary(ReportParser):
 
 
 class SummaryV2(ReportParser):
-    def __init__(
-        self, analysis_id: int, api: VMRayRESTAPI = None, report: Dict[str, Any] = None
-    ):
+    def __init__(self, analysis_id: int, api: VMRayRESTAPI = None, report: Dict[str, Any] = None):
         self.analysis_id = analysis_id
 
         if report:
@@ -815,9 +789,7 @@ class SummaryV2(ReportParser):
             )
             self.report = json.load(data)
 
-    def _resolve_refs(
-        self, data: Union[List[Dict[str, Any]], Dict[str, Any]]
-    ) -> Iterator[Dict[str, Any]]:
+    def _resolve_refs(self, data: Union[List[Dict[str, Any]], Dict[str, Any]]) -> Iterator[Dict[str, Any]]:
         if not data:
             return []
 
@@ -1100,10 +1072,8 @@ class VMRayParser:
         self._setup_optional_config(config)
         self.report_version = self._get_report_version()
 
-    def from_base64_string(
-        self, config: Dict[str, Any], data: str, filename: str
-    ) -> None:
-        """ read base64 encoded summary json """
+    def from_base64_string(self, config: Dict[str, Any], data: str, filename: str) -> None:
+        """read base64 encoded summary json"""
 
         buffer = base64.b64decode(data)
         self.report = json.loads(buffer)
@@ -1126,9 +1096,7 @@ class VMRayParser:
         self.include_all_artifacts = bool(int(config.get("Artifacts", "0")))
         self.include_analysis_details = bool(int(config.get("Analysis Details", "1")))
 
-        self.use_misp_object = not self._config_from_string(
-            config.get("disable_misp_objects")
-        )
+        self.use_misp_object = not self._config_from_string(config.get("disable_misp_objects"))
         self.tag_objects = not self._config_from_string(config.get("disable_tags"))
 
     @staticmethod
@@ -1200,15 +1168,12 @@ class VMRayParser:
         try:
             self._vmary_api_call(f"/rest/sample/{self.sample_id}")
         except VMRayRESTAPIError:
-            raise VMRayParseError(
-                f"Could not find sample id `{self.sample_id}` on server."
-            )
+            raise VMRayParseError(f"Could not find sample id `{self.sample_id}` on server.")
 
         # check if all submission are finished
         if not self.ignore_analysis_finished and not self._analysis_finished():
             raise VMRayParseError(
-                f"Not all analysis for `{self.sample_id}` are finished. "
-                "Try it again in a few minutes."
+                f"Not all analysis for `{self.sample_id}` are finished. Try it again in a few minutes."
             )
 
         analysis_results = self._get_analysis()
@@ -1244,9 +1209,7 @@ class VMRayParser:
     def _get_sample_verdict(self) -> Optional[str]:
         if self.report:
             if self.report_version == ReportVersion.v2:
-                verdict = SummaryV2.convert_verdict(
-                    self.report["analysis_metadata"]["verdict"]
-                )
+                verdict = SummaryV2.convert_verdict(self.report["analysis_metadata"]["verdict"])
                 return verdict
             return None
 
@@ -1262,7 +1225,7 @@ class VMRayParser:
         return None
 
     def parse(self) -> None:
-        """ Convert analysis results to MISP Objects """
+        """Convert analysis results to MISP Objects"""
 
         if self.use_misp_object:
             self.parse_as_misp_object()
@@ -1296,9 +1259,7 @@ class VMRayParser:
                     self.attributes.append(attr)
 
             for artifact in report.artifacts():
-                if self.include_all_artifacts or (
-                    self.include_iocs and artifact.is_ioc
-                ):
+                if self.include_all_artifacts or (self.include_iocs and artifact.is_ioc):
                     for attr in artifact.to_attributes():
                         self.attributes.append(attr)
 
@@ -1327,12 +1288,8 @@ class VMRayParser:
                 obj.add_attribute("permalink", permalink)
 
             if self.include_report and self.report:
-                report_data = base64.b64encode(
-                    json.dumps(self.report, indent=2).encode("utf-8")
-                ).decode("utf-8")
-                obj.add_attribute(
-                    "sandbox-file", value=self.report_name, data=report_data
-                )
+                report_data = base64.b64encode(json.dumps(self.report, indent=2).encode("utf-8")).decode("utf-8")
+                obj.add_attribute("sandbox-file", value=self.report_name, data=report_data)
 
             score = report.score()
             attr_score = obj.add_attribute("score", score)
@@ -1355,9 +1312,7 @@ class VMRayParser:
                         vtis.append(vti)
 
             for artifact in report.artifacts():
-                if self.include_all_artifacts or (
-                    self.include_iocs and artifact.is_ioc
-                ):
+                if self.include_all_artifacts or (self.include_iocs and artifact.is_ioc):
                     if artifact not in artifacts:
                         artifacts.append(artifact)
                     else:
@@ -1397,7 +1352,7 @@ class VMRayParser:
                 self.event.add_tag(f'vmray:verdict="{verdict}"')
 
     def to_json(self) -> Dict[str, Any]:
-        """ Convert parsed results into JSON """
+        """Convert parsed results into JSON"""
 
         if not self.use_misp_object:
             results = []
