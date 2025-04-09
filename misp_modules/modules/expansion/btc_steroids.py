@@ -51,7 +51,7 @@ def convert(btc, timestamp):
     global g_rate_limit
     global start_time
     global now
-    global conversion_rates
+    #global conversion_rates
     date = time.strftime("%Y-%m-%d", time.localtime(timestamp))
     # Lookup conversion rates in the cache:
     if date in conversion_rates:
@@ -99,7 +99,7 @@ def mprint(input):
 
 def handler(q=False):
     global result_text
-    global conversion_rates
+    #global conversion_rates
     result_text = ""
     # start_time = time.time()
     # now = time.time()
