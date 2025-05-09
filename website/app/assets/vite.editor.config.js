@@ -3,7 +3,6 @@ import path from 'path';
 
 export default defineConfig({
   root: 'src',
-  base: '/static/',
   build: {
     lib: {
       entry: path.resolve(__dirname, 'src/js/editor.js'),
@@ -11,7 +10,7 @@ export default defineConfig({
       fileName: () => 'editor.js',
       formats: ['iife']
     },
-    outDir: '../static/js',
+    outDir: '../../static/js',
     emptyOutDir: false,
     treeshake: true,
     minify: 'terser',

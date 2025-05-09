@@ -3,7 +3,6 @@ import path from 'path';
 
 export default defineConfig({
   root: 'src',
-  base: '/static/',
   build: {
     lib: {
       entry: path.resolve(__dirname, 'src/js/mermaid-markdown.js'),
@@ -11,7 +10,7 @@ export default defineConfig({
       fileName: () => 'mermaid-markdown.js',
       formats: ['umd'],
     },
-    outDir: '../static/js',
+    outDir: '../../static/js',
     emptyOutDir: false,
     minify: 'esbuild',
     rollupOptions: {
