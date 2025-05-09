@@ -3,7 +3,7 @@
   "version": "0.2.0",
   "description": "assets for the flask based front-end to misp-modules",
   "scripts": {
-    "build:static": "vite build --config vite.config.js",
+    "build:static": "vite build --config vite.config.mjs",
     "build:editor": "vite build --config vite.editor.config.js",
     "build:markdown": "vite build --config vite.markdown-it.config.js",
     "build:mermaid": "vite build --config vite.mermaid-markdown.config.js",

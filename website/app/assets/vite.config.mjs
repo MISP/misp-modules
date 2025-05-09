@@ -6,12 +6,12 @@ import path from 'path';
 export default defineConfig({
   root: 'src',
   build: {
-    outDir: '../static',
+    outDir: '../../static',
     emptyOutDir: false, // Preserve existing directories
     assetsDir: '', // Avoid default assets folder
     rollupOptions: {
       input: {
-        style: path.resolve(__dirname, 'src/css/core.css'),
+        core: path.resolve(__dirname, 'src/css/core.css'),
       },
       output: {
         assetFileNames: ({ name }) => {
