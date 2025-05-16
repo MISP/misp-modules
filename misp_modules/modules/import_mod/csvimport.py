@@ -86,6 +86,7 @@ misp_context_additional_fields = [
     "event_analysis",
     "event_date",
     "event_tag",
+    "event_timestamp"
 ]
 misp_extended_csv_header = misp_standard_csv_header + misp_context_additional_fields
 
@@ -185,7 +186,7 @@ class CsvParser:
                         objects[object_id] = misp_object
                     objects[object_id].add_attribute(**attribute)
                 else:
-                    self.event.add_attribute(**attribute)
+                    self.misp_event.add_attribute(**attribute)
             for misp_object in objects.values():
                 self.misp_event.add_object(**misp_object)
         else:

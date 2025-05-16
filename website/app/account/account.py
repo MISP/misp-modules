@@ -24,7 +24,7 @@ def login():
     form = LoginForm()
     if form.validate_on_submit():
         if form.password.data == str(admin_password()):
-            user = User(email="admin@admin.admin")
+            user = User(email="admin@admin.admin", first_name="admin", last_name="admin")
             db.session.add(user)
             db.session.commit()
             login_user(user, form.remember_me.data)

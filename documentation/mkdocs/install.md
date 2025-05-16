@@ -10,6 +10,12 @@ allows MISP workflows (and a few other modules) to work:
 pip install misp-modules
 ~~~~
 
+The following command will install a list of modules that don’t require system packages. Most of them are included.
+
+```bash
+pip install misp-modules[minimal]
+```
+
 If you want to install *all* modules you might need a number of system packages installed. 
 On Ubuntu these packages are `libpoppler-cpp-dev`, `libzbar0`, and `tesseract-ocr`. 
 
