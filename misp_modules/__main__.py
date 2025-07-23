@@ -197,7 +197,7 @@ class QueryModule(tornado.web.RequestHandler):
 
 def main():
     """Init function."""
-    global MODULES_HANDLERS
+    global MODULES_HANDLERS  # noqa: F824
 
     signal.signal(signal.SIGINT, handle_signal)
     signal.signal(signal.SIGTERM, handle_signal)

@@ -289,7 +289,7 @@ def handler(q=False):
         asyncio.get_running_loop()
     except RuntimeError:
         asyncio.set_event_loop(asyncio.new_event_loop())
-    
+
     request = json.loads(q)
     if not request.get("config") or not request["config"].get("apikey"):
         misperrors["error"] = "A VirusTotal api key is required for this module."

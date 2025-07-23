@@ -1,3 +1,14 @@
+## Install via uv
+
+If you don't have a recent version of Python or are missing some dependencies, `uv` can be used to install the required Python version.
+
+- `curl -LsSf https://astral.sh/uv/install.sh | sh`
+- `uv venv --python=3.12 .venv`
+- `source .venv/bin/activate`
+- `git clone https://github.com/MISP/misp-modules.git && cd misp-modules`
+- `uv pip install .[all]`
+- `misp-modules`
+
 ## Install from pip
 
 It is strongly recommended to use a virtual environment 

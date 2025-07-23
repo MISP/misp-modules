@@ -74,9 +74,14 @@ def getUploadedData(request):
 
 
 def getPassedConfig(request):
-    for k, v in userConfig.items():
-        if v["type"] == "Boolean":
-            request["config"][k] = True if request["config"][k] == "1" else False
+    try:
+        for k, v in userConfig.items():
+            if v["type"] == "Boolean":
+                request["config"][k] = bool(request["config"][k])
+    except KeyError:
+        request["config"] = {
+            "include_scheme": False,
+        }
     return request["config"]
 
 
