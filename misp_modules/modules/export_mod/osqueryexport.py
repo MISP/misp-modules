@@ -16,6 +16,13 @@ types_to_use = [
     "windows-service-displayname",
     "windows-scheduled-task",
     "yara",
+    "ip-dst",
+    "ip-src",
+    "filename",
+    "sha256",
+    "windows-service-name",
+    "named pipe",
+    "domain"
 ]
 
 userConfig = {}
@@ -28,7 +35,7 @@ responseType = "application/txt"
 
 
 moduleinfo = {
-    "version": "1.0",
+    "version": "1.1",
     "author": "Julien Bachmann, Hacknowledge",
     "description": "OSQuery export of a MISP event.",
     "module-type": ["export"],
@@ -77,11 +84,42 @@ def handle_service(value):
 
 
 def handle_yara(value):
-    return "not implemented yet, not sure it's easily feasible w/o dropping the sig on the hosts first"
+    return "// WARNING make sure you examine and modify the path parameter below otherwise this is a very expensive search"
+    return "SELECT * FROM file JOIN yara USING (path) WHERE (path LIKE '/%%' AND type = 'regular' AND size < 8000000 AND sigrule='%s' AND count > 0);" % value
 
 
 def handle_scheduledtask(value):
     return "SELECT * FROM scheduled_tasks WHERE name LIKE '%s';" % value
+
+
+def handle_ip_dst(value):
+    return "SELECT * FROM process_open_sockets where remote_address LIKE '%s';" % value
+
+
+def handle_ip_src(value):
+    return "SELECT * FROM process_open_sockets where local_address LIKE '%s';" % value
+
+
+def handle_filename(value):
+    return "// WARNING make sure you examine and modify the path parameter below otherwise this is a very expensive search"
+    return "select * from file where path LIKE '%s';" % value
+
+
+def handle_sha256(value):
+    return "// WARNING make sure you examine and modify the file.directory parameter below otherwise this is a very expensive search"
+    return "SELECT *, sha256 FROM file JOIN hash USING (path) WHERE file.directory LIKE '/%%' AND sha256 like '%s' ORDER BY mtime DESC LIMIT 1;" % value
+
+
+def handle_windows_service_name(value):
+    return "SELECT * FROM services WHERE service_name LIKE '%s';" % value
+
+
+def handle_named_pipe(value):
+    return "SELECT * FROM pipes WHERE name LIKE '%s';" % value
+
+
+def handle_domain(value):
+    return "SELECT * FROM dns_cache WHERE name LIKE '%s';" % value
 
 
 handlers = {
@@ -91,6 +129,13 @@ handlers = {
     "windows-service-displayname": handle_service,
     "windows-scheduled-task": handle_scheduledtask,
     "yara": handle_yara,
+    "ip-dst": handle_ip_dst,
+    "ip-src": handle_ip_src,
+    "filename": handle_filename,
+    "sha256": handle_sha256,
+    "windows-service-name": handle_windows_service_name,
+    "named pipe": handle_named_pipe,
+    "domain": handle_domain,
 }
 
 
