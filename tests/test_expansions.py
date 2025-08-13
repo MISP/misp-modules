@@ -539,7 +539,7 @@ class TestExpansions(unittest.TestCase):
     def test_reversedns(self):
         query = {"module": "reversedns", "ip-src": "8.8.8.8"}
         response = self.misp_modules_post(query)
-        self.assertEqual(self.get_values(response), "dns.google.")
+        self.assertEqual(self.get_values(response), "dns.google")
 
     def test_securitytrails(self):
         module_name = "securitytrails"
