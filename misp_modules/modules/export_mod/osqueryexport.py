@@ -84,7 +84,6 @@ def handle_service(value):
 
 
 def handle_yara(value):
-    return "// WARNING make sure you examine and modify the path parameter below otherwise this is a very expensive search"
     return "SELECT * FROM file JOIN yara USING (path) WHERE (path LIKE '/%%' AND type = 'regular' AND size < 8000000 AND sigrule='%s' AND count > 0);" % value
 
 
@@ -101,12 +100,10 @@ def handle_ip_src(value):
 
 
 def handle_filename(value):
-    return "// WARNING make sure you examine and modify the path parameter below otherwise this is a very expensive search"
     return "select * from file where path LIKE '%s';" % value
 
 
 def handle_sha256(value):
-    return "// WARNING make sure you examine and modify the file.directory parameter below otherwise this is a very expensive search"
     return "SELECT *, sha256 FROM file JOIN hash USING (path) WHERE file.directory LIKE '/%%' AND sha256 like '%s' ORDER BY mtime DESC LIMIT 1;" % value
 
 
