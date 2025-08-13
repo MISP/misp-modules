@@ -69,7 +69,7 @@ def handler(q=False):
         misperrors["error"] = "DNS resolving error"
         return misperrors
 
-    r = {"results": [{"types": mispattributes["output"], "values": [str(answer[0])]}]}
+    r = {"results": [{"types": mispattributes["output"], "values": [str(answer[0]).rstrip(".")]}]}
     return r
 
 
