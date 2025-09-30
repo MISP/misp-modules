@@ -2040,7 +2040,7 @@ Module to lookup CVE attributes in **Rapid7 AttackerKB**.
 
 - **features**:  
 >The module takes a CVE attribute and queries Rapid7 AttackerKB to retrieve information about the vulnerability.  
->It returns details such as the CVSS score, exploitability, attacker value, available references, Rapid7 analysis, and community assessments that can be added to the event.  
+>It returns details such as the CVSS score, exploitability, attacker value, available references, Rapid7 analysis, and community assessments. 
 
 - **config**:  
 > api_key
