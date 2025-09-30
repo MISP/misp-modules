@@ -2031,7 +2031,7 @@ Module to access the ransomcoinDB (see https://ransomcoindb.concinnity-risks.com
 
 -----
 
-#### [Rapid7 AttackerKB lookup] [source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/rapid7_attackerkb.py]
+#### [Rapid7 AttackerKB lookup] (https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/rapid7_attackerkb.py)
 
 <img src=logos/rapid7.png height=45>
 
