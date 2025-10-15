@@ -30,7 +30,7 @@ moduleinfo = {
     "input": "",
     "output": "",
 }
-moduleconfig = []
+moduleconfig = ['auth_key']
 
 API_URL = "https://threatfox-api.abuse.ch/api/v1/"
 
@@ -60,6 +60,9 @@ def handler(q=False):
     request = json.loads(q)
     ret_val = ""
 
+    if not request.get('config') or not request['config'].get('auth_key'):
+        return {'error': 'A auth key is required to access all abuse.ch API services.'}
+
     for input_type in mispattributes["input"]:
         if input_type in request:
             to_query = request[input_type]
@@ -69,7 +72,7 @@ def handler(q=False):
         return misperrors
 
     data = {"query": "search_ioc", "search_term": f"{to_query}"}
-    response = requests.post(API_URL, data=json.dumps(data))
+    response = requests.post(API_URL, headers={'Auth-Key': request['config']['auth_key']}, data=json.dumps(data))
     if response.status_code == 200:
         result = json.loads(response.text)
         if result["query_status"] == "ok":

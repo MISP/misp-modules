@@ -29,7 +29,7 @@ moduleinfo = {
     "input": "A domain, hostname, url, ip, md5 or sha256 attribute.",
     "output": "MISP attributes & objects fetched from the result of the URLhaus API query.",
 }
-moduleconfig = []
+moduleconfig = ['auth_key']
 
 file_keys = ("filename", "response_size", "response_md5", "response_sha256")
 file_relations = ("filename", "size-in-bytes", "md5", "sha256")
@@ -136,8 +136,8 @@ class UrlQuery(URLhaus):
                 file_object.add_attribute(relation, **{"type": relation, "value": payload[key]})
         return file_object
 
-    def query_api(self):
-        response = requests.post(self.url, data={"url": self.attribute.value}).json()
+    def query_api(self, auth_key):
+        response = requests.post(self.url, headers={'Auth-Key': auth_key}, data={"url": self.attribute.value}).json()
         if response["query_status"] != "ok":
             return self.parse_error(response["query_status"])
         if "payloads" in response and response["payloads"]:
@@ -167,13 +167,15 @@ def handler(q=False):
     if q is False:
         return False
     request = json.loads(q)
+    if not request.get('config') or not request['config'].get('auth_key'):
+        return {'error': 'A auth key is required to access all abuse.ch API services.'}
     if not request.get("attribute") or not check_input_attribute(request["attribute"]):
         return {"error": f"{standard_error_message}, which should contain at least a type, a value and an uuid."}
     attribute = request["attribute"]
     if attribute["type"] not in mispattributes["input"]:
         return {"error": "Unsupported attribute type."}
     urlhaus_parser = _misp_type_mapping[attribute["type"]](attribute)
-    return urlhaus_parser.query_api()
+    return urlhaus_parser.query_api(request['config']['auth_key'])
 
 
 def introspection():
