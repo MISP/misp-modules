@@ -68,8 +68,8 @@ class HostQuery(URLhaus):
         self.attribute.from_dict(**attribute)
         self.url = "https://urlhaus-api.abuse.ch/v1/host/"
 
-    def query_api(self):
-        response = requests.post(self.url, data={"host": self.attribute.value}).json()
+    def query_api(self, auth_key):
+        response = requests.post(self.url, headers={'Auth-Key': auth_key}, data={"host": self.attribute.value}).json()
         if response["query_status"] != "ok":
             return self.parse_error(response["query_status"])
         if "urls" in response and response["urls"]:
@@ -85,7 +85,7 @@ class PayloadQuery(URLhaus):
         self.attribute.from_dict(**attribute)
         self.url = "https://urlhaus-api.abuse.ch/v1/payload/"
 
-    def query_api(self):
+    def query_api(self, auth_key):
         hash_type = self.attribute.type
         file_object = MISPObject("file")
         if (
@@ -94,7 +94,7 @@ class PayloadQuery(URLhaus):
             and self.attribute.event_id != "0"
         ):
             file_object.id = self.attribute.object_id
-        response = requests.post(self.url, data={"{}_hash".format(hash_type): self.attribute.value}).json()
+        response = requests.post(self.url, headers={'Auth-Key': auth_key}, data={"{}_hash".format(hash_type): self.attribute.value}).json()
         if response["query_status"] != "ok":
             return self.parse_error(response["query_status"])
         other_hash_type = "md5" if hash_type == "sha256" else "sha256"
