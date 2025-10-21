@@ -2028,6 +2028,40 @@ Module to access the ransomcoinDB (see https://ransomcoindb.concinnity-risks.com
 
 -----
 
+#### [Rapid7 AttackerKB lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/rapid7_attackerkb.py)
+
+<img src=../logos/rapid7.png height=45>
+
+Module to lookup CVE attributes in **Rapid7 AttackerKB**.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/rapid7_attackerkb.py)]
+
+- **features**:  
+>The module takes a CVE attribute and queries Rapid7 AttackerKB to retrieve information about the vulnerability.  
+>It returns details such as the CVSS score, exploitability, attacker value, available references, Rapid7 analysis, and community assessments. 
+
+- **config**:  
+> api_key
+
+- **input**:  
+>A vulnerability attribute containing a CVE ID, or a comment that includes one or more CVEs.
+
+- **output**:  
+> Enriched information about the CVE, including:  
+> - Vulnerability description and link to Rapid7 AttackerKB topic  
+> - CVSS base score  
+> - Attacker value and exploitability ratings  
+> - External references related to the CVE  
+> - Rapid7’s analysis (if available)  
+> - Community assessments with contributor names, scores, and notes  
+
+- **references**:  
+> https://attackerkb.com/
+
+- **requirements**:  
+> A valid public Rapid7 AttackerKB API key https://api.attackerkb.com/v1/api-docs/docs 
+
+-----
+
 #### [Real-time Blackhost Lists Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/rbl.py)
 
 Module to check an IPv4 address against known RBLs.
