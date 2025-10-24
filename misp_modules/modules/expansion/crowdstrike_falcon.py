@@ -1,12 +1,13 @@
 import json
 
+from datetime import datetime
 from falconpy import Intel
 from pymisp import MISPAttribute, MISPEvent
 
 from . import check_input_attribute, standard_error_message
 
 moduleinfo = {
-    "version": "0.2",
+    "version": "0.3",
     "author": "Christophe Vandeplas",
     "description": "Module to query CrowdStrike Falcon.",
     "module-type": ["expansion", "hover"],
@@ -145,6 +146,75 @@ def lookup_indicator(client, ref_attribute):
             attribute = MISPAttribute()
             attribute.from_dict(**r)
             misp_event.add_attribute(**attribute)
+        for ip_type in item.get("ip_address_types", []):
+            ip_type_attribute = {
+                "type": "text",
+                "category": "Other",
+                "value": f"IP_Type: {ip_type}",
+                "to_ids": False
+            }
+            attribute = MISPAttribute()
+            attribute.from_dict(**ip_type_attribute)
+            misp_event.add_attribute(**attribute)
+        if item.get("malicious_confidence"):
+            confidence_attribute = {
+                "type": "text",
+                "category": "Other",
+                "value": f"Malicious_Confidence: {item.get('malicious_confidence')}",
+                "to_ids": False
+            }
+            attribute = MISPAttribute()
+            attribute.from_dict(**confidence_attribute)
+            misp_event.add_attribute(**attribute)
+        for label in item.get("labels", []):
+            label_value = f"Label: {label.get('name')}"
+            if label.get("created_on") and label.get("last_valid_on"):
+                iso_created_on = datetime.utcfromtimestamp(label["created_on"]).isoformat() + "Z"
+                iso_last_valid_on = datetime.utcfromtimestamp(label["last_valid_on"]).isoformat() + "Z"
+                label_value += f" (created_on: {iso_created_on}, last_valid_on: {iso_last_valid_on})"
+            label_attribute = {
+                "type": "text",
+                "category": "Other",
+                "value": label_value,
+                "to_ids": False,
+            }
+            attribute = MISPAttribute()
+            attribute.from_dict(**label_attribute)
+            misp_event.add_attribute(**attribute)
+        if item.get("reports"):
+            for report in item["reports"]:
+                report_attribute = {
+                    "type": "text",
+                    "category": "Other",
+                    "value": f"Report: {report}",
+                    "to_ids": False,
+                }
+                attribute = MISPAttribute()
+                attribute.from_dict(**report_attribute)
+                misp_event.add_attribute(**attribute)
+        if item.get("threat_types"):
+            for threat in item["threat_types"]:
+                threat_type_attribute = {
+                    "type": "text",
+                    "category": "Other",
+                    "value": f"Threat_Type: {threat}",
+                    "to_ids": False,
+                }
+                attribute = MISPAttribute()
+                attribute.from_dict(**threat_type_attribute)
+                misp_event.add_attribute(**attribute)
+        if item.get("last_updated"):
+            iso_last_updated = datetime.utcfromtimestamp(item["last_updated"]).isoformat() + "Z"
+            last_updated_attribute = {
+                "type": "datetime",
+                "category": "Other",
+                "value": iso_last_updated,
+                "to_ids": False,
+            }
+            attribute = MISPAttribute()
+            attribute.from_dict(**last_updated_attribute)
+            misp_event.add_attribute(**attribute)
+
 
     event = json.loads(misp_event.to_json())
     return {"Object": event.get("Object", []), "Attribute": event.get("Attribute", [])}
