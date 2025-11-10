@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# Contributions: Adam McHugh <adam@mchughcyber.com.au>
 import json
 from collections import defaultdict
 from urllib.parse import urlparse

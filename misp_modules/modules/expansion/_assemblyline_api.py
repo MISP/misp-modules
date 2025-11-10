@@ -3,6 +3,8 @@ from typing import Any, Dict, Optional
 
 import requests
 
+# Contributions: Adam McHugh <adam@mchughcyber.com.au>
+
 
 class AssemblyLineError(Exception):
     """Exception raised when the AssemblyLine API returns an error."""

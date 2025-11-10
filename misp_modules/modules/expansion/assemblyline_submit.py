@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# Contributions: Adam McHugh <adam@mchughcyber.com.au>
 import base64
 import binascii
 import json
