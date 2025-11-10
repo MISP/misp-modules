@@ -2,6 +2,8 @@
 Utilities to assemble a baseline OpenAPI document for the misp-modules service.
 """
 
+# Contributor: Adam McHugh (adam@mchughcyber.com.au)
+
 from __future__ import annotations
 
 import datetime
