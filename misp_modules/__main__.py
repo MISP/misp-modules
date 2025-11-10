@@ -306,11 +306,15 @@ def main():
             LOGGER.info("CUSTOM MISP module %s (type=%s) imported", module_name, module_type.name)
 
     global OPENAPI_DOCUMENT  # noqa: PLW0603
-    OPENAPI_DOCUMENT = openapi_builder.build_document(
-        MODULES_HANDLERS,
-        listen=args.listen,
-        port=args.port,
-    )
+    try:
+        OPENAPI_DOCUMENT = openapi_builder.build_document(
+            MODULES_HANDLERS,
+            listen=args.listen,
+            port=args.port,
+        )
+    except Exception:
+        LOGGER.exception("Failed to build OpenAPI document; continuing without it")
+        OPENAPI_DOCUMENT = {}
 
     try:
         server = tornado.httpserver.HTTPServer(
