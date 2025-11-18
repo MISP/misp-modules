@@ -147,12 +147,7 @@ def lookup_indicator(client, ref_attribute):
             attribute.from_dict(**r)
             misp_event.add_attribute(**attribute)
         for ip_type in item.get("ip_address_types", []):
-            ip_type_attribute = {
-                "type": "text",
-                "category": "Other",
-                "value": f"IP_Type: {ip_type}",
-                "to_ids": False
-            }
+            ip_type_attribute = {"type": "text", "category": "Other", "value": f"IP_Type: {ip_type}", "to_ids": False}
             attribute = MISPAttribute()
             attribute.from_dict(**ip_type_attribute)
             misp_event.add_attribute(**attribute)
@@ -161,7 +156,7 @@ def lookup_indicator(client, ref_attribute):
                 "type": "text",
                 "category": "Other",
                 "value": f"Malicious_Confidence: {item.get('malicious_confidence')}",
-                "to_ids": False
+                "to_ids": False,
             }
             attribute = MISPAttribute()
             attribute.from_dict(**confidence_attribute)
@@ -214,7 +209,6 @@ def lookup_indicator(client, ref_attribute):
             attribute = MISPAttribute()
             attribute.from_dict(**last_updated_attribute)
             misp_event.add_attribute(**attribute)
-
 
     event = json.loads(misp_event.to_json())
     return {"Object": event.get("Object", []), "Attribute": event.get("Attribute", [])}
