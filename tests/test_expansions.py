@@ -109,7 +109,7 @@ class TestExpansions(unittest.TestCase):
                 os.path.dirname(os.path.realpath(__file__)), "..", "misp_modules", "modules", "expansion"
             )
             module_files = [
-                file[:-3] for file in os.listdir(export_mod_path) if file.endswith(".py") if file not in ["__init__.py"]
+                file[:-3] for file in os.listdir(export_mod_path) if not file.startswith("_") if file.endswith(".py") if file not in ["__init__.py"]
             ]
             missing = []
             for module in module_files:
