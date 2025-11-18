@@ -30,6 +30,12 @@ In order to provide documentation about some modules that require specific input
 - **input** - description of the format of data used in input
 - **output** - description of the format given as the result of the module execution
 
+## OpenAPI and API explorer
+
+When the service is running you can discover the available endpoints in a machine-readable way via `/openapi.json`.
+An interactive Swagger UI that consumes the same specification is available at `/openapi`.
+The specification is generated during service startup, so restart `misp-modules` after adding or removing modules to refresh what those endpoints expose.
+
 ## Licenses
 For further Information see the [license file](https://misp.github.io/misp-modules/license/).
 

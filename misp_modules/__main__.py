@@ -41,13 +41,45 @@ from tornado import concurrent as tornado_concurrent
 from tornado import ioloop
 
 import misp_modules
+from misp_modules import openapi as openapi_builder
 
 # See https://github.com/MISP/misp-modules/issues/662
 MAX_BUFFER_SIZE = 1073741824
 
 # Global variables
 MODULES_HANDLERS = {}
+OPENAPI_DOCUMENT = {}
 LOGGER = logging.getLogger("misp-modules")
+
+SWAGGER_UI_TEMPLATE = (
+    "<!DOCTYPE html>\n"
+    "<html lang='en'>\n"
+    "<head>\n"
+    "  <meta charset='utf-8' />\n"
+    "  <title>MISP Modules API Explorer</title>\n"
+    "  <link rel='stylesheet' href='https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui.css' />\n"
+    "</head>\n"
+    "<body>\n"
+    "  <div id='swagger-ui'></div>\n"
+    "  <script src='https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui-bundle.min.js'></script>\n"
+    "  <script src='https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui-standalone-preset.js'></script>\n"
+    "  <script>\n"
+    "    window.addEventListener('load', function() {\n"
+    "      const ui = SwaggerUIBundle({\n"
+    "        url: '__SPEC_URL__',\n"
+    "        dom_id: '#swagger-ui',\n"
+    "        presets: [\n"
+    "          SwaggerUIBundle.presets.apis,\n"
+    "          SwaggerUIStandalonePreset\n"
+    "        ],\n"
+    "        layout: 'StandaloneLayout'\n"
+    "      });\n"
+    "      window.ui = ui;\n"
+    "    });\n"
+    "  </script>\n"
+    "</body>\n"
+    "</html>\n"
+)
 
 # Module that, if present, guarantees that the extra 'all' has been installed
 DEGRADED_SENTINEL_MODULE = "yara"
@@ -130,6 +162,30 @@ class HealthCheck(tornado.web.RequestHandler):
     def get(self):
         LOGGER.debug("HealthCheck request")
         self.write(orjson.dumps({"status": True}))
+
+
+class OpenAPISpec(tornado.web.RequestHandler):
+    """OpenAPI specification handler."""
+
+    def get(self):
+        LOGGER.debug("OpenAPI spec request")
+        if not OPENAPI_DOCUMENT:
+            self.send_error(503)
+            return
+        self.set_header("Content-Type", "application/json")
+        self.write(orjson.dumps(OPENAPI_DOCUMENT))
+
+
+class SwaggerUI(tornado.web.RequestHandler):
+    """Swagger UI explorer handler."""
+
+    def get(self):
+        LOGGER.debug("Swagger UI request")
+        if not OPENAPI_DOCUMENT:
+            self.send_error(503)
+            return
+        self.set_header("Content-Type", "text/html; charset=utf-8")
+        self.write(SWAGGER_UI_TEMPLATE.replace('__SPEC_URL__', '/openapi.json'))
 
 
 class ListModules(tornado.web.RequestHandler):
@@ -249,6 +305,17 @@ def main():
             MODULES_HANDLERS[f"type:{module_name}"] = module_type.name
             LOGGER.info("CUSTOM MISP module %s (type=%s) imported", module_name, module_type.name)
 
+    global OPENAPI_DOCUMENT  # noqa: PLW0603
+    try:
+        OPENAPI_DOCUMENT = openapi_builder.build_document(
+            MODULES_HANDLERS,
+            listen=args.listen,
+            port=args.port,
+        )
+    except Exception:
+        LOGGER.exception("Failed to build OpenAPI document; continuing without it")
+        OPENAPI_DOCUMENT = {}
+
     try:
         server = tornado.httpserver.HTTPServer(
             tornado.web.Application(
@@ -257,6 +324,8 @@ def main():
                     (r"/query", QueryModule),
                     (r"/healthcheck", HealthCheck),
                     (r"/version", VersionCheck),
+                    (r"/openapi.json", OpenAPISpec),
+                    (r"/openapi", SwaggerUI),
                 ]
             ),
             max_buffer_size=MAX_BUFFER_SIZE,
