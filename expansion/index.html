@@ -22,7 +22,7 @@
       
       
       <link rel="icon" href="../img/favicon.ico">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.7">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.11">
     
     
       
@@ -30,7 +30,7 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.8608ea7d.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.4af4bdda.min.css">
       
         
         <link rel="stylesheet" href="../assets/stylesheets/palette.06af60db.min.css">
@@ -193,6 +193,7 @@
       <a href=".." class="md-nav__link">
         
   
+  
   <span class="md-ellipsis">
     Home
     
@@ -216,6 +217,7 @@
     
     
     
+    
     <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
         
@@ -225,6 +227,7 @@
           
           <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
             
+  
   
   <span class="md-ellipsis">
     Modules
@@ -251,6 +254,7 @@
     <li class="md-nav__item">
       <a href="../action_mod/" class="md-nav__link">
         
+  
   
   <span class="md-ellipsis">
     Action Modules
@@ -281,6 +285,7 @@
         <label class="md-nav__link md-nav__link--active" for="__toc">
           
   
+  
   <span class="md-ellipsis">
     Expansion Modules
     
@@ -292,6 +297,7 @@
       
       <a href="./" class="md-nav__link md-nav__link--active">
         
+  
   
   <span class="md-ellipsis">
     Expansion Modules
@@ -318,6 +324,15 @@
   <a href="#abuse-ipdb" class="md-nav__link">
     <span class="md-ellipsis">
       Abuse IPDB
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#anyrun-sandbox-submit" class="md-nav__link">
+    <span class="md-ellipsis">
+      ANYRUN Sandbox Submit
     </span>
   </a>
   
@@ -966,6 +981,15 @@
   <a href="#randomcoindb-lookup" class="md-nav__link">
     <span class="md-ellipsis">
       RandomcoinDB Lookup
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#r7_akb" class="md-nav__link">
+    <span class="md-ellipsis">
+      r7_akb
     </span>
   </a>
   
@@ -1332,6 +1356,7 @@
       <a href="../export_mod/" class="md-nav__link">
         
   
+  
   <span class="md-ellipsis">
     Export Modules
     
@@ -1353,6 +1378,7 @@
     <li class="md-nav__item">
       <a href="../import_mod/" class="md-nav__link">
         
+  
   
   <span class="md-ellipsis">
     Import Modules
@@ -1383,6 +1409,7 @@
       <a href="../install/" class="md-nav__link">
         
   
+  
   <span class="md-ellipsis">
     Install Guides
     
@@ -1403,6 +1430,7 @@
     <li class="md-nav__item">
       <a href="../contribute/" class="md-nav__link">
         
+  
   
   <span class="md-ellipsis">
     Contribute
@@ -1425,6 +1453,7 @@
     
     
     
+    
     <li class="md-nav__item md-nav__item--nested">
       
         
@@ -1434,6 +1463,7 @@
           
           <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
             
+  
   
   <span class="md-ellipsis">
     About
@@ -1460,6 +1490,7 @@
     <li class="md-nav__item">
       <a href="../license/" class="md-nav__link">
         
+  
   
   <span class="md-ellipsis">
     License
@@ -1508,6 +1539,15 @@
   <a href="#abuse-ipdb" class="md-nav__link">
     <span class="md-ellipsis">
       Abuse IPDB
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#anyrun-sandbox-submit" class="md-nav__link">
+    <span class="md-ellipsis">
+      ANYRUN Sandbox Submit
     </span>
   </a>
   
@@ -2156,6 +2196,15 @@
   <a href="#randomcoindb-lookup" class="md-nav__link">
     <span class="md-ellipsis">
       RandomcoinDB Lookup
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#r7_akb" class="md-nav__link">
+    <span class="md-ellipsis">
+      r7_akb
     </span>
   </a>
   
@@ -2544,6 +2593,73 @@
 </li>
 </ul>
 <hr />
+<h4 id="anyrun-sandbox-submit"><a href="https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/anyrun_sandbox_submit.py">ANYRUN Sandbox Submit</a><a class="headerlink" href="#anyrun-sandbox-submit" title="Permanent link">&para;</a></h4>
+<p>A module designed to submit URLs or files to the ANY.RUN Sandbox for analysis and return the unique analysis link and ID.
+[<a href="https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/anyrun_sandbox_submit.py">source code</a>]</p>
+<ul>
+<li>
+<p><strong>features</strong>:</p>
+<blockquote>
+<p>Supports submission of URLs and files via the ANY.RUN API; requires an API key for authentication; returns the task ID and permanent URL for tracking analysis progress; integrates seamlessly with MISP events by enriching attributes with submission results.</p>
+</blockquote>
+</li>
+<li>
+<p><strong>config</strong>:</p>
+<blockquote>
+<ul>
+<li>api_key</li>
+<li>os_type</li>
+<li>opt_timeout</li>
+<li>opt_network_connect</li>
+<li>opt_network_fakenet</li>
+<li>opt_network_tor</li>
+<li>opt_network_geo</li>
+<li>opt_network_mitm</li>
+<li>opt_network_residential_proxy</li>
+<li>opt_network_residential_proxy_geo</li>
+<li>opt_privacy_type</li>
+<li>obj_ext_extension</li>
+<li>obj_ext_browser</li>
+<li>env_locale</li>
+<li>env_version</li>
+<li>env_bitness</li>
+<li>env_type</li>
+<li>obj_ext_startfolder</li>
+<li>obj_ext_cmd</li>
+<li>obj_force_elevation</li>
+<li>run_as_root</li>
+</ul>
+</blockquote>
+</li>
+<li>
+<p><strong>input</strong>:</p>
+<blockquote>
+<p>Attachment, malware-sample or url to submit to ANY.RUN Sandbox.</p>
+</blockquote>
+</li>
+<li>
+<p><strong>output</strong>:</p>
+<blockquote>
+<p>ANY.RUN Sandbox analysis URL and UUID.</p>
+</blockquote>
+</li>
+<li>
+<p><strong>references</strong>:</p>
+<blockquote>
+<p><a href="https://any.run">https://any.run</a></p>
+</blockquote>
+</li>
+<li>
+<p><strong>requirements</strong>:</p>
+<blockquote>
+<ul>
+<li>anyrun-sdk: ANY.RUN API python3 library</li>
+<li>ANY.RUN Sandbox API-KEY</li>
+</ul>
+</blockquote>
+</li>
+</ul>
+<hr />
 <h4 id="osint-digitalside"><a href="https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/apiosintds.py">OSINT DigitalSide</a><a class="headerlink" href="#osint-digitalside" title="Permanent link">&para;</a></h4>
 <p>On demand query API for OSINT.digitalside.it project.
 [<a href="https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/apiosintds.py">source code</a>]</p>
@@ -2682,12 +2798,6 @@
 <p><a href="https://www.cyber.gc.ca/en/assemblyline">https://www.cyber.gc.ca/en/assemblyline</a></p>
 </blockquote>
 </li>
-<li>
-<p><strong>requirements</strong>:</p>
-<blockquote>
-<p>assemblyline_client: Python library to query the AssemblyLine rest API.</p>
-</blockquote>
-</li>
 </ul>
 <hr />
 <h4 id="assemblyline-submit"><a href="https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/assemblyline_submit.py">AssemblyLine Submit</a><a class="headerlink" href="#assemblyline-submit" title="Permanent link">&para;</a></h4>
@@ -2730,12 +2840,6 @@
 <p><strong>references</strong>:</p>
 <blockquote>
 <p><a href="https://www.cyber.gc.ca/en/assemblyline">https://www.cyber.gc.ca/en/assemblyline</a></p>
-</blockquote>
-</li>
-<li>
-<p><strong>requirements</strong>:</p>
-<blockquote>
-<p>assemblyline_client: Python library to query the AssemblyLine rest API.</p>
 </blockquote>
 </li>
 </ul>
@@ -4867,6 +4971,12 @@ When the analysis is completed, it is possible to import the generated report by
 </blockquote>
 </li>
 <li>
+<p><strong>config</strong>:</p>
+<blockquote>
+<p>auth_key</p>
+</blockquote>
+</li>
+<li>
 <p><strong>input</strong>:</p>
 <blockquote>
 <p>A hash attribute (md5, sha1 or sha256).</p>
@@ -5553,6 +5663,39 @@ It is also possible to filter results on 1 db_source by configuring db_source_fi
 </li>
 </ul>
 <hr />
+<h4 id="r7_akb"><a href="https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/rapid7_attackerkb.py">r7_akb</a><a class="headerlink" href="#r7_akb" title="Permanent link">&para;</a></h4>
+<p>Enrich CVEs via AttackerKB and return structured MISP events. Handles rate limits, regex CVE detection, and markdown cleanup.
+[<a href="https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/rapid7_attackerkb.py">source code</a>]</p>
+<ul>
+<li>
+<p><strong>config</strong>:</p>
+<blockquote>
+<p>api_key</p>
+</blockquote>
+</li>
+<li>
+<p><strong>input</strong>:</p>
+<blockquote>
+<p>Vulnerability attribute (CVE ID or comment containing CVE).</p>
+</blockquote>
+</li>
+<li>
+<p><strong>output</strong>:</p>
+<blockquote>
+<p>Structured MISP Objects.</p>
+</blockquote>
+</li>
+<li>
+<p><strong>requirements</strong>:</p>
+<blockquote>
+<ul>
+<li>pymisp</li>
+<li>requests</li>
+</ul>
+</blockquote>
+</li>
+</ul>
+<hr />
 <h4 id="real-time-blackhost-lists-lookup"><a href="https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/rbl.py">Real-time Blackhost Lists Lookup</a><a class="headerlink" href="#real-time-blackhost-lists-lookup" title="Permanent link">&para;</a></h4>
 <p>Module to check an IPv4 address against known RBLs.
 [<a href="https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/rbl.py">source code</a>]</p>
@@ -5927,6 +6070,7 @@ It is also possible to filter results on 1 db_source by configuring db_source_fi
 <ul>
 <li>client_id</li>
 <li>client_secret</li>
+<li>region</li>
 </ul>
 </blockquote>
 </li>
@@ -6137,7 +6281,15 @@ It is also possible to filter results on 1 db_source by configuring db_source_fi
 <p>Module to search for an IOC on ThreatFox by abuse.ch.
 [<a href="https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/threatfox.py">source code</a>]</p>
 <ul>
-<li><strong>features</strong>:<blockquote></blockquote>
+<li>
+<p><strong>features</strong>:</p>
+<blockquote></blockquote>
+</li>
+<li>
+<p><strong>config</strong>:</p>
+<blockquote>
+<p>auth_key</p>
+</blockquote>
 </li>
 </ul>
 <hr />
@@ -6271,6 +6423,12 @@ It is also possible to filter results on 1 db_source by configuring db_source_fi
 <blockquote>
 <p>Module using the new format of modules able to return attributes and objects.</p>
 <p>The module takes one of the attribute type specified as input, and query the URLhaus API with it. If any result is returned by the API, attributes and objects are created accordingly.</p>
+</blockquote>
+</li>
+<li>
+<p><strong>config</strong>:</p>
+<blockquote>
+<p>auth_key</p>
 </blockquote>
 </li>
 <li>
@@ -7238,7 +7396,9 @@ Both hover and expansion functionalities are supported with this module, where t
     </div>
     
     
-    <script id="__config" type="application/json">{"base": "..", "features": [], "search": "../assets/javascripts/workers/search.f8cc74c7.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+      
+      <script id="__config" type="application/json">{"base": "..", "features": [], "search": "../assets/javascripts/workers/search.f8cc74c7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
       <script src="../assets/javascripts/bundle.c8b220af.min.js"></script>

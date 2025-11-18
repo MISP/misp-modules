@@ -20,7 +20,7 @@
       
       
       <link rel="icon" href="img/favicon.ico">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.7">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.11">
     
     
       
@@ -28,7 +28,7 @@
       
     
     
-      <link rel="stylesheet" href="assets/stylesheets/main.8608ea7d.min.css">
+      <link rel="stylesheet" href="assets/stylesheets/main.4af4bdda.min.css">
       
         
         <link rel="stylesheet" href="assets/stylesheets/palette.06af60db.min.css">
@@ -200,6 +200,7 @@
         <label class="md-nav__link md-nav__link--active" for="__toc">
           
   
+  
   <span class="md-ellipsis">
     Home
     
@@ -211,6 +212,7 @@
       
       <a href="." class="md-nav__link md-nav__link--active">
         
+  
   
   <span class="md-ellipsis">
     Home
@@ -322,6 +324,7 @@
     
     
     
+    
     <li class="md-nav__item md-nav__item--nested">
       
         
@@ -331,6 +334,7 @@
           
           <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
             
+  
   
   <span class="md-ellipsis">
     Modules
@@ -358,6 +362,7 @@
       <a href="action_mod/" class="md-nav__link">
         
   
+  
   <span class="md-ellipsis">
     Action Modules
     
@@ -379,6 +384,7 @@
     <li class="md-nav__item">
       <a href="expansion/" class="md-nav__link">
         
+  
   
   <span class="md-ellipsis">
     Expansion Modules
@@ -402,6 +408,7 @@
       <a href="export_mod/" class="md-nav__link">
         
   
+  
   <span class="md-ellipsis">
     Export Modules
     
@@ -423,6 +430,7 @@
     <li class="md-nav__item">
       <a href="import_mod/" class="md-nav__link">
         
+  
   
   <span class="md-ellipsis">
     Import Modules
@@ -453,6 +461,7 @@
       <a href="install/" class="md-nav__link">
         
   
+  
   <span class="md-ellipsis">
     Install Guides
     
@@ -473,6 +482,7 @@
     <li class="md-nav__item">
       <a href="contribute/" class="md-nav__link">
         
+  
   
   <span class="md-ellipsis">
     Contribute
@@ -495,6 +505,7 @@
     
     
     
+    
     <li class="md-nav__item md-nav__item--nested">
       
         
@@ -504,6 +515,7 @@
           
           <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
             
+  
   
   <span class="md-ellipsis">
     About
@@ -530,6 +542,7 @@
     <li class="md-nav__item">
       <a href="license/" class="md-nav__link">
         
+  
   
   <span class="md-ellipsis">
     License
@@ -676,6 +689,7 @@ without modifying core components. The API is available via a simple REST API wh
 <h3 id="expansion-modules">Expansion Modules<a class="headerlink" href="#expansion-modules" title="Permanent link">&para;</a></h3>
 <ul>
 <li><a href="https://misp.github.io/misp-modules/expansion/#abuse-ipdb">Abuse IPDB</a> - AbuseIPDB MISP expansion module</li>
+<li><a href="https://misp.github.io/misp-modules/expansion/#anyrun-sandbox-submit">ANYRUN Sandbox Submit</a> - A module designed to submit URLs or files to the ANY.RUN Sandbox for analysis and return the unique analysis link and ID.</li>
 <li><a href="https://misp.github.io/misp-modules/expansion/#osint-digitalside">OSINT DigitalSide</a> - On demand query API for OSINT.digitalside.it project.</li>
 <li><a href="https://misp.github.io/misp-modules/expansion/#apivoid">APIVoid</a> - Module to query APIVoid with some domain attributes.</li>
 <li><a href="https://misp.github.io/misp-modules/expansion/#assemblyline-query">AssemblyLine Query</a> - A module tu query the AssemblyLine API with a submission ID to get the submission report and parse it.</li>
@@ -748,6 +762,7 @@ without modifying core components. The API is available via a simple REST API wh
 <li><a href="https://misp.github.io/misp-modules/expansion/#qintel-qsentry-lookup">Qintel QSentry Lookup</a> - A hover and expansion module which queries Qintel QSentry for ip reputation data</li>
 <li><a href="https://misp.github.io/misp-modules/expansion/#qr-code-decode">QR Code Decode</a> - Module to decode QR codes.</li>
 <li><a href="https://misp.github.io/misp-modules/expansion/#randomcoindb-lookup">RandomcoinDB Lookup</a> - Module to access the ransomcoinDB (see <a href="https://ransomcoindb.concinnity-risks.com">https://ransomcoindb.concinnity-risks.com</a>)</li>
+<li><a href="https://misp.github.io/misp-modules/expansion/#r7_akb">r7_akb</a> - Enrich CVEs via AttackerKB and return structured MISP events. Handles rate limits, regex CVE detection, and markdown cleanup.</li>
 <li><a href="https://misp.github.io/misp-modules/expansion/#real-time-blackhost-lists-lookup">Real-time Blackhost Lists Lookup</a> - Module to check an IPv4 address against known RBLs.</li>
 <li><a href="https://misp.github.io/misp-modules/expansion/#recorded-future-enrich">Recorded Future Enrich</a> - Module to enrich attributes with threat intelligence from Recorded Future.</li>
 <li><a href="https://misp.github.io/misp-modules/expansion/#reverse-dns">Reverse DNS</a> - Simple Reverse DNS expansion service to resolve reverse DNS from MISP attributes.</li>
@@ -807,6 +822,7 @@ without modifying core components. The API is available via a simple REST API wh
 </ul>
 <h3 id="import-modules">Import Modules<a class="headerlink" href="#import-modules" title="Permanent link">&para;</a></h3>
 <ul>
+<li><a href="https://misp.github.io/misp-modules/import_mod/#anyrun-sandbox-import">ANYRUN Sandbox Import</a> - A module designed to retrieve an analysis report from the ANY.RUN Sandbox by its unique ID and extract results (such as verdict, malware tags, and IOCs), converting them into MISP attributes within your event.</li>
 <li><a href="https://misp.github.io/misp-modules/import_mod/#pdns-cof-importer">PDNS COF Importer</a> - Passive DNS Common Output Format (COF) MISP importer</li>
 <li><a href="https://misp.github.io/misp-modules/import_mod/#csv-import">CSV Import</a> - Module to import MISP attributes from a csv file.</li>
 <li><a href="https://misp.github.io/misp-modules/import_mod/#cuckoo-sandbox-import">Cuckoo Sandbox Import</a> - Module to import Cuckoo JSON.</li>
@@ -828,6 +844,7 @@ without modifying core components. The API is available via a simple REST API wh
 <h3 id="action-modules">Action Modules<a class="headerlink" href="#action-modules" title="Permanent link">&para;</a></h3>
 <ul>
 <li><a href="https://misp.github.io/misp-modules/action_mod/#mattermost">Mattermost</a> - Simplistic module to send message to a Mattermost channel.</li>
+<li><a href="https://misp.github.io/misp-modules/action_mod/#nextcloud-talk">Nextcloud talk</a> - Simplistic module to send a message to a Nextcloud talk conversation.</li>
 <li><a href="https://misp.github.io/misp-modules/action_mod/#slack">Slack</a> - Simplistic module to send messages to a Slack channel.</li>
 <li><a href="https://misp.github.io/misp-modules/action_mod/#test-action">Test action</a> - This module is merely a test, always returning true. Triggers on event publishing.</li>
 </ul>
@@ -912,7 +929,9 @@ For further information please see <a href="contribute/">Contribute</a>.</p>
     </div>
     
     
-    <script id="__config" type="application/json">{"base": ".", "features": [], "search": "assets/javascripts/workers/search.f8cc74c7.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+      
+      <script id="__config" type="application/json">{"base": ".", "features": [], "search": "assets/javascripts/workers/search.f8cc74c7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
       <script src="assets/javascripts/bundle.c8b220af.min.js"></script>
