@@ -58,6 +58,8 @@ def is_valid_module(module: importlib.abc.Traversable) -> bool:
         return False
     if module.name == "__init__.py":
         return False
+    if module.name.startswith("_"):
+        return False
     if not module.name.endswith(".py"):
         return False
     return True
