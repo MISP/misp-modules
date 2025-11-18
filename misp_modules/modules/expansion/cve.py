@@ -13,7 +13,7 @@ moduleinfo = {
     "description": "An expansion hover module to expand information about CVE id.",
     "module-type": ["expansion", "hover"],
     "name": "CVE Lookup",
-    "logo": "vulnerability_lookyp.png",
+    "logo": "vulnerability_lookup.png",
     "requirements": [],
     "features": (
         "The module takes a vulnerability attribute as input and queries Vulnerability Lookup to get additional"
