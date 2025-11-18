@@ -19,10 +19,7 @@ moduleinfo = {
     "module-type": ["import"],
     "name": "ANYRUN Sandbox Import",
     "logo": "anyrun.png",
-    "requirements": [
-        "anyrun-sdk: ANY.RUN API python3 library",
-        "ANY.RUN Sandbox API-KEY"
-    ],
+    "requirements": ["anyrun-sdk: ANY.RUN API python3 library", "ANY.RUN Sandbox API-KEY"],
     "features": (
         "Fetches detailed JSON reports using the ANY.RUN API; "
         "parses key elements like verdict, extracted IOCs (hashes, IPs, URLs), malware tags; "
@@ -30,7 +27,7 @@ moduleinfo = {
     ),
     "references": ["https://any.run"],
     "input": "ANY.RUN Sandbox analysis UUID.",
-    "output": "Analysis external references, verdict, IOCs (hashes, IPs, URLs), malware tags, MITRE ATT&CK Techniques"
+    "output": "Analysis external references, verdict, IOCs (hashes, IPs, URLs), malware tags, MITRE ATT&CK Techniques",
 }
 
 mispattributes = {
@@ -59,12 +56,10 @@ userConfig = {
         "type": "Boolean",
         "message": "Include ANY.RUN Sandbox MITRE ATT&CK Techniques",
         "checked": "True",
-    }
+    },
 }
 
-moduleconfig = [
-    "api_key"
-]
+moduleconfig = ["api_key"]
 
 
 def handler(q=False):
@@ -78,7 +73,7 @@ def handler(q=False):
         analysis_uuid = request.get("config").get("ANYRUN Analysis UUID")
 
         if not any((token, analysis_uuid)):
-            raise RunTimeException(f"ANY.RUN API-KEY and Analysis UUID must be specified.")
+            raise RunTimeException("ANY.RUN API-KEY and Analysis UUID must be specified.")
 
         with SandboxConnector.windows(token, integration=Config.INTEGRATION) as connector:
             connector.check_authorization()
