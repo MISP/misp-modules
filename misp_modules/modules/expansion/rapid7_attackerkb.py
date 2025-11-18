@@ -39,7 +39,8 @@ moduleinfo: dict[str, Any] = {
     "name": "r7_akb",
     "requirements": ["pymisp", "requests"],
     "input": "Vulnerability attribute (CVE ID or comment containing CVE).",
-    "output": "Structured MISP Objects."
+    "output": "Structured MISP Objects.",
+    "logo": ""
 }
 
 # Global HTTP session (stateless re-use; not an application state container)
