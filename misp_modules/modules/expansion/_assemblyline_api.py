@@ -24,7 +24,9 @@ class AssemblyLineAPI:
         self.timeout = timeout
         self._auth_payload: Optional[Dict[str, Any]] = None
 
-    def authenticate(self, *, user: str, apikey: Optional[str] = None, password: Optional[str] = None) -> Dict[str, Any]:
+    def authenticate(
+        self, *, user: str, apikey: Optional[str] = None, password: Optional[str] = None
+    ) -> Dict[str, Any]:
         if not user:
             raise AssemblyLineError("Missing AssemblyLine user identifier.")
         if apikey:
@@ -125,5 +127,3 @@ class AssemblyLineAPI:
         if not path.startswith("/"):
             path = f"/{path}"
         return f"{self.base_url}{path}"
-
-
