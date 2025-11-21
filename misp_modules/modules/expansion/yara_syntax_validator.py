@@ -107,8 +107,10 @@ def handler(q=False):
         summary = "Syntax error: Max validation attempts exceeded"
     return {"results": [{"types": mispattributes["output"], "values": summary}]}
 
+
 def introspection():
     return mispattributes
+
 
 def version():
     moduleinfo["config"] = moduleconfig
