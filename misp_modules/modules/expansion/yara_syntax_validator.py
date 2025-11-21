@@ -79,12 +79,12 @@ def handler(q=False):
     current_rule_text = rule_content
     while attempts < max_attempts:
         try:
-            yara.compile(source=current_rule_text, externals=externals) # some times the compilator needs externals variables
+            yara.compile(source=current_rule_text, externals=externals)  # some times the compilator needs externals variables
             summary = "Syntax valid"
             break
         except yara.SyntaxError as e:
             error_msg = str(e)
-            # try to catch modules or externals variables errors to auto correct it 
+            # try to catch modules or externals variables errors to auto correct it
             match_id = re.search(r'undefined identifier "(\w+)"', error_msg)
             if match_id:
                 var_name = match_id.group(1)
@@ -93,7 +93,7 @@ def handler(q=False):
                     current_rule_text = insert_import_module(current_rule_text, var_name)
                 else:
                     # Treat as external variable
-                    externals[var_name] = "example.txt" # a random value so that the compiler does not make an error (most of the time the external variable are in other configs files)
+                    externals[var_name] = "example.txt"  # a random value so that the compiler does not make an error (most of the time the external variable are in other configs files)
                 attempts += 1
                 continue
             # Other syntax errors
@@ -104,8 +104,10 @@ def handler(q=False):
         summary = "Syntax error: Max validation attempts exceeded"
     return {"results": [{"types": mispattributes["output"], "values": summary}]}
 
+
 def introspection():
     return mispattributes
+
 
 def version():
     moduleinfo["config"] = moduleconfig
