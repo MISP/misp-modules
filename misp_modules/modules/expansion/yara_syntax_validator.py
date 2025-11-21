@@ -44,7 +44,6 @@ def insert_import_module(rule_text, module_name):
         return f'import "{module_name}"\n' + rule_text
     return rule_text
 
-
 # -------------------------------
 #  HANDLER NOW DOES VALIDATION LOGIC
 # -------------------------------
@@ -69,19 +68,15 @@ def insert_import_module(rule_text, module_name):
 def handler(q=False):
     if q is False:
         return False
-
     request = json.loads(q)
     rule_content = request.get("yara")
-
     if not rule_content:
         misperrors["error"] = "Yara rule missing"
         return misperrors
-
     externals = {}
     attempts = 0
     max_attempts = 10   # to prevent from infinite loop
     current_rule_text = rule_content
-
     while attempts < max_attempts:
         try:
             yara.compile(source=current_rule_text, externals=externals) # some times the compilator needs externals variables
@@ -89,39 +84,29 @@ def handler(q=False):
             break
         except yara.SyntaxError as e:
             error_msg = str(e)
-
             # try to catch modules or externals variables errors to auto correct it 
             match_id = re.search(r'undefined identifier "(\w+)"', error_msg)
             if match_id:
                 var_name = match_id.group(1)
-
                 # Auto-import YARA modules
                 if var_name in YARA_MODULES:
                     current_rule_text = insert_import_module(current_rule_text, var_name)
                 else:
                     # Treat as external variable
                     externals[var_name] = "example.txt" # a random value so that the compiler does not make an error (most of the time the external variable are in other configs files)
-
                 attempts += 1
                 continue
-
             # Other syntax errors
             summary = "Syntax error: " + error_msg
             break
-
     else:
         # Max attempts exceeded
         summary = "Syntax error: Max validation attempts exceeded"
-
     return {"results": [{"types": mispattributes["output"], "values": summary}]}
-
 
 def introspection():
     return mispattributes
 
-
 def version():
     moduleinfo["config"] = moduleconfig
     return moduleinfo
-
-
