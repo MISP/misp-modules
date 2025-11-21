@@ -5,8 +5,8 @@ import re
 misperrors = {"error": "Error"}
 mispattributes = {"input": ["yara"], "output": ["text"]}
 moduleinfo = {
-    "version": "0.1",
-    "author": "Dennis Rand",
+    "version": "0.2",
+    "author": "Dennis Rand and Theo Geffe",
     "description": "An expansion hover module to perform a syntax check on if yara rules are valid or not.",
     "module-type": ["hover"],
     "name": "YARA Syntax Validator",
@@ -15,6 +15,7 @@ moduleinfo = {
     "features": (
         "This modules simply takes a YARA rule as input, and checks its syntax. It returns then a confirmation if the"
         " syntax is valid, otherwise the syntax error is displayed."
+        " This modules can compile YARA rule even if there is externals variables or miss modules"
     ),
     "references": ["http://virustotal.github.io/yara/"],
     "input": "YARA rule attribute.",
@@ -37,6 +38,7 @@ YARA_MODULES = {"pe", "math", "cuckoo", "magic", "hash", "dotnet", "elf", "macho
 # or   elf.sections
 # will raise "undefined identifier" errors unless the appropriate imports
 # are present.
+
 
 def insert_import_module(rule_text, module_name):
     lines = rule_text.strip().splitlines()
@@ -64,6 +66,7 @@ def insert_import_module(rule_text, module_name):
 #   - Correct detection of real syntax errors
 #   - No false negatives caused by missing imports or missing externals
 # -------------------------------------------------------------------------
+
 
 def handler(q=False):
     if q is False:
@@ -104,10 +107,8 @@ def handler(q=False):
         summary = "Syntax error: Max validation attempts exceeded"
     return {"results": [{"types": mispattributes["output"], "values": summary}]}
 
-
 def introspection():
     return mispattributes
-
 
 def version():
     moduleinfo["config"] = moduleconfig
