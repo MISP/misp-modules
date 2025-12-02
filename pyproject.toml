@@ -29,6 +29,7 @@ dependencies = [
     "publicsuffixlist",
     "setuptools",
     "anyrun-sdk (>=1.10.10,<2.0.0)",
+    "suricataparser>=1.0.0",
 ]
 
 [project.optional-dependencies]
