@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-'''
+"""
 Import VMRay results.
 
 This version supports import from different analyze jobs, starting from one sample
@@ -11,62 +11,64 @@ process to import data from VMRay.
 You can automate this by setting the PyMISP example script 'vmray_automation'
 as a cron job
 
-'''
+"""
 
 import json
 
-from _vmray.parser import VMRayParser, VMRayParseError
+from _vmray.parser import VMRayParseError, VMRayParser
 
-
-misperrors = {'error': 'Error'}
+misperrors = {"error": "Error"}
 
 moduleinfo = {
-    'version': '0.4',
-    'author': 'Jens Thom (VMRay), Koen van Impe',
-    'description': 'Module to import VMRay (VTI) results.',
-    'module-type': ['import'],
-    'name': 'VMRay API Import',
-    'logo': 'vmray.png',
-    'requirements': ['vmray_rest_api'],
-    'features': 'The module imports MISP Attributes from VMRay format, using the VMRay api.\nUsers should then provide as the module configuration the API Key as well as the server url in order to fetch their data to import.',
-    'references': ['https://www.vmray.com/'],
-    'input': 'VMRay format',
-    'output': 'MISP Event attributes',
+    "version": "0.4",
+    "author": "Jens Thom (VMRay), Koen van Impe",
+    "description": "Module to import VMRay (VTI) results.",
+    "module-type": ["import"],
+    "name": "VMRay API Import",
+    "logo": "vmray.png",
+    "requirements": ["vmray_rest_api"],
+    "features": (
+        "The module imports MISP Attributes from VMRay format, using the VMRay api.\nUsers should then provide as the"
+        " module configuration the API Key as well as the server url in order to fetch their data to import."
+    ),
+    "references": ["https://www.vmray.com/"],
+    "input": "VMRay format",
+    "output": "MISP Event attributes",
 }
 
 mispattributes = {
-    'inputSource': [],
-    'output': ['MISP objects'],
-    'format': 'misp_standard',
+    "inputSource": [],
+    "output": ["MISP objects"],
+    "format": "misp_standard",
 }
 
 userConfig = {
     "Sample ID": {
         "type": "Integer",
         "errorMessage": "The VMRay sample ID to download the reports",
+        "required": True,
     },
     "VTI": {
         "type": "Boolean",
         "message": "Include VMRay Threat Identifiers",
-        "checked": "True"
+        "checked": "True",
     },
-    "IOCs": {
-        "type": "Boolean",
-        "message": "Include IOCs",
-        "checked": "True"
-    },
-    "Artifacts": {
-        "type": "Boolean",
-        "message": "Include other Artifacts",
-    },
+    "IOCs": {"type": "Boolean", "message": "Include IOCs", "checked": "True"},
+    "Artifacts": {"type": "Boolean", "message": "Include other Artifacts"},
     "Analysis Details": {
         "type": "Boolean",
         "message": "Include Analysis Details",
-        "checked": "True"
-    }
+        "checked": "True",
+    },
 }
 
-moduleconfig = ["apikey", "url", "disable_tags", "disable_misp_objects", "ignore_analysis_finished"]
+moduleconfig = [
+    "apikey",
+    "url",
+    "disable_tags",
+    "disable_misp_objects",
+    "ignore_analysis_finished",
+]
 
 
 def handler(q=False):
@@ -92,5 +94,5 @@ def introspection():
 
 
 def version():
-    moduleinfo['config'] = moduleconfig
+    moduleinfo["config"] = moduleconfig
     return moduleinfo

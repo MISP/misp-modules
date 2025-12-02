@@ -1,4 +1,32 @@
 
+#### [ANYRUN Sandbox Import](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/anyrun_sandbox_import.py)
+
+<img src=../logos/anyrun.png height=60>
+
+A module designed to retrieve an analysis report from the ANY.RUN Sandbox by its unique ID and extract results (such as verdict, malware tags, and IOCs), converting them into MISP attributes within your event.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/anyrun_sandbox_import.py)]
+
+- **features**:
+>Fetches detailed JSON reports using the ANY.RUN API; parses key elements like verdict, extracted IOCs (hashes, IPs, URLs), malware tags; maps data to MISP attributes and galaxies (e.g., malware family or MITRE ATT&CK Techniques).
+
+- **config**:
+>api_key
+
+- **input**:
+>ANY.RUN Sandbox analysis UUID.
+
+- **output**:
+>Analysis external references, verdict, IOCs (hashes, IPs, URLs), malware tags, MITRE ATT&CK Techniques
+
+- **references**:
+>https://any.run
+
+- **requirements**:
+> - anyrun-sdk: ANY.RUN API python3 library
+> - ANY.RUN Sandbox API-KEY
+
+-----
+
 #### [PDNS COF Importer](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/cof2misp.py)
 
 Passive DNS Common Output Format (COF) MISP importer
@@ -244,6 +272,20 @@ Import content from a TAXII 2.1 server
 
 - **config**:
 >stix_object_limit
+
+- **requirements**:
+> - misp-lib-stix2
+> - misp-stix
+
+-----
+
+#### [CSV Test Import](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/testimport.py)
+
+Simple CSV import tool with mapable columns
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/testimport.py)]
+
+- **features**:
+>
 
 -----
 

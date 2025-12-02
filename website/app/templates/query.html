@@ -230,7 +230,7 @@ Value: [[misp_attr]]
                                         </button>
                                     </h2>
                                     <div :id="'panelsStayOpenError-'+key_query+'-'+key" class="accordion-collapse collapse">
-                                        <template v-if="tab_list == 'visual' || tasb_list == 'json'">
+                                        <template v-if="tab_list == 'visual' || tab_list == 'json'">
                                             <div class="accordion-body" v-html="generateCoreFormatUI(result)[0].outerHTML"></div>
                                         </template>
                                     </div>

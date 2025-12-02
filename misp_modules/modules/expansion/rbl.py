@@ -1,28 +1,30 @@
 import json
-import sys
 
-try:
-    import dns.resolver
-except ImportError:
-    print("dnspython3 is missing, use 'pip install dnspython3' to install it.")
-    sys.exit(0)
+import dns.resolver
 
-misperrors = {'error': 'Error'}
-mispattributes = {'input': ['ip-src', 'ip-dst'], 'output': ['text']}
+misperrors = {"error": "Error"}
+mispattributes = {"input": ["ip-src", "ip-dst"], "output": ["text"]}
 moduleinfo = {
-    'version': '0.2',
-    'author': 'Christian Studer',
-    'description': 'Module to check an IPv4 address against known RBLs.',
-    'module-type': ['expansion', 'hover'],
-    'name': 'Real-time Blackhost Lists Lookup',
-    'logo': '',
-    'requirements': ['dnspython3: DNS python3 library'],
-    'features': 'This module takes an IP address attribute as input and queries multiple know Real-time Blackhost Lists to check if they have already seen this IP address.\n\nWe display then all the information we get from those different sources.',
-    'references': ['[RBLs list](https://github.com/MISP/misp-modules/blob/8817de476572a10a9c9d03258ec81ca70f3d926d/misp_modules/modules/expansion/rbl.py#L20)'],
-    'input': 'IP address attribute.',
-    'output': 'Text with additional data from Real-time Blackhost Lists about the IP address.',
+    "version": "0.2",
+    "author": "Christian Studer",
+    "description": "Module to check an IPv4 address against known RBLs.",
+    "module-type": ["expansion", "hover"],
+    "name": "Real-time Blackhost Lists Lookup",
+    "logo": "",
+    "requirements": ["dnspython3: DNS python3 library"],
+    "features": (
+        "This module takes an IP address attribute as input and queries multiple know Real-time Blackhost Lists to"
+        " check if they have already seen this IP address.\n\nWe display then all the information we get from those"
+        " different sources."
+    ),
+    "references": [
+        "[RBLs"
+        " list](https://github.com/MISP/misp-modules/blob/8817de476572a10a9c9d03258ec81ca70f3d926d/misp_modules/modules/expansion/rbl.py#L20)"
+    ],
+    "input": "IP address attribute.",
+    "output": "Text with additional data from Real-time Blackhost Lists about the IP address.",
 }
-moduleconfig = ['timeout']
+moduleconfig = ["timeout"]
 
 rbls = (
     "spam.spamrats.com",
@@ -80,7 +82,7 @@ rbls = (
     "dnsbl.njabl.org",
     "relays.mail-abuse.org",
     "rbl.spamlab.com",
-    "all.bl.blocklist.de"
+    "all.bl.blocklist.de",
 )
 
 
@@ -88,33 +90,33 @@ def handler(q=False):
     if q is False:
         return False
     request = json.loads(q)
-    if request.get('ip-src'):
-        ip = request['ip-src']
-    elif request.get('ip-dst'):
-        ip = request['ip-dst']
+    if request.get("ip-src"):
+        ip = request["ip-src"]
+    elif request.get("ip-dst"):
+        ip = request["ip-dst"]
     else:
-        misperrors['error'] = "Unsupported attributes type"
+        misperrors["error"] = "Unsupported attributes type"
         return misperrors
     resolver = dns.resolver.Resolver()
     try:
-        timeout = float(request['config']['timeout'])
+        timeout = float(request["config"]["timeout"])
     except (KeyError, ValueError):
         timeout = 0.4
     resolver.timeout = timeout
     resolver.lifetime = timeout
     infos = {}
-    ipRev = '.'.join(ip.split('.')[::-1])
+    ipRev = ".".join(ip.split(".")[::-1])
     for rbl in rbls:
-        query = '{}.{}'.format(ipRev, rbl)
+        query = "{}.{}".format(ipRev, rbl)
         try:
-            txt = resolver.query(query, 'TXT')
+            txt = resolver.query(query, "TXT")
             infos[query] = [str(t) for t in txt]
         except Exception:
             continue
     result = "\n".join([f"{rbl}: {'  -  '.join(info)}" for rbl, info in infos.items()])
     if not result:
-        return {'error': 'No data found by querying known RBLs'}
-    return {'results': [{'types': mispattributes.get('output'), 'values': result}]}
+        return {"error": "No data found by querying known RBLs"}
+    return {"results": [{"types": mispattributes.get("output"), "values": result}]}
 
 
 def introspection():
@@ -122,5 +124,5 @@ def introspection():
 
 
 def version():
-    moduleinfo['config'] = moduleconfig
+    moduleinfo["config"] = moduleconfig
     return moduleinfo

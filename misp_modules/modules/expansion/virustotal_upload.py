@@ -1,24 +1,24 @@
-import json
-import sys
 import base64
-import io
-import zipfile
-import requests
 import hashlib
+import io
+import json
+import zipfile
 
-misperrors = {'error': 'Error'}
-mispattributes = {'input': ['attachment', 'malware-sample'], 'output': ['link']}
+import requests
+
+misperrors = {"error": "Error"}
+mispattributes = {"input": ["attachment", "malware-sample"], "output": ["link"]}
 moduleinfo = {
-    'version': '1',
-    'author': 'Karen Yousefi',
-    'description': 'Module to push malware samples to VirusTotal',
-    'module-type': ['expansion'],
-    'name': 'VirusTotal Upload',
-    'requirements': ['requests library'],
-    'logo': 'virustotal.png',
+    "version": "1",
+    "author": "Karen Yousefi",
+    "description": "Module to push malware samples to VirusTotal",
+    "module-type": ["expansion"],
+    "name": "VirusTotal Upload",
+    "requirements": ["requests library"],
+    "logo": "virustotal.png",
 }
 
-moduleconfig = ['virustotal_apikey']
+moduleconfig = ["virustotal_apikey"]
 
 
 def handler(q=False):
@@ -28,7 +28,7 @@ def handler(q=False):
 
     try:
         data = request.get("data")
-        if 'malware-sample' in request:
+        if "malware-sample" in request:
             sample_filename = request.get("malware-sample").split("|", 1)[0]
             data = base64.b64decode(data)
             fl = io.BytesIO(data)
@@ -36,14 +36,14 @@ def handler(q=False):
             sample_hashname = zf.namelist()[0]
             data = zf.read(sample_hashname, b"infected")
             zf.close()
-        elif 'attachment' in request:
+        elif "attachment" in request:
             sample_filename = request.get("attachment")
             data = base64.b64decode(data)
         else:
-            misperrors['error'] = "No malware sample or attachment supplied"
+            misperrors["error"] = "No malware sample or attachment supplied"
             return misperrors
     except Exception:
-        misperrors['error'] = "Unable to process submitted sample data"
+        misperrors["error"] = "Unable to process submitted sample data"
         return misperrors
 
     if request["config"].get("virustotal_apikey") is None:
@@ -67,15 +67,15 @@ def handler(q=False):
 
         virustotal_link = f"https://www.virustotal.com/gui/file/{sha256}"
     except Exception as e:
-        misperrors['error'] = f"Unable to send sample to VirusTotal: {str(e)}"
+        misperrors["error"] = f"Unable to send sample to VirusTotal: {str(e)}"
         return misperrors
 
     r = {
-        'results': [
+        "results": [
             {
-                'types': 'link',
-                'values': virustotal_link,
-                'comment': 'Link to VirusTotal analysis',
+                "types": "link",
+                "values": virustotal_link,
+                "comment": "Link to VirusTotal analysis",
             }
         ]
     }
@@ -87,5 +87,5 @@ def introspection():
 
 
 def version():
-    moduleinfo['config'] = moduleconfig
+    moduleinfo["config"] = moduleconfig
     return moduleinfo

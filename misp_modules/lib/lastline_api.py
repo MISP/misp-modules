@@ -30,24 +30,27 @@ WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
 ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT
 OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 """
+
 import abc
-import logging
 import io
 import ipaddress
-import pymisp
+import logging
 import re
-import requests
 from urllib import parse
 
+import pymisp
+import requests
 
 DEFAULT_LL_PORTAL_API_URL = "https://user.lastline.com/papi"
 
 DEFAULT_LL_ANALYSIS_API_URL = "https://analysis.lastline.com"
 
-LL_HOSTED_DOMAINS = frozenset([
-    "user.lastline.com",
-    "user.emea.lastline.com",
-])
+LL_HOSTED_DOMAINS = frozenset(
+    [
+        "user.lastline.com",
+        "user.emea.lastline.com",
+    ]
+)
 
 
 def purge_none(d):
@@ -129,6 +132,7 @@ class Error(Exception):
 
 class ApiError(Error):
     """Server error with a message and an error code."""
+
     def __init__(self, error_msg, error_code=None):
         super(ApiError, self).__init__(error_msg, error_code)
         self.error_msg = error_msg
@@ -143,11 +147,11 @@ class ApiError(Error):
 
 
 class LastlineAbstractClient(abc.ABC):
-    """"A very basic HTTP client providing basic functionality."""
+    """ "A very basic HTTP client providing basic functionality."""
 
     __metaclass__ = abc.ABCMeta
 
-    SUB_APIS = ('analysis', 'authentication', 'knowledgebase', 'login')
+    SUB_APIS = ("analysis", "authentication", "knowledgebase", "login")
     FORMATS = ["json", "xml"]
 
     @classmethod
@@ -348,7 +352,7 @@ class LastlineAbstractClient(abc.ABC):
         raw=False,
         raw_response=False,
         headers=None,
-        stream_response=False
+        stream_response=False,
     ):
         if raw_response:
             raw = True
@@ -420,8 +424,8 @@ class AnalysisClient(LastlineAbstractClient):
                 "progress": 100
             }
         """
-        url = self._build_url('analysis', ['get_progress'])
-        params = {'uuid': uuid}
+        url = self._build_url("analysis", ["get_progress"])
+        params = {"uuid": uuid}
         return self.do_request("POST", url, params=params)
 
     def get_result(self, uuid):
@@ -438,8 +442,8 @@ class AnalysisClient(LastlineAbstractClient):
         """
         # better: use 'get_results()' but that would break
         # backwards-compatibility
-        url = self._build_url('analysis', ['get'])
-        params = {'uuid': uuid}
+        url = self._build_url("analysis", ["get"])
+        params = {"uuid": uuid}
         return self.do_request("GET", url, params=params)
 
     def submit_file(
@@ -486,27 +490,31 @@ class AnalysisClient(LastlineAbstractClient):
         """
         file_stream = io.BytesIO(file_data)
         api_url = self._build_url("analysis", ["submit", "file"])
-        params = purge_none({
-            "bypass_cache": bypass_cache and 1 or None,
-            "analysis_timeout": analysis_timeout,
-            "analysis_env": analysis_env,
-            "allow_network_traffic": allow_network_traffic and 1 or None,
-            "filename": file_name,
-            "password": password,
-            "full_report_score": -1,
-        })
+        params = purge_none(
+            {
+                "bypass_cache": bypass_cache and 1 or None,
+                "analysis_timeout": analysis_timeout,
+                "analysis_env": analysis_env,
+                "allow_network_traffic": allow_network_traffic and 1 or None,
+                "filename": file_name,
+                "password": password,
+                "full_report_score": -1,
+            }
+        )
 
-        files = purge_none({
-            # If an explicit filename was provided, we can pass it down to
-            # python-requests to use it in the multipart/form-data. This avoids
-            # having python-requests trying to guess the filename based on stream
-            # attributes.
-            #
-            # The problem with this is that, if the filename is not ASCII, then
-            # this triggers a bug in flask/werkzeug which means the file is
-            # thrown away. Thus, we just force an ASCII name
-            "file": ('dummy-ascii-name-for-file-param', file_stream),
-        })
+        files = purge_none(
+            {
+                # If an explicit filename was provided, we can pass it down to
+                # python-requests to use it in the multipart/form-data. This avoids
+                # having python-requests trying to guess the filename based on stream
+                # attributes.
+                #
+                # The problem with this is that, if the filename is not ASCII, then
+                # this triggers a bug in flask/werkzeug which means the file is
+                # thrown away. Thus, we just force an ASCII name
+                "file": ("dummy-ascii-name-for-file-param", file_stream),
+            }
+        )
 
         return self.do_request("POST", api_url, params=params, files=files)
 
@@ -547,12 +555,14 @@ class AnalysisClient(LastlineAbstractClient):
             }
         """
         api_url = self._build_url("analysis", ["submit", "url"])
-        params = purge_none({
-            "url": url,
-            "referer": referer,
-            "bypass_cache": bypass_cache and 1 or None,
-            "user_agent": user_agent or None,
-        })
+        params = purge_none(
+            {
+                "url": url,
+                "referer": referer,
+                "bypass_cache": bypass_cache and 1 or None,
+                "user_agent": user_agent or None,
+            }
+        )
         return self.do_request("POST", api_url, params=params)
 
 
@@ -647,7 +657,7 @@ class PortalClient(LastlineAbstractClient):
                 "url": url,
                 "bypass_cache": bypass_cache,
                 "referer": referer,
-                "user_agent": user_agent
+                "user_agent": user_agent,
             }
         )
         return self.post("analysis", "submit_url", params=params)
@@ -724,12 +734,16 @@ class LastlineResultBaseParser(object):
     @staticmethod
     def _get_mitre_techniques(result):
         return [
-            "misp-galaxy:mitre-attack-pattern=\"{} - {}\"".format(w[0], w[1])
-            for w in sorted(set([
-                (y["id"], y["name"])
-                for x in result.get("malicious_activity", [])
-                for y in result.get("activity_to_mitre_techniques", {}).get(x, [])
-            ]))
+            'misp-galaxy:mitre-attack-pattern="{} - {}"'.format(w[0], w[1])
+            for w in sorted(
+                set(
+                    [
+                        (y["id"], y["name"])
+                        for x in result.get("malicious_activity", [])
+                        for y in result.get("activity_to_mitre_techniques", {}).get(x, [])
+                    ]
+                )
+            )
         ]
 
     def parse(self, analysis_link, result):
@@ -755,7 +769,7 @@ class LastlineResultBaseParser(object):
             o.add_attribute(
                 "mimetype",
                 type="mime-type",
-                value=result["analysis_subject"]["mime_type"]
+                value=result["analysis_subject"]["mime_type"],
             )
         self.misp_event.add_object(o)
 
@@ -763,10 +777,10 @@ class LastlineResultBaseParser(object):
         network_dict = result.get("report", {}).get("analysis", {}).get("network", {})
         for request in network_dict.get("requests", []):
             parsed_uri = parse.urlparse(request["url"])
-            o = pymisp.MISPObject(name='http-request')
-            o.add_attribute('host', parsed_uri.netloc)
-            o.add_attribute('method', "GET")
-            o.add_attribute('uri', request["url"])
+            o = pymisp.MISPObject(name="http-request")
+            o.add_attribute("host", parsed_uri.netloc)
+            o.add_attribute("method", "GET")
+            o.add_attribute("uri", request["url"])
             o.add_attribute("ip", request["ip"])
             self.misp_event.add_object(o)
 
@@ -785,8 +799,8 @@ class LastlineResultBaseParser(object):
                 except ValueError:
                     pass
 
-                o = pymisp.MISPObject(name='dns-record')
-                o.add_attribute('queried-domain', hostname)
+                o = pymisp.MISPObject(name="dns-record")
+                o.add_attribute("queried-domain", hostname)
                 self.misp_event.add_object(o)
 
             # Add HTTP conversations (as network connection and as http request)
@@ -809,13 +823,13 @@ class LastlineResultBaseParser(object):
                     uri = "http://{}:{}{}".format(
                         http_conversation["dst_host"],
                         http_conversation["dst_port"],
-                        path
+                        path,
                     )
-                o = pymisp.MISPObject(name='http-request')
-                o.add_attribute('host', http_conversation["dst_host"])
-                o.add_attribute('method', method)
-                o.add_attribute('uri', uri)
-                o.add_attribute('ip', http_conversation["dst_ip"])
+                o = pymisp.MISPObject(name="http-request")
+                o.add_attribute("host", http_conversation["dst_host"])
+                o.add_attribute("method", method)
+                o.add_attribute("uri", uri)
+                o.add_attribute("ip", http_conversation["dst_ip"])
                 self.misp_event.add_object(o)
 
         # Add sandbox info like score and sandbox type

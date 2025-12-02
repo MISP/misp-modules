@@ -1,4 +1,3 @@
-[submodule "misp_modules/lib/misp-objects"]
-	path = misp_modules/lib/misp-objects
+[submodule "misp-objects"]
+	path = misp-objects
 	url = https://github.com/MISP/misp-objects.git
-	branch = main

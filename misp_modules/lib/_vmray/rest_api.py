@@ -4,24 +4,9 @@
 import base64
 import datetime
 import os.path
-import requests
 import urllib.parse
 
-# disable nasty certification warning
-# pylint: disable=no-member
-try:
-    requests.packages.urllib3.disable_warnings()
-except AttributeError:
-    try:
-        import urllib3
-        try:
-            urllib3.disable_warnings()
-        except AttributeError:
-            pass
-    except ImportError:
-        pass
-
-# pylint: disable=
+import requests
 
 
 class VMRayRESTAPIError(Exception):
@@ -39,9 +24,15 @@ def handle_rest_api_result(result):
         try:
             json_result = result.json()
         except ValueError:
-            raise VMRayRESTAPIError("API returned error %u: %s" % (result.status_code, result.text), status_code=result.status_code)
+            raise VMRayRESTAPIError(
+                "API returned error %u: %s" % (result.status_code, result.text),
+                status_code=result.status_code,
+            )
 
-        raise VMRayRESTAPIError(json_result.get("error_msg", "Unknown error"), status_code=result.status_code)
+        raise VMRayRESTAPIError(
+            json_result.get("error_msg", "Unknown error"),
+            status_code=result.status_code,
+        )
 
 
 class VMRayRESTAPI(object):
@@ -72,10 +63,7 @@ class VMRayRESTAPI(object):
 
         if params is not None:
             for key, value in params.items():
-                if isinstance(value, (datetime.date,
-                                      datetime.datetime,
-                                      float,
-                                      int)):
+                if isinstance(value, (datetime.date, datetime.datetime, float, int)):
                     req_params[key] = str(value)
                 elif isinstance(value, str):
                     req_params[key] = str(value)
@@ -97,7 +85,7 @@ class VMRayRESTAPI(object):
                         req_params[b64_key] = b64_value
                     file_params[key] = (filename, value, "application/octet-stream")
                 else:
-                    raise VMRayRESTAPIError("Parameter \"%s\" has unknown type \"%s\"" % (key, type(value)))
+                    raise VMRayRESTAPIError('Parameter "%s" has unknown type "%s"' % (key, type(value)))
 
         # construct request
         if file_params:
@@ -113,7 +101,15 @@ class VMRayRESTAPI(object):
             req_data = None
 
         # do request
-        result = requests_func(self.server + api_path, data=req_data, params=req_params, headers={"Authorization": "api_key " + self.api_key}, files=files, verify=self.verify_cert, stream=raw_data)
+        result = requests_func(
+            self.server + api_path,
+            data=req_data,
+            params=req_params,
+            headers={"Authorization": "api_key " + self.api_key},
+            files=files,
+            verify=self.verify_cert,
+            stream=raw_data,
+        )
         handle_rest_api_result(result)
 
         if raw_data:
@@ -134,7 +130,11 @@ class VMRayRESTAPI(object):
         # get cached results
         while "continuation_id" in json_result:
             # send request to server
-            result = requests.get("%s/rest/continuation/%u" % (self.server, json_result["continuation_id"]), headers={"Authorization": "api_key " + self.api_key}, verify=self.verify_cert)
+            result = requests.get(
+                "%s/rest/continuation/%u" % (self.server, json_result["continuation_id"]),
+                headers={"Authorization": "api_key " + self.api_key},
+                verify=self.verify_cert,
+            )
             handle_rest_api_result(result)
 
             # parse result
