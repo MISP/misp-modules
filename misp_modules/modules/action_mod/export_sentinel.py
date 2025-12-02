@@ -97,14 +97,15 @@ def handler(q=False):
     
     request = json.loads(q)
     success = False
-    
+
     event_uuid = request.get("data", {}).get("Event", {}).get("uuid")
     if event_uuid:
         success = export_to_sentinel(request, event_uuid)
     else:
         print("Error: No event UUID found in request data")
-    
+
     return {"data": success}
+
 
 def introspection():
     modulesetup = {}
@@ -113,6 +114,7 @@ def introspection():
     except NameError:
         pass
     return modulesetup
+
 
 def version():
     moduleinfo["config"] = moduleconfig
