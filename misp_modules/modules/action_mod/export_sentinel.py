@@ -41,27 +41,28 @@ moduleinfo = {
     "output": "",
 }
 
+
 def export_to_sentinel(request, event_uuid):
     params = request["params"]
     misp2_venv = params["misp2_venv"]
-    misp2_script = params["misp2_script"]   
-    
+    misp2_script = params["misp2_script"]
+
     script_dir = os.path.dirname(misp2_script)
     python_executable = os.path.join(misp2_venv, "bin", "python")
-    
+
     if not os.path.exists(python_executable):
         print(f"Error: Python executable not found at {python_executable}")
         return False
-    
+
     if not os.path.exists(misp2_script):
         print(f"Error: Script not found at {misp2_script}")
         return False
-    
+
     print(f"Exporting event {event_uuid} to Sentinel or Defender...")
     print(f"Using Python: {python_executable}")
     print(f"Running script: {misp2_script}")
     print(f"Working directory: {script_dir}")
-    
+
     try:
         result = subprocess.run(
             [python_executable, misp2_script, event_uuid],
@@ -70,7 +71,7 @@ def export_to_sentinel(request, event_uuid):
             text=True,
             timeout=300
         )
-        
+
         if result.returncode == 0:
             print(f"Successfully exported event {event_uuid}")
             if result.stdout:
@@ -83,18 +84,19 @@ def export_to_sentinel(request, event_uuid):
             if result.stdout:
                 print(f"Output: {result.stdout}")
             return False
-            
+
     except subprocess.TimeoutExpired:
-        print(f"Export timed out after 300 seconds")
+        print("Export timed out")
         return False
     except Exception as e:
         print(f"Error executing script: {str(e)}")
         return False
 
+
 def handler(q=False):
     if q is False:
         return False
-    
+
     request = json.loads(q)
     success = False
 
