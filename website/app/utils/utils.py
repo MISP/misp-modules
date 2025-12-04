@@ -1,42 +1,50 @@
+#!/usr/bin/env python3
+import json
 import os
 import random
 import uuid
-import json
-import requests
-from conf.config import Config
 from pathlib import Path
-import configparser
-config = configparser.ConfigParser()
-CONF_PATH = os.path.join(os.getcwd(), "conf", "config.cfg")
-if os.path.isfile(CONF_PATH):
-    config.read(CONF_PATH)
-else:
-    print("[-] No conf file found. Copy config.cfg.sample to config.cfg")
-    exit()
 
+import requests
+from dotenv import load_dotenv
+
+# Load environment variables from .env
+load_dotenv()
+
+# Cache environment variables at module load time
+MISP_MODULE = os.getenv("MISP_MODULE", "127.0.0.1:6666")
+QUERIES_LIMIT = int(os.getenv("QUERIES_LIMIT", "100"))
+ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD")
+
+# Global variables
 MODULES = []
+IS_DEVELOPMENT = False  # Set by main.py or inferred from environment
 
-def query_get_module(headers={'Content-type': 'application/json'}):
+
+def query_get_module(headers={"Content-type": "application/json"}):
     global MODULES
     if not MODULES:
         try:
-            r = requests.get(f"http://{Config.MISP_MODULE}/modules", headers=headers)
+            r = requests.get(f"http://{MISP_MODULE}/modules", headers=headers)
         except ConnectionError:
             return {"message": "Instance of misp-modules is unreachable"}
         except Exception as e:
-            return {"message": e}
+            return {"message": str(e)}
         MODULES = r.json()
         return r.json()
     else:
         return MODULES
 
-def query_post_query(data, headers={'Content-type': 'application/json'}):
+
+def query_post_query(data, headers={"Content-type": "application/json"}):
     try:
-        r = requests.post(f"http://{Config.MISP_MODULE}/query", data=json.dumps(data), headers=headers)
+        r = requests.post(
+            f"http://{MISP_MODULE}/query", data=json.dumps(data), headers=headers
+        )
     except ConnectionError:
         return {"message": "Instance of misp-modules is unreachable"}
     except Exception as e:
-        return {"message": e}
+        return {"message": str(e)}
     return r.json()
 
 
@@ -46,35 +54,46 @@ def isUUID(uid):
         return True
     except ValueError:
         return False
-    
+
+
 def get_object(obj_name):
     path = Path(os.getcwd())
     parent_path = path.parent.absolute()
     loc_path = os.path.join(parent_path, "misp-objects", "objects")
     if os.path.isdir(loc_path):
-        with open(os.path.join(loc_path, obj_name, "definition.json"), "r") as read_json:
+        with open(
+            os.path.join(loc_path, obj_name, "definition.json"), "r"
+        ) as read_json:
             loc_json = json.load(read_json)
         return loc_json
     return False
 
 
 def admin_user_active():
-    config.read(CONF_PATH)
-    return config.getboolean("ADMIN", "ADMIN_USER")
+    return bool(ADMIN_PASSWORD)
+
 
 def admin_password():
-    return config["ADMIN"]["ADMIN_PASSWORD"]
+    return ADMIN_PASSWORD
+
 
 def gen_admin_password():
-    if not admin_password():
-        chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!@$%#[]+-:;_&*().,?0123456789'
-        password = ''
-        for _ in range(20):
-            password += random.choice(chars)
-        print(f"##########################\n##    Admin password    ##\n## {password} ##\n##########################")
-        config["ADMIN"]["ADMIN_PASSWORD"] = password
-        with open(CONF_PATH, "w") as conffile:
-            config.write(conffile)
+    """Generate or return admin password. Only validates in production when called explicitly."""
+    if ADMIN_PASSWORD:
+        return ADMIN_PASSWORD
+    if IS_DEVELOPMENT:
+        # Auto-generate in development mode
+        chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!@$%#[]+-:;_&*().,?0123456789"
+        password = "".join(random.choice(chars) for _ in range(20))
+        print(
+            f"##########################\n##    Admin password    ##\n## {password} ##\n##########################"
+        )
+        return password
+    else:
+        # In production, warn but don't fail - admin login will handle validation
+        print("WARNING: ADMIN_PASSWORD not set in .env - admin user will be disabled")
+        return None
+
 
 def get_limit_queries():
-    return Config.QUERIES_LIMIT
+    return QUERIES_LIMIT
