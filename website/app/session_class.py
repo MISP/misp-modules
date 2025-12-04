@@ -1,16 +1,20 @@
 import datetime
 import json
+import uuid
 from queue import Queue
 from threading import Thread
 from uuid import uuid4
-from .utils.utils import query_post_query, query_get_module, get_object, get_limit_queries
+
+from flask import session as sess
+
+from app import db
+from app.models import History, History_Tree, Session_db
+from app.utils import get_limit_queries, get_object, query_get_module, query_post_query
+
 from . import home_core as HomeModel
-import uuid
-from . import db
-from .db_class.db import History, History_Tree, Session_db
-from flask import session as sess 
 
 sessions = list()
+
 
 class Session_class:
     def __init__(self, request_json, query_as_same=False, parent_id=None) -> None:
@@ -25,10 +29,11 @@ class Session_class:
         self.input_query = request_json["input"]
         self.modules_list = request_json["modules"]
         self.nb_errors = 0
-        self.config_module = self.config_module_setter(request_json, query_as_same, parent_id)
+        self.config_module = self.config_module_setter(
+            request_json, query_as_same, parent_id
+        )
         self.query_date = datetime.datetime.now(tz=datetime.timezone.utc)
 
-    
     def util_config_as_same(self, child, parent_id):
         if child["uuid"] == parent_id:
             return child["config"]
@@ -36,7 +41,6 @@ class Session_class:
             for c in child["children"]:
                 return self.util_config_as_same(c, parent_id)
 
-    
     def config_module_setter(self, request_json, query_as_same, parent_id):
         """Setter for config for all modules used"""
         flag = False
@@ -53,7 +57,7 @@ class Session_class:
                             return res
         if not flag:
             for query in self.modules_list:
-                if not query in request_json["config"]:
+                if query not in request_json["config"]:
                     request_json["config"][query] = {}
                     module = HomeModel.get_module_by_name(query)
                     mcs = HomeModel.get_module_config_module(module.id)
@@ -69,7 +73,7 @@ class Session_class:
             for j in self.modules_list:
                 self.jobs.put((cp, i, j))
                 cp += 1
-        #need the index and the url in each queue item.
+        # need the index and the url in each queue item.
         for _ in range(self.thread_count):
             worker = Thread(target=self.process)
             worker.daemon = True
@@ -87,14 +91,14 @@ class Session_class:
         registered = len(self.result)
 
         return {
-            'id': self.uuid,
-            'total': total,
-            'complete': complete,
-            'remaining': remaining,
-            'registered': registered,
-            'stopped' : self.stopped,
-            "nb_errors": self.nb_errors
-            }
+            "id": self.uuid,
+            "total": total,
+            "complete": complete,
+            "remaining": remaining,
+            "registered": registered,
+            "stopped": self.stopped,
+            "nb_errors": self.nb_errors,
+        }
 
     def stop(self):
         """Stop the current queue and worker"""
@@ -122,21 +126,29 @@ class Session_class:
                         loc_query = {
                             "type": self.input_query,
                             "value": work[1],
-                            "uuid": str(uuid.uuid4())
+                            "uuid": str(uuid.uuid4()),
                         }
                     break
-            
+
             loc_config = {}
             if work[2] in self.config_module:
                 loc_config = self.config_module[work[2]]
-                
+
             if loc_query:
-                send_to = {"module": work[2], "attribute": loc_query, "config": loc_config}
+                send_to = {
+                    "module": work[2],
+                    "attribute": loc_query,
+                    "config": loc_config,
+                }
             else:
-                send_to = {"module": work[2], self.input_query: work[1], "config": loc_config}
+                send_to = {
+                    "module": work[2],
+                    self.input_query: work[1],
+                    "config": loc_config,
+                }
             res = query_post_query(send_to)
 
-            ## Sort attr in object by ui-priority
+            # Sort attr in object by ui-priority
             if res:
                 if "results" in res:
                     if "Object" in res["results"]:
@@ -144,21 +156,25 @@ class Session_class:
                             loc_obj = get_object(obj["name"])
                             if loc_obj:
                                 for attr in obj["Attribute"]:
-                                    attr["ui-priority"] = loc_obj["attributes"][attr["object_relation"]]["ui-priority"]
-                                
+                                    attr["ui-priority"] = loc_obj["attributes"][
+                                        attr["object_relation"]
+                                    ]["ui-priority"]
+
                                 # After adding 'ui-priority'
-                                obj["Attribute"].sort(key=lambda x: x["ui-priority"], reverse=True)
-                    
+                                obj["Attribute"].sort(
+                                    key=lambda x: x["ui-priority"], reverse=True
+                                )
+
             if res and "error" in res:
                 self.nb_errors += 1
             self.result[work[1]][work[2]] = res
 
             self.jobs.task_done()
         return True
-    
+
     def get_result(self):
         return self.result
-    
+
     def save_info(self):
         """Save info in the db"""
         s = Session_db(
@@ -169,19 +185,17 @@ class Session_class:
             config_module=json.dumps(self.config_module),
             result=json.dumps(self.result),
             nb_errors=self.nb_errors,
-            query_date=self.query_date
+            query_date=self.query_date,
         )
         db.session.add(s)
         db.session.commit()
 
-        h = History(
-            session_id=s.id
-        )
+        h = History(session_id=s.id)
         db.session.add(h)
         db.session.commit()
 
         histories = History.query.all()
-        
+
         while len(histories) > get_limit_queries():
             history = History.query.order_by(History.id).all()
             session = Session_db.query.filter_by(id=history[0].session_id)
