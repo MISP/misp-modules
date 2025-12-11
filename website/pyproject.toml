@@ -11,7 +11,7 @@ name            = "misp-modules-website"
 version         = "0.1.0"
 description     = "Web application for MISP modules"
 readme          = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.10,<3.13"
 authors = [
   { name = "MISP Contributors", email = "info@misp-project.org" },
 ]
@@ -34,15 +34,12 @@ dependencies = [
   "jsonschema",
   "requests",
   "python-dotenv",   # package is called python‑dotenv on PyPI
+  "misp-modules[minimal]",
 ]
 
 # Entry‑point commands
 [project.scripts]
-dev-site      = "main:main --dev"
-db-init       = "main:main --db-init"
-db-migrate    = "main:main --db-migrate"
-db-upgrade    = "main:main --db-upgrade"
-db-downgrade  = "main:main --db-downgrade"
+mmw = "main:main"
 
 ########################
 # Poetry‑specific bits #
@@ -56,7 +53,6 @@ include = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.9"
 flask = "*"
 sqlalchemy = "*"
 flask-session = "*"
@@ -73,6 +69,7 @@ gunicorn = "*"
 jsonschema = "*"
 requests = "*"
 dotenv = "*"
+"misp-modules[minimal]" = "*"
 
 ################
 # linting bits #

@@ -11,9 +11,8 @@ Use all MISP modules through a dedicated website without requiring a MISP instan
 The MISP Modules website uses [Poetry](https://python-poetry.org/) for dependency management. It is recommended to install dependencies in a virtual environment managed by Poetry.
 
 ### Prerequisites
-- Python 3.8 or higher
+- Python 3.10 or higher
 - Poetry
-- `misp-modules` installed in the parent directory (`../`)
 
 ### Steps
 1. **Clone the Repository**:
@@ -35,12 +34,9 @@ The MISP Modules website uses [Poetry](https://python-poetry.org/) for dependenc
 
 4. **Initialize the Database**:
    ```bash
-   poetry run db-init
+   poetry run mmw db init
    ```
    This creates the database (`misp-module.sqlite`), initializes modules, and sets up the admin password (generated in development if not set).
-
-5. **Install `misp-modules`**:
-   Ensure `misp-modules` is installed in the parent directory (`../misp-modules`). Follow the main repository’s instructions for setup.
 
 ## Configuration
 
@@ -83,7 +79,7 @@ FLASK_APP=main
 Run both `misp-modules` and the website in development mode with debug enabled:
 
 ```bash
-poetry run dev-site
+poetry run mmw dev
 ```
 
 - If `ADMIN_PASSWORD` is unset in `.env`, a random 20-character password is generated and printed.
@@ -104,10 +100,10 @@ If `ADMIN_PASSWORD` is set in `.env`, the admin user is active. Access the login
 Manage the database with the following commands:
 
 ```bash
-poetry run db-init      # Initialize database and modules
-poetry run db-migrate   # Generate a new migration
-poetry run db-upgrade   # Apply migrations
-poetry run db-downgrade # Revert the latest migration
+poetry run mmw db init     # Initialize database and modules
+poetry run mmw db migrate   # Generate a new migration
+poetry run mmw db upgrade   # Apply migrations
+poetry run mmw db downgrade # Revert the latest migration
 ```
 
 ## Systemd Services
