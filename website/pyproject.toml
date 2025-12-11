@@ -1,7 +1,85 @@
 # pyproject.toml
-[tool.pytest.ini_options]
-filterwarnings = [
-    "error",
-    "ignore::UserWarning",
-    "ignore::DeprecationWarning"
+[build-system]
+requires      = ["poetry-core>=1.9.0"]   # need ≥1.8 for PEP 621 support
+build-backend = "poetry.core.masonry.api"
+
+########################
+# Project metadata     #
+########################
+[project]
+name            = "misp-modules-website"
+version         = "0.1.0"
+description     = "Web application for MISP modules"
+readme          = "README.md"
+requires-python = ">=3.9"
+authors = [
+  { name = "MISP Contributors", email = "info@misp-project.org" },
 ]
+
+# Runtime dependencies
+dependencies = [
+  "flask",
+  "sqlalchemy",
+  "flask-session",
+  "flask-sqlalchemy",
+  "flask-wtf",
+  "flask-migrate",
+  "flask-login",
+  "wtforms",
+  "werkzeug",
+  "flask-restx",
+  "python-dateutil",
+  "schedule",
+  "gunicorn",
+  "jsonschema",
+  "requests",
+  "python-dotenv",   # package is called python‑dotenv on PyPI
+]
+
+# Entry‑point commands
+[project.scripts]
+dev-site      = "main:main --dev"
+db-init       = "main:main --db-init"
+db-migrate    = "main:main --db-migrate"
+db-upgrade    = "main:main --db-upgrade"
+db-downgrade  = "main:main --db-downgrade"
+
+########################
+# Poetry‑specific bits #
+########################
+[tool.poetry]
+packages = [
+  { include = "app" }
+]
+include = [
+  "main.py"
+]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+flask = "*"
+sqlalchemy = "*"
+flask-session = "*"
+flask-sqlalchemy = "*"
+flask-wtf = "*"
+flask-migrate = "*"
+flask-login = "*"
+wtforms = "*"
+werkzeug = "*"
+flask-restx = "*"
+python-dateutil = "*"
+schedule = "*"
+gunicorn = "*"
+jsonschema = "*"
+requests = "*"
+dotenv = "*"
+
+################
+# linting bits #
+################
+[tool.black]
+exclude = "migrations"
+
+[tool.isort]
+profile = "black"
+skip = ["migrations"]
