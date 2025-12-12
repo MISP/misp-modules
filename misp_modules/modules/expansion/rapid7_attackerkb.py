@@ -32,15 +32,28 @@ mispattributes: dict[str, str | list[str]] = {
     "format": "misp_standard"
 }
 moduleinfo: dict[str, Any] = {
-    "version": "48",
+    "version": "1",
     "author": "R7 Labs",
-    "description": "Enrich CVEs via AttackerKB and return structured MISP events. Handles rate limits, regex CVE detection, and markdown cleanup.",
+    "name": "Rapid7 AttackerKB lookup",
+    "description": "Module to lookup CVE attributes in Rapid7 AttackerKB.",
     "module-type": ["expansion", "hover"],
-    "name": "r7_akb",
-    "requirements": ["pymisp", "requests"],
-    "input": "Vulnerability attribute (CVE ID or comment containing CVE).",
-    "output": "Structured MISP Objects.",
-    "logo": ""
+    "logo": "rapid7.png",
+
+    "features": "The module takes a CVE attribute and queries Rapid7 AttackerKB to retrieve information about the vulnerability. It returns details such as the CVSS score, exploitability, attacker value, available references, Rapid7 analysis, and community assessments.",
+
+    "config": "api_key",
+
+    "input": "A vulnerability attribute containing a CVE ID, or a comment that includes one or more CVEs.",
+
+    "output": "Enriched information about the CVE, including:\n\nVulnerability description and link to Rapid7 AttackerKB topic\nCVSS base score\nAttacker value and exploitability ratings\nExternal references related to the CVE\nRapid7’s analysis (if available)\nCommunity assessments with contributor names, scores, and notes",
+
+    "references": [
+      "https://attackerkb.com/"
+    ],
+
+    "requirements": [
+      "A valid public Rapid7 AttackerKB API key https://api.attackerkb.com/v1/api-docs/docs"
+    ]
 }
 
 # Global HTTP session (stateless re-use; not an application state container)
