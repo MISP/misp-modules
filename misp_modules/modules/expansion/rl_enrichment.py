@@ -4124,12 +4124,7 @@ def _build_unified_summary(data: Dict, api_context: Optional[Dict[str, Any]] = N
             formatted = value[:10] if len(str(value)) > 10 else str(value)
             add_unique(label, formatted)
 
-    # IOC-specific metadata
-    for field, label in [("requested_domain", "Domain"), ("requested_ip", "IP"), ("requested_url", "URL")]:
-        add_unique(label, data.get(field))
-
     return "\n".join(parts) if parts else "No summary data available"
-
 
 def _format_third_party_details(data: Dict) -> str:
     """Format third party reputation details as text.
