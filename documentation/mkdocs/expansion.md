@@ -2149,6 +2149,35 @@ Module to enrich attributes with threat intelligence from Recorded Future.
 
 -----
 
+#### [ReversingLabs Enrichment](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/reversinglabs.py)
+
+<img src=../logos/reversinglabs.png height=60>
+
+Module to enrich file hashes, domains, IPs and URLs with ReversingLabs Spectra Analyze threat intelligence.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/reversinglabs.py)]
+
+- **features**:
+>This module enriches MISP attributes with threat intelligence from ReversingLabs Spectra Analyze. It supports file hashes (MD5, SHA1, SHA256, SHA512, ssdeep, imphash, TLSH), domains, hostnames, IP addresses, and URLs. The module returns detailed file analysis including classification, threat indicators, and related network infrastructure as MISP objects.
+
+- **config**:
+> - api_url
+> - api_token
+> - verify_ssl
+
+- **input**:
+>A MISP attribute of one of the following types: md5, sha1, sha256, sha512, ssdeep, imphash, tlsh, filename, domain, hostname, ip, ip-src, ip-dst, url.
+
+- **output**:
+>MISP objects including file objects, domain-ip mappings, DNS records, URL objects, and IP-port objects with detailed threat intelligence.
+
+- **references**:
+>https://github.com/reversinglabs/reversinglabs-misp
+
+- **requirements**:
+>A ReversingLabs Spectra Analyze API token.
+
+-----
+
 #### [Reverse DNS](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/reversedns.py)
 
 Simple Reverse DNS expansion service to resolve reverse DNS from MISP attributes.
