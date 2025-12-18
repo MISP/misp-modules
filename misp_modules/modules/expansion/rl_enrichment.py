@@ -1066,6 +1066,8 @@ MISP_TYPE_MAPPING = {
     "ip-src": "ip",
     "url": "url",
     "requested_domain": "domain",
+    "requested-domain": "domain",
+    "queried-domain": "domain",
     "requested_ip": "ip",
     "requested_url": "url",
 }
@@ -1377,10 +1379,12 @@ def _fetch_with_endpoint_fallback(
             
             if response.ok:
                 data = response.json()
-                
+
                 # Normalize response format
                 normalized = _normalize_api_response(data, endpoint_name, ioc_type)
-                if normalized:
+                # Treat explicit None as "no data" and continue, but accept
+                # empty dicts/lists as valid responses (do not rely on truthiness).
+                if normalized is not None:
                     return normalized
                 # If normalization returned None, try next endpoint
                 continue
@@ -1550,8 +1554,11 @@ def handler(q: Optional[str] = None) -> Dict[str, Any]:
     if object_relation:
         # Validate and map object_relation to a valid MISP type
         mapped_type = MISP_TYPE_MAPPING.get(object_relation, object_relation)
-        # Only update ioc_type if the mapping returns a non-None value
-        if mapped_type:
+        # Prefer an explicit attribute `type` or the detected IOC type.
+        # Only use the object_relation->type mapping when we have no
+        # explicit `attribute.type` and `detect_ioc_type` couldn't determine
+        # a type from the value.
+        if mapped_type and not attribute.get("type") and not ioc_type:
             ioc_type = mapped_type
 
     # Ensure ioc_type is not None before proceeding
