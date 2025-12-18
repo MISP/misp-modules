@@ -93,13 +93,13 @@ MAPPING_RULES = {
             "queried-domain": "{{#ref requested_domain (domain)}} {{#Comment The domain that was queried}}",
             "!a-record": "{{#dns_records A last_dns_records (ip-dst)}} {{#Comment IPv4 address records}}",
             "aaaa-record": "{{#dns_records AAAA last_dns_records (ip-dst)}} {{#Comment IPv6 address records}}",
-            "cname-record": "{{#dns_records CNAME last_dns_records (hostname)}} {{#Comment Canonical name records}}",
-            "mx-record": "{{#dns_records MX last_dns_records (hostname)}} {{#Comment Mail exchanger records}}",
-            "ns-record": "{{#dns_records NS last_dns_records (hostname)}} {{#Comment Name server records}}",
+            "cname-record": "{{#dns_records CNAME last_dns_records (domain)}} {{#Comment Canonical name records}}",
+            "mx-record": "{{#dns_records MX last_dns_records (domain)}} {{#Comment Mail exchanger records}}",
+            "ns-record": "{{#dns_records NS last_dns_records (domain)}} {{#Comment Name server records}}",
             "txt-record": "{{#dns_records TXT last_dns_records (text)}} {{#Comment Text records including SPF}}",
-            "soa-record": "{{#dns_records SOA last_dns_records (text)}} {{#Comment Start of authority record}}",
-            "srv-record": "{{#dns_records SRV last_dns_records (hostname)}} {{#Comment Service location records}}",
-            "ptr-record": "{{#dns_records PTR last_dns_records (hostname)}} {{#Comment Pointer records}}",
+            "soa-record": "{{#dns_records SOA last_dns_records (domain)}} {{#Comment Start of authority record}}",
+            "srv-record": "{{#dns_records SRV last_dns_records (domain)}} {{#Comment Service location records}}",
+            "ptr-record": "{{#dns_records PTR last_dns_records (domain)}} {{#Comment Pointer records}}",
             "dns-ips[10]": {
               "obj:type": "ip-port",
               "obj:path": "last_dns_records[type=A,AAAA]",
@@ -909,32 +909,40 @@ def _normalize_domain(value: str) -> str:
 
 
 def _compute_deterministic_uuid(obj_type: str, attributes: List[Dict[str, Any]], original_value: str, ioc_type: Optional[str] = None) -> Optional[str]:
-    try:
-        ident: Optional[str] = None
-        if obj_type == 'domain-ip':
-            ident = _first_attr_value(attributes, ["domain", "hostname"]) or (
-                _normalize_domain(original_value) if ioc_type in ("domain", "url") else None
-            )
-            if ident:
-                ident = _normalize_domain(ident)
-        elif obj_type == 'ip-port':
-            ident = _first_attr_value(attributes, ["ip", "ip-dst", "ip-src"]) or (
-                original_value if ioc_type == "ip" else None
-            )
-            if ident:
-                ident = str(ident).strip()
-        elif obj_type == 'dns-record':
-            ident = _first_attr_value(attributes, ["queried-domain"]) or (
-                _normalize_domain(original_value) if ioc_type in ("domain", "url") else None
-            )
-            if ident:
-                ident = _normalize_domain(ident)
-        if not ident:
-            return None
-        name = f"https://reversinglabs.com/misp/{obj_type}/{ident}"
-        return str(uuid.uuid5(uuid.NAMESPACE_URL, name))
-    except Exception:
-        return None
+    """Compute deterministic UUID for object deduplication.
+    
+    DISABLED: Deterministic UUIDs were causing MISP to silently drop objects.
+    PyMISP-generated random UUIDs work correctly. Keeping function signature
+    for future investigation.
+    """
+    return None
+    # Original implementation preserved for reference:
+    # try:
+    #     ident: Optional[str] = None
+    #     if obj_type == 'domain-ip':
+    #         ident = _first_attr_value(attributes, ["domain", "hostname"]) or (
+    #             _normalize_domain(original_value) if ioc_type in ("domain", "url") else None
+    #         )
+    #         if ident:
+    #             ident = _normalize_domain(ident)
+    #     elif obj_type == 'ip-port':
+    #         ident = _first_attr_value(attributes, ["ip", "ip-dst", "ip-src"]) or (
+    #             original_value if ioc_type == "ip" else None
+    #         )
+    #         if ident:
+    #             ident = str(ident).strip()
+    #     elif obj_type == 'dns-record':
+    #         ident = _first_attr_value(attributes, ["queried-domain"]) or (
+    #             _normalize_domain(original_value) if ioc_type in ("domain", "url") else None
+    #         )
+    #         if ident:
+    #             ident = _normalize_domain(ident)
+    #     if not ident:
+    #         return None
+    #     name = f"https://reversinglabs.com/misp/{obj_type}/{ident}"
+    #     return str(uuid.uuid5(uuid.NAMESPACE_URL, name))
+    # except Exception:
+    #     return None
 
 
 def _add_child_object_with_limit(
@@ -2729,6 +2737,20 @@ def apply_mappings(
 
     # Deduplicate tags before returning
     results = _deduplicate_tags(results)
+
+    # Collect all ObjectReferences from objects into top-level ObjectReference list
+    # MISP requires references at the top level for proper persistence
+    seen_refs: Set[Tuple[str, str, str]] = set()  # (source_uuid, target_uuid, rel_type)
+    for obj in results.get("Object", []):
+        for ref in obj.get("ObjectReference", []):
+            ref_key = (
+                ref.get("object_uuid", ""),
+                ref.get("referenced_uuid", ""),
+                ref.get("relationship_type", ""),
+            )
+            if ref_key not in seen_refs:
+                seen_refs.add(ref_key)
+                results["ObjectReference"].append(ref)
 
     return results
 
