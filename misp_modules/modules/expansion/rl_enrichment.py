@@ -1254,7 +1254,7 @@ moduleconfig = ["api_url", "api_token", "verify_ssl"]
 moduleinfo["config"] = moduleconfig
 
 mispattributes = {
-    "input": ["md5", "sha1", "sha256", "sha512", "ssdeep", "imphash", "tlsh", "filename", "domain", "hostname", "ip", "ip-src", "ip-dst", "url"],
+    "input": ["md5", "sha1", "sha256", "domain", "hostname", "ip", "ip-src", "ip-dst", "url"],
     "format": "misp_standard",
 }
 
