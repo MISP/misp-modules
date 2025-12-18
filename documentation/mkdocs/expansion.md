@@ -2157,7 +2157,7 @@ Module to enrich file hashes, domains, IPs and URLs with ReversingLabs Spectra A
 [[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/reversinglabs.py)]
 
 - **features**:
->This module enriches MISP attributes with threat intelligence from ReversingLabs Spectra Analyze. It supports file hashes (MD5, SHA1, SHA256, SHA512, ssdeep, imphash, TLSH), domains, hostnames, IP addresses, and URLs. The module returns detailed file analysis including classification, threat indicators, and related network infrastructure as MISP objects.
+>This module enriches MISP attributes with threat intelligence from ReversingLabs Spectra Analyze. It supports file hashes (MD5, SHA1, SHA256), domains, hostnames, IP addresses, and URLs. The module returns detailed file analysis including classification, threat indicators, and related network infrastructure as MISP objects.
 
 - **config**:
 > - api_url
@@ -2165,7 +2165,7 @@ Module to enrich file hashes, domains, IPs and URLs with ReversingLabs Spectra A
 > - verify_ssl
 
 - **input**:
->A MISP attribute of one of the following types: md5, sha1, sha256, sha512, ssdeep, imphash, tlsh, filename, domain, hostname, ip, ip-src, ip-dst, url.
+>A MISP attribute of one of the following types: md5, sha1, sha256, domain, hostname, ip, ip-src, ip-dst, url.
 
 - **output**:
 >MISP objects including file objects, domain-ip mappings, DNS records, URL objects, and IP-port objects with detailed threat intelligence.
