@@ -17,9 +17,9 @@ MAPPING_RULES = {
       ],
       "file-object": {
         "obj:type": "file",
-        "obj:comment": "ReversingLabs Enriched File IOC Object - {{#ref sample_summary.sha256 | sample_summary.sha1 | sample_summary.md5}}",
-        "!md5": "{{#ref sample_summary.md5 (md5)}} {{#Comment MD5 hash of the analyzed file}}",
+        "obj:comment": "ReversingLabs Enriched File IOC Object - {{#ref sample_summary.sha1 | sample_summary.sha256 | sample_summary.md5}}",
         "!sha1": "{{#ref sample_summary.sha1 (sha1)}} {{#Comment SHA1 hash of the analyzed file}}",
+        "!md5": "{{#ref sample_summary.md5 (md5)}} {{#Comment MD5 hash of the analyzed file}}",
         "!sha256": "{{#ref sample_summary.sha256 (sha256)}} {{#Comment SHA256 hash (primary identifier)}}",
         "!sha512": "{{#ref sample_summary.sha512 (sha512)}} {{#Comment SHA512 hash if available}}",
         "!ssdeep": "{{#ref sample_summary.ssdeep (ssdeep)}} {{#Comment Fuzzy hash for similarity matching}}",
@@ -47,7 +47,7 @@ MAPPING_RULES = {
         ],
         "file-analysis": {
           "obj:type": "report",
-          "obj:comment": "ReversingLabs File Report - {{#ref sample_summary.sha256 | sample_summary.sha1 | sample_summary.md5}}",
+          "obj:comment": "ReversingLabs File Report - {{#ref sample_summary.sha1 | sample_summary.sha256 | sample_summary.md5}}",
           "link": "{{#build_link file (link)}} {{#Comment Link to ReversingLabs analysis portal}}",
           "title": "ReversingLabs File Analysis",
           "type": "threat-intelligence",
