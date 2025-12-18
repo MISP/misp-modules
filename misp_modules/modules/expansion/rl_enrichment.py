@@ -1634,15 +1634,15 @@ def enrich(
     # Add User-Agent including module name and version; allow env override
     try:
         mod_name = moduleinfo.get("name", "ReversingLabs")
-        mod_version = moduleinfo.get("version", "0.0.0")
+        mod_version = moduleinfo.get("version", "1.0.0")
     except Exception:
         mod_name = "ReversingLabs"
-        mod_version = "0.0.0"
+        mod_version = "1.0.0"
     ua_env = os.getenv("RL_USER_AGENT")
     if ua_env:
         user_agent = ua_env
     else:
-        user_agent = f"MISP Module - {mod_name} {mod_version}"
+        user_agent = f"ReversingLabs MISP Module version {mod_version}"
     headers["User-Agent"] = user_agent
     
     # Build resilient requests session (retries + backoff)
