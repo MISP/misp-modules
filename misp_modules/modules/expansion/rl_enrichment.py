@@ -7,6 +7,9 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 # This compiled module is licensed under the GNU Affero General Public License v3 (AGPL-3.0)
 # See the accompanying LICENSE file in the package for full terms.
+#
+# Repository: https://github.com/reversinglabs/reversinglabs-misp
+# Support: support@reversinglabs.com
 
 MAPPING_RULES = {
   "create": {
@@ -1239,6 +1242,8 @@ moduleinfo = {
     "module-type": ["expansion"],
     "name": "ReversingLabs",
     "logo": "reversinglabs.png",
+    "references": ["https://github.com/reversinglabs/reversinglabs-misp"],
+    "support": "support@reversinglabs.com",
 }
 
 # moduleconfig is the canonical list MISP-modules reads to determine
