@@ -1276,9 +1276,9 @@ def _find_local_config() -> Optional[Path]:
 moduleinfo = {
     "version": "1.0.0",
     "author": "ReversingLabs",
-    "description": "ReversingLabs threat intelligence enrichment module",
+    "description": "Threat intelligence enrichment module",
     "module-type": ["expansion"],
-    "name": "ReversingLabs",
+    "name": "ReversingLabs Spectra Analyze",
     "logo": "reversinglabs.png",
     "references": ["https://github.com/reversinglabs/reversinglabs-misp"],
     "support": "support@reversinglabs.com",
