@@ -2149,12 +2149,12 @@ Module to enrich attributes with threat intelligence from Recorded Future.
 
 -----
 
-#### [ReversingLabs Enrichment](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/reversinglabs.py)
+#### [ReversingLabs Enrichment](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/reversinglabs_spectra_analyze.py)
 
 <img src=../logos/reversinglabs.png height=60>
 
 Module to enrich file hashes, domains, IPs and URLs with ReversingLabs Spectra Analyze threat intelligence.
-[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/reversinglabs.py)]
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/reversinglabs_spectra_analyze.py)]
 
 - **features**:
 >This module enriches MISP attributes with threat intelligence from ReversingLabs Spectra Analyze. It supports file hashes (MD5, SHA1, SHA256), domains, hostnames, IP addresses, and URLs. The module returns detailed file analysis including classification, threat indicators, and related network infrastructure as MISP objects.

@@ -1505,7 +1505,7 @@ def handler(q: Optional[str] = None) -> Dict[str, Any]:
 
     config = request.get("config", {})
 
-    # MISP may send config keys with module prefix (e.g., rl_enrichment_api_url)
+    # MISP may send config keys with module prefix (e.g., reversinglabs_spectra_analyze_api_url)
     # or without prefix (api_url). Check both patterns.
     def get_config_value(key: str) -> str:
         """Get config value checking both prefixed and unprefixed keys."""
@@ -1513,13 +1513,13 @@ def handler(q: Optional[str] = None) -> Dict[str, Any]:
         val = config.get(key, "")
         if val:
             return val
-        # Try with module name prefix (rl_enrichment_key)
-        prefixed_key = f"rl_enrichment_{key}"
+        # Try with module name prefix (reversinglabs_spectra_analyze_key)
+        prefixed_key = f"reversinglabs_spectra_analyze_{key}"
         val = config.get(prefixed_key, "")
         if val:
             return val
-        # Try with full MISP prefix pattern (Enrichment_rl_enrichment_key)
-        full_prefixed_key = f"Enrichment_rl_enrichment_{key}"
+        # Try with full MISP prefix pattern (Enrichment_reversinglabs_spectra_analyze_key)
+        full_prefixed_key = f"Enrichment_reversinglabs_spectra_analyze_{key}"
         val = config.get(full_prefixed_key, "")
         if val:
             return val
