@@ -537,7 +537,7 @@ class TestExpansions(unittest.TestCase):
             self.assertEqual(self.get_errors(response), "No data found by querying known RBLs")
 
     def test_reversinglabs(self):
-        module_name = "reversinglabs"
+        module_name = "reversinglabs_spectra_analyze"
         # Test with different attribute types
         attributes = (
             {"uuid": "a1b2c3d4-e5f6-7890-abcd-ef1234567890", "type": "sha256", "value": "a04ac6d98ad989312783d4fe3456c53730b212c79a426fb215708b6c6daa3de3"},
