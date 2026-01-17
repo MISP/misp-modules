@@ -1,0 +1,8 @@
+# Ignore Python byte‑code cache
+__pycache__/
+
+# Ignore the .env file
+.env
+
+# Ignore everything in instance/
+instance/

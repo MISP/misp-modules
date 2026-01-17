@@ -17,6 +17,52 @@ AbuseIPDB MISP expansion module
 
 -----
 
+#### [ANYRUN Sandbox Submit](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/anyrun_sandbox_submit.py)
+
+A module designed to submit URLs or files to the ANY.RUN Sandbox for analysis and return the unique analysis link and ID.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/anyrun_sandbox_submit.py)]
+
+- **features**:
+>Supports submission of URLs and files via the ANY.RUN API; requires an API key for authentication; returns the task ID and permanent URL for tracking analysis progress; integrates seamlessly with MISP events by enriching attributes with submission results.
+
+- **config**:
+> - api_key
+> - os_type
+> - opt_timeout
+> - opt_network_connect
+> - opt_network_fakenet
+> - opt_network_tor
+> - opt_network_geo
+> - opt_network_mitm
+> - opt_network_residential_proxy
+> - opt_network_residential_proxy_geo
+> - opt_privacy_type
+> - obj_ext_extension
+> - obj_ext_browser
+> - env_locale
+> - env_version
+> - env_bitness
+> - env_type
+> - obj_ext_startfolder
+> - obj_ext_cmd
+> - obj_force_elevation
+> - run_as_root
+
+- **input**:
+>Attachment, malware-sample or url to submit to ANY.RUN Sandbox.
+
+- **output**:
+>ANY.RUN Sandbox analysis URL and UUID.
+
+- **references**:
+>https://any.run
+
+- **requirements**:
+> - anyrun-sdk: ANY.RUN API python3 library
+> - ANY.RUN Sandbox API-KEY
+
+-----
+
 #### [OSINT DigitalSide](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/apiosintds.py)
 
 On demand query API for OSINT.digitalside.it project.
@@ -110,9 +156,6 @@ A module tu query the AssemblyLine API with a submission ID to get the submissio
 - **references**:
 >https://www.cyber.gc.ca/en/assemblyline
 
-- **requirements**:
->assemblyline_client: Python library to query the AssemblyLine rest API.
-
 -----
 
 #### [AssemblyLine Submit](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/assemblyline_submit.py)
@@ -142,9 +185,6 @@ A module to submit samples and URLs to AssemblyLine for advanced analysis, and r
 
 - **references**:
 >https://www.cyber.gc.ca/en/assemblyline
-
-- **requirements**:
->assemblyline_client: Python library to query the AssemblyLine rest API.
 
 -----
 
@@ -1575,6 +1615,9 @@ Query Malware Bazaar to get additional information about the input hash.
 >
 >The module is using the new format of modules able to return object since the result is one or multiple MISP object(s).
 
+- **config**:
+>auth_key
+
 - **input**:
 >A hash attribute (md5, sha1 or sha256).
 
@@ -2031,37 +2074,23 @@ Module to access the ransomcoinDB (see https://ransomcoindb.concinnity-risks.com
 
 -----
 
-#### [Rapid7 AttackerKB lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/rapid7_attackerkb.py)
+#### [r7_akb](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/rapid7_attackerkb.py)
 
-<img src=logos/rapid7.png height=45>
-
-Module to lookup CVE attributes in **Rapid7 AttackerKB**.
+Enrich CVEs via AttackerKB and return structured MISP events. Handles rate limits, regex CVE detection, and markdown cleanup.
 [[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/rapid7_attackerkb.py)]
 
-- **features**:  
->The module takes a CVE attribute and queries Rapid7 AttackerKB to retrieve information about the vulnerability.  
->It returns details such as the CVSS score, exploitability, attacker value, available references, Rapid7 analysis, and community assessments. 
+- **config**:
+>api_key
 
-- **config**:  
-> api_key
+- **input**:
+>Vulnerability attribute (CVE ID or comment containing CVE).
 
-- **input**:  
->A vulnerability attribute containing a CVE ID, or a comment that includes one or more CVEs.
+- **output**:
+>Structured MISP Objects.
 
-- **output**:  
-> Enriched information about the CVE, including:  
-> - Vulnerability description and link to Rapid7 AttackerKB topic  
-> - CVSS base score  
-> - Attacker value and exploitability ratings  
-> - External references related to the CVE  
-> - Rapid7’s analysis (if available)  
-> - Community assessments with contributor names, scores, and notes  
-
-- **references**:  
-> https://attackerkb.com/
-
-- **requirements**:  
-> A valid public Rapid7 AttackerKB API key https://api.attackerkb.com/v1/api-docs/docs 
+- **requirements**:
+> - pymisp
+> - requests
 
 -----
 
@@ -2316,6 +2345,7 @@ An expansion module to query the Sophoslabs intelix API to get additional inform
 - **config**:
 > - client_id
 > - client_secret
+> - region
 
 - **input**:
 >An ip address, url, domain or sha256 attribute.
@@ -2460,6 +2490,9 @@ Module to search for an IOC on ThreatFox by abuse.ch.
 - **features**:
 >
 
+- **config**:
+>auth_key
+
 -----
 
 #### [ThreatMiner Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/threatminer.py)
@@ -2568,6 +2601,9 @@ Query of the URLhaus API to get additional information about the input attribute
 >Module using the new format of modules able to return attributes and objects.
 >
 >The module takes one of the attribute type specified as input, and query the URLhaus API with it. If any result is returned by the API, attributes and objects are created accordingly.
+
+- **config**:
+>auth_key
 
 - **input**:
 >A domain, hostname, url, ip, md5 or sha256 attribute.
@@ -3565,6 +3601,34 @@ This module is used to export MISP events to YARA.
 
 ## Import Modules
 
+#### [ANYRUN Sandbox Import](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/anyrun_sandbox_import.py)
+
+<img src=logos/anyrun.png height=60>
+
+A module designed to retrieve an analysis report from the ANY.RUN Sandbox by its unique ID and extract results (such as verdict, malware tags, and IOCs), converting them into MISP attributes within your event.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/anyrun_sandbox_import.py)]
+
+- **features**:
+>Fetches detailed JSON reports using the ANY.RUN API; parses key elements like verdict, extracted IOCs (hashes, IPs, URLs), malware tags; maps data to MISP attributes and galaxies (e.g., malware family or MITRE ATT&CK Techniques).
+
+- **config**:
+>api_key
+
+- **input**:
+>ANY.RUN Sandbox analysis UUID.
+
+- **output**:
+>Analysis external references, verdict, IOCs (hashes, IPs, URLs), malware tags, MITRE ATT&CK Techniques
+
+- **references**:
+>https://any.run
+
+- **requirements**:
+> - anyrun-sdk: ANY.RUN API python3 library
+> - ANY.RUN Sandbox API-KEY
+
+-----
+
 #### [PDNS COF Importer](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/cof2misp.py)
 
 Passive DNS Common Output Format (COF) MISP importer
@@ -3914,6 +3978,19 @@ Simplistic module to send message to a Mattermost channel.
 
 - **config**:
 >{'params': {'mattermost_hostname': {'type': 'string', 'description': 'The Mattermost domain or URL', 'value': 'example.mattermost.com'}, 'bot_access_token': {'type': 'string', 'description': 'Access token generated when you created the bot account'}, 'channel_id': {'type': 'string', 'description': 'The channel you added the bot to'}, 'message_template': {'type': 'large_string', 'description': 'The template to be used to generate the message to be posted', 'value': 'The **template** will be rendered using *Jinja2*!', 'jinja_supported': True}}, 'blocking': False, 'support_filters': True, 'expect_misp_core_format': False}
+
+-----
+
+#### [Nextcloud talk](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/action_mod/nextcloud_talk.py)
+
+Simplistic module to send a message to a Nextcloud talk conversation.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/action_mod/nextcloud_talk.py)]
+
+- **features**:
+>
+
+- **config**:
+>{'params': {'nextcloud_baseurl': {'type': 'string', 'description': 'The Nexctloud domain or URL', 'value': 'https://example.nextcloud.org:443'}, 'nextcloud_app_uuid_login': {'type': 'string', 'description': 'The nextcloud username'}, 'app_access_token': {'type': 'string', 'description': 'The nextcloud application token'}, 'nextcloud_conversation_token': {'type': 'string', 'description': 'The token of the conversation the message should be sent to'}, 'message_template': {'type': 'large_string', 'description': 'The template to be used to generate the message to be posted', 'value': 'The **template** will be rendered using *Jinja2*!', 'jinja_supported': True}}, 'blocking': False, 'support_filters': True, 'expect_misp_core_format': False}
 
 -----
 

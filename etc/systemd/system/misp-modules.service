@@ -1,0 +1,18 @@
+[Unit]
+Description=MISP modules
+After=network.target
+
+[Service]
+Type=simple
+User=misp
+Group=misp
+WorkingDirectory=/home/misp/misp-modules
+Environment="PATH=/home/misp/.local/bin:/usr/bin"
+ExecStart=/usr/bin/env poetry run misp-modules -l 127.0.0.1
+Restart=always
+RestartSec=10
+StandardOutput=append:/var/log/misp-modules_message.log
+StandardError=append:/var/log/misp-modules_error.log
+
+[Install]
+WantedBy=multi-user.target

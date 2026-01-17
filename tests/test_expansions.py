@@ -109,7 +109,7 @@ class TestExpansions(unittest.TestCase):
                 os.path.dirname(os.path.realpath(__file__)), "..", "misp_modules", "modules", "expansion"
             )
             module_files = [
-                file[:-3] for file in os.listdir(export_mod_path) if file.endswith(".py") if file not in ["__init__.py"]
+                file[:-3] for file in os.listdir(export_mod_path) if not file.startswith("_") if file.endswith(".py") if file not in ["__init__.py"]
             ]
             missing = []
             for module in module_files:
@@ -535,6 +535,33 @@ class TestExpansions(unittest.TestCase):
             self.assertTrue(self.get_values(response).startswith("8.8.8.8.bl.spamcannibal.org"))
         except Exception:
             self.assertEqual(self.get_errors(response), "No data found by querying known RBLs")
+
+    def test_reversinglabs(self):
+        module_name = "reversinglabs_spectra_analyze"
+        # Test with different attribute types
+        attributes = (
+            {"uuid": "a1b2c3d4-e5f6-7890-abcd-ef1234567890", "type": "sha256", "value": "a04ac6d98ad989312783d4fe3456c53730b212c79a426fb215708b6c6daa3de3"},
+            {"uuid": "b2c3d4e5-f6a7-8901-bcde-f12345678901", "type": "domain", "value": "example.com"},
+            {"uuid": "c3d4e5f6-a7b8-9012-cdef-123456789012", "type": "ip-dst", "value": "8.8.8.8"},
+        )
+        results = ("file", "domain-ip", "ip-port")
+        if module_name in self.configs:
+            for attribute, result in zip(attributes, results):
+                query = {"module": module_name, "attribute": attribute, "config": self.configs[module_name]}
+                response = self.misp_modules_post(query)
+                try:
+                    self.assertEqual(self.get_first_object_type(response), result)
+                except Exception:
+                    # API errors are acceptable when testing without valid credentials
+                    self.assertTrue(
+                        self.get_errors(response).startswith("Error") or
+                        "API" in self.get_errors(response) or
+                        "authentication" in self.get_errors(response).lower()
+                    )
+        else:
+            query = {"module": module_name, "attribute": attributes[0]}
+            response = self.misp_modules_post(query)
+            self.assertEqual(self.get_errors(response), "Missing api_url in config")
 
     def test_reversedns(self):
         query = {"module": "reversedns", "ip-src": "8.8.8.8"}

@@ -1,13 +1,12 @@
-import json
-from flask import Flask, Blueprint, render_template, request, jsonify, session as sess
+from flask import Blueprint, render_template, request
+from flask import session as sess
+
+from app.utils import admin_user_active
+
 from . import history_core as HistoryModel
-from ..utils.utils import admin_user_active
 
 history_blueprint = Blueprint(
-    'history',
-    __name__,
-    template_folder='templates',
-    static_folder='static'
+    "history", __name__, template_folder="templates", static_folder="static"
 )
 
 
@@ -17,18 +16,21 @@ def history():
     sess["admin_user"] = admin_user_active()
     return render_template("history.html")
 
+
 @history_blueprint.route("/get_history", methods=["GET"])
 def get_history():
     """Get all history"""
-    page = request.args.get('page', 1, type=int)
+    page = request.args.get("page", 1, type=int)
     histories, nb_pages = HistoryModel.get_history(page)
     return {"history": histories, "nb_pages": nb_pages}
+
 
 @history_blueprint.route("/history_session", methods=["GET"])
 def history_session():
     """View all history"""
     sess["admin_user"] = admin_user_active()
     return render_template("history_session.html", tree_view=False)
+
 
 @history_blueprint.route("/get_history_session", methods=["GET"])
 def get_history_session():
@@ -37,6 +39,7 @@ def get_history_session():
     if histories:
         return histories
     return {}
+
 
 @history_blueprint.route("/get_current_query_history", methods=["GET"])
 def get_current_query_history():
@@ -55,6 +58,7 @@ def history_tree():
     sess["admin_user"] = admin_user_active()
     return render_template("history_session.html", tree_view=True)
 
+
 @history_blueprint.route("/get_history_tree", methods=["GET"])
 def get_history_tree():
     """Get all history"""
@@ -62,6 +66,7 @@ def get_history_tree():
     if histories:
         return histories
     return {}
+
 
 @history_blueprint.route("/get_history_tree/<sid>", methods=["GET"])
 def get_history_tree_uuid(sid):
@@ -71,6 +76,7 @@ def get_history_tree_uuid(sid):
         return histories
     return {}
 
+
 @history_blueprint.route("/get_history_session/<sid>", methods=["GET"])
 def get_history_session_uuid(sid):
     """Get all history"""
@@ -79,10 +85,12 @@ def get_history_session_uuid(sid):
         return histories
     return {}
 
+
 @history_blueprint.route("/history/remove_node_session/<sid>", methods=["GET"])
 def remove_node_session(sid):
     HistoryModel.remove_node_session(sid)
     return {"message": "Node deleted", "toast_class": "success-subtle"}
+
 
 @history_blueprint.route("/history/remove_node_tree/<sid>", methods=["GET"])
 def remove_node_tree(sid):

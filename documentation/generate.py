@@ -71,9 +71,10 @@ def _generate_doc(module_type: str, logo_path: str = "logos") -> list[str]:
         if module_name_pretty == "":
             module_name_pretty = module_name
         markdown.append(f"\n#### [{module_name_pretty}]({gh_ref})\n")
-        if module_info["logo"] != "":
-            logo = os.path.join(logo_path, module_info.pop("logo"))
-            markdown.append(f"\n<img src={logo} height=60>\n")
+        if 'logo' in module_info:
+            if module_info["logo"] != "":
+                logo = os.path.join(logo_path, module_info.pop("logo"))
+                markdown.append(f"\n<img src={logo} height=60>\n")
         if "description" in module_info:
             markdown.append(f"\n{module_info.pop('description')}\n")
         markdown.append(f"[[source code]({gh_ref})]\n")
