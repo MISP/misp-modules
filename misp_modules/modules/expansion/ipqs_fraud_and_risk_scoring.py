@@ -31,7 +31,12 @@ email_query_input_type = [
     "whois-registrant-email",
 ]
 phone_query_input_type = ["phone-number", "whois-registrant-phone"]
-username_query_input_type = ["first-name", "last-name", "middle-name", "github-username"]
+username_query_input_type = [
+                            "first-name",
+                            "last-name",
+                            "middle-name",
+                            "github-username"
+                            ]
 password_query_input_type = ["text"]
 file_query_input_type = ["attachment", "malware-sample"]
 
@@ -54,33 +59,41 @@ moduleinfo = {
     "description": (
         "IPQualityScore MISP Expansion Module for IP reputation,\
         Email Validation, Phone Number Validation,"
-        " Malicious Domain,Malicious URL Scanner,Malicious File Scanner & Compromised username, Password, Email  "
+        " Malicious Domain,Malicious URL Scanner,Malicious File Scanner "
+        "& Compromised username, Password, Email  "
     ),
     "module-type": ["expansion", "hover"],
     "name": "IPQualityScore Lookup",
     "logo": "ipqualityscore.png",
     "requirements": ["A IPQualityScore API Key."],
     "features": (
-        """This Module takes the IP Address, Domain, URL, Email, Phone Number, Username,
-        Password, and MISP Attributes as input to query the IPQualityScore API.
-        The results of the IPQualityScore API are then returned as an IPQS Fraud, Risk,
-        and Exposure Scoring Object. 
-        The object contains a copy of the enriched attribute with added tags presenting
-        the verdict based on fraud score, risk score, darkweb exposure status, and
-        other attributes from IPQualityScore.
-        This module also contains IPQS Darkweb Leak, IPQS Malware File Scanner API's
-        IPQS Darkweb Leak - Monitor Dark Web Activity & Compromised User Accounts,
+        """This Module takes the IP Address, Domain, URL, Email, Phone Number,
+        Username,Password, and MISP Attributes as input to query the
+        IPQualityScore API.
+        The results of the IPQualityScore API are then returned as an
+        IPQS Fraud, Risk,and Exposure Scoring Object.
+        The object contains a copy of the enriched attribute with added tags
+        presenting the verdict based on fraud score, risk score,
+        darkweb exposure status, and other attributes from IPQualityScore.
+        This module also contains IPQS Darkweb Leak, IPQS Malware
+        File Scanner API's
+        IPQS Darkweb Leak - Monitor Dark Web Activity &
+        Compromised User Accounts,
         IPQS Malware File Scanner - Detect malicious files.
         """
     ),
     "references": ["https://www.ipqualityscore.com/"],
     "input": (
-        "A MISP attribute of type IP Address(ip-src, ip-dst),             Domain(hostname, domain), URL(url, uri),"
-        " Email Address(email, email-src, email-dst, target-email,             whois-registrant-email) and Phone"
-        " Number(phone-number, whois-registrant-phone), Username(first-name, last-name,             middle-name,"
+        "A MISP attribute of type IP Address(ip-src, ip-dst),"
+        "Domain(hostname, domain), URL(url, uri),"
+        " Email Address(email, email-src, email-dst, target-email,"
+        " whois-registrant-email) and Phone"
+        " Number(phone-number, whois-registrant-phone),"
+        " Username(first-name, last-name, middle-name,"
         " github-username), Password(text)."
     ),
-    "output": "IPQualityScore object, resulting from the query on the                 IPQualityScore API.",
+    "output": "IPQualityScore object, resulting from the query "
+              "on the IPQualityScore API.",
 }
 moduleconfig = ["apikey", "base_url", "poll_delay"]
 
@@ -103,10 +116,17 @@ class RequestHandler:
         self.api_key = apikey
         self.base_url = base_url
 
-    def get(self, url: str, headers: dict = None, params: dict = None) -> requests.Response:
+    def get(
+            self,
+            url: str,
+            headers: dict = None,
+            params: dict = None
+            ) -> requests.Response:
         """General get method to fetch the response from IPQualityScore."""
         try:
-            response = self.session.get(url, headers=headers, params=params).json()
+            response = self.session.get(url,
+                                        headers=headers,
+                                        params=params).json()
             if str(response["success"]) != "True":
                 msg = response["message"]
                 logger.error("Error: %s", {msg})
@@ -127,9 +147,11 @@ class RequestHandler:
         try:
             response = self.get(url, headers, payload)
         except HTTPError as error:
+            response = error.response
+            reason = getattr(response, "reason", "Unknown reason")
             msg = (
-                f"Error when requesting data from IPQualityScore.                 {error.response}:"
-                f" {error.response.reason}"
+                "Error when requesting data from IPQualityScore. "
+                f"{response}: {reason}"
             )
             logger.error(msg)
             misperrors["error"] = msg
@@ -138,7 +160,11 @@ class RequestHandler:
             return {}
         return response
 
-    def ipqs_darkweb_lookup(self, reputation_type: str, ioc: str) -> requests.Response:
+    def ipqs_darkweb_lookup(
+            self,
+            reputation_type: str,
+            ioc: str
+            ) -> requests.Response:
         """Do a lookup call for darkweb."""
         url = f"{self.base_url.rstrip('/')}/leaked/{reputation_type}"
         payload = {reputation_type: ioc}
@@ -146,9 +172,11 @@ class RequestHandler:
         try:
             response = self.get(url, headers, payload)
         except HTTPError as error:
+            response = error.response
+            reason = getattr(response, "reason", "Unknown reason")
             msg = (
-                f"Error when requesting data from IPQualityScore.                 {error.response}:"
-                f" {error.response.reason}"
+                "Error when requesting data from IPQualityScore. "
+                f"{response}: {reason}"
             )
             logger.error(msg)
             misperrors["error"] = msg
@@ -197,7 +225,8 @@ class IPQualityScoreParser:
         self.ipqs_object.description = "IPQS Fraud and Risk Scoring Data"
         setattr(self.ipqs_object, "meta-category", "network")
         description = (
-            "An object containing the enriched attribute and related entities from IPQualityScore."
+            "An object containing the enriched attribute and "
+            "related entities from IPQualityScore."
         )
         self.ipqs_object.from_dict(
             **{
@@ -502,8 +531,12 @@ class IPQualityScoreParser:
             "user_activity": "IPQS: User Activity",
             "associated_names.status": "IPQS: Associated Names Status",
             "associated_names.names": "IPQS: Associated Names",
-            "associated_phone_numbers.status": "IPQS: Associated Phone Number Status",
-            "associated_phone_numbers.phone_numbers": "IPQS: Associated Phone Numbers",
+            "associated_phone_numbers.status": (
+                "IPQS: Associated Phone Number Status"
+                ),
+            "associated_phone_numbers.phone_numbers": (
+                "IPQS: Associated Phone Numbers"
+                ),
             "risky_tld": "IPQS: Risky TLD",
             "spf_record": "IPQS: SPF Record",
             "dmarc_record": "IPQS: DMARC Record",
@@ -563,8 +596,12 @@ class IPQualityScoreParser:
             "line_type": "IPQS: Line Type",
             "country": "IPQS: Country",
             "sms_domain": "IPQS: SMS Domain",
-            "associated_email_addresses.status": "IPQS: Associated Email Addresses Status",
-            "associated_email_addresses.emails": "IPQS: Associated Email Addresses",
+            "associated_email_addresses.status": (
+                "IPQS: Associated Email Addresses Status"
+                ),
+            "associated_email_addresses.emails": (
+                "IPQS: Associated Email Addresses"
+                ),
             "user_activity": "IPQS: User Activity",
             "mnc": "IPQS: MNC",
             "mcc": "IPQS: MCC",
@@ -609,15 +646,19 @@ class IPQualityScoreParser:
         self.enriched_attribute.add_tag(tag)
 
     def ipqs_parser(self, query_response, enrich_type):
-        """helper method to call the enrichment function according to the type"""
+        """
+        helper method to call the enrichment function according to the type
+        """
         flatten_json_response = self.flatten_json(query_response)
         if enrich_type == IP_ENRICH:
             self.ip_reputation_data(flatten_json_response)
         elif enrich_type == URL_ENRICH:
             self.url_reputation_data(flatten_json_response)
         elif enrich_type == EMAIL_ENRICH:
-            email_reputation = self.flatten_json(query_response.get("email_reputation", {}))
-            leaked_email = self.flatten_json(query_response.get("leaked_email", {}))
+            email_reputation = self.flatten_json(
+                query_response.get("email_reputation", {}))
+            leaked_email = self.flatten_json(
+                query_response.get("leaked_email", {}))
             self.email_reputation_data(email_reputation, leaked_email)
         elif enrich_type == PHONE_ENRICH:
             self.phone_reputation_data(flatten_json_response)
@@ -647,12 +688,15 @@ class IPQualityScoreParser:
         comment = "Results from IPQualityScore Username Exposure API"
         for username_data_item in self.username_data_items:
             if username_data_item in query_response:
-                data_item = self.username_data_items_friendly_names[username_data_item]
-                data_item_value = str(query_response[username_data_item])
+                data_item = self.username_data_items_friendly_names[
+                    username_data_item]
+                data_item_value = str(query_response[
+                    username_data_item])
                 if len(data_item_value) > 0:
-                    self.ipqs_object.add_attribute(**parse_attribute(comment, data_item, data_item_value))
-
-        self.ipqs_object.add_attribute("Enriched attribute", **self.enriched_attribute)
+                    self.ipqs_object.add_attribute(**parse_attribute(
+                        comment, data_item, data_item_value))
+        self.ipqs_object.add_attribute("Enriched attribute",
+                                       **self.enriched_attribute)
         self.ipqs_object.add_reference(self.attribute["uuid"], "related-to")
         self.misp_event.add_object(self.ipqs_object)
 
@@ -661,12 +705,20 @@ class IPQualityScoreParser:
         comment = "Results from IPQualityScore Password Exposure API"
         for password_data_item in self.password_data_items:
             if password_data_item in query_response:
-                data_item = self.password_data_items_friendly_names[password_data_item]
-                data_item_value = str(query_response[password_data_item])
+                data_item = self.password_data_items_friendly_names[
+                    password_data_item
+                    ]
+                data_item_value = str(query_response[
+                    password_data_item
+                    ])
                 if len(data_item_value) > 0:
-                    self.ipqs_object.add_attribute(**parse_attribute(comment, data_item, data_item_value))
-
-        self.ipqs_object.add_attribute("Enriched attribute", **self.enriched_attribute)
+                    self.ipqs_object.add_attribute(**parse_attribute(
+                        comment,
+                        data_item,
+                        data_item_value
+                        ))
+        self.ipqs_object.add_attribute("Enriched attribute",
+                                       **self.enriched_attribute)
         self.ipqs_object.add_reference(self.attribute["uuid"], "related-to")
         self.misp_event.add_object(self.ipqs_object)
 
@@ -678,12 +730,14 @@ class IPQualityScoreParser:
                 data_item = self.ip_data_items_friendly_names[ip_data_item]
                 data_item_value = str(query_response[ip_data_item])
                 if len(data_item_value) > 0:
-                    self.ipqs_object.add_attribute(**parse_attribute(comment, data_item, data_item_value))
+                    self.ipqs_object.add_attribute(**parse_attribute(
+                        comment, data_item, data_item_value))
                 if ip_data_item == "fraud_score":
                     fraud_score = int(data_item_value)
                     self.ip_address_risk_scoring(fraud_score)
 
-        self.ipqs_object.add_attribute("Enriched attribute", **self.enriched_attribute)
+        self.ipqs_object.add_attribute("Enriched attribute",
+                                       **self.enriched_attribute)
         self.ipqs_object.add_reference(self.attribute["uuid"], "related-to")
         self.misp_event.add_object(self.ipqs_object)
 
@@ -717,7 +771,8 @@ class IPQualityScoreParser:
                 data_item = self.url_data_items_friendly_names[url_data_item]
                 data_item_value = str(query_response[url_data_item])
                 if len(data_item_value) > 0:
-                    self.ipqs_object.add_attribute(**parse_attribute(comment, data_item, data_item_value))
+                    self.ipqs_object.add_attribute(**parse_attribute(
+                        comment, data_item, data_item_value))
                 if url_data_item == "malware":
                     malware = data_item_value
                 if url_data_item == "phishing":
@@ -726,7 +781,8 @@ class IPQualityScoreParser:
                     risk_score = int(data_item_value)
 
         self.url_risk_scoring(risk_score, malware, phishing)
-        self.ipqs_object.add_attribute("Enriched attribute", **self.enriched_attribute)
+        self.ipqs_object.add_attribute("Enriched attribute",
+                                       **self.enriched_attribute)
         self.ipqs_object.add_reference(self.attribute["uuid"], "related-to")
         self.misp_event.add_object(self.ipqs_object)
 
@@ -760,10 +816,15 @@ class IPQualityScoreParser:
         fraud_score = 0
         for email_data_item in self.email_data_items:
             if email_data_item in email_reputation_resp:
-                data_item = self.email_data_items_friendly_names[email_data_item]
-                data_item_value = str(email_reputation_resp[email_data_item])
+                data_item = self.email_data_items_friendly_names[
+                    email_data_item
+                    ]
+                data_item_value = str(email_reputation_resp[
+                    email_data_item
+                    ])
                 if len(data_item_value) > 0:
-                    self.ipqs_object.add_attribute(**parse_attribute(comment, data_item, data_item_value))
+                    self.ipqs_object.add_attribute(**parse_attribute(
+                        comment, data_item, data_item_value))
                 if email_data_item == "disposable":
                     disposable = data_item_value
                 if email_data_item == "valid":
@@ -773,12 +834,18 @@ class IPQualityScoreParser:
         self.email_address_risk_scoring(fraud_score, disposable, valid)
         for leaked_email_data_item in self.leaked_email_data_items:
             if leaked_email_data_item in leaked_email_resp:
-                data_item = self.leaked_email_data_items_friendly_names[leaked_email_data_item]
-                data_item_value = str(leaked_email_resp[leaked_email_data_item])
+                data_item = self.leaked_email_data_items_friendly_names[
+                    leaked_email_data_item
+                    ]
+                data_item_value = str(
+                    leaked_email_resp[leaked_email_data_item]
+                                      )
                 if len(data_item_value) > 0:
-                    self.ipqs_object.add_attribute(**parse_attribute(comment, data_item, data_item_value))
+                    self.ipqs_object.add_attribute(**parse_attribute(
+                        comment, data_item, data_item_value))
 
-        self.ipqs_object.add_attribute("Enriched attribute", **self.enriched_attribute)
+        self.ipqs_object.add_attribute("Enriched attribute",
+                                       **self.enriched_attribute)
         self.ipqs_object.add_reference(self.attribute["uuid"], "related-to")
         self.misp_event.add_object(self.ipqs_object)
 
@@ -810,10 +877,13 @@ class IPQualityScoreParser:
         comment = "Results from IPQualityScore Phone Number Validation API"
         for phone_data_item in self.phone_data_items:
             if phone_data_item in query_response:
-                data_item = self.phone_data_items_friendly_names[phone_data_item]
+                data_item = self.phone_data_items_friendly_names[
+                    phone_data_item
+                    ]
                 data_item_value = str(query_response[phone_data_item])
                 if len(data_item_value) > 0:
-                    self.ipqs_object.add_attribute(**parse_attribute(comment, data_item, data_item_value))
+                    self.ipqs_object.add_attribute(**parse_attribute(
+                        comment, data_item, data_item_value))
                 if phone_data_item == "active":
                     active = data_item_value
                 if phone_data_item == "valid":
@@ -822,7 +892,8 @@ class IPQualityScoreParser:
                     fraud_score = int(data_item_value)
 
         self.phone_address_risk_scoring(fraud_score, valid, active)
-        self.ipqs_object.add_attribute("Enriched attribute", **self.enriched_attribute)
+        self.ipqs_object.add_attribute("Enriched attribute",
+                                       **self.enriched_attribute)
         self.ipqs_object.add_reference(self.attribute["uuid"], "related-to")
         self.misp_event.add_object(self.ipqs_object)
 
@@ -866,14 +937,15 @@ def handler(q=False):
     apikey = request["config"].get("apikey")
     base_url = request.get("config").get("base_url")
 
-    # check attribute is added to the event
-    if not request.get("attribute") or not check_input_attribute(request["attribute"]):
-        return {
-            "error": (
-                f"{standard_error_message}, which should contain at                 least a type, a value and an uuid."
-            )
-        }
-
+    if (
+        not request.get("attribute")
+        or not check_input_attribute(request["attribute"])
+    ):
+        error_msg = (
+            f"{standard_error_message}, which should contain at least a type, "
+            "a value, and a uuid."
+        )
+        return {"error": error_msg}
     attribute = request["attribute"]
     attribute_type = attribute["type"]
     attribute_value = attribute["value"]
@@ -882,30 +954,42 @@ def handler(q=False):
 
     # check if the attribute type is supported by IPQualityScore
     if attribute_type not in mispattributes["input"]:
-        return {"error": "Unsupported attributes type for IPqualityScore Enrichment"}
+        return {
+            "error": "Unsupported attributes type for IPQS Enrichment"
+            }
     request_handler = RequestHandler(apikey, base_url)
     enrich_type = ""
     json_response = {}
     if attribute_type in ip_query_input_type:
         enrich_type = IP_ENRICH
-        json_response = request_handler.ipqs_lookup(IP_ENRICH, attribute_value)
+        json_response = request_handler.ipqs_lookup(IP_ENRICH,
+                                                    attribute_value)
     elif attribute_type in url_query_input_type:
         enrich_type = URL_ENRICH
-        json_response = request_handler.ipqs_lookup(URL_ENRICH, attribute_value)
+        json_response = request_handler.ipqs_lookup(URL_ENRICH,
+                                                    attribute_value)
     elif attribute_type in email_query_input_type:
         enrich_type = EMAIL_ENRICH
-        json_response1 = request_handler.ipqs_lookup(EMAIL_ENRICH, attribute_value)
-        json_response2 = request_handler.ipqs_darkweb_lookup(EMAIL_ENRICH, attribute_value)
-        json_response = {"email_reputation": json_response1, "leaked_email": json_response2}
+        json_response1 = request_handler.ipqs_lookup(EMAIL_ENRICH,
+                                                     attribute_value)
+        json_response2 = request_handler.ipqs_darkweb_lookup(EMAIL_ENRICH,
+                                                             attribute_value)
+        json_response = {
+            "email_reputation": json_response1,
+            "leaked_email": json_response2
+                        }
     elif attribute_type in phone_query_input_type:
         enrich_type = PHONE_ENRICH
-        json_response = request_handler.ipqs_lookup(PHONE_ENRICH, attribute_value)
+        json_response = request_handler.ipqs_lookup(PHONE_ENRICH,
+                                                    attribute_value)
     elif attribute_type in username_query_input_type:
         enrich_type = USERNAME_ENRICH
-        json_response = request_handler.ipqs_darkweb_lookup(USERNAME_ENRICH, attribute_value)
+        json_response = request_handler.ipqs_darkweb_lookup(USERNAME_ENRICH,
+                                                            attribute_value)
     elif attribute_type in password_query_input_type:
         enrich_type = PASSWORD_ENRICH
-        json_response = request_handler.ipqs_darkweb_lookup(PASSWORD_ENRICH, attribute_value)
+        json_response = request_handler.ipqs_darkweb_lookup(PASSWORD_ENRICH,
+                                                            attribute_value)
     elif attribute_type in file_query_input_type:
         try:
             data = request.get("attribute").get("data", "")
@@ -922,7 +1006,9 @@ def handler(q=False):
                 data = base64.b64decode(data)
             else:
                 logger.warning("No file supplied in request")
-                misperrors["error"] = "No malware sample or attachment supplied"
+                misperrors["error"] = (
+                    "No malware sample or attachment supplied"
+                    )
                 return misperrors
         except Exception:
             logger.exception("Sample processing failed")
@@ -954,22 +1040,26 @@ def handler(q=False):
                         )
                         return misperrors
                     response = requests.post(
-                        f"{base_url.strip('/')}/malware/lookup/", headers=headers, files=files, timeout=30
+                        f"{base_url.strip('/')}/malware/lookup/",
+                        headers=headers, files=files, timeout=30
                     )
                     json_response = response.json()
                     if json_response.get("success") is True:
                         if json_response.get("status", False) == "cached":
                             return ipqs_process(json_response)
                     response = requests.post(
-                        f"{base_url.strip('/')}/malware/scan/", headers=headers, files=files, timeout=30
+                        f"{base_url.strip('/')}/malware/scan/",
+                        headers=headers, files=files, timeout=30
                     )
                     json_response = response.json()
                     payload = {"request_id": json_response.get("request_id")}
-                    while retries <= max_retries and json_response.get("status") == "pending":
+                    while (retries <= max_retries and
+                           json_response.get("status") == "pending"):
                         retries += 1
                         time.sleep(poll_delay)
                         response = requests.get(
-                            f"{base_url.strip('/')}/postback/", headers=headers, json=payload, timeout=30
+                            f"{base_url.strip('/')}/postback/",
+                            headers=headers, json=payload, timeout=30
                         )
                         json_response = response.json()
                 return ipqs_process(json_response)
@@ -1044,11 +1134,8 @@ def ipqs_process(ipqsdata):
                 r["results"].append(
                     {"types": "text", "values": res["name"], "tags": tags}
                 )
-        
-        logger.info("IPQS submission processed successfully")
+                logger.info("IPQS submission processed successfully")
         return r
-        
-
     except Exception as e:
         logger.error("Error processing IPQS data: %s", str(e))
         misperrors["error"] = f"Processing error: {str(e)}"
