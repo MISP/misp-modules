@@ -1347,15 +1347,16 @@ IPQualityScore MISP Expansion Module for IP reputation, Email Validation, Phone 
 [[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/ipqs_fraud_and_risk_scoring.py)]
 
 - **features**:
->This Module takes the IP Address, Domain, URL, Email and Phone Number MISP Attributes as input to query the IPQualityScore API.
+> This Module takes the IP Address, Domain, URL, Email, Phone Number, Username MISP Attributes as input to query the IPQualityScore API.
 > The results of the IPQualityScore API are than returned as IPQS Fraud and Risk Scoring Object. 
 > The object contains a copy of the enriched attribute with added tags presenting the verdict based on fraud score,risk score and other attributes from IPQualityScore.
+> This module takes an attachment or malware-sample attribute as input to query the IPQS Malware Scanner API.
 
 - **config**:
 >apikey
 
 - **input**:
->A MISP attribute of type IP Address(ip-src, ip-dst), Domain(hostname, domain), URL(url, uri), Email Address(email, email-src, email-dst, target-email, whois-registrant-email) and Phone Number(phone-number, whois-registrant-phone).
+>A MISP attribute of type IP Address(ip-src, ip-dst), Domain(hostname, domain), URL(url, uri), Email Address(email, email-src, email-dst, target-email, whois-registrant-email), Phone Number(phone-number, whois-registrant-phone), File(attachment, malware-sample), Username(first-name, last-name, middle-name,github-username) and Password(text).
 
 - **output**:
 >IPQualityScore object, resulting from the query on the IPQualityScore API.
