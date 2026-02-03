@@ -1,6 +1,7 @@
 name: Test Python package
 
 on:
+  workflow_dispatch:
 
   push:
     branches: [ main ]
