@@ -34,7 +34,7 @@ MISP_ATTRIBUTES = {
 
 MODULE_INFO = {
     "version": "0.3",
-    "author": "Sascha Rommelfangen & SSI OpenSource",
+    "author": "Sascha Rommelfangen",
     "description": "Decode QR codes from attachments OR remote URLs (Anti-Quishing).",
     "module-type": ["expansion", "hover"],
     "name": "QR Code Decode",
