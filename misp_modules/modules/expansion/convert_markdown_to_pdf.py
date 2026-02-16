@@ -48,6 +48,34 @@ def randomFilename(length=10):
     characters = string.ascii_lowercase + string.digits  # Lowercase letters and digits
     return ''.join(random.choices(characters, k=length))
 
+
+def sanitize_ast(doc):
+    """Remove dangerous raw HTML blocks, keep code blocks intact."""
+    meta = doc[0]    # Meta
+    blocks = doc[1]  # list of Block nodes
+
+    new_blocks = []
+    for block in blocks:
+        if isinstance(block, pandoc.types.RawBlock):
+            args = getattr(block, "_args", [])
+            if len(args) < 2: # Invalid RawBlock
+                continue
+            fmt, text = args[0], args[1]
+
+            if str(fmt) == "html":
+                # Keep literal in PDF (uncomment)
+                new_blocks.append(
+                    pandoc.types.CodeBlock(["", ["html"], []], text)
+                )
+
+        elif isinstance(block, pandoc.types.CodeBlock):
+            new_blocks.append(block)
+        else:
+            new_blocks.append(block)
+
+    return pandoc.types.Pandoc(meta, new_blocks)
+
+
 def convert(markdown, margin='3'):
     doc = pandoc.read(markdown, format='gfm')
 
@@ -82,7 +110,7 @@ def convert(markdown, margin='3'):
     if not isinstance(elt, pandoc.types.Pandoc):
         raise TypeError(f"{elt!r} is not a Pandoc, Block or Inline instance.")
 
-    doc = elt
+    doc = sanitize_ast(elt)
 
     # options = [
     #     '--pdf-engine=wkhtmltopdf',
