@@ -1,25 +1,55 @@
 import json
-import requests
 import re
 
-misperrors = {'error': 'Error'}
-mispattributes = {'input': ["hostname", "domain", "ip-src", "ip-dst", "md5", "sha1", "sha256", "sha512"],
-                  'output': ["domain", "ip-src", "ip-dst", "text", "md5", "sha1", "sha256", "sha512", "email"]
-                  }
+import requests
+
+misperrors = {"error": "Error"}
+mispattributes = {
+    "input": [
+        "hostname",
+        "domain",
+        "ip-src",
+        "ip-dst",
+        "md5",
+        "sha1",
+        "sha256",
+        "sha512",
+    ],
+    "output": [
+        "domain",
+        "ip-src",
+        "ip-dst",
+        "text",
+        "md5",
+        "sha1",
+        "sha256",
+        "sha512",
+        "email",
+    ],
+}
 
 # possible module-types: 'expansion', 'hover' or both
 moduleinfo = {
-    'version': '1',
-    'author': 'chrisdoman',
-    'description': 'Module to get information from AlienVault OTX.',
-    'module-type': ['expansion'],
-    'name': 'AlienVault OTX Lookup',
-    'logo': 'otx.png',
-    'requirements': ['An access to the OTX API (apikey)'],
-    'features': 'This module takes a MISP attribute as input to query the OTX Alienvault API. The API returns then the result of the query with some types we map into compatible types we add as MISP attributes.',
-    'references': ['https://www.alienvault.com/open-threat-exchange'],
-    'input': 'A MISP attribute included in the following list:\n- hostname\n- domain\n- ip-src\n- ip-dst\n- md5\n- sha1\n- sha256\n- sha512',
-    'output': 'MISP attributes mapped from the result of the query on OTX, included in the following list:\n- domain\n- ip-src\n- ip-dst\n- text\n- md5\n- sha1\n- sha256\n- sha512\n- email',
+    "version": "1",
+    "author": "chrisdoman",
+    "description": "Module to get information from AlienVault OTX.",
+    "module-type": ["expansion"],
+    "name": "AlienVault OTX Lookup",
+    "logo": "otx.png",
+    "requirements": ["An access to the OTX API (apikey)"],
+    "features": (
+        "This module takes a MISP attribute as input to query the OTX Alienvault API. The API returns then the result"
+        " of the query with some types we map into compatible types we add as MISP attributes."
+    ),
+    "references": ["https://www.alienvault.com/open-threat-exchange"],
+    "input": (
+        "A MISP attribute included in the following list:\n- hostname\n- domain\n- ip-src\n- ip-dst\n- md5\n- sha1\n-"
+        " sha256\n- sha512"
+    ),
+    "output": (
+        "MISP attributes mapped from the result of the query on OTX, included in the following list:\n- domain\n-"
+        " ip-src\n- ip-dst\n- text\n- md5\n- sha1\n- sha256\n- sha512\n- email"
+    ),
 }
 
 # We're not actually using the API key yet
@@ -28,13 +58,19 @@ moduleconfig = ["apikey"]
 
 # Avoid adding windows update to enrichment etc.
 def isBlacklisted(value):
-    blacklist = ['0.0.0.0', '8.8.8.8', '255.255.255.255', '192.168.56.', 'time.windows.com']
+    blacklist = [
+        "0.0.0.0",
+        "8.8.8.8",
+        "255.255.255.255",
+        "192.168.56.",
+        "time.windows.com",
+    ]
 
     for b in blacklist:
         if value in b:
-            return False
+            return True
 
-    return True
+    return False
 
 
 def valid_ip(ip):
@@ -58,7 +94,12 @@ def findAll(data, keys):
 
 
 def valid_email(email):
-    return bool(re.search(r"[a-zA-Z0-9!#$%&'*+\/=?^_`{|}~-]+(?:\.[a-zA-Z0-9!#$%&'*+\/=?^_`{|}~-]+)*@(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?\.)+[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?", email))
+    return bool(
+        re.search(
+            r"[a-zA-Z0-9!#$%&'*+\/=?^_`{|}~-]+(?:\.[a-zA-Z0-9!#$%&'*+\/=?^_`{|}~-]+)*@(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?\.)+[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?",
+            email,
+        )
+    )
 
 
 def handler(q=False):
@@ -77,16 +118,16 @@ def handler(q=False):
         r["results"] += getIP(q["ip-dst"], key)
     if "domain" in q:
         r["results"] += getDomain(q["domain"], key)
-    if 'hostname' in q:
-        r["results"] += getDomain(q['hostname'], key)
-    if 'md5' in q:
-        r["results"] += getHash(q['md5'], key)
-    if 'sha1' in q:
-        r["results"] += getHash(q['sha1'], key)
-    if 'sha256' in q:
-        r["results"] += getHash(q['sha256'], key)
-    if 'sha512' in q:
-        r["results"] += getHash(q['sha512'], key)
+    if "hostname" in q:
+        r["results"] += getDomain(q["hostname"], key)
+    if "md5" in q:
+        r["results"] += getHash(q["md5"], key)
+    if "sha1" in q:
+        r["results"] += getHash(q["sha1"], key)
+    if "sha256" in q:
+        r["results"] += getHash(q["sha256"], key)
+    if "sha512" in q:
+        r["results"] += getHash(q["sha512"], key)
 
     uniq = []
     for res in r["results"]:
@@ -132,7 +173,9 @@ def getDomain(domain, key):
 
     ret = []
 
-    req = json.loads(requests.get("https://otx.alienvault.com/otxapi/indicator/domain/malware/" + domain + "?limit=1000").text)
+    req = json.loads(
+        requests.get("https://otx.alienvault.com/otxapi/indicator/domain/malware/" + domain + "?limit=1000").text
+    )
 
     for _hash in findAll(req, "hash"):
         ret.append({"types": ["sha256"], "values": [_hash]})
@@ -163,5 +206,5 @@ def introspection():
 
 
 def version():
-    moduleinfo['config'] = moduleconfig
+    moduleinfo["config"] = moduleconfig
     return moduleinfo

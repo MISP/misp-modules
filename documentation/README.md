@@ -17,6 +17,52 @@ AbuseIPDB MISP expansion module
 
 -----
 
+#### [ANYRUN Sandbox Submit](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/anyrun_sandbox_submit.py)
+
+A module designed to submit URLs or files to the ANY.RUN Sandbox for analysis and return the unique analysis link and ID.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/anyrun_sandbox_submit.py)]
+
+- **features**:
+>Supports submission of URLs and files via the ANY.RUN API; requires an API key for authentication; returns the task ID and permanent URL for tracking analysis progress; integrates seamlessly with MISP events by enriching attributes with submission results.
+
+- **config**:
+> - api_key
+> - os_type
+> - opt_timeout
+> - opt_network_connect
+> - opt_network_fakenet
+> - opt_network_tor
+> - opt_network_geo
+> - opt_network_mitm
+> - opt_network_residential_proxy
+> - opt_network_residential_proxy_geo
+> - opt_privacy_type
+> - obj_ext_extension
+> - obj_ext_browser
+> - env_locale
+> - env_version
+> - env_bitness
+> - env_type
+> - obj_ext_startfolder
+> - obj_ext_cmd
+> - obj_force_elevation
+> - run_as_root
+
+- **input**:
+>Attachment, malware-sample or url to submit to ANY.RUN Sandbox.
+
+- **output**:
+>ANY.RUN Sandbox analysis URL and UUID.
+
+- **references**:
+>https://any.run
+
+- **requirements**:
+> - anyrun-sdk: ANY.RUN API python3 library
+> - ANY.RUN Sandbox API-KEY
+
+-----
+
 #### [OSINT DigitalSide](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/apiosintds.py)
 
 On demand query API for OSINT.digitalside.it project.
@@ -110,9 +156,6 @@ A module tu query the AssemblyLine API with a submission ID to get the submissio
 - **references**:
 >https://www.cyber.gc.ca/en/assemblyline
 
-- **requirements**:
->assemblyline_client: Python library to query the AssemblyLine rest API.
-
 -----
 
 #### [AssemblyLine Submit](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/assemblyline_submit.py)
@@ -142,9 +185,6 @@ A module to submit samples and URLs to AssemblyLine for advanced analysis, and r
 
 - **references**:
 >https://www.cyber.gc.ca/en/assemblyline
-
-- **requirements**:
->assemblyline_client: Python library to query the AssemblyLine rest API.
 
 -----
 
@@ -980,30 +1020,6 @@ Google safe browsing expansion module
 
 -----
 
-#### [Google Search](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/google_search.py)
-
-<img src=logos/google.png height=60>
-
-An expansion hover module to expand google search information about an URL
-[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/google_search.py)]
-
-- **features**:
->The module takes an url as input to query the Google search API. The result of the query is then return as raw text.
-
-- **input**:
->An url attribute.
-
-- **output**:
->Text containing the result of a Google search on the input url.
-
-- **references**:
->https://github.com/abenassi/Google-Search-API
-
-- **requirements**:
->The python Google Search API library
-
------
-
 #### [Google Threat Intelligence Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/google_threat_intelligence.py)
 
 <img src=logos/google_threat_intelligence.png height=60>
@@ -1272,6 +1288,9 @@ Module to query an IP ASN history service (https://github.com/D4-project/IPASN-H
 - **features**:
 >This module takes an IP address attribute as input and queries the CIRCL IPASN service. The result of the query is the latest asn related to the IP address, that is returned as a MISP object.
 
+- **config**:
+>custom_api
+
 - **input**:
 >An IP address MISP attribute.
 
@@ -1328,15 +1347,16 @@ IPQualityScore MISP Expansion Module for IP reputation, Email Validation, Phone 
 [[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/ipqs_fraud_and_risk_scoring.py)]
 
 - **features**:
->This Module takes the IP Address, Domain, URL, Email and Phone Number MISP Attributes as input to query the IPQualityScore API.
+> This Module takes the IP Address, Domain, URL, Email, Phone Number, Username MISP Attributes as input to query the IPQualityScore API.
 > The results of the IPQualityScore API are than returned as IPQS Fraud and Risk Scoring Object. 
 > The object contains a copy of the enriched attribute with added tags presenting the verdict based on fraud score,risk score and other attributes from IPQualityScore.
+> This module takes an attachment or malware-sample attribute as input to query the IPQS Malware Scanner API.
 
 - **config**:
 >apikey
 
 - **input**:
->A MISP attribute of type IP Address(ip-src, ip-dst), Domain(hostname, domain), URL(url, uri), Email Address(email, email-src, email-dst, target-email, whois-registrant-email) and Phone Number(phone-number, whois-registrant-phone).
+>A MISP attribute of type IP Address(ip-src, ip-dst), Domain(hostname, domain), URL(url, uri), Email Address(email, email-src, email-dst, target-email, whois-registrant-email), Phone Number(phone-number, whois-registrant-phone), File(attachment, malware-sample), Username(first-name, last-name, middle-name,github-username) and Password(text).
 
 - **output**:
 >IPQualityScore object, resulting from the query on the IPQualityScore API.
@@ -1595,6 +1615,9 @@ Query Malware Bazaar to get additional information about the input hash.
 >The module takes a hash attribute as input and queries MALWAREbazaar's API to fetch additional data about it. The result, if the payload is known on the databases, is at least one file object describing the file the input hash is related to.
 >
 >The module is using the new format of modules able to return object since the result is one or multiple MISP object(s).
+
+- **config**:
+>auth_key
 
 - **input**:
 >A hash attribute (md5, sha1 or sha256).
@@ -2052,6 +2075,26 @@ Module to access the ransomcoinDB (see https://ransomcoindb.concinnity-risks.com
 
 -----
 
+#### [r7_akb](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/rapid7_attackerkb.py)
+
+Enrich CVEs via AttackerKB and return structured MISP events. Handles rate limits, regex CVE detection, and markdown cleanup.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/rapid7_attackerkb.py)]
+
+- **config**:
+>api_key
+
+- **input**:
+>Vulnerability attribute (CVE ID or comment containing CVE).
+
+- **output**:
+>Structured MISP Objects.
+
+- **requirements**:
+> - pymisp
+> - requests
+
+-----
+
 #### [Real-time Blackhost Lists Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/rbl.py)
 
 Module to check an IPv4 address against known RBLs.
@@ -2303,6 +2346,7 @@ An expansion module to query the Sophoslabs intelix API to get additional inform
 - **config**:
 > - client_id
 > - client_secret
+> - region
 
 - **input**:
 >An ip address, url, domain or sha256 attribute.
@@ -2447,6 +2491,9 @@ Module to search for an IOC on ThreatFox by abuse.ch.
 - **features**:
 >
 
+- **config**:
+>auth_key
+
 -----
 
 #### [ThreatMiner Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/threatminer.py)
@@ -2555,6 +2602,9 @@ Query of the URLhaus API to get additional information about the input attribute
 >Module using the new format of modules able to return attributes and objects.
 >
 >The module takes one of the attribute type specified as input, and query the URLhaus API with it. If any result is returned by the API, attributes and objects are created accordingly.
+
+- **config**:
+>auth_key
 
 - **input**:
 >A domain, hostname, url, ip, md5 or sha256 attribute.
@@ -3393,6 +3443,16 @@ Simple export of a MISP event to PDF.
 
 -----
 
+#### [Test Export](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/testexport.py)
+
+Skeleton export module.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/testexport.py)]
+
+- **features**:
+>
+
+-----
+
 #### [ThreatStream Export](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/threatStream_misp_export.py)
 
 <img src=logos/threatstream.png height=60>
@@ -3541,6 +3601,34 @@ This module is used to export MISP events to YARA.
 -----
 
 ## Import Modules
+
+#### [ANYRUN Sandbox Import](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/anyrun_sandbox_import.py)
+
+<img src=logos/anyrun.png height=60>
+
+A module designed to retrieve an analysis report from the ANY.RUN Sandbox by its unique ID and extract results (such as verdict, malware tags, and IOCs), converting them into MISP attributes within your event.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/anyrun_sandbox_import.py)]
+
+- **features**:
+>Fetches detailed JSON reports using the ANY.RUN API; parses key elements like verdict, extracted IOCs (hashes, IPs, URLs), malware tags; maps data to MISP attributes and galaxies (e.g., malware family or MITRE ATT&CK Techniques).
+
+- **config**:
+>api_key
+
+- **input**:
+>ANY.RUN Sandbox analysis UUID.
+
+- **output**:
+>Analysis external references, verdict, IOCs (hashes, IPs, URLs), malware tags, MITRE ATT&CK Techniques
+
+- **references**:
+>https://any.run
+
+- **requirements**:
+> - anyrun-sdk: ANY.RUN API python3 library
+> - ANY.RUN Sandbox API-KEY
+
+-----
 
 #### [PDNS COF Importer](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/cof2misp.py)
 
@@ -3788,6 +3876,20 @@ Import content from a TAXII 2.1 server
 - **config**:
 >stix_object_limit
 
+- **requirements**:
+> - misp-lib-stix2
+> - misp-stix
+
+-----
+
+#### [CSV Test Import](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/testimport.py)
+
+Simple CSV import tool with mapable columns
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/testimport.py)]
+
+- **features**:
+>
+
 -----
 
 #### [ThreadAnalyzer Sandbox Import](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/threatanalyzer_import.py)
@@ -3877,6 +3979,19 @@ Simplistic module to send message to a Mattermost channel.
 
 - **config**:
 >{'params': {'mattermost_hostname': {'type': 'string', 'description': 'The Mattermost domain or URL', 'value': 'example.mattermost.com'}, 'bot_access_token': {'type': 'string', 'description': 'Access token generated when you created the bot account'}, 'channel_id': {'type': 'string', 'description': 'The channel you added the bot to'}, 'message_template': {'type': 'large_string', 'description': 'The template to be used to generate the message to be posted', 'value': 'The **template** will be rendered using *Jinja2*!', 'jinja_supported': True}}, 'blocking': False, 'support_filters': True, 'expect_misp_core_format': False}
+
+-----
+
+#### [Nextcloud talk](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/action_mod/nextcloud_talk.py)
+
+Simplistic module to send a message to a Nextcloud talk conversation.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/action_mod/nextcloud_talk.py)]
+
+- **features**:
+>
+
+- **config**:
+>{'params': {'nextcloud_baseurl': {'type': 'string', 'description': 'The Nexctloud domain or URL', 'value': 'https://example.nextcloud.org:443'}, 'nextcloud_app_uuid_login': {'type': 'string', 'description': 'The nextcloud username'}, 'app_access_token': {'type': 'string', 'description': 'The nextcloud application token'}, 'nextcloud_conversation_token': {'type': 'string', 'description': 'The token of the conversation the message should be sent to'}, 'message_template': {'type': 'large_string', 'description': 'The template to be used to generate the message to be posted', 'value': 'The **template** will be rendered using *Jinja2*!', 'jinja_supported': True}}, 'blocking': False, 'support_filters': True, 'expect_misp_core_format': False}
 
 -----
 
