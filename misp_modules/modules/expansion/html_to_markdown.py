@@ -42,11 +42,13 @@ def handler(q=False):
     if q is False:
         return False
     request = json.loads(q)
-    if request.get('url'):
+    if request.get('raw_html'):
+        html = request.get('raw_html')
+    elif request.get('url'):
         url = request['url']
+        html = fetchHTML(url)
     else:
         return False
-    html = fetchHTML(url)
     html = stripUselessTags(html)
     markdown = convertHTML(html)
 
