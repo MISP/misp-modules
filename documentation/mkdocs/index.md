@@ -111,6 +111,7 @@ For more information: [Extending MISP with Python modules](https://www.misp-proj
 * [TruSTAR Enrich](https://misp.github.io/misp-modules/expansion/#trustar-enrich) - Module to get enrich indicators with TruSTAR.
 * [URLhaus Lookup](https://misp.github.io/misp-modules/expansion/#urlhaus-lookup) - Query of the URLhaus API to get additional information about the input attribute.
 * [URLScan Lookup](https://misp.github.io/misp-modules/expansion/#urlscan-lookup) - An expansion module to query urlscan.io.
+* [Validin Lookup](https://misp.github.io/misp-modules/expansion/#validin-lookup) - An expansion module to query Validin's historic internet intelligence database.
 * [VARIoT db Lookup](https://misp.github.io/misp-modules/expansion/#variot-db-lookup) - An expansion module to query the VARIoT db API for more information about a vulnerability.
 * [VirusTotal v3 Lookup](https://misp.github.io/misp-modules/expansion/#virustotal-v3-lookup) - Enrich observables with the VirusTotal v3 API
 * [VirusTotal Public API Lookup](https://misp.github.io/misp-modules/expansion/#virustotal-public-api-lookup) - Enrich observables with the VirusTotal v3 public API

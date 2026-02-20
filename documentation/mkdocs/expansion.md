@@ -2671,6 +2671,39 @@ An expansion module to query urlscan.io.
 
 -----
 
+#### [Validin Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/validin.py)
+
+<img src=logos/validin.png height=60>
+
+An expansion module to query Validin's historic internet dataset including: DNS, Subdomains, Host Responses, Certificates, and Registration.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/validin.py)]
+
+- **features**:
+>Queries Validin's datasets for: DNS history, subdomains, host responses, certificates and registration
+>records (enterprise users only) to enrich domains and IPs in MISP.
+>The configured lookback is 14 days for DNS, 21 days for web crawls, and
+>30 days for registration history. To set this up correctly, you need to configure: a Validin api key,
+>a Validin endpoint (e.g. app.validin.com), and a result_limit, which defaults to 100.
+
+- **config**:
+> - endpoint
+> - api_key
+> - result_limit
+
+- **input**:
+>A domain, hostname, ip-src, or ip-dst attribute.
+
+- **output**:
+>MISP attributes mapped from the result of the query on Validin.
+
+- **references**:
+>https://www.validin.com
+
+- **requirements**:
+>An account on the Validin Community or Enterprise platforms, and an API key (found in your profile on the Validin platform).
+
+-----
+
 #### [VARIoT db Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/variotdbs.py)
 
 <img src=../logos/variot.png height=60>

@@ -703,6 +703,25 @@ class TestExpansions(unittest.TestCase):
             response = self.misp_modules_post(query)
             self.assertEqual(self.get_errors(response), "Urlscan apikey is missing")
 
+    def test_validin(self):
+        module_name = "validin"
+        query = {
+            "module": module_name,
+            "attribute": {
+                "type": "domain",
+                "value": "validin.com",
+                "uuid": "c0998c0d-e9c8-4cec-8514-3307bc1bf722",
+            },
+            "config": {},
+        }
+        if module_name in self.configs:
+            query["config"] = self.configs[module_name]
+            response = self.misp_modules_post(query)
+            self.assertIn("results", response.json())
+        else:
+            response = self.misp_modules_post(query)
+            self.assertEqual(self.get_errors(response), "Validin API key is missing.")
+
     def test_virustotal_public(self):
         module_name = "virustotal_public"
         attributes = (
