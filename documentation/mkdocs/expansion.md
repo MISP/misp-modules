@@ -2675,7 +2675,7 @@ An expansion module to query urlscan.io.
 
 <img src=logos/validin.png height=60>
 
-An expansion module to query Validin's historic internet dataset including: DNS, Subdomains, Host Responses, Certificates, and Registration.
+An expansion module to query the Validin historic internet dataset including: DNS, Subdomains, Host Responses, Certificates, and Registration.
 [[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/validin.py)]
 
 - **features**:
