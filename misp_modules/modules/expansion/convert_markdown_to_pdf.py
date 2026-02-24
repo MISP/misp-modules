@@ -61,7 +61,7 @@ def sanitize_ast(doc):
     for block in blocks:
         if isinstance(block, pandoc.types.RawBlock):
             args = getattr(block, "_args", [])
-            if len(args) < 2: # Invalid RawBlock
+            if len(args) < 2:  # Invalid RawBlock
                 continue
             fmt, text = args[0], args[1]
 
