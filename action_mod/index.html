@@ -76,7 +76,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#mattermost" class="md-skip">
+        <a href="#export-to-sentinel-or-defender" class="md-skip">
           Skip to content
         </a>
       
@@ -296,6 +296,15 @@
       Table of contents
     </label>
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#export-to-sentinel-or-defender" class="md-nav__link">
+    <span class="md-ellipsis">
+      Export to Sentinel or Defender
+    </span>
+  </a>
+  
+</li>
       
         <li class="md-nav__item">
   <a href="#mattermost" class="md-nav__link">
@@ -555,6 +564,15 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#export-to-sentinel-or-defender" class="md-nav__link">
+    <span class="md-ellipsis">
+      Export to Sentinel or Defender
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#mattermost" class="md-nav__link">
     <span class="md-ellipsis">
       Mattermost
@@ -611,6 +629,22 @@
 
   <h1>Action Modules</h1>
 
+<h4 id="export-to-sentinel-or-defender"><a href="https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/action_mod/export_sentinel.py">Export to Sentinel or Defender</a><a class="headerlink" href="#export-to-sentinel-or-defender" title="Permanent link">&para;</a></h4>
+<p>Export indicators to Microsoft Sentinel or Microsoft Defender. Requires an existing installation of MISP2Sentinel or MISP2Defender.
+[<a href="https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/action_mod/export_sentinel.py">source code</a>]</p>
+<ul>
+<li>
+<p><strong>features</strong>:</p>
+<blockquote></blockquote>
+</li>
+<li>
+<p><strong>config</strong>:</p>
+<blockquote>
+<p>{'params': {'misp2_venv': {'type': 'string', 'description': 'Where is the MISP2Sentinel or MISP2Defender Python virtual environment?', 'value': '/var/www/MISP/misp-custom/misp2sentinel/venv/'}, 'misp2_script': {'type': 'string', 'description': 'Where is the MISP2Sentinel or MISP2Defender installation?', 'value': '/var/www/MISP/misp-custom/misp2sentinel/script.py'}}, 'blocking': False, 'support_filters': True, 'expect_misp_core_format': False}</p>
+</blockquote>
+</li>
+</ul>
+<hr />
 <h4 id="mattermost"><a href="https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/action_mod/mattermost.py">Mattermost</a><a class="headerlink" href="#mattermost" title="Permanent link">&para;</a></h4>
 <p>Simplistic module to send message to a Mattermost channel.
 [<a href="https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/action_mod/mattermost.py">source code</a>]</p>

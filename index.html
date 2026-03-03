@@ -734,7 +734,7 @@ without modifying core components. The API is available via a simple REST API wh
 <li><a href="https://misp.github.io/misp-modules/expansion/#ip2location.io-lookup">IP2Location.io Lookup</a> - An expansion module to query IP2Location.io to gather more information on a given IP address.</li>
 <li><a href="https://misp.github.io/misp-modules/expansion/#ipasn-history-lookup">IPASN-History Lookup</a> - Module to query an IP ASN history service (<a href="https://github.com/D4-project/IPASN-History">https://github.com/D4-project/IPASN-History</a>).</li>
 <li><a href="https://misp.github.io/misp-modules/expansion/#ipinfo.io-lookup">IPInfo.io Lookup</a> - An expansion module to query ipinfo.io to gather more information on a given IP address.</li>
-<li><a href="https://misp.github.io/misp-modules/expansion/#ipqualityscore-lookup">IPQualityScore Lookup</a> - IPQualityScore MISP Expansion Module for IP reputation, Email Validation, Phone Number Validation, Malicious Domain and Malicious URL Scanner.</li>
+<li><a href="https://misp.github.io/misp-modules/expansion/#ipqualityscore-lookup">IPQualityScore Lookup</a> - IPQualityScore MISP Expansion Module for IP reputation,        Email Validation, Phone Number Validation, Malicious Domain,Malicious URL Scanner,Malicious File Scanner &amp; Compromised username, Password, Email  </li>
 <li><a href="https://misp.github.io/misp-modules/expansion/#iprep-lookup">IPRep Lookup</a> - Module to query IPRep data for IP addresses.</li>
 <li><a href="https://misp.github.io/misp-modules/expansion/#ninja-template-rendering">Ninja Template Rendering</a> - Render the template with the data passed</li>
 <li><a href="https://misp.github.io/misp-modules/expansion/#joe-sandbox-import">Joe Sandbox Import</a> - Query Joe Sandbox API with a submission url to get the json report and extract its data that is parsed and converted into MISP attributes and objects.</li>
@@ -760,12 +760,13 @@ without modifying core components. The API is available via a simple REST API wh
 <li><a href="https://misp.github.io/misp-modules/expansion/#pdf-enrich">PDF Enrich</a> - Module to extract freetext from a PDF document.</li>
 <li><a href="https://misp.github.io/misp-modules/expansion/#pptx-enrich">PPTX Enrich</a> - Module to extract freetext from a .pptx document.</li>
 <li><a href="https://misp.github.io/misp-modules/expansion/#qintel-qsentry-lookup">Qintel QSentry Lookup</a> - A hover and expansion module which queries Qintel QSentry for ip reputation data</li>
-<li><a href="https://misp.github.io/misp-modules/expansion/#qr-code-decode">QR Code Decode</a> - Module to decode QR codes.</li>
+<li><a href="https://misp.github.io/misp-modules/expansion/#qr-code-decode">QR Code Decode</a> - Decode QR codes from attachments OR remote URLs (Anti-Quishing).</li>
 <li><a href="https://misp.github.io/misp-modules/expansion/#randomcoindb-lookup">RandomcoinDB Lookup</a> - Module to access the ransomcoinDB (see <a href="https://ransomcoindb.concinnity-risks.com">https://ransomcoindb.concinnity-risks.com</a>)</li>
-<li><a href="https://misp.github.io/misp-modules/expansion/#r7_akb">r7_akb</a> - Enrich CVEs via AttackerKB and return structured MISP events. Handles rate limits, regex CVE detection, and markdown cleanup.</li>
+<li><a href="https://misp.github.io/misp-modules/expansion/#rapid7-attackerkb-lookup">Rapid7 AttackerKB lookup</a> - Module to lookup CVE attributes in Rapid7 AttackerKB.</li>
 <li><a href="https://misp.github.io/misp-modules/expansion/#real-time-blackhost-lists-lookup">Real-time Blackhost Lists Lookup</a> - Module to check an IPv4 address against known RBLs.</li>
 <li><a href="https://misp.github.io/misp-modules/expansion/#recorded-future-enrich">Recorded Future Enrich</a> - Module to enrich attributes with threat intelligence from Recorded Future.</li>
 <li><a href="https://misp.github.io/misp-modules/expansion/#reverse-dns">Reverse DNS</a> - Simple Reverse DNS expansion service to resolve reverse DNS from MISP attributes.</li>
+<li><a href="https://misp.github.io/misp-modules/expansion/#reversinglabs-spectra-analyze">ReversingLabs Spectra Analyze</a> - Threat intelligence enrichment module</li>
 <li><a href="https://misp.github.io/misp-modules/expansion/#securitytrails-lookup">SecurityTrails Lookup</a> - An expansion modules for SecurityTrails.</li>
 <li><a href="https://misp.github.io/misp-modules/expansion/#shodan-lookup">Shodan Lookup</a> - Module to query on Shodan.</li>
 <li><a href="https://misp.github.io/misp-modules/expansion/#sigma-rule-converter">Sigma Rule Converter</a> - An expansion hover module to display the result of sigma queries.</li>
@@ -783,6 +784,7 @@ without modifying core components. The API is available via a simple REST API wh
 <li><a href="https://misp.github.io/misp-modules/expansion/#trustar-enrich">TruSTAR Enrich</a> - Module to get enrich indicators with TruSTAR.</li>
 <li><a href="https://misp.github.io/misp-modules/expansion/#urlhaus-lookup">URLhaus Lookup</a> - Query of the URLhaus API to get additional information about the input attribute.</li>
 <li><a href="https://misp.github.io/misp-modules/expansion/#urlscan-lookup">URLScan Lookup</a> - An expansion module to query urlscan.io.</li>
+<li><a href="https://misp.github.io/misp-modules/expansion/#validin-dns-history">Validin DNS History</a> - Validin internet dataset expansion. Returns dns-records, web crawls, registration (WHOIS) records, and certificates from Validin's historic internet intelligence dataset.</li>
 <li><a href="https://misp.github.io/misp-modules/expansion/#variot-db-lookup">VARIoT db Lookup</a> - An expansion module to query the VARIoT db API for more information about a vulnerability.</li>
 <li><a href="https://misp.github.io/misp-modules/expansion/#virustotal-v3-lookup">VirusTotal v3 Lookup</a> - Enrich observables with the VirusTotal v3 API</li>
 <li><a href="https://misp.github.io/misp-modules/expansion/#virustotal-public-api-lookup">VirusTotal Public API Lookup</a> - Enrich observables with the VirusTotal v3 public API</li>
@@ -843,6 +845,7 @@ without modifying core components. The API is available via a simple REST API wh
 </ul>
 <h3 id="action-modules">Action Modules<a class="headerlink" href="#action-modules" title="Permanent link">&para;</a></h3>
 <ul>
+<li><a href="https://misp.github.io/misp-modules/action_mod/#export-to-sentinel-or-defender">Export to Sentinel or Defender</a> - Export indicators to Microsoft Sentinel or Microsoft Defender. Requires an existing installation of MISP2Sentinel or MISP2Defender.</li>
 <li><a href="https://misp.github.io/misp-modules/action_mod/#mattermost">Mattermost</a> - Simplistic module to send message to a Mattermost channel.</li>
 <li><a href="https://misp.github.io/misp-modules/action_mod/#nextcloud-talk">Nextcloud talk</a> - Simplistic module to send a message to a Nextcloud talk conversation.</li>
 <li><a href="https://misp.github.io/misp-modules/action_mod/#slack">Slack</a> - Simplistic module to send messages to a Slack channel.</li>

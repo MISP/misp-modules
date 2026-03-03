@@ -987,9 +987,9 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#r7_akb" class="md-nav__link">
+  <a href="#rapid7-attackerkb-lookup" class="md-nav__link">
     <span class="md-ellipsis">
-      r7_akb
+      Rapid7 AttackerKB lookup
     </span>
   </a>
   
@@ -1017,6 +1017,15 @@
   <a href="#reverse-dns" class="md-nav__link">
     <span class="md-ellipsis">
       Reverse DNS
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#reversinglabs-spectra-analyze" class="md-nav__link">
+    <span class="md-ellipsis">
+      ReversingLabs Spectra Analyze
     </span>
   </a>
   
@@ -1170,6 +1179,15 @@
   <a href="#urlscan-lookup" class="md-nav__link">
     <span class="md-ellipsis">
       URLScan Lookup
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#validin-dns-history" class="md-nav__link">
+    <span class="md-ellipsis">
+      Validin DNS History
     </span>
   </a>
   
@@ -2202,9 +2220,9 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#r7_akb" class="md-nav__link">
+  <a href="#rapid7-attackerkb-lookup" class="md-nav__link">
     <span class="md-ellipsis">
-      r7_akb
+      Rapid7 AttackerKB lookup
     </span>
   </a>
   
@@ -2232,6 +2250,15 @@
   <a href="#reverse-dns" class="md-nav__link">
     <span class="md-ellipsis">
       Reverse DNS
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#reversinglabs-spectra-analyze" class="md-nav__link">
+    <span class="md-ellipsis">
+      ReversingLabs Spectra Analyze
     </span>
   </a>
   
@@ -2385,6 +2412,15 @@
   <a href="#urlscan-lookup" class="md-nav__link">
     <span class="md-ellipsis">
       URLScan Lookup
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#validin-dns-history" class="md-nav__link">
+    <span class="md-ellipsis">
+      Validin DNS History
     </span>
   </a>
   
@@ -3464,7 +3500,7 @@ The returned task id can be used to retrieve results when the analysis completed
 </ul>
 <hr />
 <h4 id="cve-lookup"><a href="https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/cve.py">CVE Lookup</a><a class="headerlink" href="#cve-lookup" title="Permanent link">&para;</a></h4>
-<p><img src=../logos/vulnerability_lookyp.png height=60></p>
+<p><img src=../logos/vulnerability_lookup.png height=60></p>
 <p>An expansion hover module to expand information about CVE id.
 [<a href="https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/cve.py">source code</a>]</p>
 <ul>
@@ -4561,27 +4597,42 @@ The geolocation information on the IP address is always returned.</p>
 <hr />
 <h4 id="ipqualityscore-lookup"><a href="https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/ipqs_fraud_and_risk_scoring.py">IPQualityScore Lookup</a><a class="headerlink" href="#ipqualityscore-lookup" title="Permanent link">&para;</a></h4>
 <p><img src=../logos/ipqualityscore.png height=60></p>
-<p>IPQualityScore MISP Expansion Module for IP reputation, Email Validation, Phone Number Validation, Malicious Domain and Malicious URL Scanner.
+<p>IPQualityScore MISP Expansion Module for IP reputation,        Email Validation, Phone Number Validation, Malicious Domain,Malicious URL Scanner,Malicious File Scanner &amp; Compromised username, Password, Email<br />
 [<a href="https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/ipqs_fraud_and_risk_scoring.py">source code</a>]</p>
 <ul>
 <li>
 <p><strong>features</strong>:</p>
 <blockquote>
-<p>This Module takes the IP Address, Domain, URL, Email and Phone Number MISP Attributes as input to query the IPQualityScore API.
-The results of the IPQualityScore API are than returned as IPQS Fraud and Risk Scoring Object. 
-The object contains a copy of the enriched attribute with added tags presenting the verdict based on fraud score,risk score and other attributes from IPQualityScore.</p>
+<p>This Module takes the IP Address, Domain, URL, Email, Phone Number,
+       Username,Password, and MISP Attributes as input to query the
+       IPQualityScore API.
+       The results of the IPQualityScore API are then returned as an
+       IPQS Fraud, Risk,and Exposure Scoring Object.
+       The object contains a copy of the enriched attribute with added tags
+       presenting the verdict based on fraud score, risk score,
+       darkweb exposure status, and other attributes from IPQualityScore.
+       This module also contains IPQS Darkweb Leak, IPQS Malware
+       File Scanner API's
+       IPQS Darkweb Leak - Monitor Dark Web Activity &amp;
+       Compromised User Accounts,
+       IPQS Malware File Scanner - Detect malicious files.
+</p>
 </blockquote>
 </li>
 <li>
 <p><strong>config</strong>:</p>
 <blockquote>
-<p>apikey</p>
+<ul>
+<li>apikey</li>
+<li>base_url</li>
+<li>poll_delay</li>
+</ul>
 </blockquote>
 </li>
 <li>
 <p><strong>input</strong>:</p>
 <blockquote>
-<p>A MISP attribute of type IP Address(ip-src, ip-dst), Domain(hostname, domain), URL(url, uri), Email Address(email, email-src, email-dst, target-email, whois-registrant-email) and Phone Number(phone-number, whois-registrant-phone).</p>
+<p>A MISP attribute of type IP Address(ip-src, ip-dst),Domain(hostname, domain), URL(url, uri), Email Address(email, email-src, email-dst, target-email, whois-registrant-email) and Phone Number(phone-number, whois-registrant-phone), Username(first-name, last-name, middle-name, github-username), Password(text).</p>
 </blockquote>
 </li>
 <li>
@@ -5582,19 +5633,13 @@ It is also possible to filter results on 1 db_source by configuring db_source_fi
 </ul>
 <hr />
 <h4 id="qr-code-decode"><a href="https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/qrcode.py">QR Code Decode</a><a class="headerlink" href="#qr-code-decode" title="Permanent link">&para;</a></h4>
-<p>Module to decode QR codes.
+<p>Decode QR codes from attachments OR remote URLs (Anti-Quishing).
 [<a href="https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/qrcode.py">source code</a>]</p>
 <ul>
 <li>
-<p><strong>features</strong>:</p>
-<blockquote>
-<p>The module reads the QR code and returns the related address, which can be an URL or a bitcoin address.</p>
-</blockquote>
-</li>
-<li>
 <p><strong>input</strong>:</p>
 <blockquote>
-<p>A QR code stored as attachment attribute.</p>
+<p>A QR code stored as attachment attribute or a remote URL.</p>
 </blockquote>
 </li>
 <li>
@@ -5607,8 +5652,10 @@ It is also possible to filter results on 1 db_source by configuring db_source_fi
 <p><strong>requirements</strong>:</p>
 <blockquote>
 <ul>
-<li>cv2: The OpenCV python library.</li>
-<li>pyzbar: Python library to read QR codes.</li>
+<li>cv2</li>
+<li>pyzbar</li>
+<li>requests</li>
+<li>numpy</li>
 </ul>
 </blockquote>
 </li>
@@ -5663,10 +5710,17 @@ It is also possible to filter results on 1 db_source by configuring db_source_fi
 </li>
 </ul>
 <hr />
-<h4 id="r7_akb"><a href="https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/rapid7_attackerkb.py">r7_akb</a><a class="headerlink" href="#r7_akb" title="Permanent link">&para;</a></h4>
-<p>Enrich CVEs via AttackerKB and return structured MISP events. Handles rate limits, regex CVE detection, and markdown cleanup.
+<h4 id="rapid7-attackerkb-lookup"><a href="https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/rapid7_attackerkb.py">Rapid7 AttackerKB lookup</a><a class="headerlink" href="#rapid7-attackerkb-lookup" title="Permanent link">&para;</a></h4>
+<p><img src=../logos/rapid7.png height=60></p>
+<p>Module to lookup CVE attributes in Rapid7 AttackerKB.
 [<a href="https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/rapid7_attackerkb.py">source code</a>]</p>
 <ul>
+<li>
+<p><strong>features</strong>:</p>
+<blockquote>
+<p>The module takes a CVE attribute and queries Rapid7 AttackerKB to retrieve information about the vulnerability. It returns details such as the CVSS score, exploitability, attacker value, available references, Rapid7 analysis, and community assessments.</p>
+</blockquote>
+</li>
 <li>
 <p><strong>config</strong>:</p>
 <blockquote>
@@ -5676,22 +5730,31 @@ It is also possible to filter results on 1 db_source by configuring db_source_fi
 <li>
 <p><strong>input</strong>:</p>
 <blockquote>
-<p>Vulnerability attribute (CVE ID or comment containing CVE).</p>
+<p>A vulnerability attribute containing a CVE ID, or a comment that includes one or more CVEs.</p>
 </blockquote>
 </li>
 <li>
 <p><strong>output</strong>:</p>
 <blockquote>
-<p>Structured MISP Objects.</p>
+<p>Enriched information about the CVE, including:</p>
+<p>Vulnerability description and link to Rapid7 AttackerKB topic
+CVSS base score
+Attacker value and exploitability ratings
+External references related to the CVE
+Rapid7’s analysis (if available)
+Community assessments with contributor names, scores, and notes</p>
+</blockquote>
+</li>
+<li>
+<p><strong>references</strong>:</p>
+<blockquote>
+<p><a href="https://attackerkb.com/">https://attackerkb.com/</a></p>
 </blockquote>
 </li>
 <li>
 <p><strong>requirements</strong>:</p>
 <blockquote>
-<ul>
-<li>pymisp</li>
-<li>requests</li>
-</ul>
+<p>A valid public Rapid7 AttackerKB API key <a href="https://api.attackerkb.com/v1/api-docs/docs">https://api.attackerkb.com/v1/api-docs/docs</a></p>
 </blockquote>
 </li>
 </ul>
@@ -5822,6 +5885,35 @@ It is also possible to filter results on 1 db_source by configuring db_source_fi
 <p><strong>requirements</strong>:</p>
 <blockquote>
 <p>DNS python library</p>
+</blockquote>
+</li>
+</ul>
+<hr />
+<h4 id="reversinglabs-spectra-analyze"><a href="https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/reversinglabs_spectra_analyze.py">ReversingLabs Spectra Analyze</a><a class="headerlink" href="#reversinglabs-spectra-analyze" title="Permanent link">&para;</a></h4>
+<p><img src=../logos/reversinglabs.png height=60></p>
+<p>Threat intelligence enrichment module
+[<a href="https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/reversinglabs_spectra_analyze.py">source code</a>]</p>
+<ul>
+<li>
+<p><strong>config</strong>:</p>
+<blockquote>
+<ul>
+<li>api_url</li>
+<li>api_token</li>
+<li>verify_ssl</li>
+</ul>
+</blockquote>
+</li>
+<li>
+<p><strong>references</strong>:</p>
+<blockquote>
+<p><a href="https://github.com/reversinglabs/reversinglabs-misp">https://github.com/reversinglabs/reversinglabs-misp</a></p>
+</blockquote>
+</li>
+<li>
+<p><strong>support</strong>:</p>
+<blockquote>
+<p><a href="&#109;&#97;&#105;&#108;&#116;&#111;&#58;&#115;&#117;&#112;&#112;&#111;&#114;&#116;&#64;&#114;&#101;&#118;&#101;&#114;&#115;&#105;&#110;&#103;&#108;&#97;&#98;&#115;&#46;&#99;&#111;&#109;">&#115;&#117;&#112;&#112;&#111;&#114;&#116;&#64;&#114;&#101;&#118;&#101;&#114;&#115;&#105;&#110;&#103;&#108;&#97;&#98;&#115;&#46;&#99;&#111;&#109;</a></p>
 </blockquote>
 </li>
 </ul>
@@ -6491,6 +6583,50 @@ It is also possible to filter results on 1 db_source by configuring db_source_fi
 <p><strong>requirements</strong>:</p>
 <blockquote>
 <p>An access to the urlscan.io API</p>
+</blockquote>
+</li>
+</ul>
+<hr />
+<h4 id="validin-dns-history"><a href="https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/validin.py">Validin DNS History</a><a class="headerlink" href="#validin-dns-history" title="Permanent link">&para;</a></h4>
+<p><img src=../logos/validin.png height=60></p>
+<p>Validin internet dataset expansion. Returns dns-records, web crawls, registration (WHOIS) records, and certificates from Validin's historic internet intelligence dataset.
+[<a href="https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/validin.py">source code</a>]</p>
+<ul>
+<li>
+<p><strong>features</strong>:</p>
+<blockquote>
+<p>Queries Validin's datasets for: DNS history, subdomains, host responses, certificates and registration records (enterprise users only) to enrich domains and IPs in MISP. The configured lookback is 14 days for DNS, 21 days for web crawls, and 30 days for registration history. To set this up correctly, you need to configure: a Validin api key, a Validin endpoint (e.g. app.validin.com), and a result_limit, which defaults to 100.</p>
+</blockquote>
+</li>
+<li>
+<p><strong>config</strong>:</p>
+<blockquote>
+<ul>
+<li>endpoint</li>
+<li>api_key</li>
+<li>result_limit</li>
+</ul>
+</blockquote>
+</li>
+<li>
+<p><strong>input</strong>:</p>
+<blockquote>
+<p>domain, hostname, or IP address.</p>
+</blockquote>
+</li>
+<li>
+<p><strong>output</strong>:</p>
+<blockquote>
+<p>MISP dns-record objects plus optional subdomain attributes.</p>
+</blockquote>
+</li>
+<li>
+<p><strong>requirements</strong>:</p>
+<blockquote>
+<ul>
+<li>requests</li>
+<li>pymisp</li>
+</ul>
 </blockquote>
 </li>
 </ul>
@@ -7239,7 +7375,7 @@ Both hover and expansion functionalities are supported with this module, where t
 <li>
 <p><strong>features</strong>:</p>
 <blockquote>
-<p>This modules simply takes a YARA rule as input, and checks its syntax. It returns then a confirmation if the syntax is valid, otherwise the syntax error is displayed.</p>
+<p>This modules simply takes a YARA rule as input, and checks its syntax. It returns then a confirmation if the syntax is valid, otherwise the syntax error is displayed. This modules can compile YARA rule even if there is externals variables or miss modules</p>
 </blockquote>
 </li>
 <li>
