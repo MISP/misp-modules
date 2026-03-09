@@ -330,6 +330,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#alphamountain_risk" class="md-nav__link">
+    <span class="md-ellipsis">
+      alphaMountain_risk
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#anyrun-sandbox-submit" class="md-nav__link">
     <span class="md-ellipsis">
       ANYRUN Sandbox Submit
@@ -1563,6 +1572,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#alphamountain_risk" class="md-nav__link">
+    <span class="md-ellipsis">
+      alphaMountain_risk
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#anyrun-sandbox-submit" class="md-nav__link">
     <span class="md-ellipsis">
       ANYRUN Sandbox Submit
@@ -2624,6 +2642,26 @@
 <li>api_key</li>
 <li>max_age_in_days</li>
 <li>abuse_threshold</li>
+</ul>
+</blockquote>
+</li>
+</ul>
+<hr />
+<h4 id="alphamountain_risk"><a href="https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/alphaMountain.py">alphaMountain_risk</a><a class="headerlink" href="#alphamountain_risk" title="Permanent link">&para;</a></h4>
+<p>alphaMountain threat intelligence lookup for IPs, domains, hostnames, and URLs - adds risk score tags
+[<a href="https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/alphaMountain.py">source code</a>]</p>
+<ul>
+<li>
+<p><strong>features</strong>:</p>
+<blockquote></blockquote>
+</li>
+<li>
+<p><strong>config</strong>:</p>
+<blockquote>
+<ul>
+<li>license</li>
+<li>scan_depth</li>
+<li>partner_type</li>
 </ul>
 </blockquote>
 </li>
@@ -5891,9 +5929,15 @@ Community assessments with contributor names, scores, and notes</p>
 <hr />
 <h4 id="reversinglabs-spectra-analyze"><a href="https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/reversinglabs_spectra_analyze.py">ReversingLabs Spectra Analyze</a><a class="headerlink" href="#reversinglabs-spectra-analyze" title="Permanent link">&para;</a></h4>
 <p><img src=../logos/reversinglabs.png height=60></p>
-<p>Threat intelligence enrichment module
+<p>Module to enrich file hashes, domains, IPs and URLs with ReversingLabs Spectra Analyze threat intelligence.
 [<a href="https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/reversinglabs_spectra_analyze.py">source code</a>]</p>
 <ul>
+<li>
+<p><strong>features</strong>:</p>
+<blockquote>
+<p>This module enriches MISP attributes with threat intelligence from ReversingLabs Spectra Analyze. It supports file hashes (MD5, SHA1, SHA256), domains, hostnames, IP addresses, and URLs. The module returns detailed file analysis including classification, threat indicators, and related network infrastructure as MISP objects.</p>
+</blockquote>
+</li>
 <li>
 <p><strong>config</strong>:</p>
 <blockquote>
@@ -5905,9 +5949,27 @@ Community assessments with contributor names, scores, and notes</p>
 </blockquote>
 </li>
 <li>
+<p><strong>input</strong>:</p>
+<blockquote>
+<p>A MISP attribute of one of the following types: md5, sha1, sha256, domain, hostname, ip, ip-src, ip-dst, url.</p>
+</blockquote>
+</li>
+<li>
+<p><strong>output</strong>:</p>
+<blockquote>
+<p>MISP objects including file objects, domain-ip mappings, DNS records, URL objects, and IP-port objects with detailed threat intelligence.</p>
+</blockquote>
+</li>
+<li>
 <p><strong>references</strong>:</p>
 <blockquote>
 <p><a href="https://github.com/reversinglabs/reversinglabs-misp">https://github.com/reversinglabs/reversinglabs-misp</a></p>
+</blockquote>
+</li>
+<li>
+<p><strong>requirements</strong>:</p>
+<blockquote>
+<p>A ReversingLabs Spectra Analyze API token.</p>
 </blockquote>
 </li>
 <li>
