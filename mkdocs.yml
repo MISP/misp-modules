@@ -39,7 +39,7 @@ theme:
 
   language: en
   favicon: img/favicon.ico
-  logo: img/misp.png
+  logo: img/misp-modules-logo.png
   feature:
       - navigation.tabs
       - navigation.tracking
