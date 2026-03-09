@@ -132,7 +132,7 @@ def query_alphamountain_api(api_url, license_key, ioc_value, scan_depth, partner
     except requests.exceptions.HTTPError as e:
         status = response.status_code if response else "No status"
         body = response.text[:500] if response else "No response body"
-        raise ValueError(f"HTTP {status}: {body}")
+        raise ValueError(f"HTTP {status}: {body} - {str(e)}")
 
     except requests.exceptions.RequestException as e:
         raise ValueError(f"Request failed: {str(e)}")
