@@ -7,7 +7,7 @@
 
 MISP modules are autonomous modules that can be used to extend [MISP](https://github.com/MISP/MISP) for new services such as expansion, import, export and workflow action.
 
-MISP modules can be also installed and used without [MISP](https://misp-project.org/) as a [standalone tool accessible via a convenient web interface](./website).
+MISP modules can be also installed and used without [MISP](https://misp-project.org/) as a [standalone tool accessible via a convenient web interface](./website) or using a [cli tool](https://github.com/MISP/misp-modules-cli).
 
 The modules are written in Python 3 following a simple API interface. The objective is to ease the extensions of MISP functionalities without modifying core components. The API is available via a simple REST API which is independent from MISP installation or configuration and can be used with other tools. The API is also documented automatically via an OpenAPI end-point or a swagger file.
 
