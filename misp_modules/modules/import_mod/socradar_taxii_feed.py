@@ -48,7 +48,7 @@ userConfig = {
     },
 }
 
-inputSource = []
+inputSource = ["paste"]
 
 moduleinfo = {
     "version": "1.0",
