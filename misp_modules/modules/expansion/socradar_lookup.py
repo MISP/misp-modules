@@ -28,54 +28,64 @@ import re
 
 import requests
 
-misperrors = {'error': 'Error'}
+misperrors = {"error": "Error"}
 
 mispattributes = {
-    'input': [
-        'ip-src', 'ip-dst',
-        'domain', 'hostname',
-        'url',
-        'md5', 'sha1', 'sha256',
-        'email-src', 'email-dst',
+    "input": [
+        "ip-src",
+        "ip-dst",
+        "domain",
+        "hostname",
+        "url",
+        "md5",
+        "sha1",
+        "sha256",
+        "email-src",
+        "email-dst",
     ],
-    'output': ['text'],
-    'format': 'misp_standard',
+    "output": ["text"],
+    "format": "misp_standard",
 }
 
 moduleinfo = {
-    'version': '1.0',
-    'author': 'SOCRadar',
-    'description': 'Enrich MISP attributes with SOCRadar threat intelligence. '
-                   'Queries SOCRadar IoC Enrichment API for categorization, '
-                   'malware families, threat actors, confidence scores, '
-                   'feed source history, and geographic attribution.',
-    'module-type': ['expansion', 'hover'],
-    'name': 'SOCRadar Threat Intelligence',
-    'logo': 'socradar.png',
-    'requirements': ['requests'],
-    'features': (
-        'Query SOCRadar IoC Enrichment API to enrich MISP attributes with '
-        'threat intelligence context. Supports IP, domain, URL, hash, and '
-        'email lookups. Two modes: STIX (fast) and Full (detailed with '
-        'categorization, history, and optional AI insight). '
-        'Requires a SOCRadar Advanced Threat Intelligence API key.'
+    "version": "1.0",
+    "author": "SOCRadar",
+    "description": (
+        "Enrich MISP attributes with SOCRadar threat intelligence. "
+        "Queries SOCRadar IoC Enrichment API for categorization, "
+        "malware families, threat actors, confidence scores, "
+        "feed source history, and geographic attribution."
     ),
-    'references': [
-        'https://socradar.io',
-        'https://platform.socradar.com',
+    "module-type": ["expansion", "hover"],
+    "name": "SOCRadar Threat Intelligence",
+    "logo": "socradar.png",
+    "requirements": ["requests"],
+    "features": (
+        "Query SOCRadar IoC Enrichment API to enrich MISP attributes with "
+        "threat intelligence context. Supports IP, domain, URL, hash, and "
+        "email lookups. Two modes: STIX (fast) and Full (detailed with "
+        "categorization, history, and optional AI insight). "
+        "Requires a SOCRadar Advanced Threat Intelligence API key."
+    ),
+    "references": [
+        "https://socradar.io",
+        "https://platform.socradar.com",
     ],
-    'input': 'A MISP attribute of type ip-src, ip-dst, domain, hostname, '
-             'url, md5, sha1, sha256, email-src, or email-dst.',
-    'output': 'Enrichment data including categorization, malware families, '
-              'threat actors, confidence score, SOCRadar threat score, '
-              'feed source history, and country attribution.',
+    "input": (
+        "A MISP attribute of type ip-src, ip-dst, domain, hostname, url, md5, sha1, sha256, email-src, or email-dst."
+    ),
+    "output": (
+        "Enrichment data including categorization, malware families, "
+        "threat actors, confidence score, SOCRadar threat score, "
+        "feed source history, and country attribution."
+    ),
 }
 
 moduleconfig = [
-    'socradar_api_key',
-    'socradar_api_url',
-    'socradar_mode',
-    'socradar_ai_insight',
+    "socradar_api_key",
+    "socradar_api_url",
+    "socradar_mode",
+    "socradar_ai_insight",
 ]
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -386,39 +396,39 @@ def handler(q=False):
         return False
 
     request = json.loads(q)
-    config = request.get('config', {})
+    config = request.get("config", {})
 
     # --- Validate API key ---
-    api_key = config.get('socradar_api_key', '').strip()
+    api_key = config.get("socradar_api_key", "").strip()
     if not api_key:
-        misperrors['error'] = (
-            'SOCRadar API key is required. '
-            'Get your Advanced Threat Intelligence API key at '
-            'https://platform.socradar.com → API Management'
+        misperrors["error"] = (
+            "SOCRadar API key is required. "
+            "Get your Advanced Threat Intelligence API key at "
+            "https://platform.socradar.com → API Management"
         )
         return misperrors
 
-    api_url = config.get('socradar_api_url', DEFAULT_API_URL).rstrip('/')
-    mode = config.get('socradar_mode', 'full').strip().lower()
-    include_ai = config.get('socradar_ai_insight', 'false').strip().lower() in ('true', '1', 'yes')
+    api_url = config.get("socradar_api_url", DEFAULT_API_URL).rstrip("/")
+    mode = config.get("socradar_mode", "full").strip().lower()
+    include_ai = config.get("socradar_ai_insight", "false").strip().lower() in ("true", "1", "yes")
 
     # --- Extract attribute value ---
-    attribute = request.get('attribute', {})
-    search_value = attribute.get('value', '')
+    attribute = request.get("attribute", {})
+    search_value = attribute.get("value", "")
 
     if not search_value:
-        for attr_type in mispattributes['input']:
+        for attr_type in mispattributes["input"]:
             if attr_type in request:
                 search_value = request[attr_type]
                 break
 
     if not search_value:
-        misperrors['error'] = 'No attribute value provided for enrichment'
+        misperrors["error"] = "No attribute value provided for enrichment"
         return misperrors
 
     # --- Query SOCRadar API ---
     try:
-        if mode == 'stix':
+        if mode == "stix":
             data = _call_indicator_details_stix(api_url, api_key, search_value)
             enrichment_text, tags = _format_stix_result(data, search_value)
         else:
@@ -426,39 +436,38 @@ def handler(q=False):
             enrichment_text, tags = _format_full_result(data, search_value)
 
     except requests.exceptions.HTTPError as e:
-        status = e.response.status_code if e.response else 'unknown'
+        status = e.response.status_code if e.response else "unknown"
         if status == 401:
-            misperrors['error'] = (
-                'SOCRadar API authentication failed. '
-                'Please check your API key. '
-                'A valid Advanced Threat Intelligence API key is required. '
-                'Get yours at https://platform.socradar.com → API Management'
+            misperrors["error"] = (
+                "SOCRadar API authentication failed. "
+                "Please check your API key. "
+                "A valid Advanced Threat Intelligence API key is required. "
+                "Get yours at https://platform.socradar.com → API Management"
             )
         elif status == 400:
-            misperrors['error'] = f'SOCRadar API bad request for indicator: {search_value}'
+            misperrors["error"] = f"SOCRadar API bad request for indicator: {search_value}"
         else:
-            misperrors['error'] = f'SOCRadar API error (HTTP {status}): {str(e)}'
+            misperrors["error"] = f"SOCRadar API error (HTTP {status}): {str(e)}"
         return misperrors
 
     except requests.exceptions.Timeout:
-        misperrors['error'] = (
-            'SOCRadar API request timed out. '
-            'If using AI insight mode, try disabling it for faster results.'
+        misperrors["error"] = (
+            "SOCRadar API request timed out. If using AI insight mode, try disabling it for faster results."
         )
         return misperrors
 
     except Exception as e:
-        misperrors['error'] = f'SOCRadar API query failed: {str(e)}'
+        misperrors["error"] = f"SOCRadar API query failed: {str(e)}"
         return misperrors
 
     # --- Return results ---
     result = {
-        'types': ['text'],
-        'values': [enrichment_text],
-        'tags': tags,
+        "types": ["text"],
+        "values": [enrichment_text],
+        "tags": tags,
     }
 
-    return {'results': [result]}
+    return {"results": [result]}
 
 
 def introspection():
@@ -466,5 +475,5 @@ def introspection():
 
 
 def version():
-    moduleinfo['config'] = moduleconfig
+    moduleinfo["config"] = moduleconfig
     return moduleinfo

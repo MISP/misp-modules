@@ -32,48 +32,54 @@ import urllib.parse
 
 import requests
 
-misperrors = {'error': 'Error'}
+misperrors = {"error": "Error"}
 
 userConfig = {
-    'collection_ids': {
-        'type': 'String',
-        'message': 'Comma-separated list of TAXII collection UUIDs to fetch. '
-                   'Leave empty to auto-discover all available collections.',
+    "collection_ids": {
+        "type": "String",
+        "message": (
+            "Comma-separated list of TAXII collection UUIDs to fetch. "
+            "Leave empty to auto-discover all available collections."
+        ),
     },
-    'default_tlp': {
-        'type': 'String',
-        'message': 'Default TLP marking for imported indicators (e.g. tlp:amber).',
+    "default_tlp": {
+        "type": "String",
+        "message": "Default TLP marking for imported indicators (e.g. tlp:amber).",
     },
 }
 
 inputSource = []
 
 moduleinfo = {
-    'version': '1.0',
-    'author': 'SOCRadar',
-    'description': 'Import threat indicators from SOCRadar TAXII 2.1 feed '
-                   'with MITRE ATT&CK, malware family, confidence, and geo tagging.',
-    'module-type': ['import'],
-    'name': 'SOCRadar TAXII Feed Import',
-    'logo': 'socradar.png',
-    'requirements': ['requests'],
-    'features': 'Connect to SOCRadar TAXII 2.1 server and import enriched '
-                'threat indicators into MISP. Indicators are automatically '
-                'tagged with MITRE ATT&CK techniques, malware families, '
-                'confidence levels, feed sources, and country information.',
-    'references': [
-        'https://socradar.io',
-        'https://docs.socradar.io/taxii',
+    "version": "1.0",
+    "author": "SOCRadar",
+    "description": (
+        "Import threat indicators from SOCRadar TAXII 2.1 feed "
+        "with MITRE ATT&CK, malware family, confidence, and geo tagging."
+    ),
+    "module-type": ["import"],
+    "name": "SOCRadar TAXII Feed Import",
+    "logo": "socradar.png",
+    "requirements": ["requests"],
+    "features": (
+        "Connect to SOCRadar TAXII 2.1 server and import enriched "
+        "threat indicators into MISP. Indicators are automatically "
+        "tagged with MITRE ATT&CK techniques, malware families, "
+        "confidence levels, feed sources, and country information."
+    ),
+    "references": [
+        "https://socradar.io",
+        "https://docs.socradar.io/taxii",
     ],
-    'input': 'SOCRadar TAXII 2.1 collection endpoint.',
-    'output': 'MISP attributes with rich tagging.',
+    "input": "SOCRadar TAXII 2.1 collection endpoint.",
+    "output": "MISP attributes with rich tagging.",
 }
 
 moduleconfig = [
-    'socradar_taxii_url',
-    'socradar_api_root',
-    'socradar_username',
-    'socradar_password',
+    "socradar_taxii_url",
+    "socradar_api_root",
+    "socradar_username",
+    "socradar_password",
 ]
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -81,24 +87,78 @@ moduleconfig = [
 # ═══════════════════════════════════════════════════════════════════════════
 
 KNOWN_MALWARE = {
-    "redline", "redline stealer", "raccoon", "raccoon stealer",
-    "vidar", "stealc", "risepro", "lumma", "lumma stealer",
-    "meduza", "meduza stealer", "azorult", "aurora",
-    "emotet", "trickbot", "qakbot", "qbot", "icedid",
-    "bumblebee", "batloader", "pikabot", "smokeloader",
-    "amadey", "systembc", "danabot", "darkgate",
-    "asyncrat", "remcos", "njrat", "nanocore", "darkcomet",
-    "agent tesla", "agenttesla", "formbook", "xworm",
-    "lokibot", "warzone", "dcrat",
-    "cobalt strike", "cobaltstrike", "metasploit", "sliver",
-    "havoc", "brute ratel", "mythic",
-    "mirai", "gafgyt", "mozi", "hajime",
-    "lockbit", "blackcat", "alphv", "clop", "cl0p",
-    "conti", "royal", "black basta", "akira", "rhysida",
-    "play", "medusa ransomware", "8base", "hunters international",
-    "bianlian", "cactus", "blacksuit",
-    "prometei", "xmrig", "coinminer", "cryptonight",
-    "screenconnect", "connectwise",
+    "redline",
+    "redline stealer",
+    "raccoon",
+    "raccoon stealer",
+    "vidar",
+    "stealc",
+    "risepro",
+    "lumma",
+    "lumma stealer",
+    "meduza",
+    "meduza stealer",
+    "azorult",
+    "aurora",
+    "emotet",
+    "trickbot",
+    "qakbot",
+    "qbot",
+    "icedid",
+    "bumblebee",
+    "batloader",
+    "pikabot",
+    "smokeloader",
+    "amadey",
+    "systembc",
+    "danabot",
+    "darkgate",
+    "asyncrat",
+    "remcos",
+    "njrat",
+    "nanocore",
+    "darkcomet",
+    "agent tesla",
+    "agenttesla",
+    "formbook",
+    "xworm",
+    "lokibot",
+    "warzone",
+    "dcrat",
+    "cobalt strike",
+    "cobaltstrike",
+    "metasploit",
+    "sliver",
+    "havoc",
+    "brute ratel",
+    "mythic",
+    "mirai",
+    "gafgyt",
+    "mozi",
+    "hajime",
+    "lockbit",
+    "blackcat",
+    "alphv",
+    "clop",
+    "cl0p",
+    "conti",
+    "royal",
+    "black basta",
+    "akira",
+    "rhysida",
+    "play",
+    "medusa ransomware",
+    "8base",
+    "hunters international",
+    "bianlian",
+    "cactus",
+    "blacksuit",
+    "prometei",
+    "xmrig",
+    "coinminer",
+    "cryptonight",
+    "screenconnect",
+    "connectwise",
 }
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -118,8 +178,11 @@ def _extract_ioc_from_pattern(pattern):
         return None
     obj_type, value = m.group(1).lower(), m.group(2)
     type_map = {
-        "ipv4-addr": "ip-dst", "ipv6-addr": "ip-dst",
-        "domain-name": "domain", "url": "url", "email-addr": "email-dst",
+        "ipv4-addr": "ip-dst",
+        "ipv6-addr": "ip-dst",
+        "domain-name": "domain",
+        "url": "url",
+        "email-addr": "email-dst",
     }
     if obj_type in type_map:
         return type_map[obj_type], value
@@ -127,8 +190,9 @@ def _extract_ioc_from_pattern(pattern):
         ht_match = re.search(r"hashes\.(?:'([^']+)'|(\S+?))\s*=", pattern)
         if ht_match:
             ht = (ht_match.group(1) or ht_match.group(2)).lower().replace("-", "").replace("'", "")
-            misp_ht = {"md5": "md5", "sha1": "sha1", "sha256": "sha256",
-                       "sha512": "sha512", "ssdeep": "ssdeep"}.get(ht, ht)
+            misp_ht = {"md5": "md5", "sha1": "sha1", "sha256": "sha256", "sha512": "sha512", "ssdeep": "ssdeep"}.get(
+                ht, ht
+            )
             return misp_ht, value
         vl = len(value)
         return ("md5" if vl == 32 else "sha1" if vl == 40 else "sha256" if vl == 64 else "md5"), value
@@ -139,10 +203,14 @@ def _confidence_tag(confidence):
     if confidence is None:
         return 'confidence-level:confidence="unknown"'
     c = float(confidence)
-    if c >= 80: return 'confidence-level:confidence="completely-confident"'
-    if c >= 60: return 'confidence-level:confidence="usually-confident"'
-    if c >= 40: return 'confidence-level:confidence="fairly-confident"'
-    if c >= 20: return 'confidence-level:confidence="rarely-confident"'
+    if c >= 80:
+        return 'confidence-level:confidence="completely-confident"'
+    if c >= 60:
+        return 'confidence-level:confidence="usually-confident"'
+    if c >= 40:
+        return 'confidence-level:confidence="fairly-confident"'
+    if c >= 20:
+        return 'confidence-level:confidence="rarely-confident"'
     return 'confidence-level:confidence="unconfident"'
 
 
@@ -222,17 +290,17 @@ def _taxii_get(url, username, password):
 
 
 def _fetch_indicators(config, collection_ids_str):
-    base = config.get('socradar_taxii_url', 'https://taxii2.socradar.com').rstrip('/')
-    api_root = config.get('socradar_api_root', 'radar_alpha').strip('/')
-    username = config.get('socradar_username', '')
-    password = config.get('socradar_password', '')
+    base = config.get("socradar_taxii_url", "https://taxii2.socradar.com").rstrip("/")
+    api_root = config.get("socradar_api_root", "radar_alpha").strip("/")
+    username = config.get("socradar_username", "")
+    password = config.get("socradar_password", "")
 
     if not username or not password:
         raise ValueError("SOCRadar TAXII username and password are required.")
 
     # Parse collection IDs
     if collection_ids_str:
-        collection_ids = [c.strip() for c in collection_ids_str.split(',') if c.strip()]
+        collection_ids = [c.strip() for c in collection_ids_str.split(",") if c.strip()]
     else:
         # Auto-discover
         cols_resp = _taxii_get(f"{base}/{api_root}/collections/", username, password)
@@ -270,21 +338,21 @@ def handler(q=False):
         return False
 
     request = json.loads(q)
-    config = request.get('config', {})
+    config = request.get("config", {})
 
     # User-provided overrides
-    user_config = request.get('config', {})
-    collection_ids_str = user_config.get('collection_ids', '')
-    default_tlp = user_config.get('default_tlp', 'tlp:amber')
+    user_config = request.get("config", {})
+    collection_ids_str = user_config.get("collection_ids", "")
+    default_tlp = user_config.get("default_tlp", "tlp:amber")
 
     try:
         indicators = _fetch_indicators(config, collection_ids_str)
     except Exception as e:
-        misperrors['error'] = f'SOCRadar TAXII fetch failed: {str(e)}'
+        misperrors["error"] = f"SOCRadar TAXII fetch failed: {str(e)}"
         return misperrors
 
     if not indicators:
-        return {'results': []}
+        return {"results": []}
 
     # Build MISP results
     results = []
@@ -345,33 +413,33 @@ def handler(q=False):
         to_ids = "malicious-activity" in ind_types or not ind_types
 
         result = {
-            'types': [attr_type],
-            'values': [attr_value],
-            'comment': comment,
-            'tags': tags,
-            'to_ids': to_ids,
+            "types": [attr_type],
+            "values": [attr_value],
+            "comment": comment,
+            "tags": tags,
+            "to_ids": to_ids,
         }
         results.append(result)
 
-    return {'results': results}
+    return {"results": results}
 
 
 def introspection():
     modulesetup = {}
     try:
         userConfig
-        modulesetup['userConfig'] = userConfig
+        modulesetup["userConfig"] = userConfig
     except NameError:
         pass
     try:
         inputSource
-        modulesetup['inputSource'] = inputSource
+        modulesetup["inputSource"] = inputSource
     except NameError:
         pass
-    modulesetup['format'] = 'misp_standard'
+    modulesetup["format"] = "misp_standard"
     return modulesetup
 
 
 def version():
-    moduleinfo['config'] = moduleconfig
+    moduleinfo["config"] = moduleconfig
     return moduleinfo
