@@ -2,13 +2,14 @@ import hashlib
 import json
 import socket
 
+from pymisp import MISPAttribute, MISPEvent, MISPObject
 
 misperrors = {"error": "Error"}
-mispattributes = {"input": ["ip-src", "ip-dst"], "output": ["text"]}
+mispattributes = {"input": ["ip-src", "ip-dst"], "format": "misp_standard"}
 moduleinfo = {
-    "version": "0.1",
+    "version": "0.2",
     "author": "Mihai Saveanu",
-    "description": "Grab SSH server key fingerprint from an IP address for verification or MitM detection.",
+    "description": "Grab SSH server fingerprint from an IP and return as passive-ssh MISP object.",
     "module-type": ["expansion", "hover"],
     "name": "SSH Fingerprint",
     "logo": "",
@@ -16,12 +17,12 @@ moduleinfo = {
     "features": (
         "The module takes an IP address attribute as input, connects to port 22,"
         " performs the SSH protocol version exchange and key exchange init to extract"
-        " the server host key algorithms and SSH banner. Useful for detecting MitM"
-        " attacks or verifying server identity changes."
+        " the server host key algorithms and SSH banner. Returns a structured passive-ssh"
+        " MISP object. Useful for detecting MitM attacks or verifying server identity."
     ),
     "references": ["https://tools.ietf.org/html/rfc4253"],
     "input": "An IP address attribute (ip-src or ip-dst).",
-    "output": "Text containing SSH banner and key exchange information.",
+    "output": "passive-ssh MISP object with banner and fingerprint.",
 }
 moduleconfig = ["port", "timeout"]
 
@@ -31,6 +32,7 @@ def _grab_ssh_banner(ip, port=22, timeout=5):
         "banner": None,
         "kex_algorithms": None,
         "host_key_algorithms": None,
+        "kex_hash": None,
         "error": None,
     }
     try:
@@ -46,10 +48,6 @@ def _grab_ssh_banner(ip, port=22, timeout=5):
         kex_data = sock.recv(4096)
         if len(kex_data) > 21:
             payload = kex_data[5:]
-            if payload and payload[0:1] == b"\x14":
-                payload = payload[16:]
-                if payload and payload[0:1] == b"\x14":
-                    pass
 
             try:
                 msg_code = payload[0]
@@ -99,37 +97,55 @@ def handler(q=False):
 
     request = json.loads(q)
 
-    ip = request.get("ip-src") or request.get("ip-dst")
-    if not ip:
-        misperrors["error"] = "An IP address attribute is required."
-        return misperrors
+    if not request.get("attribute") or not request["attribute"].get("type"):
+        return {"error": "Missing or invalid attribute."}
 
+    attribute = request["attribute"]
+    if attribute["type"] not in mispattributes["input"]:
+        return {"error": f"Unsupported attribute type: {attribute['type']}"}
+
+    ip = attribute["value"]
     config = request.get("config", {})
     port = int(config.get("port") or 22)
     timeout = float(config.get("timeout") or 5)
 
     result = _grab_ssh_banner(ip, port, timeout)
 
-    lines = [f"=== SSH Fingerprint: {ip}:{port} ===", ""]
+    event = MISPEvent()
+    initial_attribute = MISPAttribute()
+    initial_attribute.from_dict(**attribute)
+    event.add_attribute(**initial_attribute)
 
     if result["error"]:
-        lines.append(f"Error: {result['error']}")
-        return {"results": [{"types": ["text"], "values": "\n".join(lines)}]}
+        event.add_attribute(
+            "text",
+            f"SSH error for {ip}: {result['error']}",
+            comment="SSH Fingerprint - error",
+        )
+        ev = json.loads(event.to_json())
+        results = {key: ev[key] for key in ("Attribute", "Object") if key in ev and ev[key]}
+        return {"results": results}
+
+    ssh = MISPObject("passive-ssh")
+
+    ssh.add_attribute("host", **{"type": "ip-dst", "value": ip})
+    ssh.add_attribute("port", **{"type": "port", "value": port})
 
     if result["banner"]:
-        lines.append(f"Banner: {result['banner']}")
+        ssh.add_attribute("banner", **{"type": "text", "value": result["banner"]})
 
-    if result.get("host_key_algorithms"):
-        lines.append(f"\nHost Key Algorithms: {result['host_key_algorithms']}")
+    if result["kex_hash"]:
+        ssh.add_attribute(
+            "fingerprint",
+            **{"type": "ssh-fingerprint", "value": result["kex_hash"]},
+        )
 
-    if result.get("kex_algorithms"):
-        lines.append(f"KEX Algorithms: {result['kex_algorithms']}")
+    ssh.add_reference(initial_attribute.uuid, "related-to")
+    event.add_object(**ssh)
 
-    if result.get("kex_hash"):
-        lines.append(f"\nKEX Init Hash (SHA256): {result['kex_hash']}")
-        lines.append("  (Compare this hash over time to detect server key changes)")
-
-    return {"results": [{"types": ["text"], "values": "\n".join(lines)}]}
+    ev = json.loads(event.to_json())
+    results = {key: ev[key] for key in ("Attribute", "Object") if key in ev and ev[key]}
+    return {"results": results}
 
 
 def introspection():

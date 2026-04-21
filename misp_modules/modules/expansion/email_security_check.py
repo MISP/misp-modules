@@ -9,10 +9,12 @@ try:
 except ImportError:
     print("dnspython is missing, use 'pip install dnspython' to install it.")
 
+from pymisp import MISPAttribute, MISPEvent, MISPObject
+
 misperrors = {"error": "Error"}
-mispattributes = {"input": ["domain", "hostname"], "output": ["text"]}
+mispattributes = {"input": ["domain", "hostname"], "format": "misp_standard"}
 moduleinfo = {
-    "version": "0.1",
+    "version": "0.2",
     "author": "Mihai Saveanu",
     "description": "Check email security posture (SPF, DKIM, DMARC, MTA-STS) for a domain.",
     "module-type": ["expansion", "hover"],
@@ -22,14 +24,15 @@ moduleinfo = {
     "features": (
         "The module takes a domain or hostname attribute as input and queries DNS"
         " for email security records: SPF (TXT), DMARC (_dmarc), DKIM (common selectors),"
-        " and MTA-STS (_mta-sts). Results include record content and a pass/fail assessment."
+        " and MTA-STS (_mta-sts). Returns structured MISP attributes with a domain-ip"
+        " object linking the findings to the queried domain."
     ),
     "references": [
         "https://tools.ietf.org/html/rfc7208",
         "https://tools.ietf.org/html/rfc7489",
     ],
     "input": "A domain or hostname attribute.",
-    "output": "Text containing email security posture assessment.",
+    "output": "Domain-ip MISP object with email security assessment attributes.",
 }
 moduleconfig = ["custom_resolver"]
 
@@ -102,10 +105,14 @@ def handler(q=False):
 
     request = json.loads(q)
 
-    domain = request.get("domain") or request.get("hostname")
-    if not domain:
-        misperrors["error"] = "A domain or hostname attribute is required."
-        return misperrors
+    if not request.get("attribute") or not request["attribute"].get("type"):
+        return {"error": "Missing or invalid attribute."}
+
+    attribute = request["attribute"]
+    if attribute["type"] not in mispattributes["input"]:
+        return {"error": f"Unsupported attribute type: {attribute['type']}"}
+
+    domain = attribute["value"]
 
     if request.get("config", {}).get("custom_resolver"):
         resolver.nameservers = [request["config"]["custom_resolver"]]
@@ -115,39 +122,98 @@ def handler(q=False):
     dkim = _check_dkim(domain)
     mta_sts = _check_mta_sts(domain)
 
-    lines = [f"=== Email Security Posture: {domain} ===", ""]
+    event = MISPEvent()
+    initial_attribute = MISPAttribute()
+    initial_attribute.from_dict(**attribute)
+    event.add_attribute(**initial_attribute)
 
-    lines.append(f"SPF: {spf['status']}")
-    if spf["record"]:
-        lines.append(f"  Record: {spf['record']}")
+    domain_obj = MISPObject("domain-ip")
+    domain_obj.add_attribute("domain", **{"type": "domain", "value": domain})
 
-    lines.append(f"\nDMARC: {dmarc['status']}")
-    if dmarc["record"]:
-        lines.append(f"  Policy: {dmarc['policy']}")
-        lines.append(f"  Record: {dmarc['record']}")
+    score = 0
+
+    if spf["status"] == "FOUND":
+        score += 1
+        domain_obj.add_attribute(
+            "text",
+            **{"type": "text", "value": f"SPF: {spf['record']}", "comment": "SPF record", "disable_correlation": True},
+        )
+    else:
+        domain_obj.add_attribute(
+            "text",
+            **{"type": "text", "value": "SPF: MISSING", "comment": "SPF record", "disable_correlation": True},
+        )
+
+    if dmarc["status"] == "FOUND":
+        score += 1
+        if dmarc["policy"] in ("reject", "quarantine"):
+            score += 1
+        domain_obj.add_attribute(
+            "text",
+            **{
+                "type": "text",
+                "value": f"DMARC: {dmarc['policy']} — {dmarc['record']}",
+                "comment": "DMARC record and policy",
+                "disable_correlation": True,
+            },
+        )
+    else:
+        domain_obj.add_attribute(
+            "text",
+            **{"type": "text", "value": "DMARC: MISSING", "comment": "DMARC record", "disable_correlation": True},
+        )
 
     if dkim:
-        lines.append(f"\nDKIM: FOUND ({len(dkim)} selector(s))")
-        for entry in dkim:
-            lines.append(f"  Selector '{entry['selector']}': {entry['record'][:80]}...")
+        score += 1
+        selectors = ", ".join(d["selector"] for d in dkim)
+        domain_obj.add_attribute(
+            "text",
+            **{
+                "type": "text",
+                "value": f"DKIM: FOUND ({len(dkim)} selector(s): {selectors})",
+                "comment": "DKIM selectors found",
+                "disable_correlation": True,
+            },
+        )
     else:
-        lines.append("\nDKIM: NOT FOUND (tested common selectors)")
+        domain_obj.add_attribute(
+            "text",
+            **{
+                "type": "text",
+                "value": "DKIM: NOT FOUND (tested common selectors)",
+                "comment": "DKIM check",
+                "disable_correlation": True,
+            },
+        )
 
-    lines.append(f"\nMTA-STS: {mta_sts['status']}")
-    if mta_sts["record"]:
-        lines.append(f"  Record: {mta_sts['record']}")
+    if mta_sts["status"] == "FOUND":
+        score += 1
+        domain_obj.add_attribute(
+            "text",
+            **{"type": "text", "value": f"MTA-STS: {mta_sts['record']}", "comment": "MTA-STS record", "disable_correlation": True},
+        )
+    else:
+        domain_obj.add_attribute(
+            "text",
+            **{"type": "text", "value": "MTA-STS: MISSING", "comment": "MTA-STS record", "disable_correlation": True},
+        )
 
-    score = sum([
-        1 if spf["status"] == "FOUND" else 0,
-        1 if dmarc["status"] == "FOUND" else 0,
-        1 if dmarc.get("policy") in ("reject", "quarantine") else 0,
-        1 if dkim else 0,
-        1 if mta_sts["status"] == "FOUND" else 0,
-    ])
-    lines.append(f"\nSecurity Score: {score}/5")
+    domain_obj.add_attribute(
+        "text",
+        **{
+            "type": "text",
+            "value": f"Email Security Score: {score}/5",
+            "comment": "Overall email security posture score",
+            "disable_correlation": True,
+        },
+    )
 
-    result_text = "\n".join(lines)
-    return {"results": [{"types": ["text"], "values": result_text}]}
+    domain_obj.add_reference(initial_attribute.uuid, "related-to")
+    event.add_object(**domain_obj)
+
+    ev = json.loads(event.to_json())
+    results = {key: ev[key] for key in ("Attribute", "Object") if key in ev and ev[key]}
+    return {"results": results}
 
 
 def introspection():
