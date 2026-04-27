@@ -170,7 +170,10 @@ def dict_handler(request: dict):
         for url in urls:
             if not url:
                 continue
-            url_object = URLObject(url, standalone=False)
+            try:
+                url_object = URLObject(url, standalone=False)
+            except ValueError:
+                continue
             file_objects.append(url_object)
             email_object.add_reference(url_object.uuid, "includes", "URL in email body")
 
@@ -344,9 +347,15 @@ class HTMLURLParser(HTMLParser):
 
     def handle_starttag(self, tag, attrs):
         if tag == "a":
-            self.urls.append(dict(attrs).get("href"))
+            value = self.urls.append(dict(attrs).get("href"))
         if tag == "img":
-            self.urls.append(dict(attrs).get("src"))
+            value = self.urls.append(dict(attrs).get("src"))
+        else:
+            return
+
+        # avoid references like internal cid:
+        if value and value.lower().startswith(("http://", "https://")):
+            self.urls.append(value)
 
 
 def introspection():
