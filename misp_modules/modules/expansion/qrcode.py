@@ -100,8 +100,7 @@ def fetch_url_image(target_url):
             target_url,
             headers=headers,
             timeout=TIMEOUT_SECONDS,
-            stream=True,
-            verify=False
+            stream=True
         ) as response:  # nosec
             response.raise_for_status()
 

@@ -1,6 +1,7 @@
 #!/usr/bin/env python\
 
 import json
+import logging
 
 from jinja2.sandbox import SandboxedEnvironment
 
@@ -41,7 +42,8 @@ def handler(q=False):
     templateData = data.get("data", {})
     try:
         rendered = renderTemplate(templateData, template)
-    except TypeError:
+    except Exception as e:
+        logging.warning("Template render failed: %s", type(e).__name__)
         rendered = ""
 
     r = {"results": [{"types": mispattributes["output"], "values": [rendered]}]}
