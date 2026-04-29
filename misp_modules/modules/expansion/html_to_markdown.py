@@ -27,7 +27,6 @@ moduleinfo = {
 }
 
 
-
 BLOCKED_RANGES = [
     ipaddress.ip_network("127.0.0.0/8"),
     ipaddress.ip_network("10.0.0.0/8"),
@@ -36,6 +35,7 @@ BLOCKED_RANGES = [
     ipaddress.ip_network("169.254.0.0/16"),
     ipaddress.ip_network("::1/128"),
 ]
+
 
 def _is_ip_blocked(ip_str: str) -> bool:
     ip = ipaddress.ip_address(ip_str)
@@ -59,11 +59,13 @@ def is_safe_url(url: str) -> bool:
     except ValueError:
         return not _hostname_resolves_to_blocked_ip(parsed.hostname)
 
+
 def fetchHTML(url):
     if not is_safe_url(url):
         raise ValueError(f"Blocked URL: {url}")
     r = requests.get(url, timeout=10)
     return r.text
+
 
 def stripUselessTags(html):
     soup = BeautifulSoup(html, "html.parser")
