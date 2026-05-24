@@ -4,7 +4,7 @@ import json
 import logging
 
 import ezodf
-import np
+import numpy as np
 import pandas_ods_reader
 
 misperrors = {"error": "Error"}

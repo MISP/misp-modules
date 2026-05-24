@@ -3,7 +3,7 @@ import io
 import json
 
 import docx
-import np
+import numpy as np
 
 misperrors = {"error": "Error"}
 mispattributes = {"input": ["attachment"], "output": ["freetext", "text"]}

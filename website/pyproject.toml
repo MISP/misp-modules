@@ -1,6 +1,6 @@
 # pyproject.toml
 [build-system]
-requires      = ["poetry-core>=1.9.0"]   # need ≥1.8 for PEP 621 support
+requires      = ["poetry-core>=1.9.0"]   # need ≥1.8 for PEP621 support
 build-backend = "poetry.core.masonry.api"
 
 ########################
@@ -11,7 +11,7 @@ name            = "misp-modules-website"
 version         = "0.1.0"
 description     = "Web application for MISP modules"
 readme          = "README.md"
-requires-python = ">=3.10,<3.13"
+requires-python = ">=3.10,<4.0"
 authors = [
   { name = "MISP Contributors", email = "info@misp-project.org" },
 ]

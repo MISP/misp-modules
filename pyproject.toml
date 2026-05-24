@@ -1,6 +1,6 @@
 [project]
 name = "misp-modules"
-version = "3.0.7"
+version = "3.0.8"
 description = "MISP modules are autonomous modules that can be used for expansion and other services in MISP"
 authors = [
     {name = "Alexandre Dulaunoy", email = "alexandre.dulaunoy@circl.lu"}
@@ -15,20 +15,20 @@ classifiers = [
     "Programming Language :: Python :: 3",
     "Topic :: Security",
 ]
-requires-python = ">=3.9,<3.13"
+requires-python = ">=3.10,<4.0"
 dependencies = [
     ## core dependencies
-    "orjson",
+    "orjson>=3.11.9",
     "psutil",
     "tornado",
+    "click==8.1.8",  # greynoise requires it
     ## minimum dependencies
     "beautifulsoup4",
     "jinja2",
     "markdownify",
-    "pymisp",
+    "pymisp>=2.5.34.1",
     "publicsuffixlist",
     "setuptools",
-    "anyrun-sdk (>=1.10.10,<2.0.0)",
 ]
 
 [project.optional-dependencies]
@@ -75,10 +75,13 @@ all = [
     "censys==2.0.9",  ## in minimal
     "socialscan<2.0.0",  ## in minimal
     "yara-python==4.5.0",  ## in minimal
-    "numpy>=1.26.4,<2.0.0",
-    "pandas>=2.0.0",
+    "numpy>=2.0.0",
+    "pandas>=2.0.0,<3.0.0",
     "pandas_ods_reader>=1.0.0",
+    "lief>=0.17.6",  # required for python >3.13
+    "lxml>=6.1.1",  # required for python >3.13
     ## module dependencies
+    "anyrun-sdk>=1.10.10,<2.0.0",
     "apiosintds",
     "assemblyline_client",
     "backscatter",  ## in minimal
@@ -93,11 +96,9 @@ all = [
     "maclookup",  ## in minimal
     "matplotlib",   ## in minimal
     "mattermostdriver",   ## in minimal
-    "misp-lib-stix2>=3.0.1.2",
-    "misp-stix>=2025.1.10",
+    "misp-stix>=2026.6.1",
     "mwdblib",
     "ndjson",  ## in minimal
-    "np",
     "oauth2",   ## in minimal
     "opencv-python",
     "openpyxl",
@@ -110,7 +111,7 @@ all = [
     "pygeoip",  ## in minimal
     "pyintel471",  ## in minimal
     "pyipasnhistory",  ## in minimal
-    "pymisp[fileobjects, openioc, pdfexport, email]",
+    "pymisp[fileobjects, openioc, pdfexport, email]>=2.5.34.1",
     "pypdns",  ## in minimal
     "pypssl",  ## in minimal
     "pysafebrowsing",  ## in minimal
@@ -150,7 +151,7 @@ misp-modules = "misp_modules.__main__:main"
 packages = [{include = "misp_modules"}]
 
 [build-system]
-requires = ["poetry-core>=2.0"]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.group.test]
@@ -176,18 +177,17 @@ mkdocs-material = "*"
 markdown_include = "*"
 
 [tool.poetry.requires-plugins]
-poetry-plugin-bundle = ">=1.6"
-poetry-plugin-export = ">=1.9"
+poetry-plugin-bundle = ">=1.7"
+poetry-plugin-export = ">=1.10"
 
 [tool.black]
 line-length = 120
-target-version = ["py39"]
+target-version = ["py312"]
 preview = true
 enable-unstable-feature = ["string_processing"]
 
 [tool.isort]
 line_length = 120
-profile = "black"
 
 [tool.flake8]
 max-line-length = 120

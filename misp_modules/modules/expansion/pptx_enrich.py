@@ -2,7 +2,7 @@ import binascii
 import io
 import json
 
-import np
+import numpy as np
 from pptx import Presentation
 
 misperrors = {"error": "Error"}

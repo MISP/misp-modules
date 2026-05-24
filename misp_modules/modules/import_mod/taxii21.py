@@ -11,7 +11,8 @@ from pathlib import Path
 import requests
 import taxii2client
 import taxii2client.exceptions
-from misp_stix_converter import ExternalSTIX2toMISPParser, InternalSTIX2toMISPParser, _is_stix2_from_misp
+from misp_stix_converter import ExternalSTIX2toMISPParser, InternalSTIX2toMISPParser
+from misp_stix_converter.tools import is_stix2_from_misp
 from stix2.v20 import Bundle as Bundle_v20
 from stix2.v21 import Bundle as Bundle_v21
 
@@ -296,7 +297,7 @@ def _query_taxii(config):
 
     bundle = (Bundle_v21 if config.spec_version == "2.1" else Bundle_v20)(stix_objects, allow_custom=True)
 
-    converter = InternalSTIX2toMISPParser() if _is_stix2_from_misp(bundle.objects) else ExternalSTIX2toMISPParser()
+    converter = InternalSTIX2toMISPParser() if is_stix2_from_misp(bundle.objects) else ExternalSTIX2toMISPParser()
     converter.load_stix_bundle(bundle)
     converter.parse_stix_bundle(single_event=True)
 

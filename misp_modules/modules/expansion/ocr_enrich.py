@@ -2,7 +2,7 @@ import binascii
 import json
 
 import cv2
-import np
+import numpy as np
 import pytesseract
 
 misperrors = {"error": "Error"}

@@ -2,7 +2,7 @@ import binascii
 import io
 import json
 
-import np
+import numpy as np
 import pdftotext
 
 misperrors = {"error": "Error"}
