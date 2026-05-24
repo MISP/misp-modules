@@ -3,6 +3,7 @@
 
 import json
 import os
+import time
 import unittest
 from base64 import b64encode
 from urllib.parse import urljoin
@@ -787,13 +788,43 @@ class TestExpansions(unittest.TestCase):
 
     def test_wikidata(self):
         query = {"module": "wiki", "text": "Google"}
-        response = self.misp_modules_post(query)
+        retryable_errors = {"Something went wrong, look in the server logs for details"}
+        max_attempts = 4
+        wait_seconds = 2
+
+        last_response = None
+        last_exception = None
+        for attempt in range(1, max_attempts + 1):
+            try:
+                last_response = self.misp_modules_post(query)
+            except requests.exceptions.RequestException as request_exception:
+                last_exception = request_exception
+                if attempt < max_attempts:
+                    time.sleep(wait_seconds)
+                    continue
+                self.fail(f"Wikidata request failed after {max_attempts} attempts: {request_exception}")
+
+            try:
+                self.assertEqual(self.get_values(last_response), "http://www.wikidata.org/entity/Q95")
+                return
+            except Exception:
+                try:
+                    error_message = self.get_errors(last_response)
+                except Exception:
+                    error_message = None
+
+                if error_message not in retryable_errors or attempt == max_attempts:
+                    break
+
+                time.sleep(wait_seconds)
+
+        if last_response is None and last_exception is not None:
+            self.fail(f"Wikidata request failed after {max_attempts} attempts: {last_exception}")
+
         try:
-            self.assertEqual(self.get_values(response), "http://www.wikidata.org/entity/Q95")
-        except KeyError:
-            self.assertEqual(self.get_errors(response), "Something went wrong, look in the server logs for details")
+            self.assertEqual(self.get_values(last_response), "No additional data found on Wikidata")
         except Exception:
-            self.assertEqual(self.get_values(response), "No additional data found on Wikidata")
+            self.assertEqual(self.get_errors(last_response), "Something went wrong, look in the server logs for details")
 
     def test_xforceexchange(self):
         module_name = "xforceexchange"
