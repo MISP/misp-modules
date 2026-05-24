@@ -355,7 +355,7 @@ def main():
         ioloop.IOLoop.instance().start()
     finally:
         ioloop.IOLoop.instance().stop()
-        return 0
+    return 0
 
 
 if __name__ == "__main__":
