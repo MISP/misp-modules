@@ -2,10 +2,7 @@ import json
 import logging
 from urllib.parse import urlparse
 
-import vysion.client as vysion
-import vysion.dto
 from pymisp import MISPAttribute, MISPEvent
-from vysion.dto.util import MISPProcessor
 
 from . import standard_error_message
 
@@ -64,6 +61,26 @@ LOGGER.setLevel(logging.INFO)
 LOGGER.debug("Starting Vysion")
 
 DEFAULT_RESULTS_LIMIT = 10
+
+
+def _load_vysion_dependencies():
+    """Load Vysion runtime dependencies lazily.
+
+    Some transitive Vysion dependencies currently fail to import on newer
+    Python versions (3.13/3.14). Delaying the import avoids breaking module
+    registration and allows returning a controlled runtime error instead.
+    """
+    try:
+        import vysion.client as vysion  # type: ignore
+        from vysion.dto.util import MISPProcessor  # type: ignore
+    except Exception as exc:
+        raise RuntimeError(
+            "Vysion dependencies could not be imported. "
+            "Please upgrade the 'vysion' and 'softenum' packages to versions "
+            "compatible with your Python runtime."
+        ) from exc
+
+    return vysion, MISPProcessor
 
 
 def get_proxy_settings(config: dict) -> dict:
@@ -136,6 +153,7 @@ def handler(q=False):
     proxy_settings = get_proxy_settings(request.get("config"))
 
     try:
+        vysion, MISPProcessor = _load_vysion_dependencies()
 
         client = vysion.Client(
             api_key=request["config"]["apikey"],
@@ -196,12 +214,21 @@ def handler(q=False):
             }
         }
 
-    except vysion.APIError as ex:
+    except RuntimeError as ex:
+        LOGGER.error("Error loading Vysion dependencies")
+        LOGGER.error(ex)
+        misperrors["error"] = str(ex)
+        return misperrors
+
+    except Exception as ex:
 
         LOGGER.error("Error in Vysion")
         LOGGER.error(ex)
 
-        misperrors["error"] = ex.message
+        if hasattr(ex, "message"):
+            misperrors["error"] = ex.message
+        else:
+            misperrors["error"] = str(ex)
         return misperrors
 
 
