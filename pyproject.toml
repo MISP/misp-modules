@@ -97,7 +97,6 @@ all = [
     "maclookup",  ## in minimal
     "matplotlib",   ## in minimal
     "mattermostdriver",   ## in minimal
-    "misp-lib-stix2>=3.0.1.2",
     "misp-stix>=2026.6.1",
     "mwdblib",
     "ndjson",  ## in minimal
