@@ -6,6 +6,10 @@ on:
     tags:
       - 'v*.*.*'
 
+env:
+
+  PYTHONDONTWRITEBYTECODE: 1
+
 jobs:
 
   release:

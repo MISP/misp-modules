@@ -21,6 +21,7 @@ dependencies = [
     "orjson>=3.11.9",
     "psutil",
     "tornado",
+    "click==8.1.8",  # greynoise requires it
     ## minimum dependencies
     "beautifulsoup4",
     "jinja2",
@@ -36,7 +37,6 @@ minimal = [
     "censys==2.0.9",
     "socialscan<2.0.0",
     "yara-python==4.5.0",
-    "click==8.1.8",  # greynoise requires it
     ## module dependencies
     "backscatter",
     "blockchain",
@@ -75,7 +75,6 @@ all = [
     "censys==2.0.9",  ## in minimal
     "socialscan<2.0.0",  ## in minimal
     "yara-python==4.5.0",  ## in minimal
-    "click==8.1.8",  # greynoise requires it
     "numpy>=1.26.4,<2.0.0",
     "pandas>=2.0.0",
     "pandas_ods_reader>=1.0.0",
