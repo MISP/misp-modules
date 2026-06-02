@@ -11,7 +11,8 @@ from pathlib import Path
 import requests
 import taxii2client
 import taxii2client.exceptions
-from misp_stix_converter import ExternalSTIX2toMISPParser, InternalSTIX2toMISPParser, _is_stix2_from_misp
+from misp_stix_converter import ExternalSTIX2toMISPParser, InternalSTIX2toMISPParser
+from misp_stix_converter.tools import _is_stix2_from_misp
 from stix2.v20 import Bundle as Bundle_v20
 from stix2.v21 import Bundle as Bundle_v21
 
@@ -34,7 +35,7 @@ moduleinfo = {
     "module-type": ["import"],
     "name": "TAXII 2.1 Import",
     "logo": "",
-    "requirements": ["misp-lib-stix2", "misp-stix"],
+    "requirements": ["stix2", "misp-stix"],
     "features": "",
     "references": [],
     "input": "",
