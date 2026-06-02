@@ -1,4 +1,3 @@
-import ast
 import json
 
 from flask import Blueprint, jsonify, render_template, request
@@ -23,7 +22,7 @@ def home():
 
     sess["admin_user"] = bool(admin_user_active())
     if "query" in request.args:
-        sess["query"] = ast.literal_eval(request.args.get("query"))
+        sess["query"] = json.loads(request.args.get("query"))
     if "query" in request.form:
         sess["query"] = json.loads(request.form.get("query"))
     return render_template("home.html")

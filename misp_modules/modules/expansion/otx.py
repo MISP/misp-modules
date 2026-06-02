@@ -68,9 +68,9 @@ def isBlacklisted(value):
 
     for b in blacklist:
         if value in b:
-            return False
+            return True
 
-    return True
+    return False
 
 
 def valid_ip(ip):

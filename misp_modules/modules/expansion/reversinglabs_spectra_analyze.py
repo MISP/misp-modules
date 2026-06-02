@@ -1276,11 +1276,20 @@ def _find_local_config() -> Optional[Path]:
 moduleinfo = {
     "version": "1.0.0",
     "author": "ReversingLabs",
-    "description": "Threat intelligence enrichment module",
+    "description": "Module to enrich file hashes, domains, IPs and URLs with ReversingLabs Spectra Analyze threat intelligence.",
     "module-type": ["expansion"],
     "name": "ReversingLabs Spectra Analyze",
     "logo": "reversinglabs.png",
+    "requirements": ["A ReversingLabs Spectra Analyze API token."],
+    "features": (
+        "This module enriches MISP attributes with threat intelligence from ReversingLabs Spectra Analyze. "
+        "It supports file hashes (MD5, SHA1, SHA256), domains, hostnames, IP addresses, and URLs. "
+        "The module returns detailed file analysis including classification, threat indicators, and related "
+        "network infrastructure as MISP objects."
+    ),
     "references": ["https://github.com/reversinglabs/reversinglabs-misp"],
+    "input": "A MISP attribute of one of the following types: md5, sha1, sha256, domain, hostname, ip, ip-src, ip-dst, url.",
+    "output": "MISP objects including file objects, domain-ip mappings, DNS records, URL objects, and IP-port objects with detailed threat intelligence.",
     "support": "support@reversinglabs.com",
 }
 

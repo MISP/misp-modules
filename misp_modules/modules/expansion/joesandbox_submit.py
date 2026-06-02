@@ -24,7 +24,7 @@ moduleinfo = {
         "A module to submit files or URLs to Joe Sandbox for an advanced analysis, and return the link of the"
         " submission."
     ),
-    "module-type": ["expansion", "hover"],
+    "module-type": ["expansion"],
     "name": "Joe Sandbox Submit",
     "logo": "joesandbox.png",
     "requirements": ["jbxapi: Joe Sandbox API python3 library"],

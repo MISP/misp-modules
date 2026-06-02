@@ -58,7 +58,6 @@ def create_app():
     app.register_blueprint(history_blueprint, url_prefix="/")
     app.register_blueprint(account_blueprint, url_prefix="/")
     app.register_blueprint(external_tools_blueprint, url_prefix="/")
-    csrf.exempt(home_blueprint)
 
     # Register 404 error handler
     @app.errorhandler(404)
