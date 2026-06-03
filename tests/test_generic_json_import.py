@@ -42,3 +42,25 @@ def test_handler_can_import_unmapped_indicator_attributes(monkeypatch):
     attributes = response["results"]["Attribute"]
     assert attributes[0]["type"] == "url"
     assert attributes[0]["value"] == "https://example.com"
+
+
+def test_handler_guesses_templates_per_json_element(monkeypatch):
+    monkeypatch.setattr(
+        generic_json_import,
+        "fetch_json",
+        lambda url, timeout: {
+            "feed_name": "mixed indicators",
+            "indicators": [
+                {"url": "https://example.com/a?b=c", "host": "example.com"},
+                {"filename": "payload.exe", "sha256": "a" * 64},
+            ],
+        },
+    )
+
+    response = generic_json_import.handler(_query(config={"include_unmapped_attributes": False}))
+
+    objects = response["results"]["Object"]
+    assert [misp_object["name"] for misp_object in objects] == ["url", "file"]
+    for misp_object in objects:
+        relations = {attribute["object_relation"] for attribute in misp_object["Attribute"]}
+        assert not {"url", "host"}.intersection(relations) or not {"filename", "sha256"}.intersection(relations)

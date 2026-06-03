@@ -153,7 +153,7 @@ def generateData(event, data, config):
     templates = load_object_templates()
     for _, record in iter_json_records(data, config["max_records"]):
         flattened = flatten_record(record)
-        if not flattened:
+        if not flattened or not has_inferred_indicator(flattened):
             continue
         match = find_best_template(flattened, templates)
         mapped_keys = set()
@@ -211,21 +211,20 @@ def has_scalar_leaf(value):
     return False
 
 
-def flatten_record(record, prefix=""):
+def flatten_record(record):
     flattened = []
     for key, value in record.items():
-        name = f"{prefix}_{key}" if prefix else str(key)
-        if isinstance(value, dict):
-            flattened.extend(flatten_record(value, name))
-        elif isinstance(value, list):
+        if isinstance(value, list):
             for item in value:
-                if isinstance(item, dict):
-                    flattened.extend(flatten_record(item, name))
-                elif is_supported_scalar(item):
-                    flattened.append((name, item))
+                if is_supported_scalar(item):
+                    flattened.append((str(key), item))
         elif is_supported_scalar(value):
-            flattened.append((name, value))
+            flattened.append((str(key), value))
     return flattened
+
+
+def has_inferred_indicator(flattened):
+    return any(infer_misp_types(value) for _, value in flattened)
 
 
 def find_best_template(flattened, templates):
