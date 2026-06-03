@@ -38,7 +38,7 @@ def test_ransomlook_search_returns_ransomware_group_post_object():
 
     mocked_get.assert_called_once_with(
         "https://www.ransomlook.io/api/search",
-        params={"query": "Acme Corporation"},
+        params={"q": "Acme Corporation"},
         headers={"User-Agent": "misp-modules"},
         timeout=30,
     )
