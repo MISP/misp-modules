@@ -33,12 +33,15 @@ def test_ransomlook_search_returns_ransomware_group_post_object():
         }
     ]
 
+    expected_search_params = {"q": "Acme Corporation"}
+
     with patch.object(ransomlook.requests, "get", return_value=MockResponse(payload)) as mocked_get:
         result = ransomlook.handler(json.dumps(query))
 
+    assert "query" not in mocked_get.call_args.kwargs["params"]
     mocked_get.assert_called_once_with(
         "https://www.ransomlook.io/api/search",
-        params={"q": "Acme Corporation"},
+        params=expected_search_params,
         headers={"User-Agent": "misp-modules"},
         timeout=30,
     )
