@@ -172,7 +172,7 @@ def handler(q=False):
     query = attribute["value"]
     headers = {"User-Agent": "misp-modules"}
     try:
-        response = requests.get(f"{api_url}/search", params={"query": query}, headers=headers, timeout=30)
+        response = requests.get(f"{api_url}/search", params={"q": query}, headers=headers, timeout=30)
         response.raise_for_status()
         search_result = response.json()
     except requests.exceptions.HTTPError as http_error:
