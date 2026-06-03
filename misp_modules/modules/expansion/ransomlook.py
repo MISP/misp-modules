@@ -56,7 +56,7 @@ moduleinfo = {
     "module-type": ["expansion", "hover"],
     "name": "RansomLook Lookup",
     "logo": "",
-    "requirements": ["A RansomLook API key."],
+    "requirements": ["No API key required."],
     "features": (
         "The module accepts any MISP attribute value, including text and free-text attributes, and searches across"
         " RansomLook posts using the /api/search endpoint. Matching posts are converted to the MISP"
@@ -70,7 +70,7 @@ moduleinfo = {
     "input": "Any MISP attribute value to search in RansomLook posts.",
     "output": f"RansomLook hits represented as {_OBJECT_NAME} MISP objects.",
 }
-moduleconfig = ["api-key"]
+moduleconfig = []
 api_url = "https://www.ransomlook.io/api"
 
 _OBJECT_MAPPING = {
@@ -165,14 +165,12 @@ def handler(q=False):
     if q is False:
         return False
     request = json.loads(q)
-    if not request.get("config") or not request["config"].get("api-key"):
-        return {"error": "A RansomLook API key is required."}
     if not request.get("attribute") or not check_input_attribute(request["attribute"]):
         return {"error": f"{standard_error_message}, which should contain at least a type, a value and an UUID."}
 
     attribute = request["attribute"]
     query = attribute["value"]
-    headers = {"Authorization": request["config"]["api-key"], "User-Agent": "misp-modules"}
+    headers = {"User-Agent": "misp-modules"}
     try:
         response = requests.get(f"{api_url}/search", params={"query": query}, headers=headers, timeout=30)
         response.raise_for_status()

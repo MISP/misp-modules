@@ -19,7 +19,7 @@ class MockResponse:
 
 def test_ransomlook_search_returns_ransomware_group_post_object():
     attribute = {"type": "text", "value": "Acme Corporation", "uuid": "5b582d80-7a7e-4b6a-9f22-77656e72bb3b"}
-    query = {"module": "ransomlook", "attribute": attribute, "config": {"api-key": "test-key"}}
+    query = {"module": "ransomlook", "attribute": attribute, "config": {}}
     payload = [
         {
             "group_name": "lockbit",
@@ -39,7 +39,7 @@ def test_ransomlook_search_returns_ransomware_group_post_object():
     mocked_get.assert_called_once_with(
         "https://www.ransomlook.io/api/search",
         params={"query": "Acme Corporation"},
-        headers={"Authorization": "test-key", "User-Agent": "misp-modules"},
+        headers={"User-Agent": "misp-modules"},
         timeout=30,
     )
     assert "Object" in result["results"]
@@ -54,11 +54,6 @@ def test_ransomlook_search_returns_ransomware_group_post_object():
     assert relations["website"] == "https://acme.example"
 
 
-def test_ransomlook_requires_api_key():
-    query = {"module": "ransomlook", "attribute": {"type": "text", "value": "Acme", "uuid": "uuid"}, "config": {}}
-    assert ransomlook.handler(json.dumps(query)) == {"error": "A RansomLook API key is required."}
-
-
 def test_ransomlook_reports_http_error():
     response = Mock(payload=None)
     response.status_code = 401
@@ -66,7 +61,7 @@ def test_ransomlook_reports_http_error():
     query = {
         "module": "ransomlook",
         "attribute": {"type": "text", "value": "Acme", "uuid": "uuid"},
-        "config": {"api-key": "bad-key"},
+        "config": {},
     }
 
     with patch.object(ransomlook.requests, "get", return_value=response):
