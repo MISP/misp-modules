@@ -24,7 +24,7 @@ moduleinfo = {
     'description': 'Query Flowtriq for DDoS attack intelligence on IP addresses',
     'module-type': ['expansion', 'hover'],
     'name': 'Flowtriq DDoS Intelligence',
-    'logo': '',
+    'logo': 'flowtriq.png',
     'requirements': ['Flowtriq API key and API URL'],
     'features': (
         'Queries the Flowtriq IP threat lookup API to check whether an IP '
