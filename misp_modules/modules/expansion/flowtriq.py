@@ -248,9 +248,9 @@ def _build_results(ip, data, attribute):
                              f'Duration: {rec.get("duration_sec", 0)}s - '
                              f'{rec.get("source_ip_count", 0)} source IPs')
             if rec.get('spoofing'):
-                inc_lines.append(f'         Spoofing detected')
+                inc_lines.append('         Spoofing detected')
             if rec.get('botnet'):
-                inc_lines.append(f'         Botnet indicators')
+                inc_lines.append('         Botnet indicators')
 
         results.append({
             'types': ['text'],
