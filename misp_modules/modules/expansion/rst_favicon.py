@@ -1,4 +1,4 @@
-"""rst_favicon — favicon hashes + image as a file object (GET /scan/favicon)."""
+"""rst_favicon — favicon hashes as a file object (GET /scan/favicon)."""
 
 from __future__ import annotations
 
@@ -23,27 +23,45 @@ from ._rstcloud.client import (
 
 misperrors = {"error": "Error"}
 
-_INPUTS = ["url", "domain", "hostname", "ip-src", "ip-dst",
-           "ip-src|port", "ip-dst|port", "hostname|port", "domain|port"]
-# misp_standard: file object (md5/sha1/sha256 pivotable in Netlas/Censys) plus a
-# standalone favicon_hash attribute (Murmur3/MMH3, pivotable in Shodan/FOFA).
+_INPUTS = [
+    "url",
+    "domain",
+    "hostname",
+    "ip-src",
+    "ip-dst",
+    "ip-src|port",
+    "ip-dst|port",
+    "hostname|port",
+    "domain|port",
+]
+# misp_standard: file object (md5/sha1/sha256 pivotable in Netlas/Censys)
+# plus a standalone favicon_hash attribute (Murmur3/MMH3, Shodan/FOFA).
 mispattributes = {"input": _INPUTS, "format": "misp_standard"}
 
 moduleinfo = {
     "version": "0.3",
     "author": "RST Cloud",
-    "description": "Fetch a target's favicon (image + all hashes for Shodan/Netlas/Censys pivoting) via RST Scan API.",
+    "description": (
+        "Fetch a target's favicon (image + all hashes for"
+        " Shodan/Netlas/Censys pivoting) via RST Scan API."
+    ),
     "module-type": ["expansion"],
     "name": "RST Cloud Favicon",
     "requirements": ["An RST Cloud API key.", "rstapi>=1.2.0 (PyPI)."],
     "features": (
-        "Retrieves the favicon image and cryptographic hashes via RST Scan GET "
-        "/scan/favicon. Returns a file MISP object with MD5/SHA-1/SHA-256 for Censys/Netlas pivoting and a "
-        "standalone Murmur3 favicon-hash attribute for Shodan/FOFA-style pivoting."
+        "Retrieves the favicon image and cryptographic hashes via RST Scan"
+        " GET /scan/favicon. Returns a file MISP object with"
+        " MD5/SHA-1/SHA-256 for Censys/Netlas pivoting and a standalone"
+        " Murmur3 favicon-hash attribute for Shodan/FOFA-style pivoting."
     ),
-    "references": ["https://api.rstcloud.net/", "https://pypi.org/project/rstapi/"],
+    "references": [
+        "https://api.rstcloud.net/",
+        "https://pypi.org/project/rstapi/",
+    ],
     "input": "URL, domain, hostname, or IP attribute.",
-    "output": "file MISP object, favicon-hash attribute, and resolved favicon URL.",
+    "output": (
+        "file MISP object, favicon-hash attribute, and resolved favicon URL."
+    ),
 }
 moduleconfig = ["api_key", "base_url", "timeout"]
 
@@ -63,7 +81,10 @@ def handler(q=False):
     request = json.loads(q)
     config = request.get("config")
     if not rst_kwargs(config)["APIKEY"]:
-        return error("An RST Cloud API key is required (set api_key in the module config).")
+        return error(
+            "An RST Cloud API key is required (set api_key in the module"
+            " config)."
+        )
     # Favicon endpoint expects a bare host or a full URL — never host:port.
     # The API fetches the page over HTTP/HTTPS itself; adding ":443" breaks it.
     raw = value_from_request(request, _INPUTS)
@@ -71,7 +92,11 @@ def handler(q=False):
         return error("No target found in the request.")
     target = raw if raw.startswith(("http://", "https://")) else host_only(raw)
 
-    data, err = unwrap(rstapi.scan(**scan_kwargs(config)).GetFavicon(target, include_base64=True))
+    data, err = unwrap(
+        rstapi.scan(**scan_kwargs(config)).GetFavicon(
+            target, include_base64=True
+        )
+    )
     if err:
         return error(f"RST favicon scan failed: {err}")
     if not isinstance(data, dict) or not data.get("favicon_hash"):
@@ -84,7 +109,9 @@ def handler(q=False):
     content_type = data.get("req_content_type") or "image/x-icon"
 
     # Real filename from the resolved favicon URL (e.g. "drive_2026_32dp.ico")
-    raw_fname = req_loc.rstrip("/").split("/")[-1].split("?")[0] if req_loc else ""
+    raw_fname = (
+        req_loc.rstrip("/").split("/")[-1].split("?")[0] if req_loc else ""
+    )
     fname = raw_fname if (raw_fname and "." in raw_fname) else "favicon.ico"
 
     event, source = misp_event_with_source(request)
@@ -101,7 +128,11 @@ def handler(q=False):
 
     # Attach the raw image when the API returned base64
     try:
-        raw = base64.b64decode(data["base64_image"]) if data.get("base64_image") else None
+        raw = (
+            base64.b64decode(data["base64_image"])
+            if data.get("base64_image")
+            else None
+        )
     except Exception:
         raw = None
     if raw:
@@ -114,12 +145,18 @@ def handler(q=False):
 
     # Resolved favicon URL — where the image actually lives after redirects
     if req_loc:
-        event.add_attribute("link", req_loc, comment="RST Favicon resolved URL", to_ids=False)
+        event.add_attribute(
+            "link",
+            req_loc,
+            comment="RST Favicon resolved URL",
+            to_ids=False,
+        )
 
-    # favicon_hash (Murmur3/MMH3): standalone attribute so it correlates independently
-    # across events and is searchable in Shodan/FOFA-style hunting workflows.
+    # favicon_hash (Murmur3/MMH3): standalone attribute for independent
+    # correlation across events and Shodan/FOFA-style hunting workflows.
     fav_attr = event.add_attribute(
-        "other", fhash,
+        "other",
+        fhash,
         comment=f"Murmur3 favicon hash for {target} (Shodan/FOFA pivot)",
         to_ids=False,
     )

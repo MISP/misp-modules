@@ -1,4 +1,4 @@
-"""Shared RST Cloud helpers for the expansion modules (not a registered module)."""
+"""Shared RST Cloud helpers for expansion modules (not registered)."""
 
 from .client import (  # noqa: F401
     apply_to_source_attribute,

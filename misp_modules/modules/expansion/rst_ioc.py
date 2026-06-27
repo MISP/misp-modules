@@ -1,4 +1,4 @@
-"""rst_ioc — enrich an indicator with RST Cloud threat intelligence (GET /ioc)."""
+"""rst_ioc — enrich an indicator with RST threat intel (GET /ioc)."""
 
 from __future__ import annotations
 
@@ -25,36 +25,64 @@ from ._rstcloud.client import (
 
 misperrors = {"error": "Error"}
 
-_INPUTS = ["ip-src", "ip-dst", "domain", "hostname", "url", "md5", "sha1", "sha256",
-           "ip-src|port", "ip-dst|port", "hostname|port", "domain|port"]
+_INPUTS = [
+    "ip-src",
+    "ip-dst",
+    "domain",
+    "hostname",
+    "url",
+    "md5",
+    "sha1",
+    "sha256",
+    "ip-src|port",
+    "ip-dst|port",
+    "hostname|port",
+    "domain|port",
+]
 mispattributes = {"input": _INPUTS, "format": "misp_standard"}
 
 moduleinfo = {
     "version": "0.4",
     "author": "RST Cloud",
     "description": (
-        "Enrich indicators with RST Cloud threat intelligence. "
-        "Returns an rst-ioc object (score, attribution, geo/ASN for IPs, "
-        "DNS/WHOIS for domains, parsed components for URLs, related hashes for "
-        "file hashes) linked back to the enriched attribute."
+        "Enrich indicators with RST Cloud threat intelligence. Returns an"
+        " rst-ioc object (score, attribution, geo/ASN for IPs, DNS/WHOIS"
+        " for domains, parsed components for URLs, related hashes for file"
+        " hashes) linked back to the enriched attribute."
     ),
     "module-type": ["expansion", "hover"],
     "name": "RST Cloud IoC Lookup",
     "requirements": ["An RST Cloud API key.", "rstapi>=1.2.0 (PyPI)."],
     "features": (
-        "Queries RST Cloud GET /ioc for threat scores, attribution, geo/ASN, DNS, "
-        "WHOIS, TTPs, CVEs, and related indicators. Returns a structured rst-ioc "
-        "MISP object with galaxy tags and optional pivotable related hashes/IPs. "
-        "When misp_url and misp_key are configured, also writes score/threat tags "
-        "onto the enriched attribute via the MISP API."
+        "Queries RST Cloud GET /ioc for threat scores, attribution,"
+        " geo/ASN, DNS, WHOIS, TTPs, CVEs, and related indicators. Returns"
+        " a structured rst-ioc MISP object with galaxy tags and optional"
+        " pivotable related hashes/IPs. When misp_url and misp_key are"
+        " configured, also writes score/threat tags onto the enriched"
+        " attribute via the MISP API."
     ),
-    "references": ["https://api.rstcloud.net/", "https://pypi.org/project/rstapi/"],
-    "input": "IP, domain, hostname, URL, or hash attribute (incl. host|port composites).",
-    "output": "rst-ioc MISP object, galaxy/score tags, and optional related attributes.",
+    "references": [
+        "https://api.rstcloud.net/",
+        "https://pypi.org/project/rstapi/",
+    ],
+    "input": (
+        "IP, domain, hostname, URL, or hash attribute (incl. host|port"
+        " composites)."
+    ),
+    "output": (
+        "rst-ioc MISP object, galaxy/score tags, and optional related"
+        " attributes."
+    ),
 }
 # misp_url/misp_key (optional): when set, tags + score note are also written
-# directly onto the enriched attribute via the MISP API (like rst_noise_control).
-moduleconfig = ["api_key", "base_url", "misp_url", "misp_key", "misp_verifycert"]
+# directly onto the enriched attribute via the MISP API (like rst_noise).
+moduleconfig = [
+    "api_key",
+    "base_url",
+    "misp_url",
+    "misp_key",
+    "misp_verifycert",
+]
 
 _HASH_TYPES = {"md5", "sha1", "sha256"}
 
@@ -71,7 +99,9 @@ def version():
 def _ts(val) -> str:
     """Unix timestamp string/int -> YYYY-MM-DD (UTC), or empty string."""
     try:
-        return datetime.fromtimestamp(int(val), tz=timezone.utc).strftime("%Y-%m-%d")
+        return datetime.fromtimestamp(int(val), tz=timezone.utc).strftime(
+            "%Y-%m-%d"
+        )
     except (TypeError, ValueError, OSError):
         return ""
 
@@ -84,7 +114,12 @@ def _f(val, precision=1) -> str:
 
 
 def _known(v) -> bool:
-    return bool(v) and str(v).strip().lower() not in ("", "none", "null", "n/a")
+    return bool(v) and str(v).strip().lower() not in (
+        "",
+        "none",
+        "null",
+        "n/a",
+    )
 
 
 def handler(q=False):
@@ -93,23 +128,30 @@ def handler(q=False):
     request = json.loads(q)
     config = request.get("config")
     if not rst_kwargs(config)["APIKEY"]:
-        return error("An RST Cloud API key is required (set api_key in the module config).")
+        return error(
+            "An RST Cloud API key is required (set api_key in the module"
+            " config)."
+        )
     value = host_only(value_from_request(request, _INPUTS))
     if not value:
         return error("No supported indicator value found in the request.")
 
     # /ioc always returns HTTP 200; a miss carries an "error" key and no "id".
-    data, err = unwrap(rstapi.ioclookup(**rst_kwargs(config)).GetIndicator(value))
+    data, err = unwrap(
+        rstapi.ioclookup(**rst_kwargs(config)).GetIndicator(value)
+    )
     if err:
         return error(f"RST Cloud lookup failed: {err}")
     if not isinstance(data, dict) or data.get("error") or not data.get("id"):
-        return text_result(f"{value}: not found in RST Cloud", "RST IoC Lookup")
+        return text_result(
+            f"{value}: not found in RST Cloud", "RST IoC Lookup"
+        )
 
-    ioc_type  = (data.get("ioc_type") or "").lower()
-    is_ip     = ioc_type in ("ipv4", "ipv6")
+    ioc_type = (data.get("ioc_type") or "").lower()
+    is_ip = ioc_type in ("ipv4", "ipv6")
     is_domain = ioc_type == "domain"
-    is_url    = ioc_type == "url"
-    is_hash   = ioc_type in _HASH_TYPES
+    is_url = ioc_type == "url"
+    is_hash = ioc_type in _HASH_TYPES
 
     score_block = data.get("score") or {}
     total = score_block.get("total")
@@ -117,34 +159,34 @@ def handler(q=False):
         total_int = int(float(str(total)))
     except (TypeError, ValueError):
         total_int = None
-    conf_sub  = _f(score_block.get("tags"), 2)       # context sub-score
+    conf_sub = _f(score_block.get("tags"), 2)  # context sub-score
     relev_sub = _f(score_block.get("frequency"), 2)  # relevance sub-score
 
-    threats   = data.get("threat") or []
-    tags_str  = (data.get("tags") or {}).get("str") or []
-    ttp       = data.get("ttp") or []
-    cve       = data.get("cve") or []
-    industry  = data.get("industry") or []
-    fp        = data.get("fp") or {}
-    fp_alarm  = str(fp.get("alarm") or "").strip().lower()
+    threats = data.get("threat") or []
+    tags_str = (data.get("tags") or {}).get("str") or []
+    ttp = data.get("ttp") or []
+    cve = data.get("cve") or []
+    industry = data.get("industry") or []
+    fp = data.get("fp") or {}
+    fp_alarm = str(fp.get("alarm") or "").strip().lower()
     fp_flagged = fp_alarm in ("true", "possible")
-    geo       = data.get("geo") or {}
-    asn_blk   = data.get("asn") or {}
-    src_blk   = data.get("src") or {}
-    resolved  = data.get("resolved") or {}
-    parsed    = data.get("parsed") or {}
-    fseen     = _ts(data.get("fseen"))
-    lseen     = _ts(data.get("lseen"))
+    geo = data.get("geo") or {}
+    asn_blk = data.get("asn") or {}
+    src_blk = data.get("src") or {}
+    resolved = data.get("resolved") or {}
+    parsed = data.get("parsed") or {}
+    fseen = _ts(data.get("fseen"))
+    lseen = _ts(data.get("lseen"))
 
     # -------------------------------------------------------------------------
     # Derive the type-specific context strings once; reused for both the typed
     # rst-ioc object and the annotation fallback text.
     # -------------------------------------------------------------------------
     geo_str = asn_str = whois_str = http_status = ""
-    dns_records: list[str] = []          # ["A: 1.2.3.4", "CNAME: ..."]
-    resolved_ips: list[str] = []         # pivotable A-record IPs (domains)
+    dns_records: list[str] = []  # ["A: 1.2.3.4", "CNAME: ..."]
+    resolved_ips: list[str] = []  # pivotable A-record IPs (domains)
     url_parts: list[str] = []
-    filenames = [f for f in (data.get("filename") or []) if _known(f)]
+    filenames = [f for f in data.get("filename") or [] if _known(f)]
 
     if is_ip:
         if geo.get("country"):
@@ -163,9 +205,9 @@ def handler(q=False):
 
     if is_domain:
         res_ip = resolved.get("ip") or {}
-        a_records = [r for r in (res_ip.get("a") or []) if _known(r)]
-        cnames    = [r for r in (res_ip.get("cname") or []) if _known(r)]
-        aliases   = [r for r in (res_ip.get("alias") or []) if _known(r)]
+        a_records = [r for r in res_ip.get("a") or [] if _known(r)]
+        cnames = [r for r in res_ip.get("cname") or [] if _known(r)]
+        aliases = [r for r in res_ip.get("alias") or [] if _known(r)]
         resolved_ips = a_records
         if a_records:
             dns_records.append("A: " + ", ".join(a_records))
@@ -194,7 +236,11 @@ def handler(q=False):
     if is_url:
         if _known(parsed.get("domain")):
             url_parts.append(f"domain: {parsed['domain']}")
-        if _known(parsed.get("path")) and parsed.get("path") not in ("/", "None", "none"):
+        if _known(parsed.get("path")) and parsed.get("path") not in (
+            "/",
+            "None",
+            "none",
+        ):
             url_parts.append(f"path: {parsed['path']}")
         if _known(parsed.get("port")) and parsed.get("port") != "None":
             url_parts.append(f"port: {parsed['port']}")
@@ -241,8 +287,11 @@ def handler(q=False):
     if http_status:
         lines.append("HTTP status: " + http_status)
     if is_hash:
-        hash_parts = [f"{h.upper()}: {data[h]}" for h in ("md5", "sha1", "sha256")
-                      if _known(data.get(h))]
+        hash_parts = [
+            f"{h.upper()}: {data[h]}"
+            for h in ("md5", "sha1", "sha256")
+            if _known(data.get(h))
+        ]
         if hash_parts:
             lines.append("Hashes: " + ", ".join(hash_parts))
     if filenames:
@@ -290,7 +339,9 @@ def handler(q=False):
     if dedicated:
         tag_target = None
         if total_int is not None:
-            tag_target = obj.add_attribute("score-total", value=str(total_int), to_ids=False)
+            tag_target = obj.add_attribute(
+                "score-total", value=str(total_int), to_ids=False
+            )
         if conf_sub:
             obj.add_attribute("score-confidence", value=conf_sub, to_ids=False)
         if relev_sub:
@@ -311,7 +362,9 @@ def handler(q=False):
         for t in tags_str:
             obj.add_attribute("tag", value=t, to_ids=False)
         if fp_flagged:
-            fp_val = fp_alarm + (f" - {fp['descr']}" if fp.get("descr") else "")
+            fp_val = fp_alarm + (
+                f" - {fp['descr']}" if fp.get("descr") else ""
+            )
             obj.add_attribute("false-positive", value=fp_val, to_ids=False)
         if geo_str:
             obj.add_attribute("geo", value=geo_str, to_ids=False)
@@ -326,14 +379,21 @@ def handler(q=False):
         for fn in filenames:
             obj.add_attribute("filename", value=fn, to_ids=False)
         if data.get("description"):
-            obj.add_attribute("description", value=data["description"], to_ids=False)
+            obj.add_attribute(
+                "description", value=data["description"], to_ids=False
+            )
         for ref in ref_urls:
             obj.add_attribute("ref", value=ref, to_ids=False)
-        # Fall back to a text attribute as the tag anchor if nothing else exists.
-        tag_target = tag_target or obj.add_attribute("description", value="\n".join(lines), to_ids=False)
+        # Fall back to a text attribute as the tag anchor if nothing else
+        # exists.
+        tag_target = tag_target or obj.add_attribute(
+            "description", value="\n".join(lines), to_ids=False
+        )
     else:
         obj.add_attribute("type", value="RST IoC Lookup", to_ids=False)
-        tag_target = obj.add_attribute("text", value="\n".join(lines), to_ids=False)
+        tag_target = obj.add_attribute(
+            "text", value="\n".join(lines), to_ids=False
+        )
         if fseen:
             obj.add_attribute("creation-date", value=fseen, to_ids=False)
         for ref in ref_urls:
@@ -345,26 +405,35 @@ def handler(q=False):
         obj.add_reference(anchor, "characterizes")
     event.add_object(obj)
 
-    # Pivotable hashes: expose the related hash values as their own searchable
-    # IOC attributes (separate from the object) so they correlate across events.
+    # Pivotable hashes: expose related hash values as searchable IOC
+    # attributes (separate from the object) so they correlate across events.
     if is_hash:
         for htype in ("md5", "sha1", "sha256"):
             hval = data.get(htype)
             if _known(hval) and hval != value:
-                a = event.add_attribute(htype, value=hval, to_ids=True,
-                                        comment="RST IoC Lookup - related hash")
+                a = event.add_attribute(
+                    htype,
+                    value=hval,
+                    to_ids=True,
+                    comment="RST IoC Lookup - related hash",
+                )
                 for tag in galaxy_tags:
                     a.add_tag(tag)
 
     # Pivotable resolved IPs for domains (context, not detection-worthy).
     for rip in resolved_ips:
-        event.add_attribute("ip-dst", value=rip, to_ids=False,
-                            comment="RST IoC Lookup - resolved IP")
+        event.add_attribute(
+            "ip-dst",
+            value=rip,
+            to_ids=False,
+            comment="RST IoC Lookup - resolved IP",
+        )
 
     # Optional write-back: apply tags + brief note onto the enriched attribute
     # directly via the MISP API when misp_url/misp_key are configured.
     apply_to_source_attribute(
-        config, request,
+        config,
+        request,
         tags=galaxy_tags,
         comment_note=(
             f"RST score {total_int}/100"

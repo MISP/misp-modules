@@ -1,4 +1,4 @@
-"""rst_ssl — SSL certificate as a pivotable x509 object (GET /scan/ssl/certificate)."""
+"""rst_ssl — SSL certificate as x509 object (GET /scan/ssl/certificate)."""
 
 from __future__ import annotations
 
@@ -20,8 +20,16 @@ from ._rstcloud.client import (
 
 misperrors = {"error": "Error"}
 
-_INPUTS = ["ip-dst", "ip-src", "hostname", "domain",
-           "ip-dst|port", "ip-src|port", "hostname|port", "domain|port"]
+_INPUTS = [
+    "ip-dst",
+    "ip-src",
+    "hostname",
+    "domain",
+    "ip-dst|port",
+    "ip-src|port",
+    "hostname|port",
+    "domain|port",
+]
 # misp_standard: return a real x509 MISPObject (searchable subject/issuer,
 # pivotable fingerprints) instead of a text blob.
 mispattributes = {"input": _INPUTS, "format": "misp_standard"}
@@ -29,25 +37,36 @@ mispattributes = {"input": _INPUTS, "format": "misp_standard"}
 moduleinfo = {
     "version": "0.2",
     "author": "RST Cloud",
-    "description": "Fetch the SSL certificate for an IP[:port] as an x509 object via RST Scan API.",
+    "description": (
+        "Fetch the SSL certificate for an IP[:port] as an x509 object via"
+        " RST Scan API."
+    ),
     "module-type": ["expansion"],
     "name": "RST Cloud SSL Certificate",
     "requirements": ["An RST Cloud API key.", "rstapi>=1.2.0 (PyPI)."],
     "features": (
-        "Connects to the target service and retrieves the TLS certificate via "
-        "RST Scan GET /scan/ssl/certificate. Returns an x509 MISP object with "
-        "pivotable fingerprints (SHA-1/256/MD5), subject, issuer, and validity dates."
+        "Connects to the target service and retrieves the TLS certificate"
+        " via RST Scan GET /scan/ssl/certificate. Returns an x509 MISP"
+        " object with pivotable fingerprints (SHA-1/256/MD5), subject,"
+        " issuer, and validity dates."
     ),
-    "references": ["https://api.rstcloud.net/", "https://pypi.org/project/rstapi/"],
-    "input": "IP, hostname, or domain attribute (optional port via config or composite).",
+    "references": [
+        "https://api.rstcloud.net/",
+        "https://pypi.org/project/rstapi/",
+    ],
+    "input": (
+        "IP, hostname, or domain attribute (optional port via config or"
+        " composite)."
+    ),
     "output": "x509 MISP object referencing the enriched attribute.",
 }
 # 'port' (optional): TLS port to scan when the attribute carries none (API
 # defaults to 443 if omitted).
 moduleconfig = ["api_key", "base_url", "port", "timeout"]
 
-# RST certificate field -> x509 object_relation (pymisp infers the attribute type
-# from the template, so fingerprints become pivotable x509-fingerprint-* types).
+# RST certificate field -> x509 object_relation (pymisp infers attribute
+# type from the template, so fingerprints become pivotable x509-fingerprint-*
+# types).
 _X509_MAP = {
     "subject_dn": "subject",
     "issuer_dn": "issuer",
@@ -76,16 +95,25 @@ def handler(q=False):
     request = json.loads(q)
     config = request.get("config")
     if not rst_kwargs(config)["APIKEY"]:
-        return error("An RST Cloud API key is required (set api_key in the module config).")
+        return error(
+            "An RST Cloud API key is required (set api_key in the module"
+            " config)."
+        )
     target = scan_target(request, _INPUTS, config, default_port=443)
     if not target:
-        return error("No target found in the request (expects an IP/hostname).")
+        return error(
+            "No target found in the request (expects an IP/hostname)."
+        )
 
-    data, err = unwrap(rstapi.scan(**scan_kwargs(config)).GetSslCertificate(target))
+    data, err = unwrap(
+        rstapi.scan(**scan_kwargs(config)).GetSslCertificate(target)
+    )
     if err:
         return error(f"RST SSL scan failed: {err}")
     if not isinstance(data, dict) or not data.get("subject_dn"):
-        return text_result(f"{target}: no certificate returned", "RST SSL Certificate")
+        return text_result(
+            f"{target}: no certificate returned", "RST SSL Certificate"
+        )
 
     from pymisp import MISPObject
 

@@ -30,17 +30,20 @@ def base_url_from_config(config: dict | None) -> str:
 
 def rst_kwargs(config: dict | None) -> dict:
     """Constructor kwargs shared by every rstapi client."""
-    return {"APIKEY": api_key_from_config(config), "APIURL": base_url_from_config(config)}
+    return {
+        "APIKEY": api_key_from_config(config),
+        "APIURL": base_url_from_config(config),
+    }
 
 
 def scan_kwargs(config: dict | None) -> dict:
-    """Constructor kwargs for rstapi.scan, extending rst_kwargs with an optional read timeout.
+    """Constructor kwargs for rstapi.scan with optional read timeout.
 
-    Scan endpoints (ssl/html/favicon/screenshot/cs-beacon) are synchronous: the RST
-    Cloud server connects to the target during your request, so they can take much
-    longer than a database lookup.  The default rstapi READ timeout is 20 s, which
-    is sometimes not enough.  Set ``timeout`` in the module config (seconds, default
-    60) to override it.
+    Extends ``rst_kwargs``. Scan endpoints (ssl/html/favicon/screenshot/
+    cs-beacon) are synchronous: the RST Cloud server connects to the target
+    during your request, so they can take much longer than a database lookup.
+    The default rstapi READ timeout is 20 s, which is sometimes not enough.
+    Set ``timeout`` in the module config (seconds, default 60) to override it.
     """
     kw = rst_kwargs(config)
     try:
@@ -51,7 +54,7 @@ def scan_kwargs(config: dict | None) -> dict:
 
 
 def value_from_request(request: dict, keys) -> str | None:
-    """Pull the indicator value from a misp-modules request (attribute or typed).
+    """Pull the indicator from a misp-modules request (attribute or typed).
 
     Handles all three shapes MISP sends: a full ``attribute`` object, a typed
     top-level key (incl. composites like ``ip-dst|port``), and object-level
@@ -72,7 +75,7 @@ def value_from_request(request: dict, keys) -> str | None:
 
 
 def host_only(value):
-    """Strip a MISP composite ``|port`` suffix, returning the bare host/indicator.
+    """Strip a MISP composite ``|port`` suffix; return bare host/indicator.
 
     Used by the lookup modules (ioc / noise-control / whois) where the API keys
     on the value itself and the port is irrelevant.
@@ -101,9 +104,10 @@ def _has_explicit_port(host: str) -> bool:
 def _sibling_port(request) -> str | None:
     """Port taken from a sibling attribute when MISP passes the whole object.
 
-    An ``ip-port`` object stores the port as its own attribute (object_relation
-    ``dst-port`` / ``src-port`` / ``port``); when MISP includes ``object`` in the
-    request, pick it up so the user doesn't have to set one.
+    An ``ip-port`` object stores the port as its own attribute
+    (object_relation ``dst-port`` / ``src-port`` / ``port``); when MISP
+    includes ``object`` in the request, pick it up so the user doesn't have
+    to set one.
     """
     obj = request.get("object")
     if not isinstance(obj, dict):
@@ -116,16 +120,24 @@ def _sibling_port(request) -> str | None:
     return None
 
 
-def scan_target(request, inputs, config, *, as_url=False, default_port=None, default_scheme="https"):
-    """Build a Scan-API target from a MISP attribute, honouring an optional port.
+def scan_target(
+    request,
+    inputs,
+    config,
+    *,
+    as_url=False,
+    default_port=None,
+    default_scheme="https",
+):
+    """Build a Scan-API target from a MISP attribute with optional port.
 
     IP/host attributes carry no port, but the Scan API addresses a *service*:
-    ``host:port`` for ssl / cs-beacon / favicon, or a URL for html / screenshot.
-    Port resolution, most specific first:
+    ``host:port`` for ssl / cs-beacon / favicon, or a URL for html /
+    screenshot. Port resolution, most specific first:
 
       1. an explicit port already in the value (``1.2.3.4:8443`` or a URL),
-      2. a MISP ``host|port`` composite value (e.g. an ``ip-dst|port`` attribute),
-      3. a sibling port attribute in the same MISP object (``ip-port`` object),
+      2. a MISP ``host|port`` composite (e.g. an ``ip-dst|port`` attribute),
+      3. a sibling port attribute in the same MISP object (``ip-port``),
       4. the optional ``port`` set in the module config,
       5. ``default_port`` (module-specific fallback, may be ``None``).
 
@@ -173,10 +185,11 @@ def error(message: str) -> dict:
     return {"error": message}
 
 
-# Threat-suffix → (built-in MISP galaxy predicate, RST library galaxy stix_type).
-# Kept in sync with rstmisp.misp.tagging; duplicated here so the modules stay
-# droppable into misp-modules standalone. The 2nd element selects which RST custom
-# galaxy (rst-<stix_type>) a name belongs to when resolving the real cluster tag.
+# Threat-suffix -> (built-in MISP galaxy predicate, RST galaxy stix_type).
+# Kept in sync with rstmisp.misp.tagging; duplicated here so the modules
+# stay droppable into misp-modules standalone. The 2nd element selects which
+# RST custom galaxy (rst-<stix_type>) a name belongs to when resolving the
+# real cluster tag.
 _THREAT_SUFFIX = {
     "_group": ("misp-galaxy:threat-actor", "intrusion-set"),
     "_actor": ("misp-galaxy:threat-actor", "intrusion-set"),
@@ -193,11 +206,17 @@ _THREAT_SUFFIX = {
 # Names with no recognised suffix are malware families.
 _THREAT_DEFAULT = ("misp-galaxy:malware", "malware")
 
-# RST custom galaxy types in MISP (namespace rstcloud); galaxy stix_type = type[4:].
-_RST_GALAXY_TYPES = ("rst-malware", "rst-tool", "rst-intrusion-set", "rst-campaign")
+# RST custom galaxy types in MISP (namespace rstcloud); stix_type = type[4:].
+_RST_GALAXY_TYPES = (
+    "rst-malware",
+    "rst-tool",
+    "rst-intrusion-set",
+    "rst-campaign",
+)
 
 # Per-process caches: a misp-modules worker is long-lived, so reuse the PyMISP
-# client + resolved galaxy ids across calls instead of reconnecting every hover.
+# client + resolved galaxy ids across calls instead of reconnecting on every
+# hover.
 _RESOLVER_CACHE: dict = {}
 
 
@@ -210,12 +229,14 @@ def _truthy(v) -> bool:
 class _RstClusterResolver:
     """Resolve an RST threat ``(stix_type, name)`` to its MISP cluster's real
     ``tag_name`` (``misp-galaxy:rst-*="<cluster-uuid>"``), so an enrichment tag
-    attaches the RST Threat Library galaxy — the same node the library/reports/
-    feed connectors use. MISP stores a CUSTOM cluster's tag keyed on the UUID, not
-    the name, so the value-form ``rstcloud:rst-*="name"`` would not link.
+    attaches the RST Threat Library galaxy — the same node the library/
+    reports/ feed connectors use. MISP stores a CUSTOM cluster's tag keyed on
+    the UUID, not the name, so the value-form ``rstcloud:rst-*="name"``
+    would not link.
 
-    Targeted ``search_galaxy_clusters`` per name (a handful per enrichment call),
-    not a full galaxy pull; per-name results are memoised on the instance.
+    Targeted ``search_galaxy_clusters`` per name (a handful per enrichment
+    call), not a full galaxy pull; per-name results are memoised on the
+    instance.
     """
 
     def __init__(self, misp, galaxy_ids: dict):
@@ -247,7 +268,10 @@ class _RstClusterResolver:
             if (gc.get("value") or "").lower() == name_lower:
                 return tname
             for el in gc.get("GalaxyElement") or []:
-                if el.get("key") == "synonyms" and (el.get("value") or "").lower() == name_lower:
+                if (
+                    el.get("key") == "synonyms"
+                    and (el.get("value") or "").lower() == name_lower
+                ):
                     return tname
         return None
 
@@ -255,10 +279,10 @@ class _RstClusterResolver:
 def rst_resolver_from_config(config: dict | None):
     """Build an RST cluster resolver from optional MISP config, or None.
 
-    Needs ``misp_url`` + ``misp_key`` in the module config; without them (the
-    default standalone deployment) returns None and ``threat_tags`` falls back to
-    built-in galaxy tags. PyMISP is imported lazily so the modules still install
-    with just ``rstapi`` when MISP resolution isn't configured.
+    Needs ``misp_url`` + ``misp_key`` in the module config; without them
+    (the default standalone deployment) returns None and ``threat_tags`` falls
+    back to built-in galaxy tags. PyMISP is imported lazily so the modules
+    still install with just ``rstapi`` when MISP resolution isn't configured.
     """
     config = config or {}
     url = config.get("misp_url")
@@ -272,7 +296,9 @@ def rst_resolver_from_config(config: dict | None):
     except Exception:
         return None
     try:
-        misp = PyMISP(url, key, ssl=_truthy(config.get("misp_verifycert", False)))
+        misp = PyMISP(
+            url, key, ssl=_truthy(config.get("misp_verifycert", False))
+        )
         ids = {}
         for g in misp.galaxies(pythonify=False) or []:
             gd = g.get("Galaxy", g)
@@ -302,7 +328,8 @@ def threat_tags(threats, rst_resolver=None) -> list:
         name = threat
         for suffix, (pred, st) in _THREAT_SUFFIX.items():
             if threat.endswith(suffix):
-                predicate, stix_type, name = pred, st, threat[: -len(suffix)]
+                n = len(suffix)
+                predicate, stix_type, name = pred, st, threat[:-n]
                 break
         clean = name.replace("_", " ")
         tag = None
@@ -316,17 +343,18 @@ def threat_tags(threats, rst_resolver=None) -> list:
 
 
 def scan_group(request, source):
-    """uuid that scan-result objects should reference, so each result stays tied
+    """uuid scan-result objects should reference so each result stays tied
     to exactly what was enriched — without spawning extra container objects.
 
       1. the parent object, when MISP includes it in the request (``object``);
       2. otherwise the enriched source attribute itself.
 
     A screenshot / certificate / fetched body cannot be an *attribute* of a
-    ``url`` / ``ip-port`` / ``domain-ip`` object — MISP object templates are fixed
-    and have no such relation — so each is returned as its own object that
-    references this anchor (``identifies`` / ``screenshot-of`` / …). Returns the
-    anchor uuid, or ``None`` (typed-key request with no attribute to point at).
+    ``url`` / ``ip-port`` / ``domain-ip`` object — MISP object templates are
+    fixed and have no such relation — so each is returned as its own object
+    that references this anchor (``identifies`` / ``screenshot-of`` / …).
+    Returns the anchor uuid, or ``None`` (typed-key request with no attribute
+    to point at).
     """
     obj = request.get("object")
     if isinstance(obj, dict) and obj.get("uuid"):
@@ -337,9 +365,9 @@ def scan_group(request, source):
 def misp_event_with_source(request):
     """Start a ``MISPEvent`` seeded with the triggering attribute.
 
-    Returns ``(event, source_attribute_or_None)``. Enrichment objects/attributes
-    added to the event can ``add_reference(source.uuid, ...)`` so MISP links them
-    to the attribute the analyst enriched. Requires pymisp, which is always
+    Returns ``(event, source_attribute_or_None)``. Enrichment objects/
+    attributes added to the event can ``add_reference(source.uuid, ...)`` so
+    MISP links them to the attribute the analyst enriched. Requires pymisp,
     present in a misp-modules deployment (it's a core dependency).
     """
     from pymisp import MISPAttribute, MISPEvent
@@ -358,10 +386,11 @@ def new_enrichment_object(name):
     """Build a ``MISPObject`` for an RST enrichment template.
 
     Returns ``(object, dedicated)``. Uses the ``rst-*`` template from the MISP
-    object library (install via [MISP/misp-objects](https://github.com/MISP/misp-objects),
-    e.g. [PR #526](https://github.com/MISP/misp-objects/pull/526)). Falls back to
-    a generic ``annotation`` object if the template is not installed yet, so output
-    stays valid misp_standard on any MISP.
+    object library (install via
+    [MISP/misp-objects](https://github.com/MISP/misp-objects), e.g.
+    [PR #526](https://github.com/MISP/misp-objects/pull/526)). Falls back to
+    a generic ``annotation`` object if the template is not installed yet, so
+    output stays valid misp_standard on any MISP.
     """
     from pymisp import MISPObject
 
@@ -375,13 +404,17 @@ def new_enrichment_object(name):
 
 
 def standard_results(event) -> dict:
-    """Serialise a ``MISPEvent`` into the misp_standard expansion result envelope."""
+    """Serialise a ``MISPEvent`` into the misp_standard result envelope."""
     parsed = json.loads(event.to_json())
-    return {"results": {k: parsed[k] for k in ("Attribute", "Object") if parsed.get(k)}}
+    return {
+        "results": {
+            k: parsed[k] for k in ("Attribute", "Object") if parsed.get(k)
+        }
+    }
 
 
 def text_result(value: str, comment: str = "") -> dict:
-    """A misp_standard 'nothing structured to return' fallback (one text attribute)."""
+    """misp_standard fallback when nothing structured to return (one text)."""
     attr = {"type": "text", "value": value}
     if comment:
         attr["comment"] = comment
@@ -394,8 +427,9 @@ _PYMISP_CACHE: dict = {}
 def _pymisp(cfg):
     """Cached PyMISP client from module config (misp_url/misp_key), or None.
 
-    Reused across calls (a misp-modules worker is long-lived). Returns None when
-    creds are absent or PyMISP can't connect, so callers degrade gracefully.
+    Reused across calls (a misp-modules worker is long-lived). Returns None
+    when creds are absent or PyMISP can't connect, so callers degrade
+    gracefully.
     """
     url, key = cfg.get("misp_url"), cfg.get("misp_key")
     if not (url and key):
@@ -405,6 +439,7 @@ def _pymisp(cfg):
         return _PYMISP_CACHE[ck]
     try:
         from pymisp import PyMISP
+
         client = PyMISP(url, key, ssl=ck[2])
     except Exception:
         return None
@@ -412,25 +447,36 @@ def _pymisp(cfg):
     return client
 
 
-def apply_to_source_attribute(config, request, *, tags=None, comment_note=None,
-                              comment_prefix=None, replace_tag_prefixes=(),
-                              set_to_ids=None, fp_sightings=0):
+def apply_to_source_attribute(
+    config,
+    request,
+    *,
+    tags=None,
+    comment_note=None,
+    comment_prefix=None,
+    replace_tag_prefixes=(),
+    set_to_ids=None,
+    fp_sightings=0,
+):
     """Write enrichment back ONTO the enriched attribute via the MISP API.
 
-    MISP enrichment itself can only ADD new attributes/objects — it can't modify
-    the attribute you ran the module on. So, *only when* ``misp_url``/``misp_key``
-    are set in the module config, this updates the source attribute in place:
+    MISP enrichment itself can only ADD new attributes/objects — it can't
+    modify the attribute you ran the module on. So, *only when*
+    ``misp_url``/``misp_key`` are set in the module config, this updates the
+    source attribute in place:
 
-      * removes the module's own prior tags (``replace_tag_prefixes``) then adds
-        ``tags`` — so re-running replaces rather than stacks verdicts;
-      * appends ``comment_note`` to the existing comment (dropping any previous
-        note that started with ``comment_prefix``, so re-runs stay tidy);
+      * removes the module's own prior tags (``replace_tag_prefixes``) then
+        adds ``tags`` — so re-running replaces rather than stacks verdicts;
+      * appends ``comment_note`` to the existing comment (dropping any
+        previous note that started with ``comment_prefix``, so re-runs stay
+        tidy);
       * sets ``to_ids`` when ``set_to_ids`` is not None;
-      * adds ``fp_sightings`` false-positive sightings (type 1) — a benign signal
-        that feeds MISP's decay/scoring.
+      * adds ``fp_sightings`` false-positive sightings (type 1) — a benign
+        signal that feeds MISP's decay/scoring.
 
-    Returns True if it wrote back (caller should then return an empty result so no
-    duplicate attribute is created); False otherwise (caller returns normally).
+    Returns True if it wrote back (caller should then return an empty result
+    so no duplicate attribute is created); False otherwise (caller returns
+    normally).
     """
     cfg = config or {}
     attr = request.get("attribute") or {}
@@ -445,9 +491,14 @@ def apply_to_source_attribute(config, request, *, tags=None, comment_note=None,
     try:
         changed = False
         if comment_note is not None:
-            existing = (getattr(full, "comment", None) or attr.get("comment") or "")
-            segments = [s for s in existing.split(" | ")
-                        if s and not (comment_prefix and s.startswith(comment_prefix))]
+            existing = (
+                getattr(full, "comment", None) or attr.get("comment") or ""
+            )
+            segments = [
+                s
+                for s in existing.split(" | ")
+                if s and not (comment_prefix and s.startswith(comment_prefix))
+            ]
             segments.append(comment_note)
             full.comment = " | ".join(segments)
             changed = True
@@ -465,9 +516,12 @@ def apply_to_source_attribute(config, request, *, tags=None, comment_note=None,
             misp.tag(uuid, tag)
         if fp_sightings:
             from pymisp import MISPSighting
+
             for _ in range(int(fp_sightings)):
                 sighting = MISPSighting()
-                sighting.from_dict(type="1", source="RST Noise Control")  # 1 = false-positive
+                sighting.from_dict(
+                    type="1", source="RST Noise Control"
+                )  # 1 = false-positive
                 misp.add_sighting(sighting, attribute=uuid)
         return True
     except Exception:
