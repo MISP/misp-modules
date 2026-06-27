@@ -123,6 +123,14 @@ For further Information see the [license file](https://misp.github.io/misp-modul
 * [Real-time Blackhost Lists Lookup](https://misp.github.io/misp-modules/expansion/#real-time-blackhost-lists-lookup) - Module to check an IPv4 address against known RBLs.
 * [Recorded Future Enrich](https://misp.github.io/misp-modules/expansion/#recorded-future-enrich) - Module to enrich attributes with threat intelligence from Recorded Future.
 * [Reverse DNS](https://misp.github.io/misp-modules/expansion/#reverse-dns) - Simple Reverse DNS expansion service to resolve reverse DNS from MISP attributes.
+* [RST Cloud Cobalt Strike Beacon](https://misp.github.io/misp-modules/expansion/#rst-cloud-cobalt-strike-beacon) - Scan a target for Cobalt Strike beacon configurations via RST Scan API.
+* [RST Cloud Favicon](https://misp.github.io/misp-modules/expansion/#rst-cloud-favicon) - Fetch favicon image and hashes for Shodan/Netlas/Censys/FOFA pivoting via RST Scan API.
+* [RST Cloud HTML Fetcher](https://misp.github.io/misp-modules/expansion/#rst-cloud-html-fetcher) - Fetch rendered HTML body or extracted JavaScript via RST Scan API.
+* [RST Cloud IoC Lookup](https://misp.github.io/misp-modules/expansion/#rst-cloud-ioc-lookup) - Enrich indicators with RST Cloud threat intelligence.
+* [RST Cloud Noise Control](https://misp.github.io/misp-modules/expansion/#rst-cloud-noise-control) - Check whether an indicator is known-good or noisy via RST Noise Control.
+* [RST Cloud Screenshot](https://misp.github.io/misp-modules/expansion/#rst-cloud-screenshot) - Capture a page screenshot via RST Scan API.
+* [RST Cloud SSL Certificate](https://misp.github.io/misp-modules/expansion/#rst-cloud-ssl-certificate) - Fetch TLS certificate as an x509 MISP object via RST Scan API.
+* [RST Cloud Whois](https://misp.github.io/misp-modules/expansion/#rst-cloud-whois) - Retrieve parsed WHOIS for a domain via RST Cloud.
 * [ReversingLabs Spectra Analyze](https://misp.github.io/misp-modules/expansion/#reversinglabs-spectra-analyze) - Threat intelligence enrichment module
 * [SecurityTrails Lookup](https://misp.github.io/misp-modules/expansion/#securitytrails-lookup) - An expansion modules for SecurityTrails.
 * [Shodan Lookup](https://misp.github.io/misp-modules/expansion/#shodan-lookup) - Module to query on Shodan.
