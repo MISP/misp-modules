@@ -91,6 +91,14 @@ For more information: [Extending MISP with Python modules](https://www.misp-proj
 * [RandomcoinDB Lookup](https://misp.github.io/misp-modules/expansion/#randomcoindb-lookup) - Module to access the ransomcoinDB (see https://ransomcoindb.concinnity-risks.com)
 * [r7_akb](https://misp.github.io/misp-modules/expansion/#r7_akb) - Enrich CVEs via AttackerKB and return structured MISP events. Handles rate limits, regex CVE detection, and markdown cleanup.
 * [Real-time Blackhost Lists Lookup](https://misp.github.io/misp-modules/expansion/#real-time-blackhost-lists-lookup) - Module to check an IPv4 address against known RBLs.
+* [RST Cloud Cobalt Strike Beacon](https://misp.github.io/misp-modules/expansion/#rst-cloud-cobalt-strike-beacon) - Scan a target for Cobalt Strike beacon configurations via RST Scan API.
+* [RST Cloud Favicon](https://misp.github.io/misp-modules/expansion/#rst-cloud-favicon) - Fetch favicon image and hashes for Shodan/Netlas/Censys/FOFA pivoting via RST Scan API.
+* [RST Cloud HTML Fetcher](https://misp.github.io/misp-modules/expansion/#rst-cloud-html-fetcher) - Fetch rendered HTML body or extracted JavaScript via RST Scan API.
+* [RST Cloud IoC Lookup](https://misp.github.io/misp-modules/expansion/#rst-cloud-ioc-lookup) - Enrich indicators with RST Cloud threat intelligence.
+* [RST Cloud Noise Control](https://misp.github.io/misp-modules/expansion/#rst-cloud-noise-control) - Check whether an indicator is known-good or noisy via RST Noise Control.
+* [RST Cloud Screenshot](https://misp.github.io/misp-modules/expansion/#rst-cloud-screenshot) - Capture a page screenshot via RST Scan API.
+* [RST Cloud SSL Certificate](https://misp.github.io/misp-modules/expansion/#rst-cloud-ssl-certificate) - Fetch TLS certificate as an x509 MISP object via RST Scan API.
+* [RST Cloud Whois](https://misp.github.io/misp-modules/expansion/#rst-cloud-whois) - Retrieve parsed WHOIS for a domain via RST Cloud.
 * [Recorded Future Enrich](https://misp.github.io/misp-modules/expansion/#recorded-future-enrich) - Module to enrich attributes with threat intelligence from Recorded Future.
 * [ReversingLabs Enrichment](https://misp.github.io/misp-modules/expansion/#reversinglabs-enrichment) - Module to enrich file hashes, domains, IPs and URLs with ReversingLabs Spectra Analyze threat intelligence.
 * [Reverse DNS](https://misp.github.io/misp-modules/expansion/#reverse-dns) - Simple Reverse DNS expansion service to resolve reverse DNS from MISP attributes.

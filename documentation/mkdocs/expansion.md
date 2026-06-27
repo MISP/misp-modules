@@ -2118,6 +2118,260 @@ Module to check an IPv4 address against known RBLs.
 
 -----
 
+#### [RST Cloud Cobalt Strike Beacon](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/rst_cs_beacon.py)
+
+<img src=../logos/rstcloud.png height=60>
+
+Scan a target IP[:port] for a Cobalt Strike beacon configuration via RST Scan API.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/rst_cs_beacon.py)]
+
+- **features**:
+>Probes the target for Cobalt Strike beacon configurations via RST Scan GET /scan/cs-beacon. On a hit, returns file MISP object(s) with pivotable SHA-256 hashes tagged to the Cobalt Strike galaxy.
+
+- **config**:
+> - api_key
+> - base_url
+> - port
+> - timeout
+
+- **input**:
+>IP, URL, domain, or hostname attribute (optional port via config).
+
+- **output**:
+>file MISP object(s) with beacon hashes and Cobalt Strike galaxy tag.
+
+- **references**:
+>https://api.rstcloud.net/
+
+- **requirements**:
+> - rstapi>=1.2.0 (PyPI)
+> - An RST Cloud API key
+
+-----
+
+#### [RST Cloud Favicon](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/rst_favicon.py)
+
+<img src=../logos/rstcloud.png height=60>
+
+Fetch a target's favicon (image + all hashes for Shodan/Netlas/Censys pivoting) via RST Scan API.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/rst_favicon.py)]
+
+- **features**:
+>Retrieves the favicon image and cryptographic hashes via RST Scan GET /scan/favicon. Returns a file MISP object with MD5/SHA-1/SHA-256 and a standalone Murmur3 favicon-hash attribute for Shodan/FOFA-style pivoting.
+
+- **config**:
+> - api_key
+> - base_url
+> - timeout
+
+- **input**:
+>URL, domain, hostname, or IP attribute.
+
+- **output**:
+>file MISP object, favicon-hash attribute, and resolved favicon URL.
+
+- **references**:
+>https://api.rstcloud.net/
+
+- **requirements**:
+> - rstapi>=1.2.0 (PyPI)
+> - An RST Cloud API key
+
+-----
+
+#### [RST Cloud HTML Fetcher](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/rst_html.py)
+
+<img src=../logos/rstcloud.png height=60>
+
+Fetch rendered HTML body or extracted JavaScript for a URL/IP target via RST Scan API.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/rst_html.py)]
+
+- **features**:
+>Fetches the rendered HTML body or extracted JavaScript from the target via RST Scan. Returns a file MISP object with the page attached and pivotable content hashes. Configurable mode: body (default) or js.
+
+- **config**:
+> - api_key
+> - base_url
+> - mode
+> - port
+> - timeout
+
+- **input**:
+>URL, domain, hostname, or IP attribute (optional port via config).
+
+- **output**:
+>file MISP object (page.html or page.js) with hashes and HTTP metadata.
+
+- **references**:
+>https://api.rstcloud.net/
+
+- **requirements**:
+> - rstapi>=1.2.0 (PyPI)
+> - An RST Cloud API key
+
+-----
+
+#### [RST Cloud IoC Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/rst_ioc.py)
+
+<img src=../logos/rstcloud.png height=60>
+
+Enrich indicators with RST Cloud threat intelligence.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/rst_ioc.py)]
+
+- **features**:
+>Queries RST Cloud GET /ioc for threat scores, attribution, geo/ASN, DNS, WHOIS, TTPs, CVEs, and related indicators. Returns a structured rst-ioc MISP object with galaxy tags and optional pivotable related hashes/IPs. When misp_url and misp_key are configured, also writes score/threat tags onto the enriched attribute via the MISP API.
+
+- **config**:
+> - api_key
+> - base_url
+> - misp_url
+> - misp_key
+> - misp_verifycert
+
+- **input**:
+>IP, domain, hostname, URL, or hash attribute (incl. host|port composites).
+
+- **output**:
+>rst-ioc MISP object, galaxy/score tags, and optional related attributes.
+
+- **references**:
+>https://api.rstcloud.net/
+>https://github.com/MISP/misp-objects/pull/526
+
+- **requirements**:
+> - rstapi>=1.2.0 (PyPI)
+> - An RST Cloud API key
+> - rst-ioc object template installed on MISP ([misp-objects #526](https://github.com/MISP/misp-objects/pull/526))
+
+-----
+
+#### [RST Cloud Noise Control](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/rst_noise_control.py)
+
+<img src=../logos/rstcloud.png height=60>
+
+Check whether a value is known-good / noise via RST Noise Control.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/rst_noise_control.py)]
+
+- **features**:
+>Queries RST Cloud GET /benign/lookup for benign/noisy verdicts. Returns an rst-noise MISP object with false-positive risk tags. When misp_url and misp_key are configured, also annotates the source attribute in place (tags, comment, to_ids, false-positive sightings).
+
+- **config**:
+> - api_key
+> - base_url
+> - misp_url
+> - misp_key
+> - misp_verifycert
+
+- **input**:
+>IP, domain, hostname, URL, or hash attribute (incl. host|port composites).
+
+- **output**:
+>rst-noise MISP object with verdict, category, and risk/noise tags.
+
+- **references**:
+>https://api.rstcloud.net/
+>https://github.com/MISP/misp-taxonomies/pull/335
+
+- **requirements**:
+> - rstapi>=1.2.0 (PyPI)
+> - An RST Cloud API key
+> - rst-noise object template on MISP ([misp-objects #526](https://github.com/MISP/misp-objects/pull/526))
+> - rstcloud taxonomy on MISP ([misp-taxonomies #335](https://github.com/MISP/misp-taxonomies/pull/335))
+
+-----
+
+#### [RST Cloud Screenshot](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/rst_screenshot.py)
+
+<img src=../logos/rstcloud.png height=60>
+
+Capture a page screenshot of a URL/IP target via RST Scan API.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/rst_screenshot.py)]
+
+- **features**:
+>Renders the target page and returns a PNG screenshot as an image MISP object (inline in MISP). Configurable frame: first, full (default), or last.
+
+- **config**:
+> - api_key
+> - base_url
+> - frame
+> - port
+> - timeout
+
+- **input**:
+>URL, domain, hostname, or IP attribute (optional port via config).
+
+- **output**:
+>image MISP object with PNG attachment linked to the enriched attribute.
+
+- **references**:
+>https://api.rstcloud.net/
+
+- **requirements**:
+> - rstapi>=1.2.0 (PyPI)
+> - An RST Cloud API key
+
+-----
+
+#### [RST Cloud SSL Certificate](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/rst_ssl.py)
+
+<img src=../logos/rstcloud.png height=60>
+
+Fetch the SSL certificate for an IP[:port] as an x509 object via RST Scan API.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/rst_ssl.py)]
+
+- **features**:
+>Connects to the target service and retrieves the TLS certificate via RST Scan GET /scan/ssl/certificate. Returns an x509 MISP object with pivotable fingerprints (SHA-1/256/MD5), subject, issuer, and validity dates.
+
+- **config**:
+> - api_key
+> - base_url
+> - port
+> - timeout
+
+- **input**:
+>IP, hostname, or domain attribute (optional port via config or composite).
+
+- **output**:
+>x509 MISP object referencing the enriched attribute.
+
+- **references**:
+>https://api.rstcloud.net/
+
+- **requirements**:
+> - rstapi>=1.2.0 (PyPI)
+> - An RST Cloud API key
+
+-----
+
+#### [RST Cloud Whois](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/rst_whois.py)
+
+<img src=../logos/rstcloud.png height=60>
+
+Retrieve parsed WHOIS information for a domain via RST Cloud.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/rst_whois.py)]
+
+- **features**:
+>Queries RST Cloud GET /whois for parsed domain registration data. Returns a standard whois MISP object (registrar, registrant, dates, nameservers) linked back to the enriched attribute.
+
+- **config**:
+> - api_key
+> - base_url
+
+- **input**:
+>Domain or hostname attribute.
+
+- **output**:
+>whois MISP object with registration and nameserver fields.
+
+- **references**:
+>https://api.rstcloud.net/
+
+- **requirements**:
+> - rstapi>=1.2.0 (PyPI)
+> - An RST Cloud API key
+
+-----
+
 #### [Recorded Future Enrich](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/recordedfuture.py)
 
 <img src=../logos/recordedfuture.png height=60>

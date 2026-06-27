@@ -63,6 +63,7 @@ minimal = [
     "pyipasnhistory",
     "pysafebrowsing",
     "requests[security]",
+    "rstapi>=1.2.0,<2",
     "slack-sdk",
     "urlarchiver",
     "vt-graph-api",
@@ -120,6 +121,7 @@ all = [
     "python-pptx",
     "pyzbar",
     "requests[security]",  ## in minimal
+    "rstapi>=1.2.0,<2",  ## in minimal
     "setuptools",
     "shodan",
     "sigmatools",
