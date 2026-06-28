@@ -6368,6 +6368,25 @@ files = [
 ]
 
 [[package]]
+name = "rstapi"
+version = "1.2.0"
+description = "Python library to access the RST Cloud API."
+optional = true
+python-versions = "*"
+groups = ["main"]
+markers = "extra == \"minimal\" or extra == \"all\""
+files = [
+    {file = "rstapi-1.2.0-py3-none-any.whl", hash = "sha256:aab1fbb4e520135a3b280bebadb6511ad805f5aee46a31ed18a28aa3b6ae529c"},
+    {file = "rstapi-1.2.0.tar.gz", hash = "sha256:19c5d98f522b9dbf03f1960aa76c137ce03be6d8c205b0cf9336ec7a8c9f25ff"},
+]
+
+[package.dependencies]
+requests = "*"
+
+[package.extras]
+test = ["pytest (>=7)"]
+
+[[package]]
 name = "rtfde"
 version = "0.1.2.2"
 description = "A library for extracting HTML content from RTF encapsulated HTML as commonly found in the exchange MSG email format."
@@ -7890,10 +7909,10 @@ test = ["big-O", "jaraco.functools", "jaraco.itertools", "jaraco.test", "more_it
 type = ["pytest-mypy (>=1.0.1) ; platform_python_implementation != \"PyPy\""]
 
 [extras]
-all = ["anyrun-sdk", "apiosintds", "assemblyline_client", "backscatter", "blockchain", "censys", "clamd", "crowdstrike-falconpy", "dnsdb2", "domaintools_api", "geoip2", "greynoise", "jbxapi", "lief", "lxml", "maclookup", "matplotlib", "mattermostdriver", "misp-stix", "mwdblib", "ndjson", "numpy", "oauth2", "opencv-python", "openpyxl", "pandas", "pandas_ods_reader", "pandoc", "passivetotal", "pdftotext", "pycountry", "pyeti-python3", "pyeupi", "pygeoip", "pyintel471", "pyipasnhistory", "pymisp", "pypdns", "pypssl", "pysafebrowsing", "pytesseract", "python-docx", "python-pptx", "pyzbar", "requests", "setuptools", "shodan", "sigmatools", "sigmf", "slack-sdk", "socialscan", "sparqlwrapper", "tau-clients", "taxii2-client", "trustar", "urlarchiver", "vt-graph-api", "vt-py", "vulners", "vysion", "wand", "xlrd", "yara-python"]
-minimal = ["backscatter", "blockchain", "censys", "clamd", "crowdstrike-falconpy", "dnsdb2", "domaintools_api", "geoip2", "greynoise", "jbxapi", "maclookup", "matplotlib", "mattermostdriver", "ndjson", "oauth2", "passivetotal", "pycountry", "pyeti-python3", "pyeupi", "pygeoip", "pyintel471", "pyipasnhistory", "pypdns", "pypssl", "pysafebrowsing", "requests", "slack-sdk", "socialscan", "urlarchiver", "vt-graph-api", "vt-py", "vulners", "yara-python"]
+all = ["anyrun-sdk", "apiosintds", "assemblyline_client", "backscatter", "blockchain", "censys", "clamd", "crowdstrike-falconpy", "dnsdb2", "domaintools_api", "geoip2", "greynoise", "jbxapi", "lief", "lxml", "maclookup", "matplotlib", "mattermostdriver", "misp-stix", "mwdblib", "ndjson", "numpy", "oauth2", "opencv-python", "openpyxl", "pandas", "pandas_ods_reader", "pandoc", "passivetotal", "pdftotext", "pycountry", "pyeti-python3", "pyeupi", "pygeoip", "pyintel471", "pyipasnhistory", "pymisp", "pypdns", "pypssl", "pysafebrowsing", "pytesseract", "python-docx", "python-pptx", "pyzbar", "requests", "rstapi", "setuptools", "shodan", "sigmatools", "sigmf", "slack-sdk", "socialscan", "sparqlwrapper", "tau-clients", "taxii2-client", "trustar", "urlarchiver", "vt-graph-api", "vt-py", "vulners", "vysion", "wand", "xlrd", "yara-python"]
+minimal = ["backscatter", "blockchain", "censys", "clamd", "crowdstrike-falconpy", "dnsdb2", "domaintools_api", "geoip2", "greynoise", "jbxapi", "maclookup", "matplotlib", "mattermostdriver", "ndjson", "oauth2", "passivetotal", "pycountry", "pyeti-python3", "pyeupi", "pygeoip", "pyintel471", "pyipasnhistory", "pypdns", "pypssl", "pysafebrowsing", "requests", "rstapi", "slack-sdk", "socialscan", "urlarchiver", "vt-graph-api", "vt-py", "vulners", "yara-python"]
 
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10,<4.0"
-content-hash = "380a4bb70a1fcbc16a4f8092bb827d9bd8f828c7bd249a391e9eb03626b5938c"
+content-hash = "4ccfa27333f21a63bb882b6c1feeebf3deca81a602a910954d72922e98ac65e8"
