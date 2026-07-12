@@ -3,6 +3,7 @@ import base64
 import json
 import re
 import zipfile
+from email import message_from_bytes, policy
 from html.parser import HTMLParser
 from io import BytesIO
 from pathlib import Path
@@ -38,7 +39,7 @@ moduleinfo = {
 # unzip_attachments : Unzip all zip files that are not password protected
 # guess_zip_attachment_passwords : This attempts to unzip all password protected zip files using all the strings found in the email body and subject
 # extract_urls : This attempts to extract all URL's from text/html parts of the email
-moduleconfig = ["unzip_attachments", "guess_zip_attachment_passwords", "extract_urls"]
+moduleconfig = ["unzip_attachments", "guess_zip_attachment_passwords", "extract_urls", "extract_forwarded_emails"]
 
 
 def dict_handler(request: dict):
@@ -68,10 +69,16 @@ def dict_handler(request: dict):
     if extract_urls is not None and extract_urls.lower() in acceptable_config_yes:
         extract_urls = True
 
+    extract_forwarded_emails = config.get("extract_forwarded_emails", "true")
+    extract_forwarded_emails = (
+        extract_forwarded_emails is True
+        or (isinstance(extract_forwarded_emails, str) and extract_forwarded_emails.lower() in acceptable_config_yes)
+    )
+
     file_objects = []  # All possible file objects
     # Get Attachments
     # Get file names of attachments
-    for attachment_name, attachment in email_object.attachments:
+    for attachment_name, attachment in iter_file_attachments(email_object.email):
         # Create file objects for the attachments
         if not attachment_name:
             attachment_name = "NameMissing.txt"
@@ -177,11 +184,152 @@ def dict_handler(request: dict):
             file_objects.append(url_object)
             email_object.add_reference(url_object.uuid, "includes", "URL in email body")
 
+    if extract_forwarded_emails:
+        file_objects += extract_forwarded_email_objects(email_object)
+
     objects = [email_object.to_dict()]
     if file_objects:
         objects += [o.to_dict() for o in file_objects if o]
     r = {"results": {"Object": objects}}
     return r
+
+
+def iter_file_attachments(message):
+    """Yield non-email attachments as (filename, BytesIO(content))."""
+    for attachment in message.iter_attachments():
+        if attachment.get_content_type() == "message/rfc822":
+            continue
+        content = attachment.get_content()
+        if isinstance(content, str):
+            content = content.encode()
+        yield attachment.get_filename(), BytesIO(content)
+
+
+def extract_forwarded_email_objects(email_object):
+    """Extract attached and inline forwarded emails as dependent email objects."""
+    forwarded_objects = []
+    seen = set()
+
+    for forwarded_bytes in iter_attached_email_bytes(email_object.email):
+        add_forwarded_email_object(email_object, forwarded_objects, seen, forwarded_bytes, "Forwarded email attachment")
+
+    for body in iter_decoded_bodies(email_object.email):
+        for forwarded_bytes in find_inline_forwarded_email_bytes(body):
+            add_forwarded_email_object(email_object, forwarded_objects, seen, forwarded_bytes, "Inline forwarded email")
+
+    return forwarded_objects
+
+
+def add_forwarded_email_object(parent_email_object, forwarded_objects, seen, forwarded_bytes, comment):
+    digest = forwarded_bytes.strip()
+    if not digest or digest in seen:
+        return
+    try:
+        forwarded_object = EMailObject(
+            pseudofile=BytesIO(forwarded_bytes), attach_original_email=True, standalone=False
+        )
+    except Exception:
+        return
+    seen.add(digest)
+    forwarded_object.comment = comment
+    parent_email_object.add_reference(forwarded_object.uuid, "includes", comment)
+    forwarded_objects.append(forwarded_object)
+
+
+def iter_attached_email_bytes(message):
+    """Yield message/rfc822 attachments as raw bytes."""
+    for part in message.walk():
+        if part is message or part.get_content_type() != "message/rfc822":
+            continue
+        payload = part.get_payload()
+        if isinstance(payload, list):
+            for attached_message in payload:
+                yield attached_message.as_bytes(policy=policy.default)
+        else:
+            decoded = part.get_payload(decode=True)
+            if decoded:
+                yield decoded
+
+
+def iter_decoded_bodies(message):
+    for part in message.walk():
+        if part.get_content_maintype() == "multipart" or part.get_content_disposition() == "attachment":
+            continue
+        charset = part.get_content_charset("utf-8")
+        payload = part.get_payload(decode=True)
+        if not payload:
+            continue
+        text = payload.decode(charset, errors="ignore")
+        if part.get_content_type() == "text/html":
+            html_parser = HTMLTextParser()
+            html_parser.feed(text)
+            text = "".join(html_parser.text_data)
+        yield text
+
+
+def find_inline_forwarded_email_bytes(text):
+    """Find common forwarded-message blocks and return parseable RFC822 snippets."""
+    normalised = text.replace("\r\n", "\n").replace("\r", "\n")
+    lines = normalised.split("\n")
+    for start in find_forwarded_header_starts(lines):
+        snippet = build_forwarded_message(lines[start:])
+        if snippet:
+            yield snippet.encode()
+
+
+def find_forwarded_header_starts(lines):
+    starts = []
+    for index, line in enumerate(lines):
+        if not re.match(r"^\s*(?:>|&gt;\s*)?(?:From|De|Von)\s*:", line, re.IGNORECASE):
+            continue
+        window = "\n".join(lines[index:index + 8])
+        header_hits = sum(
+            1
+            for header in ("from", "to", "cc", "sent", "date", "subject")
+            if re.search(rf"(?im)^\s*(?:>|&gt;\s*)?{header}\s*:", window)
+        )
+        if header_hits >= 2:
+            starts.append(index)
+    return starts
+
+
+def build_forwarded_message(lines):
+    header_lines = []
+    body_lines = []
+    in_headers = True
+    known_headers = {"from", "to", "cc", "bcc", "reply-to", "subject", "date", "sent"}
+    for line in lines:
+        cleaned = re.sub(r"^\s*(?:>|&gt;)\s?", "", line).strip()
+        if in_headers:
+            if not cleaned:
+                continue
+            match = re.match(r"^([A-Za-z-]+)\s*:\s*(.*)$", cleaned)
+            if not match:
+                if header_lines and not header_lines[-1][1]:
+                    header_lines[-1] = (header_lines[-1][0], cleaned)
+                elif header_lines:
+                    in_headers = False
+                    body_lines.append(cleaned)
+                continue
+            header_name = match.group(1).lower()
+            header_value = match.group(2).strip()
+            if header_name == "sent":
+                header_name = "date"
+            if header_name in known_headers:
+                header_lines.append((header_name, header_value))
+            elif header_lines:
+                in_headers = False
+                body_lines.append(cleaned)
+        else:
+            body_lines.append(cleaned)
+    if not header_lines or not any(name == "from" for name, _ in header_lines):
+        return None
+    raw = "\n".join(f"{name.title()}: {value}" for name, value in header_lines)
+    raw += "\n\n" + "\n".join(body_lines).strip()
+    parsed = message_from_bytes(raw.encode(), policy=policy.default)
+    if not parsed.get("From"):
+        return None
+    return parsed.as_bytes(policy=policy.default).decode()
 
 
 def unzip_attachment(filename, data, email_object, file_objects, password=None):
@@ -330,6 +478,14 @@ class HTMLTextParser(HTMLParser):
             self.text_data = []
         else:
             self.text_data = text_data
+
+    def handle_starttag(self, tag, attrs):
+        if tag in {"br", "div", "p", "hr"}:
+            self.text_data.append("\n")
+
+    def handle_endtag(self, tag):
+        if tag in {"div", "p"}:
+            self.text_data.append("\n")
 
     def handle_data(self, data):
         self.text_data.append(data)
