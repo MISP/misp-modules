@@ -37,8 +37,13 @@ BLOCKED_RANGES = [
 ]
 
 
-def _is_ip_blocked(ip_str: str) -> bool:
+def _normalize_ip_address(ip_str: str) -> ipaddress.IPv4Address | ipaddress.IPv6Address:
     ip = ipaddress.ip_address(ip_str)
+    return ip.ipv4_mapped or ip
+
+
+def _is_ip_blocked(ip_str: str) -> bool:
+    ip = _normalize_ip_address(ip_str)
     return any(ip in net for net in BLOCKED_RANGES)
 
 
@@ -52,7 +57,7 @@ def _hostname_resolves_to_blocked_ip(hostname: str) -> bool:
 
 def is_safe_url(url: str) -> bool:
     parsed = urlparse(url)
-    if parsed.scheme not in ("http", "https"):
+    if parsed.scheme not in ("http", "https") or not parsed.hostname:
         return False
     try:
         return not _is_ip_blocked(parsed.hostname)
