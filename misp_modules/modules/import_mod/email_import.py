@@ -25,9 +25,9 @@ moduleinfo = {
     "name": "Email Import",
     "requirements": [],
     "features": (
-        "This module can be used to import e-mail text as well as attachments and urls.\n3 configuration parameters are"
-        " then used to unzip attachments, guess zip attachment passwords, and extract urls: set each one of them to"
-        " True or False to process or not the respective corresponding actions."
+        "This module can be used to import e-mail text as well as attachments and urls.\nConfiguration parameters are"
+        " used to unzip attachments, guess zip attachment passwords, extract urls, and remove common subject markers:"
+        " set each one of them to True or False to process or not the respective corresponding actions."
     ),
     "references": [],
     "input": "E-mail file",
@@ -38,7 +38,7 @@ moduleinfo = {
 # unzip_attachments : Unzip all zip files that are not password protected
 # guess_zip_attachment_passwords : This attempts to unzip all password protected zip files using all the strings found in the email body and subject
 # extract_urls : This attempts to extract all URL's from text/html parts of the email
-moduleconfig = ["unzip_attachments", "guess_zip_attachment_passwords", "extract_urls"]
+moduleconfig = ["unzip_attachments", "guess_zip_attachment_passwords", "extract_urls", "remove_subject_markers"]
 
 
 def dict_handler(request: dict):
@@ -67,6 +67,11 @@ def dict_handler(request: dict):
     extract_urls = config.get("extract_urls", None)
     if extract_urls is not None and extract_urls.lower() in acceptable_config_yes:
         extract_urls = True
+
+    # Do we strip common forwarding/reply markers from the e-mail subject.
+    remove_subject_markers = config.get("remove_subject_markers", None)
+    if remove_subject_markers is not None and remove_subject_markers.lower() in acceptable_config_yes:
+        strip_subject_markers(email_object)
 
     file_objects = []  # All possible file objects
     # Get Attachments
@@ -182,6 +187,35 @@ def dict_handler(request: dict):
         objects += [o.to_dict() for o in file_objects if o]
     r = {"results": {"Object": objects}}
     return r
+
+
+SUBJECT_MARKER_RE = re.compile(r"""
+    ^\s*
+    (?:(?:\[[^\]]+\]\s*)*)
+    (?:
+        (?:re|fw|fwd|wg|aw|sv|tr|rv|vs)
+        (?:\[\d+\])?
+        \s*:\s*
+    )
+    """, re.IGNORECASE | re.VERBOSE)
+
+
+def remove_common_subject_markers(subject):
+    """Remove leading reply/forward markers from an e-mail subject."""
+    cleaned_subject = subject
+    while True:
+        stripped_subject, substitutions = SUBJECT_MARKER_RE.subn("", cleaned_subject, count=1)
+        if not substitutions:
+            return cleaned_subject.strip()
+        cleaned_subject = stripped_subject
+
+
+def strip_subject_markers(email_object):
+    """Strip common reply/forward markers from the generated email subject attribute."""
+    for attribute in email_object.get_attributes_by_relation("subject"):
+        stripped_subject = remove_common_subject_markers(attribute.value)
+        if stripped_subject:
+            attribute.value = stripped_subject
 
 
 def unzip_attachment(filename, data, email_object, file_objects, password=None):
