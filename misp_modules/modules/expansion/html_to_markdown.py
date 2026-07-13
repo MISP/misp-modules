@@ -39,7 +39,7 @@ BLOCKED_RANGES = [
 
 def _normalize_ip_address(ip_str: str) -> ipaddress.IPv4Address | ipaddress.IPv6Address:
     ip = ipaddress.ip_address(ip_str)
-    return ip.ipv4_mapped or ip
+    return getattr(ip, "ipv4_mapped", None) or ip
 
 
 def _is_ip_blocked(ip_str: str) -> bool:
