@@ -25,6 +25,16 @@ class TestHtmlToMarkdownUrlSafety(unittest.TestCase):
     def test_allows_public_ipv4_mapped_ipv6_literal(self):
         self.assertTrue(is_safe_url("http://[::ffff:93.184.216.34]/"))
 
+    def test_allows_public_ipv4_literal(self):
+        self.assertTrue(is_safe_url("http://93.184.216.34/"))
+
+    def test_allows_hostnames_resolving_to_public_ipv4_addresses(self):
+        with patch(
+            "misp_modules.modules.expansion.html_to_markdown.socket.getaddrinfo",
+            return_value=[(None, None, None, None, ("93.184.216.34", 0))],
+        ):
+            self.assertTrue(is_safe_url("http://example.test/"))
+
     def test_blocks_hostnames_resolving_to_ipv4_mapped_blocked_addresses(self):
         with patch(
             "misp_modules.modules.expansion.html_to_markdown.socket.getaddrinfo",
