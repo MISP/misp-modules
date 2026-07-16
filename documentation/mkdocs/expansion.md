@@ -123,6 +123,68 @@ Module to query APIVoid with some domain attributes.
 
 -----
 
+#### [APIFreaks](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/apifreaks.py)
+
+<img src=logos/apifreaks.png height=60>
+
+An expansion module for [APIFreaks](https://apifreaks.com/) that provides an
+enriched analysis of a domain, hostname, IP address, ASN or email address,
+including WHOIS, DNS, subdomains and domain-availability information.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/apifreaks.py)]
+
+- **features**:
+
+> The module takes a domain, hostname, IP address, ASN or email attribute as
+> input and queries the relevant APIFreaks WHOIS, Domain and DNS endpoints with
+> it. The results of the queries are then parsed to extract as much information
+> as possible and mapped into compatible MISP attributes. Each lookup family can
+> be toggled on or off from the module configuration to control API credit
+> usage.
+
+- **config**:
+
+> - apikey
+> - do_whois
+> - do_dns
+> - do_subdomains
+> - do_availability
+> - do_history
+> - do_reverse_dns
+
+- **input**:
+
+> A domain, hostname, IP address (ip-src/ip-dst), ASN (AS) or email
+> (email-src/email-dst/target-email/whois-registrant-email) attribute.
+
+- **output**:
+
+> MISP attributes resulting from the queries on the APIFreaks API, included in
+> the following list:
+> - domain
+> - hostname
+> - ip-src
+> - ip-dst
+> - AS
+> - whois-registrant-email
+> - whois-registrant-phone
+> - whois-registrant-name
+> - whois-registrar
+> - whois-creation-date
+> - dns-soa-email
+> - email-src
+> - datetime
+> - text
+
+- **references**:
+
+> - <https://apifreaks.com/>
+> - <https://apifreaks.com/api>
+
+- **requirements**:
+
+> An access to the APIFreaks API (apikey)
+---
+
 #### [AssemblyLine Query](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/assemblyline_query.py)
 
 <img src=../logos/assemblyline.png height=60>

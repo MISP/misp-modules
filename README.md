@@ -51,6 +51,7 @@ For further Information see the [license file](https://misp.github.io/misp-modul
 * [APIVoid](https://misp.github.io/misp-modules/expansion/#apivoid) - Module to query APIVoid with some domain attributes.
 * [AssemblyLine Query](https://misp.github.io/misp-modules/expansion/#assemblyline-query) - A module tu query the AssemblyLine API with a submission ID to get the submission report and parse it.
 * [AssemblyLine Submit](https://misp.github.io/misp-modules/expansion/#assemblyline-submit) - A module to submit samples and URLs to AssemblyLine for advanced analysis, and return the link of the submission.
+* [APIFreaks](https://misp.github.io/misp-modules/expansion/#apifreaks) - An expansion module for https://apifreaks.com/ that will provide WHOIS, DOMAIN and DNS information.
 * [Backscatter.io](https://misp.github.io/misp-modules/expansion/#backscatter.io) - Backscatter.io module to bring mass-scanning observations into MISP.
 * [BTC Scam Check](https://misp.github.io/misp-modules/expansion/#btc-scam-check) - An expansion hover module to query a special dns blacklist to check if a bitcoin address has been abused.
 * [BTC Steroids](https://misp.github.io/misp-modules/expansion/#btc-steroids) - An expansion hover module to get a blockchain balance from a BTC address in MISP.
