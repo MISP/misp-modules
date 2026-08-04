@@ -1,0 +1,12 @@
+{
+  "module": "onyphe",
+  "attribute": {
+    "type": "ip-src",
+    "value": "8.8.8.8",
+    "uuid": "5b582d80-7a7e-4b6a-9f22-77656e72bb3b"
+  },
+  "config": {
+    "apikey": "REPLACE_WITH_YOUR_ONYPHE_API_KEY",
+    "limit": "25"
+  }
+}
