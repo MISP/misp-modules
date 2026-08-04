@@ -61,7 +61,7 @@ minimal = [
     "pygeoip",
     "pyintel471",
     "pyipasnhistory",
-    "pyonyphe>=3.0.3",
+    "pyonyphe>=3.1.0",
     "pysafebrowsing",
     "requests[security]",
     "rstapi>=1.2.0,<2",
@@ -114,7 +114,7 @@ all = [
     "pyintel471",  ## in minimal
     "pyipasnhistory",  ## in minimal
     "pymisp[fileobjects, openioc, pdfexport, email]>=2.5.34.1",
-    "pyonyphe>=3.0.3",  ## in minimal
+    "pyonyphe>=3.1.0",  ## in minimal
     "pypdns",  ## in minimal
     "pypssl",  ## in minimal
     "pysafebrowsing",  ## in minimal
