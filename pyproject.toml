@@ -184,18 +184,6 @@ markdown_include = "*"
 poetry-plugin-bundle = ">=1.7"
 poetry-plugin-export = ">=1.10"
 
-# --- LOCAL ONLY, DO NOT COMMIT -------------------------------------------
-# pyonyphe 3.0.3 declares rich>=14 as a runtime dependency (it is only used by
-# its CLI), which collides with the censys==2.0.9 pin (rich>=10.6,<11). uv has
-# to resolve every extra when locking, so the clash blocks `uv sync` even for
-# --extra minimal. Needed to run `uv sync --extra all`, which documentation/
-# generate.py requires: it imports every module and silently drops the ones
-# that fail to import. Drop this block before committing, the real fix belongs
-# in pyonyphe.
-[tool.uv]
-override-dependencies = ["rich>=14.0"]
-# --- END LOCAL ONLY -------------------------------------------------------
-
 [tool.black]
 line-length = 120
 target-version = ["py312"]
