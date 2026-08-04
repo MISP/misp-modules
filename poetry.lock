@@ -5427,6 +5427,29 @@ url = ["pyfaup-rs (>=0.4,<0.5)"]
 virustotal = ["validators (>=0.35.0)"]
 
 [[package]]
+name = "pyonyphe"
+version = "3.1.0"
+description = "Python client and CLI for the ONYPHE Cyber Defense Search Engine"
+optional = true
+python-versions = ">=3.10"
+groups = ["main"]
+markers = "extra == \"minimal\" or extra == \"all\""
+files = [
+    {file = "pyonyphe-3.1.0-py3-none-any.whl", hash = "sha256:d915708bea030aac4b58508136db3bcdc95f834b7508c114869e43e7607cb431"},
+    {file = "pyonyphe-3.1.0.tar.gz", hash = "sha256:199fd077214f453a9d6bedd72764ecb0b1c2f9a10d75bdc86e90b0c42e54cda6"},
+]
+
+[package.dependencies]
+httpx = ">=0.28"
+pydantic = ">=2.11"
+python-dotenv = ">=1.1"
+tomli = {version = ">=2.0", markers = "python_version < \"3.11\""}
+
+[package.extras]
+cli = ["rich (>=14.0)", "typer (>=0.16)"]
+mcp = ["mcp (>=2,<3)"]
+
+[[package]]
 name = "pyparsing"
 version = "3.3.2"
 description = "pyparsing - Classes and methods to define and execute parsing grammars"
@@ -5600,6 +5623,22 @@ files = [
 [package.dependencies]
 lxml = ">=3.1.0"
 typing_extensions = ">=4.9.0"
+
+[[package]]
+name = "python-dotenv"
+version = "1.2.2"
+description = "Read key-value pairs from a .env file and set them as environment variables"
+optional = true
+python-versions = ">=3.10"
+groups = ["main"]
+markers = "extra == \"minimal\" or extra == \"all\""
+files = [
+    {file = "python_dotenv-1.2.2-py3-none-any.whl", hash = "sha256:1d8214789a24de455a8b8bd8ae6fe3c6b69a5e3d64aa8a8e5d68e694bbcb285a"},
+    {file = "python_dotenv-1.2.2.tar.gz", hash = "sha256:2c371a91fbd7ba082c2c1dc1f8bf89ca22564a087c2c287cd9b662adde799cf3"},
+]
+
+[package.extras]
+cli = ["click (>=5.0)"]
 
 [[package]]
 name = "python-engineio"
@@ -6983,8 +7022,7 @@ version = "2.4.1"
 description = "A lil' TOML parser"
 optional = false
 python-versions = ">=3.8"
-groups = ["test"]
-markers = "python_version == \"3.10\""
+groups = ["main", "test"]
 files = [
     {file = "tomli-2.4.1-cp311-cp311-macosx_10_9_x86_64.whl", hash = "sha256:f8f0fc26ec2cc2b965b7a3b87cd19c5c6b8c5e5f436b984e85f486d652285c30"},
     {file = "tomli-2.4.1-cp311-cp311-macosx_11_0_arm64.whl", hash = "sha256:4ab97e64ccda8756376892c53a72bd1f964e519c77236368527f758fbc36a53a"},
@@ -7034,6 +7072,7 @@ files = [
     {file = "tomli-2.4.1-py3-none-any.whl", hash = "sha256:0d85819802132122da43cb86656f8d1f8c6587d54ae7dcaf30e90533028b49fe"},
     {file = "tomli-2.4.1.tar.gz", hash = "sha256:7c7e1a961a0b2f2472c1ac5b69affa0ae1132c39adcb67aba98568702b9cc23f"},
 ]
+markers = {main = "(extra == \"minimal\" or extra == \"all\") and python_version == \"3.10\"", test = "python_version == \"3.10\""}
 
 [[package]]
 name = "tornado"
@@ -7909,10 +7948,10 @@ test = ["big-O", "jaraco.functools", "jaraco.itertools", "jaraco.test", "more_it
 type = ["pytest-mypy (>=1.0.1) ; platform_python_implementation != \"PyPy\""]
 
 [extras]
-all = ["anyrun-sdk", "apiosintds", "assemblyline_client", "backscatter", "blockchain", "censys", "clamd", "crowdstrike-falconpy", "dnsdb2", "domaintools_api", "geoip2", "greynoise", "jbxapi", "lief", "lxml", "maclookup", "matplotlib", "mattermostdriver", "misp-stix", "mwdblib", "ndjson", "numpy", "oauth2", "opencv-python", "openpyxl", "pandas", "pandas_ods_reader", "pandoc", "passivetotal", "pdftotext", "pycountry", "pyeti-python3", "pyeupi", "pygeoip", "pyintel471", "pyipasnhistory", "pymisp", "pypdns", "pypssl", "pysafebrowsing", "pytesseract", "python-docx", "python-pptx", "pyzbar", "requests", "rstapi", "setuptools", "shodan", "sigmatools", "sigmf", "slack-sdk", "socialscan", "sparqlwrapper", "tau-clients", "taxii2-client", "trustar", "urlarchiver", "vt-graph-api", "vt-py", "vulners", "vysion", "wand", "xlrd", "yara-python"]
-minimal = ["backscatter", "blockchain", "censys", "clamd", "crowdstrike-falconpy", "dnsdb2", "domaintools_api", "geoip2", "greynoise", "jbxapi", "maclookup", "matplotlib", "mattermostdriver", "ndjson", "oauth2", "passivetotal", "pycountry", "pyeti-python3", "pyeupi", "pygeoip", "pyintel471", "pyipasnhistory", "pypdns", "pypssl", "pysafebrowsing", "requests", "rstapi", "slack-sdk", "socialscan", "urlarchiver", "vt-graph-api", "vt-py", "vulners", "yara-python"]
+all = ["anyrun-sdk", "apiosintds", "assemblyline_client", "backscatter", "blockchain", "censys", "clamd", "crowdstrike-falconpy", "dnsdb2", "domaintools_api", "geoip2", "greynoise", "jbxapi", "lief", "lxml", "maclookup", "matplotlib", "mattermostdriver", "misp-stix", "mwdblib", "ndjson", "numpy", "oauth2", "opencv-python", "openpyxl", "pandas", "pandas_ods_reader", "pandoc", "passivetotal", "pdftotext", "pycountry", "pyeti-python3", "pyeupi", "pygeoip", "pyintel471", "pyipasnhistory", "pymisp", "pyonyphe", "pypdns", "pypssl", "pysafebrowsing", "pytesseract", "python-docx", "python-pptx", "pyzbar", "requests", "rstapi", "setuptools", "shodan", "sigmatools", "sigmf", "slack-sdk", "socialscan", "sparqlwrapper", "tau-clients", "taxii2-client", "trustar", "urlarchiver", "vt-graph-api", "vt-py", "vulners", "vysion", "wand", "xlrd", "yara-python"]
+minimal = ["backscatter", "blockchain", "censys", "clamd", "crowdstrike-falconpy", "dnsdb2", "domaintools_api", "geoip2", "greynoise", "jbxapi", "maclookup", "matplotlib", "mattermostdriver", "ndjson", "oauth2", "passivetotal", "pycountry", "pyeti-python3", "pyeupi", "pygeoip", "pyintel471", "pyipasnhistory", "pyonyphe", "pypdns", "pypssl", "pysafebrowsing", "requests", "rstapi", "slack-sdk", "socialscan", "urlarchiver", "vt-graph-api", "vt-py", "vulners", "yara-python"]
 
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10,<4.0"
-content-hash = "4ccfa27333f21a63bb882b6c1feeebf3deca81a602a910954d72922e98ac65e8"
+content-hash = "5865f8e27c3f7d3e1d7a867da4080d724ea43cb33e15632595265f5c9c7f76d0"
