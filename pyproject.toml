@@ -70,6 +70,7 @@ minimal = [
     "vt-graph-api",
     "vt-py",
     "vulners",
+    "whisper-misp",
 ]
 
 all = [
@@ -139,6 +140,7 @@ all = [
     "vulners",   ## in minimal
     "vysion",
     "wand",
+    "whisper-misp",  ## in minimal
     "xlrd",
 ]
 
