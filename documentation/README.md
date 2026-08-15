@@ -1113,6 +1113,7 @@ An expansion module to have the observable's threat score assessed by Google Thr
 > - https://gtidocs.virustotal.com/reference
 
 - **requirements**:
+[Xquik](https://github.com/Xquik-dev/x-twitter-scraper)
 >An access to the Google Threat Intelligence API (apikey), with a high request rate limit.
 
 -----
@@ -2329,7 +2330,7 @@ An expansion hover module to display the result of sigma queries.
 >Text displaying results of queries on the Sigma attribute.
 
 - **references**:
->https://github.com/Neo23x0/sigma/wiki
+>https://github.com/SigmaHQ/sigma/wiki
 
 - **requirements**:
 >Sigma python library
