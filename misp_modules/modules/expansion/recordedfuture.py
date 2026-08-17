@@ -1,18 +1,22 @@
 import json
 import logging
-import os
 import platform
-from typing import Dict, List, Optional, Tuple
+from typing import Optional, List, Tuple, Dict
 from urllib.parse import quote, urlparse
-
 import requests
-from pymisp import MISPAttribute, MISPEvent, MISPObject, MISPTag
-from requests.exceptions import ConnectionError, ConnectTimeout, HTTPError, InvalidURL, ProxyError
-
+from requests.exceptions import (
+    HTTPError,
+    ProxyError,
+    InvalidURL,
+    ConnectTimeout,
+    ConnectionError,
+)
+from pymisp import MISPAttribute, MISPEvent, MISPTag, MISPObject
+import os
 from . import check_input_attribute, checking_error, standard_error_message
 
 moduleinfo = {
-    "version": "2.0.0",
+    "version": "2.0.1",
     "author": "Recorded Future",
     "description": "Module to enrich attributes with threat intelligence from Recorded Future.",
     "module-type": ["expansion", "hover"],
@@ -95,16 +99,18 @@ class RequestHandler:
         """General get method with proxy error handling."""
         try:
             timeout = 7 if self.proxies else None
-            response = self.session.get(url, headers=headers, proxies=self.proxies, timeout=timeout)
+            response = self.session.get(
+                url, headers=headers, proxies=self.proxies, timeout=timeout
+            )
             response.raise_for_status()
             return response
-        except (ConnectTimeout, ProxyError, InvalidURL) as error:
+        except (ConnectTimeout, ProxyError, ConnectionError, InvalidURL) as error:
             msg = "Error connecting with proxy, please check the Recorded Future app proxy settings."
             LOGGER.error(f"{msg} Error: {error}")
             misperrors["error"] = msg
             raise
 
-    def rf_lookup(self, category: str, ioc: str) -> requests.Response:
+    def rf_lookup(self, category: str, ioc: str) -> Optional[requests.Response]:
         """Do a lookup call using Recorded Future's ConnectAPI."""
         parsed_ioc = quote(ioc, safe="")
         url = f"https://api.recordedfuture.com/gw/misp/lookup/{category}/{parsed_ioc}"
@@ -112,7 +118,23 @@ class RequestHandler:
         try:
             response = self.get(url, headers)
         except HTTPError as error:
-            msg = f"Error when requesting data from Recorded Future. {error.response}: {error.response.reason}"
+            response = error.response
+            response_body = response.text[:1000].replace("\n", " ")
+            if response.status_code == 404:
+                LOGGER.debug(
+                    "Recorded Future lookup returned no data: "
+                    "status=%s reason=%s url=%s body=%r",
+                    response.status_code,
+                    response.reason,
+                    response.url,
+                    response_body,
+                )
+                return None
+            msg = (
+                "Error when requesting data from Recorded Future. "
+                f"status={response.status_code} reason={response.reason} "
+                f"url={response.url} body={response_body!r}"
+            )
             LOGGER.error(msg)
             misperrors["error"] = msg
             raise
@@ -195,6 +217,9 @@ class GalaxyFinder:
         return ""
 
 
+GLOBAL_GALAXY_FINDER = GalaxyFinder()
+
+
 class RFColors:
     """Class for setting signature RF-colors."""
 
@@ -253,18 +278,25 @@ class RFEnricher:
         self.enrichment_object.template_id = "1"
         self.enrichment_object.description = "Recorded Future Enrichment"
         setattr(self.enrichment_object, "meta-category", "network")
-        description = "An object containing the enriched attribute and related entities from Recorded Future."
-        self.enrichment_object.from_dict(**{"meta-category": "misc", "description": description, "distribution": 0})
+        description = (
+            "An object containing the enriched attribute and "
+            "related entities from Recorded Future."
+        )
+        self.enrichment_object.from_dict(
+            **{"meta-category": "misc", "description": description, "distribution": 0}
+        )
 
         # Create a copy of enriched attribute to add tags to
         temp_attr = MISPAttribute()
         temp_attr.from_dict(**attribute_props)
         self.enriched_attribute = MISPAttribute()
-        self.enriched_attribute.from_dict(**{"value": temp_attr.value, "type": temp_attr.type, "distribution": 0})
+        self.enriched_attribute.from_dict(
+            **{"value": temp_attr.value, "type": temp_attr.type, "distribution": 0}
+        )
 
         self.related_attributes: List[Tuple[str, MISPAttribute]] = []
         self.color_picker = RFColors()
-        self.galaxy_finder = GalaxyFinder()
+        self.galaxy_finder = GLOBAL_GALAXY_FINDER
 
         # Mapping from MISP-type to RF-type
         self.type_to_rf_category = {
@@ -315,7 +347,11 @@ class RFEnricher:
         # since RF do not support enriching ip addresses with port
         if self.enriched_attribute.type in ["ip-src|port", "ip-dst|port"]:
             enriched_attribute_value = enriched_attribute_value.split("|")[0]
-        json_response = GLOBAL_REQUEST_HANDLER.rf_lookup(category, enriched_attribute_value)
+        json_response = GLOBAL_REQUEST_HANDLER.rf_lookup(
+            category, enriched_attribute_value
+        )
+        if json_response is None:
+            return
         response = json.loads(json_response.content)
 
         try:
@@ -336,18 +372,21 @@ class RFEnricher:
                 tag_name = f'recorded-future:risk-rule="{risk_rule}"'
                 self.add_tag(tag_name, hex_color)
 
-            links_data = response["data"].get("links", {}).get("hits")
+            links = response["data"].get("links")
+            links_data = links.get("hits") if links is not None else None
             # Check if we have error in links response. If yes, then user do not have right module enabled in token
-            links_access_error = response["data"].get("links", {}).get("error")
+            links_access_error = links.get("error") if links is not None else None
             galaxy_tags = []
-            if not links_access_error:
+            if not links_access_error and links_data is not None:
                 for hit in links_data:
                     for section in hit["sections"]:
                         for sec_list in section["lists"]:
                             entity_type = sec_list["type"]["name"]
                             for entity in sec_list["entities"]:
                                 if entity_type in self.galaxy_tag_types:
-                                    galaxy = self.galaxy_finder.find_galaxy_match(entity["name"], entity_type)
+                                    galaxy = self.galaxy_finder.find_galaxy_match(
+                                        entity["name"], entity_type
+                                    )
                                     if galaxy and galaxy not in galaxy_tags:
                                         galaxy_tags.append(galaxy)
                                 else:
@@ -373,7 +412,9 @@ class RFEnricher:
                             # because there can be a huge list of related entities
                             if int(related["count"]) > 4:
                                 indicator = related["entity"]["name"]
-                                galaxy = self.galaxy_finder.find_galaxy_match(indicator, related_type)
+                                galaxy = self.galaxy_finder.find_galaxy_match(
+                                    indicator, related_type
+                                )
                                 # Handle deduplication of galaxy tags
                                 if galaxy and galaxy not in galaxy_tags:
                                     galaxy_tags.append(galaxy)
@@ -454,7 +495,8 @@ def get_proxy_settings(config: dict) -> Optional[Dict[str, str]]:
     if host:
         if not port:
             misperrors["error"] = (
-                "The recordedfuture_proxy_host config is set, please also set the recordedfuture_proxy_port."
+                "The recordedfuture_proxy_host config is set, "
+                "please also set the recordedfuture_proxy_port."
             )
             raise KeyError
         parsed = urlparse(host)
@@ -493,7 +535,9 @@ def handler(q=False):
     else:
         misperrors["error"] = "Missing Recorded Future token."
         return misperrors
-    if not request.get("attribute") or not check_input_attribute(request["attribute"], requirements=("type", "value")):
+    if not request.get("attribute") or not check_input_attribute(
+        request["attribute"], requirements=("type", "value")
+    ):
         return {"error": f"{standard_error_message}, {checking_error}."}
     if request["attribute"]["type"] not in mispattributes["input"]:
         return {"error": "Unsupported attribute type."}
@@ -508,7 +552,14 @@ def handler(q=False):
 
     try:
         rf_enricher.enrich()
-    except (HTTPError, ConnectTimeout, ProxyError, InvalidURL, KeyError):
+    except (
+        HTTPError,
+        ConnectTimeout,
+        ProxyError,
+        ConnectionError,
+        InvalidURL,
+        KeyError,
+    ):
         return misperrors
 
     return rf_enricher.get_results()
