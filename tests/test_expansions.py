@@ -166,8 +166,10 @@ class TestExpansions(unittest.TestCase):
         except Exception:
             self.assertTrue(self.get_values(response).startswith("Not a valid BTC address"))
 
-    @unittest.skip("Remote service rate limits requests from CI IPs")
     def test_btc_scam_check(self):
+        if LiveCI:
+            return
+
         query = {"module": "btc_scam_check", "btc": "1ES14c7qLb5CYhLMUekctxLgc1FV2Ti9DA"}
         response = self.misp_modules_post(query)
         self.assertEqual(self.get_values(response), "1es14c7qlb5cyhlmuekctxlgc1fv2ti9da fraudolent bitcoin address")
