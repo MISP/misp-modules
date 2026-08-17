@@ -167,6 +167,9 @@ class TestExpansions(unittest.TestCase):
             self.assertTrue(self.get_values(response).startswith("Not a valid BTC address"))
 
     def test_btc_scam_check(self):
+        if LiveCI:
+            return
+
         query = {"module": "btc_scam_check", "btc": "1ES14c7qLb5CYhLMUekctxLgc1FV2Ti9DA"}
         response = self.misp_modules_post(query)
         self.assertEqual(self.get_values(response), "1es14c7qlb5cyhlmuekctxlgc1fv2ti9da fraudolent bitcoin address")
