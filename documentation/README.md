@@ -3027,6 +3027,36 @@ Module to enrich the information by making use of the Vysion API.
 
 -----
 
+#### [Whisper](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/whisper.py)
+
+<img src=logos/whisper.png height=60>
+
+Enrich IPs, domains, and ASNs with threat intelligence and infrastructure context from the Whisper graph.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/whisper.py)]
+
+- **features**:
+>The module queries the Whisper graph for the input attribute and returns related infrastructure (DNS, ASN/BGP, WHOIS) and threat intelligence context as MISP attributes and objects.
+
+- **config**:
+> - api_url
+> - api_key
+> - max_tlp
+> - timeout
+
+- **input**:
+>An IP address, domain, hostname or AS MISP attribute.
+
+- **output**:
+>MISP attributes and objects with the related infrastructure and threat intelligence context from the Whisper graph.
+
+- **references**:
+>https://whisper.security
+
+- **requirements**:
+>An access to the Whisper graph API (api_url + api_key)
+
+-----
+
 #### [Whois Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/whois.py)
 
 Module to query a local instance of uwhois (https://github.com/rafiot/uwhoisd).
