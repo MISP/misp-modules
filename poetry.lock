@@ -7554,6 +7554,23 @@ files = [
 ]
 
 [[package]]
+name = "whisper-misp"
+version = "0.0.1"
+description = "Whisper enrichment module for MISP (misp-modules expansion/hover)."
+optional = true
+python-versions = ">=3.10"
+groups = ["main"]
+markers = "extra == \"minimal\" or extra == \"all\""
+files = [
+    {file = "whisper_misp-0.0.1-py3-none-any.whl", hash = "sha256:e297f5e89727d6180fe2f69f44feaf7a0144cc9354e2ac6b9974501bbad69b4d"},
+    {file = "whisper_misp-0.0.1.tar.gz", hash = "sha256:72c41f9593e87faddfea9d6dc83b0d83b591c7a660f979f78e45c93d5b002a5c"},
+]
+
+[package.dependencies]
+pymisp = ">=2.5,<3"
+requests = ">=2.32"
+
+[[package]]
 name = "win-unicode-console"
 version = "0.5"
 description = "Enable Unicode input and display when running Python from Windows console."
@@ -7948,10 +7965,10 @@ test = ["big-O", "jaraco.functools", "jaraco.itertools", "jaraco.test", "more_it
 type = ["pytest-mypy (>=1.0.1) ; platform_python_implementation != \"PyPy\""]
 
 [extras]
-all = ["anyrun-sdk", "apiosintds", "assemblyline_client", "backscatter", "blockchain", "censys", "clamd", "crowdstrike-falconpy", "dnsdb2", "domaintools_api", "geoip2", "greynoise", "jbxapi", "lief", "lxml", "maclookup", "matplotlib", "mattermostdriver", "misp-stix", "mwdblib", "ndjson", "numpy", "oauth2", "opencv-python", "openpyxl", "pandas", "pandas_ods_reader", "pandoc", "passivetotal", "pdftotext", "pycountry", "pyeti-python3", "pyeupi", "pygeoip", "pyintel471", "pyipasnhistory", "pymisp", "pyonyphe", "pypdns", "pypssl", "pysafebrowsing", "pytesseract", "python-docx", "python-pptx", "pyzbar", "requests", "rstapi", "setuptools", "shodan", "sigmatools", "sigmf", "slack-sdk", "socialscan", "sparqlwrapper", "tau-clients", "taxii2-client", "trustar", "urlarchiver", "vt-graph-api", "vt-py", "vulners", "vysion", "wand", "xlrd", "yara-python"]
-minimal = ["backscatter", "blockchain", "censys", "clamd", "crowdstrike-falconpy", "dnsdb2", "domaintools_api", "geoip2", "greynoise", "jbxapi", "maclookup", "matplotlib", "mattermostdriver", "ndjson", "oauth2", "passivetotal", "pycountry", "pyeti-python3", "pyeupi", "pygeoip", "pyintel471", "pyipasnhistory", "pyonyphe", "pypdns", "pypssl", "pysafebrowsing", "requests", "rstapi", "slack-sdk", "socialscan", "urlarchiver", "vt-graph-api", "vt-py", "vulners", "yara-python"]
+all = ["anyrun-sdk", "apiosintds", "assemblyline_client", "backscatter", "blockchain", "censys", "clamd", "crowdstrike-falconpy", "dnsdb2", "domaintools_api", "geoip2", "greynoise", "jbxapi", "lief", "lxml", "maclookup", "matplotlib", "mattermostdriver", "misp-stix", "mwdblib", "ndjson", "numpy", "oauth2", "opencv-python", "openpyxl", "pandas", "pandas_ods_reader", "pandoc", "passivetotal", "pdftotext", "pycountry", "pyeti-python3", "pyeupi", "pygeoip", "pyintel471", "pyipasnhistory", "pymisp", "pyonyphe", "pypdns", "pypssl", "pysafebrowsing", "pytesseract", "python-docx", "python-pptx", "pyzbar", "requests", "rstapi", "setuptools", "shodan", "sigmatools", "sigmf", "slack-sdk", "socialscan", "sparqlwrapper", "tau-clients", "taxii2-client", "trustar", "urlarchiver", "vt-graph-api", "vt-py", "vulners", "vysion", "wand", "whisper-misp", "xlrd", "yara-python"]
+minimal = ["backscatter", "blockchain", "censys", "clamd", "crowdstrike-falconpy", "dnsdb2", "domaintools_api", "geoip2", "greynoise", "jbxapi", "maclookup", "matplotlib", "mattermostdriver", "ndjson", "oauth2", "passivetotal", "pycountry", "pyeti-python3", "pyeupi", "pygeoip", "pyintel471", "pyipasnhistory", "pyonyphe", "pypdns", "pypssl", "pysafebrowsing", "requests", "rstapi", "slack-sdk", "socialscan", "urlarchiver", "vt-graph-api", "vt-py", "vulners", "whisper-misp", "yara-python"]
 
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10,<4.0"
-content-hash = "5865f8e27c3f7d3e1d7a867da4080d724ea43cb33e15632595265f5c9c7f76d0"
+content-hash = "76fdcc7346eb9799b8c8d9e109cf041e3a81f1c016972962c7a77c1f4834e778"
