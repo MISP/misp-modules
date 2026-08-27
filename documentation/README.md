@@ -3087,32 +3087,24 @@ Module to query a local instance of uwhois (https://github.com/rafiot/uwhoisd).
 
 <img src=logos/whoisfreaks.png height=60>
 
-An expansion module for https://whoisfreaks.com/ that will provide an enriched analysis of the provided domain, including WHOIS and DNS information.
+An expansion module for https://whoisfreaks.com/ that enriches a domain or an IP address. For a domain it queries the WHOIS, DNS and Domain Reputation APIs; for an IP address it queries the IP WHOIS, Geolocation and IP Security APIs. All lookups for a given attribute are executed in parallel.
 [[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/whoisfreaks.py)]
 
 - **features**:
->The module takes a domain as input and queries the Whoisfreaks API with it.
+>The module takes a domain or an IP address as input.
 >
->Some parsing operations are then processed on the result of the query to extract as much information as possible.
+>For a domain it queries the Whoisfreaks WHOIS (v1.0), DNS (v2.0) and Domain Reputation APIs in parallel. For an IP address it queries the IP WHOIS, Geolocation and IP Security APIs in parallel.
 >
->After this we map the extracted data to MISP attributes.
+>The results are mapped to MISP attributes, objects (geolocation, asn, reputation and security) and tags.
 
 - **config**:
 >apikey
 
 - **input**:
->A domain whose Data is required
+>A domain or an IP address (ip-src, ip-dst or ip).
 
 - **output**:
->MISP attributes resulting from the query on Whoisfreaks API, included in the following list:
->- domain
->- dns-soa-email
->- whois-registrant-email
->- whois-registrant-phone
->- whois-registrant-name
->- whois-registrar
->- whois-creation-date
->- domain
+>MISP attributes, objects and tags resulting from the WhoisFreaks WHOIS, DNS, Domain Reputation, IP WHOIS, Geolocation and IP Security APIs.
 
 - **references**:
 >https://whoisfreaks.com/
