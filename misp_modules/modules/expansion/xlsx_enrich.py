@@ -43,8 +43,8 @@ def handler(q=False):
 
     xls_content = ""
     xls_file = io.BytesIO(xlsx_array)
-    pandas.set_option("display.max_colwidth", -1)
     try:
+        pandas.set_option("display.max_colwidth", None)
         xls = pandas.read_excel(xls_file)
         xls_content = xls.to_string(max_rows=None)
         print(xls_content)
