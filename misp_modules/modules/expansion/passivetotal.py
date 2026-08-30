@@ -351,7 +351,7 @@ def process_malware(instance, query):
     for h in content["hashes"]:
         if len(h) == 32:
             hashes["md5"].append(h)
-        elif len(h) == 41:
+        elif len(h) == 40:
             hashes["sha1"].append(h)
         elif len(h) == 64:
             hashes["sha256"].append(h)
