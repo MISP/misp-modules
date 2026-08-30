@@ -92,9 +92,9 @@ def handler(q=False):
 
     api = VMRayRESTAPI(request["config"].get("url"), request["config"].get("apikey"), False)
 
-    shareable = request["config"].get("shareable")
-    do_not_reanalyze = request["config"].get("do_not_reanalyze")
-    do_not_include_vmrayjobids = request["config"].get("do_not_include_vmrayjobids")
+    shareable = request["config"].get("shareable") or "false"
+    do_not_reanalyze = request["config"].get("do_not_reanalyze") or "false"
+    do_not_include_vmrayjobids = request["config"].get("do_not_include_vmrayjobids") or "false"
 
     try:
         shareable = bool(strtobool(shareable))  # Do we want the sample to be shared?
