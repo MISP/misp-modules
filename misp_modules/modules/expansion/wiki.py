@@ -43,7 +43,8 @@ def handler(q=False):
             " Chrome/50.0.2661.102 Safari/537.36"
         ),
     )
-    query_string = 'SELECT ?item \nWHERE { \n?item rdfs:label"' + request.get("text") + '" @en \n}\n'
+    escaped_text = request.get("text").replace("\\", "\\\\").replace('"', '\\"')
+    query_string = 'SELECT ?item \nWHERE { \n?item rdfs:label"' + escaped_text + '" @en \n}\n'
     sparql.setQuery(query_string)
     sparql.setReturnFormat(JSON)
     results = sparql.query().convert()
