@@ -69,16 +69,18 @@ def handler(q=False):
         return False
     request = json.loads(q)
     # validate Cluster25 params
-    if request.get("config"):
-        if request["config"].get("apikey") is None:
-            misperrors["error"] = "Cluster25 apikey is missing"
-            return misperrors
-        if request["config"].get("api_id") is None:
-            misperrors["error"] = "Cluster25 api_id is missing"
-            return misperrors
-        if request["config"].get("base_url") is None:
-            misperrors["error"] = "Cluster25 base_url is missing"
-            return misperrors
+    if not request.get("config"):
+        misperrors["error"] = "Cluster25 config is missing"
+        return misperrors
+    if request["config"].get("apikey") is None:
+        misperrors["error"] = "Cluster25 apikey is missing"
+        return misperrors
+    if request["config"].get("api_id") is None:
+        misperrors["error"] = "Cluster25 api_id is missing"
+        return misperrors
+    if request["config"].get("base_url") is None:
+        misperrors["error"] = "Cluster25 base_url is missing"
+        return misperrors
 
     # validate attribute
     if not request.get("attribute") or not check_input_attribute(request["attribute"]):
