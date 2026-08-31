@@ -203,8 +203,9 @@ def lookup_indicator(client, query):
             log.debug("There is something in results > stats > malicious")
             threat_list = set()
 
-            if "matches" in result["meta"]["processors"]["gsb"]["data"]:
-                for item in result["meta"]["processors"]["gsb"]["data"]["matches"]:
+            gsb_data = result.get("meta", {}).get("processors", {}).get("gsb", {}).get("data", {})
+            if "matches" in gsb_data:
+                for item in gsb_data["matches"]:
                     if item["threatType"]:
                         threat_list.add(item["threatType"])
 
