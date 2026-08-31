@@ -67,7 +67,7 @@ def isBlacklisted(value):
     ]
 
     for b in blacklist:
-        if value in b:
+        if value.startswith(b):
             return True
 
     return False
