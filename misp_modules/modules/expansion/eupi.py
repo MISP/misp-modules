@@ -44,7 +44,7 @@ def handler(q=False):
         misperrors["error"] = "Unsupported attributes type"
         return misperrors
 
-    if not request.get("config") and not (request["config"].get("apikey") and request["config"].get("url")):
+    if not request.get("config") or not (request["config"].get("apikey") and request["config"].get("url")):
         misperrors["error"] = "EUPI authentication is missing"
         return misperrors
 
