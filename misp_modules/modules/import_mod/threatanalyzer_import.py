@@ -64,11 +64,13 @@ def handler(q=False):
                                 continue
                             if line.count("|") == 3:
                                 l_fname, l_size, l_md5, l_created = line.split("|")
-                            if line.count("|") == 4:
+                            elif line.count("|") == 4:
                                 l_fname, l_size, l_md5, l_sha256, l_created = line.split("|")
+                            else:
+                                continue
                             l_fname = cleanup_filepath(l_fname)
                             if l_fname:
-                                if l_size == 0:
+                                if int(l_size) == 0:
                                     results.append(
                                         {
                                             "values": l_fname,
