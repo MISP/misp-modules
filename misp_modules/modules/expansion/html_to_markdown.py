@@ -3,7 +3,7 @@ import socket
 
 import requests
 import ipaddress
-from urllib.parse import urlparse
+from urllib.parse import urljoin, urlparse
 from bs4 import BeautifulSoup
 from markdownify import markdownify
 
@@ -27,14 +27,7 @@ moduleinfo = {
 }
 
 
-BLOCKED_RANGES = [
-    ipaddress.ip_network("127.0.0.0/8"),
-    ipaddress.ip_network("10.0.0.0/8"),
-    ipaddress.ip_network("172.16.0.0/12"),
-    ipaddress.ip_network("192.168.0.0/16"),
-    ipaddress.ip_network("169.254.0.0/16"),
-    ipaddress.ip_network("::1/128"),
-]
+MAX_REDIRECTS = 5
 
 
 def _normalize_ip_address(ip_str: str) -> ipaddress.IPv4Address | ipaddress.IPv6Address:
@@ -43,8 +36,7 @@ def _normalize_ip_address(ip_str: str) -> ipaddress.IPv4Address | ipaddress.IPv6
 
 
 def _is_ip_blocked(ip_str: str) -> bool:
-    ip = _normalize_ip_address(ip_str)
-    return any(ip in net for net in BLOCKED_RANGES)
+    return not _normalize_ip_address(ip_str).is_global
 
 
 def _hostname_resolves_to_blocked_ip(hostname: str) -> bool:
@@ -66,10 +58,15 @@ def is_safe_url(url: str) -> bool:
 
 
 def fetchHTML(url):
-    if not is_safe_url(url):
-        raise ValueError(f"Blocked URL: {url}")
-    r = requests.get(url, timeout=10)
-    return r.text
+    for _ in range(MAX_REDIRECTS + 1):
+        if not is_safe_url(url):
+            raise ValueError(f"Blocked URL: {url}")
+        r = requests.get(url, timeout=10, allow_redirects=False)
+        if r.is_redirect and r.headers.get("location"):
+            url = urljoin(url, r.headers["location"])
+            continue
+        return r.text
+    raise ValueError(f"Too many redirects: {url}")
 
 
 def stripUselessTags(html):
