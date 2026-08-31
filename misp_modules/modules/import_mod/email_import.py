@@ -381,9 +381,9 @@ class HTMLURLParser(HTMLParser):
 
     def handle_starttag(self, tag, attrs):
         if tag == "a":
-            value = self.urls.append(dict(attrs).get("href"))
-        if tag == "img":
-            value = self.urls.append(dict(attrs).get("src"))
+            value = dict(attrs).get("href")
+        elif tag == "img":
+            value = dict(attrs).get("src")
         else:
             return
 
