@@ -91,11 +91,6 @@ class AssemblyLineParser:
         if "error" in self.results:
             return self.results
         event = json.loads(self.misp_event.to_json())
-        try:
-            with open("/tmp/assemblyline_query_debug.json", "w", encoding="utf-8") as debug_file:
-                json.dump(event, debug_file, indent=2)
-        except Exception:
-            pass
         results = {key: event[key] for key in ("Attribute", "Object", "Tag") if (key in event and event[key])}
         if not results:
             return {
