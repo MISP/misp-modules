@@ -200,9 +200,9 @@ def handler(q=False):
     markdown = data.get("markdown")
     try:
         margin = "3"
-        if "config" in request.get("config", []):
-            if request["config"].get("margin"):
-                margin = request["config"].get("margin")
+        cfg = request.get("config") or {}
+        if cfg.get("margin"):
+            margin = cfg.get("margin")
         rendered = convert(markdown, margin=margin)
     except Exception as e:
         rendered = f"Error: {e}"
