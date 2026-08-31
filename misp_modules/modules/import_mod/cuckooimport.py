@@ -343,7 +343,7 @@ class CuckooParser:
 
     def add_http(self):
         """Add the HTTP requests"""
-        network = self.report.get("network", [])
+        network = self.report.get("network", {})
         http = network.get("http", [])
         if not http:
             log.info("No HTTP connection found in the report, skipping")
@@ -363,7 +363,7 @@ class CuckooParser:
         Add UDP/TCP traffic
         proto must be one of "tcp", "udp"
         """
-        network = self.report.get("network", [])
+        network = self.report.get("network", {})
         li_conn = network.get(proto, [])
         if not li_conn:
             log.info(f"No {proto} connection found in the report, skipping")
@@ -394,7 +394,7 @@ class CuckooParser:
 
     def add_dns(self):
         """Add DNS records"""
-        network = self.report.get("network", [])
+        network = self.report.get("network", {})
         dns = network.get("dns", [])
         if not dns:
             log.info("No DNS connection found in the report, skipping")
