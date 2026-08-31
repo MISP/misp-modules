@@ -49,7 +49,10 @@ def handler(q=False):
     elif request.get("ip-src"):
         toquery = request["ip-src"]
     elif request.get("domain|ip"):
-        toquery = request["domain|ip"].split("|")[1]
+        parts = request["domain|ip"].split("|")
+        if len(parts) != 2:
+            return {"error": "Invalid domain|ip composite attribute."}
+        toquery = parts[1]
     else:
         return False
 
