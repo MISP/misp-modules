@@ -51,6 +51,7 @@ moduleconfig = [
     "upload_threat_level_id",
     "limit_upload_events",
     "limit_upload_attributes",
+    "verify_ssl",
 ]
 # There are more config settings in this module than used by the enrichment
 # There is also a PyMISP module which reuses the module config, and requires additional configuration, for example used for pushing indicators to the API
@@ -64,6 +65,7 @@ class CytomicParser:
         self.misp_event.add_attribute(**self.attribute)
 
         self.config_object = config_object
+        self.verify_ssl = config_object.get("verify_ssl", True) if config_object else True
 
         if self.config_object:
             self.token = self.get_token()
@@ -92,7 +94,7 @@ class CytomicParser:
                     access_token_response = requests.post(
                         token_url,
                         data=data,
-                        verify=False,
+                        verify=self.verify_ssl,
                         allow_redirects=False,
                         auth=(clientid, clientsecret),
                     )
@@ -136,7 +138,7 @@ class CytomicParser:
             # API calls
             api_call_headers = {"Authorization": "Bearer " + self.token}
             result_query_endpoint_fileinformation = requests.get(
-                query_endpoint_fileinformation, headers=api_call_headers, verify=False
+                query_endpoint_fileinformation, headers=api_call_headers, verify=self.verify_ssl
             )
             json_result_query_endpoint_fileinformation = json.loads(result_query_endpoint_fileinformation.text)
 
@@ -147,37 +149,37 @@ class CytomicParser:
                 cytomic_object.add_attribute(
                     "fileName",
                     type="text",
-                    value=json_result_query_endpoint_fileinformation["fileName"],
+                    value=json_result_query_endpoint_fileinformation.get("fileName"),
                 )
                 cytomic_object.add_attribute(
                     "fileSize",
                     type="text",
-                    value=json_result_query_endpoint_fileinformation["fileSize"],
+                    value=json_result_query_endpoint_fileinformation.get("fileSize"),
                 )
                 cytomic_object.add_attribute(
                     "last-seen",
                     type="datetime",
-                    value=json_result_query_endpoint_fileinformation["lastSeen"],
+                    value=json_result_query_endpoint_fileinformation.get("lastSeen"),
                 )
                 cytomic_object.add_attribute(
                     "first-seen",
                     type="datetime",
-                    value=json_result_query_endpoint_fileinformation["firstSeen"],
+                    value=json_result_query_endpoint_fileinformation.get("firstSeen"),
                 )
                 cytomic_object.add_attribute(
                     "classification",
                     type="text",
-                    value=json_result_query_endpoint_fileinformation["classification"],
+                    value=json_result_query_endpoint_fileinformation.get("classification"),
                 )
                 cytomic_object.add_attribute(
                     "classificationName",
                     type="text",
-                    value=json_result_query_endpoint_fileinformation["classificationName"],
+                    value=json_result_query_endpoint_fileinformation.get("classificationName"),
                 )
                 self.misp_event.add_object(**cytomic_object)
 
                 result_query_endpoint_machines = requests.get(
-                    query_endpoint_machines, headers=api_call_headers, verify=False
+                    query_endpoint_machines, headers=api_call_headers, verify=self.verify_ssl
                 )
                 json_result_query_endpoint_machines = json.loads(result_query_endpoint_machines.text)
 
@@ -193,7 +195,7 @@ class CytomicParser:
                             result_endpoint_machines_client = requests.get(
                                 query_endpoint_machines_client,
                                 headers=api_call_headers,
-                                verify=False,
+                                verify=self.verify_ssl,
                             )
                             json_result_endpoint_machines_client = json.loads(result_endpoint_machines_client.text)
 
@@ -292,6 +294,7 @@ def handler(q=False):
         ),
         "query_machines": True,
         "query_machine_info": True,
+        "verify_ssl": str(request["config"].get("verify_ssl") or "true").lower() not in ("false", "0", "no"),
     }
 
     cytomic_parser = CytomicParser(attribute, config_object)
