@@ -1,4 +1,7 @@
+import ipaddress
 import json
+import socket
+from urllib.parse import urlparse
 
 from url_archiver import url_archiver
 
@@ -25,6 +28,21 @@ moduleinfo = {
 moduleconfig = ["archivepath"]
 
 
+def is_safe_url(url):
+    parsed = urlparse(url)
+    if parsed.scheme not in ("http", "https") or not parsed.hostname:
+        return False
+    try:
+        resolved = socket.getaddrinfo(parsed.hostname, None)
+    except socket.gaierror:
+        return False
+    for info in resolved:
+        ip = ipaddress.ip_address(info[4][0])
+        if not ip.is_global:
+            return False
+    return True
+
+
 def handler(q=False):
     if q is False:
         return False
@@ -35,15 +53,18 @@ def handler(q=False):
         archive_path = "/tmp/"
     if request.get("link"):
         tocache = request["link"]
-        data = __archiveLink(archive_path, tocache)
-        mispattributes["output"] = ["attachment"]
+        output = ["attachment"]
     elif request.get("url"):
         tocache = request["url"]
-        data = __archiveLink(archive_path, tocache)
-        mispattributes["output"] = ["malware-sample"]
+        output = ["malware-sample"]
     else:
         misperrors["error"] = "Link is missing"
         return misperrors
+    if not is_safe_url(tocache):
+        misperrors["error"] = "Blocked URL"
+        return misperrors
+    data = __archiveLink(archive_path, tocache)
+    mispattributes["output"] = output
     enc_data = data.decode("ascii")
     r = {"results": [{"types": mispattributes["output"], "values": tocache, "data": enc_data}]}
     return r
