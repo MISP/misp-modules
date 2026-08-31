@@ -75,7 +75,7 @@ def is_cof_valid_simple(d: dict) -> bool:
     if not isinstance(d["rdata"], str) and not isinstance(d["rdata"], list):
         print("'rdata' is not a list and not a string.", file=sys.stderr)
         return False
-    if not ("time_first" in d and "time_last" in d) or ("zone_time_first" in d and "zone_time_last" in d):
+    if not (("time_first" in d and "time_last" in d) or ("zone_time_first" in d and "zone_time_last" in d)):
         print(
             "We are missing EITHER ('first_seen' and 'last_seen') OR ('zone_time_first' and zone_time_last') fields",
             file=sys.stderr,
