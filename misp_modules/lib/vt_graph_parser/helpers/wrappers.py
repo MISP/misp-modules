@@ -40,7 +40,7 @@ class MispAttribute(object):
             label (str): attribute label.
         """
         if misp_type.startswith("filename|"):
-            label, value = value.split("|")
+            label, value = value.rsplit("|", 1)
             misp_type = "filename|X"
         if misp_type == "filename":
             label = value
