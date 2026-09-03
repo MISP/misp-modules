@@ -103,7 +103,7 @@ def get_misp_modules_pid() -> typing.Union[int, None]:
             if any("misp-modules" in x for x in psutil.Process(pid).cmdline()):
                 return pid
         return None
-    except psutil.AccessDenied:
+    except (psutil.AccessDenied, psutil.NoSuchProcess, psutil.ZombieProcess):
         return None
 
 
