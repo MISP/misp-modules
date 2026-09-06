@@ -2932,6 +2932,30 @@ Module to get enrich indicators with TruSTAR.
 
 -----
 
+#### [TweetFeed Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/tweetfeed.py)
+
+Look up an IOC in TweetFeed (tweetfeed.live), the free CC0 feed of URLs, domains, IPs and hashes shared by the infosec community on X/Twitter: who reported it and when, the source tweets and hashtags, cross-feed corroboration, AI-generated context and campaign membership.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/tweetfeed.py)]
+
+- **features**:
+>The module takes an IP, domain, hostname, URL, MD5 or SHA-256 attribute and queries the TweetFeed API for it. Matches come back as microblog objects for the source tweets (reporter, hashtags, first/last seen), plus attributes for co-reported IOCs, AI-generated context, domain registration and hosting, IP network metadata, corroboration from other feeds and campaign membership. Everything returned is community reported and unverified: no MISP tag or confidence score is set from it. The live 365-day window is queried first, and IOCs older than that are looked up in TweetFeed's separate archive.
+
+- **input**:
+>An IP address, domain, hostname, URL, MD5 or SHA-256 attribute.
+
+- **output**:
+>microblog objects for the source tweets, domain-ip / text / link attributes with registration, network, corroboration, AI context and campaign data.
+
+- **references**:
+> - https://tweetfeed.live
+> - https://tweetfeed.live/api/
+> - https://tweetfeed.live/hunt/
+
+- **requirements**:
+>No API key required.
+
+-----
+
 #### [URLhaus Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/urlhaus.py)
 
 <img src=../logos/urlhaus.png height=60>
