@@ -1,5 +1,5 @@
 import json
-from urllib.parse import quote, urlparse
+from urllib.parse import urlparse
 
 import requests
 from pymisp import MISPEvent
@@ -61,6 +61,24 @@ _WEBSTORE_ID_LENGTH = 32
 _WEBSTORE_ID_ALPHABET = set("abcdefghijklmnop")
 
 
+def _host_is(host, domain):
+    """Whether the host is that domain or a subdomain of it.
+
+    str.endswith() is the wrong test: "evil-pypi.org".endswith("pypi.org") is true, which would let a
+    lookalike delivery URL inherit the verdict of the legitimate package it is imitating. That URL is
+    exactly the kind of indicator a MISP event holds, so the boundary has to be a dot.
+    """
+    return host == domain or host.endswith("." + domain)
+
+
+def _webstore_id(value):
+    """A Chrome or Edge extension id, or None. The format is exactly 32 characters from a-p."""
+    candidate = (value or "").strip().lower()
+    if len(candidate) == _WEBSTORE_ID_LENGTH and set(candidate) <= _WEBSTORE_ID_ALPHABET:
+        return candidate
+    return None
+
+
 class UnknownArtifact(Exception):
     """The attribute does not name an artifact this module can look up.
 
@@ -82,44 +100,53 @@ def _from_url(value):
                 return parts[index]
         return None
 
+    def webstore(store):
+        # .../detail/<slug>/<id>, and older listings omit the slug. Taking whichever segment is
+        # present would turn a URL truncated at the slug into a lookup for the slug, so the id is
+        # validated rather than assumed.
+        return next(((store, found) for found in
+                     (_webstore_id(after("detail", 2)), _webstore_id(after("detail", 1))) if found),
+                    None)
+
     if host in ("chromewebstore.google.com", "chrome.google.com"):
-        # .../detail/<slug>/<id>, and older listings omit the slug.
-        detail = after("detail", 2) or after("detail", 1)
-        return ("chrome", detail) if detail else None
-    if host.endswith("microsoftedge.microsoft.com"):
-        detail = after("detail", 2) or after("detail", 1)
-        return ("edge", detail) if detail else None
-    if host.endswith("addons.mozilla.org"):
+        return webstore("chrome")
+    if _host_is(host, "microsoftedge.microsoft.com"):
+        return webstore("edge")
+    if _host_is(host, "addons.mozilla.org"):
         slug = after("addon")
         return ("firefox", slug) if slug else None
-    if host.endswith("marketplace.visualstudio.com"):
+    if _host_is(host, "marketplace.visualstudio.com"):
         # itemName=<publisher>.<name> is the only stable identifier here.
         for pair in (parsed.query or "").split("&"):
             if pair.startswith("itemName="):
-                return ("vscode", pair[len("itemName="):])
+                item = pair[len("itemName="):]
+                return ("vscode", item) if item else None
         return None
-    if host.endswith("open-vsx.org"):
+    if _host_is(host, "open-vsx.org"):
         publisher, name = after("extension", 1), after("extension", 2)
         return ("openvsx", f"{publisher}.{name}") if publisher and name else None
-    if host.endswith("plugins.jetbrains.com"):
-        # /plugin/<numeric id>-<slug>
-        plugin = after("plugin")
-        return ("jetbrains", plugin.split("-", 1)[0]) if plugin else None
-    if host.endswith("marketplace.eclipse.org"):
+    if _host_is(host, "plugins.jetbrains.com"):
+        # /plugin/<numeric id>-<slug>. A URL carrying only the slug names a plugin this module
+        # cannot address, so it is rejected rather than looked up under the slug.
+        plugin = (after("plugin") or "").split("-", 1)[0]
+        return ("jetbrains", plugin) if plugin.isdigit() else None
+    if _host_is(host, "marketplace.eclipse.org"):
         slug = after("content")
         return ("eclipse", slug) if slug else None
-    if host.endswith("npmjs.com"):
+    if _host_is(host, "npmjs.com"):
         name = after("package")
-        if name and name.startswith("@") and len(parts) > parts.index("package") + 2:
-            name = f"{name}/{parts[parts.index('package') + 2]}"
+        if name and name.startswith("@"):
+            # A scope on its own is not a package.
+            scoped = after("package", 2)
+            return ("npm", f"{name}/{scoped}") if scoped else None
         return ("npm", name) if name else None
-    if host.endswith("pypi.org"):
+    if _host_is(host, "pypi.org"):
         name = after("project")
         return ("pypi", name) if name else None
-    if host.endswith("packagist.org"):
+    if _host_is(host, "packagist.org"):
         vendor, package = after("packages", 1), after("packages", 2)
         return ("composer", f"{vendor}/{package}") if vendor and package else None
-    if host.endswith("wordpress.org"):
+    if _host_is(host, "wordpress.org"):
         slug = after("plugins")
         return ("wordpress", slug) if slug else None
     return None
@@ -144,8 +171,8 @@ def _resolve(attribute):
         if store in STORES and identifier.strip():
             return store, identifier.strip()
 
-    bare = value.lower()
-    if len(bare) == _WEBSTORE_ID_LENGTH and set(bare) <= _WEBSTORE_ID_ALPHABET:
+    bare = _webstore_id(value)
+    if bare:
         # Chrome and Edge share this id format, so both are asked and the first hit answers.
         return "chrome", bare
 
@@ -168,7 +195,10 @@ def _lookup(api_url, api_key, store, identifier):
         if response.status_code == 429:
             return {"__error__": "Extuno rate limit reached; try again shortly."}
         response.raise_for_status()
-        return response.json()
+        body = response.json()
+        # A 200 carrying a JSON array or a bare string is not an answer from this API. Returning it
+        # would put a stack trace where the module contract expects an error dict.
+        return body if isinstance(body, dict) else None
     except (requests.exceptions.RequestException, ValueError):
         return None
 
@@ -184,21 +214,38 @@ class ExtunoParser:
         self.misp_event.add_attribute(**kwargs)
         self.found = True
 
-    def parse(self, store, identifier):
+    def _query(self, store, identifier):
+        """One lookup. Returns (payload, failure); exactly one of them is set."""
         result = _lookup(self.api_url, self.api_key, store, identifier)
-        if result and result.get("__error__"):
-            return result["__error__"]
-        # A Chrome id and an Edge id are the same 32 characters, so a miss on one is not an answer.
-        if store == "chrome" and result is not None and result.get("verdict") == "unknown":
-            edge = _lookup(self.api_url, self.api_key, "edge", identifier)
-            if edge and edge.get("verdict") != "unknown":
-                store, result = "edge", edge
         if result is None:
-            return "Extuno could not be reached."
+            return None, "Extuno could not be reached."
+        if result.get("__error__"):
+            return None, result["__error__"]
+        return result, None
+
+    def parse(self, store, identifier):
+        result, failure = self._query(store, identifier)
+        if failure:
+            return failure
+
+        # A Chrome id and an Edge id are the same 32 characters, so a miss on one is not an answer.
+        # The verdict is normalised the same way here as it is below: a response with no verdict, or
+        # a null one, is a miss and must reach the fallback like an explicit "unknown" does.
+        if store == "chrome" and (result.get("verdict") or "unknown") == "unknown":
+            edge, edge_failure = self._query("edge", identifier)
+            # A rejected key or a rate limit on the second call is a failed lookup, not a clean
+            # answer. Reporting "not in the malicious catalog" for a question that was never
+            # answered is the one outcome a reputation module must never produce.
+            if edge_failure:
+                return edge_failure
+            if (edge.get("verdict") or "unknown") != "unknown":
+                store, result = "edge", edge
 
         verdict = result.get("verdict") or "unknown"
-        catalog = result.get("catalog") or {}
-        scan = result.get("scan") or {}
+        # A field of the wrong type is treated as absent rather than trusted: an operator can point
+        # api_url at another deployment, and a proxy can rewrite a body.
+        catalog = result.get("catalog") if isinstance(result.get("catalog"), dict) else {}
+        scan = result.get("scan") if isinstance(result.get("scan"), dict) else {}
 
         if result.get("known_malicious"):
             threat = catalog.get("threat_type") or "malicious"
@@ -229,7 +276,10 @@ class ExtunoParser:
                 comment="Extuno: no record", disable_correlation=True)
             return None
 
-        for title in [f.get("title") for f in (scan.get("top_findings") or []) if f.get("title")][:5]:
+        findings = scan.get("top_findings")
+        findings = findings if isinstance(findings, list) else []
+        for title in [f["title"] for f in findings
+                      if isinstance(f, dict) and f.get("title")][:5]:
             self._add(type="text", value=f"Extuno finding: {title}",
                       comment="Extuno: evidence from analysis", disable_correlation=True)
         return None
@@ -268,7 +318,10 @@ def handler(q=False):
         return {"error": f"Extuno cannot look this up: {error}"}
 
     parser = ExtunoParser(api_url, api_key)
-    failure = parser.parse(store, quote(identifier, safe="@/.-_"))
+    # The identifier is passed raw: requests encodes it once as a query parameter. Encoding it here
+    # as well would put a literal "%3A" on the wire for a Maven coordinate and look up an artifact
+    # that cannot exist.
+    failure = parser.parse(store, identifier)
     if failure:
         return {"error": failure}
     return parser.get_results()
