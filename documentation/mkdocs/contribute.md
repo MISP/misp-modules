@@ -113,6 +113,229 @@ for event in request["data"]:
         for attribute in event["Attribute"]:
           # do stuff w/ attribute['type'], attribute['value'], ...
 ...
+~~~
+
+#### object enrichment
+
+An expansion module can also be triggered on a whole MISP object instead of a single attribute. Instead of receiving one value, the module receives the object with all of its attributes, and it returns MISP objects and/or attributes that MISP proposes to add to the event.
+
+To make a module available for object enrichment:
+
+* list the **object template names** your module accepts in `mispattributes['input']` (object names and attribute types share the same namespace),
+* declare `'output': ['MISP objects']` and `'format': 'misp_standard'`,
+* read the object from the `object` key of the request in your handler.
+
+~~~python
+mispattributes = {
+    "input": ["domain-ip"],          # object template name, not an attribute type
+    "output": ["MISP objects"],
+    "format": "misp_standard",
+}
+~~~
+
+Once the module is enabled, MISP shows the *Add enrichment* icon on every `domain-ip` object of an event, and the module is listed in the enrichment choice popup.
+
+##### The request
+
+MISP posts the full object, with its attributes inlined under the `Attribute` key:
+
+~~~json
+{
+  "module": "test_domain_ip_expansion",
+  "event_id": "42",
+  "object": {
+    "id": "1337",
+    "name": "domain-ip",
+    "meta-category": "network",
+    "template_uuid": "43b3b146-77eb-4931-b4cc-b66c60f28734",
+    "uuid": "5a2b1c3d-0000-4000-8000-000000000000",
+    "Attribute": [
+      {
+        "type": "domain",
+        "object_relation": "domain",
+        "value": "example.com",
+        "uuid": "b2d1a2e0-0000-4000-8000-000000000001"
+      },
+      {
+        "type": "ip-dst",
+        "object_relation": "ip",
+        "value": "198.51.100.10",
+        "uuid": "b2d1a2e0-0000-4000-8000-000000000002"
+      }
+    ]
+  },
+  "config": {
+    "apikey": "..."
+  }
+}
+~~~
+
+Attributes of an attachment type (`attachment`, `malware-sample`) also carry their content base64 encoded in a `data` key, so a module can process files attached to the object without touching the MISP filesystem.
+
+Since object names and attribute types share one namespace, a module whose `input` list contains both will be offered in both contexts. In that case branch on which key is present:
+
+~~~python
+request = json.loads(q)
+if "object" in request:
+    return handle_object(request["object"])
+return handle_attribute(request["attribute"])
+~~~
+
+##### The response
+
+Build the result with [PyMISP](https://github.com/MISP/PyMISP) and return the `Object` and `Attribute` lists of the event under the `results` key:
+
+~~~python
+{
+  "results": {
+    "Object": [...],     # MISP objects to add to the event
+    "Attribute": [...]   # standalone attributes to add to the event
+  }
+}
+~~~
+
+`EventReport`, `Tag` and `Galaxy` are accepted in `results` as well, and an optional top-level `comment` key overrides the default import comment shown to the analyst.
+
+Nothing is written to the event directly: MISP renders the returned objects and attributes in the *Enrichment Results* screen, where the analyst picks what to keep.
+
+##### Full example
+
+The module below enriches a `domain-ip` object with a `whois` object and a standalone `comment` attribute. It has no external dependency, which makes it convenient to exercise the whole object enrichment flow end to end:
+
+~~~python
+# -*- coding: utf-8 -*-
+"""Test expansion module: enriches a `domain-ip` MISP object."""
+
+import json
+
+from pymisp import MISPEvent, MISPObject
+
+misperrors = {"error": "Error"}
+
+mispattributes = {
+    "input": ["domain-ip"],
+    "output": ["MISP objects"],
+    "format": "misp_standard",
+}
+
+moduleinfo = {
+    "version": "0.1",
+    "author": "Luciano Righetti",
+    "description": "Test module that enriches a domain-ip object with static data.",
+    "module-type": ["expansion"],
+    "name": "Test Domain-IP Expansion",
+    "logo": "",
+    "requirements": [],
+    "features": "Takes a domain-ip object and returns a fake whois object plus a comment attribute.",
+    "references": [],
+    "input": "A domain-ip object.",
+    "output": "A whois object and a comment attribute.",
+}
+
+
+def process_domain_ip(misp_object):
+    domain = None
+    ip = None
+    for attribute in misp_object.get("Attribute", []):
+        if attribute.get("object_relation") == "domain":
+            domain = attribute.get("value")
+        elif attribute.get("object_relation") == "ip":
+            ip = attribute.get("value")
+
+    if domain is None and ip is None:
+        return {"error": "No domain or ip attribute found in the domain-ip object."}
+
+    event = MISPEvent()
+
+    whois = MISPObject("whois")
+    whois.add_attribute("domain", type="domain", value=domain or "example.com")
+    whois.add_attribute("registrar", type="whois-registrar", value="Test Registrar Inc.")
+    whois.add_attribute("creation-date", type="datetime", value="2020-01-01T00:00:00+00:00")
+    if ip is not None:
+        whois.add_attribute("ip-address", type="ip-src", value=ip)
+    whois.comment = "Enriched by test_domain_ip_expansion"
+    event.add_object(whois)
+
+    event.add_attribute(
+        type="comment",
+        value="test_domain_ip_expansion enrichment of {}".format(domain or ip),
+        comment="Standalone attribute returned by the test module",
+    )
+
+    event = json.loads(event.to_json())
+
+    return {
+        "results": {
+            "Object": event.get("Object", []),
+            "Attribute": event.get("Attribute", []),
+        }
+    }
+
+
+def handler(q=False):
+    if q is False:
+        return False
+    request = json.loads(q)
+    misp_object = request.get("object")
+
+    if not misp_object:
+        return {"error": "No object provided."}
+
+    if "Attribute" not in misp_object:
+        return {"error": "Empty Attribute list."}
+
+    if misp_object.get("name") != "domain-ip":
+        return {"error": "Wrong object type, expected a domain-ip object."}
+
+    return process_domain_ip(misp_object)
+
+
+def introspection():
+    return mispattributes
+
+
+def version():
+    return moduleinfo
+~~~
+
+Note the guard clauses in the handler: an object enrichment module should always verify that an object was provided, that it carries attributes, and that its template is one it understands, returning an `error` otherwise so the message reaches the MISP user-interface.
+
+##### Testing it
+
+Save the request shown above as `body.json` and post it to the module server, exactly as for an attribute based module:
+
+~~~bash
+curl -s http://127.0.0.1:6666/query -H "Content-Type: application/json" --data @body.json -X POST | jq .
+~~~
+
+~~~json
+{
+  "results": {
+    "Object": [
+      {
+        "name": "whois",
+        "meta-category": "network",
+        "comment": "Enriched by test_domain_ip_expansion",
+        "Attribute": [
+          { "type": "domain", "object_relation": "domain", "value": "example.com" },
+          { "type": "whois-registrar", "object_relation": "registrar", "value": "Test Registrar Inc." },
+          { "type": "datetime", "object_relation": "creation-date", "value": "2020-01-01T00:00:00+00:00" },
+          { "type": "ip-src", "object_relation": "ip-address", "value": "198.51.100.10" }
+        ]
+      }
+    ],
+    "Attribute": [
+      {
+        "type": "comment",
+        "value": "test_domain_ip_expansion enrichment of example.com",
+        "comment": "Standalone attribute returned by the test module"
+      }
+    ]
+  }
+}
+~~~
+
+[sigmf_expand](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/sigmf_expand.py) is an object enrichment module shipped with misp-modules that follows the same structure.
 
 ### Returning Binary Data
 
