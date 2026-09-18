@@ -11,7 +11,7 @@ mispattributes = {
     "format": "misp_standard",
 }
 moduleinfo = {
-    "version": "0.4",
+    "version": "0.5",
     "author": "Alexandre Dulaunoy",
     "description": "Simple DNS expansion service to resolve IP address from MISP attributes",
     "module-type": ["expansion", "hover"],
@@ -20,14 +20,14 @@ moduleinfo = {
     "requirements": ["dnspython3: DNS python3 library"],
     "features": (
         "The module takes a domain of hostname attribute as input, and tries to resolve it. If no error is encountered,"
-        " the A records resolving the domain are returned as a dns-record object, otherwise the origin of the error is"
-        " displayed.\n\nThe address of the DNS resolver to use is also configurable, but if no configuration is set, we"
-        " use the Google public DNS address (8.8.8.8).\n\nPlease note that composite MISP attributes containing domain"
-        " or hostname are supported as well."
+        " the A and AAAA records resolving the domain are returned as a dns-record object, otherwise the origin of the"
+        " error is displayed.\n\nThe address of the DNS resolver to use is also configurable, but if no configuration"
+        " is set, we use the Google public DNS address (8.8.8.8).\n\nPlease note that composite MISP attributes"
+        " containing domain or hostname are supported as well."
     ),
     "references": [],
     "input": "Domain or hostname attribute.",
-    "output": "A dns-record object holding the A records the input resolves to.",
+    "output": "A dns-record object holding the A and AAAA records the input resolves to.",
 }
 
 moduleconfig = ["nameserver"]
@@ -56,16 +56,26 @@ def handler(q=False):
     else:
         r.nameservers = ["8.8.8.8"]
 
-    try:
-        answer = r.resolve(toquery, "A")
-    except dns.resolver.NXDOMAIN:
-        misperrors["error"] = "NXDOMAIN"
-        return misperrors
-    except dns.exception.Timeout:
-        misperrors["error"] = "Timeout"
-        return misperrors
-    except Exception as e:
-        misperrors["error"] = f"DNS resolving error {e}"
+    records = {}
+    for rdtype, relation in (("A", "a-record"), ("AAAA", "aaaa-record")):
+        try:
+            records[relation] = [str(record) for record in r.resolve(toquery, rdtype)]
+        except dns.resolver.NXDOMAIN:
+            misperrors["error"] = "NXDOMAIN"
+            return misperrors
+        except dns.exception.Timeout:
+            misperrors["error"] = "Timeout"
+            return misperrors
+        except dns.resolver.NoAnswer:
+            # The name exists but has no record of this type. A name with no A
+            # record may still have a AAAA one, so this is not an error.
+            records[relation] = []
+        except Exception as e:
+            misperrors["error"] = f"DNS resolving error {e}"
+            return misperrors
+
+    if not any(records.values()):
+        misperrors["error"] = f"No A or AAAA record for {toquery}"
         return misperrors
 
     misp_event = MISPEvent()
@@ -77,8 +87,9 @@ def handler(q=False):
     dns_record.add_attribute("queried-domain", toquery)
     # The whole rrset, not just the first entry: a name with several A records
     # is exactly the case the plain attribute could not express.
-    for record in answer:
-        dns_record.add_attribute("a-record", str(record))
+    for relation, values in records.items():
+        for value in values:
+            dns_record.add_attribute(relation, value)
     dns_record.add_reference(input_attribute.uuid, "related-to")
     misp_event.add_object(dns_record)
 
