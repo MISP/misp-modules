@@ -10,7 +10,7 @@ from . import check_input_attribute, standard_error_message
 misperrors = {"error": "Error"}
 mispattributes = {"input": ["btc"], "format": "misp_standard"}
 moduleinfo = {
-    "version": "0.2",
+    "version": "0.3",
     "author": "Sascha Rommelfangen",
     "description": "An expansion hover module to get a blockchain balance from a BTC address in MISP.",
     "module-type": ["hover"],
@@ -100,6 +100,18 @@ def _net_value(transaction, btc):
     return (received - spent) / SATOSHI
 
 
+def _counterparties(transaction, btc):
+    """The other addresses in the transaction: who the wallet received from and
+    who it sent to, in the order blockchain.info lists them."""
+    addresses = [(tx.get("prev_out") or {}).get("addr") for tx in transaction.get("inputs") or []]
+    addresses += [out.get("addr") for out in transaction.get("out") or []]
+    counterparties = []
+    for address in addresses:
+        if address and address != btc and address not in counterparties:
+            counterparties.append(address)
+    return counterparties
+
+
 def _iter_transactions(btc, jreq, click):
     """The transactions blockchain.info knows about: all of them when the
     magnifying glass was clicked, the 5 most recent on a simple hover.
@@ -136,7 +148,10 @@ def _parse_wallet(jreq, btc):
 
 def _parse_transaction(transaction, btc):
     misp_object = MISPObject("btc-transaction")
+    # The wallet being described first, then whoever it exchanged value with.
     misp_object.add_attribute("btc-address", btc)
+    for counterparty in _counterparties(transaction, btc):
+        misp_object.add_attribute("btc-address", counterparty)
     if transaction.get("hash"):
         misp_object.add_attribute("transaction-number", transaction["hash"])
     value = _net_value(transaction, btc)

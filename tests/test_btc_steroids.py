@@ -95,6 +95,16 @@ def test_received_and_spent_transactions_get_signed_values():
     assert ("value_BTC", "-0.00053557") in by_number["bb" * 32]
 
 
+def test_transactions_carry_their_counterparties():
+    attribute = {"type": "btc", "value": BTC, "uuid": UUID}
+    transactions = _objects(_run(attribute), "btc-transaction")
+    received = next(obj for obj in transactions if ("transaction-number", "aa" * 32) in _values(obj))
+    addresses = [a["value"] for a in received["Attribute"] if a["object_relation"] == "btc-address"]
+    # the wallet first, then who it exchanged value with
+    assert addresses[0] == BTC
+    assert OTHER in addresses[1:]
+
+
 def test_transactions_are_converted_to_usd_and_eur():
     attribute = {"type": "btc", "value": BTC, "uuid": UUID}
     transactions = _objects(_run(attribute), "btc-transaction")
