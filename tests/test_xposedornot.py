@@ -63,7 +63,15 @@ def _query(value="test@example.com", config=None):
     return {"module": "xposedornot", "attribute": attribute, "config": config or {}}
 
 
-def test_xposedornot_free_api_returns_breach_attributes():
+def _objects(result, name):
+    return [misp_object for misp_object in result["results"]["Object"] if misp_object["name"] == name]
+
+
+def _values(misp_object):
+    return {(a["object_relation"], str(a["value"])) for a in misp_object["Attribute"]}
+
+
+def test_xposedornot_free_api_returns_one_breach_object_per_breach():
     with patch.object(xposedornot.requests, "get", return_value=MockResponse(FREE_PAYLOAD)) as mocked_get:
         result = xposedornot.handler(json.dumps(_query()))
 
@@ -73,14 +81,41 @@ def test_xposedornot_free_api_returns_breach_attributes():
         headers={"User-Agent": "misp-modules"},
         timeout=30,
     )
-    attributes = result["results"]["Attribute"]
-    values = [attribute["value"] for attribute in attributes]
-    assert values[0] == "Email exposed in 2 data breaches (XposedOrNot), first: 2013, latest: 2026, risk: Critical"
-    assert "Sysco" in values and "Yahoo" in values
-    sysco = next(attribute for attribute in attributes if attribute["value"] == "Sysco")
-    assert sysco["type"] == "text"
-    assert "2,699,339 records" in sysco["comment"]
-    assert "password risk: unknown" in sysco["comment"]
+    breaches = _objects(result, "breach")
+    assert {value for obj in breaches for relation, value in _values(obj) if relation == "name"} == {"Sysco", "Yahoo"}
+
+    sysco = next(obj for obj in breaches if ("name", "Sysco") in _values(obj))
+    values = _values(sysco)
+    assert ("source", "XposedOrNot") in values
+    assert ("domain", "sysco.com") in values
+    assert ("pwn-count", "2699339") in values
+    assert ("verified", "True") in values
+    # one attribute per data class, not one semicolon-joined string
+    assert {value for relation, value in values if relation == "data-classes"} == {
+        "Email addresses",
+        "Names",
+        "Phone numbers",
+    }
+    # a bare year is anchored to its first day
+    assert ("breach-date", "2026-01-01T00:00:00") in values
+    # password_risk has no relation of its own
+    assert ("description", "password storage risk: unknown") in values
+
+
+def test_xposedornot_breach_objects_reference_the_input_attribute():
+    with patch.object(xposedornot.requests, "get", return_value=MockResponse(FREE_PAYLOAD)):
+        result = xposedornot.handler(json.dumps(_query()))
+    for misp_object in result["results"]["Object"]:
+        references = [(r["referenced_uuid"], r["relationship_type"]) for r in misp_object["ObjectReference"]]
+        assert references == [("5b582d80-7a7e-4b6a-9f22-77656e72bb3b", "related-to")]
+
+
+def test_xposedornot_risk_label_becomes_a_reputation_object():
+    with patch.object(xposedornot.requests, "get", return_value=MockResponse(FREE_PAYLOAD)):
+        result = xposedornot.handler(json.dumps(_query()))
+    values = _values(_objects(result, "reputation")[0])
+    assert ("source", "XposedOrNot") in values
+    assert ("classification", "Critical") in values
 
 
 def test_xposedornot_plus_api_used_when_key_configured_and_email_is_url_encoded():
@@ -93,8 +128,10 @@ def test_xposedornot_plus_api_used_when_key_configured_and_email_is_url_encoded(
         headers={"User-Agent": "misp-modules", "x-api-key": "k"},
         timeout=30,
     )
-    values = [attribute["value"] for attribute in result["results"]["Attribute"]]
-    assert "Sysco" in values
+    breaches = _objects(result, "breach")
+    assert ("name", "Sysco") in _values(breaches[0])
+    # the Plus API carries no risk label
+    assert _objects(result, "reputation") == []
 
 
 def test_xposedornot_clean_email_returns_informative_error():
