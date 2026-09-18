@@ -814,11 +814,20 @@ class TestExpansions(unittest.TestCase):
 
     def test_vulners(self):
         module_name = "vulners"
-        query = {"module": module_name, "vulnerability": "CVE-2010-3333"}
+        query = {
+            "module": module_name,
+            "attribute": {
+                "type": "vulnerability",
+                "value": "CVE-2010-3333",
+                "uuid": "ea89a33b-4ab7-4515-9f02-922a0bee333d",
+            },
+            "config": {},
+        }
         if module_name in self.configs:
             query["config"] = self.configs[module_name]
             response = self.misp_modules_post(query)
-            self.assertTrue(self.get_values(response).endswith('"RTF Stack Buffer Overflow Vulnerability."'))
+            self.assertIn("vulnerability", self.get_object_types(response))
+            self.assertIn("CVE-2010-3333", self.get_object_attribute_values(response, "id"))
         else:
             response = self.misp_modules_post(query)
             self.assertEqual(self.get_errors(response), "A Vulners api key is required for this module.")
