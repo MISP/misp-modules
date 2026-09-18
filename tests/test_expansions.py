@@ -641,19 +641,35 @@ class TestExpansions(unittest.TestCase):
         module_name = "securitytrails"
         query_types = ("ip-src", "domain")
         query_values = ("149.13.33.14", "circl.lu")
-        results = ("circl.lu", "ns4.eurodns.com")
+        results = ("domain-ip", "passive-dns")
         if module_name in self.configs:
             for query_type, query_value, result in zip(query_types, query_values, results):
-                query = {"module": module_name, query_type: query_value, "config": self.configs[module_name]}
+                query = {
+                    "module": module_name,
+                    "attribute": {
+                        "type": query_type,
+                        "value": query_value,
+                        "uuid": "ea89a33b-4ab7-4515-9f02-922a0bee333d",
+                    },
+                    "config": self.configs[module_name],
+                }
                 response = self.misp_modules_post(query)
                 try:
-                    self.assertEqual(self.get_values(response), result)
+                    self.assertIn(result, self.get_object_types(response))
                 except Exception:
                     self.assertTrue(
                         self.get_errors(response).startswith("You've exceeded the usage limits for your account.")
                     )
         else:
-            query = {"module": module_name, query_values[0]: query_types[0]}
+            query = {
+                "module": module_name,
+                "attribute": {
+                    "type": query_types[0],
+                    "value": query_values[0],
+                    "uuid": "ea89a33b-4ab7-4515-9f02-922a0bee333d",
+                },
+                "config": {},
+            }
             response = self.misp_modules_post(query)
             self.assertEqual(self.get_errors(response), "SecurityTrails authentication is missing")
 
