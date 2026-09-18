@@ -685,10 +685,14 @@ class TestExpansions(unittest.TestCase):
 
     def test_sourcecache(self):
         input_value = "https://www.misp-project.org/feeds/"
-        query = {"module": "sourcecache", "link": input_value}
+        query = {
+            "module": "sourcecache",
+            "attribute": {"type": "link", "value": input_value, "uuid": "ea89a33b-4ab7-4515-9f02-922a0bee333d"},
+            "config": {},
+        }
         response = self.misp_modules_post(query)
-        self.assertEqual(self.get_values(response), input_value)
-        self.assertTrue(self.get_data(response))
+        self.assertEqual(self.get_first_object_type(response), "page-capture")
+        self.assertIn(input_value, self.get_object_attribute_values(response, "url"))
 
     def test_stix2_pattern_validator(self):
         query = {"module": "stix2_pattern_syntax_validator", "stix2-pattern": "[ipv4-addr:value = '8.8.8.8']"}
