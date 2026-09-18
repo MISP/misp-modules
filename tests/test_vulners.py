@@ -66,8 +66,10 @@ def test_one_exploit_object_per_exploit():
     assert titles == {"Microsoft Office RTF parsing overflow", "MS Office RTF PoC"}
     assert ("cve-id", CVE) in _values(exploits[0])
     assert ("exploit", "## exploit source ##") in _values(exploits[0])
-    # no sourceData on the second one, so what Vulners does say about it is used
-    assert ("exploit", "MS Office RTF PoC") in _values(exploits[1])
+    # no sourceData on the second one: title and reference satisfy the template
+    # on their own from exploit v2, so nothing is invented for it
+    assert "exploit" not in {relation for relation, _ in _values(exploits[1])}
+    assert ("reference", "https://vulners.com/packetstorm/PACKETSTORM:106186") in _values(exploits[1])
 
 
 def test_ai_score_goes_to_a_reputation_object():

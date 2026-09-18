@@ -8,7 +8,7 @@ from . import check_input_attribute, standard_error_message
 misperrors = {"error": "Error"}
 mispattributes = {"input": ["vulnerability"], "format": "misp_standard"}
 moduleinfo = {
-    "version": "0.2",
+    "version": "0.3",
     "author": "Igor Ivanov",
     "description": "An expansion hover module to expand information about CVE id using Vulners API.",
     "module-type": ["hover"],
@@ -59,11 +59,9 @@ def _parse_exploit(exploit, vulnerability):
     _add_if(misp_object, "reference", exploit.get("href"))
     _add_if(misp_object, "description", exploit.get("description"))
     misp_object.add_attribute("cve-id", vulnerability)
-    # The exploit template requires one of exploit / filename /
-    # exploit-as-attachment. Vulners returns the exploit source for most
-    # entries; where it does not, what it says about the exploit is all there
-    # is to put there.
-    _add_if(misp_object, "exploit", exploit.get("sourceData") or exploit.get("description") or exploit.get("title"))
+    # Only where Vulners actually carries the source. An entry it knows only
+    # by title and link is satisfied by those from exploit template v2 on.
+    _add_if(misp_object, "exploit", exploit.get("sourceData"))
     return misp_object
 
 
