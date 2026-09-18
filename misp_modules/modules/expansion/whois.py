@@ -4,6 +4,11 @@ import json
 import socket
 
 misperrors = {"error": "Error"}
+# freetext, not misp_standard, and deliberately so: MISP runs its freetext
+# importer over what this module returns, and a registration record is dense
+# with what that importer is built to find - registrant emails, nameservers,
+# addresses, related domains. Returning a whois object carrying the record as
+# one text attribute would look tidier and extract nothing.
 mispattributes = {"input": ["domain", "ip-src", "ip-dst"], "output": ["freetext"]}
 moduleinfo = {
     "version": "0.2",

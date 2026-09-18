@@ -80,3 +80,11 @@ def test_unsupported_attribute_type_is_an_error():
 def test_description_points_at_rdap():
     assert "rdap" in whois.moduleinfo["description"]
     assert whois.introspection() == whois.mispattributes
+
+
+def test_output_stays_freetext():
+    """Not misp_standard. MISP runs its freetext importer over the answer, and a
+    whois record is full of what that importer extracts; an object carrying the
+    record as one text attribute would extract nothing."""
+    assert whois.mispattributes["output"] == ["freetext"]
+    assert "format" not in whois.mispattributes
