@@ -167,18 +167,24 @@ class TestExpansions(unittest.TestCase):
         if LiveCI:
             return True
 
-        query = {"module": "btc_steroids", "btc": "1ES14c7qLb5CYhLMUekctxLgc1FV2Ti9DA"}
+        query = {
+            "module": "btc_steroids",
+            "attribute": {
+                "type": "btc",
+                "value": "1ES14c7qLb5CYhLMUekctxLgc1FV2Ti9DA",
+                "uuid": "ea89a33b-4ab7-4515-9f02-922a0bee333d",
+            },
+            "config": {},
+        }
         response = self.misp_modules_post(query)
         try:
-            self.assertTrue(
-                self.get_values(response).startswith(
-                    "\n\nAddress:\t1ES14c7qLb5CYhLMUekctxLgc1FV2Ti9DA\nBalance:\t0.0002126800 BTC (+0.0007482500 BTC /"
-                    " -0.0005355700 BTC)"
-                )
+            self.assertEqual(self.get_first_object_type(response), "btc-wallet")
+            self.assertIn(
+                "1ES14c7qLb5CYhLMUekctxLgc1FV2Ti9DA",
+                self.get_object_attribute_values(response, "wallet-address"),
             )
-
         except Exception:
-            self.assertTrue(self.get_values(response).startswith("Not a valid BTC address"))
+            self.assertTrue(self.get_errors(response).endswith("is not a valid BTC address."))
 
     def test_btc_scam_check(self):
         if LiveCI:
