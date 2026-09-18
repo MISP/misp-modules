@@ -783,11 +783,20 @@ class TestExpansions(unittest.TestCase):
 
     def test_urlscan(self):
         module_name = "urlscan"
-        query = {"module": module_name, "url": "https://circl.lu/team"}
+        query = {
+            "module": module_name,
+            "attribute": {
+                "type": "url",
+                "value": "https://circl.lu/team",
+                "uuid": "ea89a33b-4ab7-4515-9f02-922a0bee333d",
+            },
+            "config": {},
+        }
         if module_name in self.configs:
             query["config"] = self.configs[module_name]
             response = self.misp_modules_post(query)
-            self.assertEqual(self.get_values(response), "circl.lu")
+            self.assertIn("url", self.get_object_types(response))
+            self.assertIn("circl.lu", self.get_object_attribute_values(response, "domain"))
         else:
             response = self.misp_modules_post(query)
             self.assertEqual(self.get_errors(response), "Urlscan apikey is missing")
