@@ -87,6 +87,20 @@ class TestExpansions(unittest.TestCase):
         return data["results"]["Object"][0]["name"]
 
     @staticmethod
+    def get_object_attribute_values(response, relation):
+        """Every value carried under one object_relation, across all objects of a misp_standard response."""
+        data = response.json()
+        if not isinstance(data, dict):
+            print(json.dumps(data, indent=2))
+            return data
+        values = []
+        for misp_object in data["results"]["Object"]:
+            for attribute in misp_object["Attribute"]:
+                if attribute["object_relation"] == relation:
+                    values.append(attribute["value"])
+        return values
+
+    @staticmethod
     def get_values(response):
         data = response.json()
         if not isinstance(data, dict):
@@ -268,9 +282,18 @@ class TestExpansions(unittest.TestCase):
                 )
 
     def test_dns(self):
-        query = {"module": "dns", "hostname": "www.circl.lu", "config": {"nameserver": "8.8.8.8"}}
+        query = {
+            "module": "dns",
+            "attribute": {
+                "type": "hostname",
+                "value": "www.circl.lu",
+                "uuid": "ea89a33b-4ab7-4515-9f02-922a0bee333d",
+            },
+            "config": {"nameserver": "8.8.8.8"},
+        }
         response = self.misp_modules_post(query)
-        self.assertEqual(self.get_values(response), "185.194.93.14")
+        self.assertEqual(self.get_first_object_type(response), "dns-record")
+        self.assertIn("185.194.93.14", self.get_object_attribute_values(response, "a-record"))
 
     def test_docx(self):
         filename = "test.docx"
@@ -568,9 +591,14 @@ class TestExpansions(unittest.TestCase):
             self.assertEqual(self.get_errors(response), "Missing api_url in config")
 
     def test_reversedns(self):
-        query = {"module": "reversedns", "ip-src": "8.8.8.8"}
+        query = {
+            "module": "reversedns",
+            "attribute": {"type": "ip-src", "value": "8.8.8.8", "uuid": "ea89a33b-4ab7-4515-9f02-922a0bee333d"},
+            "config": {},
+        }
         response = self.misp_modules_post(query)
-        self.assertEqual(self.get_values(response), "dns.google")
+        self.assertEqual(self.get_first_object_type(response), "dns-record")
+        self.assertIn("dns.google", self.get_object_attribute_values(response, "ptr-record"))
 
     def test_securitytrails(self):
         module_name = "securitytrails"
