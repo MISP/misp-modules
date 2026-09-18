@@ -8,7 +8,12 @@ mispattributes = {"input": ["domain", "ip-src", "ip-dst"], "output": ["freetext"
 moduleinfo = {
     "version": "0.1",
     "author": "Raphaël Vinot",
-    "description": "Module to query a local instance of uwhois (https://github.com/rafiot/uwhoisd).",
+    "description": (
+        "Module to query a local instance of uwhois (https://github.com/rafiot/uwhoisd). It returns the registration"
+        " record as raw text; the rdap module answers the same question as a structured whois object, over an"
+        " unauthenticated protocol and without a local server, and is the better choice wherever RDAP covers the"
+        " registry."
+    ),
     "module-type": ["expansion"],
     "name": "Whois Lookup",
     "logo": "",
@@ -18,9 +23,9 @@ moduleinfo = {
         " get the correct details of the Whois query on the input value (check the references for more details about"
         " this whois server)."
     ),
-    "references": ["https://github.com/Lookyloo/uwhoisd"],
+    "references": ["https://github.com/Lookyloo/uwhoisd", "https://about.rdap.org/"],
     "input": "A domain or IP address attribute.",
-    "output": "Text describing the result of a whois request for the input value.",
+    "output": "Text describing the result of a whois request for the input value. See the rdap module for objects.",
 }
 
 moduleconfig = ["server", "port"]
