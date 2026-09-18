@@ -190,9 +190,18 @@ class TestExpansions(unittest.TestCase):
         if LiveCI:
             return
 
-        query = {"module": "btc_scam_check", "btc": "1ES14c7qLb5CYhLMUekctxLgc1FV2Ti9DA"}
+        query = {
+            "module": "btc_scam_check",
+            "attribute": {
+                "type": "btc",
+                "value": "1ES14c7qLb5CYhLMUekctxLgc1FV2Ti9DA",
+                "uuid": "ea89a33b-4ab7-4515-9f02-922a0bee333d",
+            },
+            "config": {},
+        }
         response = self.misp_modules_post(query)
-        self.assertEqual(self.get_values(response), "1es14c7qlb5cyhlmuekctxlgc1fv2ti9da fraudolent bitcoin address")
+        self.assertEqual(self.get_first_object_type(response), "reputation")
+        self.assertIn("malicious", self.get_object_attribute_values(response, "classification"))
 
     def test_circl_passivedns(self):
         module_name = "circl_passivedns"
@@ -275,17 +284,24 @@ class TestExpansions(unittest.TestCase):
             print(self.get_errors(response))
 
     def test_dbl_spamhaus(self):
-        query = {"module": "dbl_spamhaus", "domain": "totalmateria.net"}
+        query = {
+            "module": "dbl_spamhaus",
+            "attribute": {
+                "type": "domain",
+                "value": "totalmateria.net",
+                "uuid": "ea89a33b-4ab7-4515-9f02-922a0bee333d",
+            },
+            "config": {},
+        }
         response = self.misp_modules_post(query)
         try:
-            self.assertEqual(self.get_values(response), "totalmateria.net - spam test domain")
+            self.assertEqual(self.get_first_object_type(response), "reputation")
+            self.assertIn("dbl.spamhaus.org", self.get_object_attribute_values(response, "list-name"))
         except Exception:
-            try:
-                self.assertTrue(self.get_values(response).startswith("The DNS query name does not exist:"))
-            except Exception:
-                self.assertEqual(
-                    self.get_errors(response), "Not able to reach dbl.spamhaus.org or something went wrong"
-                )
+            self.assertTrue(
+                self.get_errors(response).startswith("totalmateria.net is not listed on")
+                or self.get_errors(response).startswith("Not able to reach dbl.spamhaus.org")
+            )
 
     def test_dns(self):
         query = {
@@ -572,10 +588,15 @@ class TestExpansions(unittest.TestCase):
     def test_rbl(self):
         if LiveCI:
             return True
-        query = {"module": "rbl", "ip-src": "8.8.8.8"}
+        query = {
+            "module": "rbl",
+            "attribute": {"type": "ip-src", "value": "8.8.8.8", "uuid": "ea89a33b-4ab7-4515-9f02-922a0bee333d"},
+            "config": {},
+        }
         response = self.misp_modules_post(query)
         try:
-            self.assertTrue(self.get_values(response).startswith("8.8.8.8.bl.spamcannibal.org"))
+            self.assertEqual(self.get_first_object_type(response), "reputation")
+            self.assertTrue(self.get_object_attribute_values(response, "list-name"))
         except Exception:
             self.assertEqual(self.get_errors(response), "No data found by querying known RBLs")
 
