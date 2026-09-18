@@ -6,7 +6,7 @@ import socket
 misperrors = {"error": "Error"}
 mispattributes = {"input": ["domain", "ip-src", "ip-dst"], "output": ["freetext"]}
 moduleinfo = {
-    "version": "0.1",
+    "version": "0.2",
     "author": "Raphaël Vinot",
     "description": (
         "Module to query a local instance of uwhois (https://github.com/rafiot/uwhoisd). It returns the registration"
@@ -45,12 +45,22 @@ def handler(q=False):
         misperrors["error"] = "Unsupported attributes type"
         return misperrors
 
-    if not request.get("config") or (not request["config"].get("server") and not request["config"].get("port")):
+    config = request.get("config") or {}
+    server = config.get("server")
+    port = config.get("port")
+    # Both are needed: the old check only fired when both were absent, and then
+    # read config["server"] unguarded.
+    if not server or not port:
         misperrors["error"] = "Whois local instance address is missing"
         return misperrors
 
-    if "event_id" in request:
-        return handle_expansion(request["config"]["server"], int(request["config"]["port"]), toquery)
+    # This used to run only when the request carried an event_id, and fell off
+    # the end returning None otherwise.
+    try:
+        return handle_expansion(server, int(port), toquery)
+    except (OSError, ValueError) as e:
+        misperrors["error"] = f"Not able to reach the uwhois instance at {server}:{port}: {e}"
+        return misperrors
 
 
 def handle_expansion(server, port, query):
