@@ -177,9 +177,7 @@ class UrlscanParser:
             asn = MISPObject("asn")
             asn.add_attribute("asn", page["asn"])
             if page.get("asnname"):
-                # organization only exists from asn template v6 on, and pymisp
-                # still bundles v5.
-                asn.add_attribute("organization", **{"type": "text", "value": page["asnname"]})
+                asn.add_attribute("organization", page["asnname"])
             self._add(asn, referenced=domain_ip)
 
         if page.get("tlsIssuer"):

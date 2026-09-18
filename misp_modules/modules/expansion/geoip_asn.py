@@ -58,10 +58,8 @@ def _parse_asn(answer):
     asn = MISPObject("asn")
     if answer.autonomous_system_number is not None:
         asn.add_attribute("asn", f"AS{answer.autonomous_system_number}")
-    # organization only exists from asn template v6 on, and pymisp still bundles
-    # v5 - spelling the type out keeps the object buildable against either.
-    _add_if(asn, "organization", answer.autonomous_system_organization, "text")
-    _add_if(asn, "subnet-announced", str(answer.network) if answer.network else None, "ip-src")
+    _add_if(asn, "organization", answer.autonomous_system_organization)
+    _add_if(asn, "subnet-announced", str(answer.network) if answer.network else None)
     return asn
 
 
