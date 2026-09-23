@@ -119,7 +119,20 @@ def build_document(
                                                     {"values": ["example"], "types": ["ip-src", "ip-dst"]}
                                                 ]
                                             },
-                                        }
+                                        },
+                                        "tagging": {
+                                            "summary": "Result tagging and untagging an attribute",
+                                            "value": {
+                                                "results": [
+                                                    {
+                                                        "values": ["198.51.100.10"],
+                                                        "types": ["ip-dst"],
+                                                        "tags": ["misp-module:verdict=\"benign\""],
+                                                        "remove_tags": ["false-positive"],
+                                                    }
+                                                ]
+                                            },
+                                        },
                                     },
                                 }
                             },
