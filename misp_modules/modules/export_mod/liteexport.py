@@ -50,10 +50,11 @@ def handler(q=False):
         return False
 
     # ~ Misp json structur
-    liteEvent = {"Event": {}}
+    liteEvents = []
 
     for evt in request["data"]:
         rawEvent = evt["Event"]
+        liteEvent = {"Event": {}}
         liteEvent["Event"]["info"] = rawEvent["info"]
         liteEvent["Event"]["Attribute"] = []
 
@@ -66,10 +67,12 @@ def handler(q=False):
                 liteAttr["value"] = attr["value"]
                 liteEvent["Event"]["Attribute"].append(liteAttr)
 
+        liteEvents.append(liteEvent)
+
     return {
         "response": [],
         "data": str(
-            base64.b64encode(bytes(json.dumps(liteEvent, indent=config["indent_json_export"]), "utf-8")),
+            base64.b64encode(bytes(json.dumps(liteEvents, indent=config["indent_json_export"]), "utf-8")),
             "utf-8",
         ),
     }
