@@ -62,7 +62,7 @@ def isBlacklisted(value):
     blacklist = ["8.8.8.8", "255.255.255.255", "192.168.56.", "time.windows.com"]
 
     for b in blacklist:
-        if value in b:
+        if value.startswith(b):
             return True
 
     return False
