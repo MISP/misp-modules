@@ -108,6 +108,10 @@ USERNAME_ENRICH = "username"
 PASSWORD_ENRICH = "password"
 
 
+class IPQualityScoreError(Exception):
+    """An error reported by the IPQualityScore API."""
+
+
 class RequestHandler:
     """A class for handling any outbound requests from this module."""
 
@@ -131,7 +135,7 @@ class RequestHandler:
                 msg = response["message"]
                 logger.error("Error: %s", {msg})
                 misperrors["error"] = msg
-                raise
+                raise IPQualityScoreError(msg)
             else:
                 return response
         except (ConnectTimeout, ProxyError, InvalidURL) as error:
@@ -960,37 +964,40 @@ def handler(q=False):
     request_handler = RequestHandler(apikey, base_url)
     enrich_type = ""
     json_response = {}
-    if attribute_type in ip_query_input_type:
-        enrich_type = IP_ENRICH
-        json_response = request_handler.ipqs_lookup(IP_ENRICH,
-                                                    attribute_value)
-    elif attribute_type in url_query_input_type:
-        enrich_type = URL_ENRICH
-        json_response = request_handler.ipqs_lookup(URL_ENRICH,
-                                                    attribute_value)
-    elif attribute_type in email_query_input_type:
-        enrich_type = EMAIL_ENRICH
-        json_response1 = request_handler.ipqs_lookup(EMAIL_ENRICH,
-                                                     attribute_value)
-        json_response2 = request_handler.ipqs_darkweb_lookup(EMAIL_ENRICH,
-                                                             attribute_value)
-        json_response = {
-            "email_reputation": json_response1,
-            "leaked_email": json_response2
-                        }
-    elif attribute_type in phone_query_input_type:
-        enrich_type = PHONE_ENRICH
-        json_response = request_handler.ipqs_lookup(PHONE_ENRICH,
-                                                    attribute_value)
-    elif attribute_type in username_query_input_type:
-        enrich_type = USERNAME_ENRICH
-        json_response = request_handler.ipqs_darkweb_lookup(USERNAME_ENRICH,
-                                                            attribute_value)
-    elif attribute_type in password_query_input_type:
-        enrich_type = PASSWORD_ENRICH
-        json_response = request_handler.ipqs_darkweb_lookup(PASSWORD_ENRICH,
-                                                            attribute_value)
-    elif attribute_type in file_query_input_type:
+    try:
+        if attribute_type in ip_query_input_type:
+            enrich_type = IP_ENRICH
+            json_response = request_handler.ipqs_lookup(IP_ENRICH,
+                                                        attribute_value)
+        elif attribute_type in url_query_input_type:
+            enrich_type = URL_ENRICH
+            json_response = request_handler.ipqs_lookup(URL_ENRICH,
+                                                        attribute_value)
+        elif attribute_type in email_query_input_type:
+            enrich_type = EMAIL_ENRICH
+            json_response1 = request_handler.ipqs_lookup(EMAIL_ENRICH,
+                                                         attribute_value)
+            json_response2 = request_handler.ipqs_darkweb_lookup(EMAIL_ENRICH,
+                                                                 attribute_value)
+            json_response = {
+                "email_reputation": json_response1,
+                "leaked_email": json_response2
+                            }
+        elif attribute_type in phone_query_input_type:
+            enrich_type = PHONE_ENRICH
+            json_response = request_handler.ipqs_lookup(PHONE_ENRICH,
+                                                        attribute_value)
+        elif attribute_type in username_query_input_type:
+            enrich_type = USERNAME_ENRICH
+            json_response = request_handler.ipqs_darkweb_lookup(USERNAME_ENRICH,
+                                                                attribute_value)
+        elif attribute_type in password_query_input_type:
+            enrich_type = PASSWORD_ENRICH
+            json_response = request_handler.ipqs_darkweb_lookup(PASSWORD_ENRICH,
+                                                                attribute_value)
+    except IPQualityScoreError:
+        return misperrors
+    if attribute_type in file_query_input_type:
         try:
             data = request.get("attribute").get("data", "")
             if "malware-sample" in attribute_type:
