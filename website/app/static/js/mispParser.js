@@ -13,14 +13,15 @@ function parseMispObject(misp_object, query_url, functionToCall){
                                 .css("margin-left", "10px")
                 }
                 if(functionToCall){
-                    // `_${functionToCall.name}('${v.value}')` refer to 'window._query_as_same = query_as_same' in my vue file
-                    $query_same = $("<button>").attr({"onclick": `_${functionToCall.name}('${v.value}')`, 
+                    // refer to 'window._query_as_same = query_as_same' in my vue file
+                    $query_same = $("<button>").attr({
                                 "title": "Query this value with the same attribute and modules as the main query",
                                 "class": "btn btn-link"
                                 })
                             // .text("query as same")
                             .append($("<i>").attr("class", "fa-solid fa-recycle"))
                             .css({"margin-left": "10px", "padding": "0", "--bs-btn-border-width": "0"})
+                            .on("click", function(){ window[`_${functionToCall.name}`](v.value) })
                 }
             }
             
@@ -78,14 +79,15 @@ function parseMispAttr(misp_attr, misp_types, key, query_url, query_as_same){
         if(query_url){
             $query=$("<a>").attr("href", query_url+misp_attr).text("query").css("margin-left", "10px")
         }
-        // `_${functionToCall.name}('${misp_attr}')` refer to 'window._query_as_same = query_as_same' in my vue file
+        // refer to 'window._query_as_same = query_as_same' in my vue file
         if(query_as_same){
-            $query_same = $("<button>").attr({"onclick": `_${query_as_same.name}('${misp_attr}')`, 
+            $query_same = $("<button>").attr({
                             "title": "Query this value with the same attribute and modules as the main query",
                             "class": "btn btn-link"
                         })
                     .text("query as same")
                     .css({"margin-left": "10px", "padding": "0", "--bs-btn-border-width": "0"})
+                    .on("click", function(){ window[`_${query_as_same.name}`](misp_attr) })
         }
     }
 
