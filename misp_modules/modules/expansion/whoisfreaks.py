@@ -335,6 +335,9 @@ def parse_domain_reputation(data, domain):
     attrs = []
     tags = []
 
+    if not isinstance(data, dict):
+        return attrs, tags, None
+
     intelligence = data.get("intelligence") or {}
     for ioc in intelligence.get("related_iocs") or []:
         value = ioc.get("value")
