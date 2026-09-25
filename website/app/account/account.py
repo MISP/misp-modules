@@ -1,3 +1,5 @@
+from urllib.parse import urlparse
+
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_required, login_user, logout_user
 
@@ -25,7 +27,10 @@ def login():
             db.session.commit()
             login_user(user, form.remember_me.data)
             flash("You are now logged in. Welcome back!", "success")
-            return redirect(request.args.get("next") or "/")
+            next_url = request.args.get("next")
+            if not next_url or urlparse(next_url).netloc not in ("", request.host):
+                next_url = "/"
+            return redirect(next_url)
         else:
             flash("Invalid password.", "error")
     return render_template("account/login.html", form=form)
