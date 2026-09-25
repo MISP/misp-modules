@@ -279,7 +279,7 @@ def change_config():
     return {"message": "Permission denied", "toast_class": "danger-subtle"}, 403
 
 
-@home_blueprint.route("/change_status", methods=["GET"])
+@home_blueprint.route("/change_status", methods=["POST"])
 def change_status():
     """Change the status of a module, active or unactive"""
     sess["admin_user"] = admin_user_active()

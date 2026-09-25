@@ -139,7 +139,10 @@
             }
 
             async function change_status(module){
-                let res = await fetch("/change_status?module_id="+module.id)
+                let res = await fetch("/change_status?module_id="+module.id, {
+                                    headers: { "X-CSRFToken": $("#csrf_token").val() },
+                                    method: "POST",
+                                })
                 if(await res.status_code == 200){
                     module.is_active = !module.is_active
                 }

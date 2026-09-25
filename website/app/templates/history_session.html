@@ -116,12 +116,18 @@
             }
 
             async function remove_node(history_loc, key){
-                const res = await fetch('/history/remove_node_session/' + history_loc.uuid)
+                const res = await fetch('/history/remove_node_session/' + history_loc.uuid, {
+                                    headers: { "X-CSRFToken": $("#csrf_token").val() },
+                                    method: "POST",
+                                })
                 display_toast(res)
                 await change_tree(history_loc, key)
             }
             async function remove_node_tree(history_loc, key){
-                const res = await fetch('/history/remove_node_tree/' + history_loc.uuid)
+                const res = await fetch('/history/remove_node_tree/' + history_loc.uuid, {
+                                    headers: { "X-CSRFToken": $("#csrf_token").val() },
+                                    method: "POST",
+                                })
                 display_toast(res)
                 await change_tree(history_loc, key)
             }

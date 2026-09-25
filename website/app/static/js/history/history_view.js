@@ -10,12 +10,18 @@ export default {
 	emits: ['delete_node'],
 	setup(props, {emit}) {
 		async function remove_node(history_uuid){
-			const res = await fetch('/history/remove_node_session/' + history_uuid)
+			const res = await fetch('/history/remove_node_session/' + history_uuid, {
+								headers: { "X-CSRFToken": $("#csrf_token").val() },
+								method: "POST",
+							})
 			display_toast(res)
 			emit('delete_node', true)
 		}
 		async function remove_node_tree(history_uuid){
-			const res = await fetch('/history/remove_node_tree/' + history_uuid)
+			const res = await fetch('/history/remove_node_tree/' + history_uuid, {
+								headers: { "X-CSRFToken": $("#csrf_token").val() },
+								method: "POST",
+							})
 			display_toast(res)
 			emit('delete_node', true)
 		}
