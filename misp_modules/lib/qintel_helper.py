@@ -231,7 +231,7 @@ def search_qsentry(search_term, **kwargs):
     return loads(_search(**kwargs).read())
 
 
-def qsentry_feed(query_type="anon", feed_date=datetime.today(), **kwargs):
+def qsentry_feed(query_type="anon", feed_date=None, **kwargs):
     """
     Fetch the most recent QSentry Feed
 
@@ -245,6 +245,8 @@ def qsentry_feed(query_type="anon", feed_date=datetime.today(), **kwargs):
     remote = _set_remote("qsentry_feed", query_type, **kwargs)
     kwargs["token"] = kwargs.get("token", os.getenv("QSENTRY_TOKEN"))
 
+    if feed_date is None:
+        feed_date = datetime.today()
     feed_date = (feed_date - timedelta(days=1)).strftime("%Y%m%d")
     kwargs["remote"] = f"{remote}/{feed_date}"
 
