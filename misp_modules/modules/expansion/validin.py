@@ -927,14 +927,14 @@ def hover(q: Any = False) -> Any:
     if not attribute or not attribute.get("value"):
         return {"error": "Missing input."}
 
-    # Ensure endpoint starts with https://
-    client = ValidinDNSClient(
-        config.get("endpoint", ""),
-        config.get("api_key", ""),
-    )
     query_val = attribute["value"]
 
     try:
+        # Ensure endpoint starts with https://
+        client = ValidinDNSClient(
+            config.get("endpoint", "app.validin.com"),
+            config.get("api_key", ""),
+        )
         data = client.get_quick_reputation(attribute["type"], query_val)
 
         # Build a scannable summary string
