@@ -49,13 +49,7 @@ def handler(q=False):
     r = resolver.Resolver()
     r.timeout = 2
     r.lifetime = 2
-    if request.get("config"):
-        if request["config"].get("nameserver"):
-            nameservers = []
-            nameservers.append(request["config"].get("nameserver"))
-            r.nameservers = nameservers
-    else:
-        r.nameservers = ["8.8.8.8"]
+    r.nameservers = [(request.get("config") or {}).get("nameserver") or "8.8.8.8"]
 
     try:
         answer = r.resolve(revname, "PTR")
