@@ -75,16 +75,19 @@ def handler(q=False):
     # Parse the geolocation information related to the IP address
     geolocation = MISPObject("geolocation")
     for field, relation in _GEOLOCATION_OBJECT_MAPPING.items():
-        geolocation.add_attribute(relation, ipinfo[field])
-    for relation, value in zip(("latitude", "longitude"), ipinfo["loc"].split(",")):
-        geolocation.add_attribute(relation, value)
+        if ipinfo.get(field) is not None:
+            geolocation.add_attribute(relation, ipinfo[field])
+    if ipinfo.get("loc") is not None:
+        for relation, value in zip(("latitude", "longitude"), ipinfo["loc"].split(",")):
+            geolocation.add_attribute(relation, value)
     geolocation.add_reference(input_attribute.uuid, "locates")
     misp_event.add_object(geolocation)
 
     # Parse the domain information
     domain_ip = misp_event.add_object(name="domain-ip")
     for feature in ("hostname", "ip"):
-        domain_ip.add_attribute(feature, ipinfo[feature])
+        if ipinfo.get(feature) is not None:
+            domain_ip.add_attribute(feature, ipinfo[feature])
     domain_ip.add_reference(input_attribute.uuid, "resolves")
     if ipinfo.get("domain") is not None:
         for domain in ipinfo["domain"]["domains"]:
