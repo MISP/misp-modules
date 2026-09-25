@@ -194,6 +194,8 @@ def process_sigmf_archive(object):
 def process_sigmf_recording(object):
 
     event = MISPEvent()
+    sigmf_data_attr = None
+    sigmf_meta_attr = None
 
     for attribute in object["Attribute"]:
         if attribute["object_relation"] == "SigMF-data":
@@ -203,10 +205,10 @@ def process_sigmf_recording(object):
             sigmf_meta_attr = attribute
 
     if sigmf_meta_attr is None:
-        return {"error": "No SigMF-data attribute"}
+        return {"error": "No SigMF-meta attribute"}
 
     if sigmf_data_attr is None:
-        return {"error": "No SigMF-meta attribute"}
+        return {"error": "No SigMF-data attribute"}
 
     try:
         sigmf_meta = base64.b64decode(sigmf_meta_attr["data"]).decode("utf-8")
