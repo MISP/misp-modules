@@ -58,7 +58,6 @@ def handler(q=False):
         return False
 
     request = json.loads(q)
-    ret_val = ""
 
     if not request.get('config') or not request['config'].get('auth_key'):
         return {'error': 'A auth key is required to access all abuse.ch API services.'}
@@ -73,23 +72,29 @@ def handler(q=False):
 
     data = {"query": "search_ioc", "search_term": f"{to_query}"}
     response = requests.post(API_URL, headers={'Auth-Key': request['config']['auth_key']}, data=json.dumps(data))
-    if response.status_code == 200:
-        result = json.loads(response.text)
-        if result["query_status"] == "ok":
-            confidence_tag = confidence_level_to_tag(result["data"][0]["confidence_level"])
-            ret_val = {
-                "results": [
-                    {
-                        "types": mispattributes["output"],
-                        "values": [result["data"][0]["threat_type_desc"]],
-                        "tags": [
-                            result["data"][0]["malware"],
-                            result["data"][0]["malware_printable"],
-                            confidence_tag,
-                        ],
-                    }
-                ]
+    if response.status_code != 200:
+        misperrors["error"] = f"ThreatFox API returned status code {response.status_code}"
+        return misperrors
+
+    result = json.loads(response.text)
+    if result["query_status"] != "ok":
+        misperrors["error"] = f"ThreatFox query status: {result['query_status']}"
+        return misperrors
+
+    confidence_tag = confidence_level_to_tag(result["data"][0]["confidence_level"])
+    ret_val = {
+        "results": [
+            {
+                "types": mispattributes["output"],
+                "values": [result["data"][0]["threat_type_desc"]],
+                "tags": [
+                    result["data"][0]["malware"],
+                    result["data"][0]["malware_printable"],
+                    confidence_tag,
+                ],
             }
+        ]
+    }
 
     return ret_val
 
