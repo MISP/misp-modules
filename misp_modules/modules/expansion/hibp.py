@@ -51,6 +51,7 @@ def handler(q=False):
         breaches = json.loads(r.text)
         if breaches:
             return {"results": [{"types": mispattributes["output"], "values": breaches}]}
+        return {"results": [{"types": mispattributes["output"], "values": "OK (Not Found)"}]}
     elif r.status_code == 404:
         return {"results": [{"types": mispattributes["output"], "values": "OK (Not Found)"}]}
     else:
