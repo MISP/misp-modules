@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 import argparse
 import sys
-import xml.etree.ElementTree as ET
 from zipfile import ZipFile
+
+import defusedxml.ElementTree as ET
 
 if sys.platform == "win32":
     import win32_unicode_argv

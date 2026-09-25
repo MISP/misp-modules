@@ -1,8 +1,8 @@
 import base64
 import json
 import time
-import xml.etree.ElementTree as ET
 
+import defusedxml.ElementTree as ET
 from pymisp import MISPEvent, MISPObject
 
 misperrors = {"error": "Error"}
