@@ -90,16 +90,17 @@ def fetchHTML(url):
     if canonical_url is None or not _is_safe_canonical_url(canonical_url):
         raise ValueError(f"Blocked URL: {url}")
 
-    for _ in range(MAX_REDIRECTS + 1):
-        response = requests.get(canonical_url, timeout=10, allow_redirects=False)
-        if not response.is_redirect:
-            return response.text
+    with requests.Session() as session:
+        for _ in range(MAX_REDIRECTS + 1):
+            response = session.get(canonical_url, timeout=10, allow_redirects=False)
+            if not response.is_redirect:
+                return response.text
 
-        redirected_url = _canonicalize_url(urljoin(canonical_url, response.headers["location"]))
-        response.close()
-        if redirected_url is None or not _is_safe_canonical_url(redirected_url):
-            raise ValueError(f"Blocked redirect URL: {redirected_url}")
-        canonical_url = redirected_url
+            redirected_url = _canonicalize_url(urljoin(canonical_url, response.headers["location"]))
+            response.close()
+            if redirected_url is None or not _is_safe_canonical_url(redirected_url):
+                raise ValueError(f"Blocked redirect URL: {redirected_url}")
+            canonical_url = redirected_url
 
     raise ValueError(f"Too many redirects for URL: {url}")
 
