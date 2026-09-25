@@ -198,8 +198,8 @@ class Session_class:
 
         while len(histories) > get_limit_queries():
             history = History.query.order_by(History.id).all()
-            session = Session_db.query.filter_by(id=history[0].session_id)
-            if not History_Tree.query.filter_by(session_uuid=session.uuid):
+            session = Session_db.query.filter_by(id=history[0].session_id).first()
+            if session and not History_Tree.query.filter_by(session_uuid=session.uuid).count():
                 Session_db.query.filter_by(id=history[0].session_id).delete()
             History.query.filter_by(id=history[0].id).delete()
 
