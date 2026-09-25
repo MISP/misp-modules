@@ -120,7 +120,7 @@ class Yeti:
             logging.error("type not found %s" % obs_to_add["type"])
             return
 
-        for t in obs_to_add["tags"]:
+        for t in obs_to_add.get("tags") or []:
             self.misp_event.add_attribute_tag(t["name"], attr["uuid"])
 
     def __get_object_domain_ip(self, obj_to_add):
