@@ -366,8 +366,12 @@ def dict_handler(request: dict):
         return misperrors
     has_header = request["config"].get("has_header")
     has_header = True if has_header == "1" else False
-    header = request["config"]["header"].split(",") if request["config"].get("header").strip() else []
-    delimiter = request["config"]["special_delimiter"] if request["config"].get("special_delimiter").strip() else ","
+    header = request["config"]["header"].split(",") if (request["config"].get("header") or "").strip() else []
+    delimiter = (
+        request["config"]["special_delimiter"]
+        if (request["config"].get("special_delimiter") or "").strip()
+        else ","
+    )
     data = __standard_parsing(data) if delimiter == "," else __special_parsing(data, delimiter)
     if not header:
         if has_header:
