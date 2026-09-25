@@ -226,9 +226,9 @@ class QueryModule(tornado.web.RequestHandler):
     @tornado_concurrent.run_on_executor
     def run_request(self, module_name, json_payload, dict_payload):
         LOGGER.debug("QueryModule %s request %s", module_name, json_payload)
-        try:
+        if hasattr(MODULES_HANDLERS[module_name], "dict_handler"):
             response = MODULES_HANDLERS[module_name].dict_handler(request=dict_payload)
-        except AttributeError:
+        else:
             response = MODULES_HANDLERS[module_name].handler(q=json_payload)
         return orjson.dumps(response, default=pymisp.pymisp_json_default)
 
