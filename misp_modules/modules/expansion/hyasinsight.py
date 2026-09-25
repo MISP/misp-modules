@@ -290,7 +290,7 @@ class RequestHandler:
 
     def get(self, url: str, headers: dict = None, req_body=None) -> requests.Response:
         """General post method to fetch the response from HYAS Insight."""
-        response = []
+        response = None
         try:
             response = self.session.post(url, headers=headers, json=req_body)
             if response:
@@ -299,6 +299,7 @@ class RequestHandler:
             msg = "Error connecting with the HYAS Insight."
             logger.error(f"{msg} Error: {error}")
             misperrors["error"] = msg
+            response = None
         return response
 
     def hyas_lookup(self, end_point: str, query_input, query_param, current=False) -> requests.Response:
@@ -792,7 +793,7 @@ def handler(q=False):
             else:
                 ip_param = IP_PARAM
             enrich_response = request_handler.hyas_lookup(endpoint, ip_param, attribute_value)
-            if endpoint == SSL_CERTIFICATE_ENDPOINT:
+            if endpoint == SSL_CERTIFICATE_ENDPOINT and enrich_response:
                 enrich_response = enrich_response.get("ssl_certs")
             if enrich_response:
                 has_results = True
@@ -808,7 +809,8 @@ def handler(q=False):
                     attribute_value,
                     endpoint == WHOIS_CURRENT_ENDPOINT,
                 )
-                enrich_response = enrich_response.get("items")
+                if enrich_response:
+                    enrich_response = enrich_response.get("items")
             if enrich_response:
                 has_results = True
                 parser.create_misp_attributes_and_objects(enrich_response, endpoint, attribute_value)
