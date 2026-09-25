@@ -734,7 +734,7 @@ class LastlineResultBaseParser(object):
     @staticmethod
     def _get_mitre_techniques(result):
         return [
-            'misp-galaxy:mitre-attack-pattern="{} - {}"'.format(w[0], w[1])
+            'misp-galaxy:mitre-attack-pattern="{} - {}"'.format(w[1], w[0])
             for w in sorted(
                 set(
                     [
