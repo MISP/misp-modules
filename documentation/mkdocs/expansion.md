@@ -1452,6 +1452,35 @@ Module to query IPRep data for IP addresses.
 
 -----
 
+#### [isMalicious Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/ismalicious.py)
+
+<img src=../logos/ismalicious.png height=60>
+
+Query isMalicious for IP, domain, hostname, and URL reputation.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/ismalicious.py)]
+
+- **features**:
+>The module takes an IP, domain, hostname or URL attribute (the domain side of a domain|ip) and queries GET /check on the isMalicious API. It returns a text summary with the malicious flag, risk score, categories and source count. Only threat listings are counted: listings that describe what an indicator is (cloud and CDN ranges, Tor exits, DoH resolvers, ad lists, allowlists) are left out of the categories and of the source count. Hover and expansion share the same handler. The queried indicator is sent over TLS; nothing else leaves the MISP instance besides the configured API key.
+
+- **config**:
+> - api_key
+> - api_url
+
+- **input**:
+>An IP address, domain, hostname or URL.
+
+- **output**:
+>Text attributes with the isMalicious reputation summary.
+
+- **references**:
+> - https://ismalicious.com/integrations/misp
+> - https://ismalicious.com/api-docs
+
+- **requirements**:
+>An isMalicious API key (free accounts are available): the X-API-KEY value, Base64 of apiKey:apiSecret, shown under API credentials on the isMalicious account page.
+
+-----
+
 #### [Ninja Template Rendering](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/jinja_template_rendering.py)
 
 Render the template with the data passed
