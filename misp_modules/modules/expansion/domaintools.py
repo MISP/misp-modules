@@ -371,7 +371,9 @@ def handler(q=False):
     if services:
         try:
             for s in services:
-                globals()[s](domtools, to_query, values)
+                result = globals()[s](domtools, to_query, values)
+                if result is misperrors:
+                    return misperrors
         except Exception as e:
             print(to_query, type(e), e)
 
