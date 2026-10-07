@@ -572,6 +572,25 @@ class TestExpansions(unittest.TestCase):
         response = self.misp_modules_post(query)
         self.assertEqual(self.get_values(response), "dns.google")
 
+    def test_rulezet_validator(self):
+        query = {
+            "module": "rulezet_validator",
+            "attribute": {
+                "type": "yara",
+                "uuid": "ea89a33b-4ab7-4515-9f02-922a0bee333d",
+                "value": "rule test { condition: tru }",
+            },
+        }
+        response = self.misp_modules_post(query)
+        self.assertEqual(self.get_first_object_type(response), "rule-validation")
+        attributes = {
+            attribute["object_relation"]: attribute["value"]
+            for attribute in response.json()["results"]["Object"][0]["Attribute"]
+        }
+        self.assertEqual(attributes["format"], "yara")
+        self.assertEqual(attributes["valid"], "0")
+        self.assertIn("undefined identifier", attributes["error"])
+
     def test_securitytrails(self):
         module_name = "securitytrails"
         query_types = ("ip-src", "domain")
