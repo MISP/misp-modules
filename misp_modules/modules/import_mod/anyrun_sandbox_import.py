@@ -72,7 +72,7 @@ def handler(q=False):
         token = request.get("config").get("api_key")
         analysis_uuid = request.get("config").get("ANYRUN Analysis UUID")
 
-        if not any((token, analysis_uuid)):
+        if not all((token, analysis_uuid)):
             raise RunTimeException("ANY.RUN API-KEY and Analysis UUID must be specified.")
 
         with SandboxConnector.windows(token, integration=Config.INTEGRATION) as connector:
