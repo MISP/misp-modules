@@ -95,23 +95,23 @@ def createPost(request):
 
     try:
         # Make POST request to send message
-        requests.post(
+        response = requests.post(
             endpoint,
             headers=headers,
             auth=(params["nextcloud_app_uuid_login"], params["app_access_token"]),
             json=message_data
         )
+        response.raise_for_status()
         return True
     except requests.exceptions.RequestException:
-        return True
+        return False
 
 
 def handler(q=False):
     if q is False:
         return False
     request = json.loads(q)
-    createPost(request)
-    r = {"data": True}
+    r = {"data": createPost(request)}
     return r
 
 
