@@ -245,7 +245,7 @@ class JoeParser:
                 self.references[self.analysisinfo_uuid].append(
                     dict(referenced_uuid=process_object.uuid, relationship_type="calls")
                 )
-                self.process_references[(general["targetid"], general["path"])] = process_object.uuid
+                self.process_references[(int(general["targetid"]), general["path"])] = process_object.uuid
 
     def parse_fileactivities(self, process_uuid, fileactivities):
         for feature, files in fileactivities.items():
