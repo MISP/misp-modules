@@ -68,6 +68,7 @@ moduleconfig = [
     "disable_tags",
     "disable_misp_objects",
     "ignore_analysis_finished",
+    "disable_certificate_verification",
 ]
 
 
