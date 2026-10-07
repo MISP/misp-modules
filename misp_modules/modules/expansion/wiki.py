@@ -52,7 +52,7 @@ def handler(q=False):
         summary = result[0]["item"]["value"] if result else "No additional data found on Wikidata"
     except Exception as e:
         misperrors["error"] = "wikidata API not accessible {}".format(e)
-        return misperrors["error"]
+        return misperrors
 
     r = {"results": [{"types": mispattributes["output"], "values": summary}]}
     return r
