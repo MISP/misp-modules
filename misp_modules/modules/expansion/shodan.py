@@ -131,7 +131,7 @@ class ShodanParser:
                             vulnerabilities[cve] = vulnerability
                 # Also parse the certificates
                 if data.get("ssl"):
-                    self._parse_cert(data["ssl"])
+                    self._parse_cert(data["ssl"]["cert"])
             for cve, vulnerability in vulnerabilities.items():
                 vulnerability_object = MISPObject("vulnerability")
                 vulnerability_object.add_attribute(**{"type": "vulnerability", "object_relation": "id", "value": cve})
