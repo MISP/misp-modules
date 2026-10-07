@@ -43,7 +43,7 @@ def is_cof_valid_strict(d: dict) -> bool:
     --------
     True on success, False on validation failure.
     """
-    return True  # FIXME
+    return is_cof_valid_simple(d)  # FIXME: the full JSON Schema validation is still missing
 
 
 def is_cof_valid_simple(d: dict) -> bool:
