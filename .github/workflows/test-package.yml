@@ -67,12 +67,19 @@ jobs:
       - name: Run server in background
         run: poetry run misp-modules -l 127.0.0.1 2>error.log &
 
-      - name: Sleep for 10 seconds
-        run: sleep 10s
+      - name: Wait for the server to answer its healthcheck
         shell: bash
-
-      - name: Check if server is running
-        run: curl -sS localhost:6666/healthcheck
+        run: |
+          for attempt in $(seq 1 60); do
+            if curl -sSf --max-time 5 localhost:6666/healthcheck; then
+              echo "healthcheck answered after ${attempt}s"
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "misp-modules did not answer /healthcheck within 60s" >&2
+          cat error.log >&2 || true
+          exit 1
 
       - name: Test package
         run: poetry run pytest
