@@ -56,6 +56,14 @@ fieldmap = {
 mispattributes = {"input": list(fieldmap.keys())}
 
 
+def sanitize_csv_value(value):
+    """Prefix values that could be interpreted as spreadsheet formulas to prevent CSV injection."""
+    value = str(value)
+    if value.startswith(("=", "+", "-", "@")):
+        value = "'" + value
+    return value
+
+
 def handler(q=False):
     """
     Convert a MISP query into a CSV file matching the ThreatConnect Structured Import file format.
@@ -90,18 +98,18 @@ def handler(q=False):
                         writer.writerow(
                             {
                                 "Type": tc_types[i],
-                                "Value": indicator,
+                                "Value": sanitize_csv_value(indicator),
                                 "Source": config["Default_Source"],
-                                "Description": attribute["comment"],
+                                "Description": sanitize_csv_value(attribute["comment"]),
                             }
                         )
                 else:
                     writer.writerow(
                         {
                             "Type": fieldmap[attribute["type"]],
-                            "Value": attribute["value"],
+                            "Value": sanitize_csv_value(attribute["value"]),
                             "Source": config["Default_Source"],
-                            "Description": attribute["comment"],
+                            "Description": sanitize_csv_value(attribute["comment"]),
                         }
                     )
 
