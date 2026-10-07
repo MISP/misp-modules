@@ -206,7 +206,7 @@ def handler(q=False):
                     except KeyError:
                         addr_out = None
                     try:
-                        prev_out = tx["prev_out"]["value"]
+                        prev_out = tx["value"]
                     except KeyError:
                         prev_out = None
                     if prev_out != 0 and addr_out == btc:
