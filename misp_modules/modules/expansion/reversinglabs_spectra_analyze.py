@@ -2539,6 +2539,11 @@ def _process_object_recursive(
             if not foreach_path:
                 foreach_path = obj_path_value.strip()
 
+            # The limit is encoded on the child key (e.g. "dns-ips[10]"), not on obj:path
+            _, _, _, _, key_limit = _parse_obj_key(child_key)
+            if key_limit != MAX_FOREACH_ITERATIONS:
+                foreach_limit = key_limit
+
             # Get the data at the path
             path_data = get_first(data, [foreach_path])
 
