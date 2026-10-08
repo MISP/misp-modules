@@ -1367,6 +1367,41 @@ Module to query an IP ASN history service (https://github.com/D4-project/IPASN-H
 
 -----
 
+#### [IPGeolocation.io Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/ipgeolocation.py)
+
+<img src=logos/ipgeolocation.png height=60>
+
+An expansion and hover module to enrich an IP address with geolocation, ASN, company, threat intelligence (threat score, VPN, proxy, Tor, bot and spam signals) and abuse contact information from IPGeolocation.io, either through the API or from local IPGeolocation.io MMDB databases.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/ipgeolocation.py)]
+
+- **features**:
+>The module takes an IP address attribute as input and answers from one of two sources:
+>- `api_key`: the [IPGeolocation.io API](https://ipgeolocation.io/documentation/ip-location-api.html). Free plans return geolocation and ASN. Paid plans also return the company, threat intelligence (`include=security`), the abuse contact (`include=abuse`) and the hostname; the `include` setting chooses these modules (default `security,abuse,hostname`, `none` for the base lookup only). If the plan does not allow them, the module falls back to the base lookup. Results are cached in memory for `cache_ttl` seconds (default 3600) to save credits on repeated lookups such as hover.
+>- `mmdb_paths`: comma-separated `.mmdb` files or directories of IPGeolocation.io databases: Location, Country, ISP, ASN, Company, Abuse Contact, Security (all versions), Residential Proxy and Hosting, or their combined editions. Names are returned in English. Lookups run locally and nothing is sent to IPGeolocation.io, which suits air-gapped instances and indicators that must not leave the organisation. Several databases are combined; for a field present in more than one, the first file in the list wins. Updated files are picked up automatically within a minute.
+>
+>When `mmdb_paths` is set, the API is never called.
+
+- **config**:
+> - api_key
+> - mmdb_paths
+> - include
+> - cache_ttl
+
+- **input**:
+>An IP address attribute (ip-src, ip-dst, ip-src|port, ip-dst|port or domain|ip).
+
+- **output**:
+>geolocation, asn and domain-ip objects, and an ipgeolocation-ip object with the threat score, anonymisation signals, company and abuse contact.
+
+- **references**:
+> - https://ipgeolocation.io/documentation/ip-location-api.html
+> - https://ipgeolocation.io/ip-security-database.html
+
+- **requirements**:
+>An IPGeolocation.io API key, or IPGeolocation.io MMDB databases stored on the misp-modules host
+
+-----
+
 #### [IPInfo.io Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/ipinfo.py)
 
 <img src=logos/ipinfo.png height=60>

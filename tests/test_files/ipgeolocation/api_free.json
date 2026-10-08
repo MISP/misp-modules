@@ -1,0 +1,75 @@
+{
+  "ip": "165.227.0.0",
+  "location": {
+    "continent_code": "NA",
+    "continent_name": "North America",
+    "country_code2": "US",
+    "country_code3": "USA",
+    "country_name": "United States",
+    "country_name_official": "United States of America",
+    "country_capital": "Washington, D.C.",
+    "state_prov": "California",
+    "state_code": "US-CA",
+    "district": "Santa Clara County",
+    "city": "Santa Clara",
+    "zipcode": "95051",
+    "latitude": "37.35983",
+    "longitude": "-121.98144",
+    "is_eu": false,
+    "country_flag": "https://ipgeolocation.io/static/flags/us_64.png",
+    "geoname_id": "5346804",
+    "country_emoji": "🇺🇸"
+  },
+  "country_metadata": {
+    "calling_code": "+1",
+    "tld": ".us",
+    "languages": [
+      "en-US",
+      "es-US",
+      "haw",
+      "fr"
+    ]
+  },
+  "currency": {
+    "code": "USD",
+    "name": "US Dollar",
+    "symbol": "$"
+  },
+  "asn": {
+    "as_number": "AS14061",
+    "organization": "DigitalOcean, LLC",
+    "country": "US"
+  },
+  "time_zone": {
+    "name": "America/Los_Angeles",
+    "offset": -8,
+    "offset_with_dst": -8,
+    "current_time": "2026-02-09 09:54:51.206-0800",
+    "current_time_unix": 1770659691.206,
+    "current_tz_abbreviation": "PST",
+    "current_tz_full_name": "Pacific Standard Time",
+    "standard_tz_abbreviation": "PST",
+    "standard_tz_full_name": "Pacific Standard Time",
+    "is_dst": false,
+    "dst_savings": 0,
+    "dst_exists": true,
+    "dst_tz_abbreviation": "PDT",
+    "dst_tz_full_name": "Pacific Daylight Time",
+    "dst_start": {
+      "utc_time": "2026-03-08 TIME 10:00",
+      "duration": "+1.00H",
+      "gap": true,
+      "date_time_after": "2026-03-08 TIME 03:00",
+      "date_time_before": "2026-03-08 TIME 02:00",
+      "overlap": false
+    },
+    "dst_end": {
+      "utc_time": "2026-11-01 TIME 09:00",
+      "duration": "-1.00H",
+      "gap": false,
+      "date_time_after": "2026-11-01 TIME 01:00",
+      "date_time_before": "2026-11-01 TIME 02:00",
+      "overlap": true
+    }
+  }
+}
