@@ -1,0 +1,90 @@
+{
+  "name": "PTR Classification",
+  "module": "ptrclassify",
+  "module-type": ["expansion", "hover"],
+  "description": "Classify PTR hostnames and add matching ptrclassify taxonomy tags to the queried MISP attribute.",
+  "requirements": [
+    "ptrclassify >=0.3.0,<0.4.0 and dnspython, included in the minimal and all installation extras",
+    "A DNS resolver that supports PTR queries for IP lookups",
+    "Enable the ptrclassify taxonomy in MISP to manage the returned tags; no API key or ptrclassify service is required"
+  ],
+  "features": [
+    "Resolve IPv4 and IPv6 addresses and classify every distinct PTR hostname with the local ptrclassify library.",
+    "Preserve the queried address in the classifier's PTR record so IPv4-encoded hostnames return the ip-encoded naming tag and embedded_ip hint.",
+    "Classify hostname and domain values directly without a DNS lookup. Address-dependent hints are only available for IP inputs.",
+    "Preserve the input attribute UUID, existing tags, comment and detection flag while adding matching taxonomy tags.",
+    "Tag each discovered PTR hostname with its own classification and add the union of matching tags to the queried attribute.",
+    "Return classification text containing confidence, evidence, rule IDs, additional hints and potential locations.",
+    "Hover displays the enrichment. Importing expansion results applies the returned tags in MISP.",
+    "PTR names are operator-controlled. Classification and location hints are heuristic and are not verified usage or geolocation."
+  ],
+  "references": [
+    "https://github.com/adulau/ptrclassify",
+    "https://misp-project.org/taxonomies.html#_ptrclassify"
+  ],
+  "input": {
+    "format": "misp_standard",
+    "types": ["ip-src", "ip-dst", "domain|ip", "hostname", "domain"],
+    "required_attribute_fields": ["type", "value", "uuid"],
+    "domain_ip": "For domain|ip, the IP component is queried; the original composite attribute is retained."
+  },
+  "output": {
+    "format": "misp_standard",
+    "response": "results.Attribute contains the original attribute, discovered PTR hostname attributes for IP inputs, and one text summary per classified hostname.",
+    "tags": "Matching machine tags, such as ptrclassify:access=\"mobile\", are returned in each attribute's Tag list. The input attribute retains its original UUID so MISP can associate the tags with the queried attribute.",
+    "new_attributes": "Discovered hostnames and classification text use to_ids=false. The queried attribute's detection flag is preserved.",
+    "no_match": "Return the input, any discovered PTR hostnames and informative text without adding taxonomy tags. Existing tags are preserved.",
+    "errors": "Missing PTR records, resolver failures, timeouts and invalid inputs return an error without tagged results."
+  },
+  "config": {
+    "nameserver": {
+      "required": false,
+      "type": "IPv4 or IPv6 address",
+      "default": "System DNS resolver",
+      "description": "Optional DNS server for IP lookups. Hostname and domain inputs do not query DNS. Resolver timeout is two seconds and the total lookup lifetime is five seconds."
+    }
+  },
+  "examples": [
+    {
+      "description": "Classify a supplied PTR-style hostname locally, in either hover or expansion mode.",
+      "request": {
+        "module": "ptrclassify",
+        "attribute": {
+          "type": "hostname",
+          "value": "188.147.228.101.nat.umts.dynamic.t-mobile.pl",
+          "uuid": "5b582d80-7a7e-4b6a-9f22-77656e72bb3b"
+        },
+        "config": {}
+      },
+      "expected_source_tags": [
+        "ptrclassify:access=\"mobile\"",
+        "ptrclassify:allocation=\"dynamic\"",
+        "ptrclassify:translation=\"nat\"",
+        "ptrclassify:naming=\"generic-reverse\""
+      ]
+    },
+    {
+      "description": "Classify an IPv4 PTR answer while retaining the address context. Tags are added to the IP and the returned hostname. The expected result depends on the current DNS answer.",
+      "request": {
+        "module": "ptrclassify",
+        "attribute": {
+          "type": "ip-src",
+          "value": "188.147.228.101",
+          "uuid": "5b582d80-7a7e-4b6a-9f22-77656e72bb3b"
+        },
+        "config": {}
+      },
+      "ptr_records": ["188.147.228.101.nat.umts.dynamic.t-mobile.pl"],
+      "expected_source_tags": [
+        "ptrclassify:access=\"mobile\"",
+        "ptrclassify:allocation=\"dynamic\"",
+        "ptrclassify:translation=\"nat\"",
+        "ptrclassify:naming=\"generic-reverse\"",
+        "ptrclassify:naming=\"ip-encoded\""
+      ],
+      "expected_hints": {
+        "embedded_ip": "188.147.228.101"
+      }
+    }
+  ]
+}
