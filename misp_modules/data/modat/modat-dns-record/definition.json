@@ -1,0 +1,219 @@
+{
+  "attributes": {
+    "cname": {
+      "description": "MODAT API field: cname.",
+      "misp-attribute": "domain",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "created-at": {
+      "categories": [
+        "Other"
+      ],
+      "description": "MODAT API field: created_at.",
+      "misp-attribute": "datetime",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "deleted-at": {
+      "categories": [
+        "Other"
+      ],
+      "description": "MODAT API field: deleted_at.",
+      "misp-attribute": "datetime",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "expire": {
+      "categories": [
+        "Other"
+      ],
+      "description": "MODAT API field: expire.",
+      "misp-attribute": "integer",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "fqdn": {
+      "description": "MODAT API field: fqdn.",
+      "misp-attribute": "domain",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "host": {
+      "description": "MODAT API field: host.",
+      "misp-attribute": "hostname",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "ip": {
+      "description": "MODAT API field: ip.",
+      "misp-attribute": "ip-dst",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "minimum": {
+      "categories": [
+        "Other"
+      ],
+      "description": "MODAT API field: minimum.",
+      "misp-attribute": "integer",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "mname": {
+      "description": "MODAT API field: mname.",
+      "misp-attribute": "hostname",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "ns": {
+      "description": "MODAT API field: ns.",
+      "misp-attribute": "hostname",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "params": {
+      "categories": [
+        "Other"
+      ],
+      "description": "MODAT API field: params.",
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "port": {
+      "description": "MODAT API field: port.",
+      "misp-attribute": "port",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "priority": {
+      "categories": [
+        "Other"
+      ],
+      "description": "MODAT API field: priority.",
+      "misp-attribute": "integer",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "raw-json": {
+      "description": "MODAT API field: raw-json.",
+      "misp-attribute": "attachment",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "refresh": {
+      "categories": [
+        "Other"
+      ],
+      "description": "MODAT API field: refresh.",
+      "misp-attribute": "integer",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "retry": {
+      "categories": [
+        "Other"
+      ],
+      "description": "MODAT API field: retry.",
+      "misp-attribute": "integer",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "rname": {
+      "categories": [
+        "Other"
+      ],
+      "description": "MODAT API field: rname.",
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "rrtype": {
+      "categories": [
+        "Other"
+      ],
+      "description": "MODAT API field: rrtype.",
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "serial": {
+      "categories": [
+        "Other"
+      ],
+      "description": "MODAT API field: serial.",
+      "misp-attribute": "integer",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "target": {
+      "categories": [
+        "Other"
+      ],
+      "description": "MODAT API field: target.",
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "ttl": {
+      "categories": [
+        "Other"
+      ],
+      "description": "MODAT API field: ttl.",
+      "misp-attribute": "integer",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "value": {
+      "categories": [
+        "Other"
+      ],
+      "description": "MODAT API field: value.",
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "weight": {
+      "categories": [
+        "Other"
+      ],
+      "description": "MODAT API field: weight.",
+      "misp-attribute": "integer",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    }
+  },
+  "description": "A single historical MODAT DNS resource record, including lifecycle and TTL. SOA rname remains DNS notation.",
+  "meta-category": "network",
+  "name": "modat-dns-record",
+  "required": [
+    "fqdn",
+    "rrtype"
+  ],
+  "uuid": "9621682b-8bed-5aee-8d46-f208c96ca825",
+  "version": 1
+}

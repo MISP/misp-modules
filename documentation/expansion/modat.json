@@ -1,0 +1,273 @@
+{
+  "name": "MODAT Magnify",
+  "module": "modat",
+  "module-type": [
+    "expansion"
+  ],
+  "description": "Enrich internet infrastructure using MODAT Magnify host, service and DNS observations.",
+  "requirements": [
+    "requests",
+    "PyMISP",
+    "MODAT Magnify API key",
+    "Install the bundled modat-service and modat-dns-record object templates in MISP"
+  ],
+  "references": [
+    "https://api.magnify.modat.io/docs",
+    "https://magnify.modat.io/docs"
+  ],
+  "api_contract": {
+    "openapi_version": "1.65.2",
+    "source": "https://api.magnify.modat.io/openapi.json",
+    "retrieved": "2026-10-12"
+  },
+  "features": [
+    "32 meaningful MISP input types; reject unsupported types explicitly.",
+    "Map all 129 leaf fields of the detailed-service schema, including deprecated fields when present; normalize singular search port into ports.",
+    "Retain all nested service and host data as original JSON attachments, including unknown fields.",
+    "Emit existing ip-port, asn, geolocation, x509, software, file, vulnerability, domain-ip and dns-record objects.",
+    "Bundle new modat-service and modat-dns-record templates; validate them against the MISP object schema.",
+    "Keep DNS TTL, created_at and deleted_at distinct. Never treat deleted_at as last_seen.",
+    "Preserve array nesting in JSON; repeat scalar leaves in the typed observation. Web files also get individual file objects.",
+    "Link observations to input and related infrastructure; deduplicate shared objects and set discovered attributes to_ids=false.",
+    "Bound search pagination; report rate limits and authentication errors without exposing response bodies or credentials."
+  ],
+  "input": {
+    "format": "misp_standard",
+    "required_attribute_fields": [
+      "type",
+      "value",
+      "uuid"
+    ],
+    "types": [
+      {
+        "type": "AS",
+        "query": "asn.number",
+        "notes": ""
+      },
+      {
+        "type": "domain",
+        "query": "fqdns",
+        "notes": ""
+      },
+      {
+        "type": "domain|ip",
+        "query": "fqdns AND ip",
+        "notes": ""
+      },
+      {
+        "type": "email",
+        "query": "tls.extensions.subject_alt_name.email OR tls.extensions.issuer_alt_name.email",
+        "notes": "TLS alternative-name email pivot; no mail traffic or WHOIS lookup."
+      },
+      {
+        "type": "email-dst",
+        "query": "tls.extensions.subject_alt_name.email OR tls.extensions.issuer_alt_name.email",
+        "notes": "TLS alternative-name email pivot; no mail traffic or WHOIS lookup."
+      },
+      {
+        "type": "email-src",
+        "query": "tls.extensions.subject_alt_name.email OR tls.extensions.issuer_alt_name.email",
+        "notes": "TLS alternative-name email pivot; no mail traffic or WHOIS lookup."
+      },
+      {
+        "type": "favicon-mmh3",
+        "query": "http.files.mmh3",
+        "notes": ""
+      },
+      {
+        "type": "filename|sha1",
+        "query": "banner_sha1 OR http.body_sha1 OR http.files.sha1",
+        "notes": "Hash pivot only; filename is retained in input but not used as a search constraint."
+      },
+      {
+        "type": "filename|sha256",
+        "query": "banner_sha256 OR http.body_sha256 OR http.files.sha256 OR http.headers_sha256",
+        "notes": "Hash pivot only; filename is retained in input but not used as a search constraint."
+      },
+      {
+        "type": "hasshserver-md5",
+        "query": "ssh.hassh",
+        "notes": "Server observation HASSH; client hassh-md5 remains unsupported."
+      },
+      {
+        "type": "hex",
+        "query": "banner_hex",
+        "notes": ""
+      },
+      {
+        "type": "hostname",
+        "query": "fqdns OR rdns",
+        "notes": ""
+      },
+      {
+        "type": "hostname|port",
+        "query": "fqdns AND port",
+        "notes": ""
+      },
+      {
+        "type": "ip-dst",
+        "query": "GET /host/{ip}/v1; CIDR: subnet",
+        "notes": ""
+      },
+      {
+        "type": "ip-dst|port",
+        "query": "ip AND port",
+        "notes": ""
+      },
+      {
+        "type": "ip-src",
+        "query": "GET /host/{ip}/v1; CIDR: subnet",
+        "notes": ""
+      },
+      {
+        "type": "ip-src|port",
+        "query": "ip AND port",
+        "notes": ""
+      },
+      {
+        "type": "jarm-fingerprint",
+        "query": "tls.jarm",
+        "notes": ""
+      },
+      {
+        "type": "link",
+        "query": "fqdns or ip AND port",
+        "notes": "HTTP(S) infrastructure pivot; path and query are not matched."
+      },
+      {
+        "type": "pattern-in-traffic",
+        "query": "banner substring",
+        "notes": ""
+      },
+      {
+        "type": "port",
+        "query": "port",
+        "notes": ""
+      },
+      {
+        "type": "sha1",
+        "query": "banner_sha1 OR http.body_sha1 OR http.files.sha1",
+        "notes": "Observed web-file/body/banner hashes; not a malware hash database."
+      },
+      {
+        "type": "sha256",
+        "query": "banner_sha256 OR http.body_sha256 OR http.files.sha256 OR http.headers_sha256",
+        "notes": "Observed web-file/body/banner hashes; not a malware hash database."
+      },
+      {
+        "type": "ssh-fingerprint",
+        "query": "ssh.key_exchange.server_host_key.fingerprint_sha256",
+        "notes": "64 hex characters required; OpenSSH SHA256:base64 notation is rejected."
+      },
+      {
+        "type": "target-email",
+        "query": "tls.extensions.subject_alt_name.email OR tls.extensions.issuer_alt_name.email",
+        "notes": "TLS alternative-name email pivot; no mail traffic or WHOIS lookup."
+      },
+      {
+        "type": "target-org",
+        "query": "asn.org OR tls.subject.organization OR tls.issuer.organization",
+        "notes": ""
+      },
+      {
+        "type": "text",
+        "query": "quoted free-text phrase",
+        "notes": ""
+      },
+      {
+        "type": "uri",
+        "query": "fqdns or ip AND port",
+        "notes": "HTTP(S) infrastructure pivot; path and query are not matched."
+      },
+      {
+        "type": "url",
+        "query": "fqdns or ip AND port",
+        "notes": "HTTP(S) infrastructure pivot; path and query are not matched."
+      },
+      {
+        "type": "vulnerability",
+        "query": "cves.id",
+        "notes": "CVE IDs only; exposure is inferred, not proof of exploitation."
+      },
+      {
+        "type": "x509-fingerprint-sha1",
+        "query": "tls.fingerprint_sha1",
+        "notes": ""
+      },
+      {
+        "type": "x509-fingerprint-sha256",
+        "query": "tls.fingerprint_sha256",
+        "notes": ""
+      }
+    ]
+  },
+  "output": {
+    "format": "misp_standard",
+    "response": "results.Attribute includes original input and host JSON evidence; results.Object contains linked observations and derived infrastructure objects.",
+    "custom_templates": [
+      "misp_modules/data/modat/modat-service/definition.json",
+      "misp_modules/data/modat/modat-dns-record/definition.json"
+    ],
+    "no_results": "Return original attribute and empty Object array.",
+    "partial_failure": "A failed API call returns an error for the enrichment; partial results are not silently returned."
+  },
+  "config": {
+    "apikey": {
+      "required": true,
+      "description": "MODAT API key sent in the Authorization header; Bearer prefix is optional."
+    },
+    "max_results": {
+      "default": 10,
+      "range": "1-1000",
+      "description": "Maximum service results and, separately, reverse-DNS search results; not a cap on emitted objects. Direct host lookups return all available services."
+    },
+    "page_size": {
+      "default": 10,
+      "range": "10-100",
+      "description": "Search page size. Final page is sliced to max_results."
+    },
+    "timeout": {
+      "default": 30,
+      "range": "1-120",
+      "description": "Per HTTP request timeout, in seconds."
+    },
+    "include_dns": {
+      "default": true,
+      "description": "Fetch historical zone records for domain/hostname inputs and domain-bearing composites/URLs."
+    },
+    "reverse_dns": {
+      "default": false,
+      "description": "When include_dns is true, direct IP inputs also search A/AAAA history and fetch matching zones. Additional API calls and quota apply."
+    }
+  },
+  "limitations": [
+    "No WHOIS endpoint exists in the pinned OpenAPI specification. Website WHOIS features are not treated as API capabilities.",
+    "JA3S, JA4S, JA4X and JA4Scan-TLS stay text-valued relations in modat-service; no client JA3 or JA4 type is substituted.",
+    "Raw certificate text is human-readable certificate output, not PEM/base64 DER; it is stored as text.",
+    "No CPE, malware-file hashes beyond documented web hashes, mail-message, registry, banking or personal/travel data are inferred.",
+    "DNS zone lookups return their full record history; max_results does not limit the number of records in a zone.",
+    "Quoted input values containing quotes, backslashes or control characters are rejected because DSL escape behavior is undocumented.",
+    "No live authenticated API call was made. Offline contract and object validation tests passed."
+  ],
+  "object_recommendations": {
+    "new": [
+      "modat-service: service observation, protocol data, fingerprints and scan lifecycle.",
+      "modat-dns-record: individual historical DNS resource record, including HTTPS, SOA and SRV."
+    ],
+    "existing_updates": "None required for this implementation. Reuse current standard templates.",
+    "upstream_candidates": [
+      "A generic DNS observation template or extension of dns-record for rrtype, TTL, record lifecycle, HTTPS priority/target/params and SOA/SRV components.",
+      "Dedicated server TLS fingerprint attribute types and a generic network-service observation template. These require MISP core/template coordination; local text relations preserve their current meaning."
+    ]
+  },
+  "installation": [
+    "Keep modat.py in misp_modules/modules/expansion/ and the entire data/modat directory in misp_modules/data/. Reinstall the package if running an installed distribution.",
+    "Copy modat-service/ and modat-dns-record/ from misp_modules/data/modat/ into the MISP object-template repository at app/files/misp-objects/objects/ and refresh templates using the normal administrator update process.",
+    "Restart misp-modules, enable modat enrichment in MISP and set apikey. Configure optional result limits, timeout and DNS behavior as needed."
+  ],
+  "validation": {
+    "offline_tests": 77,
+    "command": "python -m pytest tests/test_modat.py -q",
+    "live_authenticated": false
+  }
+}
