@@ -7,7 +7,7 @@ import math
 import re
 from pathlib import Path
 from urllib.parse import quote, urlsplit
-from uuid import NAMESPACE_URL, UUID, uuid5
+from uuid import UUID
 
 import requests
 from pymisp import MISPAttribute, MISPEvent, MISPObject
@@ -287,6 +287,7 @@ class ModatParser:
         self.source.from_dict(**attribute)
         self.event.add_attribute(**self.source.to_dict())
         self.objects = {}
+        self.host_attachments = {}
         self.zones = set()
 
     @staticmethod
@@ -320,7 +321,7 @@ class ModatParser:
         )
         key = (obj.name, signature)
         if key not in self.objects:
-            obj.uuid = uuid5(NAMESPACE_URL, obj.name + signature)
+            # Keep PyMISP's fresh identity; the cache only deduplicates this response.
             self.objects[key] = obj
             self.event.add_object(obj)
         obj = self.objects[key]
@@ -391,16 +392,16 @@ class ModatParser:
         self.vulnerabilities(data.get("cves"), host.uuid)
         # Preserve extensions and all original nested data as evidence, without inventing attribute semantics.
         payload = base64.b64encode(json.dumps(data, sort_keys=True).encode()).decode()
-        raw_uuid = uuid5(NAMESPACE_URL, "modat-host-json" + payload)
-        if not any(str(a.uuid) == str(raw_uuid) for a in self.event.attributes):
-            self.event.add_attribute(
+        if payload not in self.host_attachments:
+            attachment = self.event.add_attribute(
                 "attachment",
                 value="modat-host.json",
                 data=payload,
-                uuid=raw_uuid,
                 to_ids=False,
                 comment=f"MODAT observation for {ip}",
             )
+            self.host_attachments[payload] = attachment.uuid
+        raw_uuid = self.host_attachments[payload]
         if not any(str(r.referenced_uuid) == str(raw_uuid) for r in host.references):
             host.add_reference(str(raw_uuid), "derived-from")
         services = data.get("services", [data["service"]] if "service" in data else [])

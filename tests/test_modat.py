@@ -413,3 +413,51 @@ def test_search_single_port_and_incomplete_geo():
     assert len(observations) == 1
     assert any(a["object_relation"] == "ports" and str(a["value"]) == "8443" for a in observations[0]["Attribute"])
     assert not any(o["name"] == "geolocation" for o in result["results"]["Object"])
+
+
+@pytest.mark.parametrize("source_uuid", [UUID, "abcdefab-1234-4234-8234-abcdefabcdef"])
+def test_identical_evidence_has_distinct_ids_across_enrichments(source_uuid):
+    host = {"ip": "203.0.113.14", "asn": {"number": 64496}, "services": [service()]}
+    zone = {
+        "fqdn": "example.com",
+        "records": {"a": [{"ip": "203.0.113.14", "ttl": 300, "created_at": "2026-01-01T00:00:00Z"}]},
+    }
+    results = []
+    for uuid in (UUID, source_uuid):
+        source = {**attribute(), "uuid": uuid}
+        parser = modat.ModatParser(source)
+        parser.host(host)
+        parser.dns(zone)
+        results.append(parser.result()["results"])
+
+    def generated_ids(result, source_id):
+        return (
+            {o["uuid"] for o in result["Object"]}
+            | {a["uuid"] for o in result["Object"] for a in o["Attribute"]}
+            | {a["uuid"] for a in result["Attribute"] if a["uuid"] != source_id}
+        )
+
+    first_ids = generated_ids(results[0], UUID)
+    second_ids = generated_ids(results[1], source_uuid)
+    assert first_ids.isdisjoint(second_ids)
+    for result, source_id in zip(results, (UUID, source_uuid)):
+        local_ids = generated_ids(result, source_id) | {source_id}
+        assert any(a["type"] == "attachment" for a in result["Attribute"])
+        for obj in result["Object"]:
+            for ref in obj.get("ObjectReference", []):
+                assert ref["referenced_uuid"] in local_ids
+
+
+def test_duplicate_host_evidence_is_reused_within_response():
+    parser = modat.ModatParser(attribute())
+    host = {"ip": "203.0.113.14", "services": [service()]}
+    parser.host(host)
+    first = parser.result()["results"]
+    parser.host(host)
+    second = parser.result()["results"]
+    assert {o["uuid"] for o in first["Object"]} == {o["uuid"] for o in second["Object"]}
+    attachments = [a for a in second["Attribute"] if a["type"] == "attachment"]
+    assert len(attachments) == 1
+    for obj in second["Object"]:
+        refs = [(r["referenced_uuid"], r["relationship_type"]) for r in obj.get("ObjectReference", [])]
+        assert len(refs) == len(set(refs))

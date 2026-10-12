@@ -29,7 +29,8 @@
     "Keep DNS TTL, created_at and deleted_at distinct. Never treat deleted_at as last_seen.",
     "Preserve array nesting in JSON; repeat scalar leaves in the typed observation. Web files also get individual file objects.",
     "Link observations to input and related infrastructure; deduplicate shared objects and set discovered attributes to_ids=false.",
-    "Bound search pagination; report rate limits and authentication errors without exposing response bodies or credentials."
+    "Bound search pagination; report rate limits and authentication errors without exposing response bodies or credentials.",
+    "Use fresh PyMISP UUIDs for generated objects and host attachments across enrichments; deduplicate identical evidence only within the current response."
   ],
   "input": {
     "format": "misp_standard",
@@ -266,7 +267,7 @@
     "Restart misp-modules, enable modat enrichment in MISP and set apikey. Configure optional result limits, timeout and DNS behavior as needed."
   ],
   "validation": {
-    "offline_tests": 77,
+    "offline_tests": 80,
     "command": "python -m pytest tests/test_modat.py -q",
     "live_authenticated": false
   }
