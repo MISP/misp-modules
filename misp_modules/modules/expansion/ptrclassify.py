@@ -4,7 +4,7 @@ import re
 from functools import lru_cache
 
 from dns import exception, resolver, reversename
-from ptrclassify import PTRClassifier
+from ptrclassify import PTRClassifier, PTRRecord
 from pymisp import MISPAttribute, MISPEvent
 
 from . import check_input_attribute, standard_error_message
@@ -23,7 +23,8 @@ moduleinfo = {
     "requirements": ["ptrclassify and dnspython Python libraries; DNS access for IP lookups"],
     "features": (
         "IPv4 and IPv6 attributes are reverse-resolved and every distinct PTR hostname is classified locally using"
-        " ptrclassify's built-in rules. Hostname and domain attributes are classified directly, without DNS or an API"
+        " ptrclassify's built-in rules, retaining the queried address to detect IP-encoded naming. Hostname and domain"
+        " attributes are classified directly, without DNS or an API"
         " key. Matching ptrclassify taxonomy tags are added to the queried attribute, retaining its UUID and existing"
         " tags, and to any returned PTR hostname attributes. A text attribute provides the classification labels,"
         " confidence, evidence, rule IDs and potential location hints for hover and expansion. No match produces an"
@@ -147,7 +148,14 @@ def handler(q=False):
     event = MISPEvent()
     classifier = _classifier()
     for hostname in hostnames:
-        classification = classifier.classify(hostname)
+        if is_ip:
+            owner = reversename.from_address(address).to_text()
+            record = PTRRecord(
+                raw=f"{owner} PTR {hostname}.", hostname=hostname, address=address, owner=owner, record_type="PTR"
+            )
+            classification = classifier.classify(record)
+        else:
+            classification = classifier.classify(hostname)
         tags = classification.values()
         _add_tags(input_attribute, tags)
         if is_ip:

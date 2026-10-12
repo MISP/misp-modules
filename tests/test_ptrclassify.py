@@ -120,6 +120,41 @@ def test_all_distinct_ptr_records_are_classified_and_tags_are_scoped_to_each_hos
     assert "us-east-2" in text
 
 
+@pytest.mark.parametrize(
+    ("attribute_type", "value", "hostname", "address"),
+    [
+        ("ip-src", "188.147.228.101", MOBILE, "188.147.228.101"),
+        ("ip-dst", "3.151.166.120", AWS, "3.151.166.120"),
+        ("domain|ip", "example.com|188.147.228.101", MOBILE, "188.147.228.101"),
+    ],
+)
+def test_address_context_adds_ip_encoded_tags_and_embedded_ip_hint(attribute_type, value, hostname, address):
+    with patch.object(ptrclassify.resolver, "Resolver") as dns_resolver:
+        dns_resolver.return_value.resolve.return_value = [_answer(hostname)]
+        result = _run(_request(attribute_type, value))
+    assert 'ptrclassify:naming="ip-encoded"' in _tags(_source(result))
+    ptr = next(attribute for attribute in _attributes(result) if attribute["type"] == "hostname")
+    assert 'ptrclassify:naming="ip-encoded"' in _tags(ptr)
+    text = next(attribute["value"] for attribute in _attributes(result) if attribute["type"] == "text")
+    assert f'"embedded_ip": "{address}"' in text
+    assert "naming.ip-encoded" in text
+    assert "confidence: 0.99" in text
+
+
+@pytest.mark.parametrize(
+    ("attribute_type", "value"),
+    [("hostname", MOBILE), ("ip-src", "192.0.2.1"), ("ip-dst", "2001:db8::1")],
+)
+def test_embedded_ip_is_not_inferred_without_matching_ipv4_address_context(attribute_type, value):
+    with patch.object(ptrclassify.resolver, "Resolver") as dns_resolver:
+        dns_resolver.return_value.resolve.return_value = [_answer(MOBILE)]
+        result = _run(_request(attribute_type, value))
+    for attribute in _attributes(result):
+        assert 'ptrclassify:naming="ip-encoded"' not in _tags(attribute)
+        if attribute["type"] == "text":
+            assert "embedded_ip" not in attribute["value"]
+
+
 @pytest.mark.parametrize("is_ip", [False, True])
 def test_no_classification_match_does_not_add_taxonomy_tags(is_ip):
     request = _request("ip-src" if is_ip else "hostname", "192.0.2.1" if is_ip else "unclassified.example.com")
