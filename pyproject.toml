@@ -43,6 +43,7 @@ minimal = [
     "clamd",
     "crowdstrike-falconpy",
     "dnsdb2",
+    "dnspython",
     "domaintools_api",
     "geoip2",
     "greynoise",
@@ -53,6 +54,7 @@ minimal = [
     "mattermostdriver",
     "oauth2",
     "passivetotal",
+    "ptrclassify>=0.3.0,<0.4.0",
     "pycountry",
     "pyeti-python3",
     "pypdns",
@@ -92,6 +94,7 @@ all = [
     "clamd",   ## in minimal
     "crowdstrike-falconpy",   ## in minimal
     "dnsdb2",  ## in minimal
+    "dnspython",  ## in minimal
     "domaintools_api",   ## in minimal
     "geoip2",  ## in minimal
     "greynoise",  ## in minimal
@@ -108,6 +111,7 @@ all = [
     "pandoc",
     "passivetotal",   ## in minimal
     "pdftotext",
+    "ptrclassify>=0.3.0,<0.4.0",  ## in minimal
     "pycountry",  ## in minimal
     "pyeti-python3",  ## in minimal
     "pyeupi",  ## in minimal
