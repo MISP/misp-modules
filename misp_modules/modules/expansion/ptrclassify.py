@@ -2,10 +2,11 @@ import ipaddress
 import json
 import re
 from functools import lru_cache
+from importlib import metadata, resources
 
 from dns import exception, resolver, reversename
 from ptrclassify import PTRClassifier, PTRRecord
-from pymisp import MISPAttribute, MISPEvent
+from pymisp import MISPAttribute, MISPEvent, MISPObject
 
 from . import check_input_attribute, standard_error_message
 
@@ -14,7 +15,7 @@ mispattributes = {
     "format": "misp_standard",
 }
 moduleinfo = {
-    "version": 1,
+    "version": 2,
     "author": "MISP Project",
     "description": "Classify PTR hostnames and tag queried attributes with the ptrclassify taxonomy.",
     "module-type": ["expansion", "hover"],
@@ -24,22 +25,27 @@ moduleinfo = {
     "features": (
         "IPv4 and IPv6 attributes are reverse-resolved and every distinct PTR hostname is classified locally using"
         " ptrclassify's built-in rules, retaining the queried address to detect IP-encoded naming. Hostname and domain"
-        " attributes are classified directly, without DNS or an API"
-        " key. Matching ptrclassify taxonomy tags are added to the queried attribute, retaining its UUID and existing"
-        " tags, and to any returned PTR hostname attributes. A text attribute provides the classification labels,"
-        " confidence, evidence, rule IDs and potential location hints for hover and expansion. No match produces an"
-        " informative result without adding tags. Configure `nameserver` to use a specific DNS server; otherwise the"
-        " system resolver is used. DNS lookups have a five-second lifetime.\n\nClassification is heuristic: PTR names"
-        " are operator-controlled, and inferred locations are hints, not verified geolocation. Hover displays the"
-        " enrichment; importing the expansion applies the returned tags in MISP. Enable the ptrclassify taxonomy in"
-        " MISP to manage these tags."
+        " attributes are classified directly, without DNS or an API key. Matching ptrclassify taxonomy tags are added"
+        " to the queried attribute, retaining its UUID and existing tags, and to PTR answers in a `dns-record` object."
+        " One `ptrclassify` object per hostname holds the classification labels, confidence, evidence, rule IDs and"
+        " potential location hints. Repeated classification fields share the machine tag as their attribute comment;"
+        " location fields share a rule-ID/code comment. Classification objects reference the queried attribute and, for"
+        " IP lookups, the DNS object. No match returns an object with `matched=0` without adding tags. Configure"
+        " `nameserver` to use a specific DNS server; otherwise the system resolver is used. DNS lookups have a"
+        " five-second lifetime.\n\nClassification is heuristic: PTR names are operator-controlled, and inferred"
+        " locations are hints, not verified geolocation. Hover displays the enrichment; importing the expansion applies"
+        " the returned tags in MISP. Enable the ptrclassify taxonomy in MISP to manage these tags, and install the"
+        " ptrclassify MISP object template. The module bundles the template so it also works with PyMISP versions that"
+        " do not yet include it."
     ),
     "references": [
         "https://github.com/adulau/ptrclassify",
         "https://misp-project.org/taxonomies.html#_ptrclassify",
     ],
     "input": "An ip-src, ip-dst, domain|ip, hostname or domain attribute.",
-    "output": "The tagged input attribute, PTR hostnames for IP lookups, and explainable classification text.",
+    "output": (
+        "The tagged input attribute, one ptrclassify object per hostname, and a dns-record object for IP lookups."
+    ),
 }
 moduleconfig = ["nameserver"]
 
@@ -77,24 +83,57 @@ def _add_tags(attribute, tags):
         attribute.add_tag(tag)
 
 
-def _summary(classification):
-    lines = [f"PTR classification for {classification.hostname} (heuristic)"]
-    if not classification.labels:
-        lines.append("No classification labels matched; no taxonomy tags added.")
+@lru_cache(maxsize=1)
+def _object_template():
+    # Keep the bundled template in sync with MISP/misp-objects/objects/ptrclassify.
+    return json.loads(resources.files("misp_modules").joinpath("data", "ptrclassify", "definition.json").read_text())
+
+
+def _classification_object(classification, source_uuid, dns_uuid=None):
+    result = MISPObject("ptrclassify", strict=True, misp_objects_template_custom=_object_template())
+    hostname = result.add_attribute("hostname", classification.hostname)
+    _add_tags(hostname, classification.values())
+    result.add_attribute("matched", "1" if classification.labels else "0")
+    result.add_attribute("classifier-version", metadata.version("ptrclassify"))
+    if classification.address:
+        result.add_attribute("ip", classification.address)
     for label in classification.labels:
-        lines.append(
-            f"{label.value} — confidence: {label.confidence:g}; "
-            f"evidence: {', '.join(label.evidence)}; rules: {', '.join(label.rule_ids)}"
-        )
+        for relation, value in (
+            ("classification", label.value),
+            ("category", label.category),
+            ("label", label.label),
+            ("confidence", label.confidence),
+        ):
+            result.add_attribute(relation, value, comment=label.value)
+        for evidence in label.evidence:
+            result.add_attribute("evidence", evidence, comment=label.value)
+        for rule_id in label.rule_ids:
+            result.add_attribute("rule-id", rule_id, comment=label.value)
+        if label.description:
+            result.add_attribute("classification-description", label.description, comment=label.value)
     for location in classification.locations:
-        place = ", ".join(value for value in (location.city, location.region, location.country) if value)
-        lines.append(
-            f"Potential location: {place} (code: {location.code}; confidence: {location.confidence:g}; "
-            f"evidence: {location.evidence}; rule: {location.rule_id}). This is not verified geolocation."
-        )
-    if classification.hints:
-        lines.append(f"Hints: {json.dumps(classification.hints, sort_keys=True)}")
-    return "\n".join(lines)
+        group = f"{location.rule_id}:{location.code}"
+        for relation, value in (
+            ("location-code", location.code),
+            ("location-city", location.city),
+            ("location-region", location.region),
+            ("location-country", location.country),
+            ("location-confidence", location.confidence),
+            ("location-evidence", location.evidence),
+            ("location-rule-id", location.rule_id),
+            ("location-description", location.description),
+        ):
+            if value is not None:
+                result.add_attribute(relation, value, comment=group)
+    for hint, relation in (("embedded_ip", "embedded-ip"), ("cloud_region", "cloud-region")):
+        if classification.hints.get(hint):
+            result.add_attribute(relation, classification.hints[hint])
+    for conflict in classification.hints.get("conflicts", []):
+        result.add_attribute("conflict", conflict)
+    result.add_reference(source_uuid, "characterizes")
+    if dns_uuid:
+        result.add_reference(dns_uuid, "derived-from")
+    return result
 
 
 def handler(q=False):
@@ -146,6 +185,13 @@ def handler(q=False):
     input_attribute = MISPAttribute()
     input_attribute.from_dict(**attribute)
     event = MISPEvent()
+    dns_record = None
+    if is_ip:
+        dns_record = MISPObject("dns-record", strict=True, default_attributes_parameters={"to_ids": False})
+        dns_record.add_attribute(
+            "queried-domain", reversename.from_address(address).to_text().rstrip("."), to_ids=False
+        )
+        dns_record.add_reference(input_attribute.uuid, "related-to")
     classifier = _classifier()
     for hostname in hostnames:
         if is_ip:
@@ -159,11 +205,16 @@ def handler(q=False):
         tags = classification.values()
         _add_tags(input_attribute, tags)
         if is_ip:
-            ptr_attribute = event.add_attribute("hostname", hostname, to_ids=False, comment=f"PTR record for {address}")
+            ptr_attribute = dns_record.add_attribute("ptr-record", hostname, to_ids=False)
             _add_tags(ptr_attribute, tags)
-        event.add_attribute("text", _summary(classification), to_ids=False, comment="ptrclassify enrichment")
+        event.add_object(
+            _classification_object(classification, input_attribute.uuid, dns_record.uuid if is_ip else None)
+        )
+    if dns_record is not None:
+        event.add_object(dns_record)
     event.add_attribute(**input_attribute)
-    return {"results": {"Attribute": json.loads(event.to_json())["Attribute"]}}
+    result = json.loads(event.to_json())
+    return {"results": {key: result[key] for key in ("Attribute", "Object")}}
 
 
 def introspection():
