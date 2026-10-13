@@ -1,0 +1,53 @@
+{
+  "attributes": {
+    "date": {
+      "description": "Date of the EPSS score.",
+      "disable_correlation": true,
+      "misp-attribute": "datetime",
+      "to_ids": false,
+      "ui-priority": 0
+    },
+    "percentile": {
+      "description": "EPSS percentile rank, between 0 and 1.",
+      "disable_correlation": true,
+      "misp-attribute": "float",
+      "to_ids": false,
+      "ui-priority": 0
+    },
+    "raw-data": {
+      "description": "Original JSON score record.",
+      "disable_correlation": true,
+      "misp-attribute": "attachment",
+      "to_ids": false,
+      "ui-priority": 0
+    },
+    "reference": {
+      "description": "Source of the EPSS score.",
+      "misp-attribute": "link",
+      "to_ids": false,
+      "ui-priority": 0
+    },
+    "score": {
+      "description": "Probability of exploitation in the next 30 days, between 0 and 1.",
+      "disable_correlation": true,
+      "misp-attribute": "float",
+      "to_ids": false,
+      "ui-priority": 0
+    },
+    "vulnerability": {
+      "description": "CVE identifier scored by EPSS.",
+      "misp-attribute": "vulnerability",
+      "to_ids": false,
+      "ui-priority": 0
+    }
+  },
+  "description": "An Exploit Prediction Scoring System (EPSS) probability and percentile for a vulnerability on a given date.",
+  "meta-category": "vulnerability",
+  "name": "epss-score",
+  "required": [
+    "vulnerability",
+    "score"
+  ],
+  "uuid": "69295b84-e5bb-4e54-b6bd-347325c42e04",
+  "version": 2
+}
