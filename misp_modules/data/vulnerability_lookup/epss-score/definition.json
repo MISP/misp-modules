@@ -16,6 +16,7 @@
     },
     "raw-data": {
       "description": "Original JSON score record.",
+      "disable_correlation": true,
       "misp-attribute": "attachment",
       "to_ids": false,
       "ui-priority": 0
@@ -48,5 +49,5 @@
     "score"
   ],
   "uuid": "69295b84-e5bb-4e54-b6bd-347325c42e04",
-  "version": 1
+  "version": 2
 }
