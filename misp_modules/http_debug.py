@@ -21,6 +21,17 @@ def module_context(module_name):
         _MODULE.reset(token)
 
 
+def _log_request_chunk(label, chunk):
+    logged_chunk = chunk
+    if chunk is not None and not isinstance(chunk, (str, bytes)):
+        try:
+            with memoryview(chunk) as view:
+                logged_chunk = view.tobytes()
+        except TypeError:
+            pass
+    LOGGER.debug("%s request body chunk: %r", label, logged_chunk)
+
+
 class _LoggedBody:
     def __init__(self, body, label):
         self.body = body
@@ -31,14 +42,14 @@ class _LoggedBody:
 
     def __iter__(self):
         for chunk in self.body:
-            LOGGER.debug("%s request body chunk: %r", self.label, chunk)
+            _log_request_chunk(self.label, chunk)
             yield chunk
 
 
 class _LoggedFile(_LoggedBody):
     def read(self, *args, **kwargs):
         chunk = self.body.read(*args, **kwargs)
-        LOGGER.debug("%s request body chunk: %r", self.label, chunk)
+        _log_request_chunk(self.label, chunk)
         return chunk
 
 
@@ -106,10 +117,18 @@ def configure_http_debug(enabled=False):
         body = request.body
         if hasattr(body, "read"):
             request.body = _LoggedFile(body, label)
-        elif body is not None and not isinstance(body, (str, bytes, bytearray, memoryview)):
-            request.body = _LoggedBody(body, label)
+        elif body is None or isinstance(body, (str, bytes)):
+            LOGGER.debug("%s request body: %r", label, body)
         else:
-            LOGGER.debug("%s request body: %r", label, bytes(body) if isinstance(body, memoryview) else body)
+            try:
+                # Match urllib3's buffer-protocol detection before iterating.
+                # Log the bytes while preserving the object sent by the adapter.
+                with memoryview(body) as view:
+                    buffer_bytes = view.tobytes()
+            except TypeError:
+                request.body = _LoggedBody(body, label)
+            else:
+                LOGGER.debug("%s request body: %r", label, buffer_bytes)
 
         try:
             response = send(adapter, request, *args, **kwargs)

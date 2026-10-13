@@ -56,6 +56,9 @@ misp-modules --debug-extended
 This option implies `--debug` and writes untruncated request methods, URLs, headers,
 bodies, response status codes, headers, and bodies to the server logs on stderr.
 Each exchange has a unique ID and the module name to help follow concurrent queries.
+Custom modules starting their own worker threads must propagate the current Python
+context to those workers to retain module attribution. WhoisFreaks does this for its
+parallel domain and IP lookups.
 It covers HTTP and HTTPS calls made through `requests` and service SDKs using its
 standard HTTP adapter, including redirects. SDKs using other HTTP clients or custom
 adapters that replace `HTTPAdapter.send` are not covered.

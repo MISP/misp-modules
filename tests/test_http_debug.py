@@ -1,6 +1,7 @@
 import gzip
 import io
 import logging
+from array import array
 from concurrent.futures import ThreadPoolExecutor
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from threading import Thread
@@ -12,6 +13,7 @@ import requests
 
 from misp_modules import __main__ as server
 from misp_modules import http_debug
+from misp_modules.modules.expansion import whoisfreaks
 
 
 @pytest.fixture
@@ -151,14 +153,17 @@ def test_raw_response_reads(service, tracing, method):
         assert repr(chunk) in tracing.text
 
 
-@pytest.mark.parametrize("kind", ["file", "iterator"])
+@pytest.mark.parametrize("kind", ["file", "iterator", "buffer-iterator"])
 def test_streamed_upload_preserves_body(service, tracing, kind):
     if kind == "file":
         body = io.BytesIO(b"streamed upload")
         body.seek(2)
         expected = b"reamed upload"
-    else:
+    elif kind == "iterator":
         body = iter([b"streamed", b" upload"])
+        expected = b"streamed upload"
+    else:
+        body = iter([memoryview(b"streamed"), memoryview(b" upload")])
         expected = b"streamed upload"
     response = requests.post(service + "/echo", data=body)
     assert response.content == expected
@@ -167,6 +172,22 @@ def test_streamed_upload_preserves_body(service, tracing, kind):
         assert not body.closed
         assert body.tell() == len(b"streamed upload")
     assert "request body chunk" in tracing.text
+    if kind == "buffer-iterator":
+        assert "request body chunk: b'streamed'" in tracing.text
+        assert "request body chunk: b' upload'" in tracing.text
+
+
+@pytest.mark.parametrize("body", [array("B", b"buffer upload"), array("H", [1, 256, 65535])])
+def test_buffer_upload_preserves_body(service, tracing, body):
+    expected = memoryview(body).tobytes()
+    request = requests.Request("POST", service + "/echo", data=body).prepare()
+    # requests measures array length in elements, so set the byte length explicitly.
+    request.headers["Content-Length"] = str(len(expected))
+    with requests.Session() as session:
+        response = session.send(request)
+    assert response.content == expected
+    assert response.request.body is body
+    assert f"request body: {expected!r}" in tracing.text
 
 
 def test_connection_errors_preserved(monkeypatch, caplog):
@@ -217,6 +238,39 @@ def test_module_worker_context(service, tracing, monkeypatch, handler_name):
     assert server.orjson.loads(result) == {"result": "full response body"}
     assert "module=worker-module request" in tracing.text
     assert "module=worker-module response" in tracing.text
+
+
+@pytest.mark.parametrize(
+    "attribute_type,functions",
+    [
+        ("domain", ["expand_whois", "expand_dns", "get_domain_reputation"]),
+        ("ip-src", ["get_ip_whois", "get_geolocation", "get_ip_security"]),
+    ],
+)
+def test_whoisfreaks_nested_worker_context(service, tracing, monkeypatch, attribute_type, functions):
+    def lookup(function):
+        def query(*args):
+            assert requests.get(service + "/" + function).content == b"full response body"
+            return ([], None) if function in ("expand_whois", "expand_dns") else (None, None)
+
+        return query
+
+    for function in functions:
+        monkeypatch.setattr(whoisfreaks, function, lookup(function))
+    monkeypatch.setattr(server, "MODULES_HANDLERS", {"whoisfreaks": whoisfreaks})
+    payload = {
+        "config": {"apikey": "test-key"},
+        "attribute": {"type": attribute_type, "value": "example.org" if attribute_type == "domain" else "192.0.2.1"},
+    }
+    with ThreadPoolExecutor(max_workers=1) as executor:
+        result = executor.submit(
+            server.QueryModule.run_request.__wrapped__, None, "whoisfreaks", server.orjson.dumps(payload), payload
+        ).result()
+    assert "results" in server.orjson.loads(result)
+    for function in functions:
+        assert f"module=whoisfreaks request: GET {service}/{function}" in tracing.text
+    assert "module=unknown" not in tracing.text
+    assert http_debug._MODULE.get() == "unknown"
 
 
 @pytest.mark.parametrize("debug,extended", [(False, False), (True, False), (False, True)])
