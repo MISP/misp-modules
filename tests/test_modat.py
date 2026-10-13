@@ -377,7 +377,24 @@ def test_pinned_openapi_service_schema_is_fully_mapped():
     data = sample(schemas["_DetailedService"])
     assert paths == set(modat.SERVICE_MAPPING)
     parser = modat.ModatParser(attribute())
-    parser.host({"ip": "203.0.113.14", "services": [data]})
+    parser.host(
+        {
+            "ip": "203.0.113.14",
+            "services": [data],
+            "is_anycast": False,
+            "tags": ["Cloud", "Security Tool"],
+            "fqdns": ["one.example.com", "two.example.com"],
+            "rdns": ["one.example.com", "two.example.com"],
+            "asn": {"number": 64496, "org": "Example", "netblock": "203.0.113.0/24"},
+            "geo": {
+                "country_name": "Luxembourg",
+                "country_iso_code": "LU",
+                "city_name": "Luxembourg",
+                "accuracy_radius": 1,
+                "location": [6.13, 49.61],
+            },
+        }
+    )
     service_object = next(o for o in parser.event.objects if o.name == "modat-service")
     assert {a.object_relation for a in service_object.attributes} == {
         path.replace(".", "-").replace("_", "-") for path in paths
@@ -571,3 +588,44 @@ def test_parser_errors_identify_stage_without_leaking_data(method, stage, caplog
     assert stage in caplog.text
     assert "test-secret" not in result["error"] + caplog.text
     assert "private response" not in result["error"] + caplog.text
+
+
+@pytest.mark.parametrize(
+    "anycast,tags", [(False, ["Cloud"]), (True, ["Cloud", "Security Tool"]), (None, ["Cloud", "Security Tool"])]
+)
+def test_host_classification_notes_respect_single_value_relation(anycast, tags):
+    host = {"ip": "203.0.113.14", "tags": tags, "services": []}
+    if anycast is not None:
+        host["is_anycast"] = anycast
+    with patch.object(modat.requests.Session, "request", return_value=response({"data": host})):
+        result = modat.handler(request(include_dns=False))
+    assert "error" not in result
+    endpoint = next(o for o in result["results"]["Object"] if o["name"] == "ip-port")
+    notes = [a["value"] for a in endpoint["Attribute"] if a["object_relation"] == "text"]
+    assert len(notes) == 1
+    for tag in tags:
+        assert f"MODAT classification: {tag}" in notes[0]
+    if anycast is not None:
+        assert f"MODAT is_anycast={str(anycast).lower()}" in notes[0]
+    evidence = next(a for a in result["results"]["Attribute"] if a["type"] == "attachment")
+    assert json.loads(base64.b64decode(evidence["data"])) == host
+
+
+@pytest.mark.parametrize("missing", [False, True])
+def test_object_validation_diagnostics_identify_constraints_without_values(missing, caplog):
+    parser = modat.ModatParser(attribute())
+    if missing:
+        obj = MISPObject("dns-record", strict=True)
+        parser.add(obj, "txt-record", "private-response-one")
+        expected = "Cannot validate MISP object 'dns-record': required relations missing: queried-domain."
+    else:
+        obj = MISPObject("ip-port", strict=True)
+        parser.add(obj, "ip", "203.0.113.14")
+        parser.add(obj, "text", "private-response-one")
+        parser.add(obj, "text", "private-response-two")
+        expected = "Cannot validate MISP object 'ip-port': single-valued relations repeated: text."
+    with pytest.raises(modat.ModatError) as error:
+        parser.put(obj)
+    assert str(error.value) == expected
+    assert expected in caplog.text
+    assert "private-response" not in str(error.value) + caplog.text

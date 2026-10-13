@@ -31,7 +31,8 @@
     "Link observations to input and related infrastructure; deduplicate shared objects and set discovered attributes to_ids=false.",
     "Bound search pagination; report rate limits and authentication errors without exposing response bodies or credentials.",
     "Use fresh PyMISP UUIDs for generated objects and host attachments across enrichments; deduplicate identical evidence only within the current response.",
-    "Preserve multiple reverse-DNS names in dns-record objects and repeated certificate RDNs in the full issuer/subject strings, respecting single-valued standard object relations."
+    "Preserve multiple reverse-DNS names in dns-record objects and repeated certificate RDNs in the full issuer/subject strings, respecting single-valued standard object relations.",
+    "Combine host anycast and classification notes in one ip-port text attribute. Report object names and failing template relations for validation errors, without logging attribute values."
   ],
   "input": {
     "format": "misp_standard",
@@ -269,7 +270,7 @@
     "Restart misp-modules, enable modat enrichment in MISP and set apikey. Configure optional result limits, timeout and DNS behavior as needed."
   ],
   "validation": {
-    "offline_tests": 85,
+    "offline_tests": 90,
     "command": "python -m pytest tests/test_modat.py -q",
     "live_authenticated": false
   }

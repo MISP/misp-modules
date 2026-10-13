@@ -6,13 +6,14 @@ import json
 import logging
 import math
 import re
+from collections import Counter
 from pathlib import Path
 from urllib.parse import quote, urlsplit
 from uuid import UUID
 
 import requests
 from pymisp import MISPAttribute, MISPEvent, MISPObject
-from pymisp.exceptions import PyMISPError
+from pymisp.exceptions import InvalidMISPObject, PyMISPError
 
 LOGGER = logging.getLogger("misp-modules.modat")
 
@@ -317,7 +318,25 @@ class ModatParser:
         required_one_of = obj._definition.get("requiredOneOf", [])
         if required_one_of and not any(a.object_relation in required_one_of for a in obj.attributes):
             return None
-        obj._validate()
+        try:
+            obj._validate()
+        except InvalidMISPObject:
+            counts = Counter(a.object_relation for a in obj.attributes)
+            attributes = obj._definition.get("attributes", {})
+            repeated = sorted(
+                rel for rel, count in counts.items() if count > 1 and not attributes.get(rel, {}).get("multiple")
+            )
+            missing = sorted(set(obj._definition.get("required", [])) - set(counts))
+            details = []
+            if repeated:
+                details.append("single-valued relations repeated: " + ", ".join(repeated))
+            if missing:
+                details.append("required relations missing: " + ", ".join(missing))
+            reason = "; ".join(details) or "template constraints not satisfied"
+            message = f"Cannot validate MISP object '{obj.name}': {reason}."
+            # Describe template constraints only, never attribute values or exception contents.
+            LOGGER.warning("%s", message)
+            raise ModatError(message) from None
         # Attribute content identifies shared objects; references do not participate in deduplication.
         signature = json.dumps(
             [(a.object_relation, str(a.value), a.to_dict().get("data")) for a in obj.attributes], sort_keys=True
@@ -393,9 +412,12 @@ class ModatParser:
         # ip-port permits one PTR value; dns-record can preserve the complete answer set.
         if len(rdns) == 1:
             self.add(obj, "ptr-record", rdns[0])
+        notes = []
         if data.get("is_anycast") is not None:
-            self.add(obj, "text", f"MODAT is_anycast={str(data['is_anycast']).lower()}")
-        self.add(obj, "text", [f"MODAT classification: {tag}" for tag in data.get("tags", [])])
+            notes.append(f"MODAT is_anycast={str(data['is_anycast']).lower()}")
+        notes.extend(f"MODAT classification: {tag}" for tag in data.get("tags") or [])
+        # The standard ip-port template permits one text attribute.
+        self.add(obj, "text", "\n".join(notes))
         host = self.put(obj)
         if rdns:
             reverse_dns = MISPObject("dns-record", strict=True)
