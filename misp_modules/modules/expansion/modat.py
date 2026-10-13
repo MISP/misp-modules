@@ -62,6 +62,7 @@ mispattributes = {
     "format": "misp_standard",
 }
 moduleconfig = ["apikey", "max_results", "page_size", "timeout", "include_dns", "reverse_dns"]
+DEFAULT_CONFIG = {"max_results": 1, "page_size": 10, "timeout": 10, "include_dns": True, "reverse_dns": True}
 moduleinfo = {
     "version": "1.0",
     "author": "MISP",
@@ -202,8 +203,15 @@ def build_query(attribute):
     return None, query, None
 
 
+def _config_value(config, key, default):
+    value = config.get(key)
+    if isinstance(value, str):
+        value = value.strip()
+    return default if value is None or value == "" else value
+
+
 def _integer(config, key, default, minimum, maximum):
-    value = config.get(key, default)
+    value = _config_value(config, key, default)
     if isinstance(value, bool) or not re.fullmatch(r"\d+", str(value)):
         raise ModatError(f"{key} must be an integer.")
     value = int(value)
@@ -213,7 +221,7 @@ def _integer(config, key, default, minimum, maximum):
 
 
 def _boolean(config, key, default):
-    value = config.get(key, default)
+    value = _config_value(config, key, default)
     if isinstance(value, bool):
         return value
     if str(value).lower() in ("true", "1", "yes"):
@@ -630,11 +638,11 @@ def handler(q=False):
         config = request.get("config") or {}
         if not isinstance(config, dict) or not isinstance(config.get("apikey"), str) or not config["apikey"].strip():
             raise ModatError("Provide a MODAT API key in config.apikey.")
-        limit = _integer(config, "max_results", 10, 1, 1000)
-        page_size = _integer(config, "page_size", 10, 10, 100)
-        timeout = _integer(config, "timeout", 30, 1, 120)
-        include_dns = _boolean(config, "include_dns", True)
-        reverse_dns = _boolean(config, "reverse_dns", False)
+        limit = _integer(config, "max_results", DEFAULT_CONFIG["max_results"], 1, 1000)
+        page_size = _integer(config, "page_size", DEFAULT_CONFIG["page_size"], 10, 100)
+        timeout = _integer(config, "timeout", DEFAULT_CONFIG["timeout"], 1, 120)
+        include_dns = _boolean(config, "include_dns", DEFAULT_CONFIG["include_dns"])
+        reverse_dns = _boolean(config, "reverse_dns", DEFAULT_CONFIG["reverse_dns"])
         ip, query, zone = build_query(attribute)
         if query and len(query) > 2000:
             raise ModatError("Query exceeds the API's 2000-character limit.")
