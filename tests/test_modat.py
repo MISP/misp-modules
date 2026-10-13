@@ -17,7 +17,9 @@ def attribute(typ="ip-dst", value="203.0.113.14"):
 
 
 def request(typ="ip-dst", value="203.0.113.14", **config):
-    return json.dumps({"attribute": attribute(typ, value), "config": {"apikey": "test-secret", **config}})
+    return json.dumps(
+        {"attribute": attribute(typ, value), "config": {"apikey": "test-secret", "reverse_dns": False, **config}}
+    )
 
 
 def response(data, status=200, headers=None):
@@ -629,3 +631,49 @@ def test_object_validation_diagnostics_identify_constraints_without_values(missi
     assert str(error.value) == expected
     assert expected in caplog.text
     assert "private-response" not in str(error.value) + caplog.text
+
+
+@pytest.mark.parametrize("unset", ["missing", None, "", "  \t "])
+def test_optional_settings_use_screenshot_defaults_when_unset(unset):
+    config = {"apikey": "test-secret"}
+    if unset != "missing":
+        config.update({key: unset for key in modat.DEFAULT_CONFIG})
+    q = json.dumps({"attribute": attribute(), "config": config})
+    host = {"data": {"ip": "203.0.113.14", "services": []}}
+    rows = {"page": [{"fqdn": "first.example.com"}, {"fqdn": "second.example.com"}], "total_pages": 2}
+    with patch.object(
+        modat.requests.Session,
+        "request",
+        side_effect=[response(host), response(rows), response({"fqdn": "first.example.com", "records": {}})],
+    ) as call:
+        result = modat.handler(q)
+    assert "error" not in result
+    assert call.call_count == 3  # Both DNS options enabled, max_results limits zone lookups to one.
+    assert all(c.kwargs["timeout"] == 10 for c in call.call_args_list)
+    assert call.call_args_list[1].kwargs["json"]["page_size"] == 10
+    assert call.call_args_list[2].args[1].endswith("/dns/zones/first.example.com/v1")
+    assert result["results"]["Object"]
+
+
+def test_optional_setting_overrides_are_preserved():
+    config = {
+        "max_results": " 3 ",
+        "page_size": " 20 ",
+        "timeout": " 45 ",
+        "include_dns": " false ",
+        "reverse_dns": False,
+    }
+    assert modat._integer(config, "max_results", 1, 1, 1000) == 3
+    assert modat._integer(config, "page_size", 10, 10, 100) == 20
+    assert modat._integer(config, "timeout", 10, 1, 120) == 45
+    assert modat._boolean(config, "include_dns", True) is False
+    assert modat._boolean(config, "reverse_dns", True) is False
+    assert modat._boolean({"reverse_dns": 0}, "reverse_dns", True) is False
+
+
+@pytest.mark.parametrize("key", [None, "", "   "])
+def test_api_key_remains_required_with_optional_defaults(key):
+    with patch.object(modat.requests.Session, "request") as call:
+        result = modat.handler(json.dumps({"attribute": attribute(), "config": {"apikey": key}}))
+    assert "API key" in result["error"]
+    call.assert_not_called()

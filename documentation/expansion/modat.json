@@ -32,7 +32,8 @@
     "Bound search pagination; report rate limits and authentication errors without exposing response bodies or credentials.",
     "Use fresh PyMISP UUIDs for generated objects and host attachments across enrichments; deduplicate identical evidence only within the current response.",
     "Preserve multiple reverse-DNS names in dns-record objects and repeated certificate RDNs in the full issuer/subject strings, respecting single-valued standard object relations.",
-    "Combine host anycast and classification notes in one ip-port text attribute. Report object names and failing template relations for validation errors, without logging attribute values."
+    "Combine host anycast and classification notes in one ip-port text attribute. Report object names and failing template relations for validation errors, without logging attribute values.",
+    "Optional MISP settings use screenshot defaults when unset: max_results=1, page_size=10, timeout=10 seconds, include_dns=true and reverse_dns=true. The API key remains required."
   ],
   "input": {
     "format": "misp_standard",
@@ -221,27 +222,27 @@
       "description": "MODAT API key sent in the Authorization header; Bearer prefix is optional."
     },
     "max_results": {
-      "default": 10,
+      "default": 1,
       "range": "1-1000",
-      "description": "Maximum service results and, separately, reverse-DNS search results; not a cap on emitted objects. Direct host lookups return all available services."
+      "description": "Maximum service results and, separately, reverse-DNS search results; not a cap on emitted objects. Direct host lookups return all available services. Missing, null, empty or whitespace-only settings use the default; explicit nonblank values are validated."
     },
     "page_size": {
       "default": 10,
       "range": "10-100",
-      "description": "Search page size. Final page is sliced to max_results."
+      "description": "Search page size. Final page is sliced to max_results. Missing, null, empty or whitespace-only settings use the default; explicit nonblank values are validated."
     },
     "timeout": {
-      "default": 30,
+      "default": 10,
       "range": "1-120",
-      "description": "Per HTTP request timeout, in seconds."
+      "description": "Per HTTP request timeout, in seconds. Missing, null, empty or whitespace-only settings use the default; explicit nonblank values are validated."
     },
     "include_dns": {
       "default": true,
-      "description": "Fetch historical zone records for domain/hostname inputs and domain-bearing composites/URLs."
+      "description": "Fetch historical zone records for domain/hostname inputs and domain-bearing composites/URLs. Missing, null, empty or whitespace-only settings use the default; explicit nonblank values are validated."
     },
     "reverse_dns": {
-      "default": false,
-      "description": "When include_dns is true, direct IP inputs also search A/AAAA history and fetch matching zones. Additional API calls and quota apply."
+      "default": true,
+      "description": "When include_dns is true, direct IP inputs also search A/AAAA history and fetch matching zones. Additional API calls and quota apply. Missing, null, empty or whitespace-only settings use the default; explicit nonblank values are validated."
     }
   },
   "limitations": [
@@ -270,7 +271,7 @@
     "Restart misp-modules, enable modat enrichment in MISP and set apikey. Configure optional result limits, timeout and DNS behavior as needed."
   ],
   "validation": {
-    "offline_tests": 90,
+    "offline_tests": 98,
     "command": "python -m pytest tests/test_modat.py -q",
     "live_authenticated": false
   }
