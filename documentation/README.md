@@ -2102,6 +2102,30 @@ Module to extract freetext from a PDF document.
 
 -----
 
+#### [phishunt Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/phishunt.py)
+
+Look up a host in phishunt (phishunt.io), the free CC0 feed of live phishing domains: the phishing URLs detected on that exact host, the brand they target, when they were first seen, where they are hosted and which other feeds flag them.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/phishunt.py)]
+
+- **features**:
+>The module takes a domain, hostname or URL attribute (for a URL only the host is used) and queries the phishunt search API for it. The API does a substring match, so only the rows whose host is exactly the queried one are kept. Matches come back as phishing objects (URL, hostname, IP, targeted brand, first seen time) with hosting, TLS issuer, provider IP range and the other feeds that flag the same URL (OpenPhish, PhishTank, urlscan.io, Google Safe Browsing, TweetFeed) in the object comment, plus a link to the phishunt search page. At most 25 objects are returned. Only the read-only search endpoint is used: the phishunt analyze endpoints, which would submit the value for analysis, are never called. Detections are automated and can contain false positives, so no MISP tag or confidence score is set from them.
+
+- **input**:
+>A domain, hostname or URL attribute.
+
+- **output**:
+>phishing objects with the detected URLs, hostname, IP, targeted brand and first seen time, and a link attribute to the phishunt search page.
+
+- **references**:
+> - https://phishunt.io
+> - https://phishunt.io/api/
+> - https://phishunt.io/openapi.yaml
+
+- **requirements**:
+>No API key required.
+
+-----
+
 #### [PPTX Enrich](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/pptx_enrich.py)
 
 <img src=logos/pptx.png height=60>
