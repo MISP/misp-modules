@@ -30,7 +30,8 @@
     "Preserve array nesting in JSON; repeat scalar leaves in the typed observation. Web files also get individual file objects.",
     "Link observations to input and related infrastructure; deduplicate shared objects and set discovered attributes to_ids=false.",
     "Bound search pagination; report rate limits and authentication errors without exposing response bodies or credentials.",
-    "Use fresh PyMISP UUIDs for generated objects and host attachments across enrichments; deduplicate identical evidence only within the current response."
+    "Use fresh PyMISP UUIDs for generated objects and host attachments across enrichments; deduplicate identical evidence only within the current response.",
+    "Preserve multiple reverse-DNS names in dns-record objects and repeated certificate RDNs in the full issuer/subject strings, respecting single-valued standard object relations."
   ],
   "input": {
     "format": "misp_standard",
@@ -210,7 +211,8 @@
       "misp_modules/data/modat/modat-dns-record/definition.json"
     ],
     "no_results": "Return original attribute and empty Object array.",
-    "partial_failure": "A failed API call returns an error for the enrichment; partial results are not silently returned."
+    "partial_failure": "A failed API call returns an error for the enrichment; partial results are not silently returned.",
+    "errors": "Unexpected input or response parsing failures report the processing stage and exception class. Exception messages, response contents and credentials are not logged or returned."
   },
   "config": {
     "apikey": {
@@ -267,7 +269,7 @@
     "Restart misp-modules, enable modat enrichment in MISP and set apikey. Configure optional result limits, timeout and DNS behavior as needed."
   ],
   "validation": {
-    "offline_tests": 80,
+    "offline_tests": 85,
     "command": "python -m pytest tests/test_modat.py -q",
     "live_authenticated": false
   }
