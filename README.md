@@ -39,6 +39,17 @@ When the service is running you can discover the available endpoints in a machin
 An interactive Swagger UI that consumes the same specification is available at `/openapi`.
 The specification is generated during service startup, so restart `misp-modules` after adding or removing modules to refresh what those endpoints expose.
 
+## Extended HTTP debugging
+
+Run `misp-modules --debug-extended` to enable normal debug logging plus full outbound
+HTTP request and response logging for modules and SDKs using `requests`. Logs include
+methods, URLs, headers, and untruncated bodies, with an exchange ID and module name.
+Streamed bodies are logged as they are transferred, without reading ahead.
+
+This option logs credentials and sensitive payloads without redaction; enable it only
+while troubleshooting. See the [installation documentation](documentation/mkdocs/install.md#debugging-outbound-http-requests)
+for coverage and streaming details.
+
 ## Licenses
 For further Information see the [license file](https://misp.github.io/misp-modules/license/).
 
