@@ -1342,6 +1342,35 @@ An expansion module to query IP2Location.io to gather more information on a give
 
 -----
 
+#### [ipapi.is Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/ipapi_is.py)
+
+<img src=logos/ipapi_is.png height=60>
+
+An expansion and hover module to enrich an IP address with geolocation, ASN, company and abuse contact data, and VPN (with the provider), proxy, Tor and datacenter detection from ipapi.is.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/ipapi_is.py)]
+
+- **features**:
+>The module takes an IP address attribute as input and looks it up with the [ipapi.is API](https://ipapi.is/developers.html). It returns a geolocation object, an asn object and an ipapi-is-ip object with the detection flags that are set (VPN, proxy, Tor, datacenter, abuser, crawler, mobile, satellite and anycast), the VPN provider, the hosting provider, the organisation the address is registered to with its abuser score, and the abuse contact.
+>
+>The `api_key` is optional: a free ipapi.is account includes 1,000 requests a day. Without a key the API answers 30 requests a day per IP address with the location and the network owner only, without detection flags. The key is sent in the body of a POST request, never in the URL. Private and reserved addresses are not looked up.
+
+- **config**:
+>api_key
+
+- **input**:
+>An IP address attribute (ip-src or ip-dst).
+
+- **output**:
+>geolocation and asn objects, and an ipapi-is-ip object with the detection flags, the VPN and hosting providers, the company with its abuser score, and the abuse contact.
+
+- **references**:
+>https://ipapi.is/developers.html
+
+- **requirements**:
+>An ipapi.is API key (optional: without one the API returns location and network owner only, 30 requests a day)
+
+-----
+
 #### [IPASN-History Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/ipasn.py)
 
 Module to query an IP ASN history service (https://github.com/D4-project/IPASN-History).
