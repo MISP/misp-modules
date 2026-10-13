@@ -3,6 +3,7 @@
 import base64
 import ipaddress
 import json
+import logging
 import math
 import re
 from pathlib import Path
@@ -12,6 +13,8 @@ from uuid import UUID
 import requests
 from pymisp import MISPAttribute, MISPEvent, MISPObject
 from pymisp.exceptions import PyMISPError
+
+LOGGER = logging.getLogger("misp-modules.modat")
 
 BASE_URL = "https://api.magnify.modat.io"
 DATA_PATH = Path(__file__).resolve().parents[2] / "data" / "modat"
@@ -383,11 +386,22 @@ class ModatParser:
         obj = MISPObject("ip-port", strict=True)
         self.add(obj, "ip", ip)
         self.add(obj, "domain", data.get("fqdns"))
-        self.add(obj, "ptr-record", data.get("rdns"))
+        rdns = data.get("rdns") or []
+        if not isinstance(rdns, list) or not all(isinstance(name, str) for name in rdns):
+            raise ModatError("MODAT returned invalid reverse DNS names.")
+        rdns = list(dict.fromkeys(name for name in rdns if name))
+        # ip-port permits one PTR value; dns-record can preserve the complete answer set.
+        if len(rdns) == 1:
+            self.add(obj, "ptr-record", rdns[0])
         if data.get("is_anycast") is not None:
             self.add(obj, "text", f"MODAT is_anycast={str(data['is_anycast']).lower()}")
         self.add(obj, "text", [f"MODAT classification: {tag}" for tag in data.get("tags", [])])
         host = self.put(obj)
+        if rdns:
+            reverse_dns = MISPObject("dns-record", strict=True)
+            self.add(reverse_dns, "queried-domain", ipaddress.ip_address(ip).reverse_pointer)
+            self.add(reverse_dns, "ptr-record", rdns)
+            self.put(reverse_dns, host.uuid)
         self.infrastructure(data, host.uuid)
         self.vulnerabilities(data.get("cves"), host.uuid)
         # Preserve extensions and all original nested data as evidence, without inventing attribute semantics.
@@ -455,7 +469,11 @@ class ModatParser:
             for side in ("issuer", "subject"):
                 dn = tls.get(side) or {}
                 for field, relation in dn_mapping.items():
-                    self.add(cert, f"{side}-{relation}", dn.get(field))
+                    values = list(dict.fromkeys(dn.get(field) or []))
+                    # Specialized x509 DN relations are single-valued. Repeated RDNs
+                    # are retained in the full DN below and the MODAT observation.
+                    if len(values) == 1:
+                        self.add(cert, f"{side}-{relation}", values[0])
                 if dn:
                     # Render an X.509 distinguished name, retaining repeated RDN values.
                     labels = {
@@ -575,6 +593,7 @@ def handler(q=False):
     if q is False:
         return False
     client = None
+    stage = "module request"
     try:
         request = json.loads(q)
         if not isinstance(request, dict):
@@ -584,6 +603,7 @@ def handler(q=False):
             raise ModatError("Provide an attribute with type, value and uuid.")
         if not isinstance(attribute["type"], str) or not isinstance(attribute["value"], (str, int)):
             raise ModatError("Attribute type and value must be strings (numeric values are also accepted).")
+        stage = "input attribute"
         UUID(str(attribute["uuid"]))
         config = request.get("config") or {}
         if not isinstance(config, dict) or not isinstance(config.get("apikey"), str) or not config["apikey"].strip():
@@ -597,37 +617,48 @@ def handler(q=False):
         if query and len(query) > 2000:
             raise ModatError("Query exceeds the API's 2000-character limit.")
         parser = ModatParser(attribute)
+        stage = "MODAT client configuration"
         client = ModatClient(config["apikey"].strip(), timeout)
         if ip:
+            stage = "MODAT host lookup"
             data = client.request(f"/host/{quote(ip, safe='')}/v1")
             if data is not None:
                 if not isinstance(data.get("data"), dict):
                     raise ModatError("MODAT returned invalid host details.")
+                stage = "MODAT host data"
                 parser.host(data["data"])
         else:
+            stage = "MODAT service search"
             for row in client.search("/service/search/v1", query, limit, page_size):
                 if not isinstance(row.get("service"), dict):
                     raise ModatError("MODAT returned an invalid service search record.")
+                stage = "MODAT service data"
                 parser.host(row)
         zones = [zone] if include_dns and zone else []
         if include_dns and reverse_dns and ip:
+            stage = "MODAT reverse DNS search"
             rrtype = "a" if ipaddress.ip_address(ip).version == 4 else "aaaa"
             for row in client.search("/dns/search/v1", _term((f"{rrtype}.ip",), ip), limit, min(page_size, 100)):
                 if not isinstance(row.get("fqdn"), str):
                     raise ModatError("MODAT returned an invalid DNS search record.")
                 zones.append(_domain(row["fqdn"]))
         for fqdn in dict.fromkeys(zones):
+            stage = "MODAT DNS zone lookup"
             data = client.request(f"/dns/zones/{quote(fqdn, safe='')}/v1")
             if data is not None:
+                stage = "MODAT DNS zone data"
                 parser.dns(data)
+        stage = "MISP enrichment output"
         return parser.result()
     except ModatError as exc:
         return {"error": str(exc)}
     except requests.RequestException:
         # Exceptions may contain request headers or API response bodies; do not echo them.
         return {"error": "Unable to reach MODAT (network error or timeout)."}
-    except (ValueError, TypeError, KeyError, AttributeError, PyMISPError):
-        return {"error": "Invalid request, attribute, or MODAT response data."}
+    except (ValueError, TypeError, KeyError, AttributeError, PyMISPError) as exc:
+        # Only identify the stage and exception class: exception messages may contain response data.
+        LOGGER.warning("MODAT enrichment failed during %s (%s).", stage, type(exc).__name__)
+        return {"error": f"Unable to process {stage} ({type(exc).__name__})."}
     finally:
         if client is not None:
             client.session.close()

@@ -461,3 +461,113 @@ def test_duplicate_host_evidence_is_reused_within_response():
     for obj in second["Object"]:
         refs = [(r["referenced_uuid"], r["relationship_type"]) for r in obj.get("ObjectReference", [])]
         assert len(refs) == len(set(refs))
+
+
+def test_multiple_reverse_dns_names_use_dns_record():
+    host = {"ip": "203.0.113.14", "rdns": ["one.example.com", "two.example.com"], "services": []}
+    with patch.object(modat.requests.Session, "request", return_value=response({"data": host})):
+        result = modat.handler(request("ip-src", host["ip"], include_dns=False))
+    assert "error" not in result
+    objects = result["results"]["Object"]
+    dns = next(o for o in objects if o["name"] == "dns-record")
+    assert {a["value"] for a in dns["Attribute"] if a["object_relation"] == "ptr-record"} == set(host["rdns"])
+    assert (
+        next(a["value"] for a in dns["Attribute"] if a["object_relation"] == "queried-domain")
+        == "14.113.0.203.in-addr.arpa"
+    )
+    endpoint = next(o for o in objects if o["name"] == "ip-port")
+    assert len([a for a in endpoint["Attribute"] if a["object_relation"] == "ptr-record"]) <= 1
+
+
+def test_certificate_multiple_distinguished_name_values_are_preserved():
+    observed = service()
+    observed["tls"]["issuer"] = {"common_name": ["Issuer One", "Issuer Two"], "organization": ["Org One", "Org Two"]}
+    observed["tls"]["subject"] = {"common_name": ["one.example.com", "two.example.com"], "country": ["LU", "BE"]}
+    host = {"ip": "203.0.113.14", "services": [observed]}
+    with patch.object(modat.requests.Session, "request", return_value=response({"data": host})):
+        result = modat.handler(request("ip-src", host["ip"], include_dns=False))
+    assert "error" not in result
+    cert = next(o for o in result["results"]["Object"] if o["name"] == "x509")
+    values = {a["object_relation"]: a["value"] for a in cert["Attribute"]}
+    assert "CN=Issuer One,CN=Issuer Two" in values["issuer"]
+    assert "O=Org One,O=Org Two" in values["issuer"]
+    assert "CN=one.example.com,CN=two.example.com" in values["subject"]
+    assert "C=LU,C=BE" in values["subject"]
+    for rel in ("issuer-common-name", "issuer-organization", "subject-common-name", "subject-country"):
+        assert len([a for a in cert["Attribute"] if a["object_relation"] == rel]) <= 1
+
+
+def test_full_misp_request_with_reverse_dns_and_multiple_rdn_values():
+    source = {
+        **attribute("ip-src"),
+        "id": "1",
+        "event_id": "2",
+        "category": "Network activity",
+        "value1": "203.0.113.14",
+        "value2": "",
+        "to_ids": False,
+        "timestamp": "1791885325",
+        "distribution": "0",
+        "comment": "",
+        "sharing_group_id": "0",
+        "deleted": False,
+        "disable_correlation": False,
+        "object_id": "0",
+        "object_relation": None,
+        "first_seen": None,
+        "last_seen": None,
+    }
+    observed = service()
+    observed["tls"]["subject"]["common_name"] = ["one.example.com", "two.example.com"]
+    host = {"ip": source["value"], "rdns": ["one.example.com", "two.example.com"], "services": [observed]}
+    zone = {
+        "fqdn": "example.com",
+        "records": {"a": [{"ip": source["value"], "ttl": 300, "created_at": "2026-01-01T00:00:00Z"}]},
+    }
+    q = json.dumps(
+        {
+            "module": "modat",
+            "attribute": source,
+            "event_id": "2",
+            "timeout": 10,
+            "config": {
+                "apikey": "test-secret",
+                "max_results": "1",
+                "page_size": "10",
+                "timeout": "10",
+                "include_dns": "1",
+                "reverse_dns": "1",
+            },
+        }
+    )
+    with patch.object(
+        modat.requests.Session,
+        "request",
+        side_effect=[
+            response({"data": host}),
+            response({"page": [{"fqdn": "example.com"}], "total_pages": 1}),
+            response(zone),
+        ],
+    ) as call:
+        result = modat.handler(q)
+    assert "error" not in result
+    assert call.call_count == 3
+    assert {"modat-service", "x509", "dns-record", "modat-dns-record", "domain-ip"} <= {
+        o["name"] for o in result["results"]["Object"]
+    }
+    assert result["results"]["Attribute"][0]["uuid"] == source["uuid"]
+
+
+@pytest.mark.parametrize("method,stage", [("host", "MODAT host data"), ("result", "MISP enrichment output")])
+def test_parser_errors_identify_stage_without_leaking_data(method, stage, caplog):
+    with (
+        patch.object(
+            modat.requests.Session, "request", return_value=response({"data": {"ip": "203.0.113.14", "services": []}})
+        ),
+        patch.object(modat.ModatParser, method, side_effect=TypeError("test-secret private response")),
+    ):
+        result = modat.handler(request(include_dns=False))
+    assert result["error"] == f"Unable to process {stage} (TypeError)."
+    assert stage in caplog.text
+    assert "test-secret" not in result["error"] + caplog.text
+    assert "private response" not in result["error"] + caplog.text
