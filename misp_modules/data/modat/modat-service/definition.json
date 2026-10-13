@@ -1,0 +1,1226 @@
+{
+  "attributes": {
+    "banner": {
+      "categories": [
+        "Other"
+      ],
+      "description": "MODAT API field: banner.",
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "banner-hex": {
+      "categories": [
+        "Other"
+      ],
+      "description": "MODAT API field: banner_hex.",
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "banner-mmh3": {
+      "categories": [
+        "Other"
+      ],
+      "description": "MODAT API field: banner_mmh3.",
+      "misp-attribute": "integer",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "banner-sha1": {
+      "description": "MODAT API field: banner_sha1.",
+      "misp-attribute": "sha1",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "banner-sha256": {
+      "description": "MODAT API field: banner_sha256.",
+      "misp-attribute": "sha256",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "cves-cvss": {
+      "categories": [
+        "Other"
+      ],
+      "description": "MODAT API field: cves.cvss.",
+      "misp-attribute": "float",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "cves-id": {
+      "categories": [
+        "Other"
+      ],
+      "description": "MODAT API field: cves.id.",
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "cves-is-kev": {
+      "categories": [
+        "Other"
+      ],
+      "description": "MODAT API field: cves.is_kev.",
+      "misp-attribute": "boolean",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "discovered-at": {
+      "categories": [
+        "Other"
+      ],
+      "description": "MODAT API field: discovered_at.",
+      "misp-attribute": "datetime",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "fingerprints-os-arch": {
+      "categories": [
+        "Other"
+      ],
+      "description": "MODAT API field: fingerprints.os.arch.",
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "fingerprints-os-icon-url": {
+      "description": "MODAT API field: fingerprints.os.icon_url.",
+      "misp-attribute": "link",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "fingerprints-os-product": {
+      "categories": [
+        "Other"
+      ],
+      "description": "MODAT API field: fingerprints.os.product.",
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "fingerprints-os-version": {
+      "categories": [
+        "Other"
+      ],
+      "description": "MODAT API field: fingerprints.os.version.",
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "fingerprints-service-icon-url": {
+      "description": "MODAT API field: fingerprints.service.icon_url.",
+      "misp-attribute": "link",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "fingerprints-service-product": {
+      "categories": [
+        "Other"
+      ],
+      "description": "MODAT API field: fingerprints.service.product.",
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "fingerprints-service-version": {
+      "categories": [
+        "Other"
+      ],
+      "description": "MODAT API field: fingerprints.service.version.",
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "fingerprints-tags": {
+      "categories": [
+        "Other"
+      ],
+      "description": "MODAT API field: fingerprints.tags.",
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "fingerprints-technologies-icon-url": {
+      "description": "MODAT API field: fingerprints.technologies.icon_url.",
+      "misp-attribute": "link",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "fingerprints-technologies-name": {
+      "categories": [
+        "Other"
+      ],
+      "description": "MODAT API field: fingerprints.technologies.name.",
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "fingerprints-technologies-version": {
+      "categories": [
+        "Other"
+      ],
+      "description": "MODAT API field: fingerprints.technologies.version.",
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "http-body": {
+      "categories": [
+        "Other"
+      ],
+      "description": "MODAT API field: http.body.",
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "http-body-mmh3": {
+      "categories": [
+        "Other"
+      ],
+      "description": "MODAT API field: http.body_mmh3.",
+      "misp-attribute": "integer",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "http-body-sha1": {
+      "description": "MODAT API field: http.body_sha1.",
+      "misp-attribute": "sha1",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "http-body-sha256": {
+      "description": "MODAT API field: http.body_sha256.",
+      "misp-attribute": "sha256",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "http-css-mmh3": {
+      "categories": [
+        "Other"
+      ],
+      "description": "MODAT API field: http.css_mmh3.",
+      "misp-attribute": "integer",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "http-files-category": {
+      "categories": [
+        "Other"
+      ],
+      "description": "MODAT API field: http.files.category.",
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "http-files-mmh3": {
+      "description": "MODAT API field: http.files.mmh3.",
+      "misp-attribute": "favicon-mmh3",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "http-files-path": {
+      "categories": [
+        "Other"
+      ],
+      "description": "MODAT API field: http.files.path.",
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "http-files-sha1": {
+      "description": "MODAT API field: http.files.sha1.",
+      "misp-attribute": "sha1",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "http-files-sha256": {
+      "description": "MODAT API field: http.files.sha256.",
+      "misp-attribute": "sha256",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "http-headers": {
+      "categories": [
+        "Other"
+      ],
+      "description": "MODAT API field: http.headers.",
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "http-headers-sha256": {
+      "description": "MODAT API field: http.headers_sha256.",
+      "misp-attribute": "sha256",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "http-js-mmh3": {
+      "categories": [
+        "Other"
+      ],
+      "description": "MODAT API field: http.js_mmh3.",
+      "misp-attribute": "integer",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "http-status-code": {
+      "categories": [
+        "Other"
+      ],
+      "description": "MODAT API field: http.status_code.",
+      "misp-attribute": "integer",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "http-title": {
+      "categories": [
+        "Other"
+      ],
+      "description": "MODAT API field: http.title.",
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "ip": {
+      "description": "MODAT API field: ip.",
+      "misp-attribute": "ip-dst",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "is-match": {
+      "categories": [
+        "Other"
+      ],
+      "description": "MODAT API field: is_match.",
+      "misp-attribute": "boolean",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "last-scanned-port": {
+      "description": "MODAT API field: last_scanned_port.",
+      "misp-attribute": "port",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "ports": {
+      "description": "MODAT API field: ports.",
+      "misp-attribute": "port",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "protocol": {
+      "categories": [
+        "Other"
+      ],
+      "description": "MODAT API field: protocol.",
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "raw-json": {
+      "description": "MODAT API field: raw-json.",
+      "misp-attribute": "attachment",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "scanned-at": {
+      "categories": [
+        "Other"
+      ],
+      "description": "MODAT API field: scanned_at.",
+      "misp-attribute": "datetime",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "ssh-algorithm-selection-client-to-server-alg-group-cipher": {
+      "categories": [
+        "Other"
+      ],
+      "description": "MODAT API field: ssh.algorithm_selection.client_to_server_alg_group.cipher.",
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "ssh-algorithm-selection-client-to-server-alg-group-compression": {
+      "categories": [
+        "Other"
+      ],
+      "description": "MODAT API field: ssh.algorithm_selection.client_to_server_alg_group.compression.",
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "ssh-algorithm-selection-client-to-server-alg-group-mac": {
+      "categories": [
+        "Other"
+      ],
+      "description": "MODAT API field: ssh.algorithm_selection.client_to_server_alg_group.mac.",
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "ssh-algorithm-selection-dh-kex-algorithm": {
+      "categories": [
+        "Other"
+      ],
+      "description": "MODAT API field: ssh.algorithm_selection.dh_kex_algorithm.",
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "ssh-algorithm-selection-host-key-algorithm": {
+      "categories": [
+        "Other"
+      ],
+      "description": "MODAT API field: ssh.algorithm_selection.host_key_algorithm.",
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "ssh-algorithm-selection-server-to-client-alg-group-cipher": {
+      "categories": [
+        "Other"
+      ],
+      "description": "MODAT API field: ssh.algorithm_selection.server_to_client_alg_group.cipher.",
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "ssh-algorithm-selection-server-to-client-alg-group-compression": {
+      "categories": [
+        "Other"
+      ],
+      "description": "MODAT API field: ssh.algorithm_selection.server_to_client_alg_group.compression.",
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "ssh-algorithm-selection-server-to-client-alg-group-mac": {
+      "categories": [
+        "Other"
+      ],
+      "description": "MODAT API field: ssh.algorithm_selection.server_to_client_alg_group.mac.",
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "ssh-hassh": {
+      "description": "MODAT API field: ssh.hassh.",
+      "misp-attribute": "hasshserver-md5",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "ssh-key-exchange-curve25519-sha256-params-server-public": {
+      "categories": [
+        "Other"
+      ],
+      "description": "MODAT API field: ssh.key_exchange.curve25519_sha256_params.server_public.",
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "ssh-key-exchange-server-host-key-algorithm": {
+      "categories": [
+        "Other"
+      ],
+      "description": "MODAT API field: ssh.key_exchange.server_host_key.algorithm.",
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "ssh-key-exchange-server-host-key-ecdsa-public-key-b": {
+      "categories": [
+        "Other"
+      ],
+      "description": "MODAT API field: ssh.key_exchange.server_host_key.ecdsa_public_key.b.",
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "ssh-key-exchange-server-host-key-ecdsa-public-key-curve": {
+      "categories": [
+        "Other"
+      ],
+      "description": "MODAT API field: ssh.key_exchange.server_host_key.ecdsa_public_key.curve.",
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "ssh-key-exchange-server-host-key-ecdsa-public-key-gx": {
+      "categories": [
+        "Other"
+      ],
+      "description": "MODAT API field: ssh.key_exchange.server_host_key.ecdsa_public_key.gx.",
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "ssh-key-exchange-server-host-key-ecdsa-public-key-gy": {
+      "categories": [
+        "Other"
+      ],
+      "description": "MODAT API field: ssh.key_exchange.server_host_key.ecdsa_public_key.gy.",
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "ssh-key-exchange-server-host-key-ecdsa-public-key-length": {
+      "categories": [
+        "Other"
+      ],
+      "description": "MODAT API field: ssh.key_exchange.server_host_key.ecdsa_public_key.length.",
+      "misp-attribute": "integer",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "ssh-key-exchange-server-host-key-ecdsa-public-key-n": {
+      "categories": [
+        "Other"
+      ],
+      "description": "MODAT API field: ssh.key_exchange.server_host_key.ecdsa_public_key.n.",
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "ssh-key-exchange-server-host-key-ecdsa-public-key-p": {
+      "categories": [
+        "Other"
+      ],
+      "description": "MODAT API field: ssh.key_exchange.server_host_key.ecdsa_public_key.p.",
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "ssh-key-exchange-server-host-key-ecdsa-public-key-x": {
+      "categories": [
+        "Other"
+      ],
+      "description": "MODAT API field: ssh.key_exchange.server_host_key.ecdsa_public_key.x.",
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "ssh-key-exchange-server-host-key-ecdsa-public-key-y": {
+      "categories": [
+        "Other"
+      ],
+      "description": "MODAT API field: ssh.key_exchange.server_host_key.ecdsa_public_key.y.",
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "ssh-key-exchange-server-host-key-fingerprint-sha256": {
+      "description": "MODAT API field: ssh.key_exchange.server_host_key.fingerprint_sha256.",
+      "misp-attribute": "ssh-fingerprint",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "ssh-key-exchange-server-host-key-raw": {
+      "categories": [
+        "Other"
+      ],
+      "description": "MODAT API field: ssh.key_exchange.server_host_key.raw.",
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "ssh-key-exchange-server-host-key-rsa-public-key-exponent": {
+      "categories": [
+        "Other"
+      ],
+      "description": "MODAT API field: ssh.key_exchange.server_host_key.rsa_public_key.exponent.",
+      "misp-attribute": "integer",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "ssh-key-exchange-server-host-key-rsa-public-key-length": {
+      "categories": [
+        "Other"
+      ],
+      "description": "MODAT API field: ssh.key_exchange.server_host_key.rsa_public_key.length.",
+      "misp-attribute": "integer",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "ssh-key-exchange-server-host-key-rsa-public-key-modulus": {
+      "categories": [
+        "Other"
+      ],
+      "description": "MODAT API field: ssh.key_exchange.server_host_key.rsa_public_key.modulus.",
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "ssh-key-exchange-server-signature-h": {
+      "categories": [
+        "Other"
+      ],
+      "description": "MODAT API field: ssh.key_exchange.server_signature.h.",
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "ssh-key-exchange-server-signature-parsed-algorithm": {
+      "categories": [
+        "Other"
+      ],
+      "description": "MODAT API field: ssh.key_exchange.server_signature.parsed.algorithm.",
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "ssh-key-exchange-server-signature-parsed-value": {
+      "categories": [
+        "Other"
+      ],
+      "description": "MODAT API field: ssh.key_exchange.server_signature.parsed.value.",
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "ssh-key-exchange-server-signature-raw": {
+      "categories": [
+        "Other"
+      ],
+      "description": "MODAT API field: ssh.key_exchange.server_signature.raw.",
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "ssh-server-id": {
+      "categories": [
+        "Other"
+      ],
+      "description": "MODAT API field: ssh.server_id.",
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "ssh-server-key-exchange-client-to-server-ciphers": {
+      "categories": [
+        "Other"
+      ],
+      "description": "MODAT API field: ssh.server_key_exchange.client_to_server_ciphers.",
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "ssh-server-key-exchange-client-to-server-compression": {
+      "categories": [
+        "Other"
+      ],
+      "description": "MODAT API field: ssh.server_key_exchange.client_to_server_compression.",
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "ssh-server-key-exchange-client-to-server-macs": {
+      "categories": [
+        "Other"
+      ],
+      "description": "MODAT API field: ssh.server_key_exchange.client_to_server_macs.",
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "ssh-server-key-exchange-cookie": {
+      "categories": [
+        "Other"
+      ],
+      "description": "MODAT API field: ssh.server_key_exchange.cookie.",
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "ssh-server-key-exchange-first-kex-follows": {
+      "categories": [
+        "Other"
+      ],
+      "description": "MODAT API field: ssh.server_key_exchange.first_kex_follows.",
+      "misp-attribute": "boolean",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "ssh-server-key-exchange-host-key-algorithms": {
+      "categories": [
+        "Other"
+      ],
+      "description": "MODAT API field: ssh.server_key_exchange.host_key_algorithms.",
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "ssh-server-key-exchange-kex-algorithms": {
+      "categories": [
+        "Other"
+      ],
+      "description": "MODAT API field: ssh.server_key_exchange.kex_algorithms.",
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "ssh-server-key-exchange-reserved": {
+      "categories": [
+        "Other"
+      ],
+      "description": "MODAT API field: ssh.server_key_exchange.reserved.",
+      "misp-attribute": "integer",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "ssh-server-key-exchange-server-to-client-ciphers": {
+      "categories": [
+        "Other"
+      ],
+      "description": "MODAT API field: ssh.server_key_exchange.server_to_client_ciphers.",
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "ssh-server-key-exchange-server-to-client-compression": {
+      "categories": [
+        "Other"
+      ],
+      "description": "MODAT API field: ssh.server_key_exchange.server_to_client_compression.",
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "ssh-server-key-exchange-server-to-client-macs": {
+      "categories": [
+        "Other"
+      ],
+      "description": "MODAT API field: ssh.server_key_exchange.server_to_client_macs.",
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "tcp-window-size": {
+      "categories": [
+        "Other"
+      ],
+      "description": "MODAT API field: tcp.window_size.",
+      "misp-attribute": "integer",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "tls-expires-at": {
+      "categories": [
+        "Other"
+      ],
+      "description": "MODAT API field: tls.expires_at.",
+      "misp-attribute": "datetime",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "tls-extensions-issuer-alt-name-directory": {
+      "categories": [
+        "Other"
+      ],
+      "description": "MODAT API field: tls.extensions.issuer_alt_name.directory.",
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "tls-extensions-issuer-alt-name-dns": {
+      "description": "MODAT API field: tls.extensions.issuer_alt_name.dns.",
+      "misp-attribute": "domain",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "tls-extensions-issuer-alt-name-email": {
+      "description": "MODAT API field: tls.extensions.issuer_alt_name.email.",
+      "misp-attribute": "email",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "tls-extensions-issuer-alt-name-ipv4": {
+      "description": "MODAT API field: tls.extensions.issuer_alt_name.ipv4.",
+      "misp-attribute": "ip-dst",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "tls-extensions-issuer-alt-name-ipv6": {
+      "description": "MODAT API field: tls.extensions.issuer_alt_name.ipv6.",
+      "misp-attribute": "ip-dst",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "tls-extensions-issuer-alt-name-other-names-id": {
+      "categories": [
+        "Other"
+      ],
+      "description": "MODAT API field: tls.extensions.issuer_alt_name.other_names.id.",
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "tls-extensions-issuer-alt-name-other-names-value": {
+      "categories": [
+        "Other"
+      ],
+      "description": "MODAT API field: tls.extensions.issuer_alt_name.other_names.value.",
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "tls-extensions-issuer-alt-name-uri": {
+      "description": "MODAT API field: tls.extensions.issuer_alt_name.uri.",
+      "misp-attribute": "uri",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "tls-extensions-subject-alt-name-directory": {
+      "categories": [
+        "Other"
+      ],
+      "description": "MODAT API field: tls.extensions.subject_alt_name.directory.",
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "tls-extensions-subject-alt-name-dns": {
+      "description": "MODAT API field: tls.extensions.subject_alt_name.dns.",
+      "misp-attribute": "domain",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "tls-extensions-subject-alt-name-email": {
+      "description": "MODAT API field: tls.extensions.subject_alt_name.email.",
+      "misp-attribute": "email",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "tls-extensions-subject-alt-name-ipv4": {
+      "description": "MODAT API field: tls.extensions.subject_alt_name.ipv4.",
+      "misp-attribute": "ip-dst",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "tls-extensions-subject-alt-name-ipv6": {
+      "description": "MODAT API field: tls.extensions.subject_alt_name.ipv6.",
+      "misp-attribute": "ip-dst",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "tls-extensions-subject-alt-name-other-names-id": {
+      "categories": [
+        "Other"
+      ],
+      "description": "MODAT API field: tls.extensions.subject_alt_name.other_names.id.",
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "tls-extensions-subject-alt-name-other-names-value": {
+      "categories": [
+        "Other"
+      ],
+      "description": "MODAT API field: tls.extensions.subject_alt_name.other_names.value.",
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "tls-extensions-subject-alt-name-uri": {
+      "description": "MODAT API field: tls.extensions.subject_alt_name.uri.",
+      "misp-attribute": "uri",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "tls-fingerprint-sha1": {
+      "description": "MODAT API field: tls.fingerprint_sha1.",
+      "misp-attribute": "x509-fingerprint-sha1",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "tls-fingerprint-sha256": {
+      "description": "MODAT API field: tls.fingerprint_sha256.",
+      "misp-attribute": "x509-fingerprint-sha256",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "tls-is-self-signed": {
+      "categories": [
+        "Other"
+      ],
+      "description": "MODAT API field: tls.is_self_signed.",
+      "misp-attribute": "boolean",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "tls-is-trusted": {
+      "categories": [
+        "Other"
+      ],
+      "description": "MODAT API field: tls.is_trusted.",
+      "misp-attribute": "boolean",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "tls-is-valid": {
+      "categories": [
+        "Other"
+      ],
+      "description": "MODAT API field: tls.is_valid.",
+      "misp-attribute": "boolean",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "tls-issuer-common-name": {
+      "categories": [
+        "Other"
+      ],
+      "description": "MODAT API field: tls.issuer.common_name.",
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "tls-issuer-country": {
+      "categories": [
+        "Other"
+      ],
+      "description": "MODAT API field: tls.issuer.country.",
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "tls-issuer-email-address": {
+      "description": "MODAT API field: tls.issuer.email_address.",
+      "misp-attribute": "email",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "tls-issuer-locality": {
+      "categories": [
+        "Other"
+      ],
+      "description": "MODAT API field: tls.issuer.locality.",
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "tls-issuer-organization": {
+      "categories": [
+        "Other"
+      ],
+      "description": "MODAT API field: tls.issuer.organization.",
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "tls-issuer-organizational-unit": {
+      "categories": [
+        "Other"
+      ],
+      "description": "MODAT API field: tls.issuer.organizational_unit.",
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "tls-issuer-province": {
+      "categories": [
+        "Other"
+      ],
+      "description": "MODAT API field: tls.issuer.province.",
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "tls-ja3s": {
+      "categories": [
+        "Other"
+      ],
+      "description": "MODAT API field: tls.ja3s.",
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "tls-ja4s": {
+      "categories": [
+        "Other"
+      ],
+      "description": "MODAT API field: tls.ja4s.",
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "tls-ja4scan-tls": {
+      "categories": [
+        "Other"
+      ],
+      "description": "MODAT API field: tls.ja4scan_tls.",
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "tls-ja4x": {
+      "categories": [
+        "Other"
+      ],
+      "description": "MODAT API field: tls.ja4x.",
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "tls-jarm": {
+      "description": "MODAT API field: tls.jarm.",
+      "misp-attribute": "jarm-fingerprint",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "tls-raw": {
+      "categories": [
+        "Other"
+      ],
+      "description": "MODAT API field: tls.raw.",
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "tls-serial-number": {
+      "categories": [
+        "Other"
+      ],
+      "description": "MODAT API field: tls.serial_number.",
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "tls-subject-common-name": {
+      "categories": [
+        "Other"
+      ],
+      "description": "MODAT API field: tls.subject.common_name.",
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "tls-subject-country": {
+      "categories": [
+        "Other"
+      ],
+      "description": "MODAT API field: tls.subject.country.",
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "tls-subject-email-address": {
+      "description": "MODAT API field: tls.subject.email_address.",
+      "misp-attribute": "email",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "tls-subject-locality": {
+      "categories": [
+        "Other"
+      ],
+      "description": "MODAT API field: tls.subject.locality.",
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "tls-subject-organization": {
+      "categories": [
+        "Other"
+      ],
+      "description": "MODAT API field: tls.subject.organization.",
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "tls-subject-organizational-unit": {
+      "categories": [
+        "Other"
+      ],
+      "description": "MODAT API field: tls.subject.organizational_unit.",
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "tls-subject-province": {
+      "categories": [
+        "Other"
+      ],
+      "description": "MODAT API field: tls.subject.province.",
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "tls-supported-versions": {
+      "categories": [
+        "Other"
+      ],
+      "description": "MODAT API field: tls.supported_versions.",
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "tls-valid-from": {
+      "categories": [
+        "Other"
+      ],
+      "description": "MODAT API field: tls.valid_from.",
+      "misp-attribute": "datetime",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "tls-validity-seconds": {
+      "categories": [
+        "Other"
+      ],
+      "description": "MODAT API field: tls.validity_seconds.",
+      "misp-attribute": "integer",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "transport": {
+      "categories": [
+        "Other"
+      ],
+      "description": "MODAT API field: transport.",
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    }
+  },
+  "description": "An observed MODAT Magnify service. Array leaf values share this observation; raw JSON retains their exact nesting.",
+  "meta-category": "network",
+  "name": "modat-service",
+  "required": [
+    "ip"
+  ],
+  "uuid": "773a95c7-3072-5fb6-a840-9d26e7e2e990",
+  "version": 1
+}
