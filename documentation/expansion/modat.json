@@ -33,7 +33,8 @@
     "Use fresh PyMISP UUIDs for generated objects and host attachments across enrichments; deduplicate identical evidence only within the current response.",
     "Preserve multiple reverse-DNS names in dns-record objects and repeated certificate RDNs in the full issuer/subject strings, respecting single-valued standard object relations.",
     "Combine host anycast and classification notes in one ip-port text attribute. Report object names and failing template relations for validation errors, without logging attribute values.",
-    "Optional MISP settings use screenshot defaults when unset: max_results=1, page_size=10, timeout=10 seconds, include_dns=true and reverse_dns=true. The API key remains required."
+    "Optional MISP settings use screenshot defaults when unset: max_results=1, page_size=10, timeout=10 seconds, include_dns=true and reverse_dns=true. The API key remains required.",
+    "Treat HTTP 403 subscription denials independently per endpoint: try the remaining enabled endpoints, keep earlier permitted search pages and return any generated enrichment objects. Log denied endpoint families without exposing response bodies or credentials."
   ],
   "input": {
     "format": "misp_standard",
@@ -213,7 +214,7 @@
       "misp_modules/data/modat/modat-dns-record/definition.json"
     ],
     "no_results": "Return original attribute and empty Object array.",
-    "partial_failure": "A failed API call returns an error for the enrichment; partial results are not silently returned.",
+    "partial_failure": "HTTP 403 subscription denials do not discard enrichment from other endpoints or earlier search pages. Enabled permitted endpoints are still attempted. Return results when at least one enrichment object was generated; if access was denied and no importable enrichment data was produced, return a subscription error. HTTP 401 authentication failures, other HTTP errors, network failures and malformed responses remain errors.",
     "errors": "Unexpected input or response parsing failures report the processing stage and exception class. Exception messages, response contents and credentials are not logged or returned."
   },
   "config": {
@@ -271,7 +272,7 @@
     "Restart misp-modules, enable modat enrichment in MISP and set apikey. Configure optional result limits, timeout and DNS behavior as needed."
   ],
   "validation": {
-    "offline_tests": 98,
+    "offline_tests": 110,
     "command": "python -m pytest tests/test_modat.py -q",
     "live_authenticated": false
   }

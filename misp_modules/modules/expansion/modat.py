@@ -7,6 +7,7 @@ import logging
 import math
 import re
 from collections import Counter
+from contextlib import contextmanager
 from pathlib import Path
 from urllib.parse import quote, urlsplit
 from uuid import UUID
@@ -84,6 +85,18 @@ moduleinfo = {
 
 class ModatError(ValueError):
     pass
+
+
+class ModatPermissionError(ModatError):
+    pass
+
+
+@contextmanager
+def _subscription_access(endpoint):
+    try:
+        yield
+    except ModatPermissionError:
+        LOGGER.warning("MODAT %s denied by subscription (HTTP 403); continuing other endpoints.", endpoint)
 
 
 def _quote(value):
@@ -236,6 +249,7 @@ class ModatClient:
         self.session = requests.Session()
         self.session.headers.update({"Authorization": key, "Accept": "application/json"})
         self.timeout = timeout
+        self.permission_denied = False
 
     def request(self, path, payload=None):
         response = self.session.request(
@@ -251,8 +265,11 @@ class ModatClient:
             retry = response.headers.get("Retry-After", "")
             suffix = f" Retry after {retry} seconds." if re.fullmatch(r"\d+(?:\.\d+)?", retry) else ""
             raise ModatError(f"MODAT rate limit exceeded.{suffix}")
-        if response.status_code in (401, 403):
-            raise ModatError("MODAT authentication failed or subscription does not permit this endpoint.")
+        if response.status_code == 401:
+            raise ModatError("MODAT authentication failed (HTTP 401).")
+        if response.status_code == 403:
+            self.permission_denied = True
+            raise ModatPermissionError("MODAT subscription does not permit this endpoint (HTTP 403).")
         if response.status_code != 200:
             raise ModatError(f"MODAT returned HTTP {response.status_code}.")
         try:
@@ -266,7 +283,13 @@ class ModatClient:
     def search(self, endpoint, query, limit, page_size):
         results = []
         for page in range(1, math.ceil(limit / page_size) + 1):
-            data = self.request(endpoint, {"query": query, "page": page, "page_size": page_size})
+            try:
+                data = self.request(endpoint, {"query": query, "page": page, "page_size": page_size})
+            except ModatPermissionError:
+                if not results:
+                    raise
+                LOGGER.warning("MODAT search pagination denied (HTTP 403); retaining earlier pages.")
+                break
             if data is None:
                 raise ModatError("MODAT search endpoint was not found.")
             rows = data.get("page")
@@ -651,33 +674,41 @@ def handler(q=False):
         client = ModatClient(config["apikey"].strip(), timeout)
         if ip:
             stage = "MODAT host lookup"
-            data = client.request(f"/host/{quote(ip, safe='')}/v1")
-            if data is not None:
-                if not isinstance(data.get("data"), dict):
-                    raise ModatError("MODAT returned invalid host details.")
-                stage = "MODAT host data"
-                parser.host(data["data"])
+            with _subscription_access("host lookup"):
+                data = client.request(f"/host/{quote(ip, safe='')}/v1")
+                if data is not None:
+                    if not isinstance(data.get("data"), dict):
+                        raise ModatError("MODAT returned invalid host details.")
+                    stage = "MODAT host data"
+                    parser.host(data["data"])
         else:
             stage = "MODAT service search"
-            for row in client.search("/service/search/v1", query, limit, page_size):
-                if not isinstance(row.get("service"), dict):
-                    raise ModatError("MODAT returned an invalid service search record.")
-                stage = "MODAT service data"
-                parser.host(row)
+            with _subscription_access("service search"):
+                for row in client.search("/service/search/v1", query, limit, page_size):
+                    if not isinstance(row.get("service"), dict):
+                        raise ModatError("MODAT returned an invalid service search record.")
+                    stage = "MODAT service data"
+                    parser.host(row)
         zones = [zone] if include_dns and zone else []
         if include_dns and reverse_dns and ip:
             stage = "MODAT reverse DNS search"
-            rrtype = "a" if ipaddress.ip_address(ip).version == 4 else "aaaa"
-            for row in client.search("/dns/search/v1", _term((f"{rrtype}.ip",), ip), limit, min(page_size, 100)):
-                if not isinstance(row.get("fqdn"), str):
-                    raise ModatError("MODAT returned an invalid DNS search record.")
-                zones.append(_domain(row["fqdn"]))
+            with _subscription_access("reverse DNS search"):
+                rrtype = "a" if ipaddress.ip_address(ip).version == 4 else "aaaa"
+                for row in client.search("/dns/search/v1", _term((f"{rrtype}.ip",), ip), limit, min(page_size, 100)):
+                    if not isinstance(row.get("fqdn"), str):
+                        raise ModatError("MODAT returned an invalid DNS search record.")
+                    zones.append(_domain(row["fqdn"]))
         for fqdn in dict.fromkeys(zones):
             stage = "MODAT DNS zone lookup"
-            data = client.request(f"/dns/zones/{quote(fqdn, safe='')}/v1")
-            if data is not None:
-                stage = "MODAT DNS zone data"
-                parser.dns(data)
+            with _subscription_access("DNS zone lookup"):
+                data = client.request(f"/dns/zones/{quote(fqdn, safe='')}/v1")
+                if data is not None:
+                    stage = "MODAT DNS zone data"
+                    parser.dns(data)
+        if client.permission_denied and not parser.event.objects:
+            raise ModatPermissionError(
+                "MODAT subscription denied one or more endpoints (HTTP 403), and no enrichment data was available."
+            )
         stage = "MISP enrichment output"
         return parser.result()
     except ModatError as exc:
