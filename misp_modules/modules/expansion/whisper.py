@@ -49,7 +49,7 @@ mispattributes = {
 }
 
 moduleinfo = {
-    "version": "0.0.1",
+    "version": "0.0.2",
     "author": "Whisper",
     "description": (
         "Enrich IPs, domains, and ASNs with threat intelligence and infrastructure context from the Whisper graph."
