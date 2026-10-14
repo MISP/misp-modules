@@ -1,0 +1,155 @@
+{
+  "ip": "91.128.103.196",
+  "hostname": "91.128.103.196",
+  "location": {
+    "continent_code": "EU",
+    "continent_name": "Europe",
+    "country_code2": "SE",
+    "country_code3": "SWE",
+    "country_name": "Sweden",
+    "country_name_official": "Kingdom of Sweden",
+    "country_capital": "Stockholm",
+    "state_prov": "Stockholms län",
+    "state_code": "SE-AB",
+    "district": "Stockholm",
+    "city": "Stockholm",
+    "locality": "Stockholm",
+    "accuracy_radius": "4.395",
+    "confidence": "high",
+    "dma_code": "",
+    "zipcode": "164 40",
+    "latitude": "59.40510",
+    "longitude": "17.95510",
+    "is_eu": true,
+    "country_flag": "https://ipgeolocation.io/static/flags/se_64.png",
+    "geoname_id": "9972319",
+    "country_emoji": "🇸🇪"
+  },
+  "country_metadata": {
+    "calling_code": "+46",
+    "tld": ".se",
+    "languages": [
+      "sv-SE",
+      "se",
+      "sma",
+      "fi-SE"
+    ]
+  },
+  "network": {
+    "connection_type": "",
+    "route": "91.128.0.0/14",
+    "is_anycast": false
+  },
+  "currency": {
+    "code": "SEK",
+    "name": "Swedish Krona",
+    "symbol": "kr"
+  },
+  "asn": {
+    "as_number": "AS1257",
+    "organization": "Tele2 Sverige AB",
+    "country": "SE",
+    "type": "ISP",
+    "domain": "tele2.com",
+    "date_allocated": "2024-12-13",
+    "rir": "RIPE"
+  },
+  "company": {
+    "name": "Tele2 Sverige AB",
+    "type": "ISP",
+    "domain": "tele2.com"
+  },
+  "security": {
+    "threat_score": 0,
+    "is_tor": false,
+    "is_proxy": false,
+    "proxy_provider_names": [],
+    "proxy_confidence_score": 0,
+    "proxy_last_seen": "",
+    "is_residential_proxy": false,
+    "is_vpn": false,
+    "vpn_provider_names": [],
+    "vpn_confidence_score": 0,
+    "vpn_last_seen": "",
+    "is_relay": false,
+    "relay_provider_name": "",
+    "is_anonymous": false,
+    "is_known_attacker": false,
+    "is_bot": false,
+    "is_spam": false,
+    "is_cloud_provider": false,
+    "cloud_provider_name": ""
+  },
+  "abuse": {
+    "route": "91.128.0.0/14",
+    "country": "SE",
+    "name": "Swipnet Staff",
+    "organization": "",
+    "kind": "group",
+    "address": "Tele2 AB/Swedish IP Network, IP Registry, Torshamnsgatan 17 164 40 Kista SWEDEN",
+    "emails": [
+      "abuse@tele2.com"
+    ],
+    "phone_numbers": [
+      "+46 8 5626 42 10"
+    ]
+  },
+  "time_zone": {
+    "name": "Europe/Stockholm",
+    "offset": 1,
+    "offset_with_dst": 1,
+    "current_time": "2026-02-13 09:19:24.410+0100",
+    "current_time_unix": 1770970764.41,
+    "current_tz_abbreviation": "CET",
+    "current_tz_full_name": "Central European Standard Time",
+    "standard_tz_abbreviation": "CET",
+    "standard_tz_full_name": "Central European Standard Time",
+    "is_dst": false,
+    "dst_savings": 0,
+    "dst_exists": true,
+    "dst_tz_abbreviation": "CEST",
+    "dst_tz_full_name": "Central European Summer Time",
+    "dst_start": {
+      "utc_time": "2026-03-29 TIME 01:00",
+      "duration": "+1.00H",
+      "gap": true,
+      "date_time_after": "2026-03-29 TIME 03:00",
+      "date_time_before": "2026-03-29 TIME 02:00",
+      "overlap": false
+    },
+    "dst_end": {
+      "utc_time": "2026-10-25 TIME 01:00",
+      "duration": "-1.00H",
+      "gap": false,
+      "date_time_after": "2026-10-25 TIME 02:00",
+      "date_time_before": "2026-10-25 TIME 03:00",
+      "overlap": true
+    }
+  },
+  "user_agent": {
+    "user_agent_string": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36 Edg/143.0.0.0",
+    "name": "Edge",
+    "type": "Browser",
+    "version": "143",
+    "version_major": "143",
+    "device": {
+      "name": "Linux Desktop",
+      "type": "Desktop",
+      "brand": "Unknown",
+      "cpu": "Intel x86_64"
+    },
+    "engine": {
+      "name": "Blink",
+      "type": "Browser",
+      "version": "143",
+      "version_major": "143"
+    },
+    "operating_system": {
+      "name": "Linux",
+      "type": "Desktop",
+      "version": "??",
+      "version_major": "??",
+      "build": "??"
+    }
+  }
+}

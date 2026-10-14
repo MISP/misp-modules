@@ -42,6 +42,7 @@ from tornado import ioloop
 
 import misp_modules
 from misp_modules import openapi as openapi_builder
+from misp_modules.http_debug import configure_http_debug, module_context
 
 # See https://github.com/MISP/misp-modules/issues/662
 MAX_BUFFER_SIZE = 1073741824
@@ -121,7 +122,7 @@ def handle_signal(sig: int, frame: types.FrameType) -> None:
     ioloop.IOLoop.instance().add_callback_from_signal(ioloop.IOLoop.instance().stop)
 
 
-def init_logger(debug: bool = False) -> None:
+def init_logger(debug: bool = False, debug_extended: bool = False) -> None:
     """Initialize the logger."""
     formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
     handler = logging.StreamHandler()
@@ -141,8 +142,11 @@ def init_logger(debug: bool = False) -> None:
 
     # Set application log
     LOGGER.propagate = False
-    LOGGER.setLevel(logging.DEBUG if debug else logging.INFO)
+    LOGGER.setLevel(logging.DEBUG if debug or debug_extended else logging.INFO)
     LOGGER.addHandler(handler)
+    configure_http_debug(debug_extended)
+    if debug_extended:
+        LOGGER.warning("Extended HTTP debugging enabled: logs contain unredacted credentials and full HTTP bodies")
 
 
 class VersionCheck(tornado.web.RequestHandler):
@@ -185,7 +189,7 @@ class SwaggerUI(tornado.web.RequestHandler):
             self.send_error(503)
             return
         self.set_header("Content-Type", "text/html; charset=utf-8")
-        self.write(SWAGGER_UI_TEMPLATE.replace('__SPEC_URL__', '/openapi.json'))
+        self.write(SWAGGER_UI_TEMPLATE.replace("__SPEC_URL__", "/openapi.json"))
 
 
 class ListModules(tornado.web.RequestHandler):
@@ -226,10 +230,11 @@ class QueryModule(tornado.web.RequestHandler):
     @tornado_concurrent.run_on_executor
     def run_request(self, module_name, json_payload, dict_payload):
         LOGGER.debug("QueryModule %s request %s", module_name, json_payload)
-        try:
-            response = MODULES_HANDLERS[module_name].dict_handler(request=dict_payload)
-        except AttributeError:
-            response = MODULES_HANDLERS[module_name].handler(q=json_payload)
+        with module_context(module_name):
+            try:
+                response = MODULES_HANDLERS[module_name].dict_handler(request=dict_payload)
+            except AttributeError:
+                response = MODULES_HANDLERS[module_name].handler(q=json_payload)
         return orjson.dumps(response, default=pymisp.pymisp_json_default)
 
     @tornado.gen.coroutine
@@ -261,6 +266,12 @@ def main():
     arg_parser = argparse.ArgumentParser(description="misp-modules", formatter_class=argparse.RawTextHelpFormatter)
     arg_parser.add_argument("-t", "--test", default=False, action="store_true", help="test mode")
     arg_parser.add_argument("-d", "--debug", default=False, action="store_true", help="enable debugging")
+    arg_parser.add_argument(
+        "--debug-extended",
+        default=False,
+        action="store_true",
+        help="enable debugging and log full outbound requests HTTP exchanges (including credentials)",
+    )
     arg_parser.add_argument("-p", "--port", type=int, default=6666, help="port (default 6666)")
     arg_parser.add_argument("-l", "--listen", default="localhost", help="address (default localhost)")
     arg_parser.add_argument("-c", "--custom", default=None, help="custom modules root")
@@ -268,7 +279,7 @@ def main():
     args = arg_parser.parse_args()
 
     # Initialize
-    init_logger(debug=args.debug)
+    init_logger(debug=args.debug, debug_extended=args.debug_extended)
 
     # Alert if needed
     warn_if_degraded()

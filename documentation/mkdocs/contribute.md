@@ -101,6 +101,66 @@ def handler(q=False):
                 codecs.encode(src, "rot-13")}
 ~~~
 
+#### Tagging and untagging attributes
+
+A result of an expansion module can also carry tags. Next to `values` and `types`, a result entry
+accepts:
+
+* `tags` - tags to attach to the attribute the entry resolves to,
+* `remove_tags` - tags to take off the attribute the event already holds for that value.
+
+Both accept a list or a single tag name.
+
+~~~python
+return {
+    "results": [
+        {
+            "types": ["ip-dst"],
+            "values": ["198.51.100.10"],
+            "tags": ["misp-module:verdict=\"benign\""],
+            "remove_tags": ["false-positive"],
+        }
+    ]
+}
+~~~
+
+`remove_tags` is how a module retracts a verdict - its own from an earlier run, or one another
+module left behind. The tags are matched against the attribute in the enriched event with the same
+type and value as the entry, which is usually the attribute the enrichment was triggered on, echoed
+back by the module:
+
+~~~python
+def handler(q=False):
+    if q is False:
+        return False
+    request = json.loads(q)
+    ip = request.get("ip-dst")
+    if ip is None:
+        return {"error": "An ip-dst attribute is required"}
+    if not is_false_positive(ip):
+        return {"results": [{"types": ["ip-dst"], "values": [ip], "remove_tags": ["false-positive"]}]}
+    return {"results": []}
+~~~
+
+Worth knowing about the way MISP applies this:
+
+* When the event already holds the attribute, the entry is a tag change only - MISP does not try to
+  create the attribute a second time, and the `tags` of the same entry are attached to the attribute
+  it found. One entry can therefore swap one verdict for another. When the event does not hold the
+  attribute, the entry creates it as usual and there is nothing to remove.
+* Only tags that exist and are actually attached to the attribute are taken off; a removal never
+  creates a tag, and naming a tag that is not there is not an error.
+* Galaxy clusters are tags too, so `misp-galaxy:...` values can be removed the same way.
+* In the *Enrichment Results* screen nothing is removed behind the analyst's back: the tags show up
+  in a *Tags to remove* field, where they can be edited or cleared before the results are submitted.
+  The *Enrich event* and *Enrich attribute* background jobs have no such screen and apply the tag
+  changes directly, as they do for the attributes a module returns.
+* The user the enrichment runs as needs tagging permission. When they cannot edit the event, the
+  results come in as proposals and tag changes are skipped.
+
+Attribute tags travel differently in the `misp_standard` format, where the returned objects and
+attributes carry their own `Tag` lists; `remove_tags` belongs to the simple format shown above.
+
 #### export module
 
 For an export module, the `request["data"]` object corresponds to a list of events (dictionaries) to handle.

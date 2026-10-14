@@ -39,6 +39,17 @@ When the service is running you can discover the available endpoints in a machin
 An interactive Swagger UI that consumes the same specification is available at `/openapi`.
 The specification is generated during service startup, so restart `misp-modules` after adding or removing modules to refresh what those endpoints expose.
 
+## Extended HTTP debugging
+
+Run `misp-modules --debug-extended` to enable normal debug logging plus full outbound
+HTTP request and response logging for modules and SDKs using `requests`. Logs include
+methods, URLs, headers, and untruncated bodies, with an exchange ID and module name.
+Streamed bodies are logged as they are transferred, without reading ahead.
+
+This option logs credentials and sensitive payloads without redaction; enable it only
+while troubleshooting. See the [installation documentation](documentation/mkdocs/install.md#debugging-outbound-http-requests)
+for coverage and streaming details.
+
 ## Licenses
 For further Information see the [license file](https://misp.github.io/misp-modules/license/).
 
@@ -90,10 +101,13 @@ For further Information see the [license file](https://misp.github.io/misp-modul
 * [HYAS Insight Lookup](https://misp.github.io/misp-modules/expansion/#hyas-insight-lookup) - HYAS Insight integration to MISP provides direct, high volume access to HYAS Insight data. It enables investigators and analysts to understand and defend against cyber adversaries and their infrastructure.
 * [Intel471 Lookup](https://misp.github.io/misp-modules/expansion/#intel471-lookup) - Module to access Intel 471
 * [IP2Location.io Lookup](https://misp.github.io/misp-modules/expansion/#ip2location.io-lookup) - An expansion module to query IP2Location.io to gather more information on a given IP address.
+* [ipapi.is Lookup](https://misp.github.io/misp-modules/expansion/#ipapi.is-lookup) - An expansion and hover module to enrich an IP address with geolocation, ASN, company and abuse contact data, and VPN (with the provider), proxy, Tor and datacenter detection from ipapi.is.
 * [IPASN-History Lookup](https://misp.github.io/misp-modules/expansion/#ipasn-history-lookup) - Module to query an IP ASN history service (https://github.com/D4-project/IPASN-History).
+* [IPGeolocation.io Lookup](https://misp.github.io/misp-modules/expansion/#ipgeolocation.io-lookup) - An expansion and hover module to enrich an IP address with geolocation, ASN, company, threat intelligence (threat score, VPN, proxy, Tor, bot and spam signals) and abuse contact information from IPGeolocation.io, either through the API or from local IPGeolocation.io MMDB databases.
 * [IPInfo.io Lookup](https://misp.github.io/misp-modules/expansion/#ipinfo.io-lookup) - An expansion module to query ipinfo.io to gather more information on a given IP address.
 * [IPQualityScore Lookup](https://misp.github.io/misp-modules/expansion/#ipqualityscore-lookup) - IPQualityScore MISP Expansion Module for IP reputation,        Email Validation, Phone Number Validation, Malicious Domain,Malicious URL Scanner,Malicious File Scanner & Compromised username, Password, Email  
 * [IPRep Lookup](https://misp.github.io/misp-modules/expansion/#iprep-lookup) - Module to query IPRep data for IP addresses.
+* [isMalicious Lookup](https://misp.github.io/misp-modules/expansion/#ismalicious-lookup) - Query isMalicious for IP, domain, hostname, and URL reputation.
 * [Ninja Template Rendering](https://misp.github.io/misp-modules/expansion/#ninja-template-rendering) - Render the template with the data passed
 * [Joe Sandbox Import](https://misp.github.io/misp-modules/expansion/#joe-sandbox-import) - Query Joe Sandbox API with a submission url to get the json report and extract its data that is parsed and converted into MISP attributes and objects.
 * [Joe Sandbox Submit](https://misp.github.io/misp-modules/expansion/#joe-sandbox-submit) - A module to submit files or URLs to Joe Sandbox for an advanced analysis, and return the link of the submission.
@@ -115,7 +129,9 @@ For further Information see the [license file](https://misp.github.io/misp-modul
 * [AlienVault OTX Lookup](https://misp.github.io/misp-modules/expansion/#alienvault-otx-lookup) - Module to get information from AlienVault OTX.
 * [Passive SSH Enrichment](https://misp.github.io/misp-modules/expansion/#passive-ssh-enrichment) - An expansion module to enrich, SSH key fingerprints and IP addresses with information collected by passive-ssh
 * [PassiveTotal Lookup](https://misp.github.io/misp-modules/expansion/#passivetotal-lookup) - The PassiveTotal MISP expansion module brings the datasets derived from Internet scanning directly into your MISP instance. This module supports passive DNS, historic SSL, WHOIS, and host attributes. In order to use the module, you must have a valid PassiveTotal account username and API key. Registration is free and can be done by visiting https://www.passivetotal.org/register
+* [PTR Classification](https://misp.github.io/misp-modules/expansion/#ptr-classification) - Classify IP reverse-DNS records or supplied hostnames into ptrclassify and dns-record objects, preserving confidence and evidence, and add matching taxonomy tags to the queried attribute. [JSON documentation](documentation/expansion/ptrclassify.json).
 * [PDF Enrich](https://misp.github.io/misp-modules/expansion/#pdf-enrich) - Module to extract freetext from a PDF document.
+* [phishunt Lookup](https://misp.github.io/misp-modules/expansion/#phishunt-lookup) - Look up a host in phishunt, the CC0 feed of live phishing domains: detected URLs, targeted brand, hosting and cross-feed corroboration.
 * [PPTX Enrich](https://misp.github.io/misp-modules/expansion/#pptx-enrich) - Module to extract freetext from a .pptx document.
 * [Qintel QSentry Lookup](https://misp.github.io/misp-modules/expansion/#qintel-qsentry-lookup) - A hover and expansion module which queries Qintel QSentry for ip reputation data
 * [QR Code Decode](https://misp.github.io/misp-modules/expansion/#qr-code-decode) - Decode QR codes from attachments OR remote URLs (Anti-Quishing).

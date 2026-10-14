@@ -1,0 +1,24 @@
+MODAT field,MISP object,Object relation,MISP attribute type
+fqdn,modat-dns-record,fqdn,domain
+rrtype,modat-dns-record,rrtype,text
+ttl,modat-dns-record,ttl,integer
+created_at,modat-dns-record,created-at,datetime
+deleted_at,modat-dns-record,deleted-at,datetime
+ip,modat-dns-record,ip,ip-dst
+cname,modat-dns-record,cname,domain
+host,modat-dns-record,host,hostname
+ns,modat-dns-record,ns,hostname
+priority,modat-dns-record,priority,integer
+target,modat-dns-record,target,text
+params,modat-dns-record,params,text
+mname,modat-dns-record,mname,hostname
+rname,modat-dns-record,rname,text
+serial,modat-dns-record,serial,integer
+refresh,modat-dns-record,refresh,integer
+retry,modat-dns-record,retry,integer
+expire,modat-dns-record,expire,integer
+minimum,modat-dns-record,minimum,integer
+weight,modat-dns-record,weight,integer
+port,modat-dns-record,port,port
+value,modat-dns-record,value,text
+raw-json,modat-dns-record,raw-json,attachment
