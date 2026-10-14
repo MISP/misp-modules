@@ -23,6 +23,7 @@ misp-modules contract:
 import json
 import logging
 import math
+import uuid
 
 from whisper_core.exceptions import WhisperAuthError, WhisperClientError, WhisperTlpError, WhisperTransportError
 from whisper_core.whisper_client import WhisperClient
@@ -35,7 +36,7 @@ logger = logging.getLogger("whisper.module")
 
 misperrors = {"error": "Error"}
 
-DEFAULT_API_URL = "https://graph.whisper.security"
+DEFAULT_API_URL = "https://graph.whisper.online"
 
 # Per-flow attribute-type routing; every advertised input type now has a
 # real enrichment path.
@@ -172,6 +173,11 @@ def handler(q=False):
         return {"error": f"{standard_error_message}, which should contain at least a type, a value and an uuid."}
     if attribute["type"] not in mispattributes["input"]:
         return {"error": f"Attribute type {attribute['type']!r} is not supported by the Whisper module."}
+
+    if "uuid" not in attribute:
+        # MISP always sends the attribute uuid; hand-crafted /query calls may
+        # not. The converter references objects against it, so backfill.
+        attribute = {**attribute, "uuid": str(uuid.uuid4())}
 
     # MISP's hover endpoint (AttributesController::hoverEnrichment) posts
     # {module, attribute, config} with NO event_id; the expansion flow
