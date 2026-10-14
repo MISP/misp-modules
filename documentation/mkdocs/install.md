@@ -44,6 +44,34 @@ search path used for executables).
 misp-modules
 ~~~~
 
+### Debugging outbound HTTP requests
+
+Use `-d` / `--debug` for the usual server debug logs. To also trace HTTP requests
+from modules to their services, enable extended debugging:
+
+```bash
+misp-modules --debug-extended
+```
+
+This option implies `--debug` and writes untruncated request methods, URLs, headers,
+bodies, response status codes, headers, and bodies to the server logs on stderr.
+Each exchange has a unique ID and the module name to help follow concurrent queries.
+Custom modules starting their own worker threads must propagate the current Python
+context to those workers to retain module attribution. WhoisFreaks does this for its
+parallel domain and IP lookups.
+It covers HTTP and HTTPS calls made through `requests` and service SDKs using its
+standard HTTP adapter, including redirects. SDKs using other HTTP clients or custom
+adapters that replace `HTTPAdapter.send` are not covered.
+
+Bodies are logged using their Python representation to preserve binary data.
+Streamed uploads and responses are logged in chunks as the module sends or reads
+them, without buffering or consuming them in advance. Unread response data is not
+logged. Response bodies are decompressed when the client normally decompresses them.
+
+**These logs include credentials, API keys, cookies, and potentially sensitive
+payloads without redaction.** Enable this option only while troubleshooting, protect
+the logs, and disable it afterwards. Normal `--debug` does not enable HTTP tracing.
+
 As a new feature, you can now run custom MISP modules installed on your system by using the `-c` option.
 
 ~~~~bash
