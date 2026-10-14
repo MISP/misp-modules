@@ -4,6 +4,9 @@ import sys
 import time
 
 from dnstrails import APIError, DnsTrails
+from pymisp import MISPAttribute, MISPEvent, MISPObject
+
+from . import check_input_attribute, standard_error_message
 
 log = logging.getLogger("dnstrails")
 log.setLevel(logging.DEBUG)
@@ -16,23 +19,11 @@ log.addHandler(ch)
 misperrors = {"error": "Error"}
 mispattributes = {
     "input": ["hostname", "domain", "ip-src", "ip-dst"],
-    "output": [
-        "hostname",
-        "domain",
-        "ip-src",
-        "ip-dst",
-        "dns-soa-email",
-        "whois-registrant-email",
-        "whois-registrant-phone",
-        "whois-registrant-name",
-        "whois-registrar",
-        "whois-creation-date",
-        "domain",
-    ],
+    "format": "misp_standard",
 }
 
 moduleinfo = {
-    "version": "1",
+    "version": "2",
     "author": "Sebastien Larinier @sebdraven",
     "description": "An expansion modules for SecurityTrails.",
     "module-type": ["expansion", "hover"],
@@ -44,541 +35,236 @@ moduleinfo = {
     ],
     "features": (
         "The module takes a domain, hostname or IP address attribute as input and queries the SecurityTrails API with"
-        " it.\n\nMultiple parsing operations are then processed on the result of the query to extract a much"
-        " information as possible.\n\nFrom this data extracted are then mapped MISP attributes."
+        " it.\n\nThe current and historical DNS records are returned as passive-dns objects carrying the dates"
+        " SecurityTrails saw them, the registration data as whois objects, and the domains hosted on an IP address as"
+        " domain-ip objects."
     ),
     "references": ["https://securitytrails.com/"],
     "input": "A domain, hostname or IP address attribute.",
-    "output": (
-        "MISP attributes resulting from the query on SecurityTrails API, included in the following list:\n- hostname\n-"
-        " domain\n- ip-src\n- ip-dst\n- dns-soa-email\n- whois-registrant-email\n- whois-registrant-phone\n-"
-        " whois-registrant-name\n- whois-registrar\n- whois-creation-date\n- domain"
-    ),
+    "output": "passive-dns, whois and domain-ip objects describing what SecurityTrails knows about the input.",
 }
 
 # config fields that your code expects from the site admin
 moduleconfig = ["apikey"]
 
+# SecurityTrails current_dns section -> (record type, the key holding the value)
+_CURRENT_DNS = (
+    ("a", "A", "ip"),
+    ("aaaa", "AAAA", "ipv6"),
+    ("ns", "NS", "nameserver"),
+    ("mx", "MX", "hostname"),
+    ("soa", "SOA", "email"),
+)
+
+# SecurityTrails whois contact keys -> whois object relations
+_REGISTRANT = (
+    ("email", "registrant-email"),
+    ("telephone", "registrant-phone"),
+    ("name", "registrant-name"),
+    ("registrarName", "registrar"),
+    ("createdDate", "creation-date"),
+)
+
+
+class SecurityTrailsParser:
+    def __init__(self, attribute):
+        self.misp_event = MISPEvent()
+        self.input_attribute = MISPAttribute()
+        self.input_attribute.from_dict(**attribute)
+        self.misp_event.add_attribute(**self.input_attribute)
+
+    def add_object(self, misp_object):
+        misp_object.add_reference(self.input_attribute.uuid, "related-to")
+        self.misp_event.add_object(misp_object)
+
+    def add_passive_dns(self, rrname, rrtype, rdata, time_first=None, time_last=None):
+        """One observation of one record. SecurityTrails dates every section it
+        returns, which is what passive-dns is for and what the free-text answer
+        pushed into a comment."""
+        if not rdata:
+            return
+        misp_object = MISPObject("passive-dns")
+        misp_object.add_attribute("rrname", rrname)
+        misp_object.add_attribute("rrtype", rrtype)
+        misp_object.add_attribute("rdata", rdata)
+        misp_object.add_attribute("origin", "SecurityTrails")
+        if time_first:
+            misp_object.add_attribute("time_first", time_first)
+        if time_last:
+            misp_object.add_attribute("time_last", time_last)
+        self.add_object(misp_object)
+
+    def add_whois(self, entry, domain, text=None):
+        """The registrant block of a whois answer, current or historical."""
+        misp_object = MISPObject("whois")
+        misp_object.add_attribute("domain", domain)
+        registrant = _select_registrant_item(entry)
+        if registrant:
+            for key, relation in _REGISTRANT:
+                if registrant[0].get(key):
+                    misp_object.add_attribute(relation, registrant[0][key])
+        for nameserver in entry.get("nameServers") or []:
+            misp_object.add_attribute("nameserver", nameserver)
+        if text:
+            misp_object.add_attribute("text", text)
+        if len(misp_object.attributes) > 1:
+            self.add_object(misp_object)
+
+    def get_results(self):
+        event = json.loads(self.misp_event.to_json())
+        return {"results": {key: event[key] for key in ("Attribute", "Object") if (key in event and event[key])}}
+
 
 def handler(q=False):
-    if q:
-
-        request = json.loads(q)
-
-        if not request.get("config") or not (request["config"].get("apikey")):
-            misperrors["error"] = "SecurityTrails authentication is missing"
-            return misperrors
-
-        api = DnsTrails(request["config"].get("apikey"))
-
-        if not api:
-            misperrors["error"] = "SecurityTrails Error instance api"
-            return misperrors
-        if request.get("ip-src"):
-            ip = request["ip-src"]
-            return handle_ip(api, ip, misperrors)
-        elif request.get("ip-dst"):
-            ip = request["ip-dst"]
-            return handle_ip(api, ip, misperrors)
-        elif request.get("domain"):
-            domain = request["domain"]
-            return handle_domain(api, domain, misperrors)
-        elif request.get("hostname"):
-            hostname = request["hostname"]
-            return handle_domain(api, hostname, misperrors)
-        else:
-            misperrors["error"] = "Unsupported attributes types"
-            return misperrors
-    else:
+    if q is False:
         return False
+    request = json.loads(q)
 
-
-def handle_domain(api, domain, misperrors):
-    result_filtered = {"results": []}
-
-    r, status_ok = expand_domain_info(api, misperrors, domain)
-
-    if status_ok:
-        if r:
-            result_filtered["results"].extend(r)
-    else:
-        misperrors["error"] = misperrors["error"] + " Error DNS result"
+    if not request.get("config") or not (request["config"].get("apikey")):
+        misperrors["error"] = "SecurityTrails authentication is missing"
         return misperrors
 
-    time.sleep(1)
-    r, status_ok = expand_subdomains(api, domain)
-
-    if status_ok:
-        if r:
-            result_filtered["results"].extend(r)
-    else:
-        misperrors["error"] = misperrors["error"] + " Error subdomains result"
+    if not request.get("attribute") or not check_input_attribute(request["attribute"]):
+        return {"error": f"{standard_error_message}, which should contain at least a type, a value and an uuid."}
+    attribute = request["attribute"]
+    if attribute["type"] not in mispattributes["input"]:
+        misperrors["error"] = "Unsupported attributes types"
         return misperrors
 
-    time.sleep(1)
-    r, status_ok = expand_whois(api, domain)
-
-    if status_ok:
-        if r:
-            result_filtered["results"].extend(r)
-
-    time.sleep(1)
-    r, status_ok = expand_history_ipv4_ipv6(api, domain)
-
-    if status_ok:
-        if r:
-            result_filtered["results"].extend(r)
-    else:
-        misperrors["error"] = misperrors["error"] + " Error history ipv4"
+    api = DnsTrails(request["config"].get("apikey"))
+    if not api:
+        misperrors["error"] = "SecurityTrails Error instance api"
         return misperrors
 
-    time.sleep(1)
-
-    r, status_ok = expand_history_dns(api, domain)
-
-    if status_ok:
-        if r:
-            result_filtered["results"].extend(r)
-    else:
-        misperrors["error"] = misperrors["error"] + " Error in expand History DNS"
-        return misperrors
-
-    r, status_ok = expand_history_whois(api, domain)
-
-    if status_ok:
-        if r:
-            result_filtered["results"].extend(r)
-    else:
-        misperrors["error"] = misperrors["error"] + " Error in expand History Whois"
-        return misperrors
-
-    return result_filtered
-
-
-def handle_ip(api, ip, misperrors):
-    result_filtered = {"results": []}
-
-    r, status_ok = expand_searching_domain(api, ip)
-
-    if status_ok:
-        if r:
-            result_filtered["results"].extend(r)
-    else:
-        misperrors["error"] += " Error in expand searching domain"
-        return misperrors
-
-    return result_filtered
-
-
-def expand_domain_info(api, misperror, domain):
-    r = []
-    status_ok = False
-    ns_servers = []
-    list_ipv4 = []
-    list_ipv6 = []
-    servers_mx = []
-    soa_hostnames = []
-
+    parser = SecurityTrailsParser(attribute)
     try:
-        results = api.domain(domain)
+        if attribute["type"] in ("ip-src", "ip-dst"):
+            expand_searching_domain(api, parser, attribute["value"])
+        else:
+            handle_domain(api, parser, attribute["value"])
     except APIError as e:
         misperrors["error"] = e.value
-        return [], False
+        return misperrors
+    return parser.get_results()
 
+
+def handle_domain(api, parser, domain):
+    expand_domain_info(api, parser, domain)
+    time.sleep(1)
+    expand_subdomains(api, parser, domain)
+    time.sleep(1)
+    expand_whois(api, parser, domain)
+    time.sleep(1)
+    expand_history_ipv4_ipv6(api, parser, domain)
+    time.sleep(1)
+    expand_history_dns(api, parser, domain)
+    expand_history_whois(api, parser, domain)
+
+
+def expand_domain_info(api, parser, domain):
+    results = api.domain(domain)
+    if not results or "current_dns" not in results:
+        return
+    for section, rrtype, key in _CURRENT_DNS:
+        entry = results["current_dns"].get(section) or {}
+        first_seen = entry.get("first_seen")
+        for value in entry.get("values") or []:
+            parser.add_passive_dns(domain, rrtype, value.get(key), time_first=first_seen)
+
+
+def expand_subdomains(api, parser, domain):
+    results = api.subdomains(domain)
+    if not results:
+        return
+    for subdomain in results.get("subdomains") or []:
+        parser.misp_event.add_attribute(
+            type="domain",
+            value=f"{subdomain}.{domain}",
+            category="Network activity",
+            comment=f"subdomain of {domain} by SecurityTrails",
+        )
+
+
+def expand_whois(api, parser, domain):
+    results = api.whois(domain)
     if results:
-        status_ok = True
-        if "current_dns" in results:
-            if "values" in results["current_dns"]["ns"]:
-                ns_servers = [
-                    ns_entry["nameserver"]
-                    for ns_entry in results["current_dns"]["ns"]["values"]
-                    if "nameserver" in ns_entry
-                ]
-            if "values" in results["current_dns"]["a"]:
-                list_ipv4 = [a_entry["ip"] for a_entry in results["current_dns"]["a"]["values"] if "ip" in a_entry]
+        parser.add_whois(results, domain)
 
-            if "values" in results["current_dns"]["aaaa"]:
-                list_ipv6 = [
-                    ipv6_entry["ipv6"]
-                    for ipv6_entry in results["current_dns"]["aaaa"]["values"]
-                    if "ipv6" in ipv6_entry
-                ]
 
-            if "values" in results["current_dns"]["mx"]:
-                servers_mx = [
-                    mx_entry["hostname"]
-                    for mx_entry in results["current_dns"]["mx"]["values"]
-                    if "hostname" in mx_entry
-                ]
-            if "values" in results["current_dns"]["soa"]:
-                soa_hostnames = [
-                    soa_entry["email"] for soa_entry in results["current_dns"]["soa"]["values"] if "email" in soa_entry
-                ]
+def expand_history_ipv4_ipv6(api, parser, domain):
+    _history_ip(api.history_dns_ipv4(domain), parser, domain, "A", "ip")
+    time.sleep(1)
+    _history_ip(api.history_dns_aaaa(domain), parser, domain, "AAAA", "ipv6")
 
-        if ns_servers:
-            r.append(
-                {
-                    "types": ["domain"],
-                    "values": ns_servers,
-                    "categories": ["Network activity"],
-                    "comment": (
-                        "List of name servers  of %s first seen %s "
-                        % (domain, results["current_dns"]["ns"]["first_seen"])
-                    ),
-                }
+
+def expand_history_dns(api, parser, domain):
+    _history_dns(api.history_dns_ns(domain), parser, domain, "NS", "nameserver")
+    time.sleep(1)
+    _history_dns(api.history_dns_soa(domain), parser, domain, "SOA", "email")
+    time.sleep(1)
+    _history_dns(api.history_dns_mx(domain), parser, domain, "MX", "host")
+
+
+def expand_history_whois(api, parser, domain):
+    results = api.history_whois(domain)
+    if not results:
+        return
+    for item in (results.get("result") or {}).get("items") or []:
+        status = " ".join(item.get("status") or [])
+        parser.add_whois(item, domain, text=f"status: {status}" if status else None)
+
+
+def _history_ip(results, parser, domain, rrtype, key):
+    if not results:
+        return
+    for record in results.get("records") or []:
+        for item in record.get("values") or []:
+            parser.add_passive_dns(
+                domain,
+                rrtype,
+                item.get(key),
+                time_first=record.get("first_seen"),
+                time_last=record.get("last_seen"),
             )
 
-        if list_ipv4:
-            r.append(
-                {
-                    "types": ["domain|ip"],
-                    "values": ["%s|%s" % (domain, ipv4) for ipv4 in list_ipv4],
-                    "categories": ["Network activity"],
-                    "comment": " List ipv4 of %s first seen %s" % (domain, results["current_dns"]["a"]["first_seen"]),
-                }
-            )
-        if list_ipv6:
-            r.append(
-                {
-                    "types": ["domain|ip"],
-                    "values": ["%s|%s" % (domain, ipv6) for ipv6 in list_ipv6],
-                    "categories": ["Network activity"],
-                    "comment": (
-                        " List ipv6 of %s first seen %s" % (domain, results["current_dns"]["aaaa"]["first_seen"])
-                    ),
-                }
+
+def _history_dns(results, parser, domain, rrtype, key):
+    if not results:
+        return
+    for record in results.get("records") or []:
+        values = record.get("values")
+        if values is None:
+            continue
+        if not isinstance(values, list):
+            values = [values]
+        for item in values:
+            parser.add_passive_dns(
+                domain,
+                rrtype,
+                item.get(key),
+                time_first=record.get("first_seen"),
+                time_last=record.get("last_seen"),
             )
 
-        if servers_mx:
-            r.append(
-                {
-                    "types": ["domain"],
-                    "values": servers_mx,
-                    "categories": ["Network activity"],
-                    "comment": " List mx of %s first seen %s" % (domain, results["current_dns"]["mx"]["first_seen"]),
-                }
-            )
-        if soa_hostnames:
-            r.append(
-                {
-                    "types": ["domain"],
-                    "values": soa_hostnames,
-                    "categories": ["Network activity"],
-                    "comment": " List soa of %s first seen %s" % (domain, results["current_dns"]["soa"]["first_seen"]),
-                }
-            )
 
-    return r, status_ok
-
-
-def expand_subdomains(api, domain):
-    r = []
-    status_ok = False
-
-    try:
-        results = api.subdomains(domain)
-
-        if results:
-            status_ok = True
-            if "subdomains" in results:
-                r.append(
-                    {
-                        "types": ["domain"],
-                        "values": ["%s.%s" % (sub, domain) for sub in results["subdomains"]],
-                        "categories": ["Network activity"],
-                        "comment": "subdomains of %s" % domain,
-                    }
-                )
-    except APIError as e:
-        misperrors["error"] = e.value
-        return [], False
-
-    return r, status_ok
-
-
-def expand_whois(api, domain):
-    r = []
-    status_ok = False
-
-    try:
-        results = api.whois(domain)
-
-        if results:
-            status_ok = True
-            item_registrant = __select_registrant_item(results)
-            if item_registrant:
-
-                if "email" in item_registrant[0]:
-                    r.append(
-                        {
-                            "types": ["whois-registrant-email"],
-                            "values": [item_registrant[0]["email"]],
-                            "categories": ["Attribution"],
-                            "comment": "Whois information of %s by securitytrails" % domain,
-                        }
-                    )
-
-                if "telephone" in item_registrant[0]:
-                    r.append(
-                        {
-                            "types": ["whois-registrant-phone"],
-                            "values": [item_registrant[0]["telephone"]],
-                            "categories": ["Attribution"],
-                            "comment": "Whois information of %s by securitytrails" % domain,
-                        }
-                    )
-
-                if "name" in item_registrant[0]:
-                    r.append(
-                        {
-                            "types": ["whois-registrant-name"],
-                            "values": [item_registrant[0]["name"]],
-                            "categories": ["Attribution"],
-                            "comment": "Whois information of %s by securitytrails" % domain,
-                        }
-                    )
-
-                if "registrarName" in item_registrant[0]:
-                    r.append(
-                        {
-                            "types": ["whois-registrar"],
-                            "values": [item_registrant[0]["registrarName"]],
-                            "categories": ["Attribution"],
-                            "comment": "Whois information of %s by securitytrails" % domain,
-                        }
-                    )
-
-                if "createdDate" in item_registrant[0]:
-                    r.append(
-                        {
-                            "types": ["whois-creation-date"],
-                            "values": [item_registrant[0]["createdDate"]],
-                            "categories": ["Attribution"],
-                            "comment": "Whois information of %s by securitytrails" % domain,
-                        }
-                    )
-
-    except APIError as e:
-        misperrors["error"] = e.value
-        return [], False
-
-    return r, status_ok
-
-
-def expand_history_ipv4_ipv6(api, domain):
-    r = []
-    status_ok = False
-
-    try:
-        results = api.history_dns_ipv4(domain)
-
-        if results:
-            status_ok = True
-            r.extend(__history_ip(results, domain))
-
-        time.sleep(1)
-        results = api.history_dns_aaaa(domain)
-
-        if results:
-            status_ok = True
-            r.extend(__history_ip(results, domain, type_ip="ipv6"))
-
-    except APIError as e:
-        misperrors["error"] = e.value
-        return [], False
-
-    return r, status_ok
-
-
-def expand_history_dns(api, domain):
-    r = []
-    status_ok = False
-
-    try:
-
-        results = api.history_dns_ns(domain)
-        if results:
-            r.extend(__history_dns(results, domain, "nameserver", "ns"))
-
-        time.sleep(1)
-
-        results = api.history_dns_soa(domain)
-
-        if results:
-            r.extend(__history_dns(results, domain, "email", "soa"))
-
-        time.sleep(1)
-
-        results = api.history_dns_mx(domain)
-
-        if results:
-            status_ok = True
-            r.extend(__history_dns(results, domain, "host", "mx"))
-
-    except APIError as e:
-        misperrors["error"] = e.value
-        return [], False
-
-    status_ok = True
-
-    return r, status_ok
-
-
-def expand_history_whois(api, domain):
-    r = []
-    status_ok = False
-    try:
-        results = api.history_whois(domain)
-
-        if results:
-
-            if "items" in results["result"]:
-                for item in results["result"]["items"]:
-                    item_registrant = __select_registrant_item(item)
-
-                    r.append(
-                        {
-                            "types": ["domain"],
-                            "values": item["nameServers"],
-                            "categories": ["Network activity"],
-                            "comment": (
-                                "Whois history Name Servers of %s Status: %s " % (domain, " ".join(item["status"]))
-                            ),
-                        }
-                    )
-                    if item_registrant:
-
-                        if "email" in item_registrant[0]:
-                            r.append(
-                                {
-                                    "types": ["whois-registrant-email"],
-                                    "values": [item_registrant[0]["email"]],
-                                    "categories": ["Attribution"],
-                                    "comment": (
-                                        "Whois history registrant email of %sStatus: %s"
-                                        % (domain, " ".join(item["status"]))
-                                    ),
-                                }
-                            )
-
-                        if "telephone" in item_registrant[0]:
-                            r.append(
-                                {
-                                    "types": ["whois-registrant-phone"],
-                                    "values": [item_registrant[0]["telephone"]],
-                                    "categories": ["Attribution"],
-                                    "comment": (
-                                        "Whois history registrant phone of %sStatus: %s"
-                                        % (domain, " ".join(item["status"]))
-                                    ),
-                                }
-                            )
-
-    except APIError as e:
-        misperrors["error"] = e.value
-        return [], False
-    status_ok = True
-
-    return r, status_ok
-
-
-def __history_ip(results, domain, type_ip="ip"):
-    r = []
-    if "records" in results:
-        for record in results["records"]:
-            if "values" in record:
-                for item in record["values"]:
-                    r.append(
-                        {
-                            "types": ["domain|ip"],
-                            "values": ["%s|%s" % (domain, item[type_ip])],
-                            "categories": ["Network activity"],
-                            "comment": (
-                                "History IP on securitytrails %s last seen: %s first seen: %s"
-                                % (domain, record["last_seen"], record["first_seen"])
-                            ),
-                        }
-                    )
-
-    return r
-
-
-def __history_dns(results, domain, type_serv, service):
-    r = []
-
-    if "records" in results:
-        for record in results["records"]:
-            if "values" in record:
-                values = record["values"]
-                if type(values) is list:
-
-                    for item in record["values"]:
-                        r.append(
-                            {
-                                "types": ["domain|ip"],
-                                "values": [item[type_serv]],
-                                "categories": ["Network activity"],
-                                "comment": (
-                                    "history %s of %s last seen: %s first seen: %s"
-                                    % (
-                                        service,
-                                        domain,
-                                        record["last_seen"],
-                                        record["first_seen"],
-                                    )
-                                ),
-                            }
-                        )
-                else:
-                    r.append(
-                        {
-                            "types": ["domain|ip"],
-                            "values": [values[type_serv]],
-                            "categories": ["Network activity"],
-                            "comment": (
-                                "history %s of %s last seen: %s first seen: %s"
-                                % (
-                                    service,
-                                    domain,
-                                    record["last_seen"],
-                                    record["first_seen"],
-                                )
-                            ),
-                        }
-                    )
-    return r
-
-
-def expand_searching_domain(api, ip):
-    r = []
-    status_ok = False
-
-    try:
-        results = api.searching_domains(ipv4=ip)
-
-        if results:
-            if "records" in results:
-                res = [(r["host_provider"], r["hostname"], r["whois"]) for r in results["records"]]
-
-                for host_provider, hostname, whois in res:
-                    comment = "domain for %s by %s" % (ip, host_provider[0])
-                    if whois["registrar"]:
-                        comment = comment + " registrar %s" % whois["registrar"]
-
-                    r.append(
-                        {
-                            "types": ["domain"],
-                            "category": ["Network activity"],
-                            "values": [hostname],
-                            "comment": comment,
-                        }
-                    )
-        status_ok = True
-    except APIError as e:
-        misperrors["error"] = e.value
-        return [], False
-
-    return r, status_ok
+def expand_searching_domain(api, parser, ip):
+    results = api.searching_domains(ipv4=ip)
+    if not results:
+        return
+    for record in results.get("records") or []:
+        hostname = record.get("hostname")
+        if not hostname:
+            continue
+        misp_object = MISPObject("domain-ip")
+        misp_object.add_attribute("domain", hostname)
+        misp_object.add_attribute("ip", ip)
+        host_provider = record.get("host_provider") or []
+        if host_provider:
+            misp_object.add_attribute("text", f"host provider: {host_provider[0]}")
+        parser.add_object(misp_object)
+        registrar = (record.get("whois") or {}).get("registrar")
+        if registrar:
+            parser.add_whois({"contacts": [{"type": "registrant", "registrarName": registrar}]}, hostname)
 
 
 def introspection():
@@ -590,12 +276,12 @@ def version():
     return moduleinfo
 
 
-def __select_registrant_item(entry):
+def _select_registrant_item(entry):
     res = None
     if "contacts" in entry:
-        res = list(filter(lambda x: x["type"] == "registrant", entry["contacts"]))
+        res = list(filter(lambda x: x.get("type") == "registrant", entry["contacts"]))
 
     if "contact" in entry:
-        res = list(filter(lambda x: x["type"] == "registrant", entry["contact"]))
+        res = list(filter(lambda x: x.get("type") == "registrant", entry["contact"]))
 
     return res

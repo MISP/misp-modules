@@ -58,25 +58,39 @@ def _answer(*payloads):
     return _get
 
 
+def _reputation(results):
+    """The reputation object of a result, as {object_relation: value}."""
+    (misp_object,) = results["results"]["Object"]
+    assert misp_object["name"] == "reputation"
+    assert misp_object["ObjectReference"][0]["referenced_uuid"] == UUID
+    return {a["object_relation"]: a["value"] for a in misp_object["Attribute"]}
+
+
 def test_a_catalog_listing_reports_the_threat_and_the_advisory_it_came_from():
     with patch.object(extuno.requests, "get", _answer(MALICIOUS)):
         results = extuno.handler(_query("chrome:bidgllfieacmghieipmhgabodmljimfh"))
 
-    values = [a["value"] for a in results["results"]["Attribute"]]
-    assert any("listed as malicious" in v and "Bundling Unwanted Software" in v for v in values)
-    assert "https://example.com/report/" in values
+    reputation = _reputation(results)
+    assert reputation["classification"] == "malicious"
+    assert reputation["source"] == "Extuno"
+    assert reputation["list-name"] == "known-malicious catalog"
+    assert reputation["link"] == "https://example.com/report/"
+    assert "Bundling Unwanted Software" in reputation["text"]
     # An extension pulled from the store is no longer installable from it, which changes what an
     # analyst does next, so it is stated rather than left out.
-    assert any("removed from the store" in v for v in values)
+    assert "Removed from the store" in reputation["text"]
+    # The input attribute is returned alongside, so the object reference resolves.
+    assert [a["uuid"] for a in results["results"]["Attribute"]] == [UUID]
 
 
 def test_an_analysis_verdict_carries_its_evidence():
     with patch.object(extuno.requests, "get", _answer(ANALYSED)):
         results = extuno.handler(_query("chrome:kbnfbcpkiaganjpcanopcgeoehkleeck"))
 
-    values = [a["value"] for a in results["results"]["Attribute"]]
-    assert any("verdict review" in v and "72/100" in v for v in values)
-    assert any("Cookie access combined with broad host reach" in v for v in values)
+    reputation = _reputation(results)
+    assert reputation["classification"] == "review"
+    assert float(reputation["score"]) == 72
+    assert "Cookie access combined with broad host reach" in reputation["text"]
 
 
 def test_a_bare_webstore_id_is_also_looked_up_against_edge():
@@ -85,7 +99,9 @@ def test_a_bare_webstore_id_is_also_looked_up_against_edge():
     with patch.object(extuno.requests, "get", _answer(UNKNOWN, edge_hit)):
         results = extuno.handler(_query("bidgllfieacmghieipmhgabodmljimfh"))
 
-    assert any("listed as malicious" in a["value"] for a in results["results"]["Attribute"])
+    reputation = _reputation(results)
+    assert reputation["classification"] == "malicious"
+    assert "edge:bidgllfieacmghieipmhgabodmljimfh" in reputation["text"]
 
 
 def test_no_record_is_reported_as_a_result_rather_than_an_error():
@@ -94,7 +110,17 @@ def test_no_record_is_reported_as_a_result_rather_than_an_error():
         results = extuno.handler(_query("chrome:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"))
 
     assert "error" not in results
-    assert any("no record" in a["value"] for a in results["results"]["Attribute"])
+    reputation = _reputation(results)
+    assert reputation["classification"] == "unknown"
+    assert "No record" in reputation["text"]
+
+
+def test_a_risk_score_of_the_wrong_type_is_left_out():
+    """A score MISP cannot store as a float would make the whole object unusable."""
+    with patch.object(extuno.requests, "get", _answer(dict(ANALYSED, risk_score="high"))):
+        results = extuno.handler(_query("chrome:kbnfbcpkiaganjpcanopcgeoehkleeck"))
+
+    assert "score" not in _reputation(results)
 
 
 def test_a_value_that_cannot_be_resolved_is_never_reported_as_clean():
@@ -234,4 +260,4 @@ def test_a_response_with_no_verdict_still_reaches_the_edge_fallback():
             results = extuno.handler(_query("bidgllfieacmghieipmhgabodmljimfh"))
 
         assert stores == ["chrome", "edge"]
-        assert any("listed as malicious" in a["value"] for a in results["results"]["Attribute"])
+        assert _reputation(results)["classification"] == "malicious"

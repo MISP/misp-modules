@@ -2,16 +2,12 @@ import json
 from urllib.parse import urlparse
 
 import requests
-from pymisp import MISPEvent
+from pymisp import MISPAttribute, MISPEvent, MISPObject
 
 from . import check_input_attribute, standard_error_message
 
 misperrors = {"error": "Error"}
-mispattributes = {
-    "input": ["text", "url", "link", "other"],
-    "output": ["text", "link"],
-    "format": "misp_standard",
-}
+mispattributes = {"input": ["text", "url", "link", "other"], "format": "misp_standard"}
 moduleinfo = {
     "version": "1.0",
     "author": "extuno.com Tolga SEZER",
@@ -37,7 +33,7 @@ moduleinfo = {
     ),
     "references": ["https://extuno.com", "https://extuno.com/pip-scanner"],
     "input": "A store listing URL, or a text attribute holding `store:id` (e.g. `chrome:cjpalhd...`).",
-    "output": "A text attribute carrying the verdict, and a link to the advisory or store listing.",
+    "output": "A reputation object holding the Extuno verdict, its risk score and the advisory it came from.",
 }
 # The API key is mandatory: the lookup runs against a tenant account. api_url is exposed only so an
 # operator can point the module at a self-hosted deployment.
@@ -204,15 +200,13 @@ def _lookup(api_url, api_key, store, identifier):
 
 
 class ExtunoParser:
-    def __init__(self, api_url, api_key):
+    def __init__(self, api_url, api_key, attribute):
         self.api_url = api_url
         self.api_key = api_key
         self.misp_event = MISPEvent()
-        self.found = False
-
-    def _add(self, **kwargs):
-        self.misp_event.add_attribute(**kwargs)
-        self.found = True
+        self.input_attribute = MISPAttribute()
+        self.input_attribute.from_dict(**attribute)
+        self.misp_event.add_attribute(**self.input_attribute)
 
     def _query(self, store, identifier):
         """One lookup. Returns (payload, failure); exactly one of them is set."""
@@ -246,52 +240,51 @@ class ExtunoParser:
         # api_url at another deployment, and a proxy can rewrite a body.
         catalog = result.get("catalog") if isinstance(result.get("catalog"), dict) else {}
         scan = result.get("scan") if isinstance(result.get("scan"), dict) else {}
+        risk_score = result.get("risk_score")
+        if isinstance(risk_score, bool) or not isinstance(risk_score, (int, float)):
+            risk_score = None
 
+        # Typed explicitly, like the other reputation modules. Extuno's own verdict word goes in
+        # classification as it is: MISP reads the words it knows, and the rest as no opinion.
+        reputation = MISPObject("reputation")
+        reputation.add_attribute("source", type="text", value="Extuno")
+        texts = [f"Looked up as {store}:{identifier}"]
         if result.get("known_malicious"):
-            threat = catalog.get("threat_type") or "malicious"
-            summary = f"Extuno: {store}:{identifier} is listed as malicious ({threat})"
+            reputation.add_attribute("classification", type="text", value="malicious")
+            reputation.add_attribute("list-name", type="text", value="known-malicious catalog")
+            texts.append(f"Threat type: {catalog.get('threat_type') or 'malicious'}")
+            # An extension pulled from the store is no longer installable from it, which changes
+            # what an analyst does next, so it is stated rather than left out.
             if catalog.get("still_active") is False:
-                summary += ", removed from the store"
-            self._add(type="text", value=summary, comment="Extuno: known-malicious catalog",
-                      disable_correlation=True)
+                texts.append("Removed from the store")
             if catalog.get("reason"):
-                self._add(type="text", value=f"Extuno: {catalog['reason']}",
-                          comment="Extuno: catalog detail", disable_correlation=True)
+                texts.append(str(catalog["reason"]))
             if catalog.get("source_url"):
-                self._add(type="link", value=catalog["source_url"],
-                          comment="Extuno: advisory this listing came from", disable_correlation=True)
+                reputation.add_attribute("link", type="link", value=catalog["source_url"])
         elif verdict != "unknown":
-            summary = f"Extuno analysed {store}:{identifier} and reached the verdict {verdict}"
-            if result.get("risk_score") is not None:
-                summary += f" (risk {result['risk_score']}/100)"
-            self._add(type="text", value=summary, comment="Extuno: analysis verdict",
-                      disable_correlation=True)
+            reputation.add_attribute("classification", type="text", value=str(verdict))
         else:
             # Reported rather than returned as an error: "we looked and it is not on record" is a
             # useful answer, and is not the same as the lookup having failed.
-            self._add(
-                type="text",
-                value=f"Extuno has no record of {store}:{identifier}: not in the malicious catalog "
-                      "and not analysed.",
-                comment="Extuno: no record", disable_correlation=True)
-            return None
+            reputation.add_attribute("classification", type="text", value="unknown")
+            texts.append("No record: not in the malicious catalog and not analysed")
+        if risk_score is not None:
+            reputation.add_attribute("score", type="float", value=risk_score)
+            texts.append(f"Risk score {risk_score}/100")
 
         findings = scan.get("top_findings")
         findings = findings if isinstance(findings, list) else []
-        for title in [f["title"] for f in findings
-                      if isinstance(f, dict) and f.get("title")][:5]:
-            self._add(type="text", value=f"Extuno finding: {title}",
-                      comment="Extuno: evidence from analysis", disable_correlation=True)
+        for title in [f["title"] for f in findings if isinstance(f, dict) and f.get("title")][:5]:
+            texts.append(f"Finding: {title}")
+
+        reputation.add_attribute("text", type="text", value="\n".join(texts))
+        reputation.add_reference(self.input_attribute.uuid, "related-to")
+        self.misp_event.add_object(reputation)
         return None
 
     def get_results(self):
-        if not self.found:
-            return {"error": "No Extuno results for this attribute."}
         event = json.loads(self.misp_event.to_json())
-        results = {key: event[key] for key in ("Attribute", "Object") if event.get(key)}
-        if not results:
-            return {"error": "No Extuno results for this attribute."}
-        return {"results": results}
+        return {"results": {key: event[key] for key in ("Attribute", "Object") if event.get(key)}}
 
 
 def handler(q=False):
@@ -317,7 +310,7 @@ def handler(q=False):
     except UnknownArtifact as error:
         return {"error": f"Extuno cannot look this up: {error}"}
 
-    parser = ExtunoParser(api_url, api_key)
+    parser = ExtunoParser(api_url, api_key, attribute)
     # The identifier is passed raw: requests encodes it once as a query parameter. Encoding it here
     # as well would put a literal "%3A" on the wire for a Maven coordinate and look up an artifact
     # that cannot exist.
