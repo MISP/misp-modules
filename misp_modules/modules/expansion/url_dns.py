@@ -179,8 +179,8 @@ def handler(q=False):
             endpoint.add_reference(source.uuid, "derived-from")
             notes = list(warnings)
             if address.version == 4:
-                if not address.is_global:
-                    notes.append("ASN lookup skipped: this IPv4 address is not globally routable.")
+                if not address.is_global or address.is_multicast:
+                    notes.append("ASN lookup skipped: this IPv4 address is not globally routable unicast.")
                 else:
                     try:
                         origins = _origin_asns(resolver, address)

@@ -216,6 +216,21 @@ def test_private_ipv4_keeps_endpoint_without_asn_query(resolver):
     assert all(call.args[1] != "TXT" for call in resolver.resolve.call_args_list)
 
 
+@pytest.mark.parametrize("address", ["224.0.0.1", "239.255.255.250"])
+@pytest.mark.parametrize("literal", [True, False])
+def test_multicast_ipv4_keeps_endpoint_without_asn_query(resolver, address, literal):
+    _answers(resolver, {("example.com.", "A"): [address]})
+    result = _run(f"https://{address}/" if literal else "https://example.com/")
+    endpoint = _objects(result, "ip-port")[0]
+    assert _values(endpoint, "ip") == [address]
+    assert _values(endpoint, "dst-port") == ["443"]
+    assert (SOURCE_UUID, "derived-from") in _references(endpoint)
+    assert not _objects(result, "asn")
+    assert "not globally routable" in endpoint["comment"]
+    assert "ASN lookup unavailable" not in endpoint["comment"]
+    assert all(call.args[1] != "TXT" for call in resolver.resolve.call_args_list)
+
+
 def test_custom_nameserver_and_timeouts(resolver):
     _answers(resolver, {("example.com.", "AAAA"): ["2001:db8::1"]})
     assert "results" in _run(config={"nameserver": "9.9.9.9"})
