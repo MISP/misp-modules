@@ -5,15 +5,8 @@ from pymisp import MISPAttribute, MISPEvent, MISPObject
 
 from . import check_input_attribute, standard_error_message
 
-misperrors = {"error": "Error"}
 mispattributes = {
-    "input": [
-        "onion-address",
-        # 'domain',
-        # 'ip-dst',
-        # 'url',
-        # Any other Attribute type...
-    ],
+    "input": ["onion-address"],
     "format": "misp_standard",
 }
 
@@ -24,38 +17,24 @@ moduleinfo = {
     "description": (
         "MISP module using the MISP standard. Uses the onion-lookup service to get information about an onion."
     ),
-    "module-type": [  # possible module-types: 'expansion', 'hover' or both
-        "expansion",
-        "hover",
-    ],
+    "module-type": ["expansion", "hover"],
     "references": ["https://onion.ail-project.org/"],
     "logo": "onion.png",
 }
 
-# config fields that your code expects from the site admin
 moduleconfig = []
+ONION_LOOKUP_URL = "https://onion.ail-project.org/api/lookup/"
 
 
 def getDetails(onion_address):
-    url = f"https://onion.ail-project.org/api/lookup/{onion_address}"
+    url = f"{ONION_LOOKUP_URL}{onion_address}"
     response = requests.get(url)
     return response.json()
 
 
-"""
-{
-  "tags": [
-    "infoleak:automatic-detection=\"base64\"",
-    "infoleak:automatic-detection=\"credit-card\"",
-    "infoleak:automatic-detection=\"onion\""
-  ],
-}
-"""
-
-
 def createObject(onion_details):
     misp_object = MISPObject("tor-hiddenservice")
-    misp_object.comment = "custom-comment2"
+    misp_object.comment = f"Enriched via onion-lookup: {ONION_LOOKUP_URL}{onion_details['id']}"
     onion_address = misp_object.add_attribute("address", onion_details["id"])
     misp_object.add_attribute("first-seen", onion_details["first_seen"])
     misp_object.add_attribute("last-seen", onion_details["last_seen"])
@@ -75,7 +54,6 @@ def enrichOnion(misp_event, attribute):
     misp_event.add_object(misp_object)
     original_attribute = MISPAttribute()
     original_attribute.from_dict(**attribute)
-    original_attribute.comment = "custom comment"
     for tag in onion_details["tags"]:
         original_attribute.add_tag(tag)
     misp_event.attributes.append(original_attribute)
