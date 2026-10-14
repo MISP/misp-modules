@@ -677,3 +677,117 @@ def test_api_key_remains_required_with_optional_defaults(key):
         result = modat.handler(json.dumps({"attribute": attribute(), "config": {"apikey": key}}))
     assert "API key" in result["error"]
     call.assert_not_called()
+
+
+def test_reverse_dns_forbidden_preserves_host_results(caplog):
+    with patch.object(
+        modat.requests.Session,
+        "request",
+        side_effect=[
+            response({"data": {"ip": "203.0.113.14", "services": []}}),
+            response({"secret": "private-response"}, 403),
+        ],
+    ):
+        result = modat.handler(request(reverse_dns=True))
+    assert "error" not in result
+    assert any(o["name"] == "ip-port" for o in result["results"]["Object"])
+    assert "403" in caplog.text
+    assert "private-response" not in caplog.text
+
+
+def test_service_search_forbidden_still_imports_dns_records():
+    zone = {
+        "fqdn": "example.com",
+        "records": {"a": [{"ip": "203.0.113.14", "ttl": 300, "created_at": "2026-01-01T00:00:00Z"}]},
+    }
+    with patch.object(modat.requests.Session, "request", side_effect=[response({}, 403), response(zone)]) as call:
+        result = modat.handler(request("domain", "example.com"))
+    assert "error" not in result
+    assert call.call_count == 2
+    assert any(o["name"] == "modat-dns-record" for o in result["results"]["Object"])
+
+
+def test_dns_zone_forbidden_preserves_service_results():
+    row = {"ip": "203.0.113.14", "service": {"port": 443, "transport": "tcp", "protocol": "http"}}
+    with patch.object(
+        modat.requests.Session, "request", side_effect=[response({"page": [row], "total_pages": 1}), response({}, 403)]
+    ):
+        result = modat.handler(request("domain", "example.com"))
+    assert "error" not in result
+    assert any(o["name"] == "modat-service" for o in result["results"]["Object"])
+
+
+@pytest.mark.parametrize("denied_first", [True, False])
+def test_host_and_one_zone_forbidden_still_import_permitted_zone(denied_first):
+    name = "second.example.com" if denied_first else "first.example.com"
+    zone = {"fqdn": name, "records": {"a": [{"ip": "203.0.113.14", "ttl": 300, "created_at": "2026-01-01T00:00:00Z"}]}}
+    lookups = [response({}, 403), response(zone)] if denied_first else [response(zone), response({}, 403)]
+    with patch.object(
+        modat.requests.Session,
+        "request",
+        side_effect=[
+            response({}, 403),
+            response({"page": [{"fqdn": "first.example.com"}, {"fqdn": "second.example.com"}], "total_pages": 1}),
+            *lookups,
+        ],
+    ) as call:
+        result = modat.handler(request(reverse_dns=True, max_results=2))
+    assert "error" not in result
+    assert call.call_count == 4
+    observations = [o for o in result["results"]["Object"] if o["name"] == "modat-dns-record"]
+    assert len(observations) == 1
+    assert any(a["object_relation"] == "fqdn" and a["value"] == name for a in observations[0]["Attribute"])
+    ids = {a["uuid"] for a in result["results"]["Attribute"]} | {o["uuid"] for o in result["results"]["Object"]}
+    assert all(r["referenced_uuid"] in ids for o in result["results"]["Object"] for r in o.get("ObjectReference", []))
+
+
+@pytest.mark.parametrize("host_status", [403, 404])
+def test_forbidden_without_enrichment_data_returns_error(host_status):
+    with patch.object(modat.requests.Session, "request", side_effect=[response({}, host_status), response({}, 403)]):
+        result = modat.handler(request(reverse_dns=True))
+    assert "subscription" in result["error"]
+    assert "403" in result["error"]
+    assert "no enrichment data" in result["error"]
+    assert "results" not in result
+
+
+@pytest.mark.parametrize("status", [401, 429, 500])
+def test_other_failures_remain_errors_even_after_host_data(status):
+    with patch.object(
+        modat.requests.Session,
+        "request",
+        side_effect=[response({"data": {"ip": "203.0.113.14", "services": []}}), response({}, status)],
+    ):
+        result = modat.handler(request(reverse_dns=True))
+    assert "error" in result
+    assert "results" not in result
+
+
+def test_later_search_page_forbidden_keeps_earlier_page_results(caplog):
+    rows = [
+        {"ip": f"203.0.113.{i}", "service": {"port": 443, "transport": "tcp", "protocol": "http"}} for i in range(1, 11)
+    ]
+    with patch.object(
+        modat.requests.Session, "request", side_effect=[response({"page": rows, "total_pages": 2}), response({}, 403)]
+    ) as call:
+        result = modat.handler(request("port", "443", max_results=20))
+    assert "error" not in result
+    assert call.call_count == 2
+    assert len([o for o in result["results"]["Object"] if o["name"] == "modat-service"]) == 10
+    assert "retaining earlier pages" in caplog.text
+
+
+def test_forbidden_pagination_with_only_dns_metadata_is_not_importable_data():
+    with patch.object(
+        modat.requests.Session,
+        "request",
+        side_effect=[
+            response({}, 404),
+            response({"page": [{"fqdn": "example.com"}] * 10, "total_pages": 2}),
+            response({}, 403),
+            response({}, 404),
+        ],
+    ):
+        result = modat.handler(request(reverse_dns=True, max_results=20))
+    assert "error" in result
+    assert "no enrichment data" in result["error"]
