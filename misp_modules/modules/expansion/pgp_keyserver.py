@@ -123,16 +123,29 @@ def _timestamp(value):
 
 def _parse_index(text):
     lines = [line for line in text.splitlines() if line]
-    if not lines or not re.fullmatch(r"info:1:[0-9]+", lines[0]):
-        raise ValueError("The keyserver did not return a version 1 machine-readable HKP index.")
+    if not lines:
+        raise ValueError("The keyserver returned an empty HKP index.")
+    reported = None
+    if lines[0].partition(":")[0] == "info":
+        fields = lines.pop(0).split(":")
+        if len(fields) > 3:
+            raise ValueError("Invalid information record in the keyserver index.")
+        fields.extend([""] * (3 - len(fields)))
+        # HKP assumes version 1 when the information record or its version is absent.
+        if fields[1] not in ("", "1") or (fields[2] and not re.fullmatch(r"[0-9]+", fields[2])):
+            raise ValueError("The keyserver did not return a version 1 machine-readable HKP index.")
+        if fields[2]:
+            reported = int(fields[2])
     keys = {}
     current = None
-    for line in lines[1:]:
+    for line in lines:
         fields = line.split(":")
         if fields[0] == "pub":
-            if len(fields) != 7 or not re.fullmatch(
-                r"(?:[0-9A-Fa-f]{8}|[0-9A-Fa-f]{16}|[0-9A-Fa-f]{40}|[0-9A-Fa-f]{64})", fields[1]
-            ):
+            if len(fields) > 7:
+                raise ValueError("Invalid public-key record in the keyserver index.")
+            # Empty trailing fields and their separators may be omitted in HKP records.
+            fields.extend([""] * (7 - len(fields)))
+            if not re.fullmatch(r"(?:[0-9A-Fa-f]{8}|[0-9A-Fa-f]{16}|[0-9A-Fa-f]{40}|[0-9A-Fa-f]{64})", fields[1]):
                 raise ValueError("Invalid public-key record in the keyserver index.")
             identifier = fields[1].upper()
             fingerprint = identifier if len(identifier) in (40, 64) else None
@@ -152,14 +165,16 @@ def _parse_index(text):
             }
             current = keys.setdefault(identifier, record)
         elif fields[0] == "uid":
-            if current is None or len(fields) != 5:
+            if current is None or len(fields) > 5:
                 raise ValueError("Invalid UID record in the keyserver index.")
+            fields.extend([""] * (5 - len(fields)))
             uid = unquote(fields[1], encoding="utf-8", errors="strict")
             if uid:
                 current["uids"].setdefault((uid, fields[4]), None)
         else:
             raise ValueError("Unexpected record in the keyserver index.")
-    reported = int(lines[0].split(":")[2])
+    if reported is None:
+        reported = len(keys)
     if reported < len(keys) or (reported and not keys):
         raise ValueError("Incomplete keyserver index.")
     return list(keys.values()), reported

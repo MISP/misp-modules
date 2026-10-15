@@ -138,6 +138,59 @@ def test_all_advertised_inputs_can_be_expanded(attribute_type):
     assert "error" not in _run(_request(attribute_type=attribute_type))[0]
 
 
+@pytest.mark.parametrize("info", ["", "info::1\n", "info:1\n", "info:1:\n", "info\n"])
+def test_optional_index_information_does_not_prevent_key_and_uid_expansion(info):
+    index = info + f"pub:{FINGERPRINT}:1:2048:1483716566::\nuid:Alice <alice@example.org>:0::\n"
+    result, session = _run(index=index)
+    key = _objects(result, "pgp-key")[0]
+    assert _values(key, "fingerprint") == [FINGERPRINT]
+    assert _values(key, "key") == [ARMOR]
+    assert _values(_objects(result, "pgp-meta")[0], "user-id-email") == ["alice@example.org"]
+    assert "comment" not in key
+    assert session.get.call_count == 2
+
+
+@pytest.mark.parametrize(
+    "public_record",
+    [
+        f"pub:{FINGERPRINT}:1:2048:1483716566:",
+        f"pub:{FINGERPRINT}:1:2048:1483716566",
+        f"pub:{FINGERPRINT}:1:2048",
+        f"pub:{FINGERPRINT}:1",
+        f"pub:{FINGERPRINT}",
+    ],
+)
+@pytest.mark.parametrize(
+    "uid_record",
+    [
+        "uid:Alice%20Ops <alice+tag@example.org>:1483716566:",
+        "uid:Alice%20Ops <alice+tag@example.org>:1483716566",
+        "uid:Alice%20Ops <alice+tag@example.org>",
+    ],
+)
+def test_omitted_trailing_fields_preserve_public_key_and_uid_metadata(public_record, uid_record):
+    result, session = _run(index=f"info:1:1\n{public_record}\n{uid_record}\n")
+    key = _objects(result, "pgp-key")[0]
+    meta = _objects(result, "pgp-meta")[0]
+    assert _values(key, "key") == [ARMOR]
+    assert _values(key, "fingerprint") == [FINGERPRINT]
+    assert _values(key, "uid") == ["Alice Ops <alice+tag@example.org>"]
+    assert _values(meta, "key-id") == [FINGERPRINT[-16:]]
+    assert _values(meta, "user-id-name") == ["Alice Ops"]
+    assert _values(meta, "user-id-email") == ["alice+tag@example.org"]
+    assert not _values(key, "expiration-time")
+    assert not _values(key, "flags")
+    assert session.get.call_count == 2
+
+
+def test_headerless_index_with_omitted_trailing_fields_returns_linked_objects():
+    result, _ = _run(index=f"pub:{FINGERPRINT}\nuid:Alice <alice@example.org>\n")
+    key = _objects(result, "pgp-key")[0]
+    meta = _objects(result, "pgp-meta")[0]
+    assert _values(key, "key") == [ARMOR]
+    assert meta["ObjectReference"][0]["referenced_uuid"] == key["uuid"]
+
+
 def test_short_id_collisions_remain_distinct_by_full_fingerprint():
     collision = "A" * 24 + FINGERPRINT[-16:]
     index = f"info:1:2\npub:{FINGERPRINT}:1:2048:1483716566::\npub:{collision}:1:2048:1483716566::\n"
@@ -149,8 +202,11 @@ def test_short_id_collisions_remain_distinct_by_full_fingerprint():
     assert session.get.call_count == 3
 
 
-def test_custom_server_and_result_limit_are_applied_before_downloads():
+@pytest.mark.parametrize("with_info", [True, False])
+def test_custom_server_and_result_limit_are_applied_before_downloads(with_info):
     index = INDEX.replace("info:1:1", "info:1:2") + f"pub:{SECOND}:1:2048:0::\n"
+    if not with_info:
+        index = index.split("\n", 1)[1]
     result, session = _run(_request(keyserver="https://keys.example.org:8443/", timeout="2.5", max_results="1"), index)
     assert session.get.call_count == 2
     for call in session.get.call_args_list:
@@ -161,11 +217,15 @@ def test_custom_server_and_result_limit_are_applied_before_downloads():
     assert _values(key, "keyserver") == ["https://keys.example.org:8443"]
 
 
-def test_duplicate_records_merge_uids_without_duplicate_downloads():
+@pytest.mark.parametrize("with_info", [True, False])
+def test_duplicate_records_merge_uids_without_duplicate_downloads(with_info):
     index = INDEX + f"pub:{FINGERPRINT}:1:2048:1483716566::\nuid:Second UID:0::\n"
+    if not with_info:
+        index = index.split("\n", 1)[1]
     result, session = _run(index=index)
     assert len(_objects(result, "pgp-key")) == 1
     assert "Second UID" in _values(_objects(result, "pgp-key")[0], "uid")
+    assert "comment" not in _objects(result, "pgp-key")[0]
     assert session.get.call_count == 2
 
 
@@ -215,9 +275,17 @@ def test_no_results_or_invalid_empty_index_returns_error(index):
     [
         "<html>index</html>",
         "info:2:1\n",
+        "info:2:1\n" + f"pub:{FINGERPRINT}:1:2048:0::\n",
+        "info:1:bad\n",
+        "info:1:1:extra\n",
         "info:1:1\n",
         "info:1:1\nuid:orphan:0::\n",
+        "uid:orphan\n",
+        "pub:bad\n",
+        "pub\n",
         "info:1:1\npub:bad:1:2048:0::\n",
+        f"pub:{FINGERPRINT}:1:2048:0:::extra\n",
+        f"pub:{FINGERPRINT}\nuid:Alice:0:::extra\n",
         f"info:1:1\npub:{FINGERPRINT}:rsa:2048:0::\n",
         f"info:1:1\npub:{FINGERPRINT}:1:2048:bad::\n",
         f"info:1:1\npub:{FINGERPRINT}:1:2048:999999999999999999999999::\n",
