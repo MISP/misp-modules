@@ -1,7 +1,7 @@
 """Read bounded OpenPGP packet metadata; no signature verification is performed.
 
-RFC 9580 sections 4.2, 5.2 and 5.5 describe the packet framing, signature
-subpackets and fingerprints used here. Signature values remain opaque bytes.
+RFC 9580 sections 4.2, 4.3, 5.2 and 5.5 describe packet framing, criticality,
+signature subpackets and fingerprints. Signature values remain opaque bytes.
 """
 
 import base64
@@ -215,6 +215,8 @@ def extract_signatures(armored, fingerprint, limit):
             primary = _fingerprint(body)
             if primary != fingerprint:
                 raise ValueError("The public-key fingerprint does not match the HKP index.")
+        elif 40 <= tag <= 63:
+            continue  # RFC 9580 section 4.3: ignore unknown non-critical packets without changing the subject.
         elif tag in (10, 12, 21):
             continue  # Marker, local trust and padding do not change the signed subject.
         elif primary is None:

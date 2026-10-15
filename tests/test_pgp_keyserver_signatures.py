@@ -142,6 +142,64 @@ def test_packet_framing_preserves_the_exact_original_signature(framing):
     assert _values(signature, "uid") == ["Example UID"]
 
 
+@pytest.mark.parametrize("tag", range(40, 64))
+def test_unknown_noncritical_packets_anywhere_preserve_signatures_and_subjects(tag):
+    extension = _packet(tag, b"opaque extension payload")
+    certification = _packet(2, _signature_body())
+    binding = _packet(2, _signature_body(kind=0x18))
+    direct = _packet(2, _signature_body(kind=0x1F))
+    attribute = b"opaque user attribute fixture"
+    packets = [
+        _packet(6, PUBLIC_BODY),
+        direct,
+        _packet(13, b"Example UID"),
+        certification,
+        _packet(14, PUBLIC_BODY),
+        binding,
+        _packet(17, attribute),
+        certification,
+    ]
+    certificate = _armor(extension + extension.join(packets) + extension)
+    result, _ = _lookup(certificate)
+    extracted = _objects(result, "pgp-sign")
+    assert len(extracted) == 4
+    assert [_unarmor(_values(obj, "signature")[0]) for obj in extracted] == [
+        direct,
+        certification,
+        binding,
+        certification,
+    ]
+    assert not _values(extracted[0], "uid")
+    assert _values(extracted[1], "uid") == ["Example UID"]
+    assert _values(extracted[2], "subkey-fingerprint") == [PUBLIC_FINGERPRINT]
+    assert _values(extracted[3], "user-attribute-sha256") == [hashlib.sha256(attribute).hexdigest()]
+    assert all(_values(obj, "issuer-key-id") == [ISSUER] for obj in extracted)
+    assert "comment" not in _objects(result, "pgp-key")[0]
+
+
+@pytest.mark.parametrize("tag", [0, 23, 39])
+def test_unknown_critical_packets_still_reject_signature_extraction(tag):
+    certificate = _certificate(_packet(2, _signature_body()), _packet(tag, b"unknown critical packet"))
+    result, _ = _lookup(certificate)
+    assert not _objects(result, "pgp-sign")
+    key = _objects(result, "pgp-key")[0]
+    assert _values(key, "key") == [certificate]
+    assert "Unexpected packet" in key["comment"]
+    assert _objects(result, "pgp-meta")
+
+
+@pytest.mark.parametrize("tag", [40, 63])
+@pytest.mark.parametrize("packet_tail", [b"", b"\xff\x00", b"\x05x"])
+def test_ignored_noncritical_packets_still_require_valid_framing(tag, packet_tail):
+    certificate = _certificate(_packet(2, _signature_body()), bytes([0xC0 | tag]) + packet_tail)
+    result, _ = _lookup(certificate)
+    assert not _objects(result, "pgp-sign")
+    key = _objects(result, "pgp-key")[0]
+    assert _values(key, "key") == [certificate]
+    assert "Truncated OpenPGP packet" in key["comment"]
+    assert _objects(result, "pgp-meta")
+
+
 @pytest.mark.parametrize("width,size", [(1, 20), (2, 194), (2, 8191), (5, 20)])
 def test_signature_subpacket_lengths_do_not_hide_following_issuer_fields(width, size):
     hashed = _subpacket(20, b"x" * size, width=width)
