@@ -3,6 +3,7 @@ import json
 from urllib.parse import urlparse
 
 import requests
+from publicsuffixlist import PublicSuffixList
 from pymisp import MISPAttribute, MISPEvent, MISPObject
 
 from . import check_input_attribute, standard_error_message
@@ -12,7 +13,7 @@ mispattributes = {
     "format": "misp_standard",
 }
 moduleinfo = {
-    "version": 1,
+    "version": 2,
     "author": "Ali Bhutto",
     "description": (
         "An expansion module to query the public RDAP bootstrap (rdap.org) for"
@@ -29,7 +30,10 @@ moduleinfo = {
         " input, resolves a URL to its host, and queries the rdap.org bootstrap"
         " which redirects to the authoritative RDAP server for the object. The"
         " registrar, registration and expiration dates, name servers, status and"
-        " registrant information are parsed into a MISP whois object."
+        " registrant information are parsed into a MISP whois object. A"
+        " hostname, subdomain or URL host is looked up at its registered domain"
+        " (ICANN section of the Public Suffix List), and the object's comment"
+        " says so."
     ),
     "references": ["https://about.rdap.org/", "https://rdap.org/"],
     "input": "A domain, hostname, IP address or URL attribute.",
@@ -38,6 +42,11 @@ moduleinfo = {
 moduleconfig = []
 
 RDAP_URL = "https://rdap.org"
+
+# Registries delegate under ICANN suffixes only: a name under a private suffix
+# such as duckdns.org is registered under .org, so its registry answers for
+# duckdns.org and not for foo.duckdns.org.
+_PSL = PublicSuffixList(only_icann=True)
 
 # RDAP event actions (RFC 9083) mapped to whois object relations.
 _EVENT_MAPPING = {
@@ -53,6 +62,12 @@ def _is_ip(value):
     except ValueError:
         return False
     return True
+
+
+def _registered_domain(host):
+    """The registered domain of ``host``, or ``host`` itself when it is a
+    public suffix."""
+    return _PSL.privatesuffix(host) or host
 
 
 def _vcard_value(entity, field):
@@ -83,10 +98,19 @@ def _add_if(misp_object, relation, value):
         misp_object.add_attribute(relation, value)
 
 
-def _parse_rdap(rdap, queried_value, is_ip):
-    """Build a MISP whois object from an RDAP response."""
+def _parse_rdap(rdap, queried_value, is_ip, host=None):
+    """Build a MISP whois object from an RDAP response.
+
+    ``queried_value`` is the name asked for, used rather than RDAP's
+    ``ldhName`` which some registries return uppercased. ``host`` is the input
+    host when it differs from the registered domain asked for. It is only named
+    in the comment, never added as a second ``domain``, so that the record does
+    not read as the host's own registration.
+    """
     whois = MISPObject("whois")
     whois.add_attribute("ip-address" if is_ip else "domain", queried_value)
+    if host:
+        whois.add_attribute("comment", f"Registration data for {queried_value}, the registered domain of {host}.")
 
     registrar = _entity_by_role(rdap.get("entities"), "registrar")
     if registrar:
@@ -128,8 +152,14 @@ def handler(q=False):
         if not host:
             return {"error": f"Could not extract a host from URL {value}."}
         value = host
+    value = value.strip().lower().rstrip(".")
 
     is_ip = _is_ip(value)
+    host = None
+    if not is_ip:
+        registered = _registered_domain(value)
+        if registered != value:
+            host, value = value, registered
     path = f"ip/{value}" if is_ip else f"domain/{value}"
     try:
         response = requests.get(
@@ -140,7 +170,11 @@ def handler(q=False):
     except requests.RequestException as e:
         return {"error": f"Error while querying rdap.org: {e}"}
 
-    if response.status_code == 404:
+    # Not every registry answers 404 for an unknown name (PIR answers 400). Do
+    # not call it unregistered: a TLD without an RDAP service also answers 404.
+    if response.status_code == 404 or (response.status_code == 400 and not is_ip):
+        if host:
+            return {"error": f"No RDAP record found for {value} (the registered domain of {host})."}
         return {"error": f"No RDAP record found for {value}."}
     if response.status_code != 200:
         return {"error": f"Error while querying rdap.org - {response.status_code}: {response.reason}"}
@@ -155,7 +189,7 @@ def handler(q=False):
     input_attribute.from_dict(**attribute)
     misp_event.add_attribute(**input_attribute)
 
-    whois = _parse_rdap(rdap, value, is_ip)
+    whois = _parse_rdap(rdap, value, is_ip, host)
     whois.add_reference(input_attribute.uuid, "related-to")
     misp_event.add_object(whois)
 
