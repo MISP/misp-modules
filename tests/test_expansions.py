@@ -294,14 +294,25 @@ class TestExpansions(unittest.TestCase):
             "config": {},
         }
         response = self.misp_modules_post(query)
-        try:
+        data = response.json()
+        if "error" in data:
+            # Public CI resolvers can also receive a refused query or an
+            # unmapped DNSBL response code. Both are explicit module errors.
+            self.assertNotIn("results", data)
+            self.assertTrue(
+                data["error"].startswith(
+                    (
+                        "totalmateria.net is not listed on dbl.spamhaus.org.",
+                        "Not able to reach dbl.spamhaus.org:",
+                        "dbl.spamhaus.org answered with the unknown return code ",
+                        "dbl.spamhaus.org refused the query:",
+                    )
+                ),
+                data,
+            )
+        else:
             self.assertEqual(self.get_first_object_type(response), "reputation")
             self.assertIn("dbl.spamhaus.org", self.get_object_attribute_values(response, "list-name"))
-        except Exception:
-            self.assertTrue(
-                self.get_errors(response).startswith("totalmateria.net is not listed on")
-                or self.get_errors(response).startswith("Not able to reach dbl.spamhaus.org")
-            )
 
     def test_dns(self):
         query = {

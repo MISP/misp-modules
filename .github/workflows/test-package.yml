@@ -71,12 +71,12 @@ jobs:
       - name: Run server in background
         run: poetry run misp-modules -l 127.0.0.1 2>error.log &
 
-      - name: Sleep for 10 seconds
-        run: sleep 10s
-        shell: bash
-
-      - name: Check if server is running
-        run: curl -sS localhost:6666/healthcheck
+      - name: Wait for server readiness
+        run: >-
+          curl --fail --silent --show-error
+          --retry 30 --retry-connrefused --retry-delay 2 --retry-max-time 60
+          --connect-timeout 2 --max-time 5
+          http://127.0.0.1:6666/healthcheck
 
       - name: Test package
         run: poetry run pytest
