@@ -15,6 +15,7 @@ from pymisp import MISPAttribute, MISPEvent, MISPObject
 from pymisp.exceptions import PyMISPError
 
 from . import check_input_attribute, standard_error_message
+from ._pgp_keyserver.signatures import extract_signatures
 
 DEFAULT_KEYSERVER = "https://pgp.circl.lu"
 INDEX_LIMIT = 1024 * 1024
@@ -24,13 +25,18 @@ mispattributes = {
     "format": "misp_standard",
 }
 moduleinfo = {
-    "version": "1.0",
+    "version": "1.1",
     "author": "MISP Project",
     "description": "Pivot on OpenPGP key IDs, fingerprints, email addresses and UIDs using an HKP keyserver.",
     "module-type": ["expansion", "hover"],
     "name": "PGP Keyserver",
     "logo": "",
-    "requirements": ["requests", "PyMISP", "Install the pgp-key and pgp-message object templates in MISP"],
+    "requirements": [
+        "requests",
+        "PyMISP",
+        "Install the pgp-key and pgp-message object templates in MISP",
+        "Install pgp-sign in MISP when extract_signatures is enabled",
+    ],
     "features": (
         "Query the machine-readable HKP index, using https://pgp.circl.lu by default. Return one pgp-key object"
         " per result and a pgp-meta object referencing it with extracted-from. Preserve complete UIDs, names,"
@@ -40,15 +46,18 @@ moduleinfo = {
         " not validated. pgp-message is provided for message artifacts linked to pgp-meta; this module does not"
         " retrieve or decrypt messages. Configuration: keyserver, timeout (default 10 seconds per HTTP request),"
         " max_results (default 10, maximum 100). New object templates are bundled for older PyMISP versions."
+        " Enable extract_signatures to return pgp-sign objects with the original signature packets, issuer IDs"
+        " and fingerprints, signature metadata and UID/subkey context. max_signatures limits signature objects"
+        " across the lookup (default 100, maximum 1000). Issuer claims are preserved without verification."
     ),
     "references": ["https://pgp.circl.lu", "https://www.ietf.org/archive/id/draft-shaw-openpgp-hkp-00.html"],
     "input": "A text attribute containing a key ID, fingerprint or UID, or an email attribute.",
-    "output": "Linked pgp-key and pgp-meta objects, plus the original attribute.",
+    "output": "Linked pgp-key and pgp-meta objects, optional pgp-sign objects, and the original attribute.",
 }
-moduleconfig = ["keyserver", "timeout", "max_results"]
+moduleconfig = ["keyserver", "timeout", "max_results", "extract_signatures", "max_signatures"]
 
 
-@lru_cache(maxsize=2)
+@lru_cache(maxsize=3)
 def _template(name):
     return json.loads(resources.files("misp_modules").joinpath("data", name, "definition.json").read_text())
 
@@ -93,7 +102,19 @@ def _configuration(config):
     maximum = str(config.get("max_results") if config.get("max_results") not in (None, "") else 10)
     if not maximum.isascii() or not maximum.isdigit() or not 1 <= int(maximum) <= 100:
         raise ValueError("max_results must be an integer between 1 and 100.")
-    return server.rstrip("/") + "/pks/lookup", timeout, int(maximum)
+    signatures = config.get("extract_signatures")
+    if signatures is None:
+        signatures = False
+    if isinstance(signatures, (bool, int, str)):
+        signatures = str(signatures).strip().lower()
+    if signatures not in ("", "false", "0", "no", "off", "true", "1", "yes", "on"):
+        raise ValueError("extract_signatures must be a boolean (true/false).")
+    signatures = signatures in ("true", "1", "yes", "on")
+    signature_limit = config.get("max_signatures")
+    signature_limit = str(100 if signature_limit in (None, "") else signature_limit)
+    if not signature_limit.isascii() or not signature_limit.isdigit() or not 1 <= int(signature_limit) <= 1000:
+        raise ValueError("max_signatures must be an integer between 1 and 1000.")
+    return server.rstrip("/") + "/pks/lookup", timeout, int(maximum), signatures, int(signature_limit)
 
 
 def _get(session, endpoint, params, timeout, limit):
@@ -195,9 +216,40 @@ def _public_key(text):
     return text
 
 
-def _objects(record, source_uuid, endpoint, session, timeout):
+def _signature_object(record, key_uuid):
+    signature = MISPObject("pgp-sign", strict=True, misp_objects_template_custom=_template("pgp-sign"))
+    for relation in (
+        "signature",
+        "sha256",
+        "signature-version",
+        "signature-type",
+        "public-key-algorithm",
+        "hash-algorithm",
+        "key-fingerprint",
+        "subkey-fingerprint",
+        "uid",
+        "uid-sha256",
+        "user-attribute-sha256",
+    ):
+        if relation in record:
+            signature.add_attribute(relation, record[relation], to_ids=False)
+    for relation in ("issuer-key-id", "issuer-fingerprint", "creation-time"):
+        values = {}
+        for value, comment in record[relation]:
+            values.setdefault(value, {})[comment] = None
+        for value, comments in values.items():
+            signature.add_attribute(relation, value, comment=" ".join(comments), to_ids=False)
+    signature.comment = "Signature and issuer claims have not been cryptographically verified."
+    if record.get("warning"):
+        signature.comment += " " + record["warning"]
+    signature.add_reference(key_uuid, "extracted-from")
+    return signature
+
+
+def _objects(record, source_uuid, endpoint, session, timeout, signature_limit=None):
     key = MISPObject("pgp-key", strict=True, misp_objects_template_custom=_template("pgp-key"))
     meta = MISPObject("pgp-meta", strict=True)
+    signatures = []
     for relation in ("key-id", "fingerprint", "algorithm", "key-length", "creation-time", "expiration-time", "flags"):
         if record[relation]:
             key.add_attribute(relation, record[relation], to_ids=False)
@@ -225,11 +277,25 @@ def _objects(record, source_uuid, endpoint, session, timeout):
             key.add_attribute("key", armored, to_ids=False)
         except (requests.RequestException, ValueError) as error:
             key.comment = f"Public-key retrieval failed ({type(error).__name__}); HKP index metadata retained."
+        else:
+            if signature_limit is not None:
+                if not signature_limit:
+                    key.comment = "Signature extraction skipped: the lookup's max_signatures limit was reached."
+                else:
+                    try:
+                        packets, truncated = extract_signatures(armored, record["fingerprint"], signature_limit)
+                        signatures = [_signature_object(packet, key.uuid) for packet in packets]
+                        if truncated:
+                            key.comment = (
+                                "Signature extraction limited by max_signatures; additional packets were omitted."
+                            )
+                    except ValueError as error:
+                        key.comment = f"Signature extraction failed: {error} Public key and HKP metadata retained."
     else:
         key.comment = "No full fingerprint in the HKP index; public-key retrieval skipped to avoid an ambiguous key ID."
     key.add_reference(source_uuid, "related-to")
     meta.add_reference(key.uuid, "extracted-from")
-    return key, meta
+    return key, meta, signatures
 
 
 def handler(q=False):
@@ -250,7 +316,9 @@ def handler(q=False):
         query = _query(attribute["value"])
         UUID(str(attribute["uuid"]))
         config = request.get("config")
-        endpoint, timeout, maximum = _configuration({} if config is None else config)
+        endpoint, timeout, maximum, signatures_enabled, signature_limit = _configuration(
+            {} if config is None else config
+        )
         source = MISPAttribute()
         source.from_dict(**attribute)
     except (ValueError, TypeError, PyMISPError) as error:
@@ -268,7 +336,15 @@ def handler(q=False):
             if not records:
                 return {"error": "No matching public keys found."}
             for record in records[:maximum]:
-                key, meta = _objects(record, source.uuid, endpoint, session, timeout)
+                key, meta, signatures = _objects(
+                    record,
+                    source.uuid,
+                    endpoint,
+                    session,
+                    timeout,
+                    signature_limit if signatures_enabled else None,
+                )
+                signature_limit -= len(signatures)
                 if reported > min(maximum, len(records)):
                     notice = (
                         f"Search limited to {min(maximum, len(records))} of {reported} reported keys; narrow the query."
@@ -276,6 +352,8 @@ def handler(q=False):
                     key.comment = f"{key.comment} {notice}" if key.get("comment") else notice
                 event.add_object(key)
                 event.add_object(meta)
+                for signature in signatures:
+                    event.add_object(signature)
     except requests.Timeout:
         return {"error": "The PGP keyserver lookup timed out."}
     except requests.RequestException as error:

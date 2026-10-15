@@ -377,7 +377,7 @@ def test_stream_size_limit_is_enforced_and_response_is_closed():
     response.__exit__.assert_called_once()
 
 
-@pytest.mark.parametrize("name", ["pgp-key", "pgp-message"])
+@pytest.mark.parametrize("name", ["pgp-key", "pgp-message", "pgp-sign"])
 def test_templates_validate_and_match_the_misp_objects_submodule(name):
     template = pgp._template(name)
     root = Path(__file__).resolve().parents[1]
@@ -390,6 +390,8 @@ def test_templates_validate_and_match_the_misp_objects_submodule(name):
     if name == "pgp-key":
         obj.add_attribute("key-id", FINGERPRINT[-16:])
         obj.add_attribute("key", ARMOR)
+    elif name == "pgp-sign":
+        obj.add_attribute("signature", "-----BEGIN PGP SIGNATURE-----\n\nExample\n-----END PGP SIGNATURE-----")
     else:
         obj.add_attribute("message", "-----BEGIN PGP MESSAGE-----\nExample artifact\n-----END PGP MESSAGE-----")
         meta = MISPObject("pgp-meta", strict=True)
@@ -410,4 +412,4 @@ def test_message_template_accepts_binary_artifact_as_attachment():
 
 def test_module_advertises_configuration_and_standard_output():
     assert pgp.introspection()["format"] == "misp_standard"
-    assert pgp.version()["config"] == ["keyserver", "timeout", "max_results"]
+    assert pgp.version()["config"] == ["keyserver", "timeout", "max_results", "extract_signatures", "max_signatures"]
