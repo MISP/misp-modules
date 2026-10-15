@@ -114,6 +114,7 @@ For more information: [Extending MISP with Python modules](https://www.misp-proj
 * [Socialscan Lookup](https://misp.github.io/misp-modules/expansion/#socialscan-lookup) - A hover module to get information on the availability of an email address or username on some online platforms.
 * [SophosLabs Intelix Lookup](https://misp.github.io/misp-modules/expansion/#sophoslabs-intelix-lookup) - An expansion module to query the Sophoslabs intelix API to get additional information about an ip address, url, domain or sha256 attribute.
 * [URL Archiver](https://misp.github.io/misp-modules/expansion/#url-archiver) - Module to cache web pages of analysis reports, OSINT sources. The module returns a link of the cached page.
+* [SpamCop Lookup](https://misp.github.io/misp-modules/expansion/#spamcop-lookup) - Check an IPv4 address against the SpamCop Blocking List (SCBL).
 * [Stairwell Lookup](https://misp.github.io/misp-modules/expansion/#stairwell-lookup) - Module to query the Stairwell API to get additional information about the input hash attribute
 * [STIX2 Pattern Syntax Validator](https://misp.github.io/misp-modules/expansion/#stix2-pattern-syntax-validator) - An expansion hover module to perform a syntax check on stix2 patterns.
 * [ThreatCrowd Lookup](https://misp.github.io/misp-modules/expansion/#threatcrowd-lookup) - Module to get information from ThreatCrowd.

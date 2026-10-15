@@ -2845,6 +2845,32 @@ Module to cache web pages of analysis reports, OSINT sources. The module returns
 
 -----
 
+#### [SpamCop Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/spamcop.py)
+
+Check an IPv4 address against the SpamCop Blocking List (SCBL).
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/spamcop.py)]
+
+- **features**:
+>Queries bl.spamcop.net using the reversed IPv4 address and accepts the documented 127.0.0.2 A record as a listing. A positive result produces a suspicious reputation object linked to the input attribute, with a SpamCop lookup URL. An address that is not listed produces an informational error, not a benign verdict. DNS failures and unexpected response codes are reported separately. No API key is required. The optional timeout setting is a positive number of seconds (default: 5). IPv6 addresses are not supported.
+
+- **config**:
+>timeout
+
+- **input**:
+>An ip-src or ip-dst attribute containing an IPv4 address.
+
+- **output**:
+>A reputation object describing a SpamCop listing and referencing the original IP attribute.
+
+- **references**:
+> - https://www.spamcop.net/fom-serve/cache/351.html
+> - https://www.spamcop.net/fom-serve/cache/291.html
+
+- **requirements**:
+>dnspython
+
+-----
+
 #### [Stairwell Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/stairwell.py)
 
 <img src=../logos/stairwell.png height=60>
