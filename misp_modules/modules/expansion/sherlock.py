@@ -62,7 +62,7 @@ def _username(attribute):
     if not isinstance(value, str) or not value.strip():
         raise ValueError("A non-empty string value is required.")
     value = value.strip()
-    if attribute["type"] in _EMAIL_TYPES or (attribute["type"] == "text" and "@" in value[1:]):
+    if attribute["type"] in _EMAIL_TYPES:
         parts = value.split("@")
         if len(parts) != 2 or not all(parts) or any(char.isspace() for char in value):
             raise ValueError("A valid email address is required to derive a candidate username.")

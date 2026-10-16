@@ -96,9 +96,15 @@ def test_supported_attribute_types(attribute_type):
 
 @pytest.mark.parametrize(
     "value, candidate",
-    [(" @alice ", "alice"), ("alice@example.org", "alice"), ("Alice Smith", "Alice Smith"), ("élise", "élise")],
+    [
+        (" @alice ", "alice"),
+        ("alice@example.org", "alice@example.org"),
+        ("@alice@example.org", "alice@example.org"),
+        ("Alice Smith", "Alice Smith"),
+        ("élise", "élise"),
+    ],
 )
-def test_text_is_a_literal_candidate_or_email_local_part(value, candidate):
+def test_text_is_a_literal_username(value, candidate):
     result, run = _run(_query(value, "text"))
     assert run.call_args.args[0][-1] == candidate
     assert _values(result["results"]["Object"][0])["username"] == candidate
