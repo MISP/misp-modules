@@ -69,6 +69,9 @@ def handler(q=False):
             # Get number of pages
             pages = len(pdf.sequence)
             log.debug("PDF with {} page(s) detected".format(pages))
+            if pages == 0:
+                misperrors["error"] = "PDF has no pages to process."
+                return misperrors
             # Create new image object where the height will be the number of pages. With huge PDFs this will overflow, break, consume silly memory etc…
             img = WImage(width=pdf.width, height=pdf.height * pages)
             # Cycle through pages and stitch it together to one big file
