@@ -242,7 +242,8 @@ class CSIntelAPI:
         if r.get("status_code") != 200:
             raise Exception("HTTP Error: " + str(r.get("status_code")))
 
-        if len(r.get("body").get("errors")):
-            raise Exception("API Error: " + " | ".join(r.get("body").get("errors")))
+        errors = (r.get("body") or {}).get("errors") or []
+        if errors:
+            raise Exception("API Error: " + " | ".join(errors))
 
         return r.get("body", {})
