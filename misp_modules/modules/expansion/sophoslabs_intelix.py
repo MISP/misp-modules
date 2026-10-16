@@ -173,7 +173,7 @@ def handler(q=False):
             " https://aws.amazon.com/marketplace/pp/B07SLZPMCS."
         )
         return misperrors
-    if j["config"]["region"] not in ["us", "de", "au"]:
+    if j["config"].get("region") not in ["us", "de", "au"]:
         j["config"]["region"] = "de"
     to_check = (("type", "value"), ("type", "value1"))
     if not j.get("attribute") or not any(
