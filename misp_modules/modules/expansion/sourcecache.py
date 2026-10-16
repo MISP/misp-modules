@@ -1,6 +1,8 @@
 import base64
+import ipaddress
 import json
 import os
+import socket
 from datetime import datetime, timezone
 from io import BytesIO
 from urllib.parse import urlparse
@@ -40,6 +42,24 @@ def _filename(url):
     return os.path.basename(parsed.path) or parsed.hostname or "capture"
 
 
+def is_safe_url(url):
+    """Whether the URL may be fetched: an http or https URL whose host resolves
+    only to globally routable addresses, so that enriching an attribute cannot
+    make the server request loopback, private or link-local targets such as
+    cloud metadata endpoints."""
+    parsed = urlparse(url)
+    if parsed.scheme not in ("http", "https") or not parsed.hostname:
+        return False
+    try:
+        resolved = socket.getaddrinfo(parsed.hostname, None)
+    except (socket.gaierror, UnicodeError):
+        return False
+    for info in resolved:
+        if not ipaddress.ip_address(info[4][0]).is_global:
+            return False
+    return True
+
+
 def handler(q=False):
     if q is False:
         return False
@@ -53,6 +73,8 @@ def handler(q=False):
         misperrors["error"] = "Link is missing"
         return misperrors
     tocache = attribute["value"]
+    if not is_safe_url(tocache):
+        return {"error": f"Blocked URL {tocache}: only http and https URLs of public addresses are cached."}
 
     try:
         data = __archiveLink(archive_path, tocache)
