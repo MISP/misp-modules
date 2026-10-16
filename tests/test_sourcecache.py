@@ -98,6 +98,13 @@ def test_non_http_scheme_is_not_fetched():
     mock_archive.assert_not_called()
 
 
+def test_backslash_userinfo_is_not_fetched():
+    attribute = {"type": "url", "value": "http://127.0.0.1\\@www.misp-project.org/", "uuid": UUID}
+    result, mock_archive = _run(attribute)
+    assert "error" in result
+    mock_archive.assert_not_called()
+
+
 def test_wrong_attribute_type_returns_error():
     attribute = {"type": "md5", "value": "d41d8cd98f00b204e9800998ecf8427e", "uuid": UUID}
     result, _ = _run(attribute)

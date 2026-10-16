@@ -46,7 +46,14 @@ def is_safe_url(url):
     """Whether the URL may be fetched: an http or https URL whose host resolves
     only to globally routable addresses, so that enriching an attribute cannot
     make the server request loopback, private or link-local targets such as
-    cloud metadata endpoints."""
+    cloud metadata endpoints.
+
+    A backslash, whitespace or control character is refused outright: urlparse
+    and the requests stack behind url_archiver split such a URL differently, so
+    "http://127.0.0.1\\@example.com/" would be checked as example.com and
+    fetched from 127.0.0.1."""
+    if "\\" in url or any(ord(char) <= 32 or ord(char) == 127 for char in url):
+        return False
     parsed = urlparse(url)
     if parsed.scheme not in ("http", "https") or not parsed.hostname:
         return False
