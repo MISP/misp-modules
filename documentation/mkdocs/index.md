@@ -107,6 +107,7 @@ For more information: [Extending MISP with Python modules](https://www.misp-proj
 * [ReversingLabs Enrichment](https://misp.github.io/misp-modules/expansion/#reversinglabs-enrichment) - Module to enrich file hashes, domains, IPs and URLs with ReversingLabs Spectra Analyze threat intelligence.
 * [Reverse DNS](https://misp.github.io/misp-modules/expansion/#reverse-dns) - Simple Reverse DNS expansion service to resolve reverse DNS from MISP attributes.
 * [SecurityTrails Lookup](https://misp.github.io/misp-modules/expansion/#securitytrails-lookup) - An expansion modules for SecurityTrails.
+* [Sherlock Lookup](https://misp.github.io/misp-modules/expansion/#sherlock-lookup) - Find social media accounts by username with Sherlock.
 * [Shodan Lookup](https://misp.github.io/misp-modules/expansion/#shodan-lookup) - Module to query on Shodan.
 * [Sigma Rule Converter](https://misp.github.io/misp-modules/expansion/#sigma-rule-converter) - An expansion hover module to display the result of sigma queries.
 * [Sigma Syntax Validator](https://misp.github.io/misp-modules/expansion/#sigma-syntax-validator) - An expansion hover module to perform a syntax check on sigma rules.
