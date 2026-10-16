@@ -1,0 +1,155 @@
+{
+  "version": "1.0",
+  "author": "MISP Project",
+  "name": "Lookyloo lookup",
+  "description": "Find Lookyloo captures containing an IP, hostname, URL, resource hash or favicon hash.",
+  "module-type": [
+    "expansion"
+  ],
+  "requirements": [
+    "requests",
+    "A Lookyloo instance; API key optional",
+    "lookyloo-capture object template (bundled)"
+  ],
+  "references": [
+    "https://lookyloo.circl.lu/doc/"
+  ],
+  "features": [
+    "Pivot on existing captures using ip_info, hostname_info, url_info, hash_info and favicon_info. Optionally enrich matching captures. All new attributes use to_ids=false.",
+    "All new object attributes and contact/cookie attributes use to_ids=false. Input UUID, tags, comment and detection flag are preserved.",
+    "Capture objects link to the queried attribute. A capture contains its observed URLs, files and cookies. Files reference the URLs that returned their bytes. IP and hostname lists do not imply a DNS mapping.",
+    "Responses are limited to 5 MiB per endpoint. Optional endpoint errors, missing data and resource limits are recorded on the capture while retaining successful enrichment. Failure of the primary lookup or capture info returns an error.",
+    "These modules use existing captures only. They do not submit URLs, upload captures, trigger third-party modules, push events, send reports, or call administrative endpoints.",
+    "The lookyloo-capture template is bundled in misp_modules/data/lookyloo-capture. Install the matching template on the MISP server to render and edit its fields."
+  ],
+  "input": {
+    "format": "misp_standard",
+    "types": [
+      "ip-src",
+      "ip-dst",
+      "domain|ip",
+      "domain",
+      "hostname",
+      "url",
+      "sha512",
+      "filename|sha512"
+    ],
+    "required_attribute_fields": [
+      "type",
+      "value",
+      "uuid"
+    ]
+  },
+  "output": "Related lookyloo-capture objects and observed URL/file objects, with optional capture enrichment.",
+  "module": "lookyloo",
+  "config": {
+    "url": {
+      "default": "https://lookyloo.circl.lu",
+      "description": "HTTP(S) instance base URL, optionally with a deployment path. No credentials, query or fragment."
+    },
+    "apikey": {
+      "default": "",
+      "description": "Optional Lookyloo API key, sent in Authorization. TLS verification remains enabled; redirects are rejected."
+    },
+    "timeout": {
+      "default": 30,
+      "range": "1..120 seconds per request"
+    },
+    "max_items": {
+      "default": 100,
+      "range": "1..1000 per endpoint collection",
+      "description": "Truncation is noted on the capture; raw JSON retains the original response."
+    },
+    "include_raw": {
+      "default": true,
+      "description": "Preserve fetched JSON as named raw-data attachments. Stats, module responses, comparables and extended/export data are available in these attachments. Disable to omit raw responses, including those fields."
+    },
+    "include_cookies": {
+      "default": false,
+      "description": "Fetch the cookie jar and map to existing cookie objects. Empty-value cookies use a cookie attribute, since PyMISP omits empty object fields; domain, expiry and SameSite context is retained."
+    },
+    "include_favicons": {
+      "default": false,
+      "description": "Fetch base64 favicons, verify SHA-512, return existing file objects with hash and attachment."
+    },
+    "include_extended": {
+      "default": false,
+      "description": "Preserve storage_state, console_messages, ai_export and tree_dump JSON. Requires include_raw=true to retain these payloads."
+    },
+    "include_misp_export": {
+      "default": false,
+      "description": "Preserve the native misp_export event list as an attachment, without importing remote detection flags or merging event context. Requires include_raw=true."
+    },
+    "include_contacts": {
+      "default": false,
+      "description": "Query takedown with filter=true and return observed contact email attributes. Does not send a report, email or takedown request."
+    },
+    "limit": {
+      "default": 20,
+      "range": "1..100 per search"
+    },
+    "offset": {
+      "default": 0,
+      "range": "0..1000000",
+      "description": "Request one explicit result page. Metadata and server warnings are retained in raw-data per capture. No matches return the original attribute only."
+    },
+    "hash_lookup": {
+      "default": "resource",
+      "choices": [
+        "resource",
+        "favicon",
+        "both"
+      ],
+      "description": "SHA-512 only; a favicon SHA-512 is distinct from favicon-mmh3. Both searches share limit/offset and merge duplicate captures."
+    },
+    "enrich_captures": {
+      "default": false,
+      "description": "Retrieve capture details for the first max_captures matches."
+    },
+    "max_captures": {
+      "default": 5,
+      "range": "1..10",
+      "description": "Upper bound on detail fetches; further matches are returned with a note."
+    }
+  },
+  "endpoints": {
+    "lookup": [
+      "POST /json/ip_info",
+      "POST /json/hostname_info",
+      "POST /json/url_info",
+      "POST /json/hash_info",
+      "POST /json/favicon_info"
+    ],
+    "details": "Optional via enrich_captures; same endpoints as lookyloo_capture."
+  },
+  "examples": [
+    {
+      "module": "lookyloo",
+      "attribute": {
+        "type": "ip-dst",
+        "value": "1.1.1.1",
+        "uuid": "82383d84-3016-4d1c-902f-3de0533bfcec"
+      },
+      "config": {
+        "limit": 20,
+        "enrich_captures": true
+      }
+    },
+    {
+      "module": "lookyloo",
+      "attribute": {
+        "type": "sha512",
+        "value": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "uuid": "82383d84-3016-4d1c-902f-3de0533bfcec"
+      },
+      "config": {
+        "hash_lookup": "both"
+      }
+    }
+  ],
+  "limitations": [
+    "domain uses the hostname index and is an exact lookup, not a wildcard or subdomain search.",
+    "Hash and IP occurrence APIs return URL node UUID lists, not URL strings. These are retained in raw JSON; enable capture enrichment for resource URL details.",
+    "The resource body download GET /json/hash_info/<sha512> is not used. Lookups do not download resource bodies."
+  ]
+}
