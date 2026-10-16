@@ -9,7 +9,7 @@ import json
 import re
 import socket
 import ipaddress
-from urllib.parse import urlparse
+from urllib.parse import urljoin, urlparse
 
 # Third-party imports
 # pylint: disable=import-error
@@ -52,6 +52,7 @@ MODULE_CONFIG = []
 # --- SECURITY CONFIGURATION ---
 MAX_IMAGE_SIZE = 10 * 1024 * 1024  # 10 MB limit (Anti-DoS)
 TIMEOUT_SECONDS = 10
+MAX_REDIRECTS = 5
 
 
 def is_safe_url(url):
@@ -95,26 +96,39 @@ def fetch_url_image(target_url):
         headers = {'User-Agent': user_agent}
 
         # 2. Secure Download (Stream + Size Limit)
-        # pylint: disable=missing-timeout
-        with requests.get(
-            target_url,
-            headers=headers,
-            timeout=TIMEOUT_SECONDS,
-            stream=True
-        ) as response:  # nosec
-            response.raise_for_status()
+        # Redirects are followed manually so every hop passes the SSRF check
+        current_url = target_url
+        for _ in range(MAX_REDIRECTS + 1):
+            # pylint: disable=missing-timeout
+            with requests.get(
+                current_url,
+                headers=headers,
+                timeout=TIMEOUT_SECONDS,
+                stream=True,
+                allow_redirects=False
+            ) as response:  # nosec
+                if response.is_redirect and 'location' in response.headers:
+                    current_url = urljoin(current_url, response.headers['location'])
+                    is_safe, msg = is_safe_url(current_url)
+                    if not is_safe:
+                        return None, f"Security Block (SSRF Protection): {msg}"
+                    continue
 
-            if 'content-length' in response.headers:
-                if int(response.headers['content-length']) > MAX_IMAGE_SIZE:
-                    return None, 'Image too large (DoS protection).'
+                response.raise_for_status()
 
-            content = b""
-            for chunk in response.iter_content(chunk_size=8192):
-                content += chunk
-                if len(content) > MAX_IMAGE_SIZE:
-                    return None, 'Image too large (DoS protection) - Download aborted.'
+                if 'content-length' in response.headers:
+                    if int(response.headers['content-length']) > MAX_IMAGE_SIZE:
+                        return None, 'Image too large (DoS protection).'
 
-        return np.frombuffer(content, np.uint8), None
+                content = b""
+                for chunk in response.iter_content(chunk_size=8192):
+                    content += chunk
+                    if len(content) > MAX_IMAGE_SIZE:
+                        return None, 'Image too large (DoS protection) - Download aborted.'
+
+            return np.frombuffer(content, np.uint8), None
+
+        return None, 'Too many redirects.'
 
     except Exception as e:  # pylint: disable=broad-exception-caught
         return None, f"Fetch Error: {str(e)}"
