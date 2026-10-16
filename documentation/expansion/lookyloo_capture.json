@@ -1,0 +1,132 @@
+{
+  "version": "1.0",
+  "author": "MISP Project",
+  "name": "Lookyloo capture",
+  "description": "Enrich a Lookyloo capture link or UUID with observed resources and analysis context.",
+  "module-type": [
+    "expansion"
+  ],
+  "requirements": [
+    "requests",
+    "A Lookyloo instance; API key optional",
+    "lookyloo-capture object template (bundled)"
+  ],
+  "references": [
+    "https://lookyloo.circl.lu/doc/"
+  ],
+  "features": [
+    "Retrieve capture metadata, status, redirects, IPs, hostnames, URLs, SHA-512 hashes, statistics, cached module results and comparables. Optional cookies, favicons, extended JSON, MISP export and contact lookup. Links to screenshot and binary exports are returned.",
+    "All new object attributes and contact/cookie attributes use to_ids=false. Input UUID, tags, comment and detection flag are preserved.",
+    "Capture objects link to the queried attribute. A capture contains its observed URLs, files and cookies. Files reference the URLs that returned their bytes. IP and hostname lists do not imply a DNS mapping.",
+    "Responses are limited to 5 MiB per endpoint. Optional endpoint errors, missing data and resource limits are recorded on the capture while retaining successful enrichment. Failure of the primary lookup or capture info returns an error.",
+    "These modules use existing captures only. They do not submit URLs, upload captures, trigger third-party modules, push events, send reports, or call administrative endpoints.",
+    "The lookyloo-capture template is bundled in misp_modules/data/lookyloo-capture. Install the matching template on the MISP server to render and edit its fields."
+  ],
+  "input": {
+    "format": "misp_standard",
+    "types": [
+      "link",
+      "url",
+      "text"
+    ],
+    "required_attribute_fields": [
+      "type",
+      "value",
+      "uuid"
+    ]
+  },
+  "output": "lookyloo-capture, url, file, image and optional cookie objects and contact attributes.",
+  "module": "lookyloo_capture",
+  "config": {
+    "url": {
+      "default": "https://lookyloo.circl.lu",
+      "description": "HTTP(S) instance base URL, optionally with a deployment path. No credentials, query or fragment."
+    },
+    "apikey": {
+      "default": "",
+      "description": "Optional Lookyloo API key, sent in Authorization. TLS verification remains enabled; redirects are rejected."
+    },
+    "timeout": {
+      "default": 30,
+      "range": "1..120 seconds per request"
+    },
+    "max_items": {
+      "default": 100,
+      "range": "1..1000 per endpoint collection",
+      "description": "Truncation is noted on the capture; raw JSON retains the original response."
+    },
+    "include_raw": {
+      "default": true,
+      "description": "Preserve fetched JSON as named raw-data attachments. Stats, module responses, comparables and extended/export data are available in these attachments. Disable to omit raw responses, including those fields."
+    },
+    "include_cookies": {
+      "default": false,
+      "description": "Fetch the cookie jar and map to existing cookie objects. Empty-value cookies use a cookie attribute, since PyMISP omits empty object fields; domain, expiry and SameSite context is retained."
+    },
+    "include_favicons": {
+      "default": false,
+      "description": "Fetch base64 favicons, verify SHA-512, return existing file objects with hash and attachment."
+    },
+    "include_extended": {
+      "default": false,
+      "description": "Preserve storage_state, console_messages, ai_export and tree_dump JSON. Requires include_raw=true to retain these payloads."
+    },
+    "include_misp_export": {
+      "default": false,
+      "description": "Preserve the native misp_export event list as an attachment, without importing remote detection flags or merging event context. Requires include_raw=true."
+    },
+    "include_contacts": {
+      "default": false,
+      "description": "Query takedown with filter=true and return observed contact email attributes. Does not send a report, email or takedown request."
+    }
+  },
+  "endpoints": {
+    "default": [
+      "GET /json/<uuid>/info",
+      "GET /json/<uuid>/status",
+      "GET /json/<uuid>/redirects",
+      "GET /json/<uuid>/ips",
+      "GET /json/<uuid>/hostnames",
+      "GET /json/<uuid>/urls",
+      "GET /json/<uuid>/hashes",
+      "GET /json/<uuid>/stats",
+      "GET /json/<uuid>/modules",
+      "GET /json/<uuid>/comparables"
+    ],
+    "optional": [
+      "GET /json/<uuid>/cookies",
+      "GET /json/<uuid>/favicons",
+      "GET /json/<uuid>/storage_state",
+      "GET /json/<uuid>/console_messages",
+      "GET /json/<uuid>/ai_export",
+      "GET /json/<uuid>/tree_dump",
+      "GET /json/<uuid>/misp_export",
+      "POST /json/takedown"
+    ],
+    "links_only": [
+      "GET /bin/<uuid>/screenshot",
+      "GET /bin/<uuid>/export",
+      "GET /bin/<uuid>/data",
+      "GET /bin/<uuid>/video"
+    ]
+  },
+  "examples": [
+    {
+      "module": "lookyloo_capture",
+      "attribute": {
+        "type": "link",
+        "value": "https://lookyloo.circl.lu/tree/51de3086-4339-43fa-b290-f6d42d593619",
+        "uuid": "82383d84-3016-4d1c-902f-3de0533bfcec"
+      },
+      "config": {
+        "include_cookies": true,
+        "include_favicons": true
+      }
+    }
+  ],
+  "limitations": [
+    "Links must use the configured instance and /tree/<uuid> path. UUID text inputs are also accepted. Private capture seed URLs are not supported; configure an API key with access.",
+    "Binary artifact links are provided without downloading their contents or guaranteeing their availability. JSON MISP exports and cached module results remain attachments.",
+    "Global discovery/configuration APIs (recent_captures, categories, tlds, stats, devices, remote_lacuses, get_user_config, get_token), multi-capture comparison and advanced search are outside single-attribute enrichment."
+  ]
+}

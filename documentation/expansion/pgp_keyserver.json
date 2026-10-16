@@ -1,0 +1,161 @@
+{
+  "name": "PGP Keyserver",
+  "module": "pgp_keyserver",
+  "module-type": [
+    "expansion",
+    "hover"
+  ],
+  "description": "Search an HKP keyserver by key ID, full fingerprint, email address or arbitrary OpenPGP User ID text.",
+  "requirements": [
+    "requests and PyMISP (existing misp-modules dependencies)",
+    "Network access to the configured HKP keyserver",
+    "Install objects/pgp-key/definition.json and objects/pgp-message/definition.json from the misp-objects submodule on the MISP server, then refresh MISP object templates. The unchanged pgp-meta template must also be installed.",
+    "Install the pgp-sign object template in MISP before enabling extract_signatures. The packet metadata reader uses the Python standard library; no new dependency is required."
+  ],
+  "features": [
+    "Default keyserver: https://pgp.circl.lu. No API key is required.",
+    "Use a text attribute for a key ID, fingerprint, name or complete UID. Existing pgp-meta key-id, user-id-email and user-id-name attributes are text and can be expanded directly.",
+    "Accept email, email-src, email-dst, target-email and whois-registrant-email attributes as email searches.",
+    "Key IDs contain 8 or 16 hexadecimal digits. Fingerprints contain 40 (v4) or 64 (v5/v6) hexadecimal digits. An optional 0x prefix and spaces are accepted. Hexadecimal text of these lengths is interpreted as an identifier; other text is sent as a UID search.",
+    "Request op=index, options=mr and fingerprint=on. Accept HKP indexes with or without the optional info record, default an omitted version to 1, and derive the key count when absent. Empty trailing pub/uid fields and their colons may be omitted. Preserve all distinct returned primary keys, including keys with colliding short IDs. Store each full fingerprint in pgp-key.",
+    "Decode percent-escaped UIDs without turning literal plus signs into spaces. Retain complete UIDs on pgp-key and extracted names/emails on pgp-meta. UID comments preserve the original UID and any flags.",
+    "Retain public-key algorithm identifiers, key lengths, creation/expiration times and raw HKP flags. Missing times and flags do not establish validity. Revoked UIDs and keys remain available as investigative metadata.",
+    "Retrieve one ASCII-armored public-key block per result using its full fingerprint. An index lacking a full fingerprint produces metadata only. A failed download preserves that result's index metadata with an object comment.",
+    "Requests time out after the configured interval of inactivity. Each lookup can make 1 + max_results requests. Limit decoded index responses to 1 MiB and public-key responses to 5 MiB. Truncation is reported on returned key objects.",
+    "Bundle the pgp-key, pgp-message and pgp-sign object templates in misp_modules/data so PyMISP can produce valid objects before its bundled template set is updated.",
+    "Keyserver data and retrieved armor are not cryptographically validated. UIDs are claims and do not establish email ownership. Use full fingerprints for comparisons; short key IDs can collide.",
+    "UID text is submitted to the server unchanged; matching, tokenization and available indexes depend on the keyserver. During validation on 2026-10-15, CIRCL returned results for the example key ID and email but HTTP 404 for the name-only query CIRCL. A 404 is reported as no matching public keys.",
+    "Set extract_signatures=true to extract top-level signature packets from each downloaded public key. This is disabled by default and adds no HTTP requests or recursive issuer lookups.",
+    "Return one pgp-sign object per distinct signature packet and signed subject, linked to the source pgp-key with extracted-from. The signature attribute contains the original binary packet in ASCII armor; sha256 identifies the exact binary packet bytes including the original header.",
+    "Extract issuer-key-id and issuer-fingerprint claims with hashed/unhashed provenance in attribute comments. Derive a key ID from a fingerprint when available, retain conflicting claims, and leave issuer fields absent when the packet has none. These text attributes can be expanded with pgp_keyserver.",
+    "Preserve signature type, version, public-key/hash algorithm identifiers and creation time. Certification packets identify the preceding UID or user-attribute body hash; binding and subkey-revocation packets identify the preceding subkey fingerprint. These associations and issuer claims are unverified.",
+    "Read version 3, 4 and 6 signature metadata, including version 6 issuer fingerprint subpackets. Preserve unsupported signature versions as raw pgp-sign artifacts with a comment and no inferred issuer. Embedded sub-signatures remain inside the parent packet and do not produce separate objects.",
+    "Ignore unknown non-critical packet types 40 through 63 without changing the signed subject, as required by RFC 9580. Unknown critical packets still fail extraction. All packet framing and parsing limits remain enforced.",
+    "Before extracting signatures, compute the primary certificate fingerprint and compare it to the HKP index fingerprint. A mismatch, malformed packet or parsing limit retains the pgp-key and pgp-meta results with an explanatory key comment, without signature objects for that key. Fingerprint matching is not signature or ownership verification.",
+    "max_signatures bounds the total pgp-sign objects across a lookup (default 100, maximum 1000). Further keys are still returned, and comments indicate omitted signature extraction. Packet framing and signature subpacket loops are also bounded at 20000 packets per key and 10000 subpackets per hashed/unhashed area.",
+    "UID context includes a SHA-256 of the exact UID body. UID text over 4096 bytes is represented by its hash with a comment to avoid repeating large values. Signatures with more than 64 extracted metadata claims fail extraction for that key, retaining the source public key and index metadata."
+  ],
+  "references": [
+    "https://pgp.circl.lu",
+    "https://www.ietf.org/archive/id/draft-shaw-openpgp-hkp-00.html",
+    "https://www.rfc-editor.org/rfc/rfc9580.html"
+  ],
+  "input": {
+    "format": "misp_standard",
+    "required_attribute_fields": [
+      "type",
+      "value",
+      "uuid"
+    ],
+    "types": [
+      "text",
+      "email",
+      "email-src",
+      "email-dst",
+      "target-email",
+      "whois-registrant-email"
+    ]
+  },
+  "output": {
+    "format": "misp_standard",
+    "response": "results.Attribute contains the original attribute with its UUID, tags, comment and detection flag. results.Object contains a pgp-key and a pgp-meta object for each retained key. All new object attributes have to_ids=false. When extract_signatures is enabled, results.Object also contains pgp-sign objects for signature packets in the downloaded public keys.",
+    "relationships": [
+      "pgp-key --related-to--> input attribute",
+      "pgp-meta --extracted-from--> pgp-key",
+      "pgp-sign --extracted-from--> pgp-key (when extract_signatures is enabled)"
+    ],
+    "errors": "Invalid requests, unsupported inputs, malformed indexes, index HTTP errors/timeouts, oversized index responses and searches with no matches return a module error. Per-key download failures preserve metadata and a comment.",
+    "key_template": "misp_modules/data/pgp-key/definition.json is identical to misp-objects/objects/pgp-key/definition.json.",
+    "message_template": "misp_modules/data/pgp-message/definition.json is identical to misp-objects/objects/pgp-message/definition.json.",
+    "signature_template": "misp_modules/data/pgp-sign/definition.json is identical to misp-objects/objects/pgp-sign/definition.json."
+  },
+  "config": {
+    "keyserver": {
+      "required": false,
+      "default": "https://pgp.circl.lu",
+      "description": "HTTP(S) base URL, optionally including a path prefix. The module appends /pks/lookup. HTTPS certificate verification remains enabled."
+    },
+    "timeout": {
+      "required": false,
+      "default": 10,
+      "description": "Requests timeout in seconds, greater than zero and at most 60. Applies to each connection/read, not an overall expansion deadline."
+    },
+    "max_results": {
+      "required": false,
+      "default": 10,
+      "description": "Maximum keys returned and downloaded, an integer from 1 to 100. A comment reports limited results and advises narrowing the query."
+    },
+    "extract_signatures": {
+      "required": false,
+      "default": false,
+      "description": "Opt-in signature extraction from downloaded public-key certificates. Accepts booleans or case-insensitive true/false, 1/0, yes/no, on/off strings. Empty values disable extraction. This reads signature metadata and preserves packets; it does not cryptographically verify signatures."
+    },
+    "max_signatures": {
+      "required": false,
+      "default": 100,
+      "description": "Maximum pgp-sign objects across all keys in a lookup, an integer from 1 to 1000. Applied only when extract_signatures is enabled. Keys and metadata remain available when the signature budget is exhausted."
+    }
+  },
+  "objects": {
+    "pgp-key": "Stores an armored public key (key), full fingerprint, key-id, complete UIDs and keyserver provenance. A key-id is required so metadata can be retained when downloads fail.",
+    "pgp-meta": "Existing object, unchanged: key-id, user-id-name and user-id-email. One object per returned primary key preserves the association of its metadata.",
+    "pgp-message": "Stores an armored message, signed message or detached signature in message, or binary content in a message-file attachment. At least one of message/message-file is required. Optional fields include format, message-type, sha256, source and armor headers. Metadata extracted by another tool can use pgp-meta --extracted-from--> pgp-message. Observed recipient or issuer IDs do not prove decryption or signature verification. This keyserver module does not generate message objects, retrieve messages, decrypt or parse message packets.",
+    "message_example": "examples/pgp-message-event.json demonstrates the pgp-message/pgp-meta relationship using an illustrative armored artifact. It is not a cryptographically valid message.",
+    "pgp-sign": "Stores the original signature packet, binary-packet sha256, observed issuer IDs/fingerprints, metadata and the source certificate fingerprint. A signature is required; issuer fields may be absent or contain conflicting unverified claims. Signature packets reference their pgp-key source with extracted-from. No verified signed-by relationship or issuer ownership is asserted."
+  },
+  "examples": [
+    {
+      "description": "Look up the CIRCL public keys by email.",
+      "request": {
+        "module": "pgp_keyserver",
+        "attribute": {
+          "type": "email",
+          "value": "info@circl.lu",
+          "uuid": "5b582d80-7a7e-4b6a-9f22-77656e72bb3b"
+        },
+        "config": {}
+      }
+    },
+    {
+      "description": "Pivot from a pgp-meta key-id attribute.",
+      "request": {
+        "module": "pgp_keyserver",
+        "attribute": {
+          "type": "text",
+          "value": "70909C9C006694EB",
+          "uuid": "5b582d80-7a7e-4b6a-9f22-77656e72bb3b"
+        },
+        "config": {}
+      }
+    },
+    {
+      "description": "Submit UID text; matches depend on the selected keyserver's UID index.",
+      "request": {
+        "module": "pgp_keyserver",
+        "attribute": {
+          "type": "text",
+          "value": "CIRCL (cert)",
+          "uuid": "5b582d80-7a7e-4b6a-9f22-77656e72bb3b"
+        },
+        "config": {
+          "max_results": "5"
+        }
+      }
+    },
+    {
+      "description": "Extract signature packets and pivot on their issuer-key-id or issuer-fingerprint attributes.",
+      "request": {
+        "module": "pgp_keyserver",
+        "attribute": {
+          "type": "text",
+          "value": "70909C9C006694EB",
+          "uuid": "5b582d80-7a7e-4b6a-9f22-77656e72bb3b"
+        },
+        "config": {
+          "extract_signatures": "true",
+          "max_signatures": "100"
+        }
+      }
+    }
+  ]
+}

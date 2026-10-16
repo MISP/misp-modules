@@ -2,7 +2,7 @@ import json
 from urllib.parse import quote
 
 import requests
-from pymisp import MISPEvent
+from pymisp import MISPAttribute, MISPEvent, MISPObject
 
 from . import check_input_attribute, standard_error_message
 
@@ -10,11 +10,10 @@ misperrors = {"error": "Error"}
 
 mispattributes = {
     "input": ["email", "email-src", "email-dst", "target-email", "whois-registrant-email"],
-    "output": ["text"],
     "format": "misp_standard",
 }
 moduleinfo = {
-    "version": "1.0",
+    "version": "1.1",
     "author": "XposedOrNot",
     "description": "Query the XposedOrNot API to check whether an email address appears in known data breaches.",
     "module-type": ["expansion", "hover"],
@@ -23,15 +22,15 @@ moduleinfo = {
     "requirements": ["No API key required."],
     "features": (
         "The module takes an email address as input and queries the XposedOrNot API to determine whether the"
-        " address appears in known data breaches. Each exposure is returned as a text attribute holding the breach"
-        " name, with the breach year, number of exposed records, affected domain, exposed data classes and password"
-        " storage risk in its comment. Without any configuration the free keyless API is used (rate limits apply:"
+        " address appears in known data breaches. Each exposure is returned as a breach object holding the breach"
+        " name, date, number of exposed records, affected domain, exposed data classes and password storage risk."
+        " Without any configuration the free keyless API is used (rate limits apply:"
         " 2 requests/second, 25/hour per IP); an optional commercial api_key switches to the higher-limit Plus API."
         " The queried email address is sent over TLS to xposedornot.com; nothing else leaves the MISP instance."
     ),
     "references": ["https://xposedornot.com", "https://api.xposedornot.com/docs"],
     "input": "An email address.",
-    "output": "Breach exposure details for the email address, one text attribute per breach.",
+    "output": "One breach object per data breach the email address appears in.",
 }
 moduleconfig = ["api_key"]
 
@@ -83,73 +82,86 @@ def _risk_label(data):
     return None
 
 
-def _format_records(records):
-    try:
-        return f"{int(records):,} records"
-    except (TypeError, ValueError):
+def _breach_date(date):
+    """XposedOrNot dates a breach by year. Anchor a bare year to its first day,
+    which is the only way a datetime relation can carry it."""
+    date = str(date or "").strip()
+    if not date:
         return None
+    return f"{date}-01-01" if len(date) == 4 and date.isdigit() else date
 
 
-def _breach_comment(breach):
-    parts = []
-    if breach.get("date"):
-        parts.append(f"breached: {breach['date']}")
-    formatted_records = _format_records(breach.get("records"))
-    if formatted_records:
-        parts.append(formatted_records)
-    if breach.get("domain"):
-        parts.append(f"domain: {breach['domain']}")
-    if breach.get("data_classes"):
-        parts.append(f"exposed: {'; '.join(str(breach['data_classes']).split(';'))}")
-    if breach.get("password_risk"):
-        parts.append(f"password risk: {breach['password_risk']}")
-    if breach.get("verified"):
-        parts.append(f"verified: {breach['verified']}")
-    return " | ".join(parts)
+def _boolean(value):
+    """XposedOrNot spells its booleans several ways; anything it does not
+    recognise is left out rather than guessed at."""
+    if isinstance(value, bool):
+        return str(value)
+    normalised = str(value or "").strip().lower()
+    if normalised in ("yes", "true", "1"):
+        return "True"
+    if normalised in ("no", "false", "0"):
+        return "False"
+    return None
 
 
-def _summary_value(breaches, risk_label):
-    years = []
-    for breach in breaches:
-        try:
-            years.append(int(str(breach.get("date"))[:4]))
-        except (TypeError, ValueError):
-            continue
-    summary = f"Email exposed in {len(breaches)} data breach{'es' if len(breaches) != 1 else ''} (XposedOrNot)"
-    if years:
-        summary += f", first: {min(years)}, latest: {max(years)}"
-    if risk_label:
-        summary += f", risk: {risk_label}"
-    return summary
+def _data_classes(data_classes):
+    if not data_classes:
+        return []
+    if isinstance(data_classes, list):
+        values = data_classes
+    else:
+        values = str(data_classes).split(";")
+    return [value.strip() for value in values if value and value.strip()]
 
 
 class XposedOrNotParser:
-    def __init__(self):
+    """Every relation is typed explicitly: the breach and reputation templates
+    are new enough that pymisp does not bundle them yet."""
+
+    def __init__(self, attribute):
         self.misp_event = MISPEvent()
+        self.input_attribute = MISPAttribute()
+        self.input_attribute.from_dict(**attribute)
+        self.misp_event.add_attribute(**self.input_attribute)
+
+    def _add_if(self, misp_object, relation, value, attribute_type):
+        if value is None or value == "":
+            return
+        misp_object.add_attribute(relation, **{"type": attribute_type, "value": value})
 
     def parse(self, breaches, risk_label):
-        self.misp_event.add_attribute(
-            type="text",
-            value=_summary_value(breaches, risk_label),
-            comment="XposedOrNot breach exposure summary",
-            disable_correlation=True,
-        )
         for breach in breaches:
             if not breach.get("name"):
                 continue
-            self.misp_event.add_attribute(
-                type="text",
-                value=breach["name"],
-                comment=_breach_comment(breach),
-                disable_correlation=True,
-            )
+            misp_object = MISPObject("breach")
+            misp_object.add_attribute("name", **{"type": "text", "value": breach["name"]})
+            misp_object.add_attribute("source", **{"type": "text", "value": "XposedOrNot"})
+            self._add_if(misp_object, "breach-date", _breach_date(breach.get("date")), "datetime")
+            self._add_if(misp_object, "pwn-count", breach.get("records"), "counter")
+            self._add_if(misp_object, "domain", breach.get("domain"), "domain")
+            self._add_if(misp_object, "verified", _boolean(breach.get("verified")), "boolean")
+            for data_class in _data_classes(breach.get("data_classes")):
+                misp_object.add_attribute("data-classes", **{"type": "text", "value": data_class})
+            # password_risk is the one normalised field the breach template has
+            # no relation of its own for.
+            if breach.get("password_risk"):
+                self._add_if(misp_object, "description", f"password storage risk: {breach['password_risk']}", "text")
+            misp_object.add_reference(self.input_attribute.uuid, "related-to")
+            self.misp_event.add_object(misp_object)
+
+        if risk_label:
+            # A verdict on the address itself rather than on any one breach.
+            reputation = MISPObject("reputation")
+            reputation.add_attribute("source", **{"type": "text", "value": "XposedOrNot"})
+            reputation.add_attribute("classification", **{"type": "text", "value": risk_label})
+            reputation.add_reference(self.input_attribute.uuid, "related-to")
+            self.misp_event.add_object(reputation)
 
     def get_results(self):
         event = json.loads(self.misp_event.to_json())
-        results = {key: event[key] for key in ("Attribute",) if event.get(key)}
-        if not results:
+        if not event.get("Object"):
             return {"error": "No breach found on XposedOrNot for this email address."}
-        return {"results": results}
+        return {"results": {key: event[key] for key in ("Attribute", "Object") if event.get(key)}}
 
 
 def handler(q=False):
@@ -202,7 +214,7 @@ def handler(q=False):
     breaches = _normalise_plus_breaches(data) if api_key else _normalise_free_breaches(data)
     if not breaches:
         return {"error": "No breach found on XposedOrNot for this email address."}
-    parser = XposedOrNotParser()
+    parser = XposedOrNotParser(attribute)
     parser.parse(breaches, None if api_key else _risk_label(data))
     return parser.get_results()
 

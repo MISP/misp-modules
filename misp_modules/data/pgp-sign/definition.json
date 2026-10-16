@@ -1,0 +1,113 @@
+{
+  "attributes": {
+    "creation-time": {
+      "description": "Signature creation time observed in a version 3 field or hashed signature subpacket; not cryptographically verified.",
+      "disable_correlation": true,
+      "misp-attribute": "datetime",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 0
+    },
+    "hash-algorithm": {
+      "description": "OpenPGP hash algorithm identifier from the signature packet.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 0
+    },
+    "issuer-fingerprint": {
+      "description": "Claimed issuer fingerprint in uppercase hexadecimal. Comments identify hashed/unhashed provenance. This is not proof of the issuer's identity.",
+      "disable_correlation": false,
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "issuer-key-id": {
+      "description": "Claimed issuer key ID in uppercase hexadecimal, observed directly or derived from an issuer fingerprint. Conflicting claims may be retained. Text attributes can be expanded with pgp_keyserver.",
+      "disable_correlation": false,
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "key-fingerprint": {
+      "description": "Fingerprint of the primary public-key certificate containing this signature, distinct from the claimed issuer fingerprint.",
+      "disable_correlation": false,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "public-key-algorithm": {
+      "description": "OpenPGP public-key algorithm identifier from the signature packet.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 0
+    },
+    "sha256": {
+      "description": "SHA-256 of the exact binary signature packet, including its original packet header.",
+      "disable_correlation": false,
+      "misp-attribute": "sha256",
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "signature": {
+      "description": "ASCII-armored original OpenPGP signature packet. Certification and binding signatures require the source key/UID/subkey for verification.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "signature-type": {
+      "description": "OpenPGP signature type as hexadecimal, for example 0x13 (positive UID certification) or 0x18 (subkey binding).",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 0
+    },
+    "signature-version": {
+      "description": "Version of the OpenPGP signature packet.",
+      "disable_correlation": true,
+      "misp-attribute": "counter",
+      "to_ids": false,
+      "ui-priority": 0
+    },
+    "subkey-fingerprint": {
+      "description": "Fingerprint of the preceding public subkey for binding or subkey-revocation signature packets.",
+      "disable_correlation": false,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "uid": {
+      "description": "User ID preceding a certification or certification-revocation signature. The packet relationship is observed, not verified.",
+      "disable_correlation": false,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "uid-sha256": {
+      "description": "SHA-256 of the exact User ID packet body preceding a certification signature. This identifies the original bytes even when UID text is omitted or displayed with UTF-8 replacement characters.",
+      "disable_correlation": false,
+      "misp-attribute": "sha256",
+      "to_ids": false,
+      "ui-priority": 0
+    },
+    "user-attribute-sha256": {
+      "description": "SHA-256 of the User Attribute packet body preceding a certification signature, for example an image attribute.",
+      "disable_correlation": false,
+      "misp-attribute": "sha256",
+      "to_ids": false,
+      "ui-priority": 0
+    }
+  },
+  "description": "An OpenPGP signature packet and its unverified issuer claims, extracted from a public key or another artifact. Use extracted-from to reference the source pgp-key or pgp-message object; pgp-meta containing observed issuer IDs may reference this object with extracted-from. Observed metadata does not establish a valid signature, certification or issuer identity.",
+  "meta-category": "misc",
+  "name": "pgp-sign",
+  "required": [
+    "signature"
+  ],
+  "uuid": "4e7fb8a8-b940-4b27-a3e3-8f713c617bf1",
+  "version": 1
+}

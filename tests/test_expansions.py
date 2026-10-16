@@ -87,6 +87,20 @@ class TestExpansions(unittest.TestCase):
         return data["results"]["Object"][0]["name"]
 
     @staticmethod
+    def get_object_attribute_values(response, relation):
+        """Every value carried under one object_relation, across all objects of a misp_standard response."""
+        data = response.json()
+        if not isinstance(data, dict):
+            print(json.dumps(data, indent=2))
+            return data
+        values = []
+        for misp_object in data["results"]["Object"]:
+            for attribute in misp_object["Attribute"]:
+                if attribute["object_relation"] == relation:
+                    values.append(attribute["value"])
+        return values
+
+    @staticmethod
     def get_values(response):
         data = response.json()
         if not isinstance(data, dict):
@@ -153,26 +167,41 @@ class TestExpansions(unittest.TestCase):
         if LiveCI:
             return True
 
-        query = {"module": "btc_steroids", "btc": "1ES14c7qLb5CYhLMUekctxLgc1FV2Ti9DA"}
+        query = {
+            "module": "btc_steroids",
+            "attribute": {
+                "type": "btc",
+                "value": "1ES14c7qLb5CYhLMUekctxLgc1FV2Ti9DA",
+                "uuid": "ea89a33b-4ab7-4515-9f02-922a0bee333d",
+            },
+            "config": {},
+        }
         response = self.misp_modules_post(query)
         try:
-            self.assertTrue(
-                self.get_values(response).startswith(
-                    "\n\nAddress:\t1ES14c7qLb5CYhLMUekctxLgc1FV2Ti9DA\nBalance:\t0.0002126800 BTC (+0.0007482500 BTC /"
-                    " -0.0005355700 BTC)"
-                )
+            self.assertEqual(self.get_first_object_type(response), "btc-wallet")
+            self.assertIn(
+                "1ES14c7qLb5CYhLMUekctxLgc1FV2Ti9DA",
+                self.get_object_attribute_values(response, "wallet-address"),
             )
-
         except Exception:
-            self.assertTrue(self.get_values(response).startswith("Not a valid BTC address"))
+            self.assertTrue(self.get_errors(response).endswith("is not a valid BTC address."))
 
     def test_btc_scam_check(self):
         if LiveCI:
             return
 
-        query = {"module": "btc_scam_check", "btc": "1ES14c7qLb5CYhLMUekctxLgc1FV2Ti9DA"}
+        query = {
+            "module": "btc_scam_check",
+            "attribute": {
+                "type": "btc",
+                "value": "1ES14c7qLb5CYhLMUekctxLgc1FV2Ti9DA",
+                "uuid": "ea89a33b-4ab7-4515-9f02-922a0bee333d",
+            },
+            "config": {},
+        }
         response = self.misp_modules_post(query)
-        self.assertEqual(self.get_values(response), "1es14c7qlb5cyhlmuekctxlgc1fv2ti9da fraudolent bitcoin address")
+        self.assertEqual(self.get_first_object_type(response), "reputation")
+        self.assertIn("malicious", self.get_object_attribute_values(response, "classification"))
 
     def test_circl_passivedns(self):
         module_name = "circl_passivedns"
@@ -255,22 +284,49 @@ class TestExpansions(unittest.TestCase):
             print(self.get_errors(response))
 
     def test_dbl_spamhaus(self):
-        query = {"module": "dbl_spamhaus", "domain": "totalmateria.net"}
+        query = {
+            "module": "dbl_spamhaus",
+            "attribute": {
+                "type": "domain",
+                "value": "totalmateria.net",
+                "uuid": "ea89a33b-4ab7-4515-9f02-922a0bee333d",
+            },
+            "config": {},
+        }
         response = self.misp_modules_post(query)
-        try:
-            self.assertEqual(self.get_values(response), "totalmateria.net - spam test domain")
-        except Exception:
-            try:
-                self.assertTrue(self.get_values(response).startswith("The DNS query name does not exist:"))
-            except Exception:
-                self.assertEqual(
-                    self.get_errors(response), "Not able to reach dbl.spamhaus.org or something went wrong"
-                )
+        data = response.json()
+        if "error" in data:
+            # Public CI resolvers can also receive a refused query or an
+            # unmapped DNSBL response code. Both are explicit module errors.
+            self.assertNotIn("results", data)
+            self.assertTrue(
+                data["error"].startswith(
+                    (
+                        "totalmateria.net is not listed on dbl.spamhaus.org.",
+                        "Not able to reach dbl.spamhaus.org:",
+                        "dbl.spamhaus.org answered with the unknown return code ",
+                        "dbl.spamhaus.org refused the query:",
+                    )
+                ),
+                data,
+            )
+        else:
+            self.assertEqual(self.get_first_object_type(response), "reputation")
+            self.assertIn("dbl.spamhaus.org", self.get_object_attribute_values(response, "list-name"))
 
     def test_dns(self):
-        query = {"module": "dns", "hostname": "www.circl.lu", "config": {"nameserver": "8.8.8.8"}}
+        query = {
+            "module": "dns",
+            "attribute": {
+                "type": "hostname",
+                "value": "www.circl.lu",
+                "uuid": "ea89a33b-4ab7-4515-9f02-922a0bee333d",
+            },
+            "config": {"nameserver": "8.8.8.8"},
+        }
         response = self.misp_modules_post(query)
-        self.assertEqual(self.get_values(response), "185.194.93.14")
+        self.assertEqual(self.get_first_object_type(response), "dns-record")
+        self.assertIn("185.194.93.63", self.get_object_attribute_values(response, "a-record"))
 
     def test_docx(self):
         filename = "test.docx"
@@ -315,14 +371,24 @@ class TestExpansions(unittest.TestCase):
 
     def test_haveibeenpwned(self):
         module_name = "hibp"
-        query = {"module": "hibp", "email-src": "info@circl.lu"}
-        response = self.misp_modules_post(query)
+        query = {
+            "module": "hibp",
+            "attribute": {
+                "type": "email-src",
+                "value": "info@circl.lu",
+                "uuid": "ea89a33b-4ab7-4515-9f02-922a0bee333d",
+            },
+            "config": {},
+        }
         if module_name in self.configs:
-            to_check = self.get_values(response)
-            if to_check == "haveibeenpwned.com API not accessible (HTTP 401)":
+            query["config"] = self.configs[module_name]
+            response = self.misp_modules_post(query)
+            errors = self.get_errors(response)
+            if errors == "haveibeenpwned.com API not accessible (HTTP 401)":
                 self.skipTest(f"haveibeenpwned blocks travis IPs: {response}")
-            self.assertEqual(to_check, "OK (Not Found)", response)
+            self.assertTrue(errors.startswith("haveibeenpwned.com has no breach for"))
         else:
+            response = self.misp_modules_post(query)
             self.assertEqual(self.get_errors(response), "Have I Been Pwned authentication is incomplete (no API key)")
 
     def test_hyasinsight(self):
@@ -533,10 +599,15 @@ class TestExpansions(unittest.TestCase):
     def test_rbl(self):
         if LiveCI:
             return True
-        query = {"module": "rbl", "ip-src": "8.8.8.8"}
+        query = {
+            "module": "rbl",
+            "attribute": {"type": "ip-src", "value": "8.8.8.8", "uuid": "ea89a33b-4ab7-4515-9f02-922a0bee333d"},
+            "config": {},
+        }
         response = self.misp_modules_post(query)
         try:
-            self.assertTrue(self.get_values(response).startswith("8.8.8.8.bl.spamcannibal.org"))
+            self.assertEqual(self.get_first_object_type(response), "reputation")
+            self.assertTrue(self.get_object_attribute_values(response, "list-name"))
         except Exception:
             self.assertEqual(self.get_errors(response), "No data found by querying known RBLs")
 
@@ -568,27 +639,67 @@ class TestExpansions(unittest.TestCase):
             self.assertEqual(self.get_errors(response), "Missing api_url in config")
 
     def test_reversedns(self):
-        query = {"module": "reversedns", "ip-src": "8.8.8.8"}
+        query = {
+            "module": "reversedns",
+            "attribute": {"type": "ip-src", "value": "8.8.8.8", "uuid": "ea89a33b-4ab7-4515-9f02-922a0bee333d"},
+            "config": {},
+        }
         response = self.misp_modules_post(query)
-        self.assertEqual(self.get_values(response), "dns.google")
+        self.assertEqual(self.get_first_object_type(response), "dns-record")
+        self.assertIn("dns.google", self.get_object_attribute_values(response, "ptr-record"))
+
+    def test_rulezet_validator(self):
+        query = {
+            "module": "rulezet_validator",
+            "attribute": {
+                "type": "yara",
+                "uuid": "ea89a33b-4ab7-4515-9f02-922a0bee333d",
+                "value": "rule test { condition: tru }",
+            },
+        }
+        response = self.misp_modules_post(query)
+        self.assertEqual(self.get_first_object_type(response), "rule-validation")
+        attributes = {
+            attribute["object_relation"]: attribute["value"]
+            for attribute in response.json()["results"]["Object"][0]["Attribute"]
+        }
+        self.assertEqual(attributes["format"], "yara")
+        self.assertEqual(attributes["valid"], "0")
+        self.assertIn("undefined identifier", attributes["error"])
 
     def test_securitytrails(self):
         module_name = "securitytrails"
         query_types = ("ip-src", "domain")
         query_values = ("149.13.33.14", "circl.lu")
-        results = ("circl.lu", "ns4.eurodns.com")
+        results = ("domain-ip", "passive-dns")
         if module_name in self.configs:
             for query_type, query_value, result in zip(query_types, query_values, results):
-                query = {"module": module_name, query_type: query_value, "config": self.configs[module_name]}
+                query = {
+                    "module": module_name,
+                    "attribute": {
+                        "type": query_type,
+                        "value": query_value,
+                        "uuid": "ea89a33b-4ab7-4515-9f02-922a0bee333d",
+                    },
+                    "config": self.configs[module_name],
+                }
                 response = self.misp_modules_post(query)
                 try:
-                    self.assertEqual(self.get_values(response), result)
+                    self.assertIn(result, self.get_object_types(response))
                 except Exception:
                     self.assertTrue(
                         self.get_errors(response).startswith("You've exceeded the usage limits for your account.")
                     )
         else:
-            query = {"module": module_name, query_values[0]: query_types[0]}
+            query = {
+                "module": module_name,
+                "attribute": {
+                    "type": query_types[0],
+                    "value": query_values[0],
+                    "uuid": "ea89a33b-4ab7-4515-9f02-922a0bee333d",
+                },
+                "config": {},
+            }
             response = self.misp_modules_post(query)
             self.assertEqual(self.get_errors(response), "SecurityTrails authentication is missing")
 
@@ -620,10 +731,14 @@ class TestExpansions(unittest.TestCase):
 
     def test_sourcecache(self):
         input_value = "https://www.misp-project.org/feeds/"
-        query = {"module": "sourcecache", "link": input_value}
+        query = {
+            "module": "sourcecache",
+            "attribute": {"type": "link", "value": input_value, "uuid": "ea89a33b-4ab7-4515-9f02-922a0bee333d"},
+            "config": {},
+        }
         response = self.misp_modules_post(query)
-        self.assertEqual(self.get_values(response), input_value)
-        self.assertTrue(self.get_data(response))
+        self.assertEqual(self.get_first_object_type(response), "page-capture")
+        self.assertIn(input_value, self.get_object_attribute_values(response, "url"))
 
     def test_stix2_pattern_validator(self):
         query = {"module": "stix2_pattern_syntax_validator", "stix2-pattern": "[ipv4-addr:value = '8.8.8.8']"}
@@ -698,11 +813,20 @@ class TestExpansions(unittest.TestCase):
 
     def test_urlscan(self):
         module_name = "urlscan"
-        query = {"module": module_name, "url": "https://circl.lu/team"}
+        query = {
+            "module": module_name,
+            "attribute": {
+                "type": "url",
+                "value": "https://circl.lu/team",
+                "uuid": "ea89a33b-4ab7-4515-9f02-922a0bee333d",
+            },
+            "config": {},
+        }
         if module_name in self.configs:
             query["config"] = self.configs[module_name]
             response = self.misp_modules_post(query)
-            self.assertEqual(self.get_values(response), "circl.lu")
+            self.assertIn("url", self.get_object_types(response))
+            self.assertIn("circl.lu", self.get_object_attribute_values(response, "domain"))
         else:
             response = self.misp_modules_post(query)
             self.assertEqual(self.get_errors(response), "Urlscan apikey is missing")
@@ -780,11 +904,20 @@ class TestExpansions(unittest.TestCase):
 
     def test_vulners(self):
         module_name = "vulners"
-        query = {"module": module_name, "vulnerability": "CVE-2010-3333"}
+        query = {
+            "module": module_name,
+            "attribute": {
+                "type": "vulnerability",
+                "value": "CVE-2010-3333",
+                "uuid": "ea89a33b-4ab7-4515-9f02-922a0bee333d",
+            },
+            "config": {},
+        }
         if module_name in self.configs:
             query["config"] = self.configs[module_name]
             response = self.misp_modules_post(query)
-            self.assertTrue(self.get_values(response).endswith('"RTF Stack Buffer Overflow Vulnerability."'))
+            self.assertIn("vulnerability", self.get_object_types(response))
+            self.assertIn("CVE-2010-3333", self.get_object_attribute_values(response, "id"))
         else:
             response = self.misp_modules_post(query)
             self.assertEqual(self.get_errors(response), "A Vulners api key is required for this module.")

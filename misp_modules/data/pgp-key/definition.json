@@ -1,0 +1,90 @@
+{
+  "attributes": {
+    "algorithm": {
+      "description": "OpenPGP public-key algorithm identifier reported by the HKP index.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 0
+    },
+    "creation-time": {
+      "description": "Key creation time reported by the keyserver.",
+      "disable_correlation": true,
+      "misp-attribute": "datetime",
+      "to_ids": false,
+      "ui-priority": 0
+    },
+    "expiration-time": {
+      "description": "Key expiration time reported by the keyserver; absence does not establish validity.",
+      "disable_correlation": true,
+      "misp-attribute": "datetime",
+      "to_ids": false,
+      "ui-priority": 0
+    },
+    "fingerprint": {
+      "description": "Full OpenPGP fingerprint in uppercase hexadecimal, without 0x or spaces.",
+      "disable_correlation": false,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "flags": {
+      "description": "Raw HKP flags, for example r (revoked), d (disabled) or e (expired). These are keyserver claims.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 0
+    },
+    "key": {
+      "description": "ASCII-armored public key block. Keyserver retrieval does not establish ownership or validate certifications.",
+      "disable_correlation": true,
+      "misp-attribute": "pgp-public-key",
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "key-id": {
+      "description": "Hexadecimal key ID without 0x. Short IDs can collide; use the full fingerprint to identify a key.",
+      "disable_correlation": false,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "key-length": {
+      "description": "Public-key length in bits reported by the HKP index.",
+      "disable_correlation": true,
+      "misp-attribute": "counter",
+      "to_ids": false,
+      "ui-priority": 0
+    },
+    "keyserver": {
+      "description": "Base URL of the source HKP keyserver.",
+      "disable_correlation": true,
+      "misp-attribute": "url",
+      "to_ids": false,
+      "ui-priority": 0
+    },
+    "retrieval-url": {
+      "description": "URL used to retrieve the public key by full fingerprint.",
+      "disable_correlation": true,
+      "misp-attribute": "link",
+      "to_ids": false,
+      "ui-priority": 0
+    },
+    "uid": {
+      "description": "Complete OpenPGP User ID as reported by the keyserver. Names and email addresses are unverified claims; attribute comments can preserve UID flags.",
+      "disable_correlation": false,
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    }
+  },
+  "description": "An OpenPGP public key and its keyserver index data. Link a pgp-meta object to this object using extracted-from to keep pivotable key IDs, names and emails separate from the key artifact.",
+  "meta-category": "misc",
+  "name": "pgp-key",
+  "required": [
+    "key-id"
+  ],
+  "uuid": "285f9f55-4d2a-47d7-94f7-8c4a1d3d4c55",
+  "version": 1
+}

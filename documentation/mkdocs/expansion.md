@@ -1339,6 +1339,35 @@ An expansion module to query IP2Location.io to gather more information on a give
 
 -----
 
+#### [ipapi.is Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/ipapi_is.py)
+
+<img src=../logos/ipapi_is.png height=60>
+
+An expansion and hover module to enrich an IP address with geolocation, ASN, company and abuse contact data, and VPN (with the provider), proxy, Tor and datacenter detection from ipapi.is.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/ipapi_is.py)]
+
+- **features**:
+>The module takes an IP address attribute as input and looks it up with the [ipapi.is API](https://ipapi.is/developers.html). It returns a geolocation object, an asn object and an ipapi-is-ip object with the detection flags that are set (VPN, proxy, Tor, datacenter, abuser, crawler, mobile, satellite and anycast), the VPN provider, the hosting provider, the organisation the address is registered to with its abuser score, and the abuse contact.
+>
+>The `api_key` is optional: a free ipapi.is account includes 1,000 requests a day. Without a key the API answers 30 requests a day per IP address with the location and the network owner only, without detection flags. The key is sent in the body of a POST request, never in the URL. Private and reserved addresses are not looked up.
+
+- **config**:
+>api_key
+
+- **input**:
+>An IP address attribute (ip-src or ip-dst).
+
+- **output**:
+>geolocation and asn objects, and an ipapi-is-ip object with the detection flags, the VPN and hosting providers, the company with its abuser score, and the abuse contact.
+
+- **references**:
+>https://ipapi.is/developers.html
+
+- **requirements**:
+>An ipapi.is API key (optional: without one the API returns location and network owner only, 30 requests a day)
+
+-----
+
 #### [IPASN-History Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/ipasn.py)
 
 Module to query an IP ASN history service (https://github.com/D4-project/IPASN-History).
@@ -1361,6 +1390,41 @@ Module to query an IP ASN history service (https://github.com/D4-project/IPASN-H
 
 - **requirements**:
 >pyipasnhistory: Python library to access IPASN-history instance
+
+-----
+
+#### [IPGeolocation.io Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/ipgeolocation.py)
+
+<img src=../logos/ipgeolocation.png height=60>
+
+An expansion and hover module to enrich an IP address with geolocation, ASN, company, threat intelligence (threat score, VPN, proxy, Tor, bot and spam signals) and abuse contact information from IPGeolocation.io, either through the API or from local IPGeolocation.io MMDB databases.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/ipgeolocation.py)]
+
+- **features**:
+>The module takes an IP address attribute as input and answers from one of two sources:
+>- `api_key`: the [IPGeolocation.io API](https://ipgeolocation.io/documentation/ip-location-api.html). Free plans return geolocation and ASN. Paid plans also return the company, threat intelligence (`include=security`), the abuse contact (`include=abuse`) and the hostname; the `include` setting chooses these modules (default `security,abuse,hostname`, `none` for the base lookup only). If the plan does not allow them, the module falls back to the base lookup. Results are cached in memory for `cache_ttl` seconds (default 3600) to save credits on repeated lookups such as hover.
+>- `mmdb_paths`: comma-separated `.mmdb` files or directories of IPGeolocation.io databases: Location, Country, ISP, ASN, Company, Abuse Contact, Security (all versions), Residential Proxy and Hosting, or their combined editions. Names are returned in English. Lookups run locally and nothing is sent to IPGeolocation.io, which suits air-gapped instances and indicators that must not leave the organisation. Several databases are combined; for a field present in more than one, the first file in the list wins. Updated files are picked up automatically within a minute.
+>
+>When `mmdb_paths` is set, the API is never called.
+
+- **config**:
+> - api_key
+> - mmdb_paths
+> - include
+> - cache_ttl
+
+- **input**:
+>An IP address attribute (ip-src, ip-dst, ip-src|port, ip-dst|port or domain|ip).
+
+- **output**:
+>geolocation, asn and domain-ip objects, and an ipgeolocation-ip object with the threat score, anonymisation signals, company and abuse contact.
+
+- **references**:
+> - https://ipgeolocation.io/documentation/ip-location-api.html
+> - https://ipgeolocation.io/ip-security-database.html
+
+- **requirements**:
+>An IPGeolocation.io API key, or IPGeolocation.io MMDB databases stored on the misp-modules host
 
 -----
 
@@ -1449,6 +1513,35 @@ Module to query IPRep data for IP addresses.
 
 - **requirements**:
 >An access to the packetmail API (apikey)
+
+-----
+
+#### [isMalicious Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/ismalicious.py)
+
+<img src=../logos/ismalicious.png height=60>
+
+Query isMalicious for IP, domain, hostname, and URL reputation.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/ismalicious.py)]
+
+- **features**:
+>The module takes an IP, domain, hostname or URL attribute (the domain side of a domain|ip) and queries GET /check on the isMalicious API. It returns a text summary with the malicious flag, risk score, categories and source count. Only threat listings are counted: listings that describe what an indicator is (cloud and CDN ranges, Tor exits, DoH resolvers, ad lists, allowlists) are left out of the categories and of the source count. Hover and expansion share the same handler. The queried indicator is sent over TLS; nothing else leaves the MISP instance besides the configured API key.
+
+- **config**:
+> - api_key
+> - api_url
+
+- **input**:
+>An IP address, domain, hostname or URL.
+
+- **output**:
+>Text attributes with the isMalicious reputation summary.
+
+- **references**:
+> - https://ismalicious.com/integrations/misp
+> - https://ismalicious.com/api-docs
+
+- **requirements**:
+>An isMalicious API key (free accounts are available): the X-API-KEY value, Base64 of apiKey:apiSecret, shown under API credentials on the isMalicious account page.
 
 -----
 
@@ -2031,6 +2124,30 @@ Module to extract freetext from a PDF document.
 
 - **requirements**:
 >pdftotext: Python library to extract text from PDF.
+
+-----
+
+#### [phishunt Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/phishunt.py)
+
+Look up a host in phishunt (phishunt.io), the free CC0 feed of live phishing domains: the phishing URLs detected on that exact host, the brand they target, when they were first seen, where they are hosted and which other feeds flag them.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/phishunt.py)]
+
+- **features**:
+>The module takes a domain, hostname or URL attribute (for a URL only the host is used) and queries the phishunt search API for it. The API does a substring match, so only the rows whose host is exactly the queried one are kept. Matches come back as phishing objects (URL, hostname, IP, targeted brand, first seen time) with hosting, TLS issuer, provider IP range and the other feeds that flag the same URL (OpenPhish, PhishTank, urlscan.io, Google Safe Browsing, TweetFeed) in the object comment, plus a link to the phishunt search page. At most 25 objects are returned. Only the read-only search endpoint is used: the phishunt analyze endpoints, which would submit the value for analysis, are never called. Detections are automated and can contain false positives, so no MISP tag or confidence score is set from them.
+
+- **input**:
+>A domain, hostname or URL attribute.
+
+- **output**:
+>phishing objects with the detected URLs, hostname, IP, targeted brand and first seen time, and a link attribute to the phishunt search page.
+
+- **references**:
+> - https://phishunt.io
+> - https://phishunt.io/api/
+> - https://phishunt.io/openapi.yaml
+
+- **requirements**:
+>No API key required.
 
 -----
 
@@ -2728,6 +2845,32 @@ Module to cache web pages of analysis reports, OSINT sources. The module returns
 
 -----
 
+#### [SpamCop Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/spamcop.py)
+
+Check an IPv4 address against the SpamCop Blocking List (SCBL).
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/spamcop.py)]
+
+- **features**:
+>Queries bl.spamcop.net using the reversed IPv4 address and accepts the documented 127.0.0.2 A record as a listing. A positive result produces a suspicious reputation object linked to the input attribute, with a SpamCop lookup URL. An address that is not listed produces an informational error, not a benign verdict. DNS failures and unexpected response codes are reported separately. No API key is required. The optional timeout setting is a positive number of seconds (default: 5). IPv6 addresses are not supported.
+
+- **config**:
+>timeout
+
+- **input**:
+>An ip-src or ip-dst attribute containing an IPv4 address.
+
+- **output**:
+>A reputation object describing a SpamCop listing and referencing the original IP attribute.
+
+- **references**:
+> - https://www.spamcop.net/fom-serve/cache/351.html
+> - https://www.spamcop.net/fom-serve/cache/291.html
+
+- **requirements**:
+>dnspython
+
+-----
+
 #### [Stairwell Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/stairwell.py)
 
 <img src=../logos/stairwell.png height=60>
@@ -2929,6 +3072,30 @@ Module to get enrich indicators with TruSTAR.
 
 - **references**:
 >https://docs.trustar.co/api/v13/indicators/get_indicator_summaries.html
+
+-----
+
+#### [TweetFeed Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/tweetfeed.py)
+
+Look up an IOC in TweetFeed (tweetfeed.live), the free CC0 feed of URLs, domains, IPs and hashes shared by the infosec community on X/Twitter: who reported it and when, the source tweets and hashtags, cross-feed corroboration, AI-generated context and campaign membership.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/tweetfeed.py)]
+
+- **features**:
+>The module takes an IP, domain, hostname, URL, MD5 or SHA-256 attribute and queries the TweetFeed API for it. Matches come back as microblog objects for the source tweets (reporter, hashtags, first/last seen), plus attributes for co-reported IOCs, AI-generated context, domain registration and hosting, IP network metadata, corroboration from other feeds and campaign membership. Everything returned is community reported and unverified: no MISP tag or confidence score is set from it. The live 365-day window is queried first, and IOCs older than that are looked up in TweetFeed's separate archive.
+
+- **input**:
+>An IP address, domain, hostname, URL, MD5 or SHA-256 attribute.
+
+- **output**:
+>microblog objects for the source tweets, domain-ip / text / link attributes with registration, network, corroboration, AI context and campaign data.
+
+- **references**:
+> - https://tweetfeed.live
+> - https://tweetfeed.live/api/
+> - https://tweetfeed.live/hunt/
+
+- **requirements**:
+>No API key required.
 
 -----
 

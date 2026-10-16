@@ -18,7 +18,9 @@ jobs:
         uses: actions/checkout@v6
 
       - name: Install packages
-        run: sudo apt-get install libgl1 libfuzzy-dev libpoppler-cpp-dev libpoppler-cpp0v5 libzbar0 tesseract-ocr libjpeg-dev
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgl1 libfuzzy-dev libpoppler-cpp-dev libpoppler-cpp0v5 libzbar0 tesseract-ocr libjpeg-dev
 
       - name: Set up Python 3.14
         uses: actions/setup-python@v6
@@ -45,7 +47,9 @@ jobs:
         uses: actions/checkout@v6
 
       - name: Install packages
-        run: sudo apt-get install libgl1 libfuzzy-dev libpoppler-cpp-dev libpoppler-cpp0v5 libzbar0 tesseract-ocr libjpeg-dev
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgl1 libfuzzy-dev libpoppler-cpp-dev libpoppler-cpp0v5 libzbar0 tesseract-ocr libjpeg-dev
   
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v6
@@ -67,12 +71,12 @@ jobs:
       - name: Run server in background
         run: poetry run misp-modules -l 127.0.0.1 2>error.log &
 
-      - name: Sleep for 10 seconds
-        run: sleep 10s
-        shell: bash
-
-      - name: Check if server is running
-        run: curl -sS localhost:6666/healthcheck
+      - name: Wait for server readiness
+        run: >-
+          curl --fail --silent --show-error
+          --retry 30 --retry-connrefused --retry-delay 2 --retry-max-time 60
+          --connect-timeout 2 --max-time 5
+          http://127.0.0.1:6666/healthcheck
 
       - name: Test package
         run: poetry run pytest

@@ -1,0 +1,120 @@
+{
+  "name": "PTR Classification",
+  "module": "ptrclassify",
+  "module-type": [
+    "expansion",
+    "hover"
+  ],
+  "description": "Classify PTR hostnames and add matching ptrclassify taxonomy tags to the queried MISP attribute.",
+  "requirements": [
+    "ptrclassify >=0.3.0,<0.4.0 and dnspython, included in the minimal and all installation extras",
+    "A DNS resolver that supports PTR queries for IP lookups",
+    "Enable the ptrclassify taxonomy in MISP to manage the returned tags; no API key or ptrclassify service is required",
+    "Install the ptrclassify MISP object template. A matching template is bundled in misp-modules for PyMISP releases that do not yet ship it."
+  ],
+  "features": [
+    "Resolve IPv4 and IPv6 addresses and classify every distinct PTR hostname with the local ptrclassify library.",
+    "Preserve the queried address in the classifier's PTR record so IPv4-encoded hostnames return the ip-encoded naming tag and embedded_ip hint.",
+    "Classify hostname and domain values directly without a DNS lookup. Address-dependent hints are only available for IP inputs.",
+    "Preserve the input attribute UUID, existing tags, comment and detection flag while adding matching taxonomy tags.",
+    "Hover displays the enrichment. Importing expansion results applies the returned tags in MISP.",
+    "PTR names are operator-controlled. Classification and location hints are heuristic and are not verified usage or geolocation.",
+    "For IP lookups, return one dns-record object containing the reverse-DNS owner in queried-domain and all distinct PTR targets in ptr-record. Tag each PTR answer with its own classification and add the union of tags to the queried attribute.",
+    "Return one ptrclassify object per hostname, with repeated classification, category, label, confidence, evidence and rule-id fields instead of standalone summary text.",
+    "Classification fields use the corresponding machine tag as their attribute comment to preserve associations. Location fields use a rule-ID/code comment to identify each candidate.",
+    "Return structured location-code, location-city, location-region, location-country, location-confidence, location-evidence, location-rule-id and location-description fields when present.",
+    "Preserve embedded-ip, cloud-region and conflict hints as object attributes. Record the classifier-version and whether any label matched.",
+    "Each ptrclassify object characterizes the queried attribute and is derived-from the DNS object for IP lookups. The DNS object references the original attribute with related-to. Direct hostname/domain classification does not invent a DNS observation."
+  ],
+  "references": [
+    "https://github.com/adulau/ptrclassify",
+    "https://misp-project.org/taxonomies.html#_ptrclassify"
+  ],
+  "input": {
+    "format": "misp_standard",
+    "types": [
+      "ip-src",
+      "ip-dst",
+      "domain|ip",
+      "hostname",
+      "domain"
+    ],
+    "required_attribute_fields": [
+      "type",
+      "value",
+      "uuid"
+    ],
+    "domain_ip": "For domain|ip, the IP component is queried; the original composite attribute is retained."
+  },
+  "output": {
+    "format": "misp_standard",
+    "response": "results.Attribute contains only the original queried attribute with matching tags. results.Object contains one ptrclassify object per hostname and, for IP inputs, one dns-record object for the observed PTR answer set.",
+    "tags": "Matching machine tags, such as ptrclassify:access=\"mobile\", are returned in each attribute's Tag list. The input attribute retains its original UUID so MISP can associate the tags with the queried attribute.",
+    "new_attributes": "All newly generated object attributes use to_ids=false. The queried attribute retains its detection flag.",
+    "no_match": "Return the input, a ptrclassify object with matched=0, and any observed DNS object without adding taxonomy tags. Existing tags and any potential location hints are preserved.",
+    "errors": "Missing PTR records, resolver failures, timeouts and invalid inputs return an error without tagged results.",
+    "classification_template": "misp_modules/data/ptrclassify/definition.json is the bundled copy of MISP/misp-objects/objects/ptrclassify/definition.json.",
+    "dns_template": "Use the existing dns-record template: queried-domain holds the in-addr.arpa or ip6.arpa owner, and ptr-record holds domain-typed PTR targets. No forward A/AAAA records are inferred."
+  },
+  "config": {
+    "nameserver": {
+      "required": false,
+      "type": "IPv4 or IPv6 address",
+      "default": "System DNS resolver",
+      "description": "Optional DNS server for IP lookups. Hostname and domain inputs do not query DNS. Resolver timeout is two seconds and the total lookup lifetime is five seconds."
+    }
+  },
+  "examples": [
+    {
+      "description": "Classify a supplied PTR-style hostname locally, in either hover or expansion mode.",
+      "request": {
+        "module": "ptrclassify",
+        "attribute": {
+          "type": "hostname",
+          "value": "188.147.228.101.nat.umts.dynamic.t-mobile.pl",
+          "uuid": "5b582d80-7a7e-4b6a-9f22-77656e72bb3b"
+        },
+        "config": {}
+      },
+      "expected_source_tags": [
+        "ptrclassify:access=\"mobile\"",
+        "ptrclassify:allocation=\"dynamic\"",
+        "ptrclassify:translation=\"nat\"",
+        "ptrclassify:naming=\"generic-reverse\""
+      ],
+      "expected_objects": {
+        "ptrclassify": 1,
+        "dns-record": 0
+      }
+    },
+    {
+      "description": "Classify an IPv4 PTR answer while retaining address context. Return one ptrclassify object and one dns-record object. Tags are added to the IP and the ptr-record attribute. Expected results depend on the current DNS answer.",
+      "request": {
+        "module": "ptrclassify",
+        "attribute": {
+          "type": "ip-src",
+          "value": "188.147.228.101",
+          "uuid": "5b582d80-7a7e-4b6a-9f22-77656e72bb3b"
+        },
+        "config": {}
+      },
+      "ptr_records": [
+        "188.147.228.101.nat.umts.dynamic.t-mobile.pl"
+      ],
+      "expected_source_tags": [
+        "ptrclassify:access=\"mobile\"",
+        "ptrclassify:allocation=\"dynamic\"",
+        "ptrclassify:translation=\"nat\"",
+        "ptrclassify:naming=\"generic-reverse\"",
+        "ptrclassify:naming=\"ip-encoded\""
+      ],
+      "expected_objects": {
+        "ptrclassify": 1,
+        "dns-record": 1
+      },
+      "expected_object_fields": {
+        "embedded-ip": "188.147.228.101"
+      }
+    }
+  ]
+}
