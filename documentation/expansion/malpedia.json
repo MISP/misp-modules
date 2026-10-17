@@ -1,0 +1,86 @@
+{
+  "module": "malpedia",
+  "name": "Malpedia lookup",
+  "description": "Search and expand Malpedia family, actor and sample metadata using existing MISP objects.",
+  "references": [
+    "https://malpedia.caad.fkie.fraunhofer.de/usage/api",
+    "https://github.com/malpedia/malpediaclient"
+  ],
+  "input": {
+    "format": "misp_standard",
+    "required_attribute_fields": ["type", "value", "uuid"],
+    "types": ["text", "other", "malware-type", "threat-actor", "md5", "sha256", "filename|md5", "filename|sha256", "link", "url"]
+  },
+  "routing": {
+    "text, other": "Canonical family IDs such as win.emotet use get/family directly. Other values search both family and actor names/aliases.",
+    "malware-type": "Search family names and aliases, or expand a canonical family ID directly.",
+    "threat-actor": "Search actor names and synonyms, then expand matching actor records and their embedded families.",
+    "link, url": "Accept only Malpedia /details/<family_id> and /actor/<actor_id> URLs. Retrieve their records directly.",
+    "md5, sha256, filename|md5, filename|sha256": "Query get/sample/<hash>/info using an API token, then expand the reported family. SHA-1 is not supported by this API."
+  },
+  "config": {
+    "apikey": {
+      "default": "",
+      "description": "Optional API token sent as Authorization: apitoken <token>. Required for sample hash queries. Public family/actor queries work without a token."
+    },
+    "timeout": {
+      "default": 30,
+      "range": "1..120 seconds per request"
+    },
+    "max_results": {
+      "default": 5,
+      "range": "1..20",
+      "description": "Limit per family/actor search, embedded actor family collection, and YARA file collection. YARA lookups are also limited to this many distinct families per invocation. Truncation is recorded in result comments."
+    },
+    "include_yara": {
+      "default": false,
+      "description": "Retrieve family YARA files, preserving complete source and license metadata. API sharing levels become TLP tags on every attribute of the YARA object. Accepts booleans and true/false/1/0 strings."
+    }
+  },
+  "output_mapping": {
+    "family": "malware object: common_name -> name, alt_names and canonical family ID -> alias, description -> description, is_family=true.",
+    "actor": "intrusion-set object: value -> name, meta.synonyms and canonical actor ID -> aliases, description -> description. Actor uses references point to its embedded malware families.",
+    "sample": "file object: md5 and sha256 -> hash attributes; belongs-to reference to the expanded family.",
+    "yara": "yara object: complete rule file -> yara, family page -> reference; detects reference to malware object. Each returned file remains intact, even if it contains multiple rules.",
+    "references": "Deduplicated link attributes reached by described-by object references. These are reference reports, not malicious URLs.",
+    "attribution": "Deduplicated threat-actor attributes reached by attributed-to references from malware objects. Attribution labels are preserved without resolving them to additional actor identities.",
+    "other_metadata": "Notes, timestamps, source IDs, external UUIDs, actor country and other unmapped metadata are retained as JSON in object comments. Malpedia cluster UUIDs are not reused as object UUIDs.",
+    "input": "The original attribute UUID, tags, comment and detection flag are retained. Objects reference the original attribute. All generated attributes have to_ids=false."
+  },
+  "behavior": [
+    "Missing settings, JSON null and empty strings use the documented defaults. Other invalid values, including zero or boolean integer settings, are rejected.",
+    "Exact identifier, name and alias search matches take priority; otherwise return the first max_results substring matches in API order.",
+    "Related families are deduplicated by canonical ID, including families shared by multiple actors.",
+    "Primary lookup failures return an error. Optional YARA and sample-to-family enrichment failures preserve successful results with an explanatory object comment.",
+    "Requests use HTTPS with certificate validation, a timeout and no redirects. Only read-only GET endpoints are used; no malware binaries are downloaded or submitted."
+  ],
+  "installation": [
+    "Copy misp_modules/modules/expansion/malpedia.py into the same path in your misp-modules checkout. No registration or extra Python dependency is needed beyond requests and PyMISP.",
+    "Restart your misp-modules service. In MISP, enable Plugin.Enrichment_malpedia_enabled and set Plugin.Enrichment_malpedia_apikey if required. Configure the other exposed module settings as needed.",
+    "Existing malware, intrusion-set, file and yara templates suffice; no misp-objects change or custom template installation is required."
+  ],
+  "examples": [
+    {
+      "module": "malpedia",
+      "attribute": {
+        "type": "text",
+        "value": "win.emotet",
+        "uuid": "82383d84-3016-4d1c-902f-3de0533bfcec"
+      },
+      "config": {"include_yara": true, "max_results": 5}
+    },
+    {
+      "module": "malpedia",
+      "attribute": {
+        "type": "threat-actor",
+        "value": "APT28",
+        "uuid": "82383d84-3016-4d1c-902f-3de0533bfcec"
+      },
+      "config": {}
+    }
+  ],
+  "validation": {
+    "unit_tests": "python -m pytest tests/test_malpedia.py",
+    "live": "Public family, alias search, actor and YARA endpoints checked against Malpedia. Authenticated sample-info success is covered by mocked records only: no Malpedia API token was available."
+  }
+}
