@@ -299,14 +299,55 @@ def test_api_errors_do_not_expose_credentials(response, message):
         {"timeout": 1.5},
         {"max_results": "bad"},
         {"max_results": 21},
+        {"max_results": 0},
+        {"max_results": False},
         {"include_yara": "maybe"},
         {"apikey": "token\nheader"},
         {"apikey": 123},
+        {"apikey": False},
     ],
 )
 def test_invalid_configuration_does_not_contact_api(config):
     result, calls = invoke({}, config=config)
     assert "error" in result
+    assert calls == []
+
+
+@pytest.mark.parametrize("unset", [None, ""])
+def test_unset_optional_settings_apply_documented_defaults(unset):
+    hits = [{"name": f"win.example{index}"} for index in range(6)]
+    routes = {"find/family/partial": hits, "find/actor/partial": []}
+    routes.update({f"get/family/{hit['name']}": FAMILY for hit in hits[:5]})
+    result, calls = invoke(routes, value="partial", config=dict.fromkeys(malpedia.moduleconfig, unset))
+
+    assert len(objects(result, "malware")) == 5
+    assert any("limited to 5 of 6" in attr["value"] for attr in result["results"]["Attribute"])
+    assert len(calls) == 7
+    assert all(options["timeout"] == 30 for _, options in calls)
+    assert all("Authorization" not in options["headers"] for _, options in calls)
+    assert not objects(result, "yara")
+    assert_valid_results(result)
+
+
+@pytest.mark.parametrize("unset", [None, ""])
+def test_configured_settings_work_alongside_unset_options(unset):
+    result, calls = invoke(
+        {"get/family/win.example": FAMILY, "get/yara/win.example": {"tlp_white": {"example.yar": RULE}}},
+        config={"apikey": "test-token", "timeout": "10", "max_results": unset, "include_yara": "true"},
+    )
+
+    assert len(objects(result, "yara")) == 1
+    assert len(calls) == 2
+    assert all(options["timeout"] == 10 for _, options in calls)
+    assert all(options["headers"]["Authorization"] == "apitoken test-token" for _, options in calls)
+    assert_valid_results(result)
+
+
+@pytest.mark.parametrize("unset", [None, ""])
+def test_unset_optional_settings_still_require_token_for_hash_queries(unset):
+    result, calls = invoke({}, kind="md5", value="a" * 32, config=dict.fromkeys(malpedia.moduleconfig, unset))
+
+    assert "apikey is required" in result["error"]
     assert calls == []
 
 

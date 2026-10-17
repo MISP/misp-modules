@@ -48,6 +48,7 @@
     "input": "The original attribute UUID, tags, comment and detection flag are retained. Objects reference the original attribute. All generated attributes have to_ids=false."
   },
   "behavior": [
+    "Missing settings, JSON null and empty strings use the documented defaults. Other invalid values, including zero or boolean integer settings, are rejected.",
     "Exact identifier, name and alias search matches take priority; otherwise return the first max_results substring matches in API order.",
     "Related families are deduplicated by canonical ID, including families shared by multiple actors.",
     "Primary lookup failures return an error. Optional YARA and sample-to-family enrichment failures preserve successful results with an explanatory object comment.",

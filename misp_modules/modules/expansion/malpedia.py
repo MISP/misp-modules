@@ -61,8 +61,14 @@ def _strings(value):
     return []
 
 
-def _integer(config, name, default, maximum):
+def _config_value(config, name, default):
+    """MISP sends null or empty strings for settings that have not been configured."""
     value = config.get(name, default)
+    return default if value is None or value == "" else value
+
+
+def _integer(config, name, default, maximum):
+    value = _config_value(config, name, default)
     if isinstance(value, bool) or not re.fullmatch(r"[0-9]+", str(value)):
         raise MalpediaError(f"{name} must be an integer between 1 and {maximum}.")
     value = int(value)
@@ -72,7 +78,7 @@ def _integer(config, name, default, maximum):
 
 
 def _boolean(config, name):
-    value = config.get(name, False)
+    value = _config_value(config, name, False)
     if isinstance(value, bool):
         return value
     if isinstance(value, str) and value.lower() in ("true", "1", "false", "0", ""):
@@ -85,7 +91,7 @@ class MalpediaClient:
         self.timeout = _integer(config, "timeout", 30, 120)
         self.limit = _integer(config, "max_results", 5, 20)
         self.include_yara = _boolean(config, "include_yara")
-        token = config.get("apikey", "")
+        token = _config_value(config, "apikey", "")
         if not isinstance(token, str) or "\n" in token or "\r" in token:
             raise MalpediaError("apikey must be a single-line string.")
         self.headers = {"Accept": "application/json", "User-Agent": "misp-modules/malpedia"}
