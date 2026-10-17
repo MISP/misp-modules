@@ -1,0 +1,166 @@
+{
+  "attributes": {
+    "domain": {
+      "description": "Domain name extracted from the resource record data.",
+      "misp-attribute": "domain",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "email": {
+      "description": "Email address extracted from resource record data or mail policy text.",
+      "misp-attribute": "email",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "expire": {
+      "description": "SOA expiry interval in seconds.",
+      "disable_correlation": true,
+      "misp-attribute": "counter",
+      "to_ids": false,
+      "ui-priority": 0
+    },
+    "ip": {
+      "description": "IP address or network extracted from address records, SPF or service binding hints.",
+      "misp-attribute": "ip-dst",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "minimum": {
+      "description": "SOA minimum negative-cache TTL in seconds.",
+      "disable_correlation": true,
+      "misp-attribute": "counter",
+      "to_ids": false,
+      "ui-priority": 0
+    },
+    "port": {
+      "description": "Service port extracted from SRV or service binding data.",
+      "disable_correlation": true,
+      "misp-attribute": "port",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 0
+    },
+    "priority": {
+      "description": "MX preference, SRV/URI priority, or service binding priority.",
+      "disable_correlation": true,
+      "misp-attribute": "counter",
+      "to_ids": false,
+      "ui-priority": 0
+    },
+    "queried-name": {
+      "description": "Absolute DNS query name, without the final root dot. May differ from rrname when aliases are followed.",
+      "misp-attribute": "domain",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "rdata": {
+      "description": "Complete resource record data in DNS presentation format; preserves TXT quoting, SOA fields and unknown types.",
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "refresh": {
+      "description": "SOA secondary refresh interval in seconds.",
+      "disable_correlation": true,
+      "misp-attribute": "counter",
+      "to_ids": false,
+      "ui-priority": 0
+    },
+    "retry": {
+      "description": "SOA retry interval in seconds.",
+      "disable_correlation": true,
+      "misp-attribute": "counter",
+      "to_ids": false,
+      "ui-priority": 0
+    },
+    "rrclass": {
+      "description": "DNS resource record class, normally IN.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 0
+    },
+    "rrname": {
+      "description": "Owner name in DNS presentation form, without the final root dot except for the DNS root itself (.). Text permits root, wildcard and escaped owner names.",
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "rrtype": {
+      "description": "DNS resource record type mnemonic, or TYPE followed by its numeric code.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "section": {
+      "description": "DNS response section where this record was observed. Authority and additional records describe their own rrname, not necessarily the queried name.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 0,
+      "values_list": [
+        "answer",
+        "authority",
+        "additional"
+      ]
+    },
+    "serial": {
+      "description": "SOA zone serial number.",
+      "disable_correlation": true,
+      "misp-attribute": "counter",
+      "to_ids": false,
+      "ui-priority": 0
+    },
+    "soa-email": {
+      "description": "SOA responsible mailbox converted from DNS RNAME notation to an email address.",
+      "misp-attribute": "dns-soa-email",
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "text": {
+      "description": "Decoded TXT/SPF character strings concatenated in order; rdata preserves original chunk boundaries.",
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 0
+    },
+    "ttl": {
+      "description": "Remaining time to live in seconds as returned by the resolver.",
+      "disable_correlation": true,
+      "misp-attribute": "counter",
+      "to_ids": false,
+      "ui-priority": 0
+    },
+    "url": {
+      "description": "URL extracted from resource record data; no HTTP request is implied.",
+      "misp-attribute": "url",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "weight": {
+      "description": "SRV or URI relative weight.",
+      "disable_correlation": true,
+      "misp-attribute": "counter",
+      "to_ids": false,
+      "ui-priority": 0
+    }
+  },
+  "description": "A single DNS resource record observed through active resolution, preserving its query name, owner, type, class, TTL and complete RDATA alongside extracted correlation pivots. Object first_seen and last_seen record observation time, not zone history.",
+  "meta-category": "network",
+  "name": "dns-resource-record",
+  "required": [
+    "queried-name",
+    "rrname",
+    "rrtype",
+    "rdata"
+  ],
+  "uuid": "c6138676-09a5-4c3d-b73e-654df15e3242",
+  "version": 1
+}
