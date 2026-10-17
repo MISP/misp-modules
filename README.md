@@ -81,6 +81,7 @@ For further Information see the [license file](https://misp.github.io/misp-modul
 * [CVE Advanced Lookup](https://misp.github.io/misp-modules/expansion/#cve-advanced-lookup) - An expansion module to query the CIRCL CVE search API for more information about a vulnerability (CVE).
 * [Cytomic Orion Lookup](https://misp.github.io/misp-modules/expansion/#cytomic-orion-lookup) - An expansion module to enrich attributes in MISP by quering the Cytomic Orion API
 * [DBL Spamhaus Lookup](https://misp.github.io/misp-modules/expansion/#dbl-spamhaus-lookup) - Checks Spamhaus DBL for a domain name.
+* [DNS Record Enumeration](https://misp.github.io/misp-modules/expansion/#dns-record-enumeration) - Query DNS data types including SOA and TXT, preserve complete resource records, and extract linked domain, IP, email and URL pivots. [JSON documentation](documentation/expansion/dns_query.json).
 * [DNS Resolver](https://misp.github.io/misp-modules/expansion/#dns-resolver) - Simple DNS expansion service to resolve IP address from MISP attributes
 * [DOCX Enrich](https://misp.github.io/misp-modules/expansion/#docx-enrich) - Module to extract freetext from a .docx document.
 * [DomainTools Lookup](https://misp.github.io/misp-modules/expansion/#domaintools-lookup) - DomainTools MISP expansion module.

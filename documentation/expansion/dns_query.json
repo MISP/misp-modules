@@ -1,0 +1,119 @@
+{
+  "name": "DNS Record Enumeration",
+  "module": "dns_query",
+  "module-type": [
+    "expansion"
+  ],
+  "description": "Actively query DNS data types and collect complete resource records and typed correlation pivots in MISP.",
+  "requirements": [
+    "dnspython",
+    "PyMISP",
+    "DNS access to a recursive resolver"
+  ],
+  "features": [
+    "Query every data type known to the installed dnspython version explicitly; dnspython 2.8.0 enumerates 74 types. Common pivot-rich types are scheduled first. Results depend on resolver support and the time budget.",
+    "Include SOA, TXT, SPF, MX, NS, CNAME, DNAME, PTR, SRV, NAPTR, CAA, HTTPS/SVCB, DNSSEC and legacy data types. record_types can select a comma-separated subset or private types such as TYPE65400.",
+    "Use absolute DNS names with resolver search disabled. Normalize IDNA and case. Domains, hostnames, domain|ip, hostname|port, URLs, email/email-src/email-dst/dns-soa-email and ip-src/ip-dst (including |port) are supported. IPs and URL IP literals use the reverse DNS name.",
+    "Retain each resource record's complete presentation-format RDATA, actual owner, class and first observed TTL in a dns-resource-record object. Object first_seen and last_seen mark this run's observation time.",
+    "Keep records from answer, authority and additional sections, including SOA and glue in negative replies. queried-name and section preserve context; an authority SOA describes its own zone, not a positive SOA answer at the input name.",
+    "Deduplicate by owner, class, type and RDATA across queries; preserve all query names and response sections on the object. Aliases and canonical answers retain separate owner names.",
+    "Extract domain targets, IPs, MX/SRV/URI priorities, SRV weights and ports, SOA timings and responsible mailbox, RP mailbox, HTTPS/SVCB address hints and ports, and URLs from URI/CAA/TXT data. All other data remains available in rdata.",
+    "Concatenate TXT/SPF chunks for reading while retaining quoting and chunk boundaries in rdata. Parse explicit SPF include/redirect/a/mx/exists domains and IPv4/IPv6 networks. Extract email addresses and HTTP(S) reporting URLs; no web request is made.",
+    "Query TXT at _dmarc, _mta-sts and _smtp._tls under the input name by default. One bounded follow-up stage queries A and AAAA for up to 16 discovered domain targets. Follow-ups share the original time budget and are not recursively expanded.",
+    "Eight worker threads share immutable resolver configuration and a total DNS time budget. Preserve successful results when other queries time out, are refused, return NXDOMAIN, or cannot start within the budget. Report limitations in the first object's comment. No returned records produces an error.",
+    "Set EDNS DNSSEC OK to request available DNSSEC data. This module does not independently validate DNSSEC signatures.",
+    "Return the original attribute with its UUID and metadata; every record object is derived-from that UUID. All generated attributes use to_ids=false. The bundled template provides strict validation even before a PyMISP template update."
+  ],
+  "input": {
+    "format": "misp_standard",
+    "types": [
+      "domain",
+      "hostname",
+      "domain|ip",
+      "hostname|port",
+      "url",
+      "email",
+      "email-src",
+      "email-dst",
+      "dns-soa-email",
+      "ip-src",
+      "ip-dst",
+      "ip-src|port",
+      "ip-dst|port"
+    ],
+    "required_attribute_fields": [
+      "type",
+      "value",
+      "uuid"
+    ]
+  },
+  "output": {
+    "format": "misp_standard",
+    "objects": [
+      "dns-resource-record"
+    ],
+    "max_records": 1000,
+    "errors": "Malformed requests, unsupported attributes, invalid values/configuration or no resource records return an error. Individual DNS failures preserve successful records with diagnostic comments."
+  },
+  "config": {
+    "nameserver": {
+      "default": "System resolver",
+      "description": "Optional recursive DNS server IP address (IPv4 or IPv6)."
+    },
+    "record_types": {
+      "default": "all",
+      "description": "All dnspython-known data types or a comma-separated list such as A,AAAA,SOA,TXT,MX,NS,CAA,HTTPS. Up to 128 explicit types. Excludes ANY, AXFR, IXFR, OPT, TKEY, TSIG, MAILA, MAILB and reserved values. A/AAAA follow-ups and optional mail-policy TXT queries are controlled separately."
+    },
+    "query_timeout": {
+      "default": 2,
+      "range": "0.1–10 seconds",
+      "description": "Per-query lifetime, including resolver retries, capped by the remaining total budget."
+    },
+    "max_time": {
+      "default": 30,
+      "range": "1–120 seconds",
+      "description": "Total budget shared by all initial DNS queries and address follow-ups. Serialization adds some processing time."
+    },
+    "max_pivots": {
+      "default": 16,
+      "range": "0–64 names",
+      "description": "Maximum discovered domain names to resolve in a single A/AAAA follow-up stage. Set 0 to disable."
+    },
+    "mail_policy": {
+      "default": true,
+      "description": "Boolean or true/false/1/0 string. Query _dmarc, _mta-sts and _smtp._tls TXT names for non-IP input. This uses the exact input domain, without guessing an organizational domain."
+    }
+  },
+  "limitations": [
+    "This enumerates record types at known names, not all records in a zone. DNS has no general query that reveals every owner name. It does not guess subdomains, DKIM selectors or SRV service labels; supply those names explicitly.",
+    "It does not send ANY, perform zone transfers, scan all 65,536 numeric type codes, walk NSEC chains, or recursively expand newly found names. Private numeric types can be selected explicitly.",
+    "A recursive resolver may filter types, return cached answers or omit records. No claim of complete zone coverage or DNSSEC authentication is made. A TTL is the resolver-returned remaining TTL.",
+    "Some obsolete or specialized types have no dnspython-specific decoder; full generic RDATA is still retained, while extracted pivot fields depend on the decoder.",
+    "Queries go to the configured recursive resolver. Eight workers and bounded time, result count and follow-up count limit each expansion's workload."
+  ],
+  "installation": [
+    "Install the module through the normal misp-modules package deployment; dnspython is already in the minimal/all dependency extras and PyMISP is a core dependency.",
+    "Restart misp-modules and enable dns_query in MISP Enrichment plugin settings. No API key is required.",
+    "Import/update the dns-resource-record template in MISP from MISP/misp-objects. Until available upstream, the identical definition is bundled at misp_modules/data/dns-resource-record/definition.json; import it into the MISP object-template store with your normal administrator workflow.",
+    "Expand an existing supported attribute using its original UUID. Both input and results use misp_standard format."
+  ],
+  "verification": {
+    "command": "python -m pytest -q -o log_cli=false tests/test_dns_query.py tests/test_dns.py tests/test_url_dns.py",
+    "coverage": "Record types, SOA/TXT and policy pivots, unknown types, aliases and deduplication, negative authority/glue records, supported inputs, configuration, partial failures, budgets, limits, metadata and strict object validation. A local UDP DNS server exercises real dnspython wire parsing and EDNS.",
+    "limitations": "Public DNS and deployment into a running MISP instance have not been tested."
+  },
+  "example": {
+    "module": "dns_query",
+    "attribute": {
+      "type": "domain",
+      "value": "example.org",
+      "uuid": "5b582d80-7a7e-4b6a-9f22-77656e72bb3b"
+    },
+    "config": {
+      "record_types": "all",
+      "max_time": 30,
+      "max_pivots": 16,
+      "mail_policy": true
+    }
+  }
+}
