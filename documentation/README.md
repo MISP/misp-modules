@@ -2401,6 +2401,35 @@ An expansion modules for SecurityTrails.
 
 -----
 
+#### [Sherlock Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/sherlock.py)
+
+Find social media accounts by username with Sherlock.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/sherlock.py)]
+
+- **features**:
+>Runs the Sherlock CLI and returns user-account objects for claimed usernames only. Text is searched as a single literal username, without extracting names or generating variants. Email input uses the local part before @ as a candidate username; matches do not verify email ownership or identity. Install Sherlock for the misp-modules service user and put sherlock on its PATH, or set sherlock_path to the executable's absolute path (not a shell command). Optional sites is a comma-separated list of Sherlock site names; github-username defaults to GitHub only. timeout is the per-site timeout in seconds (default 10); scan_timeout bounds the whole process (default 120). Both must be positive finite numbers. Keep scan_timeout below the MISP enrichment and module-server request timeouts, or raise those timeouts for broad searches. Sherlock contacts the selected sites and downloads its current site definitions. Results can contain false positives and should be reviewed.
+
+- **config**:
+> - sherlock_path
+> - sites
+> - timeout
+> - scan_timeout
+
+- **input**:
+>A target-user, github-username, text, or email attribute. A leading @ on a username is removed.
+
+- **output**:
+>One user-account object per match, with username, platform, profile link and a reference to the input.
+
+- **references**:
+> - https://github.com/sherlock-project/sherlock
+> - https://sherlockproject.xyz/usage
+
+- **requirements**:
+>Install the sherlock-project CLI separately (for example: pipx install sherlock-project). No API key required.
+
+-----
+
 #### [Shodan Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/shodan.py)
 
 <img src=logos/shodan.png height=60>
