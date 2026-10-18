@@ -233,6 +233,43 @@ def test_malformed_indicators_are_reported_and_never_sent(client, kind, value):
     client.constructor.assert_not_called()
 
 
+@pytest.mark.parametrize("kind", ["domain", "hostname", "domain|ip"])
+@pytest.mark.parametrize("length", [200, 201, 253])
+def test_falcon_domain_length_boundary(client, kind, length):
+    # All labels are within DNS's 63-character limit, including beyond Falcon's limit.
+    domain = ".".join(["a" * 63, "b" * 63, "c" * 63, "d" * (length - 192)])
+    assert len(domain) == length
+    value = domain + "|192.0.2.1" if kind == "domain|ip" else domain
+    result = run(event([attribute(kind, value)]))
+    if length > 200:
+        assert result["data"]["skipped"] == {"malformed": 1}
+        assert result["data"]["created"] == 0
+        client.constructor.assert_not_called()
+    else:
+        assert result["data"]["created"] == (2 if kind == "domain|ip" else 1)
+
+
+@pytest.mark.parametrize("kind", ["domain", "hostname", "domain|ip"])
+def test_falcon_domain_limit_applies_after_idna_encoding(client, kind):
+    domain = ".".join(["ü" * 20] * 8)
+    assert len(domain) <= 200 < len(domain.encode("idna")) <= 253
+    value = domain + "|192.0.2.1" if kind == "domain|ip" else domain
+    result = run(event([attribute(kind, value)]))
+    assert result["data"]["skipped"] == {"malformed": 1}
+    client.constructor.assert_not_called()
+
+
+def test_overlong_domain_does_not_cause_partial_publication_failure(client):
+    domain = ".".join(["a" * 63, "b" * 63, "c" * 63, "d" * 9])
+    result = run(event([attribute(value=domain), attribute()]))
+    assert result["data"]["success"] is True
+    assert result["data"]["skipped"] == {"malformed": 1}
+    assert result["data"]["created"] == 1
+    client.indicator_combined_v1.assert_called_once_with(
+        filter="type:'domain'+value:'example.org'", limit=2, from_parent=False
+    )
+
+
 def test_prevent_is_only_allowed_for_hashes(client):
     assert "error" in run(action="prevent")
     client.constructor.assert_not_called()

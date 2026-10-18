@@ -85,6 +85,7 @@ REGIONS = {
 }
 OWNER_TAG = "misp-ioc-publish"
 MAX_INDICATORS = 100
+MAX_DOMAIN_LENGTH = 200  # Falcon custom IOC limit, applied after IDNA normalization.
 DEADLINE_SECONDS = 240
 HASH_LENGTHS = {"md5": 32, "sha256": 64}
 SUPPORTED_TYPES = {
@@ -192,7 +193,7 @@ def _atomic(kind, value):
         address = ipaddress.ip_address(value)
         return f"ipv{address.version}", str(address)
     domain = value.rstrip(".").encode("idna").decode("ascii").lower()
-    if len(domain) > 253 or any(
+    if len(domain) > MAX_DOMAIN_LENGTH or any(
         not re.fullmatch(r"[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?", label) for label in domain.split(".")
     ):
         raise ValueError("Invalid domain.")

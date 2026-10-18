@@ -45,7 +45,7 @@ eligible. Deleted events, objects and attributes are excluded.
 | MISP type | Falcon type | Conversion |
 | --- | --- | --- |
 | `md5`, `sha256` | `md5`, `sha256` | Validate hexadecimal length and lowercase. |
-| `domain`, `hostname` | `domain` | IDNA encode, lowercase, remove trailing DNS dot and validate DNS labels. |
+| `domain`, `hostname` | `domain` | IDNA encode, lowercase, remove trailing DNS dot and validate DNS labels and Falcon's 200-character normalized domain limit. |
 | `ip-src`, `ip-dst` | `ipv4`, `ipv6` | Validate and canonicalize the address. CIDRs and scoped IPv6 are excluded. |
 | `domain\|ip` | Domain plus IP | Publish two independent atomic IOCs. |
 | `filename\|md5`, `filename\|sha256`, `malware-sample` | File hash | Publish the hash component. Filenames containing pipes are handled by splitting at the last pipe. No sample data is uploaded. |
@@ -54,6 +54,10 @@ Other types, including URLs, SHA-1, filenames alone and port-qualified composite
 are skipped with counts in the result. Port constraints are not discarded to
 create broader IOCs. Invalid values are skipped as malformed. Existing objects
 need no special handling beyond their supported, IDS-marked attributes.
+
+The 200-character domain limit applies after IDNA encoding, including to the domain
+component of `domain|ip`. Overlong domains are counted as malformed before any
+Falcon request, so otherwise eligible indicators can still be published successfully.
 
 Indicators are deduplicated by canonical `(type, value)`. All contributing event,
 attribute and object references remain in the returned `sources` list. Falcon's
