@@ -1,123 +1,138 @@
+"""Microsoft Sentinel direct publishing or the existing MISP2* script wrapper."""
+
+import copy
 import json
-import subprocess
 import os
+import subprocess
 
-'''
-    Synchronise with Microsoft Sentinel or Defender: A wrapper around an existing installation of MISP2Sentinel or MISP2Defender
+from misp_modules.modules.action_mod import sentinel_publish
 
-    Calls the script from MISP2Sentinel or MISP2Defender (misp2_script) using the Python virtual environment (misp2_venv)
-    Uses the event UUID from the MISP event to export the indicators
-    Preferably run as Ad-Hoc workflow
-'''
-
-misperrors = {"error": "Error"}
-
+DEFAULT_VENV = "/var/www/MISP/misp-custom/misp2sentinel/venv/"
+DEFAULT_SCRIPT = "/var/www/MISP/misp-custom/misp2sentinel/script.py"
 moduleconfig = {
     "params": {
-        "misp2_venv": {"type": "string", "description": "Where is the MISP2Sentinel or MISP2Defender Python virtual environment?", "value": "/var/www/MISP/misp-custom/misp2sentinel/venv/"},
-        "misp2_script": {"type": "string", "description": "Where is the MISP2Sentinel or MISP2Defender installation?", "value": "/var/www/MISP/misp-custom/misp2sentinel/script.py"},
+        "mode": {
+            "type": "string",
+            "description": "wrapper (existing MISP2Sentinel/MISP2Defender) or direct (Sentinel STIX API)",
+            "value": "wrapper",
+        },
+        "misp2_venv": {
+            "type": "string",
+            "description": "MISP2Sentinel or MISP2Defender Python virtual environment",
+            "value": DEFAULT_VENV,
+        },
+        "misp2_script": {
+            "type": "string",
+            "description": "MISP2Sentinel or MISP2Defender script path",
+            "value": DEFAULT_SCRIPT,
+        },
+        **copy.deepcopy(sentinel_publish.moduleconfig["params"]),
     },
-    # Blocking modules break the exection of the current of action
     "blocking": False,
-    # Indicates whether parts of the data passed to this module should be extracted. Extracted data can be found under the `filteredItems` key
-    "support_filters": True,
-    # Indicates whether the data passed to this module should be compliant with the MISP core format
-    "expect_misp_core_format": False,
+    "support_filters": False,
+    "expect_misp_core_format": True,
 }
-
-returns = "boolean"
-
+returns = "data"
 moduleinfo = {
-    "version": "0.1",
-    "author": "Koen Van Impe",
-    "description": "Export indicators to Microsoft Sentinel or Microsoft Defender. Requires an existing installation of MISP2Sentinel or MISP2Defender.",
+    "version": "0.2",
+    "author": "Koen Van Impe, MISP Project",
+    "description": (
+        "Export to Sentinel or Defender using the existing script wrapper, or directly to Sentinel's STIX API."
+    ),
     "module-type": ["action"],
     "name": "Export to Sentinel or Defender",
     "logo": "",
-    "requirements": [],
-    "features": "",
-    "references": [],
-    "input": "",
-    "output": "",
+    "requirements": ["requests", "MISP2Sentinel/MISP2Defender for wrapper mode, or Entra credentials for direct mode"],
+    "features": (
+        "Preserves wrapper mode and its boolean success response by default. Direct mode publishes supplied IDS"
+        " attributes to Microsoft Sentinel without an external script, using the same implementation as"
+        " sentinel_publish. Filtered/extracted payloads are rejected because neither path applies workflow filters. See"
+        " the [usage"
+        " guide](https://github.com/MISP/misp-modules/blob/main/documentation/action_mod/sentinel_publish.md)."
+    ),
+    "references": [
+        "https://learn.microsoft.com/en-us/azure/sentinel/stix-objects-api",
+        "https://github.com/cudeso/misp2sentinel",
+    ],
+    "input": "An event UUID in wrapper mode, or supplied MISP events/object attributes in direct mode.",
+    "output": "Boolean wrapper success, or a direct publishing summary with per-indicator outcomes.",
 }
 
 
+def _paths(params):
+    venv = params.get("misp2_venv")
+    script = params.get("misp2_script")
+    if venv is None or venv == "":
+        venv = DEFAULT_VENV
+    if script is None or script == "":
+        script = DEFAULT_SCRIPT
+    if not isinstance(venv, str) or not isinstance(script, str) or not os.path.isabs(venv) or not os.path.isabs(script):
+        raise ValueError("Wrapper virtual-environment and script paths must be absolute.")
+    if "\x00" in venv or "\x00" in script:
+        raise ValueError("Wrapper paths must not contain NUL characters.")
+    return os.path.join(venv, "bin", "python"), script
+
+
 def export_to_sentinel(request, event_uuid):
-    params = request["params"]
-    misp2_venv = params["misp2_venv"]
-    misp2_script = params["misp2_script"]
-
-    script_dir = os.path.dirname(misp2_script)
-    python_executable = os.path.join(misp2_venv, "bin", "python")
-
-    if not os.path.exists(python_executable):
-        print(f"Error: Python executable not found at {python_executable}")
-        return False
-
-    if not os.path.exists(misp2_script):
-        print(f"Error: Script not found at {misp2_script}")
-        return False
-
-    print(f"Exporting event {event_uuid} to Sentinel or Defender...")
-    print(f"Using Python: {python_executable}")
-    print(f"Running script: {misp2_script}")
-    print(f"Working directory: {script_dir}")
-
+    """Keep the existing wrapper helper's boolean contract without logging secrets."""
     try:
-        result = subprocess.run(
-            [python_executable, misp2_script, event_uuid],
-            cwd=script_dir,
-            capture_output=True,
-            text=True,
-            timeout=300
-        )
-
-        if result.returncode == 0:
-            print(f"Successfully exported event {event_uuid}")
-            if result.stdout:
-                print(f"Output: {result.stdout}")
-            return True
-        else:
-            print(f"Export failed with return code {result.returncode}")
-            if result.stderr:
-                print(f"Error: {result.stderr}")
-            if result.stdout:
-                print(f"Output: {result.stdout}")
+        python, script = _paths(request.get("params", {}))
+        if not os.path.isfile(python) or not os.path.isfile(script):
             return False
-
-    except subprocess.TimeoutExpired:
-        print("Export timed out")
-        return False
-    except Exception as e:
-        print(f"Error executing script: {str(e)}")
+        result = subprocess.run(
+            [python, script, event_uuid],
+            cwd=os.path.dirname(script),
+            stdin=subprocess.DEVNULL,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            timeout=240,
+            check=False,
+        )
+        return result.returncode == 0
+    except (ValueError, TypeError, OSError, subprocess.SubprocessError):
         return False
 
 
 def handler(q=False):
-    if q is False:
+    if not q:
         return False
-
-    request = json.loads(q)
-    success = False
-
-    event_uuid = request.get("data", {}).get("Event", {}).get("uuid")
-    if event_uuid:
-        success = export_to_sentinel(request, event_uuid)
-    else:
-        print("Error: No event UUID found in request data")
-
-    return {"data": success}
+    try:
+        request = json.loads(q)
+        if not isinstance(request, dict):
+            raise ValueError("Request must be an object.")
+        if "filteredItems" in request or "matchingData" in request:
+            raise ValueError("Workflow filters/extracted data are unsupported; select the intended events upstream.")
+        params = request.get("params", {})
+        if not isinstance(params, dict):
+            raise ValueError("params must be an object.")
+        mode = params.get("mode")
+        if mode is None or mode == "":
+            mode = "wrapper"
+        if mode == "direct":
+            return sentinel_publish.handler(q)
+        if mode != "wrapper":
+            raise ValueError("mode must be wrapper or direct.")
+        if sentinel_publish._boolean(params.get("dry_run")):
+            raise ValueError("dry_run is available in direct mode; wrapper mode runs the configured script.")
+        data = request.get("data")
+        if not isinstance(data, dict) or not isinstance(event := data.get("Event", data), dict):
+            raise ValueError("Wrapper mode requires one event; use direct mode for event collections.")
+        identifier = sentinel_publish._uuid(event.get("uuid"), "event UUID")
+        _paths(params)
+    except (ValueError, TypeError) as exc:
+        return {"data": False, "error": f"Sentinel/Defender export: {exc}"}
+    success = export_to_sentinel(request, identifier)
+    if not success:
+        return {
+            "data": False,
+            "error": "Sentinel/Defender wrapper failed, timed out or is unavailable; check its installation and logs.",
+        }
+    return {"data": True}
 
 
 def introspection():
-    modulesetup = {}
-    try:
-        modulesetup["config"] = moduleconfig
-    except NameError:
-        pass
-    return modulesetup
+    return {"config": moduleconfig}
 
 
 def version():
-    moduleinfo["config"] = moduleconfig
-    return moduleinfo
+    return dict(moduleinfo, config=moduleconfig)
