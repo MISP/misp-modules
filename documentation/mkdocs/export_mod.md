@@ -77,6 +77,32 @@ Defender for Endpoint KQL hunting query export module
 
 -----
 
+#### [Elastic ECS Export](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/elastic_ecs_export.py)
+
+Export event and object indicators as ECS threat indicators in Elasticsearch Bulk NDJSON.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/elastic_ecs_export.py)]
+
+- **features**:
+>Exports all supplied events, including object attributes, to ECS 9.2 threat.indicator fields. Bulk index actions use stable source-based IDs. Only to_ids attributes are included by default; include_non_ids enables contextual attributes. Deleted data is excluded. Source UUIDs, object context, tags, observation times and TLP markings are preserved. No Elasticsearch connection is required. See the [usage guide](https://github.com/MISP/misp-modules/blob/main/documentation/export_mod/elastic_ecs_export.md) for the index template, import procedure, matching fields and lifecycle limitations.
+
+- **config**:
+> - index
+> - include_non_ids
+> - misp_url
+
+- **input**:
+>A list of MISP events in standard or legacy export format.
+
+- **output**:
+>Base64-encoded Bulk NDJSON containing ECS indicator documents; optional API warnings.
+
+- **references**:
+> - https://www.elastic.co/docs/reference/ecs/ecs-threat
+> - https://github.com/elastic/ecs/blob/v9.2.0/schemas/threat.yml
+> - https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-bulk
+
+-----
+
 #### [GoAML Export](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/goamlexport.py)
 
 <img src=../logos/goAML.jpg height=60>

@@ -1,0 +1,164 @@
+{
+  "index_patterns": [
+    "misp-indicators*"
+  ],
+  "_meta": {
+    "description": "Minimal ECS 9.2 mappings for elastic_ecs_export; adjust index_patterns for custom targets.",
+    "ecs_version": "9.2.0"
+  },
+  "template": {
+    "mappings": {
+      "dynamic": false,
+      "properties": {
+        "misp": {
+          "type": "flattened"
+        },
+        "@timestamp": {
+          "type": "date"
+        },
+        "ecs": {
+          "properties": {
+            "version": {
+              "type": "keyword"
+            }
+          }
+        },
+        "event": {
+          "properties": {
+            "category": {
+              "type": "keyword"
+            },
+            "dataset": {
+              "type": "keyword"
+            },
+            "id": {
+              "type": "keyword"
+            },
+            "kind": {
+              "type": "keyword"
+            },
+            "module": {
+              "type": "keyword"
+            },
+            "type": {
+              "type": "keyword"
+            }
+          }
+        },
+        "tags": {
+          "type": "keyword"
+        },
+        "threat": {
+          "properties": {
+            "indicator": {
+              "properties": {
+                "as": {
+                  "properties": {
+                    "number": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "confidence": {
+                  "type": "keyword"
+                },
+                "description": {
+                  "type": "keyword"
+                },
+                "email": {
+                  "properties": {
+                    "address": {
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "file": {
+                  "properties": {
+                    "hash": {
+                      "properties": {
+                        "md5": {
+                          "type": "keyword"
+                        },
+                        "sha1": {
+                          "type": "keyword"
+                        },
+                        "sha256": {
+                          "type": "keyword"
+                        },
+                        "sha384": {
+                          "type": "keyword"
+                        },
+                        "sha512": {
+                          "type": "keyword"
+                        }
+                      }
+                    },
+                    "name": {
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "first_seen": {
+                  "type": "date"
+                },
+                "id": {
+                  "type": "keyword"
+                },
+                "ip": {
+                  "type": "ip"
+                },
+                "last_seen": {
+                  "type": "date"
+                },
+                "marking": {
+                  "properties": {
+                    "tlp": {
+                      "type": "keyword"
+                    },
+                    "tlp_version": {
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "modified_at": {
+                  "type": "date"
+                },
+                "name": {
+                  "type": "keyword"
+                },
+                "port": {
+                  "type": "long"
+                },
+                "provider": {
+                  "type": "keyword"
+                },
+                "reference": {
+                  "type": "keyword"
+                },
+                "type": {
+                  "type": "keyword"
+                },
+                "url": {
+                  "properties": {
+                    "domain": {
+                      "type": "keyword"
+                    },
+                    "full": {
+                      "type": "wildcard"
+                    },
+                    "port": {
+                      "type": "long"
+                    },
+                    "scheme": {
+                      "type": "keyword"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
