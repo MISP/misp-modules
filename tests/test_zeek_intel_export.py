@@ -4,6 +4,8 @@ import json
 import os
 import re
 import shutil
+import socket
+import struct
 import subprocess
 
 import pytest
@@ -56,10 +58,10 @@ def rows(result):
         ("domain", "EXAMPLE.org.", "DOMAIN", "example.org"),
         ("hostname", "bücher.example", "DOMAIN", "xn--bcher-kva.example"),
         ("url", "HTTP://Example.org/Case?q=One#fragment", "URL", "example.org/case?q=one"),
-        ("url", "https://example.org:8443/A?b=C", "URL", "example.org:8443/a?b=c"),
-        ("url", "https://example.org", "URL", "example.org/"),
+        ("url", "https://example.org:8443/A?b=C", "URL", {"example.org:8443/a?b=c", "example.org:8443:8443/a?b=c"}),
+        ("url", "https://example.org", "URL", {"example.org:443/", "example.org:443:443/"}),
         ("url", "http://example.org?x=1", "URL", "example.org/?x=1"),
-        ("url", "http://[2001:db8::1]:8080/Path", "URL", "[2001:db8::1]:8080/path"),
+        ("url", "http://[2001:db8::1]:8080/Path", "URL", {"[2001:db8::1]:8080/path", "[2001:db8::1]:8080:8080/path"}),
         *[(kind, "A" * length, "FILE_HASH", "a" * length) for kind, length in export.HASH_LENGTHS.items()],
         *[
             (f"filename|{kind}", "a|b.exe|" + "A" * length, "FILE_HASH", "a" * length)
@@ -77,11 +79,14 @@ def rows(result):
 )
 def test_supported_types_and_normalization(kind, value, intel_type, indicator):
     result = run(event([attribute(kind, value)]))
-    row = rows(result)[0]
-    assert row["indicator_type"] == "Intel::" + intel_type and row["indicator"] == indicator
-    assert row["meta.source"] == "misp-modules" and row["meta.url"] is None
-    assert json.loads(row["meta.desc"])[0]["original_value"] == value
-    assert result["summary"] == {"count": 1, "skipped": {}}
+    expected = {indicator} if isinstance(indicator, str) else indicator
+    output_rows = rows(result)
+    assert {row["indicator"] for row in output_rows} == expected
+    for row in output_rows:
+        assert row["indicator_type"] == "Intel::" + intel_type
+        assert row["meta.source"] == "misp-modules" and row["meta.url"] is None
+        assert json.loads(row["meta.desc"])[0]["original_value"] == value
+    assert result["summary"] == {"count": len(expected), "skipped": {}}
 
 
 def test_domain_ip_emits_two_independent_indicators():
@@ -91,6 +96,162 @@ def test_domain_ip_emits_two_independent_indicators():
         ("Intel::ADDR", "192.0.2.1"),
     }
     assert all(json.loads(row["meta.desc"])[0]["misp_type"] == "domain|ip" for row in rows(result))
+
+
+@pytest.mark.parametrize(
+    "url,expected",
+    [
+        ("http://example.org/a%2Fb?x=%41+%2B", {"example.org/a/b?x=a++"}),
+        ("http://example.org/a%252Fb", {"example.org/a%2fb"}),
+        ("http://example.org/a%20b", {"example.org/a b"}),
+        ("http://example.org/a%23b?x=%3F", {"example.org/a#b?x=?"}),
+        ("http://example.org/a?", {"example.org/a?"}),
+        ("http://example.org:8080/a", {"example.org:8080/a", "example.org:8080:8080/a"}),
+        ("http://example.org:80/a", {"example.org/a", "example.org:80/a"}),
+        ("https://example.org/a", {"example.org:443/a", "example.org:443:443/a"}),
+        ("http://[2001:db8::1]:8080/a", {"[2001:db8::1]:8080/a", "[2001:db8::1]:8080:8080/a"}),
+    ],
+)
+def test_url_keys_match_decoded_targets_and_host_header_port_forms(url, expected):
+    result = run(event([attribute("url", url)]))
+    assert {row["indicator"] for row in rows(result)} == expected
+    assert all(json.loads(row["meta.desc"])[0]["original_value"] == url for row in rows(result))
+
+
+@pytest.mark.parametrize(
+    "target,expected",
+    [
+        ("/%FF%00%09%5C", b"example.org/\xff\x00\t\\"),
+        ("/%%41", b"example.org/a"),
+        ("/%u0041%u00FF", b"example.org/a\xff"),
+        ("/%GG%a%", b"example.org/%gg%a%"),
+        ("/jump?next=http%3A%2F%2Fother.example", b"/jump?next=http://other.example"),
+    ],
+)
+def test_url_escape_decoding_preserves_native_bytes_without_injecting_rows(target, expected):
+    result = run(event([attribute("url", "http://example.org" + target)]))
+    raw = base64.b64decode(result["data"])
+    assert len(raw.splitlines()) == 2
+    fields = raw.splitlines()[1].split(b"\t")
+    assert len(fields) == 5
+    decoded = re.sub(rb"\\x([0-9a-fA-F]{2})", lambda match: bytes([int(match[1], 16)]), fields[0])
+    assert decoded == expected
+    # API provenance remains JSON-serializable even when the native key is not UTF-8.
+    json.dumps(result, ensure_ascii=False).encode("utf-8")
+
+
+def _http_trace(requests):
+    """Build an offline Ethernet/IPv4/TCP trace without extra test dependencies."""
+    trace = bytearray(struct.pack("<IHHIIII", 0xA1B2C3D4, 2, 4, 0, 0, 65535, 1))
+
+    def checksum(data):
+        if len(data) % 2:
+            data += b"\x00"
+        total = sum(struct.unpack(f"!{len(data) // 2}H", data))
+        while total >> 16:
+            total = (total & 0xFFFF) + (total >> 16)
+        return (~total) & 0xFFFF
+
+    index = 0
+
+    def packet(source_port, port, seq, ack, flags, payload=b"", reply=False):
+        nonlocal index
+        source, destination = socket.inet_aton("192.0.2.1"), socket.inet_aton("198.51.100.1")
+        if reply:
+            source, destination = destination, source
+            source_port, port = port, source_port
+        tcp = struct.pack("!HHIIBBHHH", source_port, port, seq, ack, 5 << 4, flags, 65535, 0, 0)
+        pseudo = source + destination + struct.pack("!BBH", 0, 6, len(tcp) + len(payload))
+        tcp = tcp[:16] + struct.pack("!H", checksum(pseudo + tcp + payload)) + tcp[18:]
+        ip = struct.pack(
+            "!BBHHHBBH4s4s", 0x45, 0, 20 + len(tcp) + len(payload), index, 0, 64, 6, 0, source, destination
+        )
+        ip = ip[:10] + struct.pack("!H", checksum(ip)) + ip[12:]
+        ethernet = bytes.fromhex("00112233445566778899aabb0800")
+        frame = ethernet + ip + tcp + payload
+        trace.extend(struct.pack("<IIII", 1700000000 + index, 0, len(frame), len(frame)) + frame)
+        index += 1
+
+    for connection, (port, host, target) in enumerate(requests):
+        source_port = 40000 + connection
+        request = f"GET {target} HTTP/1.1\r\nHost: {host}\r\nConnection: close\r\n\r\n".encode("ascii")
+        response = b"HTTP/1.1 200 OK\r\nContent-Length: 0\r\nConnection: close\r\n\r\n"
+        packet(source_port, port, 1000, 0, 0x02)
+        packet(source_port, port, 2000, 1001, 0x12, reply=True)
+        packet(source_port, port, 1001, 2001, 0x10)
+        packet(source_port, port, 1001, 2001, 0x18, request)
+        packet(source_port, port, 2001, 1001 + len(request), 0x18, response, reply=True)
+        packet(source_port, port, 1001 + len(request), 2001 + len(response), 0x11)
+        packet(source_port, port, 2001 + len(response), 1002 + len(request), 0x11, reply=True)
+        packet(source_port, port, 1002 + len(request), 2002 + len(response), 0x10)
+    return trace
+
+
+def test_native_zeek_http_observer_matches_percent_encoding_and_nondefault_ports(tmp_path):
+    zeek = os.getenv("ZEEK") or shutil.which("zeek")
+    if not zeek:
+        pytest.skip("Set ZEEK to exercise the native HTTP analyzer and Intel URL observer.")
+    cases = [
+        (80, "example.org", "/a%2Fb?x=%41+%2B", b"example.org/a/b?x=a++"),
+        (80, "example.org", "/a%252Fb", b"example.org/a%2fb"),
+        (80, "example.org", "/a%20b", b"example.org/a b"),
+        (80, "example.org", "/a%23b?x=%3F", b"example.org/a#b?x=?"),
+        (80, "example.org", "/a?", b"example.org/a?"),
+        (8080, "example.org:8080", "/port", b"example.org:8080:8080/port"),
+        (8080, "example.org", "/port", b"example.org:8080/port"),
+        (80, "example.org:80", "/default", b"example.org:80/default"),
+        (80, "example.org", "/default", b"example.org/default"),
+    ]
+    urls = [
+        "http://example.org/a%2Fb?x=%41+%2B",
+        "http://example.org/a%252Fb",
+        "http://example.org/a%20b",
+        "http://example.org/a%23b?x=%3F",
+        "http://example.org/a?",
+        "http://example.org:8080/port",
+        "http://example.org:80/default",
+    ]
+    for target, expected in [
+        ("/bytes%FF%00%09%5C", b"example.org/bytes\xff\x00\t\\"),
+        ("/double%%41", b"example.org/doublea"),
+        ("/legacy%u0041%u00FF", b"example.org/legacya\xff"),
+        ("/bad%GG%a%", b"example.org/bad%gg%a%"),
+        ("/jump?next=http%3A%2F%2Fother.example", b"/jump?next=http://other.example"),
+    ]:
+        urls.append("http://example.org" + target)
+        cases.append((80, "example.org", target, expected))
+    result = run(event([attribute("url", url, uuid=f"url-{index}") for index, url in enumerate(urls)]))
+    (tmp_path / "feed.intel").write_bytes(base64.b64decode(result["data"]))
+    (tmp_path / "http.pcap").write_bytes(_http_trace([(port, host, target) for port, host, target, _ in cases]))
+    script = tmp_path / "http.zeek"
+    script.write_text(r"""
+@load base/frameworks/intel
+@load frameworks/intel/seen
+redef InputAscii::fail_on_invalid_lines = T;
+redef InputAscii::fail_on_file_problem = T;
+redef Intel::read_files = { "FEED_PATH" };
+event zeek_init()
+    {
+    suspend_processing();
+    }
+event Input::end_of_data(name: string, source: string)
+    {
+    continue_processing();
+    }
+hook Intel::seen_policy(s: Intel::Seen, found: bool)
+    {
+    if ( s?$indicator_type && s$indicator_type == Intel::URL )
+        print fmt("OBS %s %s", encode_base64(s$indicator), found);
+    }
+""".replace("FEED_PATH", str(tmp_path / "feed.intel")))
+    process = subprocess.run(
+        [zeek, "-r", str(tmp_path / "http.pcap"), str(script)], cwd=tmp_path, text=True, capture_output=True, timeout=40
+    )
+    assert process.returncode == 0, process.stdout + process.stderr
+    observations = [line.split() for line in process.stdout.splitlines() if line.startswith("OBS ")]
+    assert len(observations) == len(cases), process.stdout + process.stderr
+    assert [base64.b64decode(parts[1]).lower() for parts in observations] == [expected for _, _, _, expected in cases]
+    assert all(parts[2] == "T" for parts in observations), process.stdout
 
 
 def test_ipv4_mapped_aliases_share_zeek_identity_and_keep_all_provenance():
@@ -150,7 +311,7 @@ def test_case_insensitive_keys_aggregate_provenance_instead_of_overwriting_metad
             attribute("filename", "File.EXE"),
             attribute("filename", "file.exe", uuid="attribute-2"),
             attribute("url", "http://example.org/Case", uuid="attribute-3"),
-            attribute("url", "https://EXAMPLE.org/case#fragment", uuid="attribute-4"),
+            attribute("url", "http://EXAMPLE.org/case#fragment", uuid="attribute-4"),
         ]
     )
     result = run(data)
@@ -447,3 +608,17 @@ class TestZeekExportHTTP(AsyncHTTPTestCase):
             body=json.dumps({"module": "zeek_intel_export", "data": [event([attribute()])]}),
         )
         assert result.code == 200 and rows(json.loads(result.body))[0]["indicator_type"] == "Intel::DOMAIN"
+
+    def test_percent_encoded_binary_url_has_a_valid_json_api_response(self):
+        result = self.fetch(
+            "/query",
+            method="POST",
+            headers={"Content-Type": "application/json"},
+            body=json.dumps(
+                {"module": "zeek_intel_export", "data": event([attribute("url", "http://example.org/%ff%00")])}
+            ),
+        )
+        assert result.code == 200
+        body = json.loads(result.body)
+        assert body["sources"][0]["indicator"] == "example.org/\\xff\x00"
+        assert b"example.org/\\xff\\x00\tIntel::URL" in base64.b64decode(body["data"])

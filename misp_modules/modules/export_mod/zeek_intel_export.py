@@ -6,7 +6,7 @@ import json
 import re
 import uuid
 from collections import Counter
-from urllib.parse import urlsplit, urlunsplit
+from urllib.parse import urlsplit
 
 moduleinfo = {
     "version": "1.0",
@@ -122,6 +122,59 @@ def _fingerprint(value, length):
     raise ValueError("Invalid fingerprint.")
 
 
+def _unescape_uri(value):
+    """Mirror Zeek HTTP's byte-oriented, single-pass unescape_URI routine."""
+    raw, decoded, index = value.encode("utf-8"), bytearray(), 0
+    while index < len(raw):
+        remaining = raw[index : index + 6]
+        if remaining.startswith(b"%%") and len(remaining) >= 3:
+            index += 1  # Zeek ignores the first '%' in a doubled escape.
+            continue
+        if re.match(rb"%[0-9a-fA-F]{2}", remaining):
+            decoded.append(int(remaining[1:3], 16))
+            index += 3
+        elif re.match(rb"%u[0-9a-fA-F]{4}", remaining):
+            high, low = int(remaining[2:4], 16), int(remaining[4:6], 16)
+            if high:
+                decoded.append(high)
+            decoded.append(low)
+            index += 6
+        else:
+            decoded.append(raw[index])
+            index += 1
+    return bytes(decoded)
+
+
+def _urls(value):
+    parsed = urlsplit(value)
+    if (
+        parsed.scheme not in ("http", "https")
+        or not parsed.hostname
+        or parsed.username is not None
+        or parsed.password is not None
+        or any(char.isspace() or ord(char) < 32 or ord(char) == 127 for char in value)
+    ):
+        raise ValueError("URL must be absolute HTTP(S), without credentials or whitespace.")
+    port = parsed.port
+    host = parsed.netloc.rsplit(":", 1)[0] if port is not None else parsed.netloc
+    responder_port = port if port is not None else (80 if parsed.scheme == "http" else 443)
+    target = parsed.path or "/"
+    if "?" in value.split("#", 1)[0]:
+        target += "?" + parsed.query
+    target = _unescape_uri(target)
+    # HTTP::build_url returns request targets containing '://' without a Host prefix.
+    if b"://" in target:
+        return [("Intel::URL", target)]
+    authorities = {host.encode("utf-8")}
+    if port is not None or responder_port != 80:
+        authorities.add(f"{host}:{responder_port}".encode("utf-8"))
+    if port is not None:
+        authorities.add(parsed.netloc.encode("utf-8"))
+    # The observer appends the responder port even when Host already includes it.
+    suffix = f":{responder_port}".encode("ascii") if responder_port != 80 else b""
+    return [("Intel::URL", authority + suffix + target) for authority in sorted(authorities)]
+
+
 def _atomic(kind, value):
     value.encode("utf-8")
     if kind in FILENAME_TYPES:
@@ -146,19 +199,6 @@ def _atomic(kind, value):
         return "Intel::ADDR", str(address)
     if kind in ("domain", "hostname"):
         return "Intel::DOMAIN", _domain(value)
-    if kind == "url":
-        parsed = urlsplit(value)
-        if (
-            parsed.scheme not in ("http", "https")
-            or not parsed.hostname
-            or parsed.username is not None
-            or parsed.password is not None
-            or any(char.isspace() for char in value)
-        ):
-            raise ValueError("URL must be absolute HTTP(S), without credentials or whitespace.")
-        parsed.port
-        # Zeek's default HTTP observer reports host[:port]/path?query, without a scheme or fragment.
-        return "Intel::URL", urlunsplit(("", parsed.netloc, parsed.path or "/", parsed.query, ""))[2:]
     if kind in EMAIL_TYPES:
         local, separator, domain = value.rpartition("@")
         if not separator or not re.fullmatch(r"[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+", local):
@@ -173,6 +213,8 @@ def _atomic(kind, value):
 
 
 def _indicators(kind, value):
+    if kind == "url":
+        return _urls(value)
     if "|" not in kind and kind != "malware-sample":
         return [_atomic(kind, value)]
     first, separator, second = value.rpartition("|")
@@ -229,7 +271,9 @@ def _collect(data, include_non_ids):
             # Zeek's Intel string store is case-insensitive. Merge those keys so
             # identical source labels cannot overwrite another attribute's provenance.
             for atom_type, indicator in atoms:
-                atom = atom_type, indicator.translate(ASCII_LOWER)
+                atom = atom_type, (
+                    indicator.lower() if isinstance(indicator, bytes) else indicator.translate(ASCII_LOWER)
+                )
                 refs = indicators.setdefault(atom, [])
                 if ref not in refs:
                     refs.append(ref)
@@ -239,7 +283,7 @@ def _collect(data, include_non_ids):
 def _escape(value):
     if value is None:
         return "-"
-    encoded = value.encode("utf-8")
+    encoded = value if isinstance(value, bytes) else value.encode("utf-8")
     escaped = "".join(chr(byte) if 32 <= byte <= 126 and byte not in (35, 92) else f"\\x{byte:02x}" for byte in encoded)
     if escaped in ("-", "(empty)"):
         escaped = f"\\x{encoded[0]:02x}" + escaped[1:]
@@ -274,7 +318,10 @@ def handler(q=False):
             description = json.dumps(refs, sort_keys=True, ensure_ascii=False)
             row = (indicator, kind, source, description, _event_url(base, refs))
             lines.append("\t".join(_escape(field) for field in row))
-            provenance.append({"indicator": indicator, "indicator_type": kind, "sources": refs})
+            displayed = (
+                indicator.decode("utf-8", errors="backslashreplace") if isinstance(indicator, bytes) else indicator
+            )
+            provenance.append({"indicator": displayed, "indicator_type": kind, "sources": refs})
         output = ("\n".join(lines) + "\n").encode("ascii")
     except (ValueError, TypeError) as exc:
         return {"error": f"Zeek intel export: {exc}"}

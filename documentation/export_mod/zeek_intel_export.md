@@ -43,7 +43,7 @@ the module does not fetch additional data from MISP. Input can be a standard
 | `ip-src`, `ip-dst` | `Intel::ADDR` or `Intel::SUBNET` | Validate IPv4/IPv6 and canonicalize addresses. CIDRs become canonical networks, including clearing host bits. IPv4-mapped IPv6 addresses/networks normalize to IPv4, matching Zeek's identity. Scoped IPv6 is excluded. |
 | `domain`, `hostname` | `Intel::DOMAIN` | IDNA encode, lowercase, remove a trailing DNS dot and validate DNS labels and the 253-character normalized name limit. |
 | `domain\|ip` | Domain plus address/subnet | Validate both components and emit two independent indicators. The original association is retained as provenance, rather than enforced as a conjunction. |
-| `url` | `Intel::URL` | Require absolute HTTP(S), remove the scheme and fragment, retain the explicit port/query and supply `/` for an empty path. Credentials and whitespace are excluded. |
+| `url` | `Intel::URL` | Require absolute HTTP(S), remove the fragment, decode request-target escapes once as bytes, and generate Zeek-compatible Host/port keys. Supply `/` for an empty path. Credentials and literal whitespace are excluded. |
 | `email`, `email-src`, `email-dst`, `target-email` | `Intel::EMAIL` | Accept a bare address with an ASCII local part and valid IDNA domain. Display-name and quoted-local-part formats are excluded. |
 | `filename`, `email-attachment`, `attachment` | `Intel::FILE_NAME` | Emit the filename, with characters escaped for the ASCII reader. Binary attachment contents are not included. |
 | `md5`, `sha1`, `sha256`, `sha512` | `Intel::FILE_HASH` | Validate hexadecimal length and lowercase. |
@@ -64,20 +64,37 @@ paths, filenames and email local parts: Zeek Intel does not provide case-sensiti
 matching for them. Non-ASCII bytes are preserved, and original MISP values remain
 in the provenance. This is not a case-sensitive URL or filename matching engine.
 
-HTTP(S) scheme removal follows Zeek's HTTP URL observer, which reports
-`host[:port]/path?query`. A URL such as `https://example.org/Case#section` becomes
-`example.org/case`. Explicit ports are retained. TLS normally hides HTTPS paths;
-loading an HTTPS-derived URL does not make that path observable on encrypted
-traffic. Reverse-proxy absolute request targets or custom observers may report
-different strings; compare them with your feed when configuring those deployments.
+URL keys follow Zeek's HTTP analyzer and `HTTP::build_url` observer. Percent escapes
+in the path and query are decoded once as bytes before matching; `+` remains a
+literal plus. For example, `http://example.org/a%2Fb?x=%41` becomes
+`example.org/a/b?x=a`. Encoded `%25` is not recursively decoded. A literal fragment
+is removed before decoding, so an encoded `%23` remains part of the request target.
+An empty query delimiter (`/a?`) is retained. Zeek's legacy `%uHHHH` and doubled
+percent handling are also supported. If the decoded target contains `://`, Zeek's
+helper returns that target without a Host prefix; the exporter does the same.
+
+Zeek appends the responder port when it differs from 80, including when the Host
+header already contains a port. A URL such as `http://example.org:8080/a` therefore
+emits both `example.org:8080/a` and `example.org:8080:8080/a`, covering Host headers
+without and with the port. Explicit port 80 similarly emits the Host forms with
+and without `:80`. The responder port is inferred from the URL: 80 for HTTP and
+443 for HTTPS when omitted. Consequently, one URL attribute can produce multiple
+rows, each retaining the same provenance. Distinct decoded keys are deduplicated.
+
+TLS normally hides HTTPS paths; loading an HTTPS-derived URL does not make that
+path observable on encrypted traffic. Reverse proxies, rewritten Host headers or
+custom observers may report different strings; compare those observations with
+your feed when configuring those deployments.
 
 ## Escaping and provenance
 
-The file is ASCII, with non-ASCII UTF-8 bytes, controls, backslashes and `#` escaped
+The file is ASCII, with non-ASCII bytes, controls, backslashes and `#` escaped
 as `\xHH`. Zeek's ASCII reader restores the bytes. Literal `-` and `(empty)` strings
 are escaped so they do not conflict with reader markers. Tabs/newlines in filenames
 and metadata cannot create new columns, records or header directives. Optional
-`meta.url` values use Zeek's unset marker `-`.
+`meta.url` values use Zeek's unset marker `-`. Percent-encoded URL bytes that are
+not valid UTF-8 are preserved in the feed without replacement. The API's display
+of such keys uses backslash escapes; the base64 file contains the exact native key.
 
 Each unique `(Intel type, canonical indicator)` appears once. `meta.source` is the
 configured namespace. `meta.desc` is a JSON list of all contributing MISP event,
@@ -169,11 +186,12 @@ no removal instructions and does not set an expiry time.
 ## Validation
 
 Tests cover supported mappings, objects, case-insensitive deduplication, provenance,
-escaping, malformed input and the module server's discovery/query endpoints. An
-optional native test loads the exported file into Zeek and exercises the real
-Intel matcher. Set `ZEEK` to an installed Zeek executable (or place `zeek` on PATH)
-to run it; it is skipped when no runtime is available. Native validation was
-performed with Zeek 8.0.5, including UTF-8, control characters, reader markers and
+escaping, malformed input and the module server's discovery/query endpoints.
+Optional native tests load the exported file into Zeek, exercise the real Intel
+matcher, and replay HTTP packet captures through the standard URL observer. Set
+`ZEEK` to an installed Zeek executable (or place `zeek` on PATH) to run them; they
+are skipped when no runtime is available. Native validation was performed with
+Zeek 8.0.5, including UTF-8, control characters, reader markers and
 literal backslash escape sequences. No running sensor was changed.
 
 References: [Intel Framework](https://docs.zeek.org/en/current/frameworks/intel.html),
