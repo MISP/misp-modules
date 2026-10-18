@@ -3723,6 +3723,29 @@ Simple export of a MISP event to PDF.
 
 -----
 
+#### [Splunk Lookup Export](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/splunk_export.py)
+
+Export event and object indicators as a Splunk CSV lookup with CIM field mapping hints.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/splunk_export.py)]
+
+- **features**:
+>Exports attributes from every supplied event, including object attributes, to a UTF-8 CSV lookup. Only attributes marked to_ids are included by default; set include_non_ids to true to include other attributes. Deleted attributes and objects are always excluded. Composite attributes are split into independent hunting pivots while retaining the original value, port, UUIDs and object context. Event, object and attribute tags are combined in a JSON array. Unsupported or malformed indicators are counted in the API response warnings. No Splunk connection or additional Python package is required. See the [usage guide](https://github.com/MISP/misp-modules/blob/main/documentation/export_mod/splunk_export.md) for supported types, lookup setup and bounded SPL examples.
+
+- **config**:
+>include_non_ids
+
+- **input**:
+>A list of MISP events in standard or legacy export format.
+
+- **output**:
+>Base64-encoded UTF-8 CSV lookup; optional warnings describe skipped indicators.
+
+- **references**:
+> - https://help.splunk.com/en/splunk-enterprise/search/spl-search-reference/9.4/search-commands/lookup
+> - https://help.splunk.com/en/data-management/common-information-model/6.0/overview/overview-of-the-splunk-common-information-model
+
+-----
+
 #### [Test Export](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/testexport.py)
 
 Skeleton export module.
