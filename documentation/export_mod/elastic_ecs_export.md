@@ -15,6 +15,9 @@ Enable **Elastic ECS Export** under MISP's export module settings.
 | `include_non_ids` | `false` | Include contextual attributes as well as `to_ids` indicators. Accepts booleans and strings `true`, `false`, `1`, `0`. |
 | `misp_url` | Empty | Optional HTTP(S) MISP base URL for indicator references, including any deployment path prefix. |
 
+`misp_url` must not contain URL credentials, including password-only or empty
+userinfo. Authentication belongs in the consuming client's configuration.
+
 The API accepts a list of standard MISP events (`{"Event": {...}}`), bare event
 dictionaries, or legacy export envelopes with `Attribute` and `Object` alongside
 `Event`. POST this request to `/query`:
@@ -119,6 +122,14 @@ creating the target index. Its field types were checked against ECS v9.2.0. Adju
 existing templates that apply to the same index. It maps the indicator IP as `ip`,
 dates as `date`, ports/AS numbers as `long`, and matching strings as ECS keyword or
 wildcard fields. Unknown fields are retained in `_source` but not dynamically indexed.
+
+Keyword, wildcard and flattened mappings set `ignore_above=4096` characters, leaving
+room below Lucene's term byte limit for four-byte UTF-8 values and flattened key
+prefixes. Longer values remain intact in `_source` but are not indexed or available
+for matching through these fields. This prevents oversized comments, tags, URLs or
+raw provenance values from rejecting the entire indicator. Updating a template
+only affects indices created afterward; apply equivalent mapping updates to an
+existing target index or create a new index before importing.
 
 For example, with authenticated access configured for your Elasticsearch endpoint:
 

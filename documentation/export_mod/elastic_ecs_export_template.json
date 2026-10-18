@@ -11,7 +11,8 @@
       "dynamic": false,
       "properties": {
         "misp": {
-          "type": "flattened"
+          "type": "flattened",
+          "ignore_above": 4096
         },
         "@timestamp": {
           "type": "date"
@@ -19,34 +20,42 @@
         "ecs": {
           "properties": {
             "version": {
-              "type": "keyword"
+              "type": "keyword",
+              "ignore_above": 4096
             }
           }
         },
         "event": {
           "properties": {
             "category": {
-              "type": "keyword"
+              "type": "keyword",
+              "ignore_above": 4096
             },
             "dataset": {
-              "type": "keyword"
+              "type": "keyword",
+              "ignore_above": 4096
             },
             "id": {
-              "type": "keyword"
+              "type": "keyword",
+              "ignore_above": 4096
             },
             "kind": {
-              "type": "keyword"
+              "type": "keyword",
+              "ignore_above": 4096
             },
             "module": {
-              "type": "keyword"
+              "type": "keyword",
+              "ignore_above": 4096
             },
             "type": {
-              "type": "keyword"
+              "type": "keyword",
+              "ignore_above": 4096
             }
           }
         },
         "tags": {
-          "type": "keyword"
+          "type": "keyword",
+          "ignore_above": 4096
         },
         "threat": {
           "properties": {
@@ -60,15 +69,18 @@
                   }
                 },
                 "confidence": {
-                  "type": "keyword"
+                  "type": "keyword",
+                  "ignore_above": 4096
                 },
                 "description": {
-                  "type": "keyword"
+                  "type": "keyword",
+                  "ignore_above": 4096
                 },
                 "email": {
                   "properties": {
                     "address": {
-                      "type": "keyword"
+                      "type": "keyword",
+                      "ignore_above": 4096
                     }
                   }
                 },
@@ -77,24 +89,30 @@
                     "hash": {
                       "properties": {
                         "md5": {
-                          "type": "keyword"
+                          "type": "keyword",
+                          "ignore_above": 4096
                         },
                         "sha1": {
-                          "type": "keyword"
+                          "type": "keyword",
+                          "ignore_above": 4096
                         },
                         "sha256": {
-                          "type": "keyword"
+                          "type": "keyword",
+                          "ignore_above": 4096
                         },
                         "sha384": {
-                          "type": "keyword"
+                          "type": "keyword",
+                          "ignore_above": 4096
                         },
                         "sha512": {
-                          "type": "keyword"
+                          "type": "keyword",
+                          "ignore_above": 4096
                         }
                       }
                     },
                     "name": {
-                      "type": "keyword"
+                      "type": "keyword",
+                      "ignore_above": 4096
                     }
                   }
                 },
@@ -102,7 +120,8 @@
                   "type": "date"
                 },
                 "id": {
-                  "type": "keyword"
+                  "type": "keyword",
+                  "ignore_above": 4096
                 },
                 "ip": {
                   "type": "ip"
@@ -113,10 +132,12 @@
                 "marking": {
                   "properties": {
                     "tlp": {
-                      "type": "keyword"
+                      "type": "keyword",
+                      "ignore_above": 4096
                     },
                     "tlp_version": {
-                      "type": "keyword"
+                      "type": "keyword",
+                      "ignore_above": 4096
                     }
                   }
                 },
@@ -124,33 +145,40 @@
                   "type": "date"
                 },
                 "name": {
-                  "type": "keyword"
+                  "type": "keyword",
+                  "ignore_above": 4096
                 },
                 "port": {
                   "type": "long"
                 },
                 "provider": {
-                  "type": "keyword"
+                  "type": "keyword",
+                  "ignore_above": 4096
                 },
                 "reference": {
-                  "type": "keyword"
+                  "type": "keyword",
+                  "ignore_above": 4096
                 },
                 "type": {
-                  "type": "keyword"
+                  "type": "keyword",
+                  "ignore_above": 4096
                 },
                 "url": {
                   "properties": {
                     "domain": {
-                      "type": "keyword"
+                      "type": "keyword",
+                      "ignore_above": 4096
                     },
                     "full": {
-                      "type": "wildcard"
+                      "type": "wildcard",
+                      "ignore_above": 4096
                     },
                     "port": {
                       "type": "long"
                     },
                     "scheme": {
-                      "type": "keyword"
+                      "type": "keyword",
+                      "ignore_above": 4096
                     }
                   }
                 }

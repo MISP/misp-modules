@@ -352,6 +352,41 @@ def test_invalid_requests_are_errors(payload):
     assert "error" in ecs.handler(json.dumps(payload))
 
 
+@pytest.mark.parametrize("userinfo", ["user:password", ":password", "user", "user:", "", ":"])
+def test_misp_url_rejects_all_userinfo_without_exporting_credentials(userinfo):
+    response = ecs.handler(
+        json.dumps({"data": [event([attribute()])], "config": {"misp_url": f"https://{userinfo}@misp.example"}})
+    )
+    assert response == {
+        "error": "Elastic ECS export: misp_url must be an HTTP(S) base URL without credentials, query or fragment."
+    }
+
+
+def test_template_bounds_all_string_terms():
+    def check(properties):
+        for mapping in properties.values():
+            if "properties" in mapping:
+                check(mapping["properties"])
+            elif mapping["type"] in ("keyword", "wildcard", "flattened"):
+                # Reserve room for flattened key prefixes even with four-byte UTF-8 characters.
+                assert 0 < mapping.get("ignore_above", 0) <= 4096
+
+    check(PROPERTIES)
+
+
+@pytest.mark.parametrize("text", ["x" * 40000, "\U0001f600" * 9000], ids=["ascii", "unicode"])
+def test_oversized_metadata_remains_in_source_with_bounded_index_terms(text):
+    assert len(text.encode("utf-8")) > 32766
+    url = "https://example.org/" + text
+    pairs, _ = export([event([attribute("url", url, comment=text, Tag=[{"name": text}])], info=text)])
+    document = pairs[0][1]
+    assert document["threat"]["indicator"]["url"]["full"] == url
+    assert document["threat"]["indicator"]["description"] == text
+    assert document["tags"] == [text]
+    assert document["misp"]["event"]["info"] == text
+    assert document["misp"]["attribute"]["comment"] == text
+
+
 def test_handler_contract_and_template_field_types():
     assert ecs.handler() is False
     assert "error" in ecs.handler("not json")

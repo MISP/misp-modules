@@ -305,7 +305,8 @@ def handler(q=False):
                 or not parsed.hostname
                 or parsed.query
                 or parsed.fragment
-                or parsed.username
+                or parsed.username is not None
+                or parsed.password is not None
             ):
                 raise ValueError("misp_url must be an HTTP(S) base URL without credentials, query or fragment.")
         skipped = Counter()
