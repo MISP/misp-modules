@@ -1986,6 +1986,35 @@ Module to process a full query on Onyphe.
 
 -----
 
+#### [OpenCTI Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/opencti.py)
+
+Query an OpenCTI instance for exact observable matches and their context and source references.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/opencti.py)]
+
+- **features**:
+>Read-only GraphQL lookup using OpenCTI's FilterGroup API (OpenCTI 5.12 or later). Set url to the instance base URL (optionally ending in /graphql) and token to its API token. max_results defaults to 20 (1-100) and timeout to 30 seconds (1-120). Domains and IPs are normalized; file hashes, including filename|hash attributes, are matched against the specific hash algorithm. Results contain text context (description, score, author, labels, markings and timestamps), links to OpenCTI and external references. Imported attributes have to_ids=false; TLP markings are retained as tags and other markings as text. Custom markings and OpenCTI access controls are not translated into MISP sharing restrictions. No data is written to OpenCTI and no relationship traversal or synchronization is performed. A result cap notice is returned when more matches are available. No matches produce an empty Attribute list.
+
+- **config**:
+> - url
+> - token
+> - max_results
+> - timeout
+
+- **input**:
+>A domain, hostname, IP address, URL, email address or file hash (including filename|hash).
+
+- **output**:
+>MISP text and link attributes with provenance and TLP tags.
+
+- **references**:
+>https://docs.opencti.io/latest/reference/api/
+
+- **requirements**:
+> - requests
+> - An OpenCTI instance and an API token with knowledge read access.
+
+-----
+
 #### [AlienVault OTX Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/otx.py)
 
 <img src=../logos/otx.png height=60>
