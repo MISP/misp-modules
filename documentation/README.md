@@ -3953,6 +3953,31 @@ This module is used to export MISP events to YARA.
 
 -----
 
+#### [Zeek Intel Export](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/zeek_intel_export.py)
+
+Export validated MISP event and object indicators as a Zeek Intel Framework feed.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/zeek_intel_export.py)]
+
+- **features**:
+>Produces a tab-separated Intel input file with native indicator types, escaped fields, stable source labels and MISP provenance. Supports addresses/subnets, domains, HTTP(S) URLs, emails, file names/hashes, certificate SHA-1 hashes and SSH MD5 fingerprints. Defaults to IDS-marked attributes and excludes deleted data. No Zeek connection or additional dependency is required. See the [usage guide](https://github.com/MISP/misp-modules/blob/main/documentation/export_mod/zeek_intel_export.md).
+
+- **config**:
+> - source
+> - misp_url
+> - include_non_ids
+
+- **input**:
+>MISP events and object attributes in standard, bare or legacy export format.
+
+- **output**:
+>Base64-encoded ASCII Zeek Intel TSV, with skipped counts and provenance in the API response.
+
+- **references**:
+> - https://docs.zeek.org/en/current/frameworks/intel.html
+> - https://docs.zeek.org/en/current/scripts/base/frameworks/intel/main.zeek.html
+
+-----
+
 ## Import Modules
 
 #### [ANYRUN Sandbox Import](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/anyrun_sandbox_import.py)
