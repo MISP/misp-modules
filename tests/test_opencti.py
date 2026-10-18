@@ -141,7 +141,7 @@ def test_hash_matches_the_requested_algorithm(kind, algorithm, length, composite
 @pytest.mark.parametrize(
     "kind,value,entity_type,normalized",
     [
-        ("hostname", "ExAmPlE.org.", "Domain-Name", "example.org"),
+        ("hostname", "ExAmPlE.org.", "Hostname", "example.org"),
         ("ip-src", "192.0.2.1", "IPv4-Addr", "192.0.2.1"),
         ("ip-dst", "2001:0db8:0:0::1", "IPv6-Addr", "2001:db8::1"),
         ("url", "https://example.org/Case?x=1", "Url", "https://example.org/Case?x=1"),
@@ -170,6 +170,22 @@ def test_nonexact_wrong_type_and_duplicate_results_are_excluded():
         )
     )
     assert len(result["results"]["Attribute"]) == 3
+
+
+def test_hostname_lookup_returns_hostname_context_and_excludes_other_matches():
+    hostname = {**NODE, "entity_type": "Hostname", "observable_value": "Host.Example.org."}
+    domain = {**NODE, "id": "domain", "observable_value": "host.example.org"}
+    partial = {**hostname, "id": "partial", "observable_value": "other.host.example.org"}
+    attribute = {**ATTRIBUTE, "type": "hostname", "value": "HOST.example.org."}
+
+    result, post = lookup(response([hostname, domain, partial]), query(attribute=attribute))
+
+    variables = post.call_args.kwargs["json"]["variables"]
+    assert variables["types"] == ["Hostname"]
+    assert variables["filters"]["filters"][0]["values"] == ["host.example.org"]
+    summaries = [a["value"] for a in result["results"]["Attribute"] if a["type"] == "text"]
+    assert len(summaries) == 1
+    assert summaries[0].startswith("OpenCTI Hostname: Host.Example.org.")
 
 
 def test_no_matches_and_null_optional_fields():

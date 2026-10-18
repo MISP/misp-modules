@@ -10,7 +10,7 @@ from . import check_input_attribute, standard_error_message
 HASH_TYPES = {"md5": "MD5", "sha1": "SHA-1", "sha256": "SHA-256", "sha512": "SHA-512"}
 VALUE_TYPES = {
     "domain": "Domain-Name",
-    "hostname": "Domain-Name",
+    "hostname": "Hostname",
     "url": "Url",
     "email-src": "Email-Addr",
     "email-dst": "Email-Addr",
