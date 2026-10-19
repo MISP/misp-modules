@@ -209,6 +209,7 @@ For further Information see the [license file](https://misp.github.io/misp-modul
 
 ### Export Modules
 * [CEF Export](https://misp.github.io/misp-modules/export_mod/#cef-export) - Module to export a MISP event in CEF format.
+* [Cisco IOS ACL Export](https://misp.github.io/misp-modules/export_mod/#cisco-ios-acl-export) - Export IDS-marked network attributes as Cisco IOS/IOS-XE IPv4 and IPv6 ACL fragments.
 * [Cisco fireSIGHT blockrule Export](https://misp.github.io/misp-modules/export_mod/#cisco-firesight-blockrule-export) - Module to export malicious network activity attributes to Cisco fireSIGHT manager block rules.
 * [Microsoft Defender for Endpoint KQL Export](https://misp.github.io/misp-modules/export_mod/#microsoft-defender-for-endpoint-kql-export) - Defender for Endpoint KQL hunting query export module
 * [Elastic ECS Export](https://misp.github.io/misp-modules/export_mod/#elastic-ecs-export) - Export event and object indicators as ECS threat indicators in Elasticsearch Bulk NDJSON.

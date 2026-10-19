@@ -25,6 +25,33 @@ Module to export a MISP event in CEF format.
 
 -----
 
+#### [Cisco IOS ACL Export](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/cisco_acl_export.py)
+
+<img src=../logos/cisco.png height=60>
+
+Export IDS-marked network attributes as Cisco IOS/IOS-XE IPv4 and IPv6 ACL fragments.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/cisco_acl_export.py)]
+
+- **features**:
+>Exports validated event and object network attributes as named IPv4 extended and IPv6 ACL fragments. Defaults to deny entries; mode=log emits permit entries with log. Cisco ACL logging is first-match and permits matching traffic, so it cannot preserve later deny decisions. Only to_ids attributes are included; deleted data is excluded. DNS-only attributes require opt-in resolve_dns. See the [usage guide](https://github.com/MISP/misp-modules/blob/main/documentation/export_mod/cisco_acl_export.md).
+
+- **config**:
+> - mode
+> - acl_name
+> - resolve_dns
+
+- **input**:
+>MISP events and object attributes in standard, bare or legacy export format.
+
+- **output**:
+>Base64-encoded IOS/IOS-XE ACL configuration fragments; skipped counts and integration warnings.
+
+- **references**:
+> - https://www.cisco.com/c/en/us/td/docs/routers/ios/config/17-x/sec-vpn/b-security-vpn/m_sec-create-ip-apply-0.html
+> - https://www.cisco.com/c/en/us/td/docs/routers/ios/config/17-x/sec-vpn/b-security-vpn/m_ip6-acls-xe.html
+
+-----
+
 #### [Cisco fireSIGHT blockrule Export](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/cisco_firesight_manager_ACL_rule_export.py)
 
 <img src=../logos/cisco.png height=60>
