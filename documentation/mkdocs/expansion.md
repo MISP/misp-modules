@@ -98,28 +98,29 @@ On demand query API for OSINT.digitalside.it project.
 
 <img src=../logos/apivoid.png height=60>
 
-Module to query APIVoid with some domain attributes.
+Query APIVoid v2 for DNS records, SSL certificates and email verification.
 [[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/apivoid.py)]
 
 - **features**:
->This module takes a domain name and queries API Void to get the related DNS records and the SSL certificates. It returns then those pieces of data as MISP objects that can be added to the event.
+>This module queries APIVoid v2 for DNS records and SSL certificates of domains and hostnames, or verifies email addresses. Results are returned as MISP objects.
 >
->To make it work, a valid API key and enough credits to proceed 2 queries (0.06 + 0.07 credits) are required.
+>Configure `apikey` with a key from the APIVoid v2 dashboard (https://dash.apivoid.com/); v1 keys must be replaced. Each successful API call costs 1 credit: domain and hostname enrichment uses 2 calls, and email verification uses 1. Account overage settings apply.
 
 - **config**:
 >apikey
 
 - **input**:
->A domain attribute.
+>A domain, hostname or email attribute.
 
 - **output**:
->DNS records and SSL certificates related to the domain.
+>DNS records, X.509 certificates or an APIVoid email verification object.
 
 - **references**:
->https://www.apivoid.com/
+> - https://www.apivoid.com/
+> - https://docs.apivoid.com/
 
 - **requirements**:
->A valid APIVoid API key with enough credits to proceed 2 queries
+>An APIVoid v2 API key with 2 credits for domain lookups or 1 credit for email verification
 
 -----
 

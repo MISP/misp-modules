@@ -59,7 +59,7 @@ For further Information see the [license file](https://misp.github.io/misp-modul
 * [Abuse IPDB](https://misp.github.io/misp-modules/expansion/#abuse-ipdb) - AbuseIPDB MISP expansion module
 * [ANYRUN Sandbox Submit](https://misp.github.io/misp-modules/expansion/#anyrun-sandbox-submit) - A module designed to submit URLs or files to the ANY.RUN Sandbox for analysis and return the unique analysis link and ID.
 * [OSINT DigitalSide](https://misp.github.io/misp-modules/expansion/#osint-digitalside) - On demand query API for OSINT.digitalside.it project.
-* [APIVoid](https://misp.github.io/misp-modules/expansion/#apivoid) - Module to query APIVoid with some domain attributes.
+* [APIVoid](https://misp.github.io/misp-modules/expansion/#apivoid) - Query APIVoid v2 for DNS records, SSL certificates and email verification.
 * [AssemblyLine Query](https://misp.github.io/misp-modules/expansion/#assemblyline-query) - A module tu query the AssemblyLine API with a submission ID to get the submission report and parse it.
 * [AssemblyLine Submit](https://misp.github.io/misp-modules/expansion/#assemblyline-submit) - A module to submit samples and URLs to AssemblyLine for advanced analysis, and return the link of the submission.
 * [APIFreaks](https://misp.github.io/misp-modules/expansion/#apifreaks) - An expansion module for https://apifreaks.com/ that will provide WHOIS, DOMAIN and DNS information.
