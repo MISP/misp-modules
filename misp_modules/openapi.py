@@ -115,9 +115,7 @@ def build_document(
                                         "generic": {
                                             "summary": "Generic result container",
                                             "value": {
-                                                "results": [
-                                                    {"values": ["example"], "types": ["ip-src", "ip-dst"]}
-                                                ]
+                                                "results": [{"values": ["example"], "types": ["ip-src", "ip-dst"]}]
                                             },
                                         },
                                         "tagging": {
@@ -127,7 +125,7 @@ def build_document(
                                                     {
                                                         "values": ["198.51.100.10"],
                                                         "types": ["ip-dst"],
-                                                        "tags": ["misp-module:verdict=\"benign\""],
+                                                        "tags": ['misp-module:verdict="benign"'],
                                                         "remove_tags": ["false-positive"],
                                                     }
                                                 ]
@@ -156,9 +154,27 @@ def build_document(
                         "200": {
                             "description": "Service is healthy",
                             "content": {
-                                "application/json": {
-                                    "schema": {"$ref": "#/components/schemas/HealthResponse"}
-                                }
+                                "application/json": {"schema": {"$ref": "#/components/schemas/HealthResponse"}}
+                            },
+                        }
+                    },
+                }
+            },
+            "/statistics": {
+                "get": {
+                    "operationId": "getStatistics",
+                    "summary": "Retrieve module query statistics",
+                    "description": (
+                        "Process-local counters since startup, including unused modules. Only queries dispatched to"
+                        " loaded modules are counted. Errors include module errors, exceptions and timeouts. Response"
+                        " times include executor queueing and serialization, ending at response preparation or timeout;"
+                        " timed-out workers may continue running. No request or response contents are retained."
+                    ),
+                    "responses": {
+                        "200": {
+                            "description": "Current statistics snapshot",
+                            "content": {
+                                "application/json": {"schema": {"$ref": "#/components/schemas/StatisticsResponse"}}
                             },
                         }
                     },
@@ -172,9 +188,7 @@ def build_document(
                         "200": {
                             "description": "Service version",
                             "content": {
-                                "application/json": {
-                                    "schema": {"$ref": "#/components/schemas/VersionResponse"}
-                                }
+                                "application/json": {"schema": {"$ref": "#/components/schemas/VersionResponse"}}
                             },
                         },
                         "500": {
@@ -187,6 +201,70 @@ def build_document(
         },
         "components": {
             "schemas": {
+                "StatisticsResponse": {
+                    "type": "object",
+                    "required": ["started_at", "uptime_seconds", "totals", "modules"],
+                    "properties": {
+                        "started_at": {"type": "string", "format": "date-time"},
+                        "uptime_seconds": {"type": "number", "minimum": 0},
+                        "totals": {"$ref": "#/components/schemas/QueryStatistics"},
+                        "modules": {
+                            "type": "object",
+                            "description": "Statistics keyed by loaded module name, including custom modules.",
+                            "additionalProperties": {"$ref": "#/components/schemas/QueryStatistics"},
+                        },
+                    },
+                },
+                "QueryStatistics": {
+                    "type": "object",
+                    "properties": {
+                        "type": {"type": "string", "description": "Module type; omitted from totals."},
+                        **{
+                            name: {"type": "integer", "minimum": 0, "description": description}
+                            for name, description in {
+                                "queries": "Queries dispatched to the module.",
+                                "completed": "Queries with a response or timeout.",
+                                "in_flight": "Queries still awaiting a response; excludes timed-out workers.",
+                                "successes": "Responses without a nonempty top-level error or errors field.",
+                                "errors": "Sum of module_errors, exceptions and timeouts.",
+                                "module_errors": "Responses with a nonempty top-level error or errors field.",
+                                "exceptions": "Unhandled execution or serialization failures.",
+                                "timeouts": "Queries exceeding the requested timeout.",
+                                "request_bytes": "Total dispatched request body bytes.",
+                                "response_bytes": "Total response body bytes, including generated errors.",
+                            }.items()
+                        },
+                        **{
+                            name: {"type": ["number", "null"], "minimum": 0, "maximum": 1}
+                            for name in ("success_rate", "error_rate")
+                        },
+                        **{
+                            name: {"type": ["string", "null"], "format": "date-time"}
+                            for name in ("last_query_at", "last_completed_at")
+                        },
+                        "response_time_seconds": {"$ref": "#/components/schemas/ResponseTimeStatistics"},
+                    },
+                },
+                "ResponseTimeStatistics": {
+                    "type": "object",
+                    "properties": {
+                        "count": {"type": "integer", "minimum": 0},
+                        "total": {"type": "number", "minimum": 0},
+                        **{
+                            name: {"type": ["number", "null"], "minimum": 0}
+                            for name in ("min", "max", "average", "last")
+                        },
+                        "buckets": {
+                            "type": "object",
+                            "description": (
+                                "Cumulative latency counts keyed by inclusive upper bound in seconds: "
+                                "0.01, 0.05, 0.1, 0.5, 1, 5, 10, 30, 60, 300 and +Inf. "
+                                "+Inf equals count. Rates and unobserved timings are null before completion."
+                            ),
+                            "additionalProperties": {"type": "integer", "minimum": 0},
+                        },
+                    },
+                },
                 "ModuleDescriptor": {
                     "type": "object",
                     "properties": {

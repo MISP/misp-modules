@@ -187,6 +187,47 @@ If you installed it using pip, you just need to execute the command `misp-module
 
 If you installed it from the cloned repository, just use poetry, i.e., `poetry run misp-modules`.
 
+### Module statistics
+
+Retrieve a live snapshot with:
+
+```bash
+curl http://localhost:6666/statistics
+```
+
+The JSON contains `started_at` (UTC), `uptime_seconds`, aggregate `totals`, and
+`modules`, keyed by module name. Every loaded module, including custom modules,
+appears with its `type`, even before its first query. Each entry and the totals contain:
+
+| Field | Meaning |
+| --- | --- |
+| `queries`, `completed`, `in_flight` | Dispatched queries, finished queries, and queries still awaiting a response. |
+| `successes`, `errors` | Successful and failed responses. `completed = successes + errors`. |
+| `module_errors` | Responses with a nonempty top-level `error` or `errors` field, including partial results with errors. |
+| `exceptions` | Unhandled module or response serialization failures. |
+| `timeouts` | Queries whose response deadline expired. `errors = module_errors + exceptions + timeouts`. |
+| `success_rate`, `error_rate` | Fractions of completed queries (0–1), or `null` before any complete. |
+| `request_bytes`, `response_bytes` | Total JSON body sizes, including server-generated error responses; HTTP headers are excluded. |
+| `last_query_at`, `last_completed_at` | UTC timestamps, or `null` before the corresponding event. |
+| `response_time_seconds` | `count`, `total`, `min`, `max`, `average`, `last`, and cumulative `buckets`. |
+
+Response times use a monotonic clock, include executor queueing, execution and
+serialization, and end when the response is prepared or the timeout fires. They
+exclude network transfer time. Timing count equals `completed`; min/max/average/last
+are `null` before any completion. Each histogram bucket counts durations less than
+or equal to its upper bound in seconds: `0.01`, `0.05`, `0.1`, `0.5`, `1`, `5`, `10`,
+`30`, `60`, `300`, and `+Inf` (all completed queries).
+
+Timeouts count exactly once as errors; a worker may continue executing afterwards.
+`in_flight` measures queries awaiting a response, not active worker threads.
+Malformed requests, invalid timeout values, unknown module names and calls to other
+endpoints are excluded. Existing `/query` response bodies and status codes are unchanged.
+
+Statistics are process-local, held in memory and reset when the server restarts.
+Multiple server instances have separate counters. Storage is bounded by the number
+of queried modules and histogram buckets; request bodies, results, credentials and
+error messages are never retained by the statistics collector.
+
 ## Run MISP modules in Docker
 
 You can find an up-to-date container image and related documentation at the following repository: 

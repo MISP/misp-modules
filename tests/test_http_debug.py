@@ -234,8 +234,11 @@ def test_module_worker_context(service, tracing, monkeypatch, handler_name):
 
     monkeypatch.setattr(server, "MODULES_HANDLERS", {"worker-module": SimpleNamespace(**{handler_name: handler})})
     with ThreadPoolExecutor(max_workers=1) as executor:
-        result = executor.submit(server.QueryModule.run_request.__wrapped__, None, "worker-module", b"{}", {}).result()
+        result, outcome = executor.submit(
+            server.QueryModule.run_request.__wrapped__, None, "worker-module", b"{}", {}
+        ).result()
     assert server.orjson.loads(result) == {"result": "full response body"}
+    assert outcome == "successes"
     assert "module=worker-module request" in tracing.text
     assert "module=worker-module response" in tracing.text
 
@@ -263,10 +266,11 @@ def test_whoisfreaks_nested_worker_context(service, tracing, monkeypatch, attrib
         "attribute": {"type": attribute_type, "value": "example.org" if attribute_type == "domain" else "192.0.2.1"},
     }
     with ThreadPoolExecutor(max_workers=1) as executor:
-        result = executor.submit(
+        result, outcome = executor.submit(
             server.QueryModule.run_request.__wrapped__, None, "whoisfreaks", server.orjson.dumps(payload), payload
         ).result()
     assert "results" in server.orjson.loads(result)
+    assert outcome == "successes"
     for function in functions:
         assert f"module=whoisfreaks request: GET {service}/{function}" in tracing.text
     assert "module=unknown" not in tracing.text

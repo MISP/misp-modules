@@ -43,6 +43,7 @@ from tornado import ioloop
 import misp_modules
 from misp_modules import openapi as openapi_builder
 from misp_modules.http_debug import configure_http_debug, module_context
+from misp_modules.statistics import ModuleStatistics
 
 # See https://github.com/MISP/misp-modules/issues/662
 MAX_BUFFER_SIZE = 1073741824
@@ -50,6 +51,7 @@ MAX_BUFFER_SIZE = 1073741824
 # Global variables
 MODULES_HANDLERS = {}
 OPENAPI_DOCUMENT = {}
+MODULE_STATISTICS = ModuleStatistics()
 LOGGER = logging.getLogger("misp-modules")
 
 SWAGGER_UI_TEMPLATE = (
@@ -219,6 +221,20 @@ class ListModules(tornado.web.RequestHandler):
         self.write(self.CACHE)
 
 
+class Statistics(tornado.web.RequestHandler):
+    """Expose aggregate query statistics, including modules that have never been queried."""
+
+    def get(self):
+        module_types = {
+            name: MODULES_HANDLERS.get(f"type:{name}", "unknown")
+            for name in MODULES_HANDLERS
+            if not name.startswith("type:")
+        }
+        self.set_header("Content-Type", "application/json")
+        self.set_header("Cache-Control", "no-store")
+        self.write(orjson.dumps(MODULE_STATISTICS.snapshot(module_types)))
+
+
 class QueryModule(tornado.web.RequestHandler):
     """QueryModule handler."""
 
@@ -235,24 +251,43 @@ class QueryModule(tornado.web.RequestHandler):
                 response = MODULES_HANDLERS[module_name].dict_handler(request=dict_payload)
             except AttributeError:
                 response = MODULES_HANDLERS[module_name].handler(q=json_payload)
-        return orjson.dumps(response, default=pymisp.pymisp_json_default)
+        outcome = (
+            "module_errors"
+            if isinstance(response, dict) and (response.get("error") or response.get("errors"))
+            else "successes"
+        )
+        return orjson.dumps(response, default=pymisp.pymisp_json_default), outcome
 
     @tornado.gen.coroutine
     def post(self):
         json_payload = self.request.body
         dict_payload = orjson.loads(json_payload)
         timeout = datetime.timedelta(seconds=int(dict_payload.get("timeout", self.DEFAULT_TIMEOUT)))
+        module_name = dict_payload.get("module")
+        tracked = (
+            isinstance(module_name, str) and not module_name.startswith("type:") and module_name in MODULES_HANDLERS
+        )
+        if tracked:
+            started = MODULE_STATISTICS.start(module_name, len(json_payload))
+        outcome = "exceptions"
+        response = b""
         try:
             future = self.run_request(dict_payload["module"], json_payload, dict_payload)
-            response = yield tornado.gen.with_timeout(timeout, future)
+            response, outcome = yield tornado.gen.with_timeout(timeout, future)
             self.write(response)
         except tornado.gen.TimeoutError:
             LOGGER.warning("Timeout on {}".format(dict_payload["module"]))
-            self.write(orjson.dumps({"error": "Timeout."}))
+            outcome = "timeouts"
+            response = orjson.dumps({"error": "Timeout."})
+            self.write(response)
         except Exception:
-            self.write(orjson.dumps({"error": "Something went wrong, look in the server logs for details"}))
+            outcome = "exceptions"
+            response = orjson.dumps({"error": "Something went wrong, look in the server logs for details"})
+            self.write(response)
             LOGGER.exception("Something went wrong when processing query request")
         finally:
+            if tracked:
+                MODULE_STATISTICS.finish(module_name, started, outcome, len(response))
             self.finish()
 
 
@@ -333,6 +368,7 @@ def main():
                 [
                     (r"/modules", ListModules),
                     (r"/query", QueryModule),
+                    (r"/statistics", Statistics),
                     (r"/healthcheck", HealthCheck),
                     (r"/version", VersionCheck),
                     (r"/openapi.json", OpenAPISpec),
