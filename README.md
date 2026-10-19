@@ -127,6 +127,7 @@ For further Information see the [license file](https://misp.github.io/misp-modul
 * [Onion Lookup](https://misp.github.io/misp-modules/expansion/#onion-lookup) - MISP module using the MISP standard. Uses the onion-lookup service to get information about an onion.
 * [Onyphe Lookup](https://misp.github.io/misp-modules/expansion/#onyphe-lookup) - Module to process a query on Onyphe.
 * [Onyphe Full Lookup](https://misp.github.io/misp-modules/expansion/#onyphe-full-lookup) - Module to process a full query on Onyphe.
+* [OpenCTI Lookup](https://misp.github.io/misp-modules/expansion/#opencti-lookup) - Query an OpenCTI instance for exact observable matches and their context and source references.
 * [AlienVault OTX Lookup](https://misp.github.io/misp-modules/expansion/#alienvault-otx-lookup) - Module to get information from AlienVault OTX.
 * [Passive SSH Enrichment](https://misp.github.io/misp-modules/expansion/#passive-ssh-enrichment) - An expansion module to enrich, SSH key fingerprints and IP addresses with information collected by passive-ssh
 * [PassiveTotal Lookup](https://misp.github.io/misp-modules/expansion/#passivetotal-lookup) - The PassiveTotal MISP expansion module brings the datasets derived from Internet scanning directly into your MISP instance. This module supports passive DNS, historic SSL, WHOIS, and host attributes. In order to use the module, you must have a valid PassiveTotal account username and API key. Registration is free and can be done by visiting https://www.passivetotal.org/register
