@@ -11,11 +11,6 @@ def get_proxy_settings(config: dict) -> dict:
     """
     Builds the ANY.RUN SDK connector proxy kwargs from the module config
 
-    Proxy credentials are embedded directly into the proxy URL rather than passed via the SDK's
-    proxy_username/proxy_password kwargs: as of anyrun-sdk 1.14.19, WindowsConnector/LinuxConnector/
-    AndroidConnector forward those kwargs to a wrong positional slot in AnyRunConnector.__init__,
-    which corrupts the aiohttp connector setup whenever a proxy password is set.
-
     :param config: MISP module config
     :return: Kwargs to pass to the ANY.RUN SDK connector, empty if no proxy is configured
     :raises RunTimeException: If the proxy config is incomplete
