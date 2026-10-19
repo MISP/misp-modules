@@ -158,7 +158,10 @@ class TestExpansions(unittest.TestCase):
             try:
                 self.assertEqual(self.get_first_object_type(response), "dns-record")
             except Exception:
-                self.assertTrue(self.get_errors(response).startswith("You do not have enough APIVoid credits"))
+                error = self.get_errors(response)
+                self.assertTrue(
+                    error.startswith("APIVoid dns-lookup error (HTTP ") and "credit" in error.lower(), error
+                )
         else:
             response = self.misp_modules_post(query)
             self.assertEqual(self.get_errors(response), "An API key for APIVoid is required.")
