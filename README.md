@@ -215,6 +215,7 @@ For further Information see the [license file](https://misp.github.io/misp-modul
 * [GoAML Export](https://misp.github.io/misp-modules/export_mod/#goaml-export) - This module is used to export MISP events containing transaction objects into GoAML format.
 * [Lite Export](https://misp.github.io/misp-modules/export_mod/#lite-export) - Lite export of a MISP event.
 * [EQL Query Export](https://misp.github.io/misp-modules/export_mod/#eql-query-export) - Export MISP event in Event Query Language
+* [Netfilter nftables Export](https://misp.github.io/misp-modules/export_mod/#netfilter-nftables-export) - Export IDS-marked event and object network attributes as nftables block or logging rules.
 * [Nexthink NXQL Export](https://misp.github.io/misp-modules/export_mod/#nexthink-nxql-export) - Nexthink NXQL query export module
 * [OSQuery Export](https://misp.github.io/misp-modules/export_mod/#osquery-export) - OSQuery export of a MISP event.
 * [Event to PDF Export](https://misp.github.io/misp-modules/export_mod/#event-to-pdf-export) - Simple export of a MISP event to PDF.
