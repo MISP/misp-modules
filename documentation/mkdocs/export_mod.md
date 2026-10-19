@@ -191,6 +191,30 @@ Export MISP event in Event Query Language
 
 -----
 
+#### [Netfilter nftables Export](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/netfilter_export.py)
+
+Export IDS-marked event and object network attributes as nftables block or logging rules.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/netfilter_export.py)]
+
+- **features**:
+>Exports validated IPv4/IPv6 addresses and networks, IP/port pairs, domain/IP pairs, ports and source MAC addresses as deduplicated nftables chain-body rules. Defaults to dropping matches; mode=log logs without changing the firewall verdict. Only to_ids attributes are included, and deleted data is excluded. DNS-only attributes require opt-in resolve_dns and are resolved to address snapshots at export time. See the [usage guide](https://github.com/MISP/misp-modules/blob/main/documentation/export_mod/netfilter_export.md).
+
+- **config**:
+> - mode
+> - resolve_dns
+
+- **input**:
+>MISP events and object attributes in standard, bare or legacy export format.
+
+- **output**:
+>Base64-encoded nftables chain-body fragment; skipped counts and warnings in the API response.
+
+- **references**:
+> - https://netfilter.org/projects/nftables/
+> - https://www.netfilter.org/projects/nftables/manpage.html
+
+-----
+
 #### [Nexthink NXQL Export](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/nexthinkexport.py)
 
 <img src=../logos/nexthink.svg height=60>
