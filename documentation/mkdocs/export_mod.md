@@ -274,6 +274,29 @@ Simple export of a MISP event to PDF.
 
 -----
 
+#### [OpenBSD PF Export](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/pf_export.py)
+
+Export IDS-marked event and object network attributes as OpenBSD PF block or logging rules.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/pf_export.py)]
+
+- **features**:
+>Exports validated IPv4/IPv6 addresses and networks, IP/port pairs, domains, hostnames, domain/IP pairs, hostname/port pairs and ports as deduplicated block drop quick rules by default, or match log (all) rules with mode=log. Logging preserves the existing pass/block policy. Only to_ids attributes are included; deleted data is excluded. DNS names are resolved by PF at ruleset load time. No network access or additional Python dependency is required. See the [usage guide](https://github.com/MISP/misp-modules/blob/main/documentation/export_mod/pf_export.md).
+
+- **config**:
+>mode
+
+- **input**:
+>MISP events and object attributes in standard, bare or legacy export format.
+
+- **output**:
+>Base64-encoded PF ruleset fragment; skipped counts and warnings in the API response.
+
+- **references**:
+> - https://man.openbsd.org/pf.conf
+> - https://man.openbsd.org/pfctl
+
+-----
+
 #### [QRadar Reference Set Export](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/qradar_reference_set_export.py)
 
 Export deduplicated, typed MISP indicators as QRadar reference-set CSV or JSON values.
