@@ -39,6 +39,21 @@ When the service is running you can discover the available endpoints in a machin
 An interactive Swagger UI that consumes the same specification is available at `/openapi`.
 The specification is generated during service startup, so restart `misp-modules` after adding or removing modules to refresh what those endpoints expose.
 
+## Module statistics
+
+`GET /statistics` returns per-module and aggregate query counts, successes, errors
+(module errors, exceptions and timeouts), in-flight requests, success/error rates,
+response times, cumulative latency histograms, body byte counts and last-use timestamps.
+It includes loaded modules that have never been queried, including custom modules.
+
+```bash
+curl http://localhost:6666/statistics
+```
+
+Statistics are held in memory per server process and reset on restart. See
+[statistics details](documentation/mkdocs/install.md#module-statistics) for metric semantics.
+The endpoint is also described in `/openapi.json` and the `/openapi` explorer.
+
 ## Extended HTTP debugging
 
 Run `misp-modules --debug-extended` to enable normal debug logging plus full outbound
