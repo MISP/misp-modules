@@ -4,12 +4,12 @@ import traceback
 from anyrun import RunTimeException
 from anyrun.connectors import SandboxConnector
 
-from anyrun_sandbox.config import Config
+from anyrun_sandbox.config import Config, get_proxy_settings
 from anyrun_sandbox.parser import AnyRunParser
 
 
 moduleinfo = {
-    "version": "0.1",
+    "version": "0.2",
     "author": "ANY.RUN integrations team",
     "description": (
         "A module designed to retrieve an analysis report from the ANY.RUN Sandbox by its unique ID "
@@ -59,7 +59,7 @@ userConfig = {
     },
 }
 
-moduleconfig = ["api_key"]
+moduleconfig = ["api_key", "proxy_host", "proxy_port", "proxy_username", "proxy_password"]
 
 
 def handler(q=False):
@@ -75,7 +75,9 @@ def handler(q=False):
         if not any((token, analysis_uuid)):
             raise RunTimeException("ANY.RUN API-KEY and Analysis UUID must be specified.")
 
-        with SandboxConnector.windows(token, integration=Config.INTEGRATION) as connector:
+        proxy_settings = get_proxy_settings(request.get("config"))
+
+        with SandboxConnector.windows(token, integration=Config.INTEGRATION, **proxy_settings) as connector:
             connector.check_authorization()
 
             parser = AnyRunParser(request.get("config"), analysis_uuid, connector)

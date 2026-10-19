@@ -1,5 +1,7 @@
 import json
 from http import HTTPStatus
+from io import BytesIO
+
 from pymisp import MISPEvent, MISPObject
 
 from anyrun import RunTimeException
@@ -133,7 +135,7 @@ class AnyRunParser:
         self._event.add_attribute(
             type="attachment",
             value="report.html",
-            data=report.encode(),
+            data=BytesIO(report.encode()),
             comment="ANYRUN Sandbox Analysis report."
         )
 
@@ -144,4 +146,5 @@ class AnyRunParser:
         :param option_name: Option name to check
         :return: True if option is enabled else False
         """
-        return bool(int(self._config.get(option_name)))
+        value = self._config.get(option_name)
+        return bool(int(value)) if value else False
