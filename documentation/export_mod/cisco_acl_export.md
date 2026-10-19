@@ -16,9 +16,11 @@ exporter targets Cisco Firepower Management Center.
 
 Options are advertised in module configuration and per-export `userConfig`.
 Missing, null or empty `mode` and `acl_name` use their defaults. Names must start
-with an ASCII letter and contain 1-48 ASCII letters, digits, underscores or
-hyphens. Numeric-only names and CLI expressions are rejected. `resolve_dns`
-accepts booleans, integers 0/1 and strings `true`/`false`/`1`/`0`, ignoring case;
+with an ASCII letter and contain 1-27 ASCII letters, digits, underscores or
+hyphens. The three-character `-V4`/`-V6` suffix keeps generated names within
+IOS XE's 30-character named IPv4 ACL limit. Numeric-only names and CLI expressions
+are rejected. `resolve_dns` accepts booleans, integers 0/1 and strings
+`true`/`false`/`1`/`0`, ignoring case;
 missing, null or empty means false. Invalid settings return an error without a file.
 
 ### Logging and policy semantics
@@ -169,4 +171,5 @@ Tests cover generated text and the module API; no live Cisco device validation
 was available in the development environment.
 
 References: [IPv4 access lists](https://www.cisco.com/c/en/us/td/docs/routers/ios/config/17-x/sec-vpn/b-security-vpn/m_sec-create-ip-apply-0.html),
-[IPv6 access lists](https://www.cisco.com/c/en/us/td/docs/routers/ios/config/17-x/sec-vpn/b-security-vpn/m_ip6-acls-xe.html).
+[IPv6 access lists](https://www.cisco.com/c/en/us/td/docs/routers/ios/config/17-x/sec-vpn/b-security-vpn/m_ip6-acls-xe.html),
+[named ACL limits](https://www.cisco.com/c/en/us/td/docs/routers/ios/config/17-x/sec-vpn/b-security-vpn/m_sec-acl-named.html).

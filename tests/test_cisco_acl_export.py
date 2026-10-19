@@ -305,6 +305,20 @@ def test_invalid_configuration_produces_no_file(config):
     assert "error" in result and "data" not in result
 
 
+def test_maximum_acl_name_prefix_keeps_both_generated_names_within_ios_limit():
+    prefix = "A" * 27
+    _, _, text = run(event([attribute(), attribute("ip-src", "2001:db8::1")]), acl_name=prefix)
+    assert f"ip access-list extended {prefix}-V4\n" in text
+    assert f"ipv6 access-list {prefix}-V6\n" in text
+    assert len(prefix + "-V4") == len(prefix + "-V6") == 30
+
+
+@pytest.mark.parametrize("length", [28, 48])
+def test_overlong_acl_name_prefix_returns_error_without_configuration(length):
+    result = export.handler(json.dumps({"data": event([attribute()]), "config": {"acl_name": "A" * length}}))
+    assert "error" in result and "data" not in result
+
+
 def test_custom_names_and_log_warnings_are_visible_in_download_and_api():
     sections, result, text = run(
         event([attribute(), attribute("ip-src", "2001:db8::1")]), mode="log", acl_name="Threat_42"

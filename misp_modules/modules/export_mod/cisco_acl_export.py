@@ -59,9 +59,9 @@ def _settings(config):
     name = config.get("acl_name")
     if name is None or name == "":
         name = "MISP-IOC"
-    if not isinstance(name, str) or not re.fullmatch(r"[A-Za-z][A-Za-z0-9_-]{0,47}", name):
+    if not isinstance(name, str) or not re.fullmatch(r"[A-Za-z][A-Za-z0-9_-]{0,26}", name):
         raise ValueError(
-            "acl_name must start with a letter and contain 1-48 ASCII letters, digits, underscores or hyphens."
+            "acl_name must start with a letter and contain 1-27 ASCII letters, digits, underscores or hyphens."
         )
     return mode, name, _boolean(config.get("resolve_dns"), "resolve_dns")
 
@@ -261,7 +261,10 @@ def introspection():
         "responseType": "text/plain",
         "userConfig": {
             "mode": {"type": "String", "message": "Rule mode: block (default) or log (permits matching traffic)"},
-            "acl_name": {"type": "String", "message": "ACL name prefix (default: MISP-IOC; adds -V4 and -V6)"},
+            "acl_name": {
+                "type": "String",
+                "message": "ACL name prefix, max 27 characters (default: MISP-IOC; adds -V4 and -V6)",
+            },
             "resolve_dns": {
                 "type": "Boolean",
                 "message": "Resolve DNS-only indicators at export time (default: false)",
