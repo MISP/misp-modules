@@ -1,0 +1,60 @@
+{
+  "attributes": {
+    "archive": {
+      "description": "Link to an archived copy of the page held elsewhere",
+      "misp-attribute": "link",
+      "multiple": true,
+      "ui-priority": 1
+    },
+    "attachment": {
+      "description": "The captured page itself, stored as an attachment",
+      "misp-attribute": "attachment",
+      "ui-priority": 1
+    },
+    "capture-date": {
+      "description": "When the capture was taken. Distinct from the date the object was created: a capture fetched from an archive can be years older",
+      "disable_correlation": true,
+      "misp-attribute": "datetime",
+      "ui-priority": 1
+    },
+    "domain": {
+      "description": "Domain the page was served from",
+      "misp-attribute": "domain",
+      "ui-priority": 0
+    },
+    "filename": {
+      "description": "Filename of the stored capture",
+      "misp-attribute": "filename",
+      "ui-priority": 0
+    },
+    "link": {
+      "description": "Link to the capture as the capturing service publishes it",
+      "misp-attribute": "link",
+      "ui-priority": 1
+    },
+    "text": {
+      "description": "Text extracted from the captured page",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "ui-priority": 0
+    },
+    "url": {
+      "description": "URL that was fetched",
+      "misp-attribute": "url",
+      "ui-priority": 1
+    }
+  },
+  "description": "A copy of a page as it was when somebody fetched it: the stored bytes, the text extracted from them, or a link to an archived copy, with the date the capture was taken. Complements `image`, which holds a screenshot and no date, and `domain-crawled`, which holds the URLs a crawl found and not what they returned.",
+  "meta-category": "network",
+  "name": "page-capture",
+  "required": [
+    "url"
+  ],
+  "requiredOneOf": [
+    "attachment",
+    "archive",
+    "text"
+  ],
+  "uuid": "555f0d10-5df6-4e04-bf8a-145156d37ab6",
+  "version": 1
+}
