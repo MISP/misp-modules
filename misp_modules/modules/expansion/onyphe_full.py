@@ -213,7 +213,7 @@ class OnypheFullClient:
             elif self.attribute["type"].startswith("x509-fingerprint-"):
                 term = f"cert.fingerprint.{self.attribute['type'].removeprefix('x509-fingerprint-')}:{value}"
             elif self.attribute["type"] == "hostname":
-                term = f"( ?dns.forward.hostname:{value} ?dns.reverse.hostname:{value} )"
+                term = f"( ?dns.hostname:{value} ?dns.forward.hostname:{value} ?dns.reverse.hostname:{value} )"
             else:
                 raise ValueError("ctiscan/ctiurl require an IP or hostname; use riskscan/vulnscan for domains")
             fields = ",".join(
@@ -347,11 +347,18 @@ class OnypheFullClient:
         network = hit.get("ip", {}) if layered else hit
         app = hit.get("app") or {}
         component = (hit.get("component") or {}) if layered else hit
+        cves = as_list(component.get("cve"))
         dns = hit.get("dns") or {}
         ips = network.get("dest") if layered else as_list(hit.get("ip")) + as_list(hit.get("ipv6"))
         port = (hit.get("tcp") or {}).get("dest") if layered else hit.get("port")
         hostnames = (
-            as_list((dns.get("forward") or {}).get("hostname")) + as_list((dns.get("reverse") or {}).get("hostname"))
+            list(
+                dict.fromkeys(
+                    as_list(dns.get("hostname"))
+                    + as_list((dns.get("forward") or {}).get("hostname"))
+                    + as_list((dns.get("reverse") or {}).get("hostname"))
+                )
+            )
             if layered
             else hit.get("hostname")
         )
@@ -365,14 +372,14 @@ class OnypheFullClient:
             "port": port,
             "hostname": hostnames,
             "domain": hit.get("domain") if not layered else None,
-            "transport": "tcp" if layered and port is not None else hit.get("transport"),
+            "transport": app.get("transport") if layered else hit.get("transport"),
             "protocol": app.get("protocol") if layered else hit.get("protocol"),
             "device": app.get("device") if layered else (hit.get("device") or {}).get("class"),
             "seen-date": hit.get("seen_date"),
             "timestamp": hit.get("@timestamp"),
             "source": hit.get("source"),
             "tag": hit.get("tag"),
-            "cve": hit.get("cve"),
+            "cve": cves,
             "cpe": component.get("cpe"),
             "product": component.get("product"),
             "vendor": component.get("vendor") if layered else hit.get("productvendor"),
@@ -422,7 +429,7 @@ class OnypheFullClient:
         positive = category == "riskscan" or (
             "vulnerable" in tags and not any(t.startswith("notvulnerable") for t in tags)
         )
-        for cve in as_list(hit.get("cve")):
+        for cve in cves:
             vulnerability = self.__add_vulnerability(cve)
             # Version inference, uncertain and negative verdicts stay as source tags, not affects assertions.
             self.__link(vulnerability, service.uuid, "affects" if positive else "related-to")
@@ -517,7 +524,7 @@ class OnypheFullClient:
 
     def parse_certificate(self, hit):
         def scalar(value):
-            values = [v for v in as_list(value) if v is not None and v != ""]
+            values = [v for v in as_list(value) if v is not None and v != "" and not isinstance(v, (dict, list))]
             return values[0] if len(values) == 1 else None
 
         fingerprint = hit.get("fingerprint") or {}
@@ -528,8 +535,15 @@ class OnypheFullClient:
 
         # note: the x509 `ip` relation is a Subject Alternative Name, not the host serving the
         # certificate -- the queried value is tied to the object through its reference instead.
-        if scalar(hit.get("serial")):
-            misp_object.add_attribute("serial-number", scalar(hit["serial"]))
+        serial = hit.get("serial")
+        if isinstance(serial, dict):
+            number = scalar(serial.get("hex"))
+            if number is None:
+                number = scalar(serial.get("num"))
+        else:
+            number = scalar(serial)
+        if number is not None:
+            misp_object.add_attribute("serial-number", number)
 
         for algorithm in ("md5", "sha1", "sha256"):
             if scalar(fingerprint.get(algorithm)):

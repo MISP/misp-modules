@@ -618,9 +618,14 @@ def test_cti_search_uses_ip_dest_and_projection(category):
     assert options == {"size": 100, "max_results": 100}
 
 
-def test_hostname_layered_search_uses_dns_fields():
-    _, client = run_full({}, HOSTNAME_ATTRIBUTE, categories="ctiscan")
-    assert '( ?dns.forward.hostname:"www.example.com" ?dns.reverse.hostname:"www.example.com" )' in client.queries[0][0]
+@pytest.mark.parametrize("category", ["ctiscan", "ctiurl"])
+def test_hostname_layered_search_uses_dns_fields(category):
+    _, client = run_full({}, HOSTNAME_ATTRIBUTE, categories=category)
+    assert (
+        '( ?dns.hostname:"www.example.com" ?dns.forward.hostname:"www.example.com"'
+        ' ?dns.reverse.hostname:"www.example.com" )'
+        in client.queries[0][0]
+    )
 
 
 def test_domain_layered_category_rejected_before_search():
@@ -801,3 +806,88 @@ def test_array_leaves_and_duplicate_observations_validate():
 
     raw = next(a for a in service["Attribute"] if a["object_relation"] == "raw-json")
     assert json.loads(base64.b64decode(raw["data"])) == hit
+
+
+@pytest.mark.parametrize("category", ["ctiscan", "ctiurl"])
+@pytest.mark.parametrize("primary", ["www.example.com", ["www.example.com", "alias.example.com"]])
+def test_primary_cti_hostname_is_preserved_in_service_and_endpoint(category, primary):
+    hit = {"ip": {"dest": "192.0.2.10"}, "dns": {"hostname": primary}}
+    result, _ = run_full({category: [hit]}, categories=category)
+    expected = primary if isinstance(primary, list) else [primary]
+    for name in ("onyphe-service", "ip-port"):
+        assert relation_values(objects_named(result["results"], name)[0], "hostname") == expected
+
+
+def test_primary_cti_hostname_is_an_anchor_and_is_deduplicated_with_dns_enrichment():
+    hit = {"dns": {"hostname": "www.example.com", "forward": {"hostname": ["www.example.com"]}}}
+    result, _ = run_full({"ctiscan": [hit]}, categories="ctiscan")
+    for name in ("onyphe-service", "ip-port"):
+        assert relation_values(objects_named(result["results"], name)[0], "hostname") == ["www.example.com"]
+
+
+def test_basic_hostname_query_includes_primary_and_secondary_dns_fields():
+    client = full_client()
+    with patch.object(onyphe_full, "Onyphe", return_value=client):
+        onyphe.handler(query(HOSTNAME_ATTRIBUTE, {"apikey": "dummy"}))
+    assert len(client.queries) == 1
+    for field in ("dns.hostname", "dns.forward.hostname", "dns.reverse.hostname"):
+        assert f'?{field}:"www.example.com"' in client.queries[0][0]
+
+
+@pytest.mark.parametrize("category", ["ctiscan", "ctiurl"])
+@pytest.mark.parametrize("cves", ["CVE-2021-44228", ["CVE-2021-44228", "CVE-2024-3094"]])
+def test_layered_component_cves_are_preserved_and_linked_to_each_service(category, cves):
+    hits = [
+        {"ip": {"dest": "192.0.2.10"}, "tcp": {"dest": port}, "component": {"cve": cves}, "cve": ["CVE-2000-0001"]}
+        for port in (443, 8443)
+    ]
+    result, _ = run_full({category: hits}, categories=category)
+    services = objects_named(result["results"], "onyphe-service")
+    expected = cves if isinstance(cves, list) else [cves]
+    assert len(services) == 2
+    assert all(relation_values(service, "cve") == expected for service in services)
+    vulnerabilities = objects_named(result["results"], "vulnerability")
+    assert {cve for obj in vulnerabilities for cve in relation_values(obj, "id")} == set(expected)
+    for obj in vulnerabilities:
+        assert {r["referenced_uuid"] for r in obj["ObjectReference"] if r["relationship_type"] == "related-to"} >= {
+            s["uuid"] for s in services
+        }
+        assert not any(r["relationship_type"] == "affects" for r in obj["ObjectReference"])
+
+
+@pytest.mark.parametrize(
+    "serial,expected",
+    [
+        ({"hex": "0a1b", "num": 2587}, "0a1b"),
+        ({"num": 2587}, "2587"),
+        ({"hex": "", "num": 0}, "0"),
+        ({"hex": ["0a1b"], "num": 2587}, "0a1b"),
+        ({"hex": {"unexpected": "value"}, "num": 2587}, "2587"),
+        ({"hex": {"unexpected": "value"}}, None),
+        ({}, None),
+        ("0a1b", "0a1b"),
+        (["0a1b"], "0a1b"),
+    ],
+)
+def test_certificate_serial_is_a_scalar_and_layered_serial_prefers_hex(serial, expected):
+    from pymisp import MISPObject
+
+    hit = {"ip": {"dest": "192.0.2.10"}, "cert": {"serial": serial, "fingerprint": {"sha256": SHA256}}}
+    result, _ = run_full({"ctiscan": [hit]}, categories="ctiscan")
+    certificate = objects_named(result["results"], "x509")[0]
+    assert relation_values(certificate, "serial-number") == ([] if expected is None else [expected])
+    assert all(not isinstance(a["value"], (dict, list)) for a in certificate["Attribute"])
+    obj = MISPObject("x509", strict=True)
+    obj.from_dict(**certificate)
+    obj._validate()
+
+
+@pytest.mark.parametrize("category", ["ctiscan", "ctiurl"])
+@pytest.mark.parametrize("transport", ["tcp", "udp", None])
+@pytest.mark.parametrize("tcp", [{"dest": 53}, {}])
+def test_layered_app_transport_is_preserved_without_inference(category, transport, tcp):
+    hit = {"ip": {"dest": "192.0.2.10"}, "tcp": tcp, "app": {"transport": transport}}
+    result, _ = run_full({category: [hit]}, categories=category)
+    expected = [transport] if transport is not None else []
+    assert relation_values(objects_named(result["results"], "onyphe-service")[0], "transport") == expected
+    assert relation_values(objects_named(result["results"], "ip-port")[0], "protocol") == expected
