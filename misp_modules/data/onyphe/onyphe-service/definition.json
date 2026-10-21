@@ -1,0 +1,246 @@
+{
+  "attributes": {
+    "asn": {
+      "description": "Autonomous system of the service address.",
+      "misp-attribute": "AS",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "category": {
+      "description": "ONYPHE category; determines the field model.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "country": {
+      "description": "Country code.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "cpe": {
+      "description": "Observed component CPE; parallel product/vendor/version arrays are not paired.",
+      "misp-attribute": "cpe",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "cve": {
+      "description": "CVE mentioned in this observation; consult the verdict tags before interpreting it as a positive detection.",
+      "misp-attribute": "vulnerability",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "device": {
+      "description": "Observed device class.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "domain": {
+      "description": "Observed domain in the datascan model.",
+      "misp-attribute": "domain",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "hostname": {
+      "description": "Observed DNS hostname.",
+      "misp-attribute": "hostname",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "http-status": {
+      "categories": [
+        "Other"
+      ],
+      "description": "Observed HTTP response status code.",
+      "misp-attribute": "integer",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "http-title": {
+      "description": "Observed HTTP page title.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "ip": {
+      "description": "Observed service address (ip.dest or ip/ipv6).",
+      "misp-attribute": "ip-dst",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "netname": {
+      "description": "Network name.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "organization": {
+      "description": "Network organization.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "port": {
+      "description": "Port of this service (tcp.dest or port), not all ports on the host.",
+      "misp-attribute": "port",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "product": {
+      "description": "Observed product name.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "protocol": {
+      "description": "Application protocol (app.protocol or protocol).",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "raw-json": {
+      "description": "Complete returned JSON document, preserving nesting, arrays and raw response data. Datascan data may be truncated upstream.",
+      "misp-attribute": "attachment",
+      "multiple": false,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "response-length": {
+      "description": "Length of the raw application response.",
+      "misp-attribute": "size-in-bytes",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "response-md5": {
+      "description": "MD5 of the raw application response (app.data.md5).",
+      "misp-attribute": "md5",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "seen-date": {
+      "description": "Date on which ONYPHE observed this service; not its current state.",
+      "misp-attribute": "datetime",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "source": {
+      "description": "Observation source.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "subnet": {
+      "description": "Network prefix of the service address.",
+      "misp-attribute": "ip-dst",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "tag": {
+      "description": "Original ONYPHE tag, including risk and vulnerability verdict tags. No assertion is inferred from a CVE alone.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "timestamp": {
+      "description": "ONYPHE document timestamp.",
+      "misp-attribute": "datetime",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "tls": {
+      "description": "Whether TLS was observed; source string true/false is converted explicitly.",
+      "misp-attribute": "boolean",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "trackquery": {
+      "description": "OQL query reported by ONYPHE for this record.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "transport": {
+      "description": "Transport protocol.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "url": {
+      "description": "Observed URL (http.url or url).",
+      "misp-attribute": "url",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "vendor": {
+      "description": "Observed product vendor.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "version": {
+      "description": "Observed product version.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    }
+  },
+  "description": "An ONYPHE service or URL observation from ctiscan, ctiurl, datascan, riskscan or vulnscan. Keeps category, observation time, risk/verdict tags and original JSON together. A CVE mention alone does not assert vulnerability.",
+  "meta-category": "network",
+  "name": "onyphe-service",
+  "required": [
+    "category",
+    "raw-json"
+  ],
+  "requiredOneOf": [
+    "ip",
+    "hostname",
+    "domain",
+    "url"
+  ],
+  "uuid": "fa7dc85a-ceba-48d4-867f-7e86b02df6e3",
+  "version": 1
+}
