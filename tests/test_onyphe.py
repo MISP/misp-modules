@@ -860,6 +860,7 @@ def test_layered_component_cves_are_preserved_and_linked_to_each_service(categor
     [
         ({"hex": "0a1b", "num": 2587}, "0a1b"),
         ({"num": 2587}, "2587"),
+        ({"num": 340282366920938463463374607431768211455}, "340282366920938463463374607431768211455"),
         ({"hex": "", "num": 0}, "0"),
         ({"hex": ["0a1b"], "num": 2587}, "0a1b"),
         ({"hex": {"unexpected": "value"}, "num": 2587}, "2587"),
