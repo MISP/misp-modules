@@ -3826,6 +3826,26 @@ Export event and object indicators as a Splunk CSV lookup with CIM field mapping
 
 -----
 
+#### [Squid Proxy Export](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/squid_export.py)
+
+Export IDS-marked event and object attributes as Squid proxy ACLs and deny rules.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/squid_export.py)]
+
+- **features**:
+>Exports validated addresses/networks, domains, hostnames, HTTP(S) URLs and destination ports as deduplicated Squid ACLs with http_access deny rules. Composite attributes retain their constraints. Only to_ids attributes are included; deleted data is excluded. No network access or additional dependency is required. See the [usage guide](https://github.com/MISP/misp-modules/blob/main/documentation/export_mod/squid_export.md).
+
+- **input**:
+>MISP events and object attributes in standard, bare or legacy export format.
+
+- **output**:
+>Base64-encoded Squid .conf fragment; skipped counts and integration warnings in the API response.
+
+- **references**:
+> - https://www.squid-cache.org/Doc/config/acl/
+> - https://www.squid-cache.org/Doc/config/http_access/
+
+-----
+
 #### [Test Export](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/testexport.py)
 
 Skeleton export module.
