@@ -31,16 +31,16 @@ def run_dev():
         )
         time.sleep(2)
 
-    from app.utils import IS_DEVELOPMENT
+    import app.utils.utils as utils
 
-    IS_DEVELOPMENT = True
+    utils.IS_DEVELOPMENT = True
 
     try:
         print("Starting website in debug mode...")
         app.run(
             host=app.config["FLASK_URL"],
             port=app.config["FLASK_PORT"],
-            debug=IS_DEVELOPMENT,
+            debug=utils.IS_DEVELOPMENT,
         )
     finally:
         if os.getenv("WERKZEUG_RUN_MAIN") != "true":
