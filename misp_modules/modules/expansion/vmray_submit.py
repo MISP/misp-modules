@@ -50,6 +50,7 @@ moduleconfig = [
     "shareable",
     "do_not_reanalyze",
     "do_not_include_vmrayjobids",
+    "disable_certificate_verification",
 ]
 
 
@@ -90,19 +91,21 @@ def handler(q=False):
         misperrors["error"] = "Missing API key or server URL (hint: try cloud.vmray.com)"
         return misperrors
 
-    api = VMRayRESTAPI(request["config"].get("url"), request["config"].get("apikey"), False)
-
     shareable = request["config"].get("shareable")
     do_not_reanalyze = request["config"].get("do_not_reanalyze")
     do_not_include_vmrayjobids = request["config"].get("do_not_include_vmrayjobids")
+    disable_certificate_verification = request["config"].get("disable_certificate_verification")
 
     try:
         shareable = bool(strtobool(shareable))  # Do we want the sample to be shared?
         reanalyze = not bool(strtobool(do_not_reanalyze))  # Always reanalyze the sample?
         include_vmrayjobids = not bool(strtobool(do_not_include_vmrayjobids))  # Include the references to VMRay job IDs
+        verify_cert = not bool(strtobool(disable_certificate_verification))  # Verify the server's TLS certificate?
     except ValueError:
         misperrors["error"] = "Error while processing settings. Please double-check your values."
         return misperrors
+
+    api = VMRayRESTAPI(request["config"].get("url"), request["config"].get("apikey"), verify_cert)
 
     if data and sample_filename:
         args = {}
