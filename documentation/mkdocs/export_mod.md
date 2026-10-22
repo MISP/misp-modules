@@ -5,8 +5,7 @@ Module to export a MISP event in CEF format.
 [[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/cef_export.py)]
 
 - **features**:
->The module takes a MISP event in input, to look every attribute. Each attribute matching with some predefined types is then exported in Common Event Format.
->Thus, there is no particular feature concerning MISP Events since any event can be exported. However, 4 configuration parameters recognized by CEF format are required and should be provided by users before exporting data: the device vendor, product and version, as well as the default severity of data.
+>Exports supported event and object attributes as UTF-8 CEF file records, with standard escaping and field validation. IPv6 address records use CEF:1; other records use CEF:0. Device settings and severity have defaults. See the [usage guide](https://github.com/MISP/misp-modules/blob/main/documentation/export_mod/cef_export.md) for mappings and compatibility changes.
 
 - **config**:
 > - Default_Severity
@@ -15,13 +14,13 @@ Module to export a MISP event in CEF format.
 > - Device_Version
 
 - **input**:
->MISP Event attributes
+>MISP events and object attributes in standard, bare or legacy export format.
 
 - **output**:
 >Common Event Format file
 
 - **references**:
->https://community.softwaregrp.com/t5/ArcSight-Connectors/ArcSight-Common-Event-Format-CEF-Guide/ta-p/1589306?attachment-id=65537
+>https://www.microfocus.com/documentation/arcsight/arcsight-smartconnectors-24.3/pdfdoc/cef-implementation-standard/cef-implementation-standard.pdf
 
 -----
 
