@@ -131,3 +131,33 @@ This module is merely a test, always returning true. Triggers on event publishin
 >{'params': {'foo': {'type': 'string', 'description': 'blablabla', 'value': 'xyz'}, 'Data extraction path': {'type': 'hash_path', 'description': 'Only post content extracted from this path', 'value': 'Attribute.{n}.AttributeTag.{n}.Tag.name'}}, 'blocking': False, 'support_filters': False, 'expect_misp_core_format': False}
 
 -----
+
+#### [Wazuh CDB Publish](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/action_mod/wazuh_cdb_publish.py)
+
+Upload MISP event and object indicators to an explicitly named Wazuh CDB source list.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/action_mod/wazuh_cdb_publish.py)]
+
+- **features**:
+>Uploads one typed, deduplicated list of to_ids indicators using PUT /lists/files/{filename}. Credentials come from the module server environment. Supports a credential-free dry run and explicit overwrite; overwrite replaces the entire list with the supplied snapshot. Checks the Wazuh acknowledgement, refuses empty lists and optionally requests an analysisd reload on the manager or cluster without a full manager restart. See the [usage guide](https://github.com/MISP/misp-modules/blob/main/documentation/action_mod/wazuh_cdb_publish.md).
+
+- **config**:
+>{'params': {'filename': {'type': 'string', 'description': 'Required: dedicated list basename, e.g. misp-ipv4'}, 'indicator_type': {'type': 'string', 'description': 'ipv4, ipv6, domain, md5, sha1, sha256 or sha512', 'value': 'ipv4'}, 'overwrite': {'type': 'string', 'description': 'true replaces the complete existing file with this snapshot', 'value': 'false'}, 'dry_run': {'type': 'string', 'description': 'true previews the upload without network access', 'value': 'false'}, 'reload': {'type': 'string', 'description': 'none (upload only), manager (local node) or cluster (all nodes): reload analysisd after upload', 'value': 'none'}}, 'blocking': True, 'support_filters': False, 'expect_misp_core_format': True}
+
+- **input**:
+>Selected MISP events and object attributes in workflow data.
+
+- **output**:
+>Upload and reload status, selected filename, indicator counts, content SHA-256 and activation notice.
+
+- **references**:
+> - https://documentation.wazuh.com/current/user-manual/api/reference.html#tag/Lists
+> - https://documentation.wazuh.com/current/user-manual/api/reference.html#tag/Manager
+> - https://documentation.wazuh.com/current/user-manual/api/reference.html#tag/Cluster
+> - https://documentation.wazuh.com/current/user-manual/ruleset/cdb-list.html
+
+- **requirements**:
+> - requests
+> - Wazuh server API credentials with lists:update and lists:delete permissions
+> - Optional reload: manager:read/manager:restart or cluster:read/cluster:restart permissions
+
+-----

@@ -229,6 +229,7 @@ For further Information see the [license file](https://misp.github.io/misp-modul
 * [ThreadConnect Export](https://misp.github.io/misp-modules/export_mod/#threadconnect-export) - Module to export a structured CSV file for uploading to ThreatConnect.
 * [VirusTotal Collections Export](https://misp.github.io/misp-modules/export_mod/#virustotal-collections-export) - Creates a VT Collection from an event iocs.
 * [VirusTotal Graph Export](https://misp.github.io/misp-modules/export_mod/#virustotal-graph-export) - This module is used to create a VirusTotal Graph from a MISP event.
+* [Wazuh CDB Export](https://misp.github.io/misp-modules/export_mod/#wazuh-cdb-export) - Export MISP event and object indicators as a typed Wazuh CDB source list.
 * [YARA Rule Export](https://misp.github.io/misp-modules/export_mod/#yara-rule-export) - This module is used to export MISP events to YARA.
 * [Zeek Intel Export](https://misp.github.io/misp-modules/export_mod/#zeek-intel-export) - Export validated MISP event and object indicators as a Zeek Intel Framework feed.
 
@@ -261,6 +262,7 @@ For further Information see the [license file](https://misp.github.io/misp-modul
 * [SentinelOne IOC Publish](https://misp.github.io/misp-modules/action_mod/#sentinelone-ioc-publish) - Publish MISP event and object indicators to SentinelOne Threat Intelligence with explicit scope.
 * [Slack](https://misp.github.io/misp-modules/action_mod/#slack) - Simplistic module to send messages to a Slack channel.
 * [Test action](https://misp.github.io/misp-modules/action_mod/#test-action) - This module is merely a test, always returning true. Triggers on event publishing.
+* [Wazuh CDB Publish](https://misp.github.io/misp-modules/action_mod/#wazuh-cdb-publish) - Upload MISP event and object indicators to an explicitly named Wazuh CDB source list.
 
 
 
