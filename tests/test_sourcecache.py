@@ -1,6 +1,9 @@
 import base64
 import json
+import socket
 from unittest.mock import patch
+
+import pytest
 
 from misp_modules.modules.expansion import sourcecache
 
@@ -82,6 +85,67 @@ def test_fetch_failure_returns_error():
     attribute = {"type": "link", "value": "https://www.misp-project.org/feeds/", "uuid": UUID}
     result, _ = _run(attribute, fetch=fetch)
     assert "error" in result
+
+
+def test_internal_address_is_not_fetched():
+    attribute = {"type": "url", "value": "http://127.0.0.1:6379/", "uuid": UUID}
+    result, mock_archive = _run(attribute)
+    assert "error" in result
+    mock_archive.assert_not_called()
+
+
+def test_non_http_scheme_is_not_fetched():
+    attribute = {"type": "link", "value": "file:///etc/passwd", "uuid": UUID}
+    result, mock_archive = _run(attribute)
+    assert "error" in result
+    mock_archive.assert_not_called()
+
+
+def test_backslash_userinfo_is_not_fetched():
+    attribute = {"type": "url", "value": "http://127.0.0.1\\@www.misp-project.org/", "uuid": UUID}
+    result, mock_archive = _run(attribute)
+    assert "error" in result
+    mock_archive.assert_not_called()
+
+
+@pytest.mark.parametrize(
+    "url",
+    [
+        "http://[::1]:6379/",  # loopback
+        "http://[::]/",  # unspecified
+        "http://[fd00:ec2::254]/",  # unique local (an AWS IMDS IPv6 address)
+        "http://[fe80::1]/",  # link-local
+        "http://[::ffff:169.254.169.254]/",  # IPv4-mapped
+        "http://[64:ff9b::a00:1]/",  # NAT64 of 10.0.0.1
+        "http://[2002:7f00:1::]/",  # 6to4 of 127.0.0.1
+        "http://[::1/",  # unclosed bracket
+    ],
+)
+def test_internal_ipv6_address_is_not_fetched(url):
+    attribute = {"type": "url", "value": url, "uuid": UUID}
+    result, mock_archive = _run(attribute)
+    assert "error" in result
+    mock_archive.assert_not_called()
+
+
+def _resolves_to(*addresses):
+    return [(socket.AF_INET6, socket.SOCK_STREAM, 6, "", (address, 0, 0, 0)) for address in addresses]
+
+
+def test_name_with_an_internal_ipv6_record_is_not_fetched():
+    attribute = {"type": "url", "value": "https://www.misp-project.org/feeds/", "uuid": UUID}
+    with patch.object(sourcecache.socket, "getaddrinfo", return_value=_resolves_to("2001:4860:4860::8888", "fd12::1")):
+        result, mock_archive = _run(attribute)
+    assert "error" in result
+    mock_archive.assert_not_called()
+
+
+def test_name_with_public_ipv6_records_is_fetched():
+    attribute = {"type": "url", "value": "https://www.misp-project.org/feeds/", "uuid": UUID}
+    with patch.object(sourcecache.socket, "getaddrinfo", return_value=_resolves_to("2001:4860:4860::8888")):
+        result, mock_archive = _run(attribute)
+    assert "error" not in result
+    mock_archive.assert_called_once()
 
 
 def test_wrong_attribute_type_returns_error():
