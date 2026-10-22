@@ -841,9 +841,6 @@ class SummaryV2(ReportParser):
             )
 
             ref_ip_addresses = domain.get("ref_ip_addresses", [])
-            if not ref_ip_addresses:
-                continue
-
             for ip_address in self._resolve_refs(ref_ip_addresses):
                 ip = ip_address.get("ip_address")
                 if ip is not None:
