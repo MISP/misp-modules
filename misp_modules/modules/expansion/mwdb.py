@@ -4,7 +4,9 @@ import json
 import sys
 import zipfile
 
+import requests
 from mwdblib import MWDB
+from mwdblib.exc import MWDBError
 from pymisp import PyMISP
 
 # from distutils.util import strtobool
@@ -107,6 +109,7 @@ def handler(q=False):
     misp_attribute_comment = ""
     mwdb_tags = []
     misp_info = ""
+    misp_event = None
 
     try:
         if include_tags_event:
@@ -154,10 +157,10 @@ def handler(q=False):
         if len(misp_attribute_comment) < 1:
             misp_attribute_comment = "MISP attribute {}".format(misp_attribute_uuid)
         file_object.add_comment(misp_attribute_comment)
-        if len(misp_event) > 0:
+        if misp_event and len(misp_event) > 0:
             file_object.add_comment("Fetched from event {} - {}".format(misp_event_id, misp_info))
         mwdb_link = request["config"].get("mwdb_url").replace("/api", "/file/") + "{}".format(file_object.md5)
-    except Exception:
+    except (MWDBError, requests.exceptions.RequestException):
         misperrors["error"] = "Unable to send sample to MWDB instance"
         return misperrors
 
