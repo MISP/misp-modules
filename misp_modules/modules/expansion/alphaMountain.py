@@ -130,8 +130,8 @@ def query_alphamountain_api(api_url, license_key, ioc_value, scan_depth, partner
         return response.json()
 
     except requests.exceptions.HTTPError as e:
-        status = response.status_code if response else "No status"
-        body = response.text[:500] if response else "No response body"
+        status = response.status_code if response is not None else "No status"
+        body = response.text[:500] if response is not None else "No response body"
         raise ValueError(f"HTTP {status}: {body} - {str(e)}")
 
     except requests.exceptions.RequestException as e:
