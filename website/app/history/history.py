@@ -86,13 +86,13 @@ def get_history_session_uuid(sid):
     return {}
 
 
-@history_blueprint.route("/history/remove_node_session/<sid>", methods=["GET"])
+@history_blueprint.route("/history/remove_node_session/<sid>", methods=["POST"])
 def remove_node_session(sid):
     HistoryModel.remove_node_session(sid)
     return {"message": "Node deleted", "toast_class": "success-subtle"}
 
 
-@history_blueprint.route("/history/remove_node_tree/<sid>", methods=["GET"])
+@history_blueprint.route("/history/remove_node_tree/<sid>", methods=["POST"])
 def remove_node_tree(sid):
     HistoryModel.remove_node_tree(sid)
     return {"message": "Node deleted", "toast_class": "success-subtle"}
