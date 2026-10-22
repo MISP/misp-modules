@@ -47,11 +47,12 @@ def handler(q=False):
         response = r.text
         if response:
             return {"results": [{"types": mispattributes["output"], "values": response}]}
+        return {"results": []}
     elif r.status_code == 404:  # Not found (not an error)
         return {"results": [{"types": mispattributes["output"], "values": "Not found"}]}
     else:  # Real error
         misperrors["error"] = "MacVendors API not accessible (HTTP " + str(r.status_code) + ")"
-        return misperrors["error"]
+        return misperrors
 
 
 def introspection():
