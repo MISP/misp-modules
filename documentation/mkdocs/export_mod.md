@@ -546,6 +546,29 @@ This module is used to create a VirusTotal Graph from a MISP event.
 
 -----
 
+#### [Wazuh CDB Export](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/wazuh_cdb_export.py)
+
+Export MISP event and object indicators as a typed Wazuh CDB source list.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/wazuh_cdb_export.py)]
+
+- **features**:
+>Produces a sorted, deduplicated key-only CDB list for one indicator type: IPv4, IPv6, domain, MD5, SHA-1, SHA-256 or SHA-512. Defaults to to_ids IPv4 attributes. Includes object attributes, normalizes values, quotes IPv6 keys and excludes deleted data. No Wazuh connection is needed. Register the list and restart the manager to activate detection. See the [usage guide](https://github.com/MISP/misp-modules/blob/main/documentation/export_mod/wazuh_cdb_export.md).
+
+- **config**:
+> - indicator_type
+> - include_non_ids
+
+- **input**:
+>MISP events, including object attributes, in standard, bare or legacy format.
+
+- **output**:
+>Base64-encoded CDB source text, with counts, warnings and provenance outside the file.
+
+- **references**:
+>https://documentation.wazuh.com/current/user-manual/ruleset/cdb-list.html
+
+-----
+
 #### [YARA Rule Export](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/yara_export.py)
 
 <img src=../logos/yara.png height=60>
