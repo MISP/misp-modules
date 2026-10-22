@@ -25,8 +25,14 @@ disabled, requests use a 5-second connection and 30-second read timeout, and
 failed requests are not retried automatically.
 
 Use a dedicated Wazuh API account with the `lists:update` and `lists:delete`
-permissions required by the upload endpoint. Check the RBAC requirements for
-your Wazuh version. The implementation follows the Wazuh 4.14.1 API specification.
+permissions required by the upload endpoint. Optional manager reloads also need
+`manager:read` and `manager:restart`; cluster reloads need `cluster:read` and
+`cluster:restart` on the selected nodes. Check the RBAC requirements for your
+Wazuh version. The implementation follows the Wazuh 4.14.1 API specification.
+
+The connector accepts up to 100,000 unique values and 32 MiB of list source text.
+Wazuh's API `max_upload_size` defaults to 10 MiB: increase it, and any proxy request
+limits, before uploading larger lists. The connector does not change server limits.
 
 ## Workflow parameters
 
@@ -36,6 +42,7 @@ your Wazuh version. The implementation follows the Wazuh 4.14.1 API specificatio
 | `indicator_type` | `ipv4` | `ipv4`, `ipv6`, `domain`, `md5`, `sha1`, `sha256` or `sha512` |
 | `overwrite` | `false` | `true` replaces the **entire file** with the supplied snapshot |
 | `dry_run` | `false` | `true` returns the planned source text without credentials or network access |
+| `reload` | `none` | `none` uploads only; `manager` reloads analysisd on the local node; `cluster` requests reloads on all cluster nodes after a successful upload |
 
 Use one dedicated file per indicator type and publisher. With `overwrite=false`,
 an existing filename causes a failure instead of being modified. With
@@ -63,7 +70,8 @@ POST this JSON to the module server's `/query` endpoint:
     "filename": "misp-ipv4",
     "indicator_type": "ipv4",
     "overwrite": "false",
-    "dry_run": "true"
+    "dry_run": "true",
+    "reload": "manager"
   },
   "data": [{"Event": {"uuid": "event-1", "Attribute": [
     {"type": "ip-dst", "value": "192.0.2.1", "to_ids": true, "uuid": "attribute-1"}
@@ -75,7 +83,8 @@ The result uses `result_key="wazuh_cdb_publish"`. Its `data` includes:
 
 - `success`, `status` (`planned`, `uploaded`, `not_uploaded` or `unknown`), and the selected filename;
 - indicator count, skipped counts, file byte length and content SHA-256;
-- `activation="pending"`, since upload does not load detection rules;
+- selected `reload` mode and `activation` (`pending`, `reload_requested` or `unknown`);
+- acknowledged `reload_nodes` and any `reload_warning_nodes` when a reload is requested;
 - the exact `content` for dry runs only.
 
 Set `dry_run=false` to upload. Success requires HTTP 200, Wazuh `error=0`, zero
@@ -84,12 +93,34 @@ inside HTTP 200 responses are failures. Timeouts, HTTP failures or invalid
 acknowledgements during upload produce an error and an uncertain outcome; inspect
 Wazuh before retrying. There is one file upload per invocation, with no batching.
 
+With `reload=manager` or `reload=cluster`, the action requests an analysisd reload
+only after Wazuh acknowledges the upload. It uses the same JWT and TLS settings
+for `PUT /manager/analysisd/reload` or `PUT /cluster/analysisd/reload`, respectively.
+The default `reload=none` keeps the previous upload-only behavior. Dry runs do not
+upload or reload anything, regardless of the selected mode.
+
+Reload responses must report zero failures, consistent nonempty per-node results,
+and no failed-send message. Warnings from a successful reload are flagged through
+`reload_warning_nodes`; inspect the logs on those nodes. A reload error or partial
+cluster failure returns `success=false` and an error while preserving
+`status="uploaded"`, with `activation="unknown"`. Do not repeat an upload merely
+to retry activation. If a Wazuh version lacks the reload endpoints, the action
+reports the reload failure and keeps the uploaded list; it does not fall back to
+restarting services.
+
 ## Activation
 
-Register the list in `ossec.conf`, reference it in a detection rule, and restart
-the Wazuh manager using your deployment's normal procedure. The action leaves
-activation pending and does not modify configuration, trigger Active Response,
-delete lists or restart services. See the
+Register the list in `ossec.conf` and reference it in a detection rule before
+requesting an analysisd reload. A full Wazuh manager restart is not required to
+load list changes. For a cluster, follow the ruleset synchronization procedure;
+the cluster reload endpoint targets all nodes and the manager endpoint targets
+only the local node.
+
+An acknowledged reload sets `activation="reload_requested"`; it does not confirm
+asynchronous reload completion or detection coverage. Check analysisd logs. With
+`reload=none`, activation stays pending and can be requested separately through
+the same API endpoints. The action does not modify configuration, trigger Active
+Response, delete lists or restart services. See the
 [export guide's configuration and rule example](../export_mod/wazuh_cdb_export.md#activate-the-list-in-wazuh).
 
 No new MISP object template is required; existing attributes and objects supply

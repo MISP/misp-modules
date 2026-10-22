@@ -552,7 +552,7 @@ Export MISP event and object indicators as a typed Wazuh CDB source list.
 [[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/wazuh_cdb_export.py)]
 
 - **features**:
->Produces a sorted, deduplicated key-only CDB list for one indicator type: IPv4, IPv6, domain, MD5, SHA-1, SHA-256 or SHA-512. Defaults to to_ids IPv4 attributes. Includes object attributes, normalizes values, quotes IPv6 keys and excludes deleted data. No Wazuh connection is needed. Register the list and restart the manager to activate detection. See the [usage guide](https://github.com/MISP/misp-modules/blob/main/documentation/export_mod/wazuh_cdb_export.md).
+>Produces a sorted, deduplicated key-only CDB list for one indicator type: IPv4, IPv6, domain, MD5, SHA-1, SHA-256 or SHA-512. Defaults to to_ids IPv4 attributes. Includes object attributes, normalizes values, quotes IPv6 keys and excludes deleted data. No Wazuh connection is needed. Register the list and reload analysisd through the Wazuh API to activate detection. See the [usage guide](https://github.com/MISP/misp-modules/blob/main/documentation/export_mod/wazuh_cdb_export.md).
 
 - **config**:
 > - indicator_type

@@ -57,6 +57,19 @@ def acknowledgement(**changes):
     }
 
 
+def reload_acknowledgement(names=("manager",), **changes):
+    return {
+        "error": 0,
+        "data": {
+            "affected_items": [{"name": name, "msg": "Ruleset reload request sent successfully."} for name in names],
+            "total_affected_items": len(names),
+            "total_failed_items": 0,
+            "failed_items": [],
+            **changes,
+        },
+    }
+
+
 @pytest.fixture
 def client(monkeypatch):
     session = MagicMock(spec=requests.Session)
@@ -220,8 +233,26 @@ def test_limits_are_checked_before_network(client, monkeypatch):
     monkeypatch.setattr(conversion, "MAX_VALUES", 1)
     assert "error" in run(event([attribute(), attribute(value="192.0.2.2")]))
     monkeypatch.setattr(conversion, "MAX_BYTES", 2)
-    assert "error" in run()
+    assert "2 bytes" in run()["error"]
     client.constructor.assert_not_called()
+
+
+def test_byte_limit_accepts_exact_boundary_and_rejects_one_byte_over(client, monkeypatch):
+    monkeypatch.setattr(conversion, "MAX_BYTES", len(b"192.0.2.1:\n"))
+    assert run(dry_run=True)["data"]["status"] == "planned"
+    monkeypatch.setattr(conversion, "MAX_BYTES", len(b"192.0.2.1:\n") - 1)
+    assert f"{conversion.MAX_BYTES:,} bytes" in run(dry_run=True)["error"]
+    client.constructor.assert_not_called()
+
+
+def test_byte_limit_accommodates_maximum_count_of_long_domain_keys(monkeypatch):
+    # 100,000 distinct 253-character DNS names produce 25.5 MB of source text.
+    suffix = "." + "b" * 63 + "." + "c" * 63 + "." + "d" * 61
+    values = {f"{index:05d}" + "a" * 58 + suffix: [] for index in range(100000)}
+    monkeypatch.setattr(conversion, "collect", lambda *args, **kwargs: (values, {}))
+    content, summary, _ = conversion.build([], {"indicator_type": "domain"})
+    assert len(content) == 25500000 and len(content) <= conversion.MAX_BYTES
+    assert summary["count"] == 100000
 
 
 def test_dry_run_has_no_network_or_credentials_and_matches_export(client, monkeypatch):
@@ -408,6 +439,162 @@ def test_actual_requests_wire_contract(monkeypatch):
     monkeypatch.setattr(requests.adapters.HTTPAdapter, "send", send)
     assert run()["data"]["status"] == "uploaded"
     assert [call.method for call in calls] == ["POST", "PUT"]
+
+
+@pytest.mark.parametrize("mode,names", [("manager", ["manager"]), ("cluster", ["master-node", "worker-node"])])
+def test_reload_after_successful_upload_uses_correct_endpoint_and_same_connection(client, monkeypatch, mode, names):
+    monkeypatch.setenv("WAZUH_CA_BUNDLE", "/etc/certs/wazuh.pem")
+    client.request.side_effect = [response(), response(acknowledgement()), response(reload_acknowledgement(names))]
+    result = run(reload=mode)
+    assert result["data"]["success"] is True and result["data"]["status"] == "uploaded"
+    assert result["data"]["activation"] == "reload_requested" and result["data"]["reload_nodes"] == names
+    assert result["data"]["reload_warning_nodes"] == []
+    assert result["data"]["reload"] == mode
+    calls = client.request.call_args_list
+    assert len(calls) == 3
+    assert calls[2].args == ("PUT", f"https://wazuh.example:55000/{mode}/analysisd/reload")
+    assert calls[2].kwargs["headers"] == {"Authorization": "Bearer header.payload.signature"}
+    assert "data" not in calls[2].kwargs and "auth" not in calls[2].kwargs and "params" not in calls[2].kwargs
+    assert all(
+        call.kwargs["verify"] == "/etc/certs/wazuh.pem" and call.kwargs["allow_redirects"] is False for call in calls
+    )
+    assert "confirm completion" in result["warnings"][0]
+    assert "header.payload.signature" not in json.dumps(result)
+
+
+@pytest.mark.parametrize("mode", ["manager", "cluster"])
+def test_reload_is_not_attempted_in_dry_run(client, mode):
+    result = run(reload=mode, dry_run=True)
+    assert result["data"]["reload"] == mode and result["data"]["status"] == "planned"
+    assert result["data"]["activation"] == "pending"
+    client.constructor.assert_not_called()
+
+
+@pytest.mark.parametrize("mode", ["true", "all", "MANAGER", True, [], {}, 0])
+def test_invalid_reload_mode_is_rejected_before_network(client, mode):
+    assert "reload must be" in run(reload=mode)["error"]
+    client.constructor.assert_not_called()
+
+
+@pytest.mark.parametrize("mode", [None, "", "none"])
+def test_explicit_upload_only_mode_preserves_previous_behavior(client, mode):
+    result = run(reload=mode)
+    assert result["data"]["success"] is True and result["data"]["activation"] == "pending"
+    assert client.request.call_count == 2
+
+
+@pytest.mark.parametrize(
+    "failed_upload", [response({"error": 1905}), response(status=403), requests.Timeout("test-password")]
+)
+def test_reload_is_never_attempted_after_failed_upload(client, failed_upload):
+    client.request.side_effect = [response(), failed_upload]
+    result = run(reload="manager")
+    assert "error" in result and result["data"]["status"] == "unknown"
+    assert result["data"]["activation"] == "pending" and client.request.call_count == 2
+
+
+@pytest.mark.parametrize(
+    "failure",
+    [
+        response(status=403),
+        response(status=404),
+        response(status=429),
+        response(status=500),
+        requests.Timeout("test-password"),
+        requests.ConnectionError("test-password"),
+    ],
+)
+def test_reload_failure_preserves_upload_and_never_retries(client, failure):
+    client.request.side_effect = [response(), response(acknowledgement()), failure]
+    result = run(reload="cluster")
+    assert result["data"]["status"] == "uploaded" and result["data"]["activation"] == "unknown"
+    assert result["data"]["success"] is False and "Upload succeeded, but analysisd reload failed" in result["error"]
+    assert "test-password" not in json.dumps(result) and client.request.call_count == 3
+    client.__exit__.assert_called_once()
+
+
+@pytest.mark.parametrize(
+    "body",
+    [
+        None,
+        [],
+        {},
+        {"error": 1000},
+        {**reload_acknowledgement(), "error": True},
+        reload_acknowledgement(total_failed_items=1, failed_items=[{"id": ["worker-node"], "error": {"code": 1914}}]),
+        reload_acknowledgement(failed_items=[{}]),
+        reload_acknowledgement(names=[]),
+        reload_acknowledgement(total_affected_items=2),
+        reload_acknowledgement(total_affected_items=True),
+        reload_acknowledgement(total_failed_items=False),
+        reload_acknowledgement(affected_items=[None]),
+        reload_acknowledgement(affected_items=[{"name": "manager"}]),
+        reload_acknowledgement(affected_items=[{"name": "", "msg": "Ruleset reload request sent successfully."}]),
+        reload_acknowledgement(
+            affected_items=[{"name": "manager", "msg": "Failed to send the ruleset reload request."}]
+        ),
+        reload_acknowledgement(affected_items=[{"name": "manager", "msg": ""}]),
+        reload_acknowledgement(names=["master-node", "master-node"]),
+    ],
+)
+def test_bad_reload_acknowledgement_reports_failure_after_upload(client, body):
+    client.request.side_effect = [response(), response(acknowledgement()), response(body)]
+    result = run(reload="cluster")
+    assert result["data"]["status"] == "uploaded" and result["data"]["activation"] == "unknown"
+    assert result["data"]["success"] is False and "error" in result
+
+
+def test_manager_reload_rejects_acknowledgement_of_multiple_nodes(client):
+    client.request.side_effect = [
+        response(),
+        response(acknowledgement()),
+        response(reload_acknowledgement(["master", "worker"])),
+    ]
+    assert "error" in run(reload="manager")
+
+
+def test_invalid_reload_json_does_not_leak_and_keeps_uploaded_status(client):
+    bad = response()
+    bad.json.side_effect = ValueError("test-password")
+    client.request.side_effect = [response(), response(acknowledgement()), bad]
+    result = run(reload="manager")
+    assert result["data"]["status"] == "uploaded" and "test-password" not in json.dumps(result)
+    assert "error" in result
+
+
+def test_successful_reload_with_ruleset_warnings_reports_affected_nodes_without_echoing_messages(client):
+    body = reload_acknowledgement(affected_items=[{"name": "manager", "msg": "ruleset warning: test-password"}])
+    client.request.side_effect = [response(), response(acknowledgement()), response(body)]
+    result = run(reload="manager")
+    assert result["data"]["success"] is True and result["data"]["activation"] == "reload_requested"
+    assert result["data"]["reload_warning_nodes"] == ["manager"]
+    assert "ruleset reload warnings" in result["warnings"][-1] and "test-password" not in json.dumps(result)
+
+
+@pytest.mark.parametrize("mode", ["manager", "cluster"])
+def test_actual_requests_reload_wire_contract(monkeypatch, mode):
+    calls = []
+
+    def send(self, request, **kwargs):
+        calls.append(request)
+        assert request.headers["Authorization"] == "Bearer header.payload.signature"
+        if len(calls) == 1:
+            assert request.path_url == "/lists/files/misp-ipv4?overwrite=false"
+            assert request.body == b"192.0.2.1:\n"
+            body = acknowledgement()
+        else:
+            assert request.method == "PUT" and request.path_url == f"/{mode}/analysisd/reload"
+            assert request.body is None
+            body = reload_acknowledgement(["manager"] if mode == "manager" else ["master", "worker"])
+        result = requests.Response()
+        result.status_code, result._content, result.request = 200, json.dumps(body).encode(), request
+        return result
+
+    monkeypatch.setenv("WAZUH_URL", "https://wazuh.example:55000")
+    monkeypatch.setenv("WAZUH_API_TOKEN", "header.payload.signature")
+    monkeypatch.setattr(requests.adapters.HTTPAdapter, "send", send)
+    result = run(reload=mode)
+    assert result["data"]["activation"] == "reload_requested" and len(calls) == 2
 
 
 class TestWazuhHTTP(AsyncHTTPTestCase):

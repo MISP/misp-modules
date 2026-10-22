@@ -7,10 +7,10 @@ from misp_modules.lib.indicator_list import HASH_LENGTHS, SUPPORTED_TYPES, boole
 INDICATOR_TYPES = {"ipv4", "ipv6", "domain", *HASH_LENGTHS}
 INPUT_TYPES = SUPPORTED_TYPES - {"url"}
 MAX_VALUES = 100000
-MAX_BYTES = 8 * 1024 * 1024
+MAX_BYTES = 32 * 1024 * 1024
 ACTIVATION_NOTICE = (
-    "Register the list under ruleset in ossec.conf, reference it from a detection rule, and restart the Wazuh manager"
-    " to load changes. Uploading alone does not activate detection."
+    "Register the list under ruleset in ossec.conf, reference it from a detection rule, and reload analysisd through"
+    " the Wazuh API to load changes. A full manager restart is not required."
 )
 
 
@@ -46,11 +46,19 @@ def build(data, config, allow_non_ids=False):
     # as required by Wazuh's CDB upload validator. URLs cannot be represented by that validator.
     output = "".join(f'"{value}":\n' if ":" in value else f"{value}:\n" for value in sorted(values)).encode("ascii")
     if len(output) > MAX_BYTES:
-        raise ValueError("CDB list exceeds 8 MiB; split the input.")
+        raise ValueError(f"CDB list exceeds {MAX_BYTES:,} bytes; split the input.")
     return output, {"indicator_type": selected, "count": len(values), "skipped": skipped}, values
 
 
 def warnings(summary):
-    return [ACTIVATION_NOTICE] + [
+    notice = (
+        "Wazuh acknowledged the ruleset reload request; check analysisd logs to confirm completion."
+        if summary.get("activation") == "reload_requested"
+        else ACTIVATION_NOTICE
+    )
+    messages = [notice] + [
         f"Skipped {count} {reason} attribute(s)." for reason, count in sorted(summary["skipped"].items())
     ]
+    if summary.get("reload_warning_nodes"):
+        messages.append("Wazuh reported ruleset reload warnings; inspect analysisd logs on the indicated nodes.")
+    return messages

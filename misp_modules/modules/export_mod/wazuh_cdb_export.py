@@ -16,8 +16,8 @@ moduleinfo = {
     "features": (
         "Produces a sorted, deduplicated key-only CDB list for one indicator type: IPv4, IPv6, domain, MD5, SHA-1,"
         " SHA-256 or SHA-512. Defaults to to_ids IPv4 attributes. Includes object attributes, normalizes values,"
-        " quotes IPv6 keys and excludes deleted data. No Wazuh connection is needed. Register the list and restart"
-        " the manager to activate detection. See the [usage"
+        " quotes IPv6 keys and excludes deleted data. No Wazuh connection is needed. Register the list and reload"
+        " analysisd through the Wazuh API to activate detection. See the [usage"
         " guide](https://github.com/MISP/misp-modules/blob/main/documentation/export_mod/wazuh_cdb_export.md)."
     ),
     "references": ["https://documentation.wazuh.com/current/user-manual/ruleset/cdb-list.html"],

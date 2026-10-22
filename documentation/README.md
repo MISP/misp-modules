@@ -3983,7 +3983,7 @@ Export MISP event and object indicators as a typed Wazuh CDB source list.
 [[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/wazuh_cdb_export.py)]
 
 - **features**:
->Produces a sorted, deduplicated key-only CDB list for one indicator type: IPv4, IPv6, domain, MD5, SHA-1, SHA-256 or SHA-512. Defaults to to_ids IPv4 attributes. Includes object attributes, normalizes values, quotes IPv6 keys and excludes deleted data. No Wazuh connection is needed. Register the list and restart the manager to activate detection. See the [usage guide](https://github.com/MISP/misp-modules/blob/main/documentation/export_mod/wazuh_cdb_export.md).
+>Produces a sorted, deduplicated key-only CDB list for one indicator type: IPv4, IPv6, domain, MD5, SHA-1, SHA-256 or SHA-512. Defaults to to_ids IPv4 attributes. Includes object attributes, normalizes values, quotes IPv6 keys and excludes deleted data. No Wazuh connection is needed. Register the list and reload analysisd through the Wazuh API to activate detection. See the [usage guide](https://github.com/MISP/misp-modules/blob/main/documentation/export_mod/wazuh_cdb_export.md).
 
 - **config**:
 > - indicator_type
@@ -4558,23 +4558,26 @@ Upload MISP event and object indicators to an explicitly named Wazuh CDB source 
 [[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/action_mod/wazuh_cdb_publish.py)]
 
 - **features**:
->Uploads one typed, deduplicated list of to_ids indicators using PUT /lists/files/{filename}. Credentials come from the module server environment. Supports a credential-free dry run and explicit overwrite; overwrite replaces the entire list with the supplied snapshot. Checks the Wazuh acknowledgement, refuses empty lists and reports activation as pending. See the [usage guide](https://github.com/MISP/misp-modules/blob/main/documentation/action_mod/wazuh_cdb_publish.md).
+>Uploads one typed, deduplicated list of to_ids indicators using PUT /lists/files/{filename}. Credentials come from the module server environment. Supports a credential-free dry run and explicit overwrite; overwrite replaces the entire list with the supplied snapshot. Checks the Wazuh acknowledgement, refuses empty lists and optionally requests an analysisd reload on the manager or cluster without a full manager restart. See the [usage guide](https://github.com/MISP/misp-modules/blob/main/documentation/action_mod/wazuh_cdb_publish.md).
 
 - **config**:
->{'params': {'filename': {'type': 'string', 'description': 'Required: dedicated list basename, e.g. misp-ipv4'}, 'indicator_type': {'type': 'string', 'description': 'ipv4, ipv6, domain, md5, sha1, sha256 or sha512', 'value': 'ipv4'}, 'overwrite': {'type': 'string', 'description': 'true replaces the complete existing file with this snapshot', 'value': 'false'}, 'dry_run': {'type': 'string', 'description': 'true previews the upload without network access', 'value': 'false'}}, 'blocking': True, 'support_filters': False, 'expect_misp_core_format': True}
+>{'params': {'filename': {'type': 'string', 'description': 'Required: dedicated list basename, e.g. misp-ipv4'}, 'indicator_type': {'type': 'string', 'description': 'ipv4, ipv6, domain, md5, sha1, sha256 or sha512', 'value': 'ipv4'}, 'overwrite': {'type': 'string', 'description': 'true replaces the complete existing file with this snapshot', 'value': 'false'}, 'dry_run': {'type': 'string', 'description': 'true previews the upload without network access', 'value': 'false'}, 'reload': {'type': 'string', 'description': 'none (upload only), manager (local node) or cluster (all nodes): reload analysisd after upload', 'value': 'none'}}, 'blocking': True, 'support_filters': False, 'expect_misp_core_format': True}
 
 - **input**:
 >Selected MISP events and object attributes in workflow data.
 
 - **output**:
->Upload status, selected filename, indicator counts, content SHA-256 and activation notice.
+>Upload and reload status, selected filename, indicator counts, content SHA-256 and activation notice.
 
 - **references**:
 > - https://documentation.wazuh.com/current/user-manual/api/reference.html#tag/Lists
+> - https://documentation.wazuh.com/current/user-manual/api/reference.html#tag/Manager
+> - https://documentation.wazuh.com/current/user-manual/api/reference.html#tag/Cluster
 > - https://documentation.wazuh.com/current/user-manual/ruleset/cdb-list.html
 
 - **requirements**:
 > - requests
 > - Wazuh server API credentials with lists:update and lists:delete permissions
+> - Optional reload: manager:read/manager:restart or cluster:read/cluster:restart permissions
 
 -----
