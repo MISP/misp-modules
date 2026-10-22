@@ -164,7 +164,7 @@ def remove_node_session(node_uuid):
                 if util_remove_node_session(node_uuid, q_value, sess[keys_list[i]]):
                     loc = i
                     break
-    if loc:
+    if loc is not None:
         del sess[keys_list[i]]
 
 
