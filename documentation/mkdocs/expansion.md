@@ -2828,6 +2828,37 @@ Expands a SigMF Recording object into a SigMF Expanded Recording object, extract
 
 -----
 
+#### [SoChain](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/sochain.py)
+
+Get the balance, activity, counterparties and address poisoning findings of a BTC, LTC, DOGE or ZEC address from SoChain.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/sochain.py)]
+
+- **features**:
+>Query the SoChain API v3 for a btc attribute or a coin-address object. A btc attribute is looked up on Bitcoin. A coin-address object is looked up on the network named by its symbol (BTC, LTC, DOGE or ZEC); without a symbol, the network is the first of Bitcoin, Litecoin, Dogecoin and Zcash on which SoChain says the address is valid.
+>
+>The result is a coin-address object with the balance, total received and sent, the number of transactions and the first and last activity, referencing the input. Recent counterparties are returned as coin-address objects linked with `paid` references (5 on hover, 50 when the magnifying glass is clicked), whose comments give the amount, transaction and block. When look-alike addresses sent the address dust to poison its history, each one is returned as a coin-address object that `impersonates` the address it copies.
+>
+>No API key is needed for up to 2,500 lookups a day per IP. With a key from https://sochain.com/dashboard, lookups count against that account's plan.
+
+- **config**:
+>apikey
+
+- **input**:
+>A btc attribute, or a coin-address object with a BTC, LTC, DOGE or ZEC address.
+
+- **output**:
+>coin-address objects: the address, its recent counterparties and any look-alike addresses.
+
+- **references**:
+> - https://sochain.com/docs
+> - https://sochain.com/api/v3/openapi.json
+
+- **requirements**:
+> - requests
+> - PyMISP
+
+-----
+
 #### [Socialscan Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/socialscan.py)
 
 A hover module to get information on the availability of an email address or username on some online platforms.
