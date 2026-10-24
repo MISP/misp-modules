@@ -4447,6 +4447,33 @@ Create and renew module-owned Falcon custom IOCs from MISP event and object attr
 
 -----
 
+#### [Export to Sentinel or Defender](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/action_mod/export_sentinel.py)
+
+Export to Sentinel or Defender using the existing script wrapper, or directly to Sentinel's STIX API.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/action_mod/export_sentinel.py)]
+
+- **features**:
+>Preserves wrapper mode and its boolean success response by default. Direct mode publishes supplied IDS attributes to Microsoft Sentinel without an external script, using the same implementation as sentinel_publish. Filtered/extracted payloads are rejected because neither path applies workflow filters. See the [usage guide](https://github.com/MISP/misp-modules/blob/main/documentation/action_mod/sentinel_publish.md).
+
+- **config**:
+>{'params': {'mode': {'type': 'string', 'description': 'wrapper (existing MISP2Sentinel/MISP2Defender) or direct (Sentinel STIX API)', 'value': 'wrapper'}, 'misp2_venv': {'type': 'string', 'description': 'MISP2Sentinel or MISP2Defender Python virtual environment', 'value': '/var/www/MISP/misp-custom/misp2sentinel/venv/'}, 'misp2_script': {'type': 'string', 'description': 'MISP2Sentinel or MISP2Defender script path', 'value': '/var/www/MISP/misp-custom/misp2sentinel/script.py'}, 'workspace_id': {'type': 'string', 'description': 'Required: target Log Analytics workspace UUID'}, 'source': {'type': 'string', 'description': 'Stable source-system namespace', 'value': 'misp-modules'}, 'expiration_days': {'type': 'string', 'description': 'Days until indicator expiry (1-365)', 'value': '30'}, 'confidence': {'type': 'string', 'description': 'STIX confidence (0-100)', 'value': '50'}, 'dry_run': {'type': 'string', 'description': 'true previews STIX payloads without network access', 'value': 'false'}}, 'blocking': False, 'support_filters': False, 'expect_misp_core_format': True}
+
+- **input**:
+>An event UUID in wrapper mode, or supplied MISP events/object attributes in direct mode.
+
+- **output**:
+>Boolean wrapper success, or a direct publishing summary with per-indicator outcomes.
+
+- **references**:
+> - https://learn.microsoft.com/en-us/azure/sentinel/stix-objects-api
+> - https://github.com/cudeso/misp2sentinel
+
+- **requirements**:
+> - requests
+> - MISP2Sentinel/MISP2Defender for wrapper mode, or Entra credentials for direct mode
+
+-----
+
 #### [Mattermost](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/action_mod/mattermost.py)
 
 Simplistic module to send message to a Mattermost channel.
@@ -4497,6 +4524,32 @@ Publish typed MISP indicators to an existing QRadar reference set and explicit d
 - **requirements**:
 > - requests
 > - QRadar API 20.0 and an authorized service token with reference-data access
+
+-----
+
+#### [Microsoft Sentinel Publish](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/action_mod/sentinel_publish.py)
+
+Publish MISP indicators directly to Microsoft Sentinel's STIX upload API with per-object results.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/action_mod/sentinel_publish.py)]
+
+- **features**:
+>Converts IDS-marked event and object attributes into STIX 2.1 indicators and uploads batches of up to 100 objects. Supports dry runs, explicit workspace selection, expiry and checked per-object results. Entra credentials come from the module server environment. No external script installation is required. See the [usage guide](https://github.com/MISP/misp-modules/blob/main/documentation/action_mod/sentinel_publish.md).
+
+- **config**:
+>{'params': {'workspace_id': {'type': 'string', 'description': 'Required: target Log Analytics workspace UUID'}, 'source': {'type': 'string', 'description': 'Stable source-system namespace', 'value': 'misp-modules'}, 'expiration_days': {'type': 'string', 'description': 'Days until indicator expiry (1-365)', 'value': '30'}, 'confidence': {'type': 'string', 'description': 'STIX confidence (0-100)', 'value': '50'}, 'dry_run': {'type': 'string', 'description': 'true previews STIX payloads without network access', 'value': 'false'}}, 'blocking': True, 'support_filters': False, 'expect_misp_core_format': True}
+
+- **input**:
+>MISP events and object attributes, including attribute UUIDs and Unix timestamps.
+
+- **output**:
+>Upload counts and per-indicator outcomes; errors signal incomplete publication.
+
+- **references**:
+>https://learn.microsoft.com/en-us/azure/sentinel/stix-objects-api
+
+- **requirements**:
+> - requests
+> - Microsoft Sentinel Contributor at the target workspace
 
 -----
 
