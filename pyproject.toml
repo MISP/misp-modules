@@ -48,7 +48,7 @@ minimal = [
     "geoip2",
     "greynoise",
     "jbxapi",
-    "ndjson",    
+    "ndjson",
     "maclookup",
     "matplotlib",
     "mattermostdriver",
@@ -86,7 +86,7 @@ all = [
     "lief>=0.17.6",  # required for python >3.13
     "lxml>=6.1.1",  # required for python >3.13
     ## module dependencies
-    "anyrun-sdk>=1.10.10,<2.0.0",
+    "anyrun-sdk>=1.14.19,<2.0.0",
     "apiosintds",
     "assemblyline_client",
     "backscatter",  ## in minimal

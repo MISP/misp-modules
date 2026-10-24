@@ -6,7 +6,7 @@ from anyrun import RunTimeException
 from anyrun.connectors import SandboxConnector
 from anyrun.connectors.sandbox.operation_systems import WindowsConnector, LinuxConnector, AndroidConnector
 
-from anyrun_sandbox.config import Config
+from anyrun_sandbox.config import Config, get_proxy_settings
 
 
 class AnyRunSubmitter:
@@ -27,13 +27,13 @@ class AnyRunSubmitter:
         self._sanitize_config()
 
         if self._os_type == "windows":
-            with SandboxConnector.windows(self._token, Config.INTEGRATION) as connector:
+            with SandboxConnector.windows(self._token, Config.INTEGRATION, **self._proxy_settings) as connector:
                 analysis_uuid = self._process_analysis(connector)
         elif self._os_type in ("ubuntu", "debian"):
-            with SandboxConnector.linux(self._token, Config.INTEGRATION) as connector:
+            with SandboxConnector.linux(self._token, Config.INTEGRATION, **self._proxy_settings) as connector:
                 analysis_uuid = self._process_analysis(connector)
         elif self._os_type == "android":
-            with SandboxConnector.android(self._token, Config.INTEGRATION) as connector:
+            with SandboxConnector.android(self._token, Config.INTEGRATION, **self._proxy_settings) as connector:
                 analysis_uuid = self._process_analysis(connector)
         else:
             raise RunTimeException(
@@ -49,6 +49,11 @@ class AnyRunSubmitter:
         """
         self._token = self._config.pop("api_key", "")
         self._os_type = self._config.pop("os_type", "")
+        self._proxy_settings = get_proxy_settings(self._config)
+        self._config.pop("proxy_host", "")
+        self._config.pop("proxy_port", "")
+        self._config.pop("proxy_username", "")
+        self._config.pop("proxy_password", "")
 
         if not any((self._token, self._os_type)):
             raise RunTimeException(f"ANYRUN Sandbox API-KEY and OS type must be specified.")

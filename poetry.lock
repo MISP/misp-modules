@@ -265,20 +265,20 @@ trio = ["trio (>=0.32.0)"]
 
 [[package]]
 name = "anyrun-sdk"
-version = "1.14.12"
+version = "1.14.19"
 description = "This is the official Python client library for ANY.RUN. Automate management of ANY.RUN REST endpoints"
 optional = true
 python-versions = ">=3.9"
 groups = ["main"]
 markers = "extra == \"all\""
 files = [
-    {file = "anyrun_sdk-1.14.12-py3-none-any.whl", hash = "sha256:b3f4c7378fb78e41ec8ff665b06809d1ab17f598862568684a28533780aaf5eb"},
-    {file = "anyrun_sdk-1.14.12.tar.gz", hash = "sha256:9bd5853e4d251c5265c8c63201625a6b52283fa716eebe3c2fd88d694609624f"},
+    {file = "anyrun_sdk-1.14.19-py3-none-any.whl", hash = "sha256:53e97c75bc0576dfdd934e013d16608db0d418438109285a6f4b1237b5ca7c61"},
+    {file = "anyrun_sdk-1.14.19.tar.gz", hash = "sha256:ad057781c34072f9e6411d6caaa4a7bd9e39b0f3441bc46cf2cc54ed0d7e766e"},
 ]
 
 [package.dependencies]
 aiofiles = ">=24.1.0"
-aiohttp = ">=3.12.14"
+aiohttp = ">=3.13.5"
 pydantic = ">=2.12.5"
 requests = ">=2.32.4"
 typing-extensions = ">=4.12.2"
@@ -7988,4 +7988,4 @@ minimal = ["backscatter", "blockchain", "censys", "clamd", "crowdstrike-falconpy
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10,<4.0"
-content-hash = "2ed848b89262ed971941bb0f63818a239585531b1ba2ffbc97b93eb4e7a77d9b"
+content-hash = "c8f2eafc761ff6e099fc486af531c846d684e40874e867f3866c03341660eb5b"
