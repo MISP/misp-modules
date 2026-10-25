@@ -2,6 +2,7 @@ import json
 import re
 import socket
 import ssl
+import time
 from datetime import datetime, timezone
 from io import BytesIO
 from ipaddress import ip_address
@@ -26,10 +27,10 @@ moduleinfo = {
     "logo": "",
     "requirements": ["urllib3", "certifi", "beautifulsoup4", "markdownify"],
     "features": (
-        "Downloads a public HTTP(S) URL on ports 80 or 443, with a 30-second timeout and at most five redirects."
-        " Resolves and validates every hop, connects directly to the validated public address and verifies TLS against"
-        " the original hostname. Private, reserved and mixed public/private DNS answers are rejected. No proxy or"
-        " browser is used. max_size_mb defaults to 5 (1-25), enforced while streaming decompressed content. HTML is"
+        "Downloads a public HTTP(S) URL on ports 80 or 443, with a 30-second wall-clock deadline and at most five"
+        " redirects. Resolves and validates every hop, connects directly to the validated public address and verifies"
+        " TLS against the original hostname. Private, reserved and mixed public/private DNS answers are rejected. No"
+        " proxy or browser is used. max_size_mb defaults to 5 (1-25), enforced while streaming content. HTML is"
         " converted into Markdown; PDFs are preserved. Returns a page-capture object referencing the URL attribute."
     ),
     "references": ["https://www.misp-project.org/objects.html#_page_capture"],
@@ -162,7 +163,15 @@ def _public_target(value):
     return (parts, host, str(addresses[0]), port, path)
 
 
+def _remaining(deadline):
+    remaining = deadline - time.monotonic()
+    if remaining <= 0:
+        raise ModuleError("The reference exceeded its 30-second deadline.")
+    return remaining
+
+
 def _fetch(value, maximum):
+    deadline = time.monotonic() + 30
     for _ in range(6):
         parts, host, address, port, path = _public_target(value)
         if parts.scheme == "https":
@@ -186,7 +195,7 @@ def _fetch(value, maximum):
                     "User-Agent": "MISP-modules/ReferenceCapture",
                     "Accept-Encoding": "identity",
                 },
-                timeout=urllib3.Timeout(total=30),
+                timeout=urllib3.Timeout(total=_remaining(deadline)),
                 retries=False,
                 redirect=False,
                 preload_content=False,
@@ -199,12 +208,23 @@ def _fetch(value, maximum):
                 continue
             if response.status != 200:
                 raise ModuleError(f"The reference returned HTTP {response.status}.")
+            if response.headers.get("Content-Encoding", "identity").strip().lower() not in ("", "identity"):
+                raise ModuleError(
+                    "Encoded references are not supported; the server must honor Accept-Encoding: identity."
+                )
             content_type = response.headers.get("Content-Type", "").split(";", 1)[0].strip().lower()
             if content_type not in ("text/html", "application/xhtml+xml", "application/pdf"):
                 raise ModuleError("Only HTML and PDF references are supported.")
             raw = bytearray()
+            connection = response.connection
+            sock = connection.sock if connection is not None else None
+            if sock is None:
+                # HTTPConnection may detach a socket when the response says Connection: close.
+                sock = response._fp.fp.raw._sock
             while True:
-                chunk = response.read(min(65536, maximum + 1 - len(raw)), decode_content=True)
+                sock.settimeout(_remaining(deadline))
+                chunk = response.read1(min(65536, maximum + 1 - len(raw)), decode_content=False)
+                _remaining(deadline)
                 if not chunk:
                     break
                 raw.extend(chunk)

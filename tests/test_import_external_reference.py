@@ -70,7 +70,7 @@ def dns(address="93.184.216.34"):
 def pool_reply(raw=b"<h1>Example</h1><script>ignored()</script>", content_type="text/html", status=200, headers=None):
     reply = Mock(status=status, headers={"Content-Type": content_type, **(headers or {})})
     chunks = [raw, b""]
-    reply.read.side_effect = chunks
+    reply.read1.side_effect = chunks
     return reply
 
 
@@ -173,3 +173,46 @@ def test_invalid_pdf_does_not_become_attachment():
         patch.object(module.urllib3, "HTTPSConnectionPool", return_value=pool),
     ):
         assert "error" in module.handler(query())
+
+
+def test_encoded_response_rejected_before_decompression():
+    pool = Mock()
+    reply = pool_reply(b"compressed-data", headers={"Content-Encoding": "gzip"})
+    pool.urlopen.return_value = reply
+    with (
+        patch.object(module.socket, "getaddrinfo", return_value=dns()),
+        patch.object(module.urllib3, "HTTPSConnectionPool", return_value=pool),
+    ):
+        result = module.handler(query())
+    assert "Encoded references" in result["error"]
+    reply.read1.assert_not_called()
+
+
+def test_slow_stream_obeys_wall_clock_deadline():
+    pool = Mock()
+    reply = pool_reply()
+    pool.urlopen.return_value = reply
+    with (
+        patch.object(module.socket, "getaddrinfo", return_value=dns()),
+        patch.object(module.urllib3, "HTTPSConnectionPool", return_value=pool),
+        patch.object(module.time, "monotonic", side_effect=[100, 100, 101, 131]),
+    ):
+        result = module.handler(query())
+    assert "deadline" in result["error"]
+    assert reply.read1.call_count == 1
+    reply.connection.sock.settimeout.assert_called_once_with(29)
+    reply.close.assert_called_once()
+
+
+def test_connection_close_socket_remains_bounded():
+    pool = Mock()
+    reply = pool_reply()
+    reply.connection.sock = None
+    pool.urlopen.return_value = reply
+    with (
+        patch.object(module.socket, "getaddrinfo", return_value=dns()),
+        patch.object(module.urllib3, "HTTPSConnectionPool", return_value=pool),
+    ):
+        result = module.handler(query())
+    assert_source(result)
+    assert reply._fp.fp.raw._sock.settimeout.call_count >= 1
