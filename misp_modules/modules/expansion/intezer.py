@@ -39,12 +39,12 @@ class ModuleError(ValueError):
     """An actionable error that contains no request credentials."""
 
 
-def _request(method, url, response_format="json", **kwargs):
+def _request(method, url, response_format="json", missing_statuses=(404, 204), **kwargs):
     try:
         response = requests.request(method, url, timeout=TIMEOUT, allow_redirects=False, verify=True, **kwargs)
     except requests.RequestException:
         raise ModuleError("The service request failed or timed out.") from None
-    if response.status_code in (404, 204):
+    if response.status_code in missing_statuses:
         return None
     if response.status_code not in (200, 201, 202):
         raise ModuleError(f"The service returned HTTP {response.status_code}.")
@@ -210,7 +210,7 @@ def _expand(event, attribute, config):
     if kind in HASH_LENGTHS:
         data = _request("GET", base + "/files/" + value, headers=headers)
     elif kind == "text":
-        data = _request("GET", base + "/analyses/" + analysis_id, headers=headers)
+        data = _request("GET", base + "/analyses/" + analysis_id, headers=headers, missing_statuses=(404, 204, 410))
     else:
         data = _request("POST", base + "/analyze", files={"file": (filename, content)}, headers=headers)
     if data is None:
@@ -234,5 +234,5 @@ def _expand(event, attribute, config):
         raise ModuleError("Intezer did not return an analysis identifier.")
     link = "https://analyze.intezer.com/analyses/" + str(UUID(analysis_id)) if analysis_id else None
     _sandbox(event, attribute, data, "Intezer Analyze", link)
-    _file(event, attribute, report)
+    _file(event, attribute, dict(report, filename=report.get("file_name") or report.get("filename")))
     return _results(event)

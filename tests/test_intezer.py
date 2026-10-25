@@ -177,3 +177,26 @@ def test_bad_attachment_validated_before_token_request():
     with patch.object(module.requests, "request") as request:
         assert "error" in module.handler(query(kind="attachment", value="sample", data="bad"))
     request.assert_not_called()
+
+
+def test_provider_filename_is_pivotable():
+    data = {"result": {"analysis_id": ANALYSIS_ID, "sha256": "a" * 64, "file_name": "sample.exe"}}
+    with patch.object(module.requests, "request", side_effect=[response({"result": TOKEN}), response(data)]):
+        result = module.handler(query())
+    assert_source(result)
+    assert values(objects(result, "file")[0])["filename"] == "sample.exe"
+
+
+def test_expired_analysis_is_no_match():
+    with patch.object(module.requests, "request", side_effect=[response({"result": TOKEN}), response(status=410)]):
+        result = module.handler(query(kind="text", value=ANALYSIS_ID))
+    assert_source(result)
+    assert not result["results"]["Object"]
+
+
+def test_410_on_submission_remains_an_error():
+    with patch.object(module.requests, "request", side_effect=[response({"result": TOKEN}), response(status=410)]):
+        result = module.handler(
+            query(kind="attachment", value="sample.bin", data=base64.b64encode(b"content").decode())
+        )
+    assert "410" in result["error"]

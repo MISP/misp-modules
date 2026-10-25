@@ -15,3 +15,5 @@ New attributes use `to_ids=false`; the source attribute retains its UUID and met
 References:
 
 - https://intezer-python-sdk.readthedocs.io/
+
+The provider file_name is mapped to the MISP filename relation. HTTP 410 is treated as a missing result only for an analysis-ID lookup; failed submissions still return an error.
