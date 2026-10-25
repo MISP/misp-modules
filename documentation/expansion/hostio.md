@@ -15,3 +15,5 @@ New attributes use `to_ids=false`; the source attribute retains its UUID and met
 References:
 
 - https://host.io/docs
+
+IP lookups round the requested page size up to a supported Host.io size (1, 5, 10, 25 or 100), then cap the returned objects to max_results.

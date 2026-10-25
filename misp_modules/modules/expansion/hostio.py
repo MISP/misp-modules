@@ -166,11 +166,12 @@ def _expand(event, attribute, config):
     limit = _limit(config, default=5)
     headers = {"Authorization": "Bearer " + config["apikey"], "Accept": "application/json"}
     if attribute["type"] in ("ip-src", "ip-dst"):
+        page_size = next(size for size in (1, 5, 10, 25, 100) if size >= limit)
         data = _request(
             "GET",
             "https://host.io/api/domains/ip/" + quote(value, safe=""),
             headers=headers,
-            params={"limit": limit, "page": 0},
+            params={"limit": page_size, "page": 0},
         )
         if data is None:
             return _results(event)

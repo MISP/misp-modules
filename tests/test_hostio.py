@@ -142,3 +142,16 @@ def test_no_match(status):
         result = module.handler(query())
     assert_source(result)
     assert not result["results"]["Object"]
+
+
+@pytest.mark.parametrize("limit,page_size", [(2, 5), (50, 100)])
+def test_requested_page_size_is_supported_and_capped_locally(limit, page_size):
+    domains = [f"example{i}.com" for i in range(page_size)]
+    with patch.object(
+        module.requests, "request", return_value=response({"total": page_size + 1, "domains": domains})
+    ) as request:
+        result = module.handler(query(kind="ip-dst", value="1.1.1.1", config={"apikey": SECRET, "max_results": limit}))
+    assert_source(result)
+    assert request.call_args.kwargs["params"]["limit"] == page_size
+    assert len(objects(result, "domain-ip")) == limit
+    assert objects(result, "annotation")
