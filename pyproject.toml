@@ -20,7 +20,11 @@ dependencies = [
     ## core dependencies
     "orjson>=3.11.9",
     "psutil",
-    "tornado",
+    "tornado>=6.5.10,<6.6",  # keep Python 3.10 support
+    "certifi>=2026.10.19",  # remove the compromised emSign root
+    "urllib3>=2.8.0",
+    "Brotli>=1.2.1; platform_python_implementation == 'CPython'",
+    "brotlicffi>=1.2.1.0; platform_python_implementation != 'CPython'",
     "click==8.1.8",  # greynoise requires it
     ## minimum dependencies
     "beautifulsoup4",
