@@ -36,3 +36,5 @@ Example request:
 Validation: `pytest tests/test_orange_cyberdefense.py`. Tests use mocked provider responses; authenticated live API calls were not exercised.
 
 Supply the raw long-term token in `token`; the module adds the `Token` authorization scheme.
+
+The current API contract is at https://datalake.cert.orangecyberdefense.com/api/v3/docs/swagger.json and defines `/v3/mrti/threats/lookup/` relative to the `/api` host. Hostname inputs use `domain`: the current atom-type enum includes `domain` and does not include `fqdn`. The obsolete v2 endpoints return HTTP 404.

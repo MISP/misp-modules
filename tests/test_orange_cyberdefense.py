@@ -170,3 +170,11 @@ def test_transport_is_bounded_and_credentials_are_absent_from_url():
         assert call.kwargs["verify"] is True
         assert call.kwargs["allow_redirects"] is False
         assert SECRET not in json.dumps(call.kwargs.get("params", {}))
+
+
+def test_current_versioned_lookup_and_hostname_atom_type():
+    result, request = handle({"threat_found": False}, kind="hostname", value="Host.Example.COM.")
+    assert_source(result)
+    assert request.call_args.args[1] == "https://datalake.cert.orangecyberdefense.com/api/v3/mrti/threats/lookup/"
+    assert request.call_args.kwargs["params"]["atom_type"] == "domain"
+    assert request.call_args.kwargs["params"]["atom_value"] == "host.example.com"

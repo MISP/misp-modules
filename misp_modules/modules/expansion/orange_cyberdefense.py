@@ -22,7 +22,7 @@ moduleinfo = {
     "logo": "",
     "requirements": ["requests"],
     "features": (
-        "Queries the documented mrti/threats/lookup endpoint using a long-term token in the Authorization header and"
+        "Queries the documented v3/mrti/threats/lookup endpoint using a long-term token in the Authorization header and"
         " requests JSON. IPs, domains and hashes are normalized before exact lookup. Scores, whitelisting,"
         " classifications, source evidence and other returned context remain in a referenced annotation; scores do not"
         " automatically change MISP IDS flags."
@@ -161,7 +161,7 @@ def _expand(event, attribute, config):
     )
     data = _request(
         "GET",
-        "https://datalake.cert.orangecyberdefense.com/api/mrti/threats/lookup/",
+        "https://datalake.cert.orangecyberdefense.com/api/v3/mrti/threats/lookup/",
         params={"atom_value": value, "atom_type": atom_type, "hashkey_only": "false"},
         headers={"Authorization": "Token " + config["token"], "Accept": "application/json"},
     )
