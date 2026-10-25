@@ -122,7 +122,7 @@ def _fetch_dectrax_ip_intel(ip: str, api_url: str, api_key: str, timeout: int) -
                         "decoy_service": "FIREWALL_EDL",
                         "dest_port": 0,
                         "threat_level": "CRITICAL",
-                        "interdiction_status": "BLOCKED_IN_EDL",
+                        "interdiction_status": "BLOCKED",
                         "interaction_count": 1,
                         "techniques": ["T1046", "T1110"],
                     }
@@ -182,7 +182,7 @@ def handler(q=False):
             "decoy_service": "RDP",
             "dest_port": 3389,
             "threat_level": "CRITICAL",
-            "interdiction_status": "BLOCKED_IN_EDL",
+            "interdiction_status": "BLOCKED",
             "interaction_count": 5,
             "techniques": ["T1021.001", "T1110"],
             "first_seen": "2026-10-22T10:00:00Z",
@@ -205,6 +205,8 @@ def handler(q=False):
     if add_decoy_tag:
         misp_attribute.add_tag(f'dectrax:decoy="{decoy.lower()}"')
     if add_interdiction_tag:
+        # Tag using standard MISP workflow taxonomy (action:blocked / workflow:state="complete")
+        misp_attribute.add_tag('workflow:state="complete"')
         misp_attribute.add_tag(f'dectrax:interdiction="{interdiction.lower()}"')
 
     # Technique tags
