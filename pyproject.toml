@@ -1,6 +1,6 @@
 [project]
 name = "misp-modules"
-version = "3.1.0"
+version = "3.1.1"
 description = "MISP modules are autonomous modules that can be used for expansion and other services in MISP"
 authors = [
     {name = "Alexandre Dulaunoy", email = "alexandre.dulaunoy@circl.lu"}
