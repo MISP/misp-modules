@@ -167,3 +167,19 @@ def test_transport_is_bounded_and_credentials_are_absent_from_url():
         assert call.kwargs["verify"] is True
         assert call.kwargs["allow_redirects"] is False
         assert SECRET not in json.dumps(call.kwargs.get("params", {}))
+
+
+@pytest.mark.parametrize(
+    "value,kind", [("185.70.186.153", "ip-dst"), ("2001:db8::1", "ip-dst"), ("C2.EXAMPLE.COM.", "domain")]
+)
+def test_c2_values_keep_their_actual_indicator_type(value, kind):
+    result, _ = handle([{"c2domain": value}])
+    assert_source(result)
+    added = [item for item in result["results"]["Attribute"] if item["uuid"] != UUID]
+    assert [(item["type"], item["value"]) for item in added] == [(kind, value.lower().rstrip("."))]
+
+
+def test_ip_c2_deduplicates_with_the_correct_type():
+    result, _ = handle([{"c2domain": "185.70.186.153"}, {"c2domain": "185.70.186.153", "actorip": "1.1.1.1"}])
+    added = [item for item in result["results"]["Attribute"] if item["uuid"] != UUID]
+    assert [(item["type"], item["value"]) for item in added] == [("ip-dst", "185.70.186.153"), ("ip-src", "1.1.1.1")]

@@ -33,3 +33,5 @@ Example request:
 ```
 
 Validation: `pytest tests/test_malbeacon.py`. Tests use mocked provider responses; authenticated live API calls were not exercised.
+
+IP literals in `c2domain`, including IPv6 addresses, become `ip-dst` pivots. Actual names become `domain` pivots.

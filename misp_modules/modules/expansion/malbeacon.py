@@ -182,7 +182,15 @@ def _expand(event, attribute, config):
             raw = row.get(key)
             if not raw or raw == "NA":
                 continue
-            value = str(ip_address(raw)) if kind == "ip-src" else _domain(raw)
+            if not isinstance(raw, str):
+                raise ModuleError("MalBeacon returned an invalid infrastructure value.")
+            if key == "c2domain":
+                try:
+                    value, kind = str(ip_address(raw)), "ip-dst"
+                except ValueError:
+                    value = _domain(raw)
+            else:
+                value = str(ip_address(raw)) if kind == "ip-src" else _domain(raw)
             if (kind, value) not in seen:
                 seen.add((kind, value))
                 event.add_attribute(kind, value, to_ids=False, comment="MalBeacon " + key)
