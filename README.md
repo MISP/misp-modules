@@ -211,15 +211,20 @@ For further Information see the [license file](https://misp.github.io/misp-modul
 ### Export Modules
 * [CEF Export](https://misp.github.io/misp-modules/export_mod/#cef-export) - Module to export a MISP event in CEF format.
 * [Cisco IOS ACL Export](https://misp.github.io/misp-modules/export_mod/#cisco-ios-acl-export) - Export IDS-marked network attributes as Cisco IOS/IOS-XE IPv4 and IPv6 ACL fragments.
+* [Cisco ASA ACL Export](https://misp.github.io/misp-modules/export_mod/#cisco-asa-acl-export) - Export IDS-marked network attributes as Cisco ASA 9.x IPv4/IPv6 extended ACL entries.
 * [Cisco fireSIGHT blockrule Export](https://misp.github.io/misp-modules/export_mod/#cisco-firesight-blockrule-export) - Module to export malicious network activity attributes to Cisco fireSIGHT manager block rules.
 * [Microsoft Defender for Endpoint KQL Export](https://misp.github.io/misp-modules/export_mod/#microsoft-defender-for-endpoint-kql-export) - Defender for Endpoint KQL hunting query export module
 * [Elastic ECS Export](https://misp.github.io/misp-modules/export_mod/#elastic-ecs-export) - Export event and object indicators as ECS threat indicators in Elasticsearch Bulk NDJSON.
+* [Fortinet FortiOS ACL Export](https://misp.github.io/misp-modules/export_mod/#fortinet-fortios-acl-export) - Export IDS-marked network attributes as FortiOS 7.4+ address objects, services and firewall policies.
 * [GoAML Export](https://misp.github.io/misp-modules/export_mod/#goaml-export) - This module is used to export MISP events containing transaction objects into GoAML format.
+* [Juniper Junos ACL Export](https://misp.github.io/misp-modules/export_mod/#juniper-junos-acl-export) - Export IDS-marked network attributes as Junos inet/inet6 stateless firewall filter set commands.
 * [Lite Export](https://misp.github.io/misp-modules/export_mod/#lite-export) - Lite export of a MISP event.
 * [EQL Query Export](https://misp.github.io/misp-modules/export_mod/#eql-query-export) - Export MISP event in Event Query Language
+* [MikroTik RouterOS ACL Export](https://misp.github.io/misp-modules/export_mod/#mikrotik-routeros-acl-export) - Export IDS-marked network attributes as RouterOS IPv4/IPv6 firewall filter commands.
 * [Netfilter nftables Export](https://misp.github.io/misp-modules/export_mod/#netfilter-nftables-export) - Export IDS-marked event and object network attributes as nftables block or logging rules.
 * [Nexthink NXQL Export](https://misp.github.io/misp-modules/export_mod/#nexthink-nxql-export) - Nexthink NXQL query export module
 * [OSQuery Export](https://misp.github.io/misp-modules/export_mod/#osquery-export) - OSQuery export of a MISP event.
+* [Palo Alto PAN-OS ACL Export](https://misp.github.io/misp-modules/export_mod/#palo-alto-pan-os-acl-export) - Export IDS-marked network attributes as PAN-OS local security policy set commands.
 * [Event to PDF Export](https://misp.github.io/misp-modules/export_mod/#event-to-pdf-export) - Simple export of a MISP event to PDF.
 * [OpenBSD PF Export](https://misp.github.io/misp-modules/export_mod/#openbsd-pf-export) - Export IDS-marked event and object network attributes as OpenBSD PF block or logging rules.
 * [QRadar Reference Set Export](https://misp.github.io/misp-modules/export_mod/#qradar-reference-set-export) - Export deduplicated, typed MISP indicators as QRadar reference-set CSV or JSON values.

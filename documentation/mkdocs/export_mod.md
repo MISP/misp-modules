@@ -51,6 +51,30 @@ Export IDS-marked network attributes as Cisco IOS/IOS-XE IPv4 and IPv6 ACL fragm
 
 -----
 
+#### [Cisco ASA ACL Export](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/cisco_asa_export.py)
+
+Export IDS-marked network attributes as Cisco ASA 9.x IPv4/IPv6 extended ACL entries.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/cisco_asa_export.py)]
+
+- **features**:
+>Exports validated IDS-marked event and object network attributes as deduplicated IPv4/IPv6 configuration fragments. Preserves source/destination address and port constraints. Deleted data is excluded. DNS-only attributes require opt-in resolve_dns. No device connection or additional dependency is required. See the [usage guide](https://github.com/MISP/misp-modules/blob/main/documentation/export_mod/cisco_asa_export.md) for configuration, logging semantics and policy integration.
+
+- **config**:
+> - mode
+> - name_prefix
+> - resolve_dns
+
+- **input**:
+>MISP events and object attributes in standard, bare or legacy export format.
+
+- **output**:
+>Base64-encoded configuration fragment; rule counts, skipped counts and integration warnings.
+
+- **references**:
+>https://www.cisco.com/c/en/us/td/docs/security/asa/asa-cli-reference/A-H/asa-command-ref-A-H/aa-ac-commands.html
+
+-----
+
 #### [Cisco fireSIGHT blockrule Export](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/cisco_firesight_manager_ACL_rule_export.py)
 
 <img src=../logos/cisco.png height=60>
@@ -129,6 +153,33 @@ Export event and object indicators as ECS threat indicators in Elasticsearch Bul
 
 -----
 
+#### [Fortinet FortiOS ACL Export](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/fortios_export.py)
+
+Export IDS-marked network attributes as FortiOS 7.4+ address objects, services and firewall policies.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/fortios_export.py)]
+
+- **features**:
+>Exports validated IDS-marked event and object network attributes as deduplicated IPv4/IPv6 configuration fragments. Preserves source/destination address and port constraints. Deleted data is excluded. DNS-only attributes require opt-in resolve_dns. No device connection or additional dependency is required. See the [usage guide](https://github.com/MISP/misp-modules/blob/main/documentation/export_mod/fortios_export.md) for configuration, logging semantics and policy integration.
+
+- **config**:
+> - mode
+> - name_prefix
+> - resolve_dns
+> - srcintf
+> - dstintf
+> - start_policy_id
+
+- **input**:
+>MISP events and object attributes in standard, bare or legacy export format.
+
+- **output**:
+>Base64-encoded configuration fragment; rule counts, skipped counts and integration warnings.
+
+- **references**:
+>https://docs.fortinet.com/document/fortigate/7.4.8/cli-reference/333889629/config-firewall-policy
+
+-----
+
 #### [GoAML Export](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/goamlexport.py)
 
 <img src=../logos/goAML.jpg height=60>
@@ -177,6 +228,30 @@ This module is used to export MISP events containing transaction objects into Go
 
 -----
 
+#### [Juniper Junos ACL Export](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/junos_export.py)
+
+Export IDS-marked network attributes as Junos inet/inet6 stateless firewall filter set commands.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/junos_export.py)]
+
+- **features**:
+>Exports validated IDS-marked event and object network attributes as deduplicated IPv4/IPv6 configuration fragments. Preserves source/destination address and port constraints. Deleted data is excluded. DNS-only attributes require opt-in resolve_dns. No device connection or additional dependency is required. See the [usage guide](https://github.com/MISP/misp-modules/blob/main/documentation/export_mod/junos_export.md) for configuration, logging semantics and policy integration.
+
+- **config**:
+> - mode
+> - name_prefix
+> - resolve_dns
+
+- **input**:
+>MISP events and object attributes in standard, bare or legacy export format.
+
+- **output**:
+>Base64-encoded configuration fragment; rule counts, skipped counts and integration warnings.
+
+- **references**:
+>https://www.juniper.net/documentation/us/en/software/junos/routing-policy/topics/concept/firewall-filter-overview.html
+
+-----
+
 #### [Lite Export](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/liteexport.py)
 
 Lite export of a MISP event.
@@ -214,6 +289,31 @@ Export MISP event in Event Query Language
 
 - **references**:
 >https://eql.readthedocs.io/en/latest/
+
+-----
+
+#### [MikroTik RouterOS ACL Export](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/mikrotik_export.py)
+
+Export IDS-marked network attributes as RouterOS IPv4/IPv6 firewall filter commands.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/mikrotik_export.py)]
+
+- **features**:
+>Exports validated IDS-marked event and object network attributes as deduplicated IPv4/IPv6 configuration fragments. Preserves source/destination address and port constraints. Deleted data is excluded. DNS-only attributes require opt-in resolve_dns. No device connection or additional dependency is required. See the [usage guide](https://github.com/MISP/misp-modules/blob/main/documentation/export_mod/mikrotik_export.md) for configuration, logging semantics and policy integration.
+
+- **config**:
+> - mode
+> - name_prefix
+> - resolve_dns
+> - chain
+
+- **input**:
+>MISP events and object attributes in standard, bare or legacy export format.
+
+- **output**:
+>Base64-encoded configuration fragment; rule counts, skipped counts and integration warnings.
+
+- **references**:
+>https://help.mikrotik.com/docs/spaces/ROS/pages/48660574/Filter
 
 -----
 
@@ -280,6 +380,32 @@ OSQuery export of a MISP event.
 
 - **output**:
 >osquery SQL queries
+
+-----
+
+#### [Palo Alto PAN-OS ACL Export](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/panos_export.py)
+
+Export IDS-marked network attributes as PAN-OS local security policy set commands.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/panos_export.py)]
+
+- **features**:
+>Exports validated IDS-marked event and object network attributes as deduplicated IPv4/IPv6 configuration fragments. Preserves source/destination address and port constraints. Deleted data is excluded. DNS-only attributes require opt-in resolve_dns. No device connection or additional dependency is required. See the [usage guide](https://github.com/MISP/misp-modules/blob/main/documentation/export_mod/panos_export.md) for configuration, logging semantics and policy integration.
+
+- **config**:
+> - mode
+> - name_prefix
+> - resolve_dns
+> - from_zone
+> - to_zone
+
+- **input**:
+>MISP events and object attributes in standard, bare or legacy export format.
+
+- **output**:
+>Base64-encoded configuration fragment; rule counts, skipped counts and integration warnings.
+
+- **references**:
+>https://docs.paloaltonetworks.com/pan-os/11-1/pan-os-cli-quick-start
 
 -----
 
