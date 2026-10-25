@@ -203,12 +203,12 @@ def _expand(event, attribute, config):
             "Accept": "application/json",
             "User-Agent": "MISP-modules/Intel471-Hunter",
         },
-        params={"indexes": "cyborg_usecases", search: value},
+        params={"indexes": "cyborg_usecases", search: value, "size": limit},
     )
     if data is None:
         return _results(event)
     rows = _rows(data, "results")
-    for row in _cap(event, attribute, rows, limit, int(data.get("total", len(rows))) > limit):
+    for row in _cap(event, attribute, rows, limit, int(data.get("total", len(rows))) > min(len(rows), limit)):
         _annotation(event, attribute, "Intel 471 Hunter hunt package", {k: v for k, v in row.items() if k != "sigma"})
         if row.get("sigma"):
             if not isinstance(row["sigma"], str):

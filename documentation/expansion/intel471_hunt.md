@@ -16,3 +16,5 @@ References:
 
 - https://hunter.cyborgsecurity.io/
 - https://api.hunter.cyborgsecurity.io/docs
+
+The Hunter request includes size=max_results. A truncation notice is also emitted if the service returns fewer records than the reported total.

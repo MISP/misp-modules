@@ -114,7 +114,11 @@ def test_sigma_and_runbook_preserved():
     assert values(objects(result, "sigma")[0])["sigma"] == package["sigma"]
     assert any("Check process ancestry" in values(o)["text"] for o in objects(result, "annotation"))
     assert len(objects(result, "sigma")) == 1
-    assert request.call_args.kwargs["params"] == {"indexes": "cyborg_usecases", "mitre_technique_ids": "T1059.001"}
+    assert request.call_args.kwargs["params"] == {
+        "indexes": "cyborg_usecases",
+        "mitre_technique_ids": "T1059.001",
+        "size": 1,
+    }
     assert request.call_args.kwargs["headers"]["Authorization"] == "API-Key " + SECRET
 
 
@@ -129,3 +133,11 @@ def test_invalid_search_type_does_not_request():
     with patch.object(module.requests, "request") as request:
         assert "error" in module.handler(query(config={"apikey": SECRET, "search_type": "arbitrary"}))
     request.assert_not_called()
+
+
+def test_requests_configured_result_size():
+    with patch.object(module.requests, "request", return_value=response({"total": 20, "results": []})) as request:
+        result = module.handler(query())
+    assert_source(result)
+    assert request.call_args.kwargs["params"]["size"] == 25
+    assert objects(result, "annotation")
