@@ -55,10 +55,10 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y libgl1 libfuzzy-dev libpoppler-cpp-dev libpoppler-cpp0v5 libzbar0 tesseract-ocr libjpeg-dev
 
-      - name: Set up Python 3.14
+      - name: Set up Python 3.15
         uses: actions/setup-python@v6
         with:
-          python-version: 3.14
+          python-version: 3.15
 
       - name: Install poetry
         run: python -m pip install poetry poetry-plugin-bundle poetry-plugin-export
@@ -102,10 +102,10 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y libgl1 libfuzzy-dev libpoppler-cpp-dev libpoppler-cpp0v5 libzbar0 tesseract-ocr libjpeg-dev
 
-      - name: Set up Python 3.14
+      - name: Set up Python 3.15
         uses: actions/setup-python@v6
         with:
-          python-version: 3.14
+          python-version: 3.15
 
       - name: Install poetry
         run: python -m pip install poetry poetry-plugin-bundle poetry-plugin-export
