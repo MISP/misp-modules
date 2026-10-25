@@ -304,6 +304,8 @@ class CsvParser:
         return {self.header[index]: line[index] for index in indexes if line[index]}
 
     def __check_category(self, attribute):
+        if "category" not in attribute:
+            return
         category = attribute["category"]
         if category in self.categories:
             return
@@ -314,12 +316,13 @@ class CsvParser:
 
     @staticmethod
     def __deal_with_ids(attribute):
-        attribute["to_ids"] = True if attribute["to_ids"] == "1" else False
+        if "to_ids" in attribute:
+            attribute["to_ids"] = attribute["to_ids"] == "1"
 
     @staticmethod
     def __deal_with_tags(attribute):
-        if "Tag" in attribute.keys():
-            attribute["Tag"] = [{"name": tag.strip()} for tag in attribute["Tag"].split(",")]
+        if "attribute_tag" in attribute:
+            attribute["Tag"] = [{"name": tag.strip()} for tag in attribute.pop("attribute_tag").split(",")]
 
     def __get_score(self):
         score = 1 if "to_ids" in self.header else 0
@@ -339,11 +342,12 @@ def __any_mandatory_misp_field(header):
 
 
 def __special_parsing(data, delimiter):
-    return list(
-        tuple(part.strip() for part in line[0].split(delimiter))
-        for line in csv.reader(io.TextIOWrapper(io.BytesIO(data.encode()), encoding="utf-8"))
-        if line and not line[0].startswith("#")
-    )
+    if len(delimiter) == 1:
+        lines = csv.reader(io.StringIO(data), delimiter=delimiter)
+    else:
+        # csv only supports single-character delimiters
+        lines = (line.split(delimiter) for line in data.splitlines() if line.strip())
+    return list(tuple(part.strip() for part in line) for line in lines if line and not line[0].startswith("#"))
 
 
 def __standard_parsing(data):
