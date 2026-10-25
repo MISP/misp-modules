@@ -145,43 +145,43 @@ def process_sigmf_archive(object):
 
                 sigmf_tarfile = tarfile.open(sigmf_archive_file.name, mode="r", format=tarfile.PAX_FORMAT)
 
-            files = sigmf_tarfile.getmembers()
+                files = sigmf_tarfile.getmembers()
 
-            for file in files:
-                if file.name.endswith(SIGMF_METADATA_EXT):
-                    metadata_reader = sigmf_tarfile.extractfile(file)
-                    sigmf_meta_attr = {
-                        "type": "attachment",
-                        "value": file.name,
-                        "data": base64.b64encode(metadata_reader.read()).decode("utf-8"),
-                        "comment": "SigMF metadata file",
-                        "object_relation": "SigMF-meta",
-                    }
+                for file in files:
+                    if file.name.endswith(SIGMF_METADATA_EXT):
+                        metadata_reader = sigmf_tarfile.extractfile(file)
+                        sigmf_meta_attr = {
+                            "type": "attachment",
+                            "value": file.name,
+                            "data": base64.b64encode(metadata_reader.read()).decode("utf-8"),
+                            "comment": "SigMF metadata file",
+                            "object_relation": "SigMF-meta",
+                        }
 
-                if file.name.endswith(SIGMF_DATASET_EXT):
-                    data_reader = sigmf_tarfile.extractfile(file)
-                    sigmf_data_attr = {
-                        "type": "attachment",
-                        "value": file.name,
-                        "data": base64.b64encode(data_reader.read()).decode("utf-8"),
-                        "comment": "SigMF data file",
-                        "object_relation": "SigMF-data",
-                    }
+                    if file.name.endswith(SIGMF_DATASET_EXT):
+                        data_reader = sigmf_tarfile.extractfile(file)
+                        sigmf_data_attr = {
+                            "type": "attachment",
+                            "value": file.name,
+                            "data": base64.b64encode(data_reader.read()).decode("utf-8"),
+                            "comment": "SigMF data file",
+                            "object_relation": "SigMF-data",
+                        }
 
-            if sigmf_meta_attr is None:
-                return {"error": "No SigMF metadata file found"}
+                if sigmf_meta_attr is None:
+                    return {"error": "No SigMF metadata file found"}
 
-            recording = MISPObject("sigmf-recording")
-            recording.add_attribute(**sigmf_meta_attr)
-            recording.add_attribute(**sigmf_data_attr)
+                recording = MISPObject("sigmf-recording")
+                recording.add_attribute(**sigmf_meta_attr)
+                recording.add_attribute(**sigmf_data_attr)
 
-            # add reference to original SigMF Archive object
-            recording.add_reference(object["uuid"], "expands")
+                # add reference to original SigMF Archive object
+                recording.add_reference(object["uuid"], "expands")
 
-            event.add_object(recording)
-            event = json.loads(event.to_json())
+                event.add_object(recording)
+                event = json.loads(event.to_json())
 
-            return {"results": {"Object": event["Object"]}}
+                return {"results": {"Object": event["Object"]}}
 
         # no sigmf-archive attribute found
         return {"error": "No SigMF-archive attribute found"}
