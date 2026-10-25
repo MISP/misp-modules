@@ -111,7 +111,6 @@ class ExternalTools(db.Model):
             "id": self.id,
             "url": self.url,
             "name": self.name,
-            "api_key": self.api_key,
             "is_active": self.is_active,
         }
 
