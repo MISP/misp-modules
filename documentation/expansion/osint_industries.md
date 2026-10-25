@@ -33,3 +33,5 @@ Example request:
 ```
 
 Validation: `pytest tests/test_osint_industries.py`. Tests use mocked provider responses; authenticated live API calls were not exercised.
+
+The provider lookup timeout is 25 seconds, the documented minimum, and the HTTP timeout is 30 seconds. Results support typed `spec_format` arrays, legacy mappings, and normalized `data` objects; normalized values take precedence when both forms are supplied.

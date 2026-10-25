@@ -164,6 +164,33 @@ def version():
     return dict(moduleinfo, config=moduleconfig)
 
 
+def _account_fields(row):
+    spec, data = row.get("spec_format"), row.get("data")
+    flat = {}
+    if isinstance(spec, dict):
+        flat.update({key: item.get("value") for key, item in spec.items() if isinstance(item, dict)})
+    elif isinstance(spec, list):
+        for item in spec:
+            if not isinstance(item, dict):
+                raise ModuleError("OSINT Industries returned an invalid typed field.")
+            key = item.get("key") or item.get("id") or item.get("name") or item.get("proper_key")
+            if isinstance(key, str):
+                key = key.strip().lower().replace(" ", "_").replace("-", "_")
+                flat[key] = item.get("value")
+    elif not isinstance(data, dict):
+        raise ModuleError("OSINT Industries returned an invalid account record.")
+    if isinstance(data, dict):
+        for key, item in data.items():
+            value = item.get("value") if isinstance(item, dict) and "value" in item else item
+            if value is not None and value != "":
+                flat[key] = value
+    if isinstance(flat.get("registered"), str) and flat["registered"].lower() in ("true", "false"):
+        flat["registered"] = flat["registered"].lower() == "true"
+    if flat.get("id") is None:
+        flat["id"] = flat.get("user_id") or flat.get("account_id")
+    return flat
+
+
 def _expand(event, attribute, config):
     value, limit = (_value(attribute), _limit(config))
     selector = {
@@ -184,7 +211,7 @@ def _expand(event, attribute, config):
         json={
             "type": selector,
             "query": value,
-            "timeout": 20,
+            "timeout": 25,
             "exact_match": True,
             "premium": False,
             "premium_modules_only": False,
@@ -195,10 +222,7 @@ def _expand(event, attribute, config):
     if not isinstance(data, list) or not all((isinstance(row, dict) for row in data)):
         raise ModuleError("OSINT Industries returned an unexpected response or rejected the lookup.")
     for row in _cap(event, attribute, data, limit):
-        spec = row.get("spec_format")
-        if not isinstance(spec, dict):
-            raise ModuleError("OSINT Industries returned an invalid account record.")
-        flat = {key: val.get("value") for key, val in spec.items() if isinstance(val, dict)}
+        flat = _account_fields(row)
         _annotation(event, attribute, "OSINT Industries " + str(row.get("module", row.get("name", "result"))), row)
         if flat.get("registered") is False:
             continue

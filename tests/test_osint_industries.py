@@ -187,3 +187,55 @@ def test_transport_is_bounded_and_credentials_are_absent_from_url():
         assert call.kwargs["verify"] is True
         assert call.kwargs["allow_redirects"] is False
         assert SECRET not in json.dumps(call.kwargs.get("params", {}))
+
+
+def test_lookup_timeout_meets_the_live_api_minimum():
+    _, request = handle([])
+    assert request.call_args.kwargs["json"]["timeout"] == 25
+    assert request.call_args.kwargs["timeout"] > request.call_args.kwargs["json"]["timeout"]
+
+
+def test_live_typed_field_array_creates_account_and_profile_pivots():
+    row = {
+        "module": "example",
+        "spec_format": [
+            {"key": "registered", "type": "bool", "value": True},
+            {"key": "username", "type": "str", "value": "alice"},
+            {"key": "id", "type": "str", "value": "42"},
+            {"key": "profile_url", "type": "str", "value": "https://example.com/alice"},
+        ],
+    }
+    result, _ = handle([row])
+    assert_source(result)
+    assert values(objects(result, "user-account")[0])["username"] == "alice"
+    assert any(item["value"] == "https://example.com/alice" for item in result["results"]["Attribute"])
+    assert contexts(result)[0] == row
+
+
+def test_normalized_data_is_accepted_and_takes_precedence():
+    row = {
+        "module": "example",
+        "spec_format": [{"name": "Username", "value": "masked"}],
+        "data": {"registered": True, "username": "alice", "user_id": "42", "profile_url": "https://example.com/alice"},
+    }
+    result, _ = handle([row])
+    assert values(objects(result, "user-account")[0])["username"] == "alice"
+    assert values(objects(result, "user-account")[0])["user-id"] == "42"
+
+
+def test_normalized_data_without_spec_format_is_supported():
+    result, _ = handle([{"module": "example", "data": {"registered": False, "username": "alice"}}])
+    assert_source(result)
+    assert not objects(result, "user-account")
+
+
+def test_false_registration_in_typed_fields_does_not_create_an_account():
+    result, _ = handle(
+        [
+            {
+                "module": "example",
+                "spec_format": [{"name": "Registered", "value": "false"}, {"name": "Username", "value": "alice"}],
+            }
+        ]
+    )
+    assert not objects(result, "user-account")
