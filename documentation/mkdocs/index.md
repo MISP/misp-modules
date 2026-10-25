@@ -160,7 +160,7 @@ For more information: [Extending MISP with Python modules](https://www.misp-proj
 * [EQL Query Export](https://misp.github.io/misp-modules/export_mod/#eql-query-export) - Export MISP event in Event Query Language
 * [MikroTik RouterOS ACL Export](https://misp.github.io/misp-modules/export_mod/#mikrotik-routeros-acl-export) - Export IDS-marked network attributes as RouterOS IPv4/IPv6 firewall filter commands.
 * [Nexthink NXQL Export](https://misp.github.io/misp-modules/export_mod/#nexthink-nxql-export) - Nexthink NXQL query export module
-* [OSQuery Export](https://misp.github.io/misp-modules/export_mod/#osquery-export) - OSQuery export of a MISP event.
+* [OSQuery Export](https://misp.github.io/misp-modules/export_mod/#osquery-export) - Export MISP event and object indicators as an osquery query pack.
 * [Palo Alto PAN-OS ACL Export](https://misp.github.io/misp-modules/export_mod/#palo-alto-pan-os-acl-export) - Export IDS-marked network attributes as PAN-OS local security policy set commands.
 * [Event to PDF Export](https://misp.github.io/misp-modules/export_mod/#event-to-pdf-export) - Simple export of a MISP event to PDF.
 * [QRadar Reference Set Export](https://misp.github.io/misp-modules/export_mod/#qradar-reference-set-export) - Export deduplicated, typed MISP indicators as QRadar reference-set CSV or JSON values.
@@ -200,6 +200,7 @@ For more information: [Extending MISP with Python modules](https://www.misp-proj
 * [Matrix](https://misp.github.io/misp-modules/action_mod/#matrix) - Send a message to an unencrypted Matrix room.
 * [Mattermost](https://misp.github.io/misp-modules/action_mod/#mattermost) - Simplistic module to send message to a Mattermost channel.
 * [Nextcloud talk](https://misp.github.io/misp-modules/action_mod/#nextcloud-talk) - Simplistic module to send a message to a Nextcloud talk conversation.
+* [OSQuery Pack Publish](https://misp.github.io/misp-modules/action_mod/#osquery-pack-publish) - Publish a MISP query pack to a configured local osquery pack directory.
 * [QRadar Reference Set Publish](https://misp.github.io/misp-modules/action_mod/#qradar-reference-set-publish) - Publish typed MISP indicators to an existing QRadar reference set and explicit domain.
 * [SentinelOne IOC Publish](https://misp.github.io/misp-modules/action_mod/#sentinelone-ioc-publish) - Publish MISP event and object indicators to SentinelOne Threat Intelligence with explicit scope.
 * [Slack](https://misp.github.io/misp-modules/action_mod/#slack) - Simplistic module to send messages to a Slack channel.

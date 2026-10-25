@@ -78,6 +78,33 @@ Simplistic module to send a message to a Nextcloud talk conversation.
 
 -----
 
+#### [OSQuery Pack Publish](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/action_mod/osquery_pack_publish.py)
+
+<img src=../logos/osquery.png height=60>
+
+Publish a MISP query pack to a configured local osquery pack directory.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/action_mod/osquery_pack_publish.py)]
+
+- **features**:
+>Atomically publishes a named pack under OSQUERY_PACK_DIRECTORY. Defaults to dry run; existing packs require explicit overwrite. Reuses the export's platform selectors, IDS filtering and bounded scan paths. Publication does not execute queries or reload osquery. See the [usage guide](https://github.com/MISP/misp-modules/blob/main/documentation/action_mod/osquery_pack_publish.md).
+
+- **config**:
+>{'params': {'pack_name': {'type': 'string', 'description': 'Required: pack basename, letters/digits/_/- only'}, 'interval': {'type': 'string', 'description': 'Query interval in seconds', 'value': '3600'}, 'scan_path': {'type': 'string', 'description': 'Absolute osquery file path pattern for file scans'}, 'dry_run': {'type': 'string', 'description': 'Preview without writing files', 'value': 'true'}, 'overwrite': {'type': 'string', 'description': 'Replace the complete named pack with this snapshot', 'value': 'false'}}, 'blocking': True, 'support_filters': False, 'expect_misp_core_format': True}
+
+- **input**:
+>Selected MISP events and object attributes in workflow data.
+
+- **output**:
+>Publication status, pack content, counts, provenance and content SHA-256.
+
+- **references**:
+>https://osquery.readthedocs.io/en/stable/deployment/configuration/#query-packs
+
+- **requirements**:
+>OSQUERY_PACK_DIRECTORY on the module server; filesystem pack distribution and config reload
+
+-----
+
 #### [QRadar Reference Set Publish](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/action_mod/qradar_reference_set_publish.py)
 
 Publish typed MISP indicators to an existing QRadar reference set and explicit domain.
