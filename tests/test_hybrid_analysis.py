@@ -136,7 +136,7 @@ def test_url_submission_once():
 
 
 def test_report_lookup_and_pending_state():
-    identifier = "a" * 64 + "_110"
+    identifier = "a" * 64 + ":110"
     with patch.object(
         module.requests, "request", return_value=response({"state": "IN_QUEUE", "sha256": "a" * 64})
     ) as request:
@@ -161,3 +161,11 @@ def test_mismatched_hash_rejected():
 def test_submission_requires_job_receipt():
     with patch.object(module.requests, "request", return_value=response({"message": "unexpected"})):
         assert "error" in module.handler(query(kind="url", value="https://example.com"))
+
+
+@pytest.mark.parametrize("identifier", ["a" * 24, "a" * 64 + ":110"])
+def test_api_report_identifier_forms(identifier):
+    with patch.object(module.requests, "request", return_value=response({"state": "IN_QUEUE"})) as request:
+        result = module.handler(query(kind="text", value=identifier))
+    assert_source(result)
+    assert request.call_args.args[1].endswith("/report/" + identifier + "/summary")

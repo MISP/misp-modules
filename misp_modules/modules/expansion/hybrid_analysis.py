@@ -20,7 +20,7 @@ moduleinfo = {
     "logo": "",
     "requirements": ["requests"],
     "features": (
-        "Hashes use GET /search/hash; text accepts a report ID (SHA256_environment-ID) and uses GET"
+        "Hashes use GET /search/hash; text accepts a report ID (job ID or SHA256:environment-ID) and uses GET"
         " /report/{id}/summary. Files and URLs use POST /submit/file and /submit/url, returning the receipt without"
         " polling or retrying a submission. environment_id defaults to 110. max_results defaults to 25 (1-100);"
         " max_size_mb defaults to 25 (1-100). Reports and receipts become sandbox-report objects with links."
@@ -225,8 +225,8 @@ def _expand(event, attribute, config):
             raise ModuleError("Hybrid Analysis returned an unexpected search response.")
         rows = _cap(event, attribute, data, limit)
     elif kind == "text":
-        if not re.fullmatch("[0-9a-fA-F]{64}_\\d{1,4}", value):
-            raise ModuleError("Text must contain a Hybrid Analysis SHA256_environment-ID report identifier.")
+        if not re.fullmatch(r"(?:[0-9a-fA-F]{24}|[0-9a-fA-F]{64}:\d{1,4})", value):
+            raise ModuleError("Text must contain a Hybrid Analysis job ID or SHA256:environment-ID report identifier.")
         data = _request("GET", base + "/report/" + value + "/summary", headers=headers)
         rows = [] if data is None else [data]
     elif kind == "url":
