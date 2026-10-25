@@ -119,7 +119,15 @@ def _convert(event, attribute, data):
     except Exception:
         raise ModuleError("The Scout STIX bundle could not be converted.") from None
     if parser.errors:
-        raise ModuleError("The Scout STIX bundle contains data that could not be converted.")
+        if not converted.attributes and not converted.objects:
+            raise ModuleError("The Scout STIX bundle contains no usable converted intelligence.")
+        event.add_attribute(
+            "text",
+            "Some Scout intelligence could not be converted; results are partial.",
+            to_ids=False,
+            disable_correlation=True,
+            comment="Scout conversion notice",
+        )
     for item in converted.attributes:
         item.to_ids = False
         event.add_attribute(**item)

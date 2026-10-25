@@ -173,3 +173,37 @@ def test_invalid_search_window_never_calls_service(days):
     with patch.object(module.requests, "get") as get:
         assert "error" in module.handler(query(config={"apikey": SECRET, "days": days}))
     get.assert_not_called()
+
+
+def extension_definition():
+    return (
+        {
+            "type": "x-example-optional",
+            "spec_version": "2.1",
+            "id": "x-example-optional--a087b5de-68cc-4a94-bb22-a9c99b6fb0e6",
+            "created": "2025-01-01T00:00:00Z",
+            "modified": "2025-01-01T00:00:00Z",
+            "name": "Example optional intelligence",
+        },
+    )
+
+
+def test_optional_unsupported_stix_does_not_discard_supported_intelligence():
+    bundle = stix_bundle()
+    bundle["objects"].extend(extension_definition())
+    result, _ = handle(bundle)
+    assert_source(result)
+    assert any(item["value"] == "8.8.8.8" for item in result["results"]["Attribute"])
+    assert any(item["type"] == "text" and "partial" in item["value"] for item in result["results"]["Attribute"])
+    tags = result["results"].get("Tag", [])
+    tags += [tag for item in result["results"]["Attribute"] for tag in item.get("Tag", [])]
+    assert any(tag["name"] == "tlp:amber" for tag in tags)
+
+
+def test_bundle_with_only_unsupported_intelligence_reports_an_error():
+    from stix2 import Bundle
+
+    bundle = json.loads(Bundle().serialize())
+    bundle["objects"] = list(extension_definition())
+    result, _ = handle(bundle)
+    assert "error" in result

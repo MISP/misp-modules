@@ -37,3 +37,5 @@ Example request:
 
 Validation: `pytest tests/test_team_cymru_scout_search.py` uses mocked service responses;
 no paid API credentials are needed.
+
+Supported intelligence is retained if optional STIX objects cannot be converted. Partial results include an explicit notice; a bundle with no usable converted intelligence produces an error.
