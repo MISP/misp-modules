@@ -4604,6 +4604,31 @@ Create and renew module-owned Falcon custom IOCs from MISP event and object attr
 
 -----
 
+#### [Matrix](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/action_mod/matrix.py)
+
+Send a message to an unencrypted Matrix room.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/action_mod/matrix.py)]
+
+- **features**:
+>Renders Jinja2 templates using matchingData when present, otherwise data, with a JSON fallback. Sends plain-text m.room.message events using a bot access token. The bot must already be a room member with permission to send messages. End-to-end encrypted rooms and HTML/Markdown formatting are unsupported. See the [usage guide](https://github.com/MISP/misp-modules/blob/main/documentation/action_mod/matrix.md).
+
+- **config**:
+>{'params': {'matrix_homeserver': {'type': 'string', 'description': 'The Matrix homeserver base URL, including scheme and optional path prefix', 'value': 'https://matrix.example.org'}, 'bot_access_token': {'type': 'string', 'description': 'Access token for a Matrix bot that has joined the room'}, 'room_id': {'type': 'string', 'description': 'The unencrypted room ID (starting with !), not a room alias'}, 'message_template': {'type': 'large_string', 'description': 'Jinja2 template for the plain-text message; leave empty to send the workflow data as JSON', 'value': 'MISP event: {{ Event.info }}', 'jinja_supported': True}}, 'blocking': False, 'support_filters': True, 'expect_misp_core_format': False}
+
+- **input**:
+>Workflow data or matchingData, and an optional Jinja2 message template.
+
+- **output**:
+>Boolean success; errors indicate an unsuccessful or unacknowledged send.
+
+- **references**:
+>https://spec.matrix.org/latest/client-server-api/#put_matrixclientv3roomsroomidsendeventtypetxnid
+
+- **requirements**:
+>requests
+
+-----
+
 #### [Mattermost](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/action_mod/mattermost.py)
 
 Simplistic module to send message to a Mattermost channel.
