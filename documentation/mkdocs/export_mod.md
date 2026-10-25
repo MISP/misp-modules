@@ -369,17 +369,26 @@ Nexthink NXQL query export module
 
 <img src=../logos/osquery.png height=60>
 
-OSQuery export of a MISP event.
+Export MISP event and object indicators as an osquery query pack.
 [[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/osqueryexport.py)]
 
 - **features**:
->This module export an event as osquery queries that can be used in packs or in fleet management solution like Kolide.
+>Produces a JSON query pack with per-query platform selectors and intervals. Validated against osquery 5.24.0. Defaults to IDS-marked attributes, includes object attributes and excludes deleted data. File scans require an explicit scan_path. Set format=sql for legacy SQL text. See the [usage guide](https://github.com/MISP/misp-modules/blob/main/documentation/export_mod/osqueryexport.md).
+
+- **config**:
+> - format
+> - interval
+> - scan_path
+> - include_non_ids
 
 - **input**:
->MISP Event attributes
+>MISP events and object attributes.
 
 - **output**:
->osquery SQL queries
+>Base64-encoded JSON query pack (default) or SQL text, with counts and provenance.
+
+- **references**:
+>https://osquery.readthedocs.io/en/stable/deployment/configuration/
 
 -----
 

@@ -1,0 +1,156 @@
+{
+  "version": "5.24.0",
+  "tables": {
+    "services": {
+      "source": "https://github.com/osquery/osquery/blob/5.24.0/specs/windows/services.table",
+      "columns": [
+        "name",
+        "service_type",
+        "display_name",
+        "status",
+        "pid",
+        "start_type",
+        "win32_exit_code",
+        "service_exit_code",
+        "path",
+        "module_path",
+        "description",
+        "user_account"
+      ]
+    },
+    "winbaseobj": {
+      "source": "https://github.com/osquery/osquery/blob/5.24.0/specs/windows/winbaseobj.table",
+      "columns": [
+        "session_id",
+        "object_name",
+        "object_type"
+      ]
+    },
+    "registry": {
+      "source": "https://github.com/osquery/osquery/blob/5.24.0/specs/windows/registry.table",
+      "columns": [
+        "key",
+        "path",
+        "name",
+        "type",
+        "data",
+        "mtime"
+      ]
+    },
+    "pipes": {
+      "source": "https://github.com/osquery/osquery/blob/5.24.0/specs/windows/pipes.table",
+      "columns": [
+        "pid",
+        "name",
+        "instances",
+        "max_instances",
+        "flags"
+      ]
+    },
+    "scheduled_tasks": {
+      "source": "https://github.com/osquery/osquery/blob/5.24.0/specs/windows/scheduled_tasks.table",
+      "columns": [
+        "name",
+        "action",
+        "path",
+        "enabled",
+        "state",
+        "hidden",
+        "last_run_time",
+        "next_run_time",
+        "last_run_message",
+        "last_run_code"
+      ]
+    },
+    "dns_cache": {
+      "source": "https://github.com/osquery/osquery/blob/5.24.0/specs/windows/dns_cache.table",
+      "columns": [
+        "name",
+        "type",
+        "flags"
+      ]
+    },
+    "hash": {
+      "source": "https://github.com/osquery/osquery/blob/5.24.0/specs/hash.table",
+      "columns": [
+        "path",
+        "directory",
+        "md5",
+        "sha1",
+        "sha256",
+        "pid_with_namespace",
+        "mount_namespace_id"
+      ]
+    },
+    "file": {
+      "source": "https://github.com/osquery/osquery/blob/5.24.0/specs/utility/file.table",
+      "columns": [
+        "path",
+        "directory",
+        "filename",
+        "inode",
+        "uid",
+        "gid",
+        "mode",
+        "device",
+        "size",
+        "block_size",
+        "atime",
+        "mtime",
+        "ctime",
+        "btime",
+        "hard_links",
+        "symlink",
+        "type",
+        "symlink_target_path",
+        "attributes",
+        "volume_serial",
+        "file_id",
+        "file_version",
+        "product_version",
+        "original_filename",
+        "shortcut_target_path",
+        "shortcut_target_type",
+        "shortcut_target_location",
+        "shortcut_start_in",
+        "shortcut_run",
+        "shortcut_comment",
+        "bsd_flags",
+        "pid_with_namespace",
+        "mount_namespace_id"
+      ]
+    },
+    "yara_file": {
+      "source": "https://github.com/osquery/osquery/blob/5.24.0/specs/yara_file.table",
+      "columns": [
+        "path",
+        "matches",
+        "count",
+        "sig_group",
+        "sigfile",
+        "sigrule",
+        "strings",
+        "tags",
+        "sigurl",
+        "pid_with_namespace"
+      ]
+    },
+    "process_open_sockets": {
+      "source": "https://github.com/osquery/osquery/blob/5.24.0/specs/process_open_sockets.table",
+      "columns": [
+        "pid",
+        "fd",
+        "socket",
+        "family",
+        "protocol",
+        "local_address",
+        "remote_address",
+        "local_port",
+        "remote_port",
+        "path",
+        "state",
+        "net_namespace"
+      ]
+    }
+  }
+}

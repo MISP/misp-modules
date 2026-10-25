@@ -3854,17 +3854,26 @@ Nexthink NXQL query export module
 
 <img src=logos/osquery.png height=60>
 
-OSQuery export of a MISP event.
+Export MISP event and object indicators as an osquery query pack.
 [[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/osqueryexport.py)]
 
 - **features**:
->This module export an event as osquery queries that can be used in packs or in fleet management solution like Kolide.
+>Produces a JSON query pack with per-query platform selectors and intervals. Validated against osquery 5.24.0. Defaults to IDS-marked attributes, includes object attributes and excludes deleted data. File scans require an explicit scan_path. Set format=sql for legacy SQL text. See the [usage guide](https://github.com/MISP/misp-modules/blob/main/documentation/export_mod/osqueryexport.md).
+
+- **config**:
+> - format
+> - interval
+> - scan_path
+> - include_non_ids
 
 - **input**:
->MISP Event attributes
+>MISP events and object attributes.
 
 - **output**:
->osquery SQL queries
+>Base64-encoded JSON query pack (default) or SQL text, with counts and provenance.
+
+- **references**:
+>https://osquery.readthedocs.io/en/stable/deployment/configuration/
 
 -----
 
@@ -4627,6 +4636,33 @@ Simplistic module to send a message to a Nextcloud talk conversation.
 
 - **config**:
 >{'params': {'nextcloud_baseurl': {'type': 'string', 'description': 'The Nexctloud domain or URL', 'value': 'https://example.nextcloud.org:443'}, 'nextcloud_app_uuid_login': {'type': 'string', 'description': 'The nextcloud username'}, 'app_access_token': {'type': 'string', 'description': 'The nextcloud application token'}, 'nextcloud_conversation_token': {'type': 'string', 'description': 'The token of the conversation the message should be sent to'}, 'message_template': {'type': 'large_string', 'description': 'The template to be used to generate the message to be posted', 'value': 'The **template** will be rendered using *Jinja2*!', 'jinja_supported': True}}, 'blocking': False, 'support_filters': True, 'expect_misp_core_format': False}
+
+-----
+
+#### [OSQuery Pack Publish](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/action_mod/osquery_pack_publish.py)
+
+<img src=logos/osquery.png height=60>
+
+Publish a MISP query pack to a configured local osquery pack directory.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/action_mod/osquery_pack_publish.py)]
+
+- **features**:
+>Atomically publishes a named pack under OSQUERY_PACK_DIRECTORY. Defaults to dry run; existing packs require explicit overwrite. Reuses the export's platform selectors, IDS filtering and bounded scan paths. Publication does not execute queries or reload osquery. See the [usage guide](https://github.com/MISP/misp-modules/blob/main/documentation/action_mod/osquery_pack_publish.md).
+
+- **config**:
+>{'params': {'pack_name': {'type': 'string', 'description': 'Required: pack basename, letters/digits/_/- only'}, 'interval': {'type': 'string', 'description': 'Query interval in seconds', 'value': '3600'}, 'scan_path': {'type': 'string', 'description': 'Absolute osquery file path pattern for file scans'}, 'dry_run': {'type': 'string', 'description': 'Preview without writing files', 'value': 'true'}, 'overwrite': {'type': 'string', 'description': 'Replace the complete named pack with this snapshot', 'value': 'false'}}, 'blocking': True, 'support_filters': False, 'expect_misp_core_format': True}
+
+- **input**:
+>Selected MISP events and object attributes in workflow data.
+
+- **output**:
+>Publication status, pack content, counts, provenance and content SHA-256.
+
+- **references**:
+>https://osquery.readthedocs.io/en/stable/deployment/configuration/#query-packs
+
+- **requirements**:
+>OSQUERY_PACK_DIRECTORY on the module server; filesystem pack distribution and config reload
 
 -----
 
