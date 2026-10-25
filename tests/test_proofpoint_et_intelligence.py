@@ -179,3 +179,13 @@ def test_transport_is_bounded_and_credentials_are_absent_from_url():
         assert call.kwargs["verify"] is True
         assert call.kwargs["allow_redirects"] is False
         assert SECRET not in json.dumps(call.kwargs.get("params", {}))
+
+
+@pytest.mark.parametrize("size", [0, 12345])
+def test_sample_file_size_becomes_a_structured_byte_count(size):
+    result, _ = handle(
+        {"success": True, "response": {"md5sum": "b" * 32, "file_size": size}}, kind="md5", value="b" * 32
+    )
+    assert_source(result)
+    assert int(values(objects(result, "file")[0])["size-in-bytes"]) == size
+    assert contexts(result)[0]["file_size"] == size

@@ -196,7 +196,12 @@ def _expand(event, attribute, config):
         if not isinstance(detail, dict) or _hash("md5", detail.get("md5sum", "")) != value:
             raise ModuleError("Proofpoint ET Intelligence returned a different sample.")
         _annotation(event, attribute, "Proofpoint sample details", detail)
-        _file(event, attribute, detail, {"md5": "md5sum", "sha256": "sha256"})
+        _file(
+            event,
+            attribute,
+            dict(detail, size=detail.get("file_size", detail.get("size"))),
+            {"md5": "md5sum", "sha256": "sha256"},
+        )
         return _results(event)
     for suffix in ("reputation", "domains" if collection == "ips" else "ips"):
         data = _request("GET", base + "/" + suffix, headers=headers)

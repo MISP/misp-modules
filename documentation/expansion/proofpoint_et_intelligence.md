@@ -33,3 +33,5 @@ Example request:
 ```
 
 Validation: `pytest tests/test_proofpoint_et_intelligence.py`. Tests use mocked provider responses; authenticated live API calls were not exercised.
+
+Sample `file_size` is mapped to the file object `size-in-bytes` relation, including zero-byte files.
