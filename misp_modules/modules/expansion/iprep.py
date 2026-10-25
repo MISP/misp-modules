@@ -38,7 +38,7 @@ def handler(q=False):
         misperrors["error"] = "Unsupported attributes type"
         return misperrors
 
-    if not request.get("config") and not request["config"].get("apikey"):
+    if not request.get("config") or not request["config"].get("apikey"):
         misperrors["error"] = "IPRep api key is missing"
         return misperrors
 
