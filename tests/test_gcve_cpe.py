@@ -138,11 +138,17 @@ def test_page_limit_is_reported_instead_of_claiming_no_match():
     assert get.call_count == 2
 
 
-@pytest.mark.parametrize("items", [[], [dict(ENTRY, cpe_uri=CPE + "suffix")]])
-def test_no_exact_match_returns_only_the_original_attribute(items):
-    result, _ = run([response(items)])
+@pytest.mark.parametrize("items,pages", [([], 0), ([], 1), ([dict(ENTRY, cpe_uri=CPE + "suffix")], 1)])
+def test_no_exact_match_returns_only_the_original_attribute(items, pages):
+    result, get = run([response(items, pages=pages)])
     assert result["results"]["Object"] == []
-    assert result["results"]["Attribute"][0]["uuid"] == UUID
+    assert len(result["results"]["Attribute"]) == 1
+    source = result["results"]["Attribute"][0]
+    assert source["uuid"] == UUID
+    assert source["value"] == CPE
+    assert source["to_ids"] is True
+    assert source["comment"] == "Original"
+    get.assert_called_once()
 
 
 @pytest.mark.parametrize(
@@ -237,7 +243,8 @@ def test_network_failures_do_not_expose_request_details(failure):
         None,
         [],
         {},
-        {"items": [], "total_pages": 0},
+        {"items": [], "total_pages": -1},
+        {"items": [ENTRY], "total_pages": 0},
         {"items": [], "total_pages": True},
         {"items": {}, "total_pages": 1},
         {"items": [None], "total_pages": 1},

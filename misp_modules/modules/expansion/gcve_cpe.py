@@ -64,7 +64,8 @@ def _find_cpe(base_url, value, timeout, max_pages):
             not isinstance(items, list)
             or isinstance(total_pages, bool)
             or not isinstance(total_pages, int)
-            or total_pages < 1
+            or total_pages < 0
+            or (total_pages == 0 and items)
             or any(not isinstance(item, dict) or not isinstance(item.get("cpe_uri"), str) for item in items)
         ):
             raise ModuleError("GCVE CPE API returned an invalid search response.")
