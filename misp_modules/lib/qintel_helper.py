@@ -80,7 +80,7 @@ def _search(**kwargs):
             wait_time = _get_request_wait_time(request_attempts)
 
             if response.code == 429:
-                msg = "rate limit reached on attempt {request_attempts}, waiting {wait_time} seconds"
+                msg = f"rate limit reached on attempt {request_attempts}, waiting {wait_time} seconds"
 
                 if logger:
                     logger(msg)
