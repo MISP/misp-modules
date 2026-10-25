@@ -984,6 +984,35 @@ Module to access Farsight DNSDB Passive DNS.
 
 -----
 
+#### [GCVE CPE](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/gcve_cpe.py)
+
+Expand CPE attributes with GCVE CPE catalog metadata, package mappings and vulnerability references.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/gcve_cpe.py)]
+
+- **features**:
+>Query the public CPE Editor API without an API key. Search results are checked for an exact CPE URI match. Catalog metadata, deprecation information and PURL mappings are retained in a related annotation. Vulnerability references become vulnerability objects with their cpe_applicability and rationale preserved. Only references marked vulnerable populate vulnerable-configuration; other applicability states are context. api_url defaults to https://cpe.gcve.eu (instance root, without /api); timeout defaults to 30 seconds per request (maximum 120); max_pages defaults to 5 (1-20), with 100 search results per page. Blank or null settings use defaults. CPE 2.3 and URI bindings are looked up literally, without conversion.
+
+- **config**:
+> - api_url
+> - timeout
+> - max_pages
+
+- **input**:
+>CPE attribute.
+
+- **output**:
+>A catalog annotation and related vulnerability objects in MISP standard format.
+
+- **references**:
+> - https://cpe.gcve.eu/api/docs
+> - https://cpe.gcve.eu/api/openapi.yaml
+
+- **requirements**:
+> - requests
+> - pymisp
+
+-----
+
 #### [GeoIP ASN Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/geoip_asn.py)
 
 <img src=logos/maxmind.png height=60>

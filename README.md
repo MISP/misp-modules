@@ -104,6 +104,7 @@ For further Information see the [license file](https://misp.github.io/misp-modul
 * [EUPI Lookup](https://misp.github.io/misp-modules/expansion/#eupi-lookup) - A module to query the Phishing Initiative service (https://phishing-initiative.lu).
 * [URL Components Extractor](https://misp.github.io/misp-modules/expansion/#url-components-extractor) - Extract URL components
 * [Farsight DNSDB Lookup](https://misp.github.io/misp-modules/expansion/#farsight-dnsdb-lookup) - Module to access Farsight DNSDB Passive DNS.
+* [GCVE CPE](https://misp.github.io/misp-modules/expansion/#gcve-cpe) - Expand CPE attributes with GCVE CPE catalog metadata, package mappings and vulnerability references.
 * [GeoIP ASN Lookup](https://misp.github.io/misp-modules/expansion/#geoip-asn-lookup) - Query a local copy of the Maxmind Geolite ASN database (MMDB format)
 * [GeoIP City Lookup](https://misp.github.io/misp-modules/expansion/#geoip-city-lookup) - An expansion module to query a local copy of Maxmind's Geolite database with an IP address, in order to get information about the city where it is located.
 * [GeoIP Country Lookup](https://misp.github.io/misp-modules/expansion/#geoip-country-lookup) - Query a local copy of Maxminds Geolite database, updated for MMDB format
