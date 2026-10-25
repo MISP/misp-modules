@@ -122,6 +122,8 @@ class AssemblyLineParser:
             tag = {"Tag": [{"name": file_info["classification"].lower()}]}
             filename_attribute.update(tag)
             for feature, attribute in self._file_mapping.items():
+                if feature not in file_info:
+                    continue
                 attribute_payload = attribute.copy()
                 attribute_payload.update(tag)
                 file_object.add_attribute(value=file_info[feature], **attribute_payload)
