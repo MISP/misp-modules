@@ -106,7 +106,7 @@ def _expand(event, attribute, config):
     address = _ip(attribute["value"].strip())
     labels = [tag["name"] for tag in attribute.get("Tag", []) if isinstance(tag, dict) and tag.get("name")]
     data = _post(
-        "https://shadowtrackr.com/docs_v3/5-APIv3/ip_info",
+        "https://shadowtrackr.com/api/v3/ip_info",
         json={"api_key": config["apikey"], "ip": address, "labels": labels or ""},
     )
     if data is None or data == {}:
