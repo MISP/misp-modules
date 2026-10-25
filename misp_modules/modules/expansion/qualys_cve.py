@@ -19,7 +19,7 @@ moduleinfo = {
     "requirements": ["requests"],
     "features": (
         "Set url to the HTTPS API URL for your Qualys platform. Uses Basic authentication and GET"
-        " /api/3.0/fo/knowledge_base/vuln/ with action=list, details=All and the cve filter. max_results defaults to 25"
+        " /api/4.0/fo/knowledge_base/vuln/ with action=list, details=All and the cve filter. max_results defaults to 25"
         " (1-100). All matching QIDs retain title, diagnosis, solution, severity and CVSS data. Only entries explicitly"
         " containing the requested CVE are imported. Does not query customer host inventories."
     ),
@@ -39,7 +39,7 @@ def _request(method, url, response_format="json", **kwargs):
         response = requests.request(method, url, timeout=TIMEOUT, allow_redirects=False, verify=True, **kwargs)
     except requests.RequestException:
         raise ModuleError("The service request failed or timed out.") from None
-    if response.status_code in (404, 204):
+    if response.status_code == 204:
         return None
     if response.status_code not in (200, 201, 202):
         raise ModuleError(f"The service returned HTTP {response.status_code}.")
@@ -152,7 +152,7 @@ def _expand(event, attribute, config):
         raise ModuleError("Invalid CVE identifier.")
     root = _request(
         "GET",
-        base + "/api/3.0/fo/knowledge_base/vuln/",
+        base + "/api/4.0/fo/knowledge_base/vuln/",
         response_format="xml",
         auth=(config["username"], config["password"]),
         headers={"X-Requested-With": "MISP modules"},

@@ -2,7 +2,7 @@
 
 Retrieve Qualys KnowledgeBase vulnerability details for a CVE identifier.
 
-Set url to the HTTPS API URL for your Qualys platform. Uses Basic authentication and GET /api/3.0/fo/knowledge_base/vuln/ with action=list, details=All and the cve filter. max_results defaults to 25 (1-100). All matching QIDs retain title, diagnosis, solution, severity and CVSS data. Only entries explicitly containing the requested CVE are imported. Does not query customer host inventories.
+Set url to the HTTPS API URL for your Qualys platform. Uses Basic authentication and GET /api/4.0/fo/knowledge_base/vuln/ with action=list, details=All and the cve filter. max_results defaults to 25 (1-100). All matching QIDs retain title, diagnosis, solution, severity and CVSS data. Only entries explicitly containing the requested CVE are imported. Does not query customer host inventories.
 
 Input: vulnerability.
 
@@ -35,3 +35,5 @@ Example request:
 ```
 
 Validation: `pytest tests/test_qualys_cve.py`. Tests use mocked provider responses; authenticated live API calls were not exercised.
+
+The module uses the active v4 KnowledgeBase API. Endpoint HTTP 404 responses are errors; a successful XML response with no matching vulnerability entries is an empty lookup. The API lifecycle is documented at https://docs.qualys.com/en/vm/qweb-all-api/mergedProjects/qapi-scan/kbase/knowledgebase.htm .

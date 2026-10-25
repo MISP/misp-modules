@@ -108,7 +108,7 @@ def test_connection_failures_are_redacted(failure):
     assert SECRET not in result["error"]
 
 
-@pytest.mark.parametrize("status", [404, 204])
+@pytest.mark.parametrize("status", [204])
 def test_empty_lookup_preserves_source(status):
     with patch.object(module.requests, "request", return_value=response(status=status)):
         result = module.handler(query())
@@ -192,3 +192,23 @@ def test_transport_is_bounded_and_credentials_are_absent_from_url():
         assert call.kwargs["verify"] is True
         assert call.kwargs["allow_redirects"] is False
         assert SECRET not in json.dumps(call.kwargs.get("params", {}))
+
+
+def test_active_v4_knowledgebase_endpoint_is_used():
+    result, request = handle(xml=kb())
+    assert_source(result)
+    assert request.call_args.args[1] == "https://service.example/api/4.0/fo/knowledge_base/vuln/"
+
+
+def test_missing_endpoint_is_an_error_rather_than_an_empty_lookup():
+    with patch.object(module.requests, "request", return_value=response(status=404)):
+        result = module.handler(query())
+    assert "404" in result["error"]
+
+
+def test_successful_empty_knowledgebase_is_an_empty_lookup():
+    result, _ = handle(
+        xml="<KNOWLEDGE_BASE_VULN_LIST_OUTPUT><RESPONSE><VULN_LIST/></RESPONSE></KNOWLEDGE_BASE_VULN_LIST_OUTPUT>"
+    )
+    assert_source(result)
+    assert not result["results"]["Object"]
