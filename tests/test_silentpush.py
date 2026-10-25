@@ -154,3 +154,33 @@ def test_invalid_envelopes_and_errors(payload):
     result, _ = handle(payload, kind="ip-src", value="1.1.1.1")
     assert "error" in result
     assert SECRET not in result["error"]
+
+
+@pytest.mark.parametrize(
+    "kind,value", [("domain", "example.com"), ("hostname", "host.example.com"), ("url", "https://example.com/path")]
+)
+def test_domain_resolved_addresses_produce_deduplicated_asn_and_ptr_pivots(kind, value):
+    payload = {
+        "response": {
+            "ip2asn": [
+                {"asn": 13335, "ip_ptr": "first.example.com"},
+                {"asn": 13335, "ip_ptr": "second.example.com"},
+                {"asn": 13335, "ip_ptr": "first.example.com"},
+            ],
+            "sp_risk_score": 0,
+        }
+    }
+    result, _ = handle(payload, kind=kind, value=value)
+    assert_source(result)
+    added = [item for item in result["results"]["Attribute"] if item["uuid"] != UUID]
+    assert [(item["type"], item["value"]) for item in added] == [
+        ("AS", "AS13335"),
+        ("hostname", "first.example.com"),
+        ("hostname", "second.example.com"),
+    ]
+    assert json.loads(values(objects(result, "annotation")[0])["text"])["ip2asn"] == payload["response"]["ip2asn"]
+
+
+def test_domain_invalid_ip_context_is_reported():
+    result, _ = handle({"response": {"ip2asn": ["invalid"]}}, kind="domain", value="example.com")
+    assert "error" in result

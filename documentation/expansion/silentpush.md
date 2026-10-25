@@ -37,3 +37,5 @@ Example request:
 
 Validation: `pytest tests/test_silentpush.py` uses mocked service responses;
 no paid API credentials are needed.
+
+Domain, hostname and URL lookups also extract ASN and PTR pivots from all nested `ip2asn` records, deduplicating shared ASNs and hostnames.

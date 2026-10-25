@@ -149,12 +149,20 @@ def _expand(event, attribute, config):
     if not isinstance(context, dict):
         raise ModuleError("Silent Push returned an unexpected enrichment record.")
     _annotation(event, attribute, "Silent Push intelligence", context)
-    if context.get("asn") is not None:
-        number = str(context["asn"]).removeprefix("AS")
-        if number.isdigit():
-            event.add_attribute("AS", "AS" + number, to_ids=False, comment="Silent Push")
-    if isinstance(context.get("ip_ptr"), str) and context["ip_ptr"]:
-        event.add_attribute("hostname", context["ip_ptr"], to_ids=False, comment="Silent Push PTR")
+    records = context.get("ip2asn", []) if api_type == "domain" else rows
+    if not isinstance(records, list) or not all(isinstance(row, dict) for row in records):
+        raise ModuleError("Silent Push returned invalid resolved-address records.")
+    seen = set()
+    for record in [context, *records]:
+        if record.get("asn") is not None:
+            number = str(record["asn"]).removeprefix("AS")
+            if number.isdigit() and ("AS", number) not in seen:
+                seen.add(("AS", number))
+                event.add_attribute("AS", "AS" + number, to_ids=False, comment="Silent Push")
+        ptr = record.get("ip_ptr")
+        if isinstance(ptr, str) and ptr and ("hostname", ptr) not in seen:
+            seen.add(("hostname", ptr))
+            event.add_attribute("hostname", ptr, to_ids=False, comment="Silent Push PTR")
     reputation = context.get("ns_reputation") or {}
     if not isinstance(reputation, dict):
         raise ModuleError("Silent Push returned invalid nameserver context.")
