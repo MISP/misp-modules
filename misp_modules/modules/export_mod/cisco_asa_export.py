@@ -38,7 +38,7 @@ def _render(rules, config):
         action = "deny" if config["mode"] == "block" else "permit"
         suffix = " log" if config["mode"] == "log" else ""
         yield (
-            f"access-list {config['name_prefix']}-V{rule.family} extended {action}"
+            f"access-list {config['name_prefix']} extended {action}"
             f" {rule.protocol or 'ip'} {source} {destination}{suffix}"
         )
 

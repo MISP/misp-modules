@@ -11,7 +11,9 @@ for supported attributes, DNS behavior and API requests.
 | `name_prefix` | `MISP-IOC` (maximum 27 characters) |
 | `resolve_dns` | `false` |
 
-ACLs are named `<prefix>-V4` and `<prefix>-V6`. IPv4 networks use **subnet masks**,
+Both IPv4 and IPv6 entries use the same ACL name, exactly `name_prefix` (default
+`MISP-IOC`). ASA permits only one extended ACL per interface and direction, so
+the two families must share a unified ACL. IPv4 networks use **subnet masks**,
 hosts use `host`, and unrestricted endpoints use `any4`/`any6` to retain family
 scope. IPv6 networks use prefix notation. Port constraints stay on their source
 or destination endpoint; TCP and UDP get separate entries. Port zero is supported.
@@ -19,8 +21,8 @@ or destination endpoint; TCP and UDP get separate entries. Port zero is supporte
 Example source TCP/443 and destination IPv6 UDP/53 entries:
 
 ```text
-access-list MISP-IOC-V4 extended deny tcp 192.0.2.0 255.255.255.0 eq 443 any4
-access-list MISP-IOC-V6 extended deny udp any6 host 2001:db8::1 eq 53
+access-list MISP-IOC extended deny tcp 192.0.2.0 255.255.255.0 eq 443 any4
+access-list MISP-IOC extended deny udp any6 host 2001:db8::1 eq 53
 ```
 
 **Logging mode permits matching traffic** and stops ACL evaluation. It can

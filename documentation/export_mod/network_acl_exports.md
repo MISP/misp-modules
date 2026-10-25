@@ -122,9 +122,11 @@ legacy exports with `Attribute`/`Object` beside `Event`. The response contains:
   semantics. The same warnings appear as comments in the download.
 
 Empty input emits comments without creating policies, filters or objects.
-Rule order is deterministic. Names use the prefix and a 16-character SHA-256
-digest of the normalized packet match. FortiOS numeric IDs are assigned separately.
-Changing the verdict mode updates the same managed names.
+Rule order is deterministic. PAN-OS, Junos, FortiOS and RouterOS managed rule
+names/comments use the prefix and a 16-character SHA-256 digest of the normalized
+packet match. FortiOS numeric IDs are assigned separately. ASA uses `name_prefix`
+directly as one unified ACL name for IPv4 and IPv6 entries. Changing the verdict
+mode retains the same managed names.
 
 ## Policy integration
 

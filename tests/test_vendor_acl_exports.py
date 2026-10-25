@@ -301,15 +301,38 @@ def test_asa_uses_netmasks_not_ios_wildcards_and_preserves_port_sides():
         event([attribute("ip-src|port", "192.0.2.7/24|443"), attribute("ip-dst|port", "2001:db8::1|53")]),
     )
     assert commands(text) == [
-        "access-list MISP-IOC-V4 extended deny tcp 192.0.2.0 255.255.255.0 eq 443 any4",
-        "access-list MISP-IOC-V4 extended deny udp 192.0.2.0 255.255.255.0 eq 443 any4",
-        "access-list MISP-IOC-V6 extended deny tcp any6 host 2001:db8::1 eq 53",
-        "access-list MISP-IOC-V6 extended deny udp any6 host 2001:db8::1 eq 53",
+        "access-list MISP-IOC extended deny tcp 192.0.2.0 255.255.255.0 eq 443 any4",
+        "access-list MISP-IOC extended deny udp 192.0.2.0 255.255.255.0 eq 443 any4",
+        "access-list MISP-IOC extended deny tcp any6 host 2001:db8::1 eq 53",
+        "access-list MISP-IOC extended deny udp any6 host 2001:db8::1 eq 53",
     ]
     assert result["summary"]["count"] == 4
     text, result = run(module("cisco_asa_export"), event([attribute()]), mode="log")
-    assert commands(text) == ["access-list MISP-IOC-V4 extended permit ip any4 host 192.0.2.1 log"]
+    assert commands(text) == ["access-list MISP-IOC extended permit ip any4 host 192.0.2.1 log"]
     assert acl.PERMIT_LOG_WARNING in text and acl.PERMIT_LOG_WARNING in result["warnings"]
+
+
+@pytest.mark.parametrize("mode", ["block", "log"])
+@pytest.mark.parametrize("name_prefix", ["MISP-IOC", "Threat_42"])
+def test_asa_dual_stack_export_uses_one_attachable_acl(mode, name_prefix):
+    text, result = run(
+        module("cisco_asa_export"),
+        event([attribute(), attribute(value="2001:db8::1"), attribute("port", "443")]),
+        mode=mode,
+        name_prefix=name_prefix,
+    )
+    entries = commands(text)
+    # ASA permits one extended ACL per interface/direction, so both families
+    # and standalone-port entries must be usable through a single binding.
+    assert {line.split()[1] for line in entries} == {name_prefix}
+    assert len(entries) == result["summary"]["count"] == 6
+    assert sum("any4" in line for line in entries) == 3
+    assert sum("any6" in line for line in entries) == 3
+    assert all(("any4" in line) != ("any6" in line) for line in entries)
+    if mode == "log":
+        assert all(" extended permit " in line and line.endswith(" log") for line in entries)
+    else:
+        assert all(" extended deny " in line and not line.endswith(" log") for line in entries)
 
 
 def test_routeros_separate_ipv6_path_and_nonterminating_log():
