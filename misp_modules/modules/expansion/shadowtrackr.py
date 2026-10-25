@@ -16,11 +16,11 @@ moduleinfo = {
     "logo": "",
     "requirements": ["requests"],
     "features": (
-        "Queries /api/v3/ip_info for IPv4 or IPv6. Existing attribute tags are sent as labels. Returns the"
-        " false_positive_estimate, provider details and VPN/CDN/cloud/bogon/Tor/public-DNS flags in a referenced"
-        " annotation. Scores are reported without changing MISP decay scores or IDS flags."
+        "Posts JSON to /api/v3/ip_info for IPv4 or IPv6; the API key stays out of the URL. Existing attribute tags are"
+        " sent as labels. Returns the false_positive_estimate, provider details and VPN/CDN/cloud/bogon/Tor/public-DNS"
+        " flags in a referenced annotation. Scores are reported without changing MISP decay scores or IDS flags."
     ),
-    "references": ["https://shadowtrackr.com/api/"],
+    "references": ["https://shadowtrackr.com/docs_v3/5-API"],
     "input": "ip-src, ip-dst MISP attribute.",
     "output": "A referenced annotation containing IP intelligence.",
 }
@@ -31,9 +31,9 @@ class ModuleError(ValueError):
     """An actionable module error safe to return to the caller."""
 
 
-def _get(url, **kwargs):
+def _post(url, **kwargs):
     try:
-        response = requests.get(url, timeout=TIMEOUT, allow_redirects=False, **kwargs)
+        response = requests.post(url, timeout=TIMEOUT, allow_redirects=False, **kwargs)
     except requests.RequestException:
         raise ModuleError("The service request failed or timed out.") from None
     if response.status_code == 404:
@@ -105,9 +105,9 @@ def version():
 def _expand(event, attribute, config):
     address = _ip(attribute["value"].strip())
     labels = [tag["name"] for tag in attribute.get("Tag", []) if isinstance(tag, dict) and tag.get("name")]
-    data = _get(
-        "https://shadowtrackr.com/api/v3/ip_info",
-        params={"api_key": config["apikey"], "ip": address, "labels": labels or ""},
+    data = _post(
+        "https://shadowtrackr.com/docs_v3/5-APIv3/ip_info",
+        json={"api_key": config["apikey"], "ip": address, "labels": labels or ""},
     )
     if data is None or data == {}:
         return _results(event)

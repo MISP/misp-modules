@@ -2,7 +2,7 @@
 
 Enrich IP addresses with ShadowTrackr false-positive and infrastructure context.
 
-Queries /api/v3/ip_info for IPv4 or IPv6. Existing attribute tags are sent as labels. Returns the false_positive_estimate, provider details and VPN/CDN/cloud/bogon/Tor/public-DNS flags in a referenced annotation. Scores are reported without changing MISP decay scores or IDS flags.
+Posts JSON to /api/v3/ip_info for IPv4 or IPv6. The API key, IP and labels are sent in the JSON body, so the API key does not appear in the request URL. Existing attribute tags are sent as labels. Returns the false_positive_estimate, provider details and VPN/CDN/cloud/bogon/Tor/public-DNS flags in a referenced annotation. Scores are reported without changing MISP decay scores or IDS flags.
 
 Input: ip-src, ip-dst. Output: A referenced annotation containing IP intelligence.
 
@@ -17,7 +17,7 @@ Empty lookups return the source attribute without fabricated enrichment.
 
 References:
 
-- https://shadowtrackr.com/api/
+- https://shadowtrackr.com/docs_v3/5-API
 
 Example request:
 
