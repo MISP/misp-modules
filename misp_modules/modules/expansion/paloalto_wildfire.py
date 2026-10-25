@@ -3,8 +3,10 @@ import hashlib
 import json
 import re
 import xml.etree.ElementTree as ET
+from functools import partial
 from io import BytesIO
 from ipaddress import ip_address
+from pathlib import Path
 from urllib.parse import urlsplit
 
 import requests
@@ -12,7 +14,7 @@ from pymisp import MISPEvent, MISPObject
 
 misperrors = {"error": "Error"}
 mispattributes = {"input": ["md5", "sha256", "attachment"], "format": "misp_standard"}
-moduleconfig = ["apikey", "url", "max_size_mb"]
+moduleconfig = ["apikey", "url", "max_size_mb", "ca_bundle"]
 moduleinfo = {
     "version": "1",
     "author": "MISP Project",
@@ -40,9 +42,14 @@ class ModuleError(ValueError):
     """An actionable error that contains no request credentials."""
 
 
-def _request(method, url, response_format="json", **kwargs):
+def _request(method, url, response_format="json", ca_bundle=None, **kwargs):
+    trust = True
+    if ca_bundle is not None and ca_bundle != "":
+        if not isinstance(ca_bundle, str) or not Path(ca_bundle).is_file():
+            raise ModuleError("ca_bundle must be the path to an existing CA bundle file.")
+        trust = ca_bundle
     try:
-        response = requests.request(method, url, timeout=TIMEOUT, allow_redirects=False, verify=True, **kwargs)
+        response = requests.request(method, url, timeout=TIMEOUT, allow_redirects=False, verify=trust, **kwargs)
     except requests.RequestException:
         raise ModuleError("The service request failed or timed out.") from None
     if response.status_code in (404, 204):
@@ -208,10 +215,11 @@ def version():
 
 
 def _expand(event, attribute, config):
+    request = partial(_request, ca_bundle=config.get("ca_bundle"))
     base = _base(config, "https://wildfire.paloaltonetworks.com/publicapi")
     if attribute["type"] == "attachment":
         filename, content = _binary(attribute, config)
-        data = _request(
+        data = request(
             "POST",
             base + "/submit/file",
             response_format="xml",
@@ -227,7 +235,7 @@ def _expand(event, attribute, config):
         _annotation(event, attribute, "WildFire submission", {"sha256": digest, "status": "submitted"})
         return _results(event)
     value = _value(attribute)
-    data = _request(
+    data = request(
         "POST", base + "/get/verdict", response_format="xml", data={"apikey": config["apikey"], "hash": value}
     )
     if data is None:
@@ -247,7 +255,7 @@ def _expand(event, attribute, config):
     _annotation(event, attribute, "WildFire verdict", {"code": code, "verdict": meanings[code]})
     if code < 0:
         return _results(event)
-    report = _request(
+    report = request(
         "POST",
         base + "/get/report",
         response_format="xml",

@@ -209,3 +209,26 @@ def test_transport_is_bounded_and_credentials_are_absent_from_url():
         assert call.kwargs["verify"] is True
         assert call.kwargs["allow_redirects"] is False
         assert SECRET not in json.dumps(call.kwargs.get("params", {}))
+
+
+def test_appliance_ca_bundle_applies_to_verdict_and_report_requests(tmp_path):
+    bundle = tmp_path / "appliance-ca.pem"
+    bundle.write_text("test CA certificate")
+    with patch.object(
+        module.requests, "request", side_effect=[response(xml=verdict(0)), response(status=404)]
+    ) as request:
+        result = module.handler(
+            query(config=dict(CONFIG, url="https://wildfire.internal/publicapi", ca_bundle=str(bundle)))
+        )
+    assert_source(result)
+    assert request.call_count == 2
+    assert all(call.kwargs["verify"] == str(bundle) for call in request.call_args_list)
+    assert all(call.kwargs["allow_redirects"] is False for call in request.call_args_list)
+
+
+@pytest.mark.parametrize("bundle", [False, True, "/missing/appliance-ca.pem"])
+def test_invalid_ca_bundle_cannot_disable_tls_verification(bundle):
+    with patch.object(module.requests, "request") as request:
+        result = module.handler(query(config=dict(CONFIG, ca_bundle=bundle)))
+    assert "error" in result
+    request.assert_not_called()

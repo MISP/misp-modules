@@ -33,3 +33,5 @@ Example request:
 ```
 
 Validation: `pytest tests/test_paloalto_wildfire.py`. Tests use mocked provider responses; authenticated live API calls were not exercised.
+
+For an appliance with a private certificate authority, set `ca_bundle` to an existing PEM CA-bundle file on the module server. The file is used for both lookups and submissions. Leaving the option unset uses the default trust store; TLS verification remains enabled.
