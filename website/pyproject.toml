@@ -33,6 +33,11 @@ dependencies = [
   "gunicorn",
   "jsonschema",
   "requests",
+  "tornado>=6.5.10,<6.6",
+  "certifi>=2026.10.19",
+  "urllib3>=2.8.0",
+  "Brotli>=1.2.1; platform_python_implementation == 'CPython'",
+  "brotlicffi>=1.2.1.0; platform_python_implementation != 'CPython'",
   "python-dotenv",   # package is called python‑dotenv on PyPI
   "misp-modules[minimal]",
 ]
@@ -68,6 +73,11 @@ schedule = "*"
 gunicorn = "*"
 jsonschema = "*"
 requests = "*"
+tornado = ">=6.5.10,<6.6"
+certifi = ">=2026.10.19"
+urllib3 = ">=2.8.0"
+Brotli = { version = ">=1.2.1", markers = "platform_python_implementation == 'CPython'" }
+brotlicffi = { version = ">=1.2.1.0", markers = "platform_python_implementation != 'CPython'" }
 dotenv = "*"
 "misp-modules[minimal]" = "*"
 
