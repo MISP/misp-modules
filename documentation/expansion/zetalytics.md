@@ -38,3 +38,5 @@ Example request:
 
 Validation: `pytest tests/test_zetalytics.py` uses mocked service responses;
 no paid API credentials are needed.
+
+Observation boundaries come from `first_seen` and `last_seen`. UNIX seconds and ISO 8601/date strings are accepted and normalized to UTC; timestamp zero is retained. Legacy `first_ts`/`last_ts` and the first-observation `date` field are fallback inputs. Deduplication includes the normalized observation times.

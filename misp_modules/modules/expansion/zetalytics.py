@@ -123,6 +123,36 @@ def version():
     return dict(moduleinfo, config=moduleconfig)
 
 
+def _observation_time(value):
+    if value is None or value == "":
+        return None
+    if isinstance(value, bool):
+        raise ModuleError("Zetalytics returned an invalid observation timestamp.")
+    if (
+        isinstance(value, (int, float))
+        or isinstance(value, str)
+        and re.fullmatch(r"[+-]?[0-9]+(?:\.[0-9]+)?", value.strip())
+    ):
+        return datetime.fromtimestamp(float(value), timezone.utc)
+    if not isinstance(value, str):
+        raise ModuleError("Zetalytics returned an invalid observation timestamp.")
+    text = value.strip()
+    if text.endswith("Z"):
+        text = text[:-1] + "+00:00"
+    parsed = datetime.fromisoformat(text)
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=timezone.utc)
+    return parsed.astimezone(timezone.utc)
+
+
+def _observation_times(row):
+    result = []
+    for keys in (("first_seen", "first_ts", "date"), ("last_seen", "last_ts")):
+        value = next((row[key] for key in keys if row.get(key) is not None and row[key] != ""), None)
+        result.append(_observation_time(value))
+    return tuple(result)
+
+
 def _expand(event, attribute, config):
     limit = _limit(config)
     params = {"token": config["apikey"], "size": limit, "tsfield": "all"}
@@ -163,7 +193,8 @@ def _expand(event, attribute, config):
             value = _domain(parts[-1])
         elif kind in ("cname", "ns", "ptr"):
             value = _domain(value)
-        key = (domain, kind, value, row.get("first_ts"), row.get("last_ts"))
+        first_seen, last_seen = _observation_times(row)
+        key = (domain, kind, value, first_seen, last_seen)
         if key in seen:
             continue
         seen.add(key)
@@ -174,9 +205,9 @@ def _expand(event, attribute, config):
         obj.comment = "Zetalytics passive DNS"
         obj.add_attribute("queried-domain", value=domain, to_ids=False)
         obj.add_attribute(relations[kind], value=value, to_ids=False)
-        for source, target in (("first_ts", "first_seen"), ("last_ts", "last_seen")):
-            if row.get(source) is not None:
-                setattr(obj, target, datetime.fromtimestamp(float(row[source]), timezone.utc))
+        for target, timestamp in (("first_seen", first_seen), ("last_seen", last_seen)):
+            if timestamp is not None:
+                setattr(obj, target, timestamp)
         obj.add_reference(attribute["uuid"], "related-to")
         event.add_object(obj)
     total = data.get("total", data.get("count", 0))

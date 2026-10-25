@@ -186,3 +186,44 @@ def test_invalid_address_family_rejected():
 def test_invalid_record_fields_return_a_module_error(record):
     result, _ = handle({"results": [record]})
     assert "error" in result
+
+
+@pytest.mark.parametrize(
+    "first,last,expected_first,expected_last",
+    [
+        (0, 1735689600, "1970-01-01T00:00:00", "2025-01-01T00:00:00"),
+        ("2025-01-01T01:00:00+01:00", "2025-01-02T00:00:00Z", "2025-01-01T00:00:00", "2025-01-02T00:00:00"),
+        ("2025-01-01 00:00:00", "2025-01-02", "2025-01-01T00:00:00", "2025-01-02T00:00:00"),
+    ],
+)
+def test_provider_observation_fields_are_parsed(first, last, expected_first, expected_last):
+    record = {"qname": "example.com", "rrtype": "a", "value": "1.2.3.4", "first_seen": first, "last_seen": last}
+    result, _ = handle({"results": [record]})
+    obj = objects(result, "dns-record")[0]
+    assert obj["first_seen"].startswith(expected_first)
+    assert obj["last_seen"].startswith(expected_last)
+
+
+def test_deduplication_uses_the_actual_observation_boundaries():
+    row = {
+        "qname": "example.com",
+        "rrtype": "a",
+        "value": "1.2.3.4",
+        "first_seen": "2025-01-01",
+        "last_seen": "2025-01-02",
+    }
+    result, _ = handle({"results": [row, row, dict(row, last_seen="2025-01-03")]})
+    assert len(objects(result, "dns-record")) == 2
+
+
+def test_provider_fields_take_precedence_over_legacy_timestamps():
+    row = {
+        "qname": "example.com",
+        "rrtype": "a",
+        "value": "1.2.3.4",
+        "first_seen": 0,
+        "first_ts": 1735689600,
+        "last_seen": 1735689600,
+    }
+    result, _ = handle({"results": [row]})
+    assert objects(result, "dns-record")[0]["first_seen"].startswith("1970-01-01")
