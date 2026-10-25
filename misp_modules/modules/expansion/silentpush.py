@@ -18,9 +18,9 @@ moduleinfo = {
     "logo": "",
     "requirements": ["requests"],
     "features": (
-        "Uses the documented enrich endpoint with x-api-key authentication. URL inputs query only the hostname. IPv4 and IPv6"
-        " use their respective endpoints. Risk scores and flags remain in a referenced annotation; AS numbers, reverse"
-        " DNS and nameservers become pivotable attributes. Does not submit or scan URLs."
+        "Uses the documented enrich endpoint with x-api-key authentication. URL inputs query only the hostname. IPv4"
+        " and IPv6 use their respective endpoints. Risk scores and flags remain in a referenced annotation; AS numbers,"
+        " reverse DNS and nameservers become pivotable attributes. Does not submit or scan URLs."
     ),
     "references": ["https://help.silentpush.com/docs/get-enrichment-data"],
     "input": "domain, hostname, ip-src, ip-dst, url MISP attribute.",
