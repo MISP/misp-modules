@@ -37,3 +37,5 @@ Example request:
 
 Validation: `pytest tests/test_unpac_me.py` uses mocked service responses;
 no paid API credentials are needed.
+
+Search records use `id` and an integer `children` count. Positive counts trigger one authenticated `/private/results/{id}` request to retrieve unpacked SHA-256 values from the result entries. Parent and duplicate hashes are excluded. Zero-child and pending submissions retain their ID and child count; unavailable result details do not trigger polling. Legacy child-hash lists remain supported.

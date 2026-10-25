@@ -130,28 +130,63 @@ def _expand(event, attribute, config):
     for row in data["results"][:limit]:
         if not isinstance(row, dict) or _hash("sha256", row.get("sha256", "")) != value:
             raise ModuleError("UnpacMe returned an unexpected sample.")
-        _annotation(
-            event,
-            attribute,
-            "UnpacMe submission",
-            {key: row[key] for key in ("submission_id", "sha256", "status", "created") if key in row},
-        )
-        children = row.get("children") or []
-        if not isinstance(children, list):
-            raise ModuleError("UnpacMe returned invalid unpacked hashes.")
-        for child in children[:limit]:
+        context = {key: row[key] for key in ("id", "submission_id", "sha256", "status", "created") if key in row}
+        children = row.get("children", 0)
+        if children is None:
+            children = 0
+        if isinstance(children, list):
+            hashes = children
+            context["children"] = len(children)
+        elif isinstance(children, int) and not isinstance(children, bool) and children >= 0:
+            context["children"] = children
+            hashes = []
+            if children:
+                submission_id = row.get("id") or row.get("submission_id")
+                if not isinstance(submission_id, str) or not re.fullmatch(r"[A-Za-z0-9_-]{1,128}", submission_id):
+                    raise ModuleError("UnpacMe returned an invalid submission ID.")
+                report = _get(
+                    "https://api.unpac.me/api/v1/private/results/" + submission_id,
+                    headers={"Authorization": "Key " + config["apikey"]},
+                )
+                context["results_available"] = report is not None
+                if report is not None:
+                    if not isinstance(report, dict) or _hash("sha256", report.get("sha256", "")) != value:
+                        raise ModuleError("UnpacMe returned results for a different sample.")
+                    if report.get("id") is not None and report["id"] != submission_id:
+                        raise ModuleError("UnpacMe returned results for a different submission.")
+                    results = report.get("results")
+                    if isinstance(results, list):
+                        for result in results:
+                            if not isinstance(result, dict):
+                                raise ModuleError("UnpacMe returned an invalid unpacked result.")
+                            child_hashes = result.get("hashes", {})
+                            if not isinstance(child_hashes, dict):
+                                raise ModuleError("UnpacMe returned invalid result hashes.")
+                            hashes.append(child_hashes.get("sha256") or result.get("sha256"))
+                    elif not isinstance(results, dict):
+                        raise ModuleError("UnpacMe returned an invalid result collection.")
+        else:
+            raise ModuleError("UnpacMe returned an invalid unpacked child count.")
+        _annotation(event, attribute, "UnpacMe submission", context)
+        candidates = []
+        for child in hashes:
             digest = _hash("sha256", child)
             if digest == value or digest in seen:
                 continue
             seen.add(digest)
+            candidates.append(digest)
+        for digest in candidates[:limit]:
             obj = MISPObject("file")
             obj.comment = "UnpacMe unpacked child"
             obj.add_attribute("sha256", value=digest, to_ids=False)
             obj.add_reference(attribute["uuid"], "derived-from")
             event.add_object(obj)
-        if len(children) > limit:
+        if len(candidates) > limit:
             _annotation(
-                event, attribute, "UnpacMe result limit", {"returned_children": limit, "total_children": len(children)}
+                event,
+                attribute,
+                "UnpacMe result limit",
+                {"returned_children": limit, "total_children": len(candidates)},
             )
     if len(data["results"]) > limit:
         _annotation(

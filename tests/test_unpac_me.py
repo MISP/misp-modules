@@ -167,3 +167,65 @@ def test_child_limit_has_explicit_notice():
 def test_mismatched_sample_or_malformed_children(row):
     result, _ = handle({"results": [row]})
     assert "error" in result
+
+
+def test_search_child_count_fetches_authenticated_private_results():
+    search = {
+        "results": [
+            {"id": "submission-42", "sha256": "a" * 64, "children": 2, "status": "complete", "created": 1735689600}
+        ]
+    }
+    report = {
+        "id": "submission-42",
+        "sha256": "a" * 64,
+        "results": [
+            {"hashes": {"sha256": "a" * 64}},
+            {"hashes": {"sha256": "b" * 64}},
+            {"hashes": {"sha256": "c" * 64}},
+            {"hashes": {"sha256": "b" * 64}},
+        ],
+    }
+    with patch.object(module.requests, "get", side_effect=[response(search), response(report)]) as get:
+        result = module.handler(query())
+    assert_source(result)
+    assert [values(obj)["sha256"] for obj in objects(result, "file")] == ["b" * 64, "c" * 64]
+    context = json.loads(values(objects(result, "annotation")[0])["text"])
+    assert context["id"] == "submission-42" and context["children"] == 2
+    assert get.call_args.args[0] == "https://api.unpac.me/api/v1/private/results/submission-42"
+    assert get.call_args.kwargs["headers"] == {"Authorization": "Key " + SECRET}
+    assert get.call_count == 2
+
+
+def test_zero_children_preserves_id_without_fetching_results():
+    result, get = handle(
+        {"results": [{"id": "submission-42", "sha256": "a" * 64, "children": 0, "status": "complete"}]}
+    )
+    context = json.loads(values(objects(result, "annotation")[0])["text"])
+    assert context["id"] == "submission-42" and context["children"] == 0
+    assert get.call_count == 1 and not objects(result, "file")
+
+
+def test_unavailable_child_results_keep_submission_context_without_polling():
+    search = {"results": [{"id": "submission-42", "sha256": "a" * 64, "children": 1, "status": "unpacking"}]}
+    with patch.object(module.requests, "get", side_effect=[response(search), response(status=404)]) as get:
+        result = module.handler(query())
+    assert_source(result)
+    context = json.loads(values(objects(result, "annotation")[0])["text"])
+    assert context["children"] == 1 and context["results_available"] is False
+    assert get.call_count == 2
+
+
+def test_mismatched_private_results_are_not_attached_to_the_source():
+    search = {"results": [{"id": "submission-42", "sha256": "a" * 64, "children": 1}]}
+    with patch.object(
+        module.requests,
+        "get",
+        side_effect=[response(search), response({"id": "submission-42", "sha256": "b" * 64, "results": []})],
+    ):
+        assert "error" in module.handler(query())
+
+
+@pytest.mark.parametrize("count", [-1, True, "2"])
+def test_invalid_child_count_is_reported(count):
+    result, _ = handle({"results": [{"id": "submission-42", "sha256": "a" * 64, "children": count}]})
+    assert "error" in result
