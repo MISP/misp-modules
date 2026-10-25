@@ -230,6 +230,8 @@ def _fetch(value, maximum):
                 raw.extend(chunk)
                 if len(raw) > maximum:
                     raise ModuleError("The reference exceeds max_size_mb.")
+                if response.closed:
+                    break
             return (value, content_type, bytes(raw))
         except (urllib3.exceptions.HTTPError, OSError):
             raise ModuleError("The reference request failed or timed out.") from None

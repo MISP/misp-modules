@@ -68,7 +68,7 @@ def dns(address="93.184.216.34"):
 
 
 def pool_reply(raw=b"<h1>Example</h1><script>ignored()</script>", content_type="text/html", status=200, headers=None):
-    reply = Mock(status=status, headers={"Content-Type": content_type, **(headers or {})})
+    reply = Mock(status=status, closed=False, headers={"Content-Type": content_type, **(headers or {})})
     chunks = [raw, b""]
     reply.read1.side_effect = chunks
     return reply
@@ -216,3 +216,18 @@ def test_connection_close_socket_remains_bounded():
         result = module.handler(query())
     assert_source(result)
     assert reply._fp.fp.raw._sock.settimeout.call_count >= 1
+
+
+def test_completed_response_does_not_reuse_closed_socket():
+    pool = Mock()
+    reply = pool_reply()
+    reply.closed = True
+    pool.urlopen.return_value = reply
+    with (
+        patch.object(module.socket, "getaddrinfo", return_value=dns()),
+        patch.object(module.urllib3, "HTTPSConnectionPool", return_value=pool),
+    ):
+        result = module.handler(query())
+    assert_source(result)
+    assert reply.read1.call_count == 1
+    assert reply.connection.sock.settimeout.call_count == 1
