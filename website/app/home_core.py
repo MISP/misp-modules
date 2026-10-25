@@ -243,6 +243,7 @@ def set_flask_session(current_session, parent_id):
             # If not in current query, current query change for an other one
             if not util_set_flask_session(parent_id, loc_session, current_session):
                 # sess["uuid"]
+                flag = True
                 for q in sess:
                     if isUUID(q) and not q == current_query:
                         loc_session = sess.get(q)
