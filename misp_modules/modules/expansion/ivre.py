@@ -45,7 +45,7 @@ def _request(method, url, response_format="json", **kwargs):
         response = requests.request(method, url, timeout=TIMEOUT, allow_redirects=False, verify=True, **kwargs)
     except requests.RequestException:
         raise ModuleError("The service request failed or timed out.") from None
-    if response.status_code in (404, 204):
+    if response.status_code == 204:
         return None
     if response.status_code not in (200, 201, 202):
         raise ModuleError(f"The service returned HTTP {response.status_code}.")
@@ -191,7 +191,11 @@ def _expand(event, attribute, config):
     if bool(config.get("username")) != bool(config.get("password")):
         raise ModuleError("username and password must be configured together.")
     auth = (config["username"], config["password"]) if config.get("username") else None
-    field = "host" if attribute["type"] in ("ip-src", "ip-dst") else "domain"
+    field = (
+        "host"
+        if attribute["type"] in ("ip-src", "ip-dst")
+        else "hostname" if attribute["type"] == "hostname" else "domain"
+    )
     data = _request(
         "GET",
         base,
@@ -221,7 +225,7 @@ def _expand(event, attribute, config):
         ports = [p for p in row.get("ports", []) if p.get("state_state") == "open" and p.get("port", -1) >= 0]
         for port in _cap(event, attribute, ports, limit):
             number = port["port"]
-            if isinstance(number, bool) or not isinstance(number, int) or (not 1 <= number <= 65535):
+            if isinstance(number, bool) or not isinstance(number, int) or (not 0 <= number <= 65535):
                 raise ModuleError("IVRE returned an invalid port.")
             obj = MISPObject("ip-port", strict=True)
             obj.add_attribute("ip", value=address, to_ids=False)

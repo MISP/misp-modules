@@ -140,3 +140,30 @@ def test_basic_auth_and_no_redirects():
         result = module.handler(query(config=dict(CONFIG, username="user", password=SECRET)))
     assert_source(result)
     assert request.call_args.kwargs["auth"] == ("user", SECRET)
+
+
+def test_missing_view_endpoint_is_configuration_error():
+    with patch.object(module.requests, "request", return_value=response(status=404)):
+        result = module.handler(query())
+    assert "404" in result["error"]
+
+
+def test_hostname_uses_exact_hostname_filter():
+    with patch.object(module.requests, "request", return_value=response([])) as request:
+        result = module.handler(query(kind="hostname", value="host.example.com"))
+    assert_source(result)
+    assert json.loads(request.call_args.kwargs["params"]["f"]) == {"f": "hostname", "a": ["host.example.com"]}
+
+
+def test_open_port_zero_preserved_and_pseudo_port_skipped():
+    data = [
+        {
+            "addr": "1.1.1.1",
+            "ports": [{"port": 0, "protocol": "tcp", "state_state": "open"}, {"port": -1, "state_state": "open"}],
+        }
+    ]
+    with patch.object(module.requests, "request", return_value=response(data)):
+        result = module.handler(query())
+    assert_source(result)
+    assert len(objects(result, "ip-port")) == 1
+    assert values(objects(result, "ip-port")[0])["dst-port"] == "0"

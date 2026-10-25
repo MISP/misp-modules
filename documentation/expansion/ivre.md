@@ -16,3 +16,5 @@ References:
 
 - https://doc.ivre.rocks/en/latest/usage/web-ui.html
 - https://github.com/ivre/ivre/blob/master/ivre/web/app.py
+
+Hostname attributes use the exact hostname filter; domain attributes use the domain filter. A missing view endpoint (HTTP 404) is an error, while HTTP 200 with [] is a valid empty lookup. Explicitly observed open port 0 is retained; negative scan pseudo-ports are excluded.
