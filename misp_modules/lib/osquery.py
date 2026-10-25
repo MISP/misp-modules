@@ -71,8 +71,9 @@ def query(kind, value, scan_path=""):
     }
     if kind in simple:
         table, column = simple[kind]
+        collation = " COLLATE NOCASE" if kind == "domain" else ""
         extra = " AND object_type = 'Mutant'" if kind == "mutex" else ""
-        return f"SELECT * FROM {table} WHERE {column} = {quoted}{extra};", platform
+        return f"SELECT * FROM {table} WHERE {column} = {quoted}{collation}{extra};", platform
     if kind in ("regkey", "regkey|value"):
         key, separator, data = value.partition("|") if kind == "regkey|value" else (value, "", "")
         if kind == "regkey|value" and (not separator or not key):

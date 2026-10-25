@@ -91,6 +91,20 @@ def test_indicator_quotes_and_wildcards_are_literal(database, kind, table, colum
     database.execute("SELECT * FROM services")
 
 
+@pytest.mark.parametrize(
+    "indicator,cached_name",
+    [("EXAMPLE.ORG", "example.org"), ("example.org", "EXAMPLE.ORG"), ("ExAmPlE.OrG", "eXaMpLe.oRg")],
+)
+def test_domain_matches_ignore_case_but_require_the_whole_name(database, indicator, cached_name):
+    database.executemany(
+        "INSERT INTO dns_cache (name) VALUES (?)",
+        [(cached_name,), ("sub." + cached_name,), (cached_name + ".attacker.test",)],
+    )
+    sql, platform = osquery.query("domain", indicator)
+    assert database.execute(sql).fetchall() == [(cached_name, None, None)]
+    assert platform == "windows"
+
+
 def test_registry_key_semantics_hkcu_and_composite_separator(database):
     database.execute(
         "INSERT INTO registry (key, path, type) VALUES (?, ?, ?)", ("HKEY_USERS", r"HKEY_USERS\S-1-5-21", "subkey")

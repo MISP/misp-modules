@@ -19,7 +19,7 @@ Other corrections:
 | Previous behavior | Current behavior |
 | --- | --- |
 | Service-name lookup used nonexistent `services.service_name` | Uses `services.name`; display names use `display_name` |
-| All comparisons used unescaped `LIKE` values | SQL quotes are escaped; indicators match literal values, including `%` and `_` |
+| All comparisons used unescaped `LIKE` values | SQL quotes are escaped; indicators match literal values, including `%` and `_`; DNS names match case-insensitively |
 | `regkey` queried a registry value's `path` | Queries the registry `key`; HKCU maps to user hives, aliases expand only at the root |
 | Composite registry values split at every `\|` | Splits once, preserving pipes in data |
 | Mutex query matched other named object types | Requires `object_type = 'Mutant'` |
@@ -66,7 +66,8 @@ must choose paths appropriate to the target hosts. File queries select POSIX or
 Windows based on the path. YARA checks regular files smaller than 8 MB; inline
 rules are embedded in the pack. Rule compilation depends on the target build's
 YARA support. `ip-src` checks local socket addresses, `ip-dst` remote addresses;
-DNS checks the Windows DNS cache, not historical DNS or network traffic.
+DNS checks the Windows DNS cache using case-insensitive whole-name comparisons,
+not historical DNS or network traffic.
 
 ## Deployment
 
