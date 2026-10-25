@@ -136,3 +136,25 @@ def test_url_is_encoded_as_single_path_value():
 def test_mismatched_hash_rejected():
     with patch.object(module.requests, "request", return_value=response({"FileGeneralInfo": {"Sha256": "b" * 64}})):
         assert "error" in module.handler(query())
+
+
+@pytest.mark.parametrize("name_field", ["FileName", "FileNames"])
+def test_filename_response_variants(name_field):
+    payload = {"FileGeneralInfo": {"Sha256": "a" * 64}, "FileNames": [{name_field: "sample.exe"}]}
+    with patch.object(module.requests, "request", return_value=response(payload)):
+        result = module.handler(query())
+    assert_source(result)
+    assert any(values(obj).get("filename") == "sample.exe" for obj in objects(result, "file"))
+
+
+def test_url_downloaded_files_are_typed_and_bounded():
+    payload = {"UrlGeneralInfo": {}, "FilesDownloaded": [{"Md5": "a" * 32, "Size": 0}, {"Md5": "b" * 32}]}
+    with patch.object(module.requests, "request", return_value=response(payload)):
+        result = module.handler(
+            query(kind="url", value="https://example.com", config={"apikey": SECRET, "max_results": 1})
+        )
+    assert_source(result)
+    assert len(objects(result, "file")) == 1
+    assert values(objects(result, "file")[0])["md5"] == "a" * 32
+    assert values(objects(result, "file")[0])["size-in-bytes"] == "0"
+    assert len(objects(result, "annotation")) == 2

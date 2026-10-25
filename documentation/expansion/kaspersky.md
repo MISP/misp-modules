@@ -15,3 +15,5 @@ New attributes use `to_ids=false`; the source attribute retains its UUID and met
 References:
 
 - https://tip.kaspersky.com/
+
+URL FilesDownloaded rows become bounded file objects. Filename sections accept both FileName and FileNames response fields, including lists of names.

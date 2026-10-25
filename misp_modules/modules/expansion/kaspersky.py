@@ -234,15 +234,23 @@ def _expand(event, attribute, config):
     if not isinstance(data, dict) or not isinstance(data.get(section), dict):
         raise ModuleError("Kaspersky returned an unexpected report or no licensed report data.")
     _annotation(event, attribute, "Kaspersky TIP report", data)
+    mapping = {"md5": "Md5", "sha1": "Sha1", "sha256": "Sha256"}
     if endpoint == "hash":
         info = data[section]
-        mapping = {"md5": "Md5", "sha1": "Sha1", "sha256": "Sha256"}
         if info.get(mapping[kind]) and _hash(kind, info[mapping[kind]]) != value:
             raise ModuleError("Kaspersky returned a different file hash.")
         _file(event, attribute, dict(info, size=info.get("Size")), mapping)
-        for row in _cap(event, attribute, _optional_rows(data, "FileNames"), limit):
-            if row.get("FileName"):
-                _file(event, attribute, dict(info, filename=row["FileName"]), mapping)
+        filenames = []
+        for row in _optional_rows(data, "FileNames"):
+            names = row.get("FileNames", row.get("FileName"))
+            if isinstance(names, str):
+                filenames.append(names)
+            elif isinstance(names, list) and all(isinstance(name, str) for name in names):
+                filenames.extend(names)
+            elif names is not None:
+                raise ModuleError("Kaspersky returned an invalid filename section.")
+        for filename in _cap(event, attribute, filenames, limit):
+            _file(event, attribute, dict(info, filename=filename), mapping)
     elif endpoint in ("ip", "domain"):
         key = "IpDnsResolutions" if endpoint == "ip" else "DomainDnsResolutions"
         for row in _cap(event, attribute, _optional_rows(data, key), limit):
@@ -255,6 +263,9 @@ def _expand(event, attribute, config):
                 obj.add_attribute("last-seen", value=row["LastSeen"], to_ids=False)
             obj.add_reference(attribute["uuid"], "related-to")
             event.add_object(obj)
+    elif endpoint == "url":
+        for row in _cap(event, attribute, _optional_rows(data, "FilesDownloaded"), limit):
+            _file(event, attribute, dict(row, size=row.get("Size")), mapping)
     return _results(event)
 
 
