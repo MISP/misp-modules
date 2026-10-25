@@ -118,3 +118,46 @@ def test_missing_path_does_not_fall_back_to_bundled_lists(tmp_path):
 
 def test_bad_matching_mode():
     assert "error" in module.handler(query(config={"slow_search": "maybe"}))
+
+
+def test_matching_attributes_are_enforced_before_limit(tmp_path):
+    folder = tmp_path / "lists" / "email-only"
+    folder.mkdir(parents=True)
+    data = {
+        "name": "Email only",
+        "description": "Disposable email domains",
+        "version": 1,
+        "type": "substring",
+        "list": ["example.com"],
+        "matching_attributes": ["email-src", "email-dst"],
+    }
+    (folder / "list.json").write_text(json.dumps(data))
+    config = {"warninglists_path": str(tmp_path), "max_results": 1}
+    domain = module.handler(query(kind="domain", value="example.com", config=config))
+    email = module.handler(query(kind="email-src", value="User@example.com", config=config))
+    assert_source(domain)
+    assert not objects(domain, "warninglist-match")
+    assert values(objects(email, "warninglist-match")[0])["value"] == "User@example.com"
+
+
+@pytest.mark.parametrize(
+    "email,expected", [("User@EXAMPLE.COM", "User@example.com"), ("User@bücher.example", "User@xn--bcher-kva.example")]
+)
+def test_email_domain_normalization(tmp_path, email, expected):
+    folder = tmp_path / "lists" / "domain"
+    folder.mkdir(parents=True)
+    (folder / "list.json").write_text(
+        json.dumps(
+            {
+                "name": "Email domains",
+                "description": "Example",
+                "version": 1,
+                "type": "substring",
+                "list": [expected.split("@")[1]],
+                "matching_attributes": ["email-src"],
+            }
+        )
+    )
+    result = module.handler(query(kind="email-src", value=email, config={"warninglists_path": str(tmp_path)}))
+    assert_source(result)
+    assert values(objects(result, "warninglist-match")[0])["value"] == expected

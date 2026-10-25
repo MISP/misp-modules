@@ -146,6 +146,11 @@ def _expand(event, attribute, config):
     except ImportError:
         raise ModuleError("The pymispwarninglists package is required for Hygiene.") from None
     value = _value(attribute)
+    if attribute["type"] in ("email-src", "email-dst"):
+        local, separator, domain = value.rpartition("@")
+        if not separator or not local:
+            raise ModuleError("A valid email address is required.")
+        value = local + "@" + _domain(domain)
     limit = _limit(config)
     slow = config.get("slow_search", "true")
     if str(slow).lower() not in ("true", "false"):
@@ -157,7 +162,13 @@ def _expand(event, attribute, config):
             raise ModuleError("warninglists_path must contain a lists directory.")
     try:
         warninglists = WarningLists(slow_search=str(slow).lower() == "true", path_to_repo=path)
-        rows = warninglists.search(value)
+        rows = [
+            row
+            for row in warninglists.search(value)
+            if not getattr(row, "matching_attributes", None)
+            or "ALL" in row.matching_attributes
+            or attribute["type"] in row.matching_attributes
+        ]
     except Exception:
         raise ModuleError("The local warninglists could not be loaded or searched.") from None
     for row in _cap(event, attribute, rows, limit):

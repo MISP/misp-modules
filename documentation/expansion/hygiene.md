@@ -14,3 +14,5 @@ References:
 
 - https://github.com/MISP/misp-warninglists
 - https://github.com/MISP/PyMISPWarningLists
+
+Warninglist matching_attributes restrictions are applied before result limits. Email domains are lowercased and IDNA-encoded while preserving the local part.
