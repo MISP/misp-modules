@@ -147,7 +147,11 @@ def test_attachment_is_uploaded_before_detonation_with_verified_local_hash():
     with patch.object(
         module.requests,
         "request",
-        side_effect=[response(content=b""), response({"rl": {"analysis_id": "analysis-42", "sha1": sha1}})],
+        side_effect=[
+            response(content=b""),
+            response(content=b""),
+            response({"rl": {"analysis_id": "analysis-42", "sha1": sha1}}),
+        ],
     ) as request:
         result = module.handler(
             query(
@@ -160,8 +164,8 @@ def test_attachment_is_uploaded_before_detonation_with_verified_local_hash():
     assert_source(result)
     assert request.call_args_list[0].args[1].endswith("/api/spex/upload/" + sha1)
     assert request.call_args_list[0].kwargs["data"] == content
-    assert request.call_args_list[1].kwargs["json"]["rl"]["sha1"] == sha1
-    assert request.call_count == 2
+    assert request.call_args_list[2].kwargs["json"]["rl"]["sha1"] == sha1
+    assert request.call_count == 3
 
 
 def test_latest_report_mode_does_not_submit():
@@ -224,3 +228,53 @@ def test_transport_is_bounded_and_credentials_are_absent_from_url():
         assert call.kwargs["verify"] is True
         assert call.kwargs["allow_redirects"] is False
         assert SECRET not in json.dumps(call.kwargs.get("params", {}))
+
+
+def test_filename_metadata_is_uploaded_and_xml_escaped_before_detonation():
+    import xml.etree.ElementTree as ET
+
+    content = b"metadata test"
+    filename = "sample&<test>.bin"
+    with patch.object(
+        module.requests,
+        "request",
+        side_effect=[response(content=b""), response(content=b""), response({"rl": {"analysis_id": "42"}})],
+    ) as request:
+        result = module.handler(
+            query(
+                kind="attachment",
+                value=filename,
+                data=base64.b64encode(content).decode(),
+                config=dict(CONFIG, mode="submit"),
+            )
+        )
+    assert_source(result)
+    metadata_call = request.call_args_list[1]
+    assert metadata_call.args[1].endswith("/api/spex/upload/" + hashlib.sha1(content).hexdigest() + "/meta")
+    assert metadata_call.kwargs["headers"]["Content-Type"] == "application/octet-stream"
+    root = ET.fromstring(metadata_call.kwargs["data"])
+    assert root.findtext("properties/property/name") == "filename"
+    assert root.findtext("properties/property/value") == filename
+    assert root.find("domain") is not None
+    assert request.call_args_list[2].args[1].endswith("/api/dynamic/analysis/analyze/v1/query/json")
+
+
+def test_metadata_failure_prevents_detonation():
+    with patch.object(module.requests, "request", side_effect=[response(content=b""), response(status=500)]) as request:
+        result = module.handler(
+            query(
+                kind="attachment",
+                value="sample.bin",
+                data=base64.b64encode(b"content").decode(),
+                config=dict(CONFIG, mode="submit"),
+            )
+        )
+    assert "error" in result
+    assert request.call_count == 2
+
+
+def test_unsupported_macos_platform_is_rejected_before_submission():
+    with patch.object(module.requests, "request") as request:
+        result = module.handler(query(config=dict(CONFIG, mode="submit", platform="macos15")))
+    assert "error" in result
+    request.assert_not_called()

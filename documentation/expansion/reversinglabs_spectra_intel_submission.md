@@ -35,3 +35,5 @@ Example request:
 ```
 
 Validation: `pytest tests/test_reversinglabs_spectra_intel_submission.py`. Tests use mocked provider responses; authenticated live API calls were not exercised.
+
+Attachment submission posts raw bytes, then XML filename metadata with an empty domain to `/api/spex/upload/{sha1}/meta`, and only then requests detonation. Metadata failures stop the submission. Supported platforms follow TCA-0207: `windows11`, `windows10`, `windows7`, `macos11`, `linux`, and `android12`.

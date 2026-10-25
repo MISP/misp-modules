@@ -213,7 +213,7 @@ def _expand(event, attribute, config):
     if mode not in ("submit", "report"):
         raise ModuleError("mode must be submit or report.")
     platform = config.get("platform") or "windows10"
-    if platform not in ("windows7", "windows10", "windows11", "macos11", "linux", "android12", "macos15"):
+    if platform not in ("windows7", "windows10", "windows11", "macos11", "linux", "android12"):
         raise ModuleError("Unsupported dynamic analysis platform.")
     kind = attribute["type"]
     if kind == "attachment":
@@ -231,6 +231,22 @@ def _expand(event, attribute, config):
         )
         if uploaded is None:
             raise ModuleError("ReversingLabs returned no upload acknowledgement.")
+        metadata = ET.Element("rl")
+        properties = ET.SubElement(metadata, "properties")
+        prop = ET.SubElement(properties, "property")
+        ET.SubElement(prop, "name").text = "filename"
+        ET.SubElement(prop, "value").text = filename
+        ET.SubElement(metadata, "domain").text = ""
+        acknowledged = _request(
+            "POST",
+            base + "/api/spex/upload/" + value + "/meta",
+            response_format="bytes",
+            auth=auth,
+            headers={"Content-Type": "application/octet-stream"},
+            data=ET.tostring(metadata, encoding="utf-8"),
+        )
+        if acknowledged is None:
+            raise ModuleError("ReversingLabs returned no sample metadata acknowledgement.")
         _file(event, attribute, {"sha1": value, "sha256": hashlib.sha256(content).hexdigest(), "filename": filename})
     else:
         value = _value(attribute)
