@@ -9,7 +9,7 @@ on:
 jobs:
 
   release:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     steps:
 
       - name: Checkout repository
@@ -44,7 +44,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
 
   docs:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     steps:
 
       - name: Checkout repository
@@ -53,7 +53,7 @@ jobs:
       - name: Install packages
         run: |
           sudo apt-get update
-          sudo apt-get install -y nasm libgl1 libfuzzy-dev libpoppler-cpp-dev libpoppler-cpp0v5 libzbar0 tesseract-ocr libjpeg-dev
+          sudo apt-get install -y nasm libgl1 libfuzzy-dev libpoppler-cpp-dev libpoppler-cpp3 libzbar0 tesseract-ocr libjpeg-dev
 
       - name: Set up Python 3.15
         uses: actions/setup-python@v6
@@ -75,7 +75,7 @@ jobs:
           path: site/
 
   deploy-gh-pages:
-      runs-on: ubuntu-24.04
+      runs-on: ubuntu-26.04
       needs: docs
   
       permissions:
@@ -92,7 +92,7 @@ jobs:
           uses: actions/deploy-pages@v5
 
   build:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
@@ -100,7 +100,7 @@ jobs:
       - name: Install packages
         run: |
           sudo apt-get update
-          sudo apt-get install -y nasm libgl1 libfuzzy-dev libpoppler-cpp-dev libpoppler-cpp0v5 libzbar0 tesseract-ocr libjpeg-dev
+          sudo apt-get install -y nasm libgl1 libfuzzy-dev libpoppler-cpp-dev libpoppler-cpp3 libzbar0 tesseract-ocr libjpeg-dev
 
       - name: Set up Python 3.15
         uses: actions/setup-python@v6
@@ -123,7 +123,7 @@ jobs:
           path: dist/
 
   publish-to-pypi:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     needs: build
 
     permissions:
