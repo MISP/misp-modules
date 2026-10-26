@@ -169,7 +169,7 @@ def dict_handler(request: dict):
             urls = url_parser.urls
         else:
             urls = re.findall(
-                r"https?://(?:[-\w.]|(?:%[\da-fA-F]{2}))+",
+                r"""https?://[^\s<>"']+""",
                 mail_body.get_payload(decode=True).decode(charset, errors="ignore"),
             )
         for url in urls:

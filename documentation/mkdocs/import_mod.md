@@ -289,6 +289,33 @@ Simple CSV import tool with mapable columns
 
 -----
 
+#### [PCAP Import](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/pcap_import.py)
+
+Import a PCAP or PCAPNG capture, including reassembled files, emails and network indicators.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/pcap_import.py)]
+
+- **features**:
+>Parses captures offline with TShark, without capture privileges or network lookups. Extracts IPv4/IPv6 endpoints, DNS names and answers, HTTP URLs, hosts and user agents, and TLS SNI hostnames. Reassembles HTTP files and SMTP messages; reuses email_import for email objects, attachments and body URLs. Requires complete, unencrypted application traffic for payload extraction; HTTPS yields visible TLS metadata only. Other file-transfer protocols and TLS decryption are not supported. Observed network attributes have to_ids disabled for analyst review. Captures are limited to 50 MiB, exported data and JSON metadata to 100 MiB each. timeout is a positive number of seconds, at most 300 (default 60).
+
+- **config**:
+>timeout
+
+- **input**:
+>Base64-encoded PCAP or PCAPNG file
+
+- **output**:
+>MISP network attributes, file and email objects, including attachments and hashes
+
+- **references**:
+> - https://github.com/MISP/misp-modules/issues/397
+> - https://www.wireshark.org/docs/man-pages/tshark.html
+
+- **requirements**:
+> - TShark >= 4.0 on the service user's PATH (Debian/Ubuntu: apt install tshark)
+> - PyMISP with email and fileobjects extras (included in misp-modules[all])
+
+-----
+
 #### [ThreadAnalyzer Sandbox Import](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/threatanalyzer_import.py)
 
 Module to import ThreatAnalyzer archive.zip / analysis.json files.
