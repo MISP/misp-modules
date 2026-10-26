@@ -106,7 +106,10 @@ def create_post(request):
     if response.status_code != 201:
         return False
     acknowledgement = response.json()
-    timestamp = acknowledgement.get("timestamp") if isinstance(acknowledgement, dict) else None
+    # The API can return 201 with a timestamp even when some recipients failed.
+    if not isinstance(acknowledgement, dict) or acknowledgement.get("errors"):
+        return False
+    timestamp = acknowledgement.get("timestamp")
     return (
         not isinstance(timestamp, bool)
         and isinstance(timestamp, (int, str))
@@ -129,7 +132,7 @@ def handler(q=False):
     except (KeyError, TypeError, ValueError, TemplateError):
         return {"data": False, "error": "Invalid Signal configuration, workflow data, template or API response."}
     if not success:
-        return {"data": False, "error": "Signal message was not acknowledged by the API service."}
+        return {"data": False, "error": "Signal send was not fully acknowledged by the API service."}
     return {"data": True}
 
 

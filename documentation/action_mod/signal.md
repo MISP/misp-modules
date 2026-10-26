@@ -24,9 +24,11 @@ present, including an empty value; otherwise they use `data`. Workflow filters
 are supported. Messages are plain text, so Markdown markers remain literal text.
 
 The action sends `POST /v2/send` with `number`, `recipients` and `message`, using
-a 30-second timeout. Success requires HTTP 201 and a positive `timestamp` in the
-response. This acknowledges the service's send operation, not recipient delivery.
-Errors return `data: false` without exposing phone numbers or the response body.
+a 30-second timeout. Success requires HTTP 201, a positive `timestamp`, and an
+absent or empty `errors` field in the response. Recipient errors, including
+partial failures with a valid timestamp, return `data: false`. A successful
+response acknowledges the service's send operation, not recipient delivery.
+Errors are reported without exposing phone numbers or the response body.
 Requests are not automatically retried; a timeout can leave delivery uncertain.
 Like Mattermost, this action is nonblocking.
 

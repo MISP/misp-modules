@@ -91,6 +91,29 @@ def test_timestamp_formats(transport, timestamp):
     assert signal.handler(json.dumps(workflow())) == {"data": True}
 
 
+@pytest.mark.parametrize(
+    "errors",
+    [
+        {"+33123456780": "private recipient failure"},
+        {"group.YWJjZA==": {"+33123456780": "private recipient failure"}},
+        ["private recipient failure"],
+    ],
+)
+def test_recipient_errors_fail_even_with_a_valid_timestamp(transport, errors):
+    transport.body = {"timestamp": "1690000000000", "errors": errors}
+    result = signal.handler(json.dumps(workflow()))
+    assert result["data"] is False and "error" in result
+    assert "+33123456780" not in json.dumps(result)
+    assert "private recipient failure" not in json.dumps(result)
+    assert len(transport.calls) == 1
+
+
+@pytest.mark.parametrize("errors", [{}, [], None])
+def test_empty_recipient_errors_allow_success(transport, errors):
+    transport.body = {"timestamp": "1690000000000", "errors": errors}
+    assert signal.handler(json.dumps(workflow())) == {"data": True}
+
+
 @pytest.mark.parametrize("error", [requests.Timeout("private response"), requests.ConnectionError("private response")])
 def test_transport_errors_are_sanitized_without_retry(transport, error):
     transport.error = error
