@@ -27,6 +27,28 @@ Create and renew module-owned Falcon custom IOCs from MISP event and object attr
 
 -----
 
+#### [IRC](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/action_mod/irc.py)
+
+Send a message to an IRC channel.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/action_mod/irc.py)]
+
+- **features**:
+>Renders Jinja2 templates using matchingData when present, otherwise data, with a JSON fallback. Supports verified TLS, server passwords and channel keys. Splits multiline and long UTF-8 messages into IRC PRIVMSG lines. See the [usage guide](https://github.com/MISP/misp-modules/blob/main/documentation/action_mod/irc.md).
+
+- **config**:
+>{'params': {'irc_server': {'type': 'string', 'description': 'IRC server hostname', 'value': 'irc.example.org'}, 'irc_port': {'type': 'string', 'description': 'IRC server port', 'value': '6697'}, 'use_tls': {'type': 'string', 'description': 'true for verified TLS, false for a plaintext connection', 'value': 'true'}, 'nickname': {'type': 'string', 'description': 'Nickname for this connection', 'value': 'misp'}, 'channel': {'type': 'string', 'description': 'IRC channel to join', 'value': '#misp'}, 'server_password': {'type': 'string', 'description': 'Optional server PASS password', 'value': ''}, 'channel_key': {'type': 'string', 'description': 'Optional channel JOIN key', 'value': ''}, 'message_template': {'type': 'large_string', 'description': 'Jinja2 message template; leave empty to send the workflow data as JSON', 'value': 'MISP event: {{ Event.info }}', 'jinja_supported': True}}, 'blocking': False, 'support_filters': True, 'expect_misp_core_format': False}
+
+- **input**:
+>Workflow data or matchingData, and an optional Jinja2 message template.
+
+- **output**:
+>Boolean success after server processing; IRC provides no recipient delivery receipt.
+
+- **references**:
+>https://modern.ircdocs.horse/
+
+-----
+
 #### [Matrix](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/action_mod/matrix.py)
 
 Send a message to an unencrypted Matrix room.
@@ -155,6 +177,32 @@ Publish MISP event and object indicators to SentinelOne Threat Intelligence with
 - **requirements**:
 > - requests
 > - SentinelOne Threat Intelligence.view and Threat Intelligence.manage permissions
+
+-----
+
+#### [Signal](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/action_mod/signal.py)
+
+Send a message to Signal recipients or a group through signal-cli-rest-api.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/action_mod/signal.py)]
+
+- **features**:
+>Renders Jinja2 templates using matchingData when present, otherwise data, with a JSON fallback. Sends plain-text messages through POST /v2/send. See the [usage guide](https://github.com/MISP/misp-modules/blob/main/documentation/action_mod/signal.md).
+
+- **config**:
+>{'params': {'signal_api_url': {'type': 'string', 'description': 'Base URL of your signal-cli-rest-api service, including any proxy path prefix', 'value': 'http://localhost:8080'}, 'sender_number': {'type': 'string', 'description': 'Registered or linked Signal account number in international format, e.g. +33123456789'}, 'recipients': {'type': 'string', 'description': 'Comma-separated international phone numbers or signal-cli-rest-api group IDs (group.…)'}, 'message_template': {'type': 'large_string', 'description': 'Jinja2 message template; leave empty to send the workflow data as JSON', 'value': 'MISP event: {{ Event.info }}', 'jinja_supported': True}}, 'blocking': False, 'support_filters': True, 'expect_misp_core_format': False}
+
+- **input**:
+>Workflow data or matchingData, and an optional Jinja2 message template.
+
+- **output**:
+>Boolean success; errors indicate an unsuccessful or unacknowledged send.
+
+- **references**:
+>https://github.com/bbernhard/signal-cli-rest-api
+
+- **requirements**:
+> - requests
+> - A configured signal-cli-rest-api service with a registered or linked account
 
 -----
 
