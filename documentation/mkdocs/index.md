@@ -198,12 +198,14 @@ For more information: [Extending MISP with Python modules](https://www.misp-proj
 
 ### Action Modules
 * [CrowdStrike IOC Publish](https://misp.github.io/misp-modules/action_mod/#crowdstrike-ioc-publish) - Create and renew module-owned Falcon custom IOCs from MISP event and object attributes.
+* [IRC](https://misp.github.io/misp-modules/action_mod/#irc) - Send a message to an IRC channel.
 * [Matrix](https://misp.github.io/misp-modules/action_mod/#matrix) - Send a message to an unencrypted Matrix room.
 * [Mattermost](https://misp.github.io/misp-modules/action_mod/#mattermost) - Simplistic module to send message to a Mattermost channel.
 * [Nextcloud talk](https://misp.github.io/misp-modules/action_mod/#nextcloud-talk) - Simplistic module to send a message to a Nextcloud talk conversation.
 * [OSQuery Pack Publish](https://misp.github.io/misp-modules/action_mod/#osquery-pack-publish) - Publish a MISP query pack to a configured local osquery pack directory.
 * [QRadar Reference Set Publish](https://misp.github.io/misp-modules/action_mod/#qradar-reference-set-publish) - Publish typed MISP indicators to an existing QRadar reference set and explicit domain.
 * [SentinelOne IOC Publish](https://misp.github.io/misp-modules/action_mod/#sentinelone-ioc-publish) - Publish MISP event and object indicators to SentinelOne Threat Intelligence with explicit scope.
+* [Signal](https://misp.github.io/misp-modules/action_mod/#signal) - Send a message to Signal recipients or a group through signal-cli-rest-api.
 * [Slack](https://misp.github.io/misp-modules/action_mod/#slack) - Simplistic module to send messages to a Slack channel.
 * [Test action](https://misp.github.io/misp-modules/action_mod/#test-action) - This module is merely a test, always returning true. Triggers on event publishing.
 * [Wazuh CDB Publish](https://misp.github.io/misp-modules/action_mod/#wazuh-cdb-publish) - Upload MISP event and object indicators to an explicitly named Wazuh CDB source list.
