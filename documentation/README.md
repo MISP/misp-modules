@@ -2939,6 +2939,37 @@ Look up an IOC in TweetFeed (tweetfeed.live), the free CC0 feed of URLs, domains
 
 -----
 
+#### [URL Shortener Resolver](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/url_shortener.py)
+
+Resolve known HTTP(S) URL shorteners into a shortened-link object.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/url_shortener.py)]
+
+- **features**:
+>Resolve known shorteners and optional additional_shorteners (comma-separated exact hostnames). Follow at most max_redirects HTTP redirects (default 10, maximum 20), using HEAD with streamed GET fallback on HTTP 405/501. timeout is per request (default 10 seconds, maximum 30); DNS uses the system resolver. Every hop must resolve exclusively to public addresses on ports 80/443. Connections are pinned to a validated address with TLS hostname verification. Return the original attribute and a shortened-link object with the final destination and ordered redirect history. No API key, proxy, browser, JavaScript or HTML redirect processing is used. Generated attributes have to_ids=false.
+
+- **config**:
+> - additional_shorteners
+> - max_redirects
+> - timeout
+
+- **input**:
+>A URL attribute containing type, value and UUID.
+
+- **output**:
+>A shortened-link object referencing the original URL attribute.
+
+- **references**:
+> - https://github.com/MISP/misp-modules/issues/260
+> - https://github.com/MISP/misp-objects/blob/main/objects/shortened-link/definition.json
+
+- **requirements**:
+> - urllib3
+> - certifi
+> - PyMISP
+> - Direct outbound HTTP(S) and DNS access
+
+-----
+
 #### [URLhaus Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/urlhaus.py)
 
 <img src=logos/urlhaus.png height=60>

@@ -1,0 +1,79 @@
+{
+  "name": "URL Shortener Resolver",
+  "module": "url_shortener",
+  "module-type": ["expansion"],
+  "description": "Resolve known HTTP(S) URL shorteners into a standard shortened-link object.",
+  "requirements": ["urllib3", "certifi", "PyMISP", "Direct outbound HTTP(S) on ports 80/443 and system DNS resolution"],
+  "references": [
+    "https://github.com/MISP/misp-modules/issues/260",
+    "https://github.com/MISP/misp-objects/blob/main/objects/shortened-link/definition.json"
+  ],
+  "features": [
+    "Match the starting hostname against a built-in exact-match shortener list. Use additional_shorteners for custom or branded domains. Subsequent destinations need not be shorteners.",
+    "Follow HTTP 301, 302, 303, 307 and 308 redirects, including relative and scheme-relative Location headers. Preserve query strings, percent-encode Unicode paths and queries, normalize IDNA hostnames, and inherit fragments when Location omits one.",
+    "Use HEAD; retry with GET only when HEAD returns 405 or 501. Read response headers only and close each response without downloading its body.",
+    "Validate every hop and every fallback request against all DNS answers. Reject non-public, multicast, reserved, IPv4-mapped and mixed public/private answers. Connect to a validated address with the original Host header, TLS hostname verification and CA verification.",
+    "Reject credentials, non-HTTP(S) schemes, nonstandard ports, malformed URLs, redirect loops, missing Location headers and HTTP failures. No partial expansion is returned on failure.",
+    "Preserve the original attribute UUID, comment, tags and to_ids setting. All generated object attributes have to_ids=false."
+  ],
+  "input": {
+    "format": "misp_standard",
+    "types": ["url"],
+    "required_attribute_fields": ["type", "value", "uuid"]
+  },
+  "output": {
+    "format": "misp_standard",
+    "objects": ["shortened-link"],
+    "shortened-url": "The original input URL.",
+    "redirect-url": "The final URL that returned a successful 2xx response after at least one redirect.",
+    "domain": "The normalized starting shortener hostname.",
+    "text": "JSON containing an ordered redirects array, with url, redirect-url, status and method for every hop. Intermediate URLs remain in this history rather than becoming independent indicators.",
+    "reference": "The shortened-link object is derived-from the original URL attribute UUID.",
+    "errors": "Invalid input/configuration, unknown shorteners, no redirect, DNS/network/TLS failures, unsafe destinations, HTTP failures, loops and exhausted limits return an error."
+  },
+  "config": {
+    "additional_shorteners": {
+      "required": false,
+      "default": "",
+      "description": "Comma-separated exact hostnames, for example go.example.org,s.example.net. Hostnames only; no schemes, ports, paths, wildcards or empty entries. Matching is case-insensitive and normalizes IDNA and trailing dots."
+    },
+    "max_redirects": {
+      "required": false,
+      "default": 10,
+      "maximum": 20,
+      "description": "Maximum redirects to follow. Positive integer; accepts MISP configuration strings. Exactly this number of redirects may be followed, plus the final response."
+    },
+    "timeout": {
+      "required": false,
+      "default": 10,
+      "maximum": 30,
+      "description": "Positive integer seconds per HTTP request, including connect/read time. This is not a wall-clock budget for the whole expansion or a bound on system DNS resolution. HEAD fallback may add one request per hop."
+    }
+  },
+  "installation": [
+    "The module is automatically discovered at misp_modules/modules/expansion/url_shortener.py. Its dependencies are already core dependencies of misp-modules; no API key or new Python package is needed.",
+    "Restart misp-modules and enable url_shortener in MISP's Enrichment plugin settings. Expand a URL attribute using its existing UUID.",
+    "Use the existing shortened-link object template (UUID 361c0ae8-68bd-11e8-adc0-fa7ae01bbebc). Update MISP's object templates if it is absent. No new template or change to misp-objects is necessary.",
+    "Outbound connections use validated IPs directly. Deploy with suitable DNS and direct HTTP(S) egress; this module does not use environment proxies or proxy credentials."
+  ],
+  "limitations": [
+    "This performs live requests to the shortener and destination: both can observe the module server's IP address and URL token. It is not passive enrichment.",
+    "JavaScript redirects, HTML meta refresh, authentication flows, cookies, interstitial pages and CAPTCHAs are not processed. A HEAD 2xx response is terminal even if a browser GET would behave differently.",
+    "Shortener services can retire or change behavior; membership in the built-in list does not guarantee availability. Subdomains and www variants require their own exact entry.",
+    "Only the first validated public DNS address is attempted. No retries, alternate-address failover or persistent cookies are used.",
+    "An unknown shortener or a known shortener returning no redirect produces an explanatory error. A destination returning a non-2xx response is not reported as a successfully resolved URL."
+  ],
+  "example": {
+    "module": "url_shortener",
+    "attribute": {
+      "type": "url",
+      "value": "https://bit.ly/example",
+      "uuid": "32876e4a-916d-4935-9e51-7b69a76718f8"
+    },
+    "config": {"max_redirects": "10", "timeout": "10"}
+  },
+  "verification": {
+    "command": "python -m pytest -q tests/test_url_shortener.py tests/test_import_external_reference.py tests/test_webarchive.py",
+    "scope": "Mocked DNS/HTTP responses, strict shortened-link template validation, module discovery, URL handling, source preservation, cleanup, fallback, limits, network errors and public-address enforcement. Live shortener services and a running MISP deployment have not been tested."
+  }
+}
