@@ -7,6 +7,7 @@ from html.parser import HTMLParser
 from io import BytesIO
 from pathlib import Path
 
+from pymisp.exceptions import MISPObjectException
 from pymisp.tools import EMailObject, URLObject, make_binary_objects
 
 misperrors = {"error": "Error"}
@@ -177,7 +178,7 @@ def dict_handler(request: dict):
                 continue
             try:
                 url_object = URLObject(url, standalone=False)
-            except ValueError:
+            except (ValueError, MISPObjectException):
                 continue
             file_objects.append(url_object)
             email_object.add_reference(url_object.uuid, "includes", "URL in email body")

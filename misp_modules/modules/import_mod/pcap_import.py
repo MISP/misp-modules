@@ -7,6 +7,7 @@ import math
 import os
 import shutil
 import subprocess
+import time
 from io import BytesIO
 from pathlib import Path
 from tempfile import TemporaryDirectory
@@ -39,6 +40,8 @@ moduleinfo = {
         " metadata only. Other file-transfer protocols and TLS decryption are not supported. Observed network"
         " attributes have to_ids disabled for analyst review. Captures are limited to 50 MiB, exported data and"
         " JSON metadata to 100 MiB each. timeout is a positive number of seconds, at most 300 (default 60)."
+        " Output sizes, including diagnostics, are checked every 50 ms while TShark runs; exceeding a limit"
+        " kills the process. Bursts can overshoot between checks; these checks are not filesystem quotas."
     ),
     "references": [
         "https://github.com/MISP/misp-modules/issues/397",
@@ -50,6 +53,7 @@ moduleinfo = {
 
 MAX_CAPTURE_SIZE = 50 * 1024 * 1024
 MAX_OUTPUT_SIZE = 100 * 1024 * 1024
+OUTPUT_CHECK_INTERVAL = 0.05
 CAPTURE_MAGICS = {
     b"\xd4\xc3\xb2\xa1",
     b"\xa1\xb2\xc3\xd4",
@@ -136,24 +140,36 @@ def _run_tshark(executable, capture, directory, timeout):
     # Avoid loading the service user's Wireshark profile, keys or personal plugins.
     environment = dict(os.environ, XDG_CONFIG_HOME=str(directory), WIRESHARK_CONFIG_DIR=str(directory))
     report = directory / "packets.json"
-    with report.open("wb") as output, (directory / "stderr.txt").open("wb") as errors:
-        try:
-            process = subprocess.run(
-                command,
-                stdin=subprocess.DEVNULL,
-                stdout=output,
-                stderr=errors,
-                cwd=directory,
-                env=environment,
-                timeout=timeout,
-                check=False,
-            )
-        except subprocess.TimeoutExpired:
-            raise ValueError("TShark exceeded the configured timeout.") from None
+    errors_path = directory / "stderr.txt"
+    with report.open("wb") as output, errors_path.open("wb") as errors:
+        with subprocess.Popen(
+            command,
+            stdin=subprocess.DEVNULL,
+            stdout=output,
+            stderr=errors,
+            cwd=directory,
+            env=environment,
+        ) as process:
+            deadline = time.monotonic() + timeout
+            try:
+                while True:
+                    _check_output_sizes(directory, report, errors_path)
+                    remaining = deadline - time.monotonic()
+                    if remaining <= 0:
+                        raise ValueError("TShark exceeded the configured timeout.")
+                    try:
+                        process.wait(timeout=min(OUTPUT_CHECK_INTERVAL, remaining))
+                        break
+                    except subprocess.TimeoutExpired:
+                        continue
+                # Fast writers may finish between checks, so validate once more before reading any output.
+                _check_output_sizes(directory, report, errors_path)
+            finally:
+                if process.poll() is None:
+                    process.kill()
+                process.wait()
     if process.returncode:
         raise ValueError("TShark could not read the capture. Check that it is complete and TShark >= 4.0 is installed.")
-    if report.stat().st_size > MAX_OUTPUT_SIZE:
-        raise ValueError("The capture's JSON metadata exceeds the 100 MiB limit.")
     try:
         packets = json.loads(report.read_bytes())
     except ValueError:
@@ -161,6 +177,26 @@ def _run_tshark(executable, capture, directory, timeout):
     if not isinstance(packets, list):
         raise ValueError("TShark returned invalid packet metadata.")
     return packets
+
+
+def _check_output_sizes(directory, report, errors):
+    # Poll during extraction: a small compressed capture can expand to large files.
+    # Writers may overshoot between checks; this is monitoring, not a filesystem quota.
+    if report.stat().st_size > MAX_OUTPUT_SIZE:
+        raise ValueError("The capture's JSON metadata exceeds the 100 MiB limit.")
+    if errors.stat().st_size > MAX_OUTPUT_SIZE:
+        raise ValueError("TShark's diagnostic output exceeds the 100 MiB limit.")
+    exported_size = 0
+    for protocol in ("http", "imf"):
+        folder = directory / protocol
+        if not folder.exists():
+            continue
+        with os.scandir(folder) as entries:
+            for entry in entries:
+                if entry.is_file(follow_symlinks=False):
+                    exported_size += entry.stat(follow_symlinks=False).st_size
+                    if exported_size > MAX_OUTPUT_SIZE:
+                        raise ValueError("The capture's exported files exceed the 100 MiB limit.")
 
 
 def _network_attributes(event, packets):

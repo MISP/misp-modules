@@ -1,12 +1,14 @@
 """Small synthetic captures exercise the real dissector, without live traffic."""
 
 import base64
+import gzip
 import hashlib
 import ipaddress
 import json
 import shutil
 import struct
 import subprocess
+import sys
 from email.message import EmailMessage
 
 import pytest
@@ -146,6 +148,20 @@ def test_http_file_reassembly(tshark, out_of_order):
     assert base64.b64decode(_relation(files[0], "malware-sample")[0]["data"]) == body
 
 
+def test_compressed_http_export_limit(tshark, monkeypatch):
+    tcp = _TCP(80)
+    tcp.send(b"GET /compressed.bin HTTP/1.1\r\nHost: example.test\r\n\r\n")
+    body = gzip.compress(b"x" * (256 * 1024))
+    response = b"HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Encoding: gzip\r\n"
+    response += b"Content-Length: " + str(len(body)).encode() + b"\r\n\r\n" + body
+    tcp.send(response, server=True)
+    capture = _pcap(tcp.frames)
+    assert len(capture) < 4096
+    monkeypatch.setattr(pcap_import, "MAX_OUTPUT_SIZE", 64 * 1024)
+    result = pcap_import.handler(_request(capture))
+    assert "exported files exceed" in result["error"]
+
+
 def test_smtp_email_and_attachment_reassembly(tshark):
     message = EmailMessage()
     message["From"] = "sender@example.test"
@@ -221,19 +237,90 @@ def test_size_limit(monkeypatch):
     assert "50 MiB" in pcap_import.handler(_request(_pcap([])))["error"]
 
 
-def test_tshark_timeout_and_cleanup(monkeypatch):
-    paths = []
+@pytest.fixture
+def fake_tshark(monkeypatch):
+    """Use a real child process to verify termination, reaping and cleanup."""
+    popen = subprocess.Popen
+    children = []
 
-    def run(command, **kwargs):
-        paths.append(kwargs["cwd"])
-        assert kwargs["stdin"] == subprocess.DEVNULL
-        assert "-n" in command and "-r" in command
-        raise subprocess.TimeoutExpired(command, kwargs["timeout"])
+    def launch(script):
+        def start(command, **kwargs):
+            assert kwargs["stdin"] == subprocess.DEVNULL
+            assert "-n" in command and "-r" in command
+            child = popen([sys.executable, "-c", script], **kwargs)
+            children.append((child, kwargs["cwd"]))
+            return child
 
-    monkeypatch.setattr(pcap_import.shutil, "which", lambda _: "/usr/bin/tshark")
-    monkeypatch.setattr(pcap_import.subprocess, "run", run)
-    assert "timeout" in pcap_import.handler(_request(_pcap([])))["error"]
-    assert paths and not paths[0].exists()
+        monkeypatch.setattr(pcap_import.shutil, "which", lambda _: sys.executable)
+        monkeypatch.setattr(pcap_import.subprocess, "Popen", start)
+        return children
+
+    return launch
+
+
+def test_tshark_timeout_and_cleanup(fake_tshark):
+    children = fake_tshark("import time\nwhile True: time.sleep(0.01)")
+    result = pcap_import.handler(_request(_pcap([]), timeout=0.1))
+    assert "timeout" in result["error"]
+    assert len(children) == 1
+    child, directory = children[0]
+    assert child.returncode is not None and child.returncode != 0
+    assert not directory.exists()
+
+
+@pytest.mark.parametrize("output", ["metadata", "http", "imf", "aggregate", "diagnostics"])
+def test_live_output_limit_stops_tshark_and_cleans_up(fake_tshark, monkeypatch, output):
+    monkeypatch.setattr(pcap_import, "MAX_OUTPUT_SIZE", 4096)
+    setup = {
+        "metadata": "os.write(1, b'x' * 8192)",
+        "diagnostics": "os.write(2, b'x' * 8192)",
+        "http": "Path('http').mkdir(); Path('http/download').write_bytes(b'x' * 8192)",
+        "imf": "Path('imf').mkdir(); Path('imf/message').write_bytes(b'x' * 8192)",
+        # Each file is below the cap; their combined size crosses the shared export limit.
+        "aggregate": (
+            "Path('http').mkdir(); Path('imf').mkdir(); "
+            "Path('http/one').write_bytes(b'x' * 3072); Path('imf/two').write_bytes(b'x' * 3072)"
+        ),
+    }[output]
+    children = fake_tshark(f"import os, time\nfrom pathlib import Path\n{setup}\nwhile True: time.sleep(0.01)")
+    result = pcap_import.handler(_request(_pcap([]), timeout=3))
+    assert "100 MiB limit" in result["error"]
+    assert "timeout" not in result["error"]
+    child, directory = children[0]
+    assert child.returncode is not None and child.returncode != 0
+    assert not directory.exists()
+
+
+def test_output_limit_checked_after_fast_writer_exits(fake_tshark, monkeypatch):
+    monkeypatch.setattr(pcap_import, "MAX_OUTPUT_SIZE", 4096)
+    children = fake_tshark("import os\nos.write(1, b'x' * 8192)")
+    result = pcap_import.handler(_request(_pcap([])))
+    assert "JSON metadata exceeds" in result["error"]
+    assert not children[0][1].exists()
+
+
+@pytest.mark.parametrize("malformed", ["http://example[.]com", "http://:"])
+def test_email_skips_invalid_urls_and_keeps_other_objects(malformed):
+    message = EmailMessage()
+    message["From"] = "sender@example.test"
+    message["To"] = "recipient@example.test"
+    message["Subject"] = "URL parser errors"
+    message.set_content(f"{malformed}\nhttps://valid.example.test/path?one=two#part\n")
+    message.add_attachment(b"evidence", maintype="application", subtype="octet-stream", filename="evidence.bin")
+    result = pcap_import.email_import.dict_handler(
+        {
+            "data": base64.b64encode(message.as_bytes()).decode(),
+            "config": {"extract_urls": "true"},
+        }
+    )
+    emails = _objects(result, "email")
+    assert len(emails) == 1
+    assert _relation(emails[0], "subject")[0]["value"] == "URL parser errors"
+    assert len(_objects(result, "file")) == 1
+    urls = _objects(result, "url")
+    assert len(urls) == 1
+    assert _relation(urls[0], "url")[0]["value"] == "https://valid.example.test/path?one=two#part"
+    assert any(ref["referenced_uuid"] == urls[0]["uuid"] for ref in emails[0]["ObjectReference"])
 
 
 def test_truncated_capture(tshark):
