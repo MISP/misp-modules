@@ -164,6 +164,60 @@ def test_idna_and_fragment_inheritance(network):
     assert network.pools[-1].urlopen.call_args.args[1] == "/%C3%A4?q=%C3%B6"
 
 
+@pytest.mark.parametrize(
+    "hostname,expected",
+    [
+        ("faß.de", "xn--fa-hia.de"),
+        ("FAẞ.DE.", "xn--fa-hia.de"),
+        ("βόλος.gr", "xn--nxasmm1c.gr"),
+        ("ＦＡＳＳ.de", "fass.de"),
+    ],
+)
+@pytest.mark.parametrize("custom_shortener", [False, True])
+def test_uts46_hostnames_used_consistently_for_dns_host_and_tls(network, hostname, expected, custom_shortener):
+    target = f"https://{hostname}/article"
+    network.replies((302, DESTINATION if custom_shortener else target), (200, None))
+    if custom_shortener:
+        result = module.handler(query(target, config={"additional_shorteners": hostname}))
+        hop = 0
+        assert values(result)["domain"] == expected
+        assert values(result)["shortened-url"] == target
+    else:
+        result = module.handler(query())
+        hop = 1
+        assert values(result)["redirect-url"] == f"https://{expected}/article"
+    assert "results" in result, result
+    assert network.resolver.call_args_list[hop].args == (expected, 443)
+    assert network.https.call_args_list[hop].kwargs["server_hostname"] == expected
+    assert network.https.call_args_list[hop].kwargs["assert_hostname"] == expected
+    assert network.pools[hop].urlopen.call_args.kwargs["headers"]["Host"] == expected
+
+
+def test_uts46_allowlist_does_not_confuse_sharp_s_with_ss(network):
+    result = module.handler(query("https://faß.de/id", config={"additional_shorteners": "fass.de"}))
+    assert "Unknown URL shortener" in result["error"]
+    network.resolver.assert_not_called()
+
+
+@pytest.mark.parametrize("hostname", ["fa\u200dss.de", "fa\u200css.de", "xn--.example"])
+@pytest.mark.parametrize("source", ["url", "config", "redirect"])
+def test_invalid_idna_labels_rejected_before_dns(network, hostname, source):
+    if source == "redirect":
+        replies = network.replies((302, f"https://{hostname}/article"))
+        result = module.handler(query())
+        assert network.resolver.call_count == len(network.pools) == 1
+        assert_closed(network, replies)
+    else:
+        # Exercise the URL and configured allowlist separately so neither path
+        # can silently discard a joiner or accept an invalid A-label.
+        url = f"https://{hostname}/id" if source == "url" else SHORT_URL
+        config = {"additional_shorteners": hostname} if source == "config" else None
+        result = module.handler(query(url, config=config))
+        network.resolver.assert_not_called()
+    assert "error" in result
+    assert "results" not in result
+
+
 def test_explicit_fragment_replaces_original(network):
     network.replies((302, DESTINATION + "#new"), (200, None))
     assert values(module.handler(query(SHORT_URL + "#old")))["redirect-url"] == DESTINATION + "#new"

@@ -3466,7 +3466,7 @@ description = "Low-level, pure Python DBus protocol wrapper."
 optional = true
 python-versions = ">=3.7"
 groups = ["main"]
-markers = "sys_platform == \"linux\" and extra == \"all\""
+markers = "extra == \"all\" and sys_platform == \"linux\""
 files = [
     {file = "jeepney-0.9.0-py3-none-any.whl", hash = "sha256:97e5714520c16fc0a45695e5365a2e11b81ea79bba796e26f9f1d178cb182683"},
     {file = "jeepney-0.9.0.tar.gz", hash = "sha256:cf0e9e845622b81e4a28df94c40345400256ec608d0e55bb8a3feaa9163f5732"},
@@ -4826,7 +4826,7 @@ description = "Python tool and library for decrypting and encrypting MS Office f
 optional = true
 python-versions = "<4.0,>=3.10"
 groups = ["main"]
-markers = "(platform_python_implementation != \"PyPy\" or platform_system != \"Windows\" and platform_system != \"Darwin\") and extra == \"all\""
+markers = "extra == \"all\" and (platform_python_implementation != \"PyPy\" or platform_system != \"Windows\" and platform_system != \"Darwin\")"
 files = [
     {file = "msoffcrypto_tool-6.0.0-py3-none-any.whl", hash = "sha256:46c394ed5d9641e802fc79bf3fb0666a53748b23fa8c4aa634ae9d30d46fe397"},
     {file = "msoffcrypto_tool-6.0.0.tar.gz", hash = "sha256:9a5ebc4c0096b42e5d7ebc2350afdc92dc511061e935ca188468094fdd032bbe"},
@@ -6693,7 +6693,7 @@ description = "C parser in Python"
 optional = false
 python-versions = ">=3.11"
 groups = ["main"]
-markers = "python_version >= \"3.11\" and implementation_name != \"PyPy\" and (platform_python_implementation != \"CPython\" or extra == \"all\")"
+markers = "(platform_python_implementation != \"CPython\" or extra == \"all\") and implementation_name != \"PyPy\" and python_version >= \"3.11\""
 files = [
     {file = "pycparser-3.12-py3-none-any.whl", hash = "sha256:a076f3f489b39b43ed13563a1dafe42447445bec2e294154ec5c57fcdda4c85e"},
     {file = "pycparser-3.12.tar.gz", hash = "sha256:f03387877eab82ce01bbdfd0ba7252ee55a90b1c708d5129e2ce915475cf1db6"},
@@ -7560,7 +7560,7 @@ description = "A (partial) reimplementation of pywin32 using ctypes/cffi"
 optional = true
 python-versions = ">=3.6"
 groups = ["main"]
-markers = "sys_platform == \"win32\" and extra == \"all\""
+markers = "extra == \"all\" and sys_platform == \"win32\""
 files = [
     {file = "pywin32-ctypes-0.2.3.tar.gz", hash = "sha256:d162dc04946d704503b2edc4d55f3dba5c1d539ead017afa00142c38b9885755"},
     {file = "pywin32_ctypes-0.2.3-py3-none-any.whl", hash = "sha256:8a1513379d709975552d202d942d9837758905c8d01eb82b8bcc30918929e7b8"},
@@ -8196,7 +8196,7 @@ description = "Python bindings to FreeDesktop.org Secret Service API"
 optional = true
 python-versions = ">=3.10"
 groups = ["main"]
-markers = "sys_platform == \"linux\" and extra == \"all\""
+markers = "extra == \"all\" and sys_platform == \"linux\""
 files = [
     {file = "secretstorage-3.5.0-py3-none-any.whl", hash = "sha256:0ce65888c0725fcb2c5bc0fdb8e5438eece02c523557ea40ce0703c266248137"},
     {file = "secretstorage-3.5.0.tar.gz", hash = "sha256:f04b8e4689cbce351744d5537bf6b1329c6fc68f91fa666f60a380edddcd11be"},
@@ -9775,7 +9775,7 @@ description = "Enable Unicode input and display when running Python from Windows
 optional = true
 python-versions = "*"
 groups = ["main"]
-markers = "platform_python_implementation != \"PyPy\" and extra == \"all\" and platform_system == \"Windows\""
+markers = "platform_system == \"Windows\" and platform_python_implementation != \"PyPy\" and extra == \"all\""
 files = [
     {file = "win_unicode_console-0.5.zip", hash = "sha256:d4142d4d56d46f449d6f00536a73625a871cba040f0bc1a2e305a04578f07d1e"},
 ]
@@ -10327,4 +10327,4 @@ minimal = ["backscatter", "blockchain", "censys", "clamd", "crowdstrike-falconpy
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10,<4.0"
-content-hash = "33b3ec8ca58f3db81d69ba1cf45d95e986686d3c6b9e4327d02a8692a3a14e9e"
+content-hash = "84f726cffc9cdbf4ce78a4496ebf95b3596a67205452e151bd86df1645614c6b"

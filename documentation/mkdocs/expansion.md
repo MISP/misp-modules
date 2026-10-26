@@ -3244,6 +3244,7 @@ Resolve known HTTP(S) URL shorteners into a shortened-link object.
 - **requirements**:
 > - urllib3
 > - certifi
+> - idna
 > - PyMISP
 > - Direct outbound HTTP(S) and DNS access
 

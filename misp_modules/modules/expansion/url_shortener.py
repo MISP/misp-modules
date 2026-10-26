@@ -9,6 +9,7 @@ from urllib.parse import quote, urljoin, urlsplit, urlunsplit
 from uuid import UUID
 
 import certifi
+import idna
 import urllib3
 from pymisp import MISPAttribute, MISPEvent, MISPObject
 from pymisp.exceptions import PyMISPError
@@ -24,7 +25,7 @@ moduleinfo = {
     "description": "Resolve known HTTP(S) URL shorteners into a shortened-link object.",
     "module-type": ["expansion"],
     "logo": "",
-    "requirements": ["urllib3", "certifi", "PyMISP", "Direct outbound HTTP(S) and DNS access"],
+    "requirements": ["urllib3", "certifi", "idna", "PyMISP", "Direct outbound HTTP(S) and DNS access"],
     "features": (
         "Resolve known shorteners and optional additional_shorteners (comma-separated exact hostnames). Follow"
         " at most max_redirects HTTP redirects (default 10, maximum 20), using HEAD with streamed GET fallback"
@@ -76,7 +77,9 @@ REDIRECT_STATUSES = {301, 302, 303, 307, 308}
 
 
 def _hostname(value):
-    host = value.encode("idna").decode("ascii").lower().rstrip(".")
+    # Non-transitional UTS #46 preserves IDNA2008 characters such as sharp s and
+    # validates contextual joiners instead of silently dropping them (IDNA2003).
+    host = idna.encode(value, uts46=True, std3_rules=True, transitional=False).decode("ascii").rstrip(".")
     if len(host) > 253 or not all(
         re.fullmatch(r"[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?", label) for label in host.split(".")
     ):

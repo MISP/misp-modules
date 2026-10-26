@@ -3,14 +3,14 @@
   "module": "url_shortener",
   "module-type": ["expansion"],
   "description": "Resolve known HTTP(S) URL shorteners into a standard shortened-link object.",
-  "requirements": ["urllib3", "certifi", "PyMISP", "Direct outbound HTTP(S) on ports 80/443 and system DNS resolution"],
+  "requirements": ["urllib3", "certifi", "idna>=3.10,<4", "PyMISP", "Direct outbound HTTP(S) on ports 80/443 and system DNS resolution"],
   "references": [
     "https://github.com/MISP/misp-modules/issues/260",
     "https://github.com/MISP/misp-objects/blob/main/objects/shortened-link/definition.json"
   ],
   "features": [
     "Match the starting hostname against a built-in exact-match shortener list. Use additional_shorteners for custom or branded domains. Subsequent destinations need not be shorteners.",
-    "Follow HTTP 301, 302, 303, 307 and 308 redirects, including relative and scheme-relative Location headers. Preserve query strings, percent-encode Unicode paths and queries, normalize IDNA hostnames, and inherit fragments when Location omits one.",
+    "Follow HTTP 301, 302, 303, 307 and 308 redirects, including relative and scheme-relative Location headers. Preserve query strings, percent-encode Unicode paths and queries, normalize hostnames using non-transitional IDNA2008/UTS #46 with strict label validation, and inherit fragments when Location omits one.",
     "Use HEAD; retry with GET only when HEAD returns 405 or 501. Read response headers only and close each response without downloading its body.",
     "Validate every hop and every fallback request against all DNS answers. Reject non-public, multicast, reserved, IPv4-mapped and mixed public/private answers. Connect to a validated address with the original Host header, TLS hostname verification and CA verification.",
     "Reject credentials, non-HTTP(S) schemes, nonstandard ports, malformed URLs, redirect loops, missing Location headers and HTTP failures. No partial expansion is returned on failure.",
