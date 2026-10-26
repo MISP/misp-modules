@@ -254,6 +254,7 @@ For further Information see the [license file](https://misp.github.io/misp-modul
 * [MISP JSON Import](https://misp.github.io/misp-modules/import_mod/#misp-json-import) - Module to import MISP JSON format for merging MISP events.
 * [OCR Import](https://misp.github.io/misp-modules/import_mod/#ocr-import) - Optical Character Recognition (OCR) module for MISP.
 * [OpenIOC Import](https://misp.github.io/misp-modules/import_mod/#openioc-import) - Module to import OpenIOC packages.
+* [PCAP Import](https://misp.github.io/misp-modules/import_mod/#pcap-import) - Import a PCAP or PCAPNG capture, including reassembled files, emails and network indicators.
 * [TAXII 2.1 Import](https://misp.github.io/misp-modules/import_mod/#taxii-2.1-import) - Import content from a TAXII 2.1 server
 * [CSV Test Import](https://misp.github.io/misp-modules/import_mod/#csv-test-import) - Simple CSV import tool with mapable columns
 * [ThreadAnalyzer Sandbox Import](https://misp.github.io/misp-modules/import_mod/#threadanalyzer-sandbox-import) - Module to import ThreatAnalyzer archive.zip / analysis.json files.
