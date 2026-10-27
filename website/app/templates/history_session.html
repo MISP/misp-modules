@@ -1,92 +1,129 @@
 <!-- 
     Author: David Cruciani
 -->
-
-{% extends 'base.html' %}
-
+{% extends "base.html" %}
+{% block title %}{{ 'Investigation trees' if tree_view else 'Session history' }} · MISP Modules{% endblock %}
 {% block content %}
-    <input hidden value="{{tree_view}}" id="tree_view">
-    <h1 id="top">History</h1>
-    <small v-if="!tree_view"><i>All histories present here will be delete at the end of the session</i></small>
-    <hr>
-    
-    <template v-if="Object.keys(history).length">
-        <div v-for="his, key in history" style="background-color: white; border: 1px solid #808080a1; border-radius: 8px; padding: 10px; margin-top: 17px;">
-            <div class="d-flex w-100 justify-content-between">
-                <h4># [[key + 1]]</h4>
-                <button v-if="!tree_view" class="btn btn-primary btn-sm" @click="save_history(his)">Save</button>
-            </div>
-            <hr>
-            <div style="display: flex;">
-                <a style="padding: 10px; font-size: large; color: black;" v-if="'children' in his && his['children'].length" data-bs-toggle="collapse" :href="'#collapseChild-'+his.uuid" aria-expanded="true" :aria-controls="'collapseChild-'+his.uuid">
-                    <i class="fa-solid fa-caret-down"></i>
-                </a>
-                <a style="text-decoration: none; color: black;" data-bs-toggle="collapse" :href="'#collapse'+his.uuid" role="button" aria-expanded="false" :aria-controls="'collapse'+his.uuid">
-                    <ul class="list-group list-group-horizontal">
-                        <li class="list-group-item">
-                            <h4>[[his.query.join(", ")]]</h4>
-                        </li>
-                        <li class="list-group-item">
-                            <h5 style="color: brown"><u>Input Attributes</u></h5>
-                            [[his.input]]
-                        </li>
-                        <li class="list-group-item">
-                            <h5 style="color: brown"><u>Modules</u></h5>
-                            [[his.modules.join(", ")]]
-                        </li>
-                    </ul>
-                </a>
-                <div style="display: flex; align-items: center; margin-left: 3px">
-                    <button v-if="!tree_view" class="btn btn-danger btn-sm" title="Remove this node" @click="remove_node(his, key)"><i class="fa-solid fa-trash"></i></button>
-                    <button v-else class="btn btn-danger btn-sm" title="Remove this node" @click="remove_node_tree(his, key)"><i class="fa-solid fa-trash"></i></button>
-                </div>
-            </div>
+    <div class="session-history">
+        <input hidden value="{{ tree_view }}" id="tree_view">
+        <div class="page-heading" id="top">
             <div>
-                <div class="collapse" :id="'collapse'+his.uuid" style="width: 70%; margin-left:30px">
-                    <div class="card card-body">
-                        <div class="d-flex w-100 justify-content-between">
-                            <h5 class="mb-1">[[his.query.join(", ")]]</h5>
-                            <small><i>[[his.uuid]]</i></small>
-                        </div>
-                        <p class="mb-1" style="color: green;"><u>Input Attribute</u>:</p>
-                        <div>[[his.input]]</div>
-                        <br>
-                        <p class="mb-1" style="color: #2000ff;"><u>Modules</u>:</p>
-                        <div>
-                            [[his.modules.join(", ")]]
-                        </div>
-                        <div></div>
-                        <div class="d-flex w-100 justify-content-between">
-                            <div><a :href="'/query/'+his.uuid">See results</a></div>
-                            <small><i>[[his.query_date]]</i></small>
-                        </div>
+                <p class="eyebrow">FOLLOW THE CONNECTIONS</p>
+                <h1>{{ 'Investigation trees' if tree_view else 'Session history' }}</h1>
+                <p class="page-description">{{ 'Explore your saved investigation paths.' if tree_view else 'Your current investigation paths. Save a tree to keep it after this session ends.' }}</p>
+            </div>
+            <a href="/" class="btn btn-primary">New enrichment</a>
+        </div>
+        <template v-if="Object.keys(history).length">
+            <div v-for="his, key in history"
+                 style="background-color: var(--misp-surface);
+                        border: 1px solid var(--misp-border);
+                        border-radius: var(--misp-radius);
+                        padding: 20px;
+                        margin-top: 17px">
+                <div class="d-flex w-100 justify-content-between">
+                    <h4># [[key + 1]]</h4>
+                    <button v-if="!tree_view"
+                            class="btn btn-primary btn-sm"
+                            @click="save_history(his)">Save</button>
+                </div>
+                <hr>
+                <div style="display: flex;">
+                    <a style="padding: 10px;
+                              font-size: large;
+                              color: black"
+                       v-if="'children' in his && his['children'].length"
+                       data-bs-toggle="collapse"
+                       :href="'#collapseChild-'+his.uuid"
+                       aria-expanded="true"
+                       :aria-controls="'collapseChild-'+his.uuid">
+                        <i class="fa-solid fa-caret-down"></i>
+                    </a>
+                    <a style="text-decoration: none;
+                              color: black"
+                       data-bs-toggle="collapse"
+                       :href="'#collapse'+his.uuid"
+                       role="button"
+                       aria-expanded="false"
+                       :aria-controls="'collapse'+his.uuid">
+                        <ul class="list-group list-group-horizontal">
+                            <li class="list-group-item">
+                                <h4>[[his.query.join(", ")]]</h4>
+                            </li>
+                            <li class="list-group-item">
+                                <h5 style="color: brown"><u>Input Attributes</u></h5>
+                                [[his.input]]
+                            </li>
+                            <li class="list-group-item">
+                                <h5 style="color: brown"><u>Modules</u></h5>
+                                [[his.modules.join(", ")]]
+                            </li>
+                        </ul>
+                    </a>
+                    <div style="display: flex; align-items: center; margin-left: 3px">
+                        <button v-if="!tree_view"
+                                class="btn btn-danger btn-sm"
+                                title="Remove this node"
+                                @click="remove_node(his, key)">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                        <button v-else
+                                class="btn btn-danger btn-sm"
+                                title="Remove this node"
+                                @click="remove_node_tree(his, key)">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
                     </div>
                 </div>
-
-                <div class="collapse show" :id="'collapseChild-'+his.uuid">
-                    <ul style="list-style-type: none;">
-                        <li>
-                            <div class="card-body">
-                                <template v-for="h, key_loop in his['children']">
-                                    <history_view :history="h" :key_loop="key_loop" :tree_view="tree_view" @delete_node="(msg) => change_tree(his, key)"/>
-                                </template>
+                <div>
+                    <div class="collapse"
+                         :id="'collapse'+his.uuid"
+                         style="width: 70%;
+                                margin-left:30px">
+                        <div class="card card-body">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h5 class="mb-1">[[his.query.join(", ")]]</h5>
+                                <small><i>[[his.uuid]]</i></small>
                             </div>
-                        </li>
-                    </ul>
+                            <p class="mb-1" style="color: green;"><u>Input Attribute</u>:</p>
+                            <div>[[his.input]]</div>
+                            <br>
+                            <p class="mb-1" style="color: #2000ff;"><u>Modules</u>:</p>
+                            <div>[[his.modules.join(", ")]]</div>
+                            <div></div>
+                            <div class="d-flex w-100 justify-content-between">
+                                <div><a :href="'/query/'+his.uuid">See results</a></div>
+                                <small><i>[[his.query_date]]</i></small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="collapse show" :id="'collapseChild-'+his.uuid">
+                        <ul style="list-style-type: none;">
+                            <li>
+                                <div class="card-body">
+                                    <template v-for="h, key_loop in his['children']">
+                                        <history_view :history="h" :key_loop="key_loop" :tree_view="tree_view" @delete_node="(msg) => change_tree(his, key)" />
+                                    </template>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
                 </div>
             </div>
+        </template>
+        <div v-else>
+            <div class="workspace-card empty-state">
+                <i class="fa-solid fa-diagram-project" aria-hidden="true"></i>
+                <h2>No investigation paths yet</h2>
+                <p>Run an enrichment to start connecting indicators and results.</p>
+                <a href="/" class="btn btn-outline-secondary">Start an enrichment</a>
+            </div>
         </div>
-    </template>
-
-    <div v-else>
-        <i>No History</i>
+        <span id="goTop">[<a href="#top">Go Back Top</a>]</span>
     </div>
-    
-    <span id="goTop">[<a href="#top">Go Back Top</a>]</span>
 {% endblock %}
-
 {% block script %}
-<script type="module">
+    <script type="module">
     const { createApp, ref, onMounted, nextTick, defineComponent} = Vue
     import {display_toast, message_list} from '/static/js/toaster.js'
     import history_view from '/static/js/history/history_view.js'
@@ -171,5 +208,5 @@
         }
     }).mount('.container-fluid')
 
-</script>
+    </script>
 {% endblock %}

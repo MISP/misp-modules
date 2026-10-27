@@ -1,28 +1,10 @@
-<!DOCTYPE html>
-<html lang="en">
-
-
-    <head>
-        <meta charset="UTF-8" />
-        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Not Found</title>
-        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/vendor/bootstrap.min.css') }}">
-    </head>
-
-
-    <body>
-        <div class="d-flex align-items-center justify-content-center vh-100">
-            <div class="text-center">
-                <h1 class="display-1 fw-bold">404</h1>
-                <p class="fs-3"> <span class="text-danger">Opps!</span> Page not found.</p>
-                <p class="lead">
-                    The page you’re looking for doesn’t exist.
-                  </p>
-                <a href="/" class="btn btn-primary">Go Home</a>
-            </div>
-        </div>
-    </body>
-
-
-</html>
+{% extends "base.html" %}
+{% block title %}Page not found · MISP Modules{% endblock %}
+{% block content %}
+    <div class="workspace-card empty-state">
+        <p class="eyebrow">404 · PAGE NOT FOUND</p>
+        <h1>We couldn’t find that page.</h1>
+        <p>The link may be outdated or the query is no longer available.</p>
+        <a href="/" class="btn btn-primary">Start a new enrichment</a>
+    </div>
+{% endblock %}
