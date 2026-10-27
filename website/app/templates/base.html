@@ -121,10 +121,12 @@
             <script type="module">
             import {message_list} from '/static/js/toaster.js'
             const {createApp} = Vue
+            // Keep server-rendered forms outside Vue so late initialization
+            // cannot replace their inputs and discard values already entered.
             createApp({
                 delimiters: ['[[', ']]'],
                 setup() { return {message_list} }
-            }).mount('.container-fluid')
+            }).mount('.toast-container')
             </script>
         {% endblock %}
         <script>
