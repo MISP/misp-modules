@@ -88,7 +88,7 @@ class InterfaceTests(unittest.TestCase):
 
     @unittest.skipUnless(os.environ.get("AXE_SCRIPT_PATH"), "Set AXE_SCRIPT_PATH to an installed axe.min.js")
     def test_accessibility_scan(self):
-        for path in ("/", "/modules_config", "/history", "/history_session", "/history_tree", "/external_tools", "/add_external_tool", "/login", "/query/test-query"):
+        for path in ("/", "/modules_config", "/history", "/history_session", "/history_tree", "/external_tools", "/add_external_tool", "/login", "/query/test-query", "/query/object-query"):
             with self.subTest(path=path):
                 self.page.goto(self.base + path)
                 if path == "/":
@@ -96,16 +96,95 @@ class InterfaceTests(unittest.TestCase):
                     self.select_module("virustotal")
                 if path == "/modules_config":
                     self.page.get_by_role("button", name="virustotal", exact=False).click()
-                if path == "/query/test-query":
-                    expect(self.page.get_by_role("link", name="query", exact=True)).to_be_visible()
+                if path.startswith("/query/"):
+                    expect(self.page.get_by_role("link", name="Choose modules", exact=True).first).to_be_visible()
                 self.page.add_script_tag(path=os.environ["AXE_SCRIPT_PATH"])
                 violations = self.page.evaluate("""async () => (await axe.run({runOnly: {type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21aa']}})).violations.map(v => ({id: v.id, targets: v.nodes.map(n => n.target)}))""")
                 self.assertEqual(violations, [])
-                if path == "/query/test-query":
+                if path.startswith("/query/"):
                     for name in ("JSON", "Markdown"):
                         self.page.get_by_role("tab", name=name, exact=True).click()
                         violations = self.page.evaluate("""async () => (await axe.run({runOnly: {type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21aa']}})).violations.map(v => ({id: v.id, targets: v.nodes.map(n => n.target)}))""")
                         self.assertEqual(violations, [], f"{name} result format")
+
+    def test_official_brand_assets_load(self):
+        self.home()
+        expect(self.page.locator(".brand img")).to_have_attribute("src", "/static/images/misp-modules-white.svg")
+        expect(self.page.locator(".misp-project-brand img")).to_have_attribute("src", "/static/images/misp-logo-white.svg")
+        self.assertEqual(self.page.locator("link[rel='icon']").get_attribute("href"), "/static/images/misp-modules-icon.svg")
+        for image in self.page.locator(".brand img, .misp-project-brand img").all():
+            self.assertTrue(image.evaluate("image => image.complete && image.naturalWidth > 0"))
+        self.page.set_viewport_size({"width": 320, "height": 800})
+        expect(self.page.locator(".mobile-brand img")).to_be_visible()
+        expect(self.page.locator(".mobile-brand img")).to_have_attribute("src", "/static/images/misp-modules.svg")
+        self.assertFalse(self.page.evaluate("document.documentElement.scrollWidth > innerWidth"))
+
+    def test_visual_cards_preserve_values_and_related_queries(self):
+        value = "https://example.org/a?owner=O'Reilly&tag=<img src=x onerror=window.injected=true>#frag"
+        self.page.add_init_script("Object.defineProperty(navigator, 'clipboard', {configurable: true, value: {writeText: async value => { window.copiedValue = value }}})")
+        self.page.route("**/result/test-query", lambda route: route.fulfill(json={"example.org": {"dns": {"results": [{"types": ["url"], "values": [value]}]}}}))
+        self.page.goto(self.base + "/query/test-query")
+        expect(self.page.locator(".enrichment-value")).to_have_text(value)
+        expect(self.page.locator(".enrichment-value img")).to_have_count(0)
+        self.assertIsNone(self.page.evaluate("window.injected"))
+        self.page.get_by_role("button", name="Copy value", exact=True).click()
+        expect(self.page.get_by_role("status").filter(has_text="Value copied.")).to_be_visible()
+        self.assertEqual(self.page.evaluate("window.copiedValue"), value)
+        choose = self.page.get_by_role("link", name="Choose modules", exact=True)
+        self.assertEqual(parse_qs(urlparse(choose.get_attribute("href")).query)["query"][0], value)
+        choose.click()
+        expect(self.page.get_by_role("textbox", name="Indicator 1", exact=True)).to_have_value(value)
+        self.page.goto(self.base + "/query/test-query")
+        requests = []
+
+        def submit(route):
+            requests.append(route.request.post_data_json)
+            route.fulfill(status=201, json={"id": "test-query"})
+
+        self.page.route("**/run_modules", submit)
+        self.page.get_by_role("button", name="Run same modules", exact=True).click()
+        self.page.wait_for_url("**/query/test-query", wait_until="load")
+        self.assertEqual(requests[0]["query"], [value])
+        self.assertEqual(requests[0]["parent_id"], "test-query")
+
+    def test_visual_action_failures_are_readable(self):
+        self.page.add_init_script("Object.defineProperty(navigator, 'clipboard', {configurable: true, value: {writeText: async () => { throw new Error('Denied') }}})")
+        self.page.goto(self.base + "/query/test-query")
+        self.page.get_by_role("button", name="Copy value", exact=True).click()
+        expect(self.page.get_by_role("status").filter(has_text="Unable to copy.")).to_be_visible()
+        self.page.route("**/run_modules", lambda route: route.fulfill(status=400, json={"message": "Lookup unavailable"}))
+        self.page.get_by_role("button", name="Run same modules", exact=True).click()
+        expect(self.page.get_by_role("status").filter(has_text="Lookup unavailable")).to_be_visible()
+        expect(self.page.get_by_role("button", name="Run same modules", exact=True)).to_be_enabled()
+
+    def test_object_card_layout_and_attribute_types(self):
+        for width in (320, 768, 1440):
+            self.page.set_viewport_size({"width": width, "height": 1000})
+            self.page.goto(self.base + "/query/object-query")
+            expect(self.page.locator(".enrichment-object-card")).to_have_count(1)
+            expect(self.page.locator(".enrichment-count")).to_have_text("6 attributes")
+            expect(self.page.locator(".enrichment-field")).to_have_count(6)
+            expect(self.page.get_by_text("Components extracted from the submitted URL.", exact=True)).to_be_visible()
+            self.assertFalse(self.page.evaluate("document.documentElement.scrollWidth > innerWidth"), f"Object output overflows at {width}px")
+            self.screenshot(f"object-results-{width}.png")
+        self.page.get_by_role("tab", name="JSON", exact=True).click()
+        with self.page.expect_download() as downloaded:
+            self.page.get_by_role("link", name="Download", exact=True).click()
+        result = json.loads(Path(downloaded.value.path()).read_text())
+        self.assertIn("&view=details", result["results"]["Object"][0]["Attribute"][0]["value"])
+        self.page.route("**/result/test-query", lambda route: route.fulfill(json={"example.org": {"dns": {"results": [
+            {"types": ["counter"], "values": [0]},
+            {"types": ["datetime"], "values": ["2026-10-27T12:00:00Z"]},
+            {"types": ["text"], "values": [False, "Line one\nLine two", "a" * 256]},
+        ]}}}))
+        self.page.set_viewport_size({"width": 320, "height": 1000})
+        self.page.goto(self.base + "/query/test-query")
+        expect(self.page.locator(".enrichment-attribute-card")).to_have_count(5)
+        expect(self.page.locator(".enrichment-value").nth(0)).to_have_text("0")
+        expect(self.page.locator(".enrichment-value").nth(2)).to_have_text("false")
+        self.assertEqual(self.page.locator(".enrichment-value").nth(3).text_content(), "Line one\nLine two")
+        expect(self.page.locator(".enrichment-attribute-card").first.get_by_role("button", name="Run same modules", exact=True)).to_have_count(0)
+        self.assertFalse(self.page.evaluate("document.documentElement.scrollWidth > innerWidth"))
 
     def test_validation_and_indicator_removal(self):
         self.home()

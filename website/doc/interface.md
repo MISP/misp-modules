@@ -11,6 +11,33 @@ CDN requests, or database migration.
 [View the mobile layout](home_mobile.png). Screenshots use the isolated sample
 catalogue from the browser checks.
 
+## Official branding and visual results
+
+The application uses the official MISP Modules wordmark and favicon from
+[MISP visual identity 2.0](https://github.com/MISP/visual-identity/tree/main/2.0/misp-satellite/MISP-Modules),
+alongside the updated parent MISP logo. See the [asset attribution and exact source
+files](../app/static/images/README.md). The SVG artwork is bundled locally and
+used without modifications, external fonts, or CDN requests.
+
+Visual enrichment output uses separate cards for MISP objects and flat
+attributes. Object properties are grouped in a definition list with readable
+labels, original MISP type badges, complete values, and comments. Long indicators
+wrap and multiline text retains its line breaks. Property order follows the
+module response, including the backend's UI priority ordering. Missing attributes
+have an explicit empty state; zero and false values remain visible.
+
+Each value offers copying and the existing related-query actions. “Choose
+modules” opens a related query with the complete value; “Run same modules” keeps
+the original query's attribute type and modules. Count and datetime attributes
+only offer copying, as before. Action errors appear beside the value. Indicator
+values are inserted as text; delegated actions preserve them without inline
+JavaScript, and related-query URLs encode reserved characters. JSON download links also
+encode complete indicator values, including query strings containing `&` or `#`.
+
+![Visual object result](object_result_cards.png)
+
+[View the visual object card on mobile](object_result_mobile.png).
+
 ## Design references
 
 The interface follows the [MISP 3.0 Overmind theme](https://github.com/MISP/MISP/tree/3.0_wip/tools/bootstrap-themes):
@@ -81,7 +108,9 @@ fresh temporary SQLite database, sample module catalogue, and fixture enrichment
 execution. They do not need the misp-modules daemon, credentials, or Internet
 access. They cover request payloads and CSRF, validation, configuration, selection
 reset, network failures/retry, duplicate submissions, settings save/toggle failures,
-login/navigation, result/error grouping, query parent relationships, and layouts at 320, 768, and 1440 pixels.
+login/navigation, result/error grouping, query parent relationships, copy and
+related-query actions, official brand assets, safe text rendering, object cards,
+and layouts at 320, 768, and 1440 pixels.
 
 Optional screenshots and automated accessibility checks:
 
