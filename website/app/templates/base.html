@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width,initial-scale=1">
-        <title>Misp Modules</title>
+        <title>{% block title %}MISP Modules{% endblock %}</title>
         <link rel="icon" href="{{ url_for('static',filename='images/misp.png') }}">
         <script src="{{ url_for('static',filename='js/vendor/popper.min.js') }}"></script>
         <script src="{{ url_for('static',filename='js/vendor/bootstrap.min.js') }}"></script>
@@ -16,81 +16,119 @@
         <script src="{{ url_for('static',filename='js/editor.js') }}"></script>
         <script src="{{ url_for('static',filename='js/mermaid-markdown.js') }}"></script>
         <script src="{{ url_for('static',filename='js/utils.js') }}"></script>
-
         <script src="{{ url_for('static',filename='js/jsonParser.js') }}"></script>
         <script src="{{ url_for('static',filename='js/mispParser.js') }}"></script>
-
         <script src="{{ url_for('static',filename='js/vendor/dayjs/dayjs.min.js') }}"></script>
+        <script src="{{ url_for('static',filename='js/vendor/dayjs/dayjs-utc.js') }}"></script>
         <script>dayjs.extend(window.dayjs_plugin_utc)</script>
+        <script src="{{ url_for('static',filename='js/vendor/dayjs/dayjs-relativeTime.js') }}"></script>
         <script>dayjs.extend(window.dayjs_plugin_relativeTime)</script>
-
-        <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='css/vendor/select2.min.css') }}">
-        <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='css/vendor/bootstrap.min.css') }}">
-        <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='css/vendor/fontawesome.css') }}"> 
-        <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='css/vendor/solid.css') }}">
-        <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='css/vendor/brands.css') }}">
-        <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='css/vendor/jquery-ui.min.css') }}">
-
-        <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='css/core.css') }}">
-
-        <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='css/vendor/select2-bootstrap-5-theme.min.css') }}">
+        <link rel="stylesheet"
+              type="text/css"
+              href="{{ url_for('static',filename='css/vendor/select2.min.css') }}">
+        <link rel="stylesheet"
+              type="text/css"
+              href="{{ url_for('static',filename='css/vendor/bootstrap.min.css') }}">
+        <link rel="stylesheet"
+              type="text/css"
+              href="{{ url_for('static',filename='css/vendor/fontawesome.css') }}">
+        <link rel="stylesheet"
+              type="text/css"
+              href="{{ url_for('static',filename='css/vendor/solid.css') }}">
+        <link rel="stylesheet"
+              type="text/css"
+              href="{{ url_for('static',filename='css/vendor/brands.css') }}">
+        <link rel="stylesheet"
+              type="text/css"
+              href="{{ url_for('static',filename='css/vendor/jquery-ui.min.css') }}">
+        <link rel="stylesheet"
+              type="text/css"
+              href="{{ url_for('static',filename='css/vendor/select2-bootstrap-5-theme.min.css') }}">
+        <link rel="stylesheet"
+              href="{{ url_for('static', filename='css/core.css') }}">
+        <script defer src="{{ url_for('static', filename='js/shell.js') }}"></script>
     </head>
-
     <body>
-        <div class="container-fluid">
-            <div class="row flex-nowrap">
-                {% include 'sidebar.html' %}
-
+        <a class="skip-link" href="#main-content">Skip to content</a>
+        <div class="container-fluid app-shell">
+            <div class="app-layout">
+                {% include "sidebar.html" %}
                 <!--Main layout-->
-                <main class="col ps-md-4 pt-2">
-                    {% include 'macros/_flashes.html' %}
-    
-                    <div aria-live="polite" aria-atomic="true" class="">
-                        <div class="toast-container start-50 translate-middle-x top-0 p-3" style="position: fixed;">
-                            <template v-if="message_list">
-                                <template v-for="message in message_list" v-key="message.id">
-                                    <div :id="`liveToast-${message.id}`" :class="`toast bg-${message.toast_class}`" role="alert" aria-live="assertive" data-bs-delay="5000" aria-atomic="true" style="--bs-toast-spacing: 0.5rem;">
-                                        <div class="d-flex">
-                                            <div class="toast-body">
-                                                <template v-if="message.message">
-                                                    [[message.message]]
-                                                </template>
-                                            </div>
-                                            <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-                                        </div>
-                                    </div>
-                                </template>
-                            </template>
+                <div class="app-main">
+                    <header class="app-topbar">
+                        <div class="d-flex align-items-center gap-3">
+                            <button type="button"
+                                    class="btn btn-sm btn-outline-secondary menu-toggle"
+                                    aria-controls="sidebar"
+                                    aria-expanded="false"
+                                    aria-label="Open navigation">
+                                <i class="fa-solid fa-bars" aria-hidden="true"></i>
+                            </button><a href="/" class="mobile-brand">MISP <span>Modules</span></a><span class="topbar-label">Threat intelligence workspace</span>
                         </div>
-                    </div>
-                    <a href="#" data-bs-target="#sidebar" data-bs-toggle="collapse" class="border rounded-3 p-1 text-decoration-none"><i class="fa-solid fa-bars-staggered"></i> Menu</a>
-                    {# When extended, the content block contains all the html of the webpage #}
-                    {% block content %}
-                    {% endblock %}
-                </main>
+                        <div class="topbar-actions">
+                            <a href="https://misp.github.io/misp-modules/"
+                               aria-label="Documentation"
+                               target="_blank"
+                               rel="noopener noreferrer"><i class="fa-solid fa-book-open me-2" aria-hidden="true"></i><span class="documentation-label">Documentation</span></a>
+                        {% if session.admin_user %}{% if current_user.is_authenticated %}<a href="/logout"><i class="fa-solid fa-arrow-right-from-bracket me-2" aria-hidden="true"></i>Log out</a>{% else %}<a href="/login"><i class="fa-solid fa-user-shield me-2" aria-hidden="true"></i>Admin login</a>{% endif %}{% endif %}</div>
+                    </header>
+                    <main id="main-content" class="page-content" tabindex="-1">
+                        {% include "macros/_flashes.html" %}
+                        <div aria-live="polite" aria-atomic="true" class="">
+                            <div v-cloak
+                                 class="toast-container start-50 translate-middle-x top-0 p-3"
+                                 style="position: fixed">
+                                <template v-if="message_list">
+                                    <template v-for="message in message_list" :key="message.id">
+                                        <div :id="`liveToast-${message.id}`"
+                                             :class="`toast bg-${message.toast_class}`"
+                                             role="alert"
+                                             aria-live="assertive"
+                                             data-bs-delay="5000"
+                                             aria-atomic="true"
+                                             style="--bs-toast-spacing: 0.5rem">
+                                            <div class="d-flex">
+                                                <div class="toast-body">
+                                                    <template v-if="message.message">
+                                                        [[message.message]]
+                                                    </template>
+                                                </div>
+                                                <button type="button"
+                                                        class="btn-close me-2 m-auto"
+                                                        data-bs-dismiss="toast"
+                                                        aria-label="Close"></button>
+                                            </div>
+                                        </div>
+                                    </template>
+                                </template>
+                            </div>
+                        </div>
+                        {# When extended, the content block contains all the html of the webpage #}
+                        {% block content %}{% endblock %}
+                    </main>
+                </div>
                 <!--Main layout-->
-        
                 {# Implement CSRF protection for site #}
                 {% if csrf_token()|safe %}
                     <div style="visibility: hidden; display: none">
-                    <input type="hidden" id="csrf_token" name="csrf_token" value="{{ csrf_token()|safe }}">
+                        <input type="hidden"
+                               id="csrf_token"
+                               name="csrf_token"
+                               value="{{ csrf_token()|safe }}">
                     </div>
                 {% endif %}
             </div>
         </div>
-        
-
         {% block script %}
-        <script type="module">
-            // Empty vue used for toast to declar vue is used in the rest of the project
+            <script type="module">
+            import {message_list} from '/static/js/toaster.js'
             const {createApp} = Vue
             createApp({
                 delimiters: ['[[', ']]'],
-                setup() {}
+                setup() { return {message_list} }
             }).mount('.container-fluid')
-        </script>
+            </script>
         {% endblock %}
-        
         <script>
             $( document ).ready(function() {
                 $('.message').each((i, el) => {
@@ -104,6 +142,6 @@
                 if (sec) $el.T = setTimeout(triggerRemove, sec * 1000);
                 });
             })
-          </script>
+        </script>
     </body>
 </html>

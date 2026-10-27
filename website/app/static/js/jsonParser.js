@@ -1,13 +1,13 @@
 function generateCoreFormatUI(event) {
     var indent_size = 'calc(1.25em)'
-    var color_key = '#005cd5'
-    var color_index = '#727272'
-    var color_string = '#cf5900'
-    var color_null = '#747474'
-    var color_bool = '#004bad'
-    var color_brace = '#727272'
-    var color_column = '#727272'
-    var color_collapse = '#727272'
+    var color_key = 'var(--misp-json-key)'
+    var color_index = 'var(--misp-muted)'
+    var color_string = 'var(--misp-json-string)'
+    var color_null = 'var(--misp-muted)'
+    var color_bool = 'var(--misp-json-literal)'
+    var color_brace = 'var(--misp-muted)'
+    var color_column = 'var(--misp-muted)'
+    var color_collapse = 'var(--misp-muted)'
     var defaultCollapseList = ['Org', 'Orgc']
 
     function generate(item, depth, path, forceObjectCollaspe) {
@@ -154,7 +154,7 @@ function generateCoreFormatUI(event) {
         return count
     }
 
-    var $mainContainer = $('<div id="core-format-picker">')
+    var $mainContainer = $('<div class="core-format-picker">')
     $mainContainer.append(header(), generate(event, 1, ''), footer())
     return $mainContainer
 }

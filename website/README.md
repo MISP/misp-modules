@@ -6,6 +6,9 @@ Use all MISP modules through a dedicated website without requiring a MISP instan
 
 ![Query](https://github.com/MISP/misp-modules/blob/main/website/doc/query_misp_module.png?raw=true)
 
+See the [interface guide](doc/interface.md) for design references, asset builds,
+and browser regression tests.
+
 ## Installation
 
 The MISP Modules website uses [Poetry](https://python-poetry.org/) for dependency management. It is recommended to install dependencies in a virtual environment managed by Poetry.

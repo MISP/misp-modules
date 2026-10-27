@@ -1,79 +1,95 @@
 <!-- 
     Author: David Cruciani
 -->
-
-{% extends 'base.html' %}
-
+{% extends "base.html" %}
+{% block title %}Enrichment results · MISP Modules{% endblock %}
 {% block content %}
-    <br> <br>
-    <input type="hidden" id="share" value="{{sid}}">
-    <div id="top" style="display: ruby; margin-top: 40px;">
-        <h2 title="{{', '.join(query)}}">{{query_str}}</h2>
-    </div>
-
-    <div class="btn-group" style="float: right;" role="group" aria-label="Basic mixed styles example">
-        <a style="float: right;" class="btn btn-primary" href="/" title="Do a new query with no relation with this one"><i class="fa-solid fa-plus"></i> New query</a>
-        <a style="float: right;" class="btn btn-secondary" href="/?query={{query}}" title="New query with same name">Query</a>
-        <div class="dropdown" style="float: right;">
-            <button class="btn btn-primary dropdown-toggle" title="New query with same parameters" style="border-radius: 0;" data-bs-toggle="dropdown" aria-expanded="false" data-bs-auto-close="outside">
-                <i class="fa-solid fa-recycle"></i>
-            </button>
-            <div class="dropdown-menu p-4" style="min-width: 200px;">
-                <div class="mb-3">
-                    <label for="query_as_params" class="form-label">To query:</label>
-                    <input type="email" class="form-control" id="query_as_params" value="{{', '.join(query)}}">
-                    <div id="query_as_params_error" style="color:brown"></div>
+    <input type="hidden" id="share" value="{{ sid }}">
+    <div id="top" class="page-heading results-heading">
+        <div>
+            <p class="eyebrow">ENRICHMENT RESULTS</p>
+            <h1 title="{{ ', '.join(query) }}">{{ query_str }}</h1>
+            <p class="page-description">Explore the results, download data, or continue your investigation.</p>
+        </div>
+        <div class="results-actions">
+            <a class="btn btn-outline-secondary" href="/">New enrichment</a><a class="btn btn-outline-secondary"
+   href="/?query={{ query|tojson|urlencode }}"
+   title="Start a new query using these indicators">Reuse indicators</a>
+            <div class="dropdown">
+                <button class="btn btn-primary dropdown-toggle"
+                        data-bs-toggle="dropdown"
+                        aria-expanded="false"
+                        data-bs-auto-close="outside">Run again</button>
+                <div class="dropdown-menu p-4" style="min-width: 260px;">
+                    <label for="query_as_params" class="form-label">Indicators</label><input type="text"
+       class="form-control"
+       id="query_as_params"
+       value="{{ ', '.join(query) }}">
+                    <div id="query_as_params_error" class="field-error"></div>
+                    <button type="button"
+                            class="btn btn-primary btn-sm mt-3"
+                            @click="query_as_params()">Run with same settings</button>
                 </div>
-                <button type="submit" class="btn btn-primary btn-sm" @click="query_as_params()" style="border-radius: 50px;">Query</button>
             </div>
         </div>
     </div>
-    
-    
-
-    <div class="card card-body">
-        <div class="row">
-            <div class="col">
-                <h4>Input Attribute:</h4>
-                {{input_query}}
-            </div>
-            <div class="col">
-                <h4>Modules:</h4>
-                {{", ".join(modules)}}
-            </div>
+    <dl class="workspace-card result-metadata">
+        <div>
+            <dt>Input attribute</dt>
+            <dd>
+                {{ input_query }}
+            </dd>
         </div>
-        <div class="d-flex w-100 justify-content-between">
-            <div></div>
-            <small><i>{{query_date}}</i></small>
+        <div>
+            <dt>Modules</dt>
+            <dd>
+                {{ ', '.join(modules) }}
+            </dd>
         </div>
+        <div>
+            <dt>Started</dt>
+            <dd>
+                {{ query_date }}
+            </dd>
+        </div>
+    </dl>
+    <div style="margin-top: 10px;" v-if="is_searching" class="progress">
+        <div class="progress-bar"
+             id="progress"
+             role="progressbar"
+             :aria-valuenow="progress"
+             aria-label="Modules processed"
+             aria-valuemin="0"
+             aria-valuemax="100"
+             :style="'width:'+progress + '%;'">[[progress]]%</div>
     </div>
-    
-    <div style="margin-top: 10px;" v-if="is_searching" class="progress" >
-        <div class="progress-bar" id="progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" :style="'width:'+progress + '%;'">
-            [[progress]]%
-        </div>
-    </div>
-    <span v-if="status_site" style="margin-left: 5px; font-size: 13px; float: right;">[[status_site]]</span>
-    <br>
-    <button type="button" class="btn btn-secondary btn-sm" @click="send_all = -1" title="Send all results to an external tool" style="float: right;" data-bs-toggle="modal" data-bs-target="#Send_to_modal">
-        External tools
-        <i class="fa-solid fa-share-from-square"></i>
-    </button>
-
+    <span v-if="status_site"
+          role="status"
+          class="d-block text-muted small mt-2">[[status_site]]</span>
     <!-- Modal send to -->
-    <div class="modal fade" id="Send_to_modal" tabindex="-1" aria-labelledby="Send_to_modalLabel" aria-hidden="true">
+    <div class="modal fade"
+         id="Send_to_modal"
+         tabindex="-1"
+         aria-labelledby="Send_to_modalLabel"
+         aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
                     <h1 class="modal-title fs-5" id="Send_to_modalLabel">Send to external tools</h1>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <label for="tools_select">Tools:</label>
-                    <select data-placeholder="Tools" class="select2-select form-control" name="tools_select" id="tools_select" >
+                    <select data-placeholder="Tools"
+                            class="select2-select form-control"
+                            name="tools_select"
+                            id="tools_select">
                         <option value="None">--</option>
                         <template v-for="tool, key in external_tools">
-                            <option v-if="tool.is_active" :value="[[key]]">[[tool.name]]</option>
+                            <option v-if="tool.is_active" :value="key">[[tool.name]]</option>
                         </template>
                     </select>
                     <div id="tools_errors" class="invalid-feedback"></div>
@@ -84,25 +100,24 @@
             </div>
         </div>
     </div>
-
-    <br/>
-
-    <!-- Offcanvas to navigate throw current search tree -->
-    <button class="btn btn-outline-primary" style="position: fixed; right: 0px; margin-top:30px" title="Session history" data-bs-toggle="offcanvas" data-bs-target="#offcanvasScrolling" aria-controls="offcanvasScrolling">
-        <i class="fa-solid fa-bars"></i>
-    </button>
-
-    <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasScrolling" aria-labelledby="offcanvasScrollingLabel">
+    <div class="offcanvas offcanvas-end"
+         tabindex="-1"
+         id="offcanvasScrolling"
+         aria-labelledby="offcanvasScrollingLabel">
         <div class="offcanvas-header">
-            <h5 class="offcanvas-title" id="offcanvasScrollingLabel">Current History query</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+            <h5 class="offcanvas-title" id="offcanvasScrollingLabel">Current investigation</h5>
+            <button type="button"
+                    class="btn-close"
+                    data-bs-dismiss="offcanvas"
+                    aria-label="Close"></button>
         </div>
         <div style="margin-left: 18px;">
             <a class="btn btn-secondary btn-sm" href="/history_session">Complete view</a>
         </div>
         <div class="offcanvas-body">
             <ul>
-                <li v-if="history.query"><a :href="'/query/'+history.uuid" :title="'Attribute: \n' +history.input+ '\n\nModules: \n' + history.modules">[[history.query.join(", ")]]</a></li>
+                <li v-if="history.query"><a :href="'/query/'+history.uuid"
+   :title="'Attribute: \n' +history.input+ '\n\nModules: \n' + history.modules">[[history.query.join(", ")]]</a></li>
                 <ul>
                     <template v-for="child in history.children">
                         <history_view :history="child"></history_view>
@@ -111,66 +126,133 @@
             </ul>
         </div>
     </div>
-
     <!-- Results Part -->
-    <hr>
-    <ul class="nav nav-tabs" style="margin-bottom: 10px;">
-        <li class="nav-item">
-            <button class="nav-link active" id="tab-visual" @click="active_tab('visual')">Visual</button>
-        </li>
-        <li class="nav-item">
-            <button class="nav-link" id="tab-json" aria-current="page" @click="active_tab('json')">Json</button>
-        </li>
-        <li class="nav-item">
-            <button class="nav-link" id="tab-markdown" @click="active_tab('markdown')">Markdown</button>
-        </li>
-    </ul>
-
-    <div class="row" style="margin-bottom: 50px;">
-        <div class="col-10">
-            <div class="accordion" v-if="Object.keys(modules_res).length" style="width: 95%">
-                <div class="accordion-item" :id="'list-item-'+key_query" v-for="ele, key_query in modules_res">
+    <div class="result-toolbar">
+        <ul class="nav nav-tabs"
+            role="tablist"
+            aria-label="Result format"
+            style="margin-bottom: 10px">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active"
+                        id="tab-visual"
+                        role="tab"
+                        :aria-selected="tab_list === 'visual'"
+                        aria-controls="result-panel"
+                        :tabindex="tab_list === 'visual' ? 0 : -1"
+                        @keydown="switchTab($event)"
+                        @click="active_tab('visual')">Visual</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link"
+                        id="tab-json"
+                        role="tab"
+                        :aria-selected="tab_list === 'json'"
+                        aria-controls="result-panel"
+                        :tabindex="tab_list === 'json' ? 0 : -1"
+                        @keydown="switchTab($event)"
+                        @click="active_tab('json')">JSON</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link"
+                        id="tab-markdown"
+                        role="tab"
+                        :aria-selected="tab_list === 'markdown'"
+                        aria-controls="result-panel"
+                        :tabindex="tab_list === 'markdown' ? 0 : -1"
+                        @keydown="switchTab($event)"
+                        @click="active_tab('markdown')">Markdown</button>
+            </li>
+        </ul>
+        <div class="results-actions">
+            <button type="button"
+                    class="btn btn-sm btn-outline-secondary"
+                    @click="send_all = -1"
+                    data-bs-toggle="modal"
+                    data-bs-target="#Send_to_modal"><i class="fa-solid fa-share-from-square me-2" aria-hidden="true"></i>External tools</button>
+            <button type="button"
+                    class="btn btn-sm btn-outline-secondary"
+                    data-bs-toggle="offcanvas"
+                    data-bs-target="#offcanvasScrolling"
+                    aria-controls="offcanvasScrolling"><i class="fa-solid fa-diagram-project me-2" aria-hidden="true"></i>Investigation</button>
+        </div>
+    </div>
+    <div id="result-panel"
+         role="tabpanel"
+         :aria-labelledby="'tab-'+tab_list"
+         tabindex="0"
+         class="result-content"
+         style="margin-bottom: 50px">
+        <div class="result-body">
+            <div class="accordion" v-if="Object.keys(modules_res).length">
+                <div class="accordion-item"
+                     :id="'list-item-'+key_query"
+                     v-for="ele, key_query in successfulResults">
                     <h2 class="accordion-header">
-                        <button class="accordion-button" data-bs-toggle="collapse" :data-bs-target="'#panelsStayOpenMain-'+key_query" aria-expanded="true" :aria-controls="'panelsStayOpenMain-'+key_query">
-                            [[key_query]]
-                        </button>
+                        <button class="accordion-button"
+                                data-bs-toggle="collapse"
+                                :data-bs-target="'#panelsStayOpenMain-'+key_query"
+                                aria-expanded="true"
+                                :aria-controls="'panelsStayOpenMain-'+key_query">[[key_query]]</button>
                     </h2>
-                    <div :id="'panelsStayOpenMain-'+key_query" class="accordion-collapse collapse show">
-                        <button type="button" class="btn btn-secondary btn-sm" @click="send_all = key_query" title="Send this result to an external tool" data-bs-toggle="modal" data-bs-target="#Send_to_modal" style="margin-top: 5px; margin-left:5px">
+                    <div :id="'panelsStayOpenMain-'+key_query"
+                         class="accordion-collapse collapse show">
+                        <button type="button"
+                                class="btn btn-secondary btn-sm"
+                                @click="send_all = key_query"
+                                title="Send this result to an external tool"
+                                data-bs-toggle="modal"
+                                data-bs-target="#Send_to_modal"
+                                style="margin-top: 5px;
+                                       margin-left:5px">
                             External tools
                             <i class="fa-solid fa-share-from-square"></i>
                         </button>
                         <div class="accordion" style="padding: 20px">
-                            <div class="accordion-item" :id="'list-item-'+key_query+'-'+key" v-for="result, key in ele">
+                            <div class="accordion-item"
+                                 :id="'list-item-'+key_query+'-'+key"
+                                 v-for="result, key in ele">
                                 <template v-if="!('error' in result)">
                                     <h2 class="accordion-header">
-                                        <button class="accordion-button" style="height: 40px;" data-bs-toggle="collapse" :data-bs-target="'#panelsStayOpen-'+key_query+'-'+key" aria-expanded="true" :aria-controls="'panelsStayOpen-'+key">
-                                            [[key]]
-                                        </button>
+                                        <button class="accordion-button"
+                                                style="height: 40px"
+                                                data-bs-toggle="collapse"
+                                                :data-bs-target="'#panelsStayOpen-'+key_query+'-'+key"
+                                                aria-expanded="true"
+                                                :aria-controls="'panelsStayOpen-'+key_query+'-'+key">[[key]]</button>
                                     </h2>
-                                    <div :id="'panelsStayOpen-'+key_query+'-'+key" class="accordion-collapse collapse show">
+                                    <div :id="'panelsStayOpen-'+key_query+'-'+key"
+                                         class="accordion-collapse collapse show">
                                         <!-- visual part -->
                                         <template v-if="tab_list == 'visual'">
-                                            <div class="accordion-body" >
+                                            <div class="accordion-body">
                                                 <template v-if="'Object' in result.results">
                                                     <template v-for="obj in result.results.Object">
-                                                        <div v-html="parseMispObject(obj, '/home/{{sid}}?query=', query_as_same)[0].outerHTML"></div>
+                                                        <div v-html="parseMispObject(obj, '/home/{{ sid }}?query=', query_as_same)[0].outerHTML"></div>
                                                     </template>
                                                 </template>
-        
                                                 <template v-else>
                                                     <template v-for="misp_attrs, key_loop in result.results">
-                                                        <div v-for="misp_attr in misp_attrs.values" class="accordion-body" v-html="parseMispAttr(misp_attr, misp_attrs.types, key_loop, '/home/{{sid}}?query=', query_as_same)[0].outerHTML"></div>
+                                                        <div v-for="misp_attr in misp_attrs.values"
+                                                             class="accordion-body"
+                                                             v-html="parseMispAttr(misp_attr, misp_attrs.types, key_loop, '/home/{{ sid }}?query=', query_as_same)[0].outerHTML">
+                                                        </div>
                                                     </template>
                                                 </template>
                                             </div>
                                         </template>
                                         <!-- json part -->
                                         <template v-if="tab_list == 'json'">
-                                            <div class="btn-group" role="group" style="padding: 5px; margin-left: 5px; margin-top: 5px;">
-                                                <a class="btn btn-primary" :href="`/download/${sid}?query=${key_query}&module=${key}`" title="Download the json" >Download</a>
+                                            <div class="btn-group"
+                                                 role="group"
+                                                 style="padding: 5px;
+                                                        margin-left: 5px;
+                                                        margin-top: 5px">
+                                                <a class="btn btn-primary"
+                                                   :href="`/download/${sid}?query=${key_query}&module=${key}`"
+                                                   title="Download the json">Download</a>
                                             </div>
-                                            <div class="accordion-body" v-html="generateCoreFormatUI(result)[0].outerHTML"></div>
+                                            <div class="accordion-body"
+                                                 v-html="generateCoreFormatUI(result)[0].outerHTML"></div>
                                         </template>
                                         <!-- markdown part -->
                                         <template v-if="tab_list == 'markdown'">
@@ -204,94 +286,82 @@ Value: [[misp_attr]]
                                     </div>
                                 </template> <!-- Not error -->
                             </div>
-                        </div> <!-- Accordion -->
+                        </div>
+                        <!-- Accordion -->
                     </div>
                 </div>
             </div>
-
             <!-- Errors Part -->
-            <hr style="margin-top: 50px; width: 95%">
-            <h3 id="errors_part">Errors</h3>
-            <div class="accordion" style="width: 95%">
-                <div class="accordion-item" :id="'list-item-'+key_query" v-for="ele, key_query in modules_res">
-                    <h2 class="accordion-header">
-                        <button class="accordion-button collapsed" data-bs-toggle="collapse" :data-bs-target="'#panelsStayOpenMainError-'+key_query" aria-expanded="false" :aria-controls="'panelsStayOpenMainError-'+key_query">
-                            [[key_query]]
-                        </button>
-                    </h2>
-                    <div :id="'panelsStayOpenMainError-'+key_query" class="accordion-collapse collapse">
-                        <div class="accordion" style="padding: 25px">
-                            <div class="accordion-item" :id="'list-item-'+key_query+'-'+key" v-for="result, key in ele">
-                                <template v-if="'error' in result">
-                                    <h2 class="accordion-header">
-                                        <button class="accordion-button" style="height: 40px;" data-bs-toggle="collapse" :data-bs-target="'#panelsStayOpenError-'+key_query+'-'+key" aria-expanded="false" :aria-controls="'panelsStayOpenError-'+key_query+'-'+key">
-                                            [[key]]
-                                            <span style="margin-left: 5px;" title="Error">❌</span>
-                                        </button>
-                                    </h2>
-                                    <div :id="'panelsStayOpenError-'+key_query+'-'+key" class="accordion-collapse collapse">
-                                        <template v-if="tab_list == 'visual' || tab_list == 'json'">
-                                            <div class="accordion-body" v-html="generateCoreFormatUI(result)[0].outerHTML"></div>
-                                        </template>
-                                    </div>
-                                </template>
+            <section v-if="Object.keys(errorResults).length" class="result-errors">
+                <h3 id="errors_part">Errors</h3>
+                <div class="accordion">
+                    <div class="accordion-item"
+                         :id="'list-error-'+key_query"
+                         v-for="ele, key_query in errorResults">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed"
+                                    data-bs-toggle="collapse"
+                                    :data-bs-target="'#panelsStayOpenMainError-'+key_query"
+                                    aria-expanded="false"
+                                    :aria-controls="'panelsStayOpenMainError-'+key_query">[[key_query]]</button>
+                        </h2>
+                        <div :id="'panelsStayOpenMainError-'+key_query"
+                             class="accordion-collapse collapse">
+                            <div class="accordion" style="padding: 25px">
+                                <div class="accordion-item"
+                                     :id="'list-error-'+key_query+'-'+key"
+                                     v-for="result, key in ele">
+                                    <template v-if="'error' in result">
+                                        <h2 class="accordion-header">
+                                            <button class="accordion-button"
+                                                    style="height: 40px"
+                                                    data-bs-toggle="collapse"
+                                                    :data-bs-target="'#panelsStayOpenError-'+key_query+'-'+key"
+                                                    aria-expanded="false"
+                                                    :aria-controls="'panelsStayOpenError-'+key_query+'-'+key">
+                                                [[key]]
+                                                <span style="margin-left: 5px;" title="Error">❌</span>
+                                            </button>
+                                        </h2>
+                                        <div :id="'panelsStayOpenError-'+key_query+'-'+key"
+                                             class="accordion-collapse collapse">
+                                            <template v-if="tab_list == 'visual' || tab_list == 'json'">
+                                                <div class="accordion-body"
+                                                     v-html="generateCoreFormatUI(result)[0].outerHTML"></div>
+                                            </template>
+                                        </div>
+                                    </template>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            </section>
         </div>
-
-        <!-- right menu -->
-        <div id="list-result" class="list-group col-2" style="position: fixed; right: 0px;">            
-            <template v-for="result, key in modules_res">
-                <a class="btn btn-outline-primary" data-bs-toggle="collapse" :href="'#collapse-menu-'+key" role="button" aria-expanded="false" :aria-controls="'collapse-menu-'+key">
-                    <template v-if="key.length > 20">
-                        [[key.substring(0, 21)]]...
-                    </template>
-                    <template v-else>
-                        [[key]]
-                    </template>
-                </a>
-                <div class="collapse" :id="'collapse-menu-'+key">
-                    <div class="card card-body">
-                        <template v-for="res, key_sub in result">
-                            <a class="list-group-item list-group-item-action" v-if="!('error' in res)" :href="'#list-item-'+key+'-'+key_sub">[[key_sub]]</a>
-                        </template>
-                    </div>
-                </div>
+        <aside id="list-result"
+               class="workspace-card result-index"
+               aria-label="Result navigation">
+            <h2>On this page</h2>
+            <template v-for="(results, indicator) in successfulResults" :key="indicator">
+                <a :href="'#list-item-'+indicator" class="result-index-indicator">[[indicator]]</a>
+                <a v-for="(result, name) in results"
+                   :key="name"
+                   :href="'#list-item-'+indicator+'-'+name">[[name]]</a>
             </template>
-            
-            <template v-if="tab_list == 'json' || tab_list == 'visual'">
-                <a class="btn btn-primary" style="background-color: #0d6efd; color:white" href="#errors_part">Errors</a>
-                <template v-for="result, key in modules_res">
-                    <a class="btn btn-outline-primary" data-bs-toggle="collapse" :href="'#collapse-menu-error-'+key" role="button" aria-expanded="false" :aria-controls="'collapse-menu-error-'+key">
-                        <template v-if="key.length > 20">
-                            [[key.substring(0, 21)]]...
-                        </template>
-                        <template v-else>
-                            [[key]]
-                        </template>
-                    </a>
-                    <div class="collapse" :id="'collapse-menu-error-'+key">
-                        <div class="card card-body">
-                            <template v-for="res, key_sub in result">
-                                <a class="list-group-item list-group-item-action" v-if="'error' in res" :href="'#list-item-'+key+'-'+key_sub">[[key_sub]]</a>
-                            </template>
-                        </div>
-                    </div>
-                </template>
+            <template v-if="Object.keys(errorResults).length">
+                <a href="#errors_part" class="result-index-indicator field-error">Module errors</a>
+                <a v-for="(results, indicator) in errorResults"
+                   :key="indicator"
+                   :href="'#list-error-'+indicator">[[indicator]]</a>
             </template>
-        </div>
+        </aside>
     </div>
-
     <span id="goTop">[<a href="#top">Go Back Top</a>]</span>
     <div id="insert_form"></div>
 {% endblock %}
-
 {% block script %}
-<script type="module">
-    const { createApp, ref, onMounted, nextTick} = Vue
+    <script type="module">
+    const { createApp, ref, computed, onMounted, nextTick} = Vue
     import {message_list, display_toast} from '/static/js/toaster.js'
     import history_view from '/static/js/history/history_tree_query.js'
     createApp({
@@ -305,6 +375,20 @@ Value: [[misp_attr]]
             const sid = ref(null)
             let last_registered = 0
             const modules_res = ref({})
+            function groupResults(wantErrors) {
+                const groups = Object.create(null)
+                for (const [indicator, results] of Object.entries(modules_res.value)) {
+                    const group = Object.create(null)
+                    for (const [name, value] of Object.entries(results || {})) {
+                        const result = value && typeof value === 'object' ? value : {error: 'The module returned no usable result.'}
+                        if (('error' in result) === wantErrors) group[name] = result
+                    }
+                    if (Object.keys(group).length) groups[indicator] = group
+                }
+                return groups
+            }
+            const successfulResults = computed(() => groupResults(false))
+            const errorResults = computed(() => groupResults(true))
             const progress = ref(0)
             const status_site = ref()
             const tab_list = ref("visual")
@@ -330,15 +414,16 @@ Value: [[misp_attr]]
             function pollScan() {
                 // Loop function to update the list of identified domains
                 $.getJSON('/status/' + sid.value, function(data) {
-                    progress.value = Math.round((data['complete']/data['total'])*100)
+                    progress.value = data.total ? Math.round((data.complete / data.total) * 100) : 100
                     status_site.value = 'Processed ' + data['complete'] + ' of ' + data['total']
                     if (data['remaining'] > 0) {
                         setTimeout(pollScan, 3000);
                     } else {
+                        is_searching.value = false
                         let sum = data['complete'] - data["nb_errors"]
                         // Button Stop pressed
                         if (data['stopped']){
-                            status_site.value = 'Stopped ! ' + sum + ' Success. ' + data["nb_errors"] + ' Errors. ' + data['complete'] + ' Total.'
+                            status_site.value = 'Complete: ' + sum + ' succeeded, ' + data.nb_errors + ' failed, ' + data.complete + ' total.'
                             // Display result of the search
                         }else{
                             status_site.value = sum + ' Success. ' + data["nb_errors"] + ' Errors. ' + data['complete'] + ' Total.'
@@ -348,6 +433,9 @@ Value: [[misp_attr]]
                         last_registered = data['registered']
                         fetchResult();
                     }
+                }).fail(() => {
+                    is_searching.value = false
+                    status_site.value = 'Unable to load query status. Reload this page to try again.'
                 });
             }
 
@@ -383,6 +471,19 @@ Value: [[misp_attr]]
                 }
             }
 
+            function switchTab(event) {
+                const tabs = ['visual', 'json', 'markdown']
+                let index = tabs.indexOf(tab_list.value)
+                if (event.key === 'ArrowRight') index = (index + 1) % tabs.length
+                else if (event.key === 'ArrowLeft') index = (index + tabs.length - 1) % tabs.length
+                else if (event.key === 'Home') index = 0
+                else if (event.key === 'End') index = tabs.length - 1
+                else return
+                event.preventDefault()
+                active_tab(tabs[index])
+                document.getElementById('tab-' + tabs[index]).focus()
+            }
+
             async function get_history_session(){
                 let res = await fetch("/get_current_query_history")
                 let loc = await res.json()
@@ -413,9 +514,9 @@ Value: [[misp_attr]]
             // query 'value' with same parameters without a parent
              async function query_as_params(){
                 let loc = $("#query_as_params").val()
-                loc = loc.split(', ')
+                loc = loc.split(',').map(value => value.trim()).filter(Boolean)
                 $("#query_as_params_error").text("")
-                if(loc){
+                if(loc.length){
                     let result_dict = {
                         "modules": query_info.value["modules"], 
                         "input": query_info.value["input_query"],
@@ -435,7 +536,7 @@ Value: [[misp_attr]]
                         window.location.href="/query/" + loc['id']
                     }
                 }else{
-                    $("#query_as_params_error").text("Please give value")
+                    $("#query_as_params_error").text("Enter at least one indicator.")
                 }
             }
 
@@ -490,6 +591,8 @@ Value: [[misp_attr]]
                 status_site,
                 is_searching,
                 modules_res,
+                successfulResults,
+                errorResults,
                 tab_list,
                 history,
                 generateCoreFormatUI,
@@ -498,6 +601,7 @@ Value: [[misp_attr]]
                 external_tools,
                 send_all,
                 active_tab,
+                switchTab,
                 query_as_same,
                 query_as_params,
                 submit_external_tool
@@ -505,5 +609,5 @@ Value: [[misp_attr]]
         }
     }).mount('.container-fluid')
 
-</script>
+    </script>
 {% endblock %}

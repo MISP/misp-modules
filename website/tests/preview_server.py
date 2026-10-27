@@ -1,0 +1,62 @@
+"""Run the actual Flask website with isolated data for UI regression tests.
+
+The module catalogue and query execution use fixtures. All templates, database
+configuration, CSRF protection, and other routes use the real Flask application.
+No module daemon, credentials, or external services are used.
+"""
+import json
+import os
+import sys
+from datetime import datetime
+from pathlib import Path
+from tempfile import TemporaryDirectory
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
+MODULES = [
+    {"name": "dns", "mispattributes": {"input": ["domain", "hostname"]}, "meta": {"description": "Resolve domains and hostnames into IP addresses.", "config": [], "module-type": ["expansion"]}},
+    {"name": "whois", "mispattributes": {"input": ["domain", "ip-dst"]}, "meta": {"description": "Look up registration details and ownership information.", "config": ["server"], "module-type": ["expansion"]}},
+    {"name": "virustotal", "mispattributes": {"input": ["domain", "ip-dst", "sha256", "url"]}, "meta": {"description": "Investigate reputation, detections, and related indicators.", "config": ["apikey"], "module-type": ["expansion"]}},
+]
+
+
+def create_fixture_app(database_path):
+    os.environ["SECRET_KEY"] = "local-ui-test-only"
+    os.environ["DATABASE_URI"] = f"sqlite:///{database_path}"
+    from app import create_app, db
+    from app.models import Module, Session_db
+    from app.utils import utils
+    from app.utils.init_modules import create_modules_db
+
+    utils.MODULES = MODULES
+    utils.ADMIN_PASSWORD = None
+    app = create_app()
+    app.config["TESTING"] = True
+
+    @app.before_request
+    def fixture_enrichment():
+        from flask import request
+        if request.endpoint == "home.run_modules":
+            return {"id": "test-query"}, 201
+
+    with app.app_context():
+        db.create_all()
+        create_modules_db()
+        Module.query.filter_by(name="virustotal").first().request_on_query = True
+        db.session.add(Session_db(
+            uuid="test-query", query_enter=json.dumps(["example.org"]),
+            modules_list=json.dumps(["dns"]), input_query="domain", nb_errors=0,
+            query_date=datetime(2026, 10, 27, 12), config_module="{}",
+            result=json.dumps({"example.org": {"dns": {"results": [{"types": ["ip-dst"], "values": ["192.0.2.1"]}]}}}),
+        ))
+        db.session.commit()
+    return app
+
+
+if __name__ == "__main__":
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--port", type=int, default=7010)
+    args = parser.parse_args()
+    with TemporaryDirectory(prefix="misp-modules-ui-") as directory:
+        create_fixture_app(Path(directory) / "preview.sqlite").run(host="127.0.0.1", port=args.port, debug=False)
