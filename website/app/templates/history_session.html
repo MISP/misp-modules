@@ -1,212 +1,134 @@
-<!-- 
-    Author: David Cruciani
--->
 {% extends "base.html" %}
 {% block title %}{{ 'Investigation trees' if tree_view else 'Session history' }} · MISP Modules{% endblock %}
 {% block content %}
-    <div class="session-history">
-        <input hidden value="{{ tree_view }}" id="tree_view">
-        <div class="page-heading" id="top">
+    <div id="investigation-workspace"
+         data-saved="{{ 'true' if tree_view else 'false' }}">
+        <div class="page-heading">
             <div>
                 <p class="eyebrow">FOLLOW THE CONNECTIONS</p>
                 <h1>{{ 'Investigation trees' if tree_view else 'Session history' }}</h1>
-                <p class="page-description">{{ 'Explore your saved investigation paths.' if tree_view else 'Your current investigation paths. Save a tree to keep it after this session ends.' }}</p>
+                <p class="page-description">{{ 'Revisit your saved paths and follow the connections between queries.' if tree_view else 'Follow your enrichment paths, revisit results, and save investigations.' }}</p>
             </div>
-            <a href="/" class="btn btn-primary">New enrichment</a>
+            <a href="/"
+               class="btn btn-primary"><i class="fa-solid fa-plus me-2"
+   aria-hidden="true"></i>New enrichment</a>
         </div>
-        <template v-if="Object.keys(history).length">
-            <div v-for="his, key in history"
-                 style="background-color: var(--misp-surface);
-                        border: 1px solid var(--misp-border);
-                        border-radius: var(--misp-radius);
-                        padding: 20px;
-                        margin-top: 17px">
-                <div class="d-flex w-100 justify-content-between">
-                    <h4># [[key + 1]]</h4>
-                    <button v-if="!tree_view"
-                            class="btn btn-primary btn-sm"
-                            @click="save_history(his)">Save</button>
-                </div>
-                <hr>
-                <div style="display: flex;">
-                    <a style="padding: 10px;
-                              font-size: large;
-                              color: black"
-                       v-if="'children' in his && his['children'].length"
-                       data-bs-toggle="collapse"
-                       :href="'#collapseChild-'+his.uuid"
-                       aria-expanded="true"
-                       :aria-controls="'collapseChild-'+his.uuid">
-                        <i class="fa-solid fa-caret-down"></i>
-                    </a>
-                    <a style="text-decoration: none;
-                              color: black"
-                       data-bs-toggle="collapse"
-                       :href="'#collapse'+his.uuid"
-                       role="button"
-                       aria-expanded="false"
-                       :aria-controls="'collapse'+his.uuid">
-                        <ul class="list-group list-group-horizontal">
-                            <li class="list-group-item">
-                                <h4>[[his.query.join(", ")]]</h4>
-                            </li>
-                            <li class="list-group-item">
-                                <h5 style="color: brown"><u>Input Attributes</u></h5>
-                                [[his.input]]
-                            </li>
-                            <li class="list-group-item">
-                                <h5 style="color: brown"><u>Modules</u></h5>
-                                [[his.modules.join(", ")]]
-                            </li>
-                        </ul>
-                    </a>
-                    <div style="display: flex; align-items: center; margin-left: 3px">
-                        <button v-if="!tree_view"
-                                class="btn btn-danger btn-sm"
-                                title="Remove this node"
-                                @click="remove_node(his, key)">
-                            <i class="fa-solid fa-trash"></i>
-                        </button>
-                        <button v-else
-                                class="btn btn-danger btn-sm"
-                                title="Remove this node"
-                                @click="remove_node_tree(his, key)">
-                            <i class="fa-solid fa-trash"></i>
-                        </button>
+        <div v-cloak>
+            {% if not tree_view %}<div class="session-note"><i class="fa-solid fa-clock" aria-hidden="true"></i><span><strong>Your current session.</strong> Save an investigation to keep its path after the session ends.</span><a href="/history_tree">View saved trees <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a></div>{% endif %}
+            <div v-if="error"
+                 class="alert alert-danger"
+                 role="alert"
+                 tabindex="-1"
+                 ref="errorBox">
+                [[error]]
+                <button type="button"
+                        class="btn btn-sm btn-outline-danger"
+                        @click="loadHistory"
+                        :disabled="loading || !!busy">Try again</button>
+            </div>
+            <div v-if="feedback"
+                 class="alert alert-success"
+                 role="status"
+                 tabindex="-1"
+                 ref="feedbackBox">[[feedback]]</div>
+            <div v-if="loading && !roots.length"
+                 class="workspace-card empty-state"
+                 role="status">Loading investigation paths…</div>
+            <template v-else-if="roots.length">
+                <div class="investigation-stats" aria-label="Investigation overview">
+                    <div>
+                        <span class="stat-icon"><i class="fa-solid fa-diagram-project" aria-hidden="true"></i></span>
+                        <div><strong>[[roots.length]]</strong><span>[[roots.length === 1 ? 'Investigation' : 'Investigations']]</span></div>
+                    </div>
+                    <div>
+                        <span class="stat-icon"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></span>
+                        <div><strong>[[overview.queries]]</strong><span>Enrichment queries</span></div>
+                    </div>
+                    <div>
+                        <span class="stat-icon"><i class="fa-solid fa-code-branch" aria-hidden="true"></i></span>
+                        <div><strong>[[overview.depth]] <small>steps</small></strong><span>Longest path</span></div>
                     </div>
                 </div>
-                <div>
-                    <div class="collapse"
-                         :id="'collapse'+his.uuid"
-                         style="width: 70%;
-                                margin-left:30px">
-                        <div class="card card-body">
-                            <div class="d-flex w-100 justify-content-between">
-                                <h5 class="mb-1">[[his.query.join(", ")]]</h5>
-                                <small><i>[[his.uuid]]</i></small>
-                            </div>
-                            <p class="mb-1" style="color: green;"><u>Input Attribute</u>:</p>
-                            <div>[[his.input]]</div>
-                            <br>
-                            <p class="mb-1" style="color: #2000ff;"><u>Modules</u>:</p>
-                            <div>[[his.modules.join(", ")]]</div>
-                            <div></div>
-                            <div class="d-flex w-100 justify-content-between">
-                                <div><a :href="'/query/'+his.uuid">See results</a></div>
-                                <small><i>[[his.query_date]]</i></small>
+                <div class="investigation-search-row">
+                    <div class="search-field">
+                        <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+                        <input type="search"
+                               class="form-control"
+                               v-model="search"
+                               placeholder="Find an indicator, module, or attribute in any path"
+                               aria-label="Search investigation paths"
+                               :disabled="!!busy">
+                    </div>
+                    <span class="small text-muted" role="status">[[filteredRoots.length]] of [[roots.length]] investigations<span v-if="search.trim()"> · [[matchCount]] matching queries</span></span>
+                </div>
+                <div v-if="!filteredRoots.length" class="workspace-card empty-state">
+                    <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+                    <h2>No matching paths</h2>
+                    <p>Try another indicator, module name, or MISP attribute.</p>
+                    <button type="button" class="btn btn-outline-secondary" @click="search = ''">Clear search</button>
+                </div>
+                <div v-else class="investigation-explorer" :aria-busy="loading || !!busy">
+                    <nav class="investigation-list" aria-label="Investigations">
+                        <div class="investigation-list-heading">
+                            <h2>Investigations</h2>
+                            <span class="count-badge">[[filteredRoots.length]]</span>
+                        </div>
+                        <button v-for="root in filteredRoots"
+                                :key="root.uuid"
+                                type="button"
+                                class="investigation-choice"
+                                :class="{selected: selectedId === root.uuid}"
+                                :aria-pressed="selectedId === root.uuid"
+                                @click="selectRoot(root.uuid)"
+                                :disabled="!!busy"><span class="investigation-choice-label">Investigation [[root.ordinal]] <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></span><strong>[[root.query.join(', ')]]</strong><span class="investigation-choice-meta"><span>[[root.input]]</span><span>[[root.totalQueries]] queries</span></span><time v-if="root.query_date" :datetime="root.query_date.replace(' ', 'T')">[[root.query_date]]</time></button>
+                    </nav>
+                    <div class="investigation-mobile-picker">
+                        <label for="investigation-select" class="form-label">Investigation</label><select id="investigation-select"
+        class="form-select"
+        :value="selectedId"
+        @change="selectRoot($event.target.value)"
+        :disabled="!!busy">
+                            <option v-for="root in filteredRoots"
+                                    :key="root.uuid"
+                                    :value="root.uuid">[[root.ordinal]]. [[root.query.join(', ')]]</option>
+                        </select>
+                    </div>
+                    <section v-if="selectedRoot"
+                             class="investigation-path"
+                             aria-labelledby="selected-path-heading">
+                        <header class="investigation-path-header"><div><p class="eyebrow">INVESTIGATION [[selectedRoot.ordinal]] · {{ 'SAVED PATH' if tree_view else 'SESSION PATH' }}</p><h2 id="selected-path-heading">[[selectedRoot.query.join(', ')]]</h2><p>[[selectedRoot.totalQueries]] queries · [[selectedRoot.maxDepth]] steps in the longest path</p></div>{% if not tree_view %}<button type="button"
+        class="btn btn-outline-primary btn-sm"
+        @click="saveTree"
+        :disabled="!!busy"><i class="fa-solid fa-bookmark me-2" aria-hidden="true"></i>[[busy === 'save' ? 'Saving…' : savedIds.has(selectedId) ? 'Update saved tree' : 'Save investigation']]</button>{% endif %}</header>
+                        <div class="path-toolbar">
+                            <p><i class="fa-solid fa-turn-up" aria-hidden="true"></i>[[search.trim() ? 'Matching queries are shown with their parent path.' : 'Each branch follows a pivot from its parent query.']]</p>
+                            <div>
+                                <button type="button"
+                                        class="text-button"
+                                        @click="expandAll"
+                                        :disabled="!!search.trim()">Expand all</button><button type="button"
+        class="text-button"
+        @click="collapseAll"
+        :disabled="!!search.trim()">Collapse branches</button>
                             </div>
                         </div>
-                    </div>
-                    <div class="collapse show" :id="'collapseChild-'+his.uuid">
-                        <ul style="list-style-type: none;">
-                            <li>
-                                <div class="card-body">
-                                    <template v-for="h, key_loop in his['children']">
-                                        <history_view :history="h" :key_loop="key_loop" :tree_view="tree_view" @delete_node="(msg) => change_tree(his, key)" />
-                                    </template>
-                                </div>
-                            </li>
-                        </ul>
-                    </div>
+                        <ol class="investigation-node-list">
+                            <investigation-node :node="selectedRoot" :scope="selectedRoot.uuid" :collapsed="collapsed" :searching="!!search.trim()" :busy="!!busy" :pending-removal="pendingRemoval" @toggle="toggleBranch" @remove-request="requestRemoval" @remove-cancel="cancelRemoval" @remove-confirm="removeNode" />
+                        </ol>
+                    </section>
                 </div>
-            </div>
-        </template>
-        <div v-else>
-            <div class="workspace-card empty-state">
+            </template>
+            <div v-else-if="!error" class="workspace-card empty-state">
                 <i class="fa-solid fa-diagram-project" aria-hidden="true"></i>
                 <h2>No investigation paths yet</h2>
-                <p>Run an enrichment to start connecting indicators and results.</p>
-                <a href="/" class="btn btn-outline-secondary">Start an enrichment</a>
+                <p>{{ 'Save an investigation from session history to explore it here.' if tree_view else 'Run an enrichment, then pivot from a result to build an investigation path.' }}</p>
+                <a href="{{ '/history_session' if tree_view else '/' }}"
+                   class="btn btn-outline-secondary">{{ 'View session history' if tree_view else 'Start an enrichment' }}</a>
             </div>
         </div>
-        <span id="goTop">[<a href="#top">Go Back Top</a>]</span>
     </div>
 {% endblock %}
 {% block script %}
-    <script type="module">
-    const { createApp, ref, onMounted, nextTick, defineComponent} = Vue
-    import {display_toast, message_list} from '/static/js/toaster.js'
-    import history_view from '/static/js/history/history_view.js'
-    createApp({
-        delimiters: ['[[', ']]'],
-        components: {
-            history_view
-        },
-        setup() {
-            const history = ref({})
-            const tree_view = ref(false)
-
-            async function get_history_session(){
-                let res = await fetch("/get_history_session")
-                let loc = await res.json()
-                history.value = loc
-            }
-            async function get_history_tree(){
-                let res = await fetch("/get_history_tree")
-                let loc = await res.json()
-                history.value = loc
-            }
-
-            async function save_history(history){
-                const res = await fetch("/save_history/" + history.uuid)
-                display_toast(res)
-            }
-
-            async function remove_node(history_loc, key){
-                const res = await fetch('/history/remove_node_session/' + history_loc.uuid)
-                display_toast(res)
-                await change_tree(history_loc, key)
-            }
-            async function remove_node_tree(history_loc, key){
-                const res = await fetch('/history/remove_node_tree/' + history_loc.uuid)
-                display_toast(res)
-                await change_tree(history_loc, key)
-            }
-
-            async function change_tree(history_loc, key){
-                if(!tree_view.value){
-                    const res = await fetch("/get_history_session/"+history_loc.uuid)
-                    let loc = await res.json()
-                    if(!Object.keys(loc).length){
-                        history.value.splice(key, key+1)
-                    }else{
-                        history.value[key] = loc
-                    }
-                }else{
-                    const res = await fetch("/get_history_tree/"+history_loc.uuid)
-                    let loc = await res.json()
-                    if(!Object.keys(loc).length){
-                        history.value.splice(key, key+1)
-                    }else{
-                        history.value[key] = loc
-                    }
-                }                
-            }
-
-            onMounted(() => {
-                tree_view.value = $("#tree_view").val()
-                if(tree_view.value == "True"){
-                    get_history_tree()
-                    tree_view.value = true
-                }
-                else{
-                    tree_view.value = false
-                    get_history_session()
-                }
-            })
-
-
-            return {
-                message_list,
-                history,
-                tree_view,
-                save_history,
-                change_tree,
-                remove_node,
-                remove_node_tree
-            }
-        }
-    }).mount('.container-fluid')
-
-    </script>
+    <script type="module"
+            src="{{ url_for('static', filename='js/history/investigations.js') }}"></script>
 {% endblock %}

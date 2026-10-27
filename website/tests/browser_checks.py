@@ -90,7 +90,7 @@ class InterfaceTests(unittest.TestCase):
     def test_accessibility_scan(self):
         for path in ("/", "/modules_config", "/history", "/history_session", "/history_tree", "/external_tools", "/add_external_tool", "/login", "/query/test-query", "/query/object-query"):
             with self.subTest(path=path):
-                self.page.goto(self.base + path)
+                self.page.goto(self.base + path + ("?sample=saved" if path in ("/history_session", "/history_tree") else ""))
                 if path == "/":
                     self.page.get_by_role("combobox", name="MISP attribute").select_option("domain")
                     self.select_module("virustotal")
@@ -106,6 +106,129 @@ class InterfaceTests(unittest.TestCase):
                         self.page.get_by_role("tab", name=name, exact=True).click()
                         violations = self.page.evaluate("""async () => (await axe.run({runOnly: {type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21aa']}})).violations.map(v => ({id: v.id, targets: v.nodes.map(n => n.target)}))""")
                         self.assertEqual(violations, [], f"{name} result format")
+
+    def sample_history(self, saved=False):
+        self.page.goto(self.base + ("/history_tree?sample=saved" if saved else "/history_session?sample=session"))
+        expect(self.page.locator(".investigation-choice")).to_have_count(3)
+        self.page.locator(".investigation-choice").filter(has_text="circl.lu").click()
+        expect(self.page.locator(".path-query-card")).to_have_count(6)
+
+    def test_investigation_paths_search_and_branch_controls(self):
+        self.sample_history()
+        expect(self.page.locator(".investigation-stats")).to_contain_text("12")
+        expect(self.page.locator(".path-parent").first).to_contain_text("circl.lu")
+        self.page.get_by_role("button", name="Collapse branches", exact=True).click()
+        expect(self.page.locator(".path-query-card:visible")).to_have_count(1)
+        self.page.get_by_role("button", name="Expand all", exact=True).click()
+        expect(self.page.locator(".path-query-card:visible")).to_have_count(6)
+        root_toggle = self.page.locator(".path-branch-toggle").first
+        root_toggle.focus()
+        self.page.keyboard.press("Enter")
+        expect(root_toggle).to_have_attribute("aria-expanded", "false")
+        self.page.get_by_role("searchbox", name="Search investigation paths").fill("circl_passivessl")
+        expect(self.page.locator(".investigation-choice")).to_have_count(1)
+        expect(self.page.locator(".path-query-card:visible")).to_have_count(3)
+        expect(self.page.locator(".path-query-card.search-match")).to_have_count(1)
+        expect(self.page.locator(".path-query-card").last).to_contain_text("192.0.2.14")
+        self.assertNotIn("fixture-secret-not-for-display", self.page.locator("main").inner_text())
+        self.page.get_by_role("searchbox", name="Search investigation paths").fill("no-such-indicator")
+        expect(self.page.get_by_role("heading", name="No matching paths", exact=True)).to_be_visible()
+        self.page.get_by_role("button", name="Clear search", exact=True).click()
+        expect(self.page.locator(".investigation-choice")).to_have_count(3)
+
+    def test_session_investigation_save_and_scoped_removal(self):
+        self.sample_history()
+        self.page.locator(".investigation-choice").nth(1).click()
+        self.page.get_by_role("button", name="Save investigation", exact=True).click()
+        expect(self.page.get_by_role("status").filter(has_text="Investigation saved.")).to_be_visible()
+        self.page.get_by_role("button", name="Update saved tree", exact=True).click()
+        expect(self.page.get_by_role("status").filter(has_text="Investigation saved.")).to_be_visible()
+        self.page.goto(self.base + "/history_tree")
+        expect(self.page.locator(".investigation-choice")).to_have_count(1)
+        expect(self.page.locator(".path-query-card")).to_have_count(3)
+        self.page.get_by_role("button", name="Remove query security@example.org", exact=True).click()
+        expect(self.page.get_by_role("group", name="Confirm branch removal")).to_be_focused()
+        self.page.get_by_role("button", name="Cancel", exact=True).click()
+        expect(self.page.get_by_role("button", name="Remove query security@example.org", exact=True)).to_be_focused()
+        self.page.get_by_role("button", name="Remove query security@example.org", exact=True).click()
+        self.page.get_by_role("button", name="Remove branch", exact=True).click()
+        expect(self.page.locator(".path-query-card")).to_have_count(2)
+        self.page.reload()
+        expect(self.page.locator(".path-query-card")).to_have_count(2)
+        self.page.goto(self.base + "/history_session")
+        expect(self.page.locator(".investigation-choice")).to_have_count(3)
+        self.page.get_by_role("button", name="Remove query mail.circl.lu", exact=True).click()
+        self.page.get_by_role("button", name="Remove branch", exact=True).click()
+        expect(self.page.locator(".path-query-card")).to_have_count(4)
+        self.page.reload()
+        expect(self.page.locator(".path-query-card")).to_have_count(4)
+        expect(self.page.locator(".investigation-choice")).to_have_count(3)
+
+    def test_history_failures_keep_paths_and_allow_retry(self):
+        self.page.route("**/get_history_tree", lambda route: route.abort())
+        self.page.goto(self.base + "/history_tree?sample=saved")
+        expect(self.page.get_by_role("alert")).to_be_visible()
+        expect(self.page.get_by_role("heading", name="No investigation paths yet", exact=True)).to_have_count(0)
+        self.page.unroute("**/get_history_tree")
+        self.page.get_by_role("button", name="Try again", exact=True).click()
+        expect(self.page.locator(".investigation-choice")).to_have_count(3)
+        self.page.locator(".investigation-choice").filter(has_text="circl.lu").click()
+        self.page.route("**/history/remove_node_tree/**", lambda route: route.fulfill(status=500, json={"message": "Could not remove branch"}))
+        self.page.get_by_role("button", name="Remove query mail.circl.lu", exact=True).click()
+        self.page.get_by_role("button", name="Remove branch", exact=True).click()
+        expect(self.page.get_by_role("alert")).to_contain_text("Could not remove branch")
+        expect(self.page.locator(".path-query-card")).to_have_count(6)
+        expect(self.page.get_by_role("button", name="Remove branch", exact=True)).to_be_enabled()
+
+    def test_populated_history_responsive_layouts(self):
+        self.sample_history(saved=True)
+        for width in (320, 768, 1440):
+            self.page.set_viewport_size({"width": width, "height": 1100})
+            self.assertFalse(self.page.evaluate("document.documentElement.scrollWidth > innerWidth"), f"History overflows at {width}px")
+            self.screenshot(f"investigation-trees-{width}.png")
+        self.page.set_viewport_size({"width": 320, "height": 1000})
+        self.page.get_by_role("combobox", name="Investigation", exact=True).select_option("00000000-0000-4000-8000-000000000301")
+        expect(self.page.locator("#selected-path-heading")).to_contain_text("a3f8")
+        self.assertFalse(self.page.evaluate("document.documentElement.scrollWidth > innerWidth"))
+        self.page.goto(self.base + "/history_session")
+        expect(self.page.get_by_role("button", name="Save investigation", exact=True)).to_be_visible()
+        self.screenshot("session-history-320.png")
+        self.page.set_viewport_size({"width": 1440, "height": 1100})
+        self.screenshot("session-history-1440.png")
+
+    def test_deep_history_paths_stay_readable_and_searchable(self):
+        from history_samples import node
+        path = node(999, "needle.example", "domain", ["dns"])
+        for depth in range(11):
+            path = node(900 + depth, "long-" + "a" * 160 + ".example", "hostname", ["circl_passivedns"], [path])
+        self.page.route("**/get_history_tree", lambda route: route.fulfill(json=[path]))
+        for width in (320, 768, 1440):
+            self.page.set_viewport_size({"width": width, "height": 1000})
+            self.page.goto(self.base + "/history_tree")
+            expect(self.page.locator(".path-query-card")).to_have_count(12)
+            self.assertFalse(self.page.evaluate("document.documentElement.scrollWidth > innerWidth"), f"Deep path overflows at {width}px")
+        self.page.get_by_role("button", name="Collapse branches", exact=True).click()
+        expect(self.page.locator(".path-query-card:visible")).to_have_count(1)
+        self.page.get_by_role("searchbox", name="Search investigation paths").fill("needle.example")
+        expect(self.page.locator(".path-query-card:visible")).to_have_count(12)
+        expect(self.page.locator(".path-query-card.search-match")).to_have_count(1)
+        expect(self.page.locator(".investigation-search-row")).to_contain_text("1 matching queries")
+
+    def test_removal_of_filtered_root_keeps_other_investigations(self):
+        self.sample_history(saved=True)
+        self.page.get_by_role("searchbox", name="Search investigation paths").fill("whois")
+        expect(self.page.locator(".investigation-choice")).to_have_count(1)
+        expect(self.page.locator(".path-query-card")).to_have_count(2)
+        self.page.locator(".path-query-card").first.locator(".path-remove").click()
+        expect(self.page.get_by_role("group", name="Confirm branch removal")).to_contain_text("branch of 3 queries")
+        self.page.get_by_role("button", name="Remove branch", exact=True).click()
+        expect(self.page.get_by_role("heading", name="No matching paths", exact=True)).to_be_visible()
+        self.page.get_by_role("button", name="Clear search", exact=True).click()
+        expect(self.page.locator(".investigation-choice")).to_have_count(2)
+        self.page.reload()
+        expect(self.page.locator(".investigation-choice")).to_have_count(2)
+        self.page.goto(self.base + "/history_session")
+        expect(self.page.locator(".investigation-choice")).to_have_count(3)
 
     def test_official_brand_assets_load(self):
         self.home()

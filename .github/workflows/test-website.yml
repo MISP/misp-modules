@@ -48,7 +48,7 @@ jobs:
         env:
           AXE_SCRIPT_PATH: ${{ runner.temp }}/misp-ui-a11y/node_modules/axe-core/axe.min.js
           UI_SCREENSHOT_DIR: ${{ runner.temp }}/misp-ui-screenshots
-        run: python -m unittest discover -s website/tests -p 'browser_checks.py' -v
+        run: python -m unittest discover -s website/tests -p '*_checks.py' -v
       - name: Upload interface screenshots
         if: always()
         uses: actions/upload-artifact@v7
