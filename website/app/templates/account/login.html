@@ -3,6 +3,11 @@
 {% block content %}
     <div class="login-content">
         <section class="workspace-card login-card" aria-labelledby="login-heading">
+            <img class="login-brand"
+                 src="{{ url_for('static', filename='images/misp-modules.svg') }}"
+                 alt="MISP Modules"
+                 width="220"
+                 height="57">
             <p class="eyebrow">WORKSPACE ADMINISTRATION</p>
             <h1 id="login-heading">Welcome back.</h1>
             <p class="page-description mb-4">Sign in to manage modules and workspace settings.</p>
@@ -13,6 +18,16 @@
                 {{ form.submit(class_="btn btn-primary") }}
             </form>
             <a href="/" class="d-block mt-4 small">Return to enrichment workspace</a>
+            <a href="https://www.misp-project.org/"
+               target="_blank"
+               rel="noopener noreferrer"
+               aria-label="Visit the MISP Project">
+                <img class="login-misp-brand"
+                     src="{{ url_for('static', filename='images/misp-logo.svg') }}"
+                     alt="MISP"
+                     width="100"
+                     height="30">
+            </a>
         </section>
     </div>
 {% endblock %}

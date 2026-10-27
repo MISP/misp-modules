@@ -4,11 +4,12 @@
        {% if active %} aria-current="page"{% endif %}><i class="fa-solid {{ icon }} fa-fw" aria-hidden="true"></i><span>{{ label }}</span></a>
 {% endmacro %}
 <aside class="app-sidebar" id="sidebar" aria-label="Main navigation">
-    <a class="brand" href="/">
-    <img src="{{ url_for('static', filename='images/misp.png') }}"
-         alt=""
-         width="42"
-         height="42"><span>MISP<span class="brand-product">MODULES</span></span></a>
+    <a class="brand" href="/" aria-label="MISP Modules home">
+        <img src="{{ url_for('static', filename='images/misp-modules-white.svg') }}"
+             alt="MISP Modules"
+             width="194"
+             height="50">
+    </a>
     <p class="sidebar-caption">WORKSPACE</p>
     <nav>
         {{ nav_item('/', 'fa-layer-group', 'New enrichment', request.path == '/' or request.path.startswith('/home/')) }}
@@ -25,9 +26,16 @@
         <span class="sidebar-footer-mark"><i class="fa-solid fa-share-nodes"
    aria-hidden="true"></i> Open source intelligence</span>
         <p>Enrich. Explore. Connect.</p>
-        <a href="https://www.misp-project.org/"
+        <a class="misp-project-brand"
+           href="https://www.misp-project.org/"
            target="_blank"
-           rel="noopener noreferrer">MISP Project <i class="fa-solid fa-arrow-up-right-from-square"
-    aria-hidden="true"></i></a>
+           rel="noopener noreferrer"
+           aria-label="Visit the MISP Project">
+            <img src="{{ url_for('static', filename='images/misp-logo-white.svg') }}"
+                 alt="MISP"
+                 width="102"
+                 height="30">
+            <span>MISP Project <i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i></span>
+        </a>
     </div>
 </aside>

@@ -224,16 +224,18 @@
                                          class="accordion-collapse collapse show">
                                         <!-- visual part -->
                                         <template v-if="tab_list == 'visual'">
-                                            <div class="accordion-body">
+                                            <div class="accordion-body enrichment-visual">
                                                 <template v-if="'Object' in result.results">
                                                     <template v-for="obj in result.results.Object">
-                                                        <div v-html="parseMispObject(obj, '/home/{{ sid }}?query=', query_as_same)[0].outerHTML"></div>
+                                                        <div class="enrichment-object-wrapper"
+                                                             v-html="parseMispObject(obj, '/home/{{ sid }}?query=', query_as_same)[0].outerHTML">
+                                                        </div>
                                                     </template>
                                                 </template>
                                                 <template v-else>
                                                     <template v-for="misp_attrs, key_loop in result.results">
                                                         <div v-for="misp_attr in misp_attrs.values"
-                                                             class="accordion-body"
+                                                             class="enrichment-attribute-wrapper"
                                                              v-html="parseMispAttr(misp_attr, misp_attrs.types, key_loop, '/home/{{ sid }}?query=', query_as_same)[0].outerHTML">
                                                         </div>
                                                     </template>
@@ -248,7 +250,7 @@
                                                         margin-left: 5px;
                                                         margin-top: 5px">
                                                 <a class="btn btn-primary"
-                                                   :href="`/download/${sid}?query=${key_query}&module=${key}`"
+                                                   :href="`/download/${encodeURIComponent(sid)}?query=${encodeURIComponent(key_query)}&module=${encodeURIComponent(key)}`"
                                                    title="Download the json">Download</a>
                                             </div>
                                             <div class="accordion-body"
@@ -504,11 +506,10 @@ Value: [[misp_attr]]
                                 method: "POST",
                                 body: JSON.stringify(result_dict)
                             })
-                if(await res.status == 201){
-                    let loc = await res.json()
-                    await nextTick()
-                    window.location.href="/query/" + loc['id']
-                }
+                const data = await res.json()
+                if (!res.ok) throw new Error(data.message || 'Unable to start a related enrichment. Please try again.')
+                if (!data.id) throw new Error('The server did not return a query ID. Please try again.')
+                window.location.href = '/query/' + encodeURIComponent(data.id)
             }
 
             // query 'value' with same parameters without a parent

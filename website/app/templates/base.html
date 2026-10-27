@@ -4,7 +4,9 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width,initial-scale=1">
         <title>{% block title %}MISP Modules{% endblock %}</title>
-        <link rel="icon" href="{{ url_for('static',filename='images/misp.png') }}">
+        <link rel="icon"
+              type="image/svg+xml"
+              href="{{ url_for('static',filename='images/misp-modules-icon.svg') }}">
         <script src="{{ url_for('static',filename='js/vendor/popper.min.js') }}"></script>
         <script src="{{ url_for('static',filename='js/vendor/bootstrap.min.js') }}"></script>
         <script src="{{ url_for('static',filename='js/vendor/jquery.min.js') }}"></script>
@@ -24,25 +26,18 @@
         <script src="{{ url_for('static',filename='js/vendor/dayjs/dayjs-relativeTime.js') }}"></script>
         <script>dayjs.extend(window.dayjs_plugin_relativeTime)</script>
         <link rel="stylesheet"
-              type="text/css"
               href="{{ url_for('static',filename='css/vendor/select2.min.css') }}">
         <link rel="stylesheet"
-              type="text/css"
               href="{{ url_for('static',filename='css/vendor/bootstrap.min.css') }}">
         <link rel="stylesheet"
-              type="text/css"
               href="{{ url_for('static',filename='css/vendor/fontawesome.css') }}">
         <link rel="stylesheet"
-              type="text/css"
               href="{{ url_for('static',filename='css/vendor/solid.css') }}">
         <link rel="stylesheet"
-              type="text/css"
               href="{{ url_for('static',filename='css/vendor/brands.css') }}">
         <link rel="stylesheet"
-              type="text/css"
               href="{{ url_for('static',filename='css/vendor/jquery-ui.min.css') }}">
         <link rel="stylesheet"
-              type="text/css"
               href="{{ url_for('static',filename='css/vendor/select2-bootstrap-5-theme.min.css') }}">
         <link rel="stylesheet"
               href="{{ url_for('static', filename='css/core.css') }}">
@@ -63,7 +58,10 @@
                                     aria-expanded="false"
                                     aria-label="Open navigation">
                                 <i class="fa-solid fa-bars" aria-hidden="true"></i>
-                            </button><a href="/" class="mobile-brand">MISP <span>Modules</span></a><span class="topbar-label">Threat intelligence workspace</span>
+                            </button><a href="/" class="mobile-brand" aria-label="MISP Modules home"><img src="{{ url_for('static', filename='images/misp-modules.svg') }}"
+     alt="MISP Modules"
+     width="136"
+     height="35"></a><span class="topbar-label">Threat intelligence workspace</span>
                         </div>
                         <div class="topbar-actions">
                             <a href="https://misp.github.io/misp-modules/"

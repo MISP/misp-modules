@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_1" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 400 400">
+  <!-- Generator: Adobe Illustrator 30.1.0, SVG Export Plug-In . SVG Version: 2.1.1 Build 136)  -->
+  <defs>
+    <style>
+      .st0 {
+        fill: none;
+        stroke: #fff;
+        stroke-miterlimit: 10;
+        stroke-width: 23.3px;
+      }
+
+      .st1 {
+        fill: #f31e81;
+      }
+
+      .st2 {
+        fill: #fe32ae;
+      }
+
+      .st3 {
+        fill: #fff;
+      }
+
+      .st4 {
+        fill: #fe64cc;
+      }
+
+      .st5 {
+        fill: #fe50ae;
+      }
+
+      .st6 {
+        fill: #df32ae;
+      }
+    </style>
+  </defs>
+  <polygon class="st2" points="200.2 19.4 44.3 109.5 200.3 199.4 200.2 19.4"/>
+  <polygon class="st6" points="356.2 109.5 356.2 289.6 200.3 199.4 356.2 109.5"/>
+  <polygon class="st4" points="200.2 379.6 44.3 289.6 200.3 199.4 200.2 379.6"/>
+  <polygon class="st5" points="44.3 109.5 44.3 289.6 200.3 199.4 44.3 109.5"/>
+  <polygon class="st1" points="200.2 19.4 356.2 109.5 200.3 199.4 200.2 19.4"/>
+  <polygon class="st2" points="200.2 379.6 356.2 289.6 200.3 199.4 200.2 379.6"/>
+  <path class="st3" d="M200.3,186.3l12.5,7.2v11.9l-12.5,7.2-12.5-7.2v-11.9l12.5-7.2"/>
+  <g>
+    <polyline class="st0" points="186.6 124.2 123.1 124.2 123.1 187.7"/>
+    <polyline class="st0" points="210.2 274.8 273.7 274.8 273.7 211.3"/>
+    <polyline class="st0" points="123.1 211.3 123.1 274.8 186.6 274.8"/>
+    <polyline class="st0" points="273.7 187.7 273.7 124.2 210.2 124.2"/>
+  </g>
+</svg>

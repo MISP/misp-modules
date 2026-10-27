@@ -20,6 +20,19 @@ MODULES = [
 ]
 
 
+OBJECT_RESULT = {"results": {"Object": [{
+    "name": "url", "description": "Components extracted from the submitted URL.",
+    "Attribute": [
+        {"object_relation": "url", "type": "url", "value": "https://example.org/a/very/long/path?search=threat+intelligence&view=details", "comment": "Source URL supplied to the enrichment."},
+        {"object_relation": "domain", "type": "domain", "value": "example.org"},
+        {"object_relation": "scheme", "type": "text", "value": "https"},
+        {"object_relation": "port", "type": "port", "value": 443},
+        {"object_relation": "resource_path", "type": "text", "value": "/a/very/long/path"},
+        {"object_relation": "query_string", "type": "text", "value": "search=threat+intelligence&view=details"},
+    ],
+}]}}
+
+
 def create_fixture_app(database_path):
     os.environ["SECRET_KEY"] = "local-ui-test-only"
     os.environ["DATABASE_URI"] = f"sqlite:///{database_path}"
@@ -48,6 +61,12 @@ def create_fixture_app(database_path):
             modules_list=json.dumps(["dns"]), input_query="domain", nb_errors=0,
             query_date=datetime(2026, 10, 27, 12), config_module="{}",
             result=json.dumps({"example.org": {"dns": {"results": [{"types": ["ip-dst"], "values": ["192.0.2.1"]}]}}}),
+        ))
+        db.session.add(Session_db(
+            uuid="object-query", query_enter=json.dumps([OBJECT_RESULT["results"]["Object"][0]["Attribute"][0]["value"]]),
+            modules_list=json.dumps(["extract_url_components"]), input_query="url", nb_errors=0,
+            query_date=datetime(2026, 10, 27, 12), config_module="{}",
+            result=json.dumps({OBJECT_RESULT["results"]["Object"][0]["Attribute"][0]["value"]: {"extract_url_components": OBJECT_RESULT}}),
         ))
         db.session.commit()
     return app
