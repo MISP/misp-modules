@@ -11,6 +11,7 @@ import tempfile
 import zipfile
 import zlib
 from pathlib import Path
+from uuid import UUID
 
 from pymisp import MISPEvent, MISPObject
 
@@ -81,7 +82,7 @@ def _sample(attribute, maximum):
             raise ModuleError("Unable to read the malware-sample ZIP (password: infected).") from None
         if len(content) > maximum:
             raise ModuleError("The extracted sample exceeds max_size_mb.")
-        if hashlib.md5(content).hexdigest() != digest.lower():
+        if hashlib.md5(content, usedforsecurity=False).hexdigest() != digest.lower():
             raise ModuleError("The extracted sample MD5 does not match the malware-sample attribute.")
     if not content.startswith(b"MZ"):
         raise ModuleError("Manalyze requires a PE file with an MZ header.")
@@ -135,7 +136,9 @@ def _results(attribute, content, report):
     file_object.add_attribute("filename", value=filename, to_ids=False)
     file_object.add_attribute("size-in-bytes", value=len(content), to_ids=False)
     for kind in ("md5", "sha1", "sha256"):
-        file_object.add_attribute(kind, value=hashlib.new(kind, content).hexdigest(), to_ids=False)
+        file_object.add_attribute(
+            kind, value=hashlib.new(kind, content, usedforsecurity=False).hexdigest(), to_ids=False
+        )
     file_object.add_reference(attribute["uuid"], "related-to")
     event.add_object(file_object)
     annotation = MISPObject("annotation")
@@ -184,6 +187,10 @@ def handler(q=False):
             raise ModuleError("An attribute containing type, value and uuid is required.")
         if attribute["type"] not in mispattributes["input"]:
             raise ModuleError("Unsupported attribute type; expected attachment or malware-sample.")
+        try:
+            UUID(attribute["uuid"])
+        except ValueError:
+            raise ModuleError("The attribute uuid must be a valid UUID.") from None
         config = request.get("config")
         if config is None:
             config = {}

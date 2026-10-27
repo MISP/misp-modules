@@ -12,7 +12,7 @@ Configuration:
 | `timeout` | `60` | Analysis timeout in seconds, from 1 to 300. |
 | `max_size_mb` | `25` | Maximum decoded attachment/archive and extracted sample size in MiB, from 1 to 100. |
 
-Input is a MISP `attachment` or `malware-sample` attribute containing `type`, `value`, `uuid` and base64 `data`. Malware samples must be ZIP archives containing one sample, optionally accompanied by MISP's `.filename.txt` metadata. The attribute value must be `filename|md5`; the extracted sample is verified against that MD5. The ZIP password is `infected`; unencrypted archives also work. Filenames from attributes and ZIP entries are never used as filesystem paths. The module writes the bytes to a private temporary file named `sample.exe` and removes it after analysis, including on failure.
+Input is a MISP `attachment` or `malware-sample` attribute containing `type`, `value`, a valid `uuid` and base64 `data`. Invalid UUIDs are rejected before decoding the sample or invoking the analyzer. Malware samples must be ZIP archives containing one sample, optionally accompanied by MISP's `.filename.txt` metadata. The attribute value must be `filename|md5`; the extracted sample is verified against that MD5. The ZIP password is `infected`; unencrypted archives also work. Filenames from attributes and ZIP entries are never used as filesystem paths. The module writes the bytes to a private temporary file named `sample.exe` and removes it after analysis, including on failure.
 
 The command selects `--output=json --dump=all --hashes` and the offline plugins `imports,mitigation,resources,peid,compilers,findcrypt,strings`. It does not select `all` or the VirusTotal plugin. Run the module with a trusted Manalyze installation under the same isolation and resource controls used for other file parsers. Captured JSON is stored in a temporary file; reports larger than 20 MiB are rejected after the process finishes. The timeout bounds process runtime, but the module does not impose an operating-system disk or memory quota.
 
@@ -23,7 +23,7 @@ Results use `misp_standard`:
 - Each plugin yields a `malware-analysis` object with product `Manalyze`, the plugin name, its summary (when present), and its own verdict: 0 → `benign`, 1 → `unknown`, 2 → `suspicious`, 3 → `malicious`. These objects reference the file and the report annotation. Verdicts describe each plugin's limited scope, not an aggregate judgment of the file.
 - An `annotation` object references the file and preserves the complete single-file JSON report as `manalyze.json`, including PE headers, sections, imports, hashes and arbitrary plugin output. The temporary input path used as the CLI's outer report key is omitted.
 
-All newly created attributes have `to_ids=false`. Existing MISP object templates cover these fields; no new template is required. Invalid requests, oversized samples, invalid archives, non-PE inputs, missing executables, timeouts, process failures and malformed or empty reports return an error without fabricated findings.
+File identification hashes use `usedforsecurity=False` so MD5 verification and hash enrichment also work with Python FIPS restrictions. All newly created attributes have `to_ids=false`. Existing MISP object templates cover these fields; no new template is required. Invalid requests, oversized samples, invalid archives, non-PE inputs, missing executables, timeouts, process failures and malformed or empty reports return an error without fabricated findings.
 
 For a request example, set `module` to `manalyze` and provide:
 

@@ -32,7 +32,9 @@ REPORT = {
 
 def query(content=SAMPLE, kind="attachment", value=None, config=None):
     if value is None:
-        value = "program.exe" + ("|" + hashlib.md5(SAMPLE).hexdigest() if kind == "malware-sample" else "")
+        value = "program.exe" + (
+            "|" + hashlib.md5(SAMPLE, usedforsecurity=False).hexdigest() if kind == "malware-sample" else ""
+        )
     return json.dumps(
         {
             "attribute": {
@@ -79,7 +81,7 @@ def test_full_report_and_independent_verdicts():
     file_object, annotation = objects[:2]
     assert attributes(file_object)["filename"] == "program.exe"
     assert attributes(file_object)["size-in-bytes"] == str(len(SAMPLE))
-    assert attributes(file_object)["sha256"] == hashlib.sha256(SAMPLE).hexdigest()
+    assert attributes(file_object)["sha256"] == hashlib.sha256(SAMPLE, usedforsecurity=False).hexdigest()
     report_attribute = next(a for a in annotation["Attribute"] if a["object_relation"] == "attachment")
     assert json.loads(base64.b64decode(report_attribute["data"])) == REPORT
     assert "misp-manalyze-" not in base64.b64decode(report_attribute["data"]).decode()
@@ -112,7 +114,11 @@ def test_malware_sample_zip_with_misp_filename_metadata():
         archive.writestr("digest.filename.txt", "program.exe")
     with patch.object(module.subprocess, "run", side_effect=run_report()):
         result = module.handler(
-            query(content.getvalue(), kind="malware-sample", value="program.exe|" + hashlib.md5(SAMPLE).hexdigest())
+            query(
+                content.getvalue(),
+                kind="malware-sample",
+                value="program.exe|" + hashlib.md5(SAMPLE, usedforsecurity=False).hexdigest(),
+            )
         )
     assert attributes(result["results"]["Object"][0])["filename"] == "program.exe"
 
@@ -122,7 +128,9 @@ def test_encrypted_misp_zip():
     # it must be rejected as a non-PE after extraction, before invoking Manalyze.
     with patch.object(module.subprocess, "run") as run:
         with zipfile.ZipFile("tests/infected.zip") as archive:
-            digest = hashlib.md5(archive.read(archive.namelist()[0], pwd=b"infected")).hexdigest()
+            digest = hashlib.md5(
+                archive.read(archive.namelist()[0], pwd=b"infected"), usedforsecurity=False
+            ).hexdigest()
         result = module.handler(
             query(Path("tests/infected.zip").read_bytes(), kind="malware-sample", value="eicar|" + digest)
         )
@@ -274,4 +282,47 @@ def test_malware_sample_hash_mismatch():
 def test_malware_sample_invalid_value(value):
     with patch.object(module.subprocess, "run") as run:
         assert "filename|md5" in module.handler(query(kind="malware-sample", value=value))["error"]
+    run.assert_not_called()
+
+
+@pytest.mark.parametrize("kind", ["attachment", "malware-sample"])
+def test_file_identification_hashes_work_with_fips_restrictions(kind):
+    content = SAMPLE
+    if kind == "malware-sample":
+        archive = io.BytesIO()
+        with zipfile.ZipFile(archive, "w") as sample_zip:
+            sample_zip.writestr("sample", SAMPLE)
+        content = archive.getvalue()
+    request = query(content, kind=kind)
+    original_new, original_md5 = hashlib.new, hashlib.md5
+
+    def fips_new(name, data=b"", **kwargs):
+        if name in {"md5", "sha1"} and kwargs.get("usedforsecurity", True):
+            raise ValueError("Hash algorithm disabled for security use in FIPS mode")
+        return original_new(name, data, **kwargs)
+
+    def fips_md5(data=b"", **kwargs):
+        if kwargs.get("usedforsecurity", True):
+            raise ValueError("MD5 disabled for security use in FIPS mode")
+        return original_md5(data, **kwargs)
+
+    with (
+        patch.object(module.hashlib, "new", side_effect=fips_new),
+        patch.object(module.hashlib, "md5", side_effect=fips_md5),
+        patch.object(module.subprocess, "run", side_effect=run_report()),
+    ):
+        result = module.handler(request)
+    file_attributes = attributes(result["results"]["Object"][0])
+    for name in ("md5", "sha1", "sha256"):
+        assert file_attributes[name] == original_new(name, SAMPLE, usedforsecurity=False).hexdigest()
+
+
+@pytest.mark.parametrize("uuid", ["not-a-uuid", "g" * 32, UUID[:-1], UUID + "-extra"])
+def test_malformed_uuid_is_rejected_before_sample_processing(uuid):
+    request = json.loads(query())
+    request["attribute"]["uuid"] = uuid
+    with patch.object(module, "_sample") as sample, patch.object(module.subprocess, "run") as run:
+        result = module.handler(json.dumps(request))
+    assert "valid UUID" in result["error"]
+    sample.assert_not_called()
     run.assert_not_called()
