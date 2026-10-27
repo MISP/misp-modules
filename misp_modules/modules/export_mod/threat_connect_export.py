@@ -35,21 +35,21 @@ moduleinfo = {
 #   Default_Source: The source of the data. Typically this won't be changed from the default
 moduleconfig = ["Default_Source"]
 
-# Map of MISP fields => ThreatConnect fields
+# Map of MISP fields => ThreatConnect fields; an empty field skips that part of a composite value
 fieldmap = {
     "domain": "Host",
     "domain|ip": "Host|Address",
     "hostname": "Host",
     "ip-src": "Address",
     "ip-dst": "Address",
-    "ip-src|port": "Address",
-    "ip-dst|port": "Address",
+    "ip-src|port": "Address|",
+    "ip-dst|port": "Address|",
     "whois-registrant-email": "EmailAddress",
     "email-src": "EmailAddress",
     "email-dst": "EmailAddress",
     "url": "URL",
     "md5": "File",
-    "filename|md5": "File",
+    "filename|md5": "|File",
 }
 
 # combine all the MISP fields from fieldmap into one big list
@@ -87,6 +87,8 @@ def handler(q=False):
                     indicators = tuple(attribute["value"].split("|"))
                     tc_types = tuple(fieldmap[attribute["type"]].split("|"))
                     for i, indicator in enumerate(indicators):
+                        if not tc_types[i]:
+                            continue
                         writer.writerow(
                             {
                                 "Type": tc_types[i],
