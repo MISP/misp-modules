@@ -68,13 +68,30 @@ def _api(check=None, rank=None, calls=None):
     return _get
 
 
+def _reputation(results):
+    """The reputation object as {object_relation: value}, checked to point at the queried attribute."""
+    (reputation,) = results["results"]["Object"]
+    assert reputation["name"] == "reputation"
+    assert [r["referenced_uuid"] for r in reputation["ObjectReference"]] == [UUID]
+    return {a["object_relation"]: a["value"] for a in reputation["Attribute"]}
+
+
 def _texts(results):
-    return [a["value"] for a in results["results"]["Attribute"] if a["type"] == "text"]
+    """The two lines of the reputation text: the feed listing and the Top 1M rank."""
+    return _reputation(results)["text"].split("\n")
 
 
 def test_listed_domain_returns_the_listing_and_the_rank():
     with patch.object(netapi.requests, "get", _api(CHECK_LISTED_NOW, RANK_NOT_IN_TOP_1M)):
         results = netapi.handler(_query("000359.xyz"))
+
+    reputation = _reputation(results)
+    assert reputation["classification"] == "malicious"
+    assert reputation["source"] == "NetAPI"
+    assert reputation["list-name"] == "NetAPI compromised domains"
+    assert reputation["first-seen"] == "2023-02-25T00:00:00+00:00"
+    assert reputation["last-seen"] == "2026-10-26T01:05:27+00:00"
+    assert reputation["link"] == "https://netapi.com/lookup-domain/000359.xyz/"
 
     listing, rank = _texts(results)
     assert listing.startswith("NetAPI compromised feed: 000359.xyz is listed now")
@@ -94,12 +111,19 @@ def test_hostname_listed_through_its_registered_domain_says_so():
         results = netapi.handler(_query("www.000359.xyz", "hostname"))
 
     assert "matched entry: 000359.xyz (the registered domain)" in _texts(results)[0]
+    # The listed entry is the registered domain, so the hostname gets the weaker verdict
+    # and the link opens the entry that is actually listed.
+    reputation = _reputation(results)
+    assert reputation["classification"] == "suspicious"
+    assert reputation["link"] == "https://netapi.com/lookup-domain/000359.xyz/"
 
 
 def test_past_listing_is_not_reported_as_current():
     with patch.object(netapi.requests, "get", _api(CHECK_LISTED_PAST, RANK_PAST_NOT_IN_TOP_1M)):
         results = netapi.handler(_query("0-07.ru"))
 
+    # A past listing is history, not a verdict on the value today.
+    assert _reputation(results)["classification"] == "unknown"
     listing, rank = _texts(results)
     assert "listed in the past (last seen 2019-12-25), not in the current feed" in listing
     assert "reported by suspicious" in listing
@@ -111,9 +135,26 @@ def test_a_clean_value_is_an_answer_not_an_error():
     with patch.object(netapi.requests, "get", _api(CHECK_CLEAN, RANK_IN_TOP_1M)):
         results = netapi.handler(_query("github.com"))
 
+    reputation = _reputation(results)
+    # Absence from a blocklist is no opinion, so it must not read as benign either.
+    assert reputation["classification"] == "unknown"
+    assert "first-seen" not in reputation and "last-seen" not in reputation
+    assert reputation["link"] == "https://netapi.com/lookup-domain/github.com/"
+
     listing, rank = _texts(results)
     assert listing == "NetAPI compromised feed: github.com is not listed, now or in the past"
     assert rank == "NetAPI Top 1M: github.com is ranked #11 (snapshot of 2026-10-26)"
+
+
+def test_an_unexpected_date_format_is_left_out_instead_of_failing():
+    """pymisp refuses a datetime it cannot parse; the lookup must still answer."""
+    odd_dates = dict(CHECK_LISTED_NOW, first_seen="Feb 2023", last_seen="2026-10-26T01:05:27Z")
+    with patch.object(netapi.requests, "get", _api(odd_dates, RANK_NOT_IN_TOP_1M)):
+        results = netapi.handler(_query("000359.xyz"))
+
+    reputation = _reputation(results)
+    assert "first-seen" not in reputation and "last-seen" not in reputation
+    assert "first seen Feb 2023" in reputation["text"]
 
 
 def test_url_is_looked_up_by_its_host():
@@ -208,6 +249,8 @@ def test_results_are_not_correlated_and_not_flagged_for_ids():
     with patch.object(netapi.requests, "get", _api(CHECK_LISTED_NOW, RANK_NOT_IN_TOP_1M)):
         results = netapi.handler(_query("000359.xyz"))
 
-    for attribute in results["results"]["Attribute"]:
+    (input_attribute,) = results["results"]["Attribute"]
+    assert (input_attribute["uuid"], input_attribute["value"]) == (UUID, "000359.xyz")
+    for attribute in results["results"]["Object"][0]["Attribute"]:
         assert attribute["disable_correlation"] is True
         assert attribute["to_ids"] is False

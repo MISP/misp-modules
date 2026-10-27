@@ -1,20 +1,21 @@
 import ipaddress
 import json
+from datetime import datetime, timezone
 from urllib.parse import urlparse
 
 import requests
-from pymisp import MISPEvent
+from pymisp import MISPAttribute, MISPEvent, MISPObject
 
 from . import check_input_attribute, standard_error_message
 
 misperrors = {"error": "Error"}
 mispattributes = {
     "input": ["domain", "hostname", "url", "domain|ip"],
-    "output": ["text"],
+    "output": ["text", "datetime", "link"],
     "format": "misp_standard",
 }
 moduleinfo = {
-    "version": "1.0",
+    "version": "1.1",
     "author": "Slava Olesik",
     "description": (
         "Check a domain, hostname or URL against the NetAPI compromised feed and get the domain's position in the"
@@ -33,6 +34,10 @@ moduleinfo = {
         " registered domain in the NetAPI Top 1M, a daily popularity ranking: a top-ranked domain in the feed is"
         " more likely a compromised legitimate site than infrastructure set up by the attacker. IP addresses are"
         " not covered, so a URL whose host is an IP address is not looked up."
+        "\n\nThe answer is a reputation object linked to the queried attribute: classification malicious when the"
+        " value is listed now, suspicious when only its registered domain is, and unknown when it is listed in the"
+        " past only or never (the feed holds no opinion on a value it does not list), with the first and last seen"
+        " dates, a link to the NetAPI domain lookup and the details and the Top 1M rank in its text."
         "\n\nNo API key is required. An optional NetAPI API token only raises the request limits (30 requests a"
         " minute and 1,000 a day per IP address without one). Only the queried indicator leaves the MISP instance."
     ),
@@ -42,14 +47,15 @@ moduleinfo = {
         "https://netapi.com/help/api/#json-api",
     ],
     "input": "A domain, hostname or URL.",
-    "output": "Text attributes describing the feed listing and the Top 1M rank.",
+    "output": "A reputation object with the feed listing and the Top 1M rank.",
 }
 # No API key is needed: api_token only raises the request limits, and api_url is exposed
 # only so an operator can point the module at a different deployment.
 moduleconfig = ["api_token", "api_url"]
 
 DEFAULT_API_URL = "https://netapi.com/api-json/"
-USER_AGENT = "netapi-misp/1.0 (+https://github.com/MISP/misp-modules)"
+USER_AGENT = "netapi-misp/1.1 (+https://github.com/MISP/misp-modules)"
+LOOKUP_URL = "https://netapi.com/lookup-domain/{}/"
 TIMEOUT = 30
 
 
@@ -141,6 +147,32 @@ def _rank_summary(rank):
     return f"NetAPI Top 1M: {domain} is not in the NetAPI Top 1M"
 
 
+def _classification(query, check):
+    """
+    MISP reads malicious, suspicious and benign as a verdict and any other word as no opinion.
+    Only a current listing is a verdict; a hostname that matched through its registered domain
+    is not itself on the list, so it gets the weaker word.
+    """
+    if not check.get("listed_now"):
+        return "unknown"
+    matched = check.get("matched_value")
+    return "malicious" if not matched or matched == query else "suspicious"
+
+
+def _iso_datetime(value):
+    """
+    The API gives "2026-10-26 01:05:27 UTC" or a bare date. pymisp raises on a datetime it cannot
+    parse, so any other form is left out of the field; the text still carries it.
+    """
+    value = str(value or "").strip()
+    for date_format in ("%Y-%m-%d %H:%M:%S UTC", "%Y-%m-%d"):
+        try:
+            return datetime.strptime(value, date_format).replace(tzinfo=timezone.utc).isoformat()
+        except ValueError:
+            continue
+    return None
+
+
 def handler(q=False):
     if q is False:
         return False
@@ -168,26 +200,36 @@ def handler(q=False):
     except NetAPIError as error:
         return {"error": f"NetAPI lookup failed: {error}"}
 
-    misp_event = MISPEvent()
-    misp_event.add_attribute(
-        type="text",
-        value=_listing_summary(query, check),
-        comment="NetAPI: compromised feed listing",
-        disable_correlation=True,
-    )
-
     # The rank is context, so a failure here is reported next to the listing instead of
     # discarding the answer that was already obtained.
     try:
         rank_value = _rank_summary(_get(api_url, token, "domain-rank", domain=query))
     except NetAPIError as error:
         rank_value = f"NetAPI Top 1M rank unavailable: {error}"
-    misp_event.add_attribute(
-        type="text",
-        value=rank_value,
-        comment="NetAPI: Top 1M popularity rank",
-        disable_correlation=True,
-    )
+
+    misp_event = MISPEvent()
+    input_attribute = MISPAttribute()
+    input_attribute.from_dict(**attribute)
+    misp_event.add_attribute(**input_attribute)
+
+    # Typed explicitly, since pymisp does not bundle the reputation template yet. Nothing in
+    # the object correlates: every lookup would otherwise share "NetAPI", the list name and
+    # the verdict word with every other one.
+    reputation = MISPObject("reputation")
+    fields = [
+        ("classification", "text", _classification(query, check)),
+        ("source", "text", "NetAPI"),
+        ("list-name", "text", "NetAPI compromised domains"),
+        ("first-seen", "datetime", _iso_datetime(check.get("first_seen"))),
+        ("last-seen", "datetime", _iso_datetime(check.get("last_seen"))),
+        ("link", "link", LOOKUP_URL.format(check.get("matched_value") or query)),
+        ("text", "text", f"{_listing_summary(query, check)}\n{rank_value}"),
+    ]
+    for relation, attribute_type, value in fields:
+        if value:
+            reputation.add_attribute(relation, type=attribute_type, value=value, to_ids=False, disable_correlation=True)
+    reputation.add_reference(input_attribute.uuid, "related-to")
+    misp_event.add_object(reputation)
 
     event = json.loads(misp_event.to_json())
     return {"results": {key: event[key] for key in ("Attribute", "Object") if event.get(key)}}
