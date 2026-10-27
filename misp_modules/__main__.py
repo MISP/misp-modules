@@ -43,6 +43,7 @@ from tornado import ioloop
 import misp_modules
 from misp_modules import openapi as openapi_builder
 from misp_modules.http_debug import configure_http_debug, module_context
+from misp_modules.module_config import ModuleConfig, ModuleConfigError
 from misp_modules.statistics import ModuleStatistics
 
 # See https://github.com/MISP/misp-modules/issues/662
@@ -52,6 +53,7 @@ MAX_BUFFER_SIZE = 1073741824
 MODULES_HANDLERS = {}
 OPENAPI_DOCUMENT = {}
 MODULE_STATISTICS = ModuleStatistics()
+MODULE_CONFIG = ModuleConfig()
 LOGGER = logging.getLogger("misp-modules")
 
 SWAGGER_UI_TEMPLATE = (
@@ -245,7 +247,12 @@ class QueryModule(tornado.web.RequestHandler):
 
     @tornado_concurrent.run_on_executor
     def run_request(self, module_name, json_payload, dict_payload):
+        # Log only the original request, before any server-local secrets are added.
         LOGGER.debug("QueryModule %s request %s", module_name, json_payload)
+        resolved_payload = MODULE_CONFIG.resolve(module_name, dict_payload)
+        if resolved_payload is not dict_payload:
+            dict_payload = resolved_payload
+            json_payload = orjson.dumps(dict_payload)
         with module_context(module_name):
             try:
                 response = MODULES_HANDLERS[module_name].dict_handler(request=dict_payload)
@@ -310,11 +317,18 @@ def main():
     arg_parser.add_argument("-p", "--port", type=int, default=6666, help="port (default 6666)")
     arg_parser.add_argument("-l", "--listen", default="localhost", help="address (default localhost)")
     arg_parser.add_argument("-c", "--custom", default=None, help="custom modules root")
+    arg_parser.add_argument("--module-config", default=None, help="JSON file containing optional per-module defaults")
     arg_parser.add_argument("-s", "--system", default=None, help="legacy option that now has no effect")
     args = arg_parser.parse_args()
 
     # Initialize
     init_logger(debug=args.debug, debug_extended=args.debug_extended)
+
+    global MODULE_CONFIG  # noqa: PLW0603
+    try:
+        MODULE_CONFIG = ModuleConfig.from_file(args.module_config) if args.module_config is not None else ModuleConfig()
+    except ModuleConfigError as exc:
+        arg_parser.error(str(exc))
 
     # Alert if needed
     warn_if_degraded()
