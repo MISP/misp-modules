@@ -107,12 +107,12 @@ def handle_combined(yara_rules: list, yr: YaraRule, attribute: dict):
     type_1, type_2 = attribute["type"].split("|")
     value_1, value_2 = attribute["value"].split("|")
     try:
-        handlers[type_1](yara_rules, yr, type_1, value_1)
+        handlers[type_1](yara_rules, yr, dict(attribute, type=type_1, value=value_1))
     except KeyError:
         # ignore unsupported types
         pass
     try:
-        handlers[type_2](yara_rules, yr, type_2, value_2)
+        handlers[type_2](yara_rules, yr, dict(attribute, type=type_2, value=value_2))
     except KeyError:
         # ignore unsupported types
         pass
@@ -173,7 +173,7 @@ def handle_yara(yara_rules: list, yr: YaraRule, attribute: dict):
 def handle_malware_sample(yara_rules: list, yr: YaraRule, attribute: dict):
     if not attribute["to_ids"]:  # skip non IDS attributes
         return
-    handle_combined(yara_rules, yr, "filename|md5", attribute["value"])
+    handle_combined(yara_rules, yr, dict(attribute, type="filename|md5"))
 
 
 def handle_meta(yara_rules: list, yr: YaraRule, attribute: dict):
