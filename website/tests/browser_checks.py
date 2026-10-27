@@ -86,6 +86,38 @@ class InterfaceTests(unittest.TestCase):
         finally:
             utils.ADMIN_PASSWORD = None
 
+    def test_login_input_survives_delayed_toast_initialization(self):
+        from app.utils import utils
+        utils.ADMIN_PASSWORD = "local-test-password"
+        pending = []
+        try:
+            self.home()
+            # The form is usable before the optional toast module finishes loading.
+            # Hold its import to reproduce the timing seen on a fresh CI runner.
+            self.page.route("**/static/js/toaster.js", lambda route: pending.append(route))
+            self.page.goto(self.base + "/login", wait_until="commit")
+            self.page.get_by_label("Password", exact=True).fill("local-test-password")
+            self.page.get_by_label("Keep me logged in", exact=True).check()
+            self.assertEqual(len(pending), 1)
+            pending.pop().continue_()
+            self.page.wait_for_load_state("load")
+            self.page.unroute("**/static/js/toaster.js")
+            await_toast = """async () => {
+                const {display_toast} = await import('/static/js/toaster.js')
+                await display_toast(new Response(JSON.stringify({message: 'Toast ready', toast_class: 'success-subtle'})))
+            }"""
+            self.page.evaluate(await_toast)
+            expect(self.page.locator(".toast.show")).to_contain_text("Toast ready")
+            expect(self.page.get_by_label("Password", exact=True)).to_have_value("local-test-password")
+            expect(self.page.get_by_label("Keep me logged in", exact=True)).to_be_checked()
+            self.page.get_by_role("button", name="Log in", exact=True).click()
+            self.page.wait_for_url(self.base + "/")
+            expect(self.page.get_by_role("link", name="Log out", exact=True)).to_be_visible()
+        finally:
+            for route in pending:
+                route.abort()
+            utils.ADMIN_PASSWORD = None
+
     @unittest.skipUnless(os.environ.get("AXE_SCRIPT_PATH"), "Set AXE_SCRIPT_PATH to an installed axe.min.js")
     def test_accessibility_scan(self):
         for path in ("/", "/modules_config", "/history", "/history_session", "/history_tree", "/external_tools", "/add_external_tool", "/login", "/query/test-query", "/query/object-query"):
