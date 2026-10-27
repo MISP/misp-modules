@@ -1,40 +1,44 @@
 import base64
 import io
 import json
-import sys
+import runpy
 import zipfile
+import zlib
+from pathlib import Path
+from urllib.parse import urlsplit, urlunsplit
 
 from mwdblib import MWDB
+from mwdblib.exc import MWDBError
 from pymisp import PyMISP
-
-# from distutils.util import strtobool
-
+from pymisp.exceptions import PyMISPError
+from requests.exceptions import RequestException
 
 misperrors = {"error": "Error"}
 mispattributes = {"input": ["attachment", "malware-sample"], "output": ["link"]}
 moduleinfo = {
-    "version": "1",
+    "version": "2",
     "author": "Koen Van Impe",
     "description": "Module to push malware samples to a MWDB instance",
     "module-type": ["expansion"],
     "name": "MWDB Submit",
     "logo": "",
     "requirements": [
-        "* mwdblib installed (pip install mwdblib) ; * (optional) keys.py file to add tags of events/attributes to MWDB"
-        " * (optional) MWDB attribute created for the link back to MISP (defined in mwdb_misp_attribute)"
+        "mwdblib>=4.0.0 and MWDB Core>=2.6.0",
+        "Optional keys.py file for MISP event and attribute tags",
+        "Optional MWDB attribute key configured in mwdb_misp_attribute",
     ],
     "features": (
-        "An expansion module to push malware samples to a MWDB (https://github.com/CERT-Polska/mwdb-core) instance."
-        " This module does not push samples to a sandbox. This can be achieved via Karton (connected to the MWDB)."
-        " Does: * Upload of attachment or malware sample to MWDB * Tags of events and/or attributes are added to MWDB."
-        " * Comment of the MISP attribute is added to MWDB. * A link back to the MISP event is added to MWDB via the"
-        " MWDB attribute.  * A link to the MWDB attribute is added as an enrichted attribute to the MISP event."
+        "Uploads an attachment or unpacked MISP malware sample to MWDB using an API key."
+        " Optionally forwards event and attribute tags, the attribute comment and the MISP event ID."
+        " Returns a link to the uploaded sample. mwdb_url accepts an instance URL or an API URL ending in /api/."
+        " Boolean settings accept true/false, yes/no, on/off and 1/0."
+        " mwdb_public defaults to true for compatibility; set it to false to use normal instance sharing."
+        " See documentation/expansion/mwdb.md for configuration."
     ),
-    "references": [],
+    "references": ["https://mwdb.readthedocs.io/en/latest/user-guide/8-REST-and-mwdblib.html"],
     "input": "Attachment or malware sample",
-    "output": "Link attribute that points to the sample at the MWDB instane",
+    "output": "Link attribute pointing to the uploaded MWDB sample",
 }
-
 moduleconfig = [
     "mwdb_apikey",
     "mwdb_url",
@@ -43,126 +47,179 @@ moduleconfig = [
     "include_tags_event",
     "include_tags_attribute",
 ]
-
 pymisp_keys_file = "/var/www/MISP/PyMISP/"
 mwdb_public_default = True
 
-"""
-An expansion module to push malware samples to a MWDB (https://github.com/CERT-Polska/mwdb-core) instance.
-This module does not push samples to a sandbox. This can be achieved via Karton (connected to the MWDB)
 
-Does:
-- Upload of attachment or malware sample to MWDB
-- Tags of events and/or attributes are added to MWDB.
-- Comment of the MISP attribute is added to MWDB.
-- A link back to the MISP event is added to MWDB via the MWDB attribute.
-- A link to the MWDB attribute is added as an enriched attribute to the MISP event.
+class ModuleError(ValueError):
+    """A validation error safe to return to the caller."""
 
-Requires
-- mwdblib installed (pip install mwdblib)
-- (optional) keys.py file to add tags of events/attributes to MWDB
-- (optional) MWDB "attribute" created for the link back to MISP (defined in mwdb_misp_attribute)
-"""
+
+def _boolean(config, name, default=False):
+    value = config.get(name)
+    if value is None or value == "":
+        return default
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, (str, int)):
+        value = str(value).strip().lower()
+        if value in ("1", "true", "yes", "on"):
+            return True
+        if value in ("0", "false", "no", "off"):
+            return False
+    raise ModuleError(f"{name} must be a boolean (true/false).")
+
+
+def _urls(value):
+    if not isinstance(value, str) or not value.strip():
+        raise ModuleError("Missing MWDB server URL.")
+    try:
+        parsed = urlsplit(value.strip())
+        port = parsed.port
+    except ValueError:
+        raise ModuleError("Invalid MWDB server URL.") from None
+    if (
+        parsed.scheme not in ("http", "https")
+        or not parsed.hostname
+        or parsed.username is not None
+        or parsed.password is not None
+        or parsed.query
+        or parsed.fragment
+        or (port is not None and port == 0)
+        or any(character.isspace() for character in value.strip())
+    ):
+        raise ModuleError("MWDB URL must be an HTTP(S) instance or API URL without credentials, query or fragment.")
+    path = parsed.path.rstrip("/")
+    if path.endswith("/api"):
+        path = path[:-4]
+    base = urlunsplit((parsed.scheme, parsed.netloc, path, "", ""))
+    return base + "/api/", base + "/file/"
+
+
+def _sample(request):
+    kinds = [kind for kind in mispattributes["input"] if kind in request]
+    if len(kinds) != 1:
+        raise ModuleError("Supply exactly one malware sample or attachment.")
+    kind = kinds[0]
+    filename = request[kind]
+    if not isinstance(filename, str) or not filename.strip():
+        raise ModuleError("A sample filename is required.")
+    if not isinstance(request.get("data"), str) or not request["data"]:
+        raise ModuleError("Base64-encoded sample data is required.")
+    try:
+        data = base64.b64decode(request["data"], validate=True)
+        if kind == "malware-sample":
+            filename = filename.split("|", 1)[0]
+            with zipfile.ZipFile(io.BytesIO(data)) as archive:
+                # MISP archives may contain the original filename before the binary.
+                members = [
+                    item
+                    for item in archive.infolist()
+                    if not item.is_dir() and not item.filename.endswith(".filename.txt")
+                ]
+                if len(members) != 1:
+                    raise ModuleError("A malware-sample archive must contain exactly one sample.")
+                data = archive.read(members[0], pwd=b"infected")
+    except ModuleError:
+        raise
+    except (ValueError, OSError, RuntimeError, zipfile.BadZipFile, zlib.error):
+        raise ModuleError("Unable to decode or unpack submitted sample data.") from None
+    if not filename.strip():
+        raise ModuleError("A sample filename is required.")
+    return filename, data
+
+
+def _metadata(request, include_event, include_attribute):
+    comments = [f"MISP attribute {request['attribute_uuid']}"] if request.get("attribute_uuid") else []
+    if not (include_event or include_attribute):
+        return [], comments
+    if include_event and not request.get("event_id"):
+        raise ModuleError("event_id is required to include event tags.")
+    if include_attribute and not request.get("attribute_uuid"):
+        raise ModuleError("attribute_uuid is required to include attribute tags.")
+    try:
+        # Load the legacy configuration without changing the process-wide import path.
+        keys = runpy.run_path(str(Path(pymisp_keys_file) / "keys.py"))
+        misp = PyMISP(keys["misp_url"], keys["misp_key"], keys["misp_verifycert"], False)
+        tags = []
+        if include_event:
+            result = misp.get_event(request["event_id"])
+            if not isinstance(result, dict) or not isinstance(result.get("Event"), dict):
+                raise ModuleError("Unable to fetch MISP event metadata.")
+            event = result["Event"]
+            tags.extend(event.get("Tag") or [])
+            if event.get("info"):
+                comments.append(f"Fetched from event {request['event_id']} - {event['info']}")
+        if include_attribute:
+            result = misp.get_attribute(request["attribute_uuid"])
+            if not isinstance(result, dict) or not isinstance(result.get("Attribute"), dict):
+                raise ModuleError("Unable to fetch MISP attribute metadata.")
+            attribute = result["Attribute"]
+            tags.extend(attribute.get("Tag") or [])
+            if attribute.get("comment"):
+                comments[0] = attribute["comment"]
+    except (OSError, ImportError, KeyError, SyntaxError, PyMISPError, RequestException):
+        raise ModuleError("Unable to read MISP metadata; check the PyMISP keys.py configuration and access.") from None
+    names = [
+        tag["name"]
+        for tag in tags
+        if isinstance(tag, dict)
+        and isinstance(tag.get("name"), str)
+        and tag["name"]
+        and "misp-galaxy" not in tag["name"]
+    ]
+    return list(dict.fromkeys(names)), comments
 
 
 def handler(q=False):
     if q is False:
         return False
-    request = json.loads(q)
+    try:
+        try:
+            request = json.loads(q)
+        except (ValueError, TypeError):
+            raise ModuleError("Invalid JSON request.") from None
+        if not isinstance(request, dict):
+            raise ModuleError("The request must be a JSON object.")
+        config = request.get("config")
+        if not isinstance(config, dict):
+            raise ModuleError("Missing MWDB configuration.")
+        api_key = config.get("mwdb_apikey")
+        if not isinstance(api_key, str) or not api_key.strip():
+            raise ModuleError("Missing MWDB API key.")
+        api_url, file_url = _urls(config.get("mwdb_url"))
+        public = _boolean(config, "mwdb_public", mwdb_public_default)
+        include_event = _boolean(config, "include_tags_event")
+        include_attribute = _boolean(config, "include_tags_attribute")
+        attribute_key = config.get("mwdb_misp_attribute")
+        if attribute_key is not None and not isinstance(attribute_key, str):
+            raise ModuleError("mwdb_misp_attribute must be an attribute key name.")
+        attributes = None
+        if attribute_key and attribute_key.strip():
+            event_id = request.get("event_id")
+            if not isinstance(event_id, (str, int)) or isinstance(event_id, bool) or not str(event_id).strip():
+                raise ModuleError("event_id is required when mwdb_misp_attribute is configured.")
+            attributes = {attribute_key.strip(): str(event_id)}
+        filename, data = _sample(request)
+        tags, comments = _metadata(request, include_event, include_attribute)
+    except ModuleError as error:
+        return {"error": str(error)}
 
     try:
-        data = request.get("data")
-        if "malware-sample" in request:
-            # malicious samples are encrypted with zip (password infected) and then base64 encoded
-            sample_filename = request.get("malware-sample").split("|", 1)[0]
-            data = base64.b64decode(data)
-            fl = io.BytesIO(data)
-            zf = zipfile.ZipFile(fl)
-            sample_hashname = zf.namelist()[0]
-            data = zf.read(sample_hashname, b"infected")
-            zf.close()
-        elif "attachment" in request:
-            # All attachments get base64 encoded
-            sample_filename = request.get("attachment")
-            data = base64.b64decode(data)
+        mwdb = MWDB(api_key=api_key.strip(), api_url=api_url, config_path=None, obey_ratelimiter=False)
+        file_object = mwdb.upload_file(filename, data, attributes=attributes, tags=tags, public=public)
+    except (MWDBError, RequestException):
+        return {"error": "Unable to upload sample to MWDB; check the API key, permissions and server availability."}
 
-        else:
-            misperrors["error"] = "No malware sample or attachment supplied"
-            return misperrors
-    except Exception:
-        misperrors["error"] = "Unable to process submited sample data"
-        return misperrors
-
-    if (request["config"].get("mwdb_apikey") is None) or (request["config"].get("mwdb_url") is None):
-        misperrors["error"] = "Missing MWDB API key or server URL"
-        return misperrors
-
-    mwdb_misp_attribute = request["config"].get("mwdb_misp_attribute")
-    mwdb_public = request["config"].get("mwdb_public", mwdb_public_default)
-
-    include_tags_event = request["config"].get("include_tags_event")
-    include_tags_attribute = request["config"].get("include_tags_attribute")
-    misp_event_id = request.get("event_id")
-    misp_attribute_uuid = request.get("attribute_uuid")
-    misp_attribute_comment = ""
-    mwdb_tags = []
-    misp_info = ""
-
+    link = file_url + file_object.id
+    comment = "Link to MWDB sample"
     try:
-        if include_tags_event:
-            sys.path.append(pymisp_keys_file)
-            from keys import misp_key, misp_url, misp_verifycert
-
-            misp = PyMISP(misp_url, misp_key, misp_verifycert, False)
-            misp_event = misp.get_event(misp_event_id)
-            if "Event" in misp_event:
-                misp_info = misp_event["Event"]["info"]
-                if "Tag" in misp_event["Event"]:
-                    tags = misp_event["Event"]["Tag"]
-                    for tag in tags:
-                        if "misp-galaxy" not in tag["name"]:
-                            mwdb_tags.append(tag["name"])
-        if include_tags_attribute:
-            sys.path.append(pymisp_keys_file)
-            from keys import misp_key, misp_url, misp_verifycert
-
-            misp = PyMISP(misp_url, misp_key, misp_verifycert, False)
-            misp_attribute = misp.get_attribute(misp_attribute_uuid)
-            if "Attribute" in misp_attribute:
-                if "Tag" in misp_attribute["Attribute"]:
-                    tags = misp_attribute["Attribute"]["Tag"]
-                    for tag in tags:
-                        if "misp-galaxy" not in tag["name"]:
-                            mwdb_tags.append(tag["name"])
-                misp_attribute_comment = misp_attribute["Attribute"]["comment"]
-    except Exception:
-        misperrors["error"] = "Unable to read PyMISP (keys.py) configuration file"
-        return misperrors
-
-    try:
-        mwdb = MWDB(
-            api_key=request["config"].get("mwdb_apikey"),
-            api_url=request["config"].get("mwdb_url"),
-        )
-        if mwdb_misp_attribute and len(mwdb_misp_attribute) > 0:
-            metakeys = {mwdb_misp_attribute: misp_event_id}
-        else:
-            metakeys = False
-        file_object = mwdb.upload_file(sample_filename, data, metakeys=metakeys, public=mwdb_public)
-        for tag in mwdb_tags:
-            file_object.add_tag(tag)
-        if len(misp_attribute_comment) < 1:
-            misp_attribute_comment = "MISP attribute {}".format(misp_attribute_uuid)
-        file_object.add_comment(misp_attribute_comment)
-        if len(misp_event) > 0:
-            file_object.add_comment("Fetched from event {} - {}".format(misp_event_id, misp_info))
-        mwdb_link = request["config"].get("mwdb_url").replace("/api", "/file/") + "{}".format(file_object.md5)
-    except Exception:
-        misperrors["error"] = "Unable to send sample to MWDB instance"
-        return misperrors
-
-    r = {"results": [{"types": "link", "values": mwdb_link, "comment": "Link to MWDB sample"}]}
-    return r
+        for text in comments:
+            file_object.add_comment(text)
+    except (MWDBError, RequestException):
+        # Upload succeeded: return the link so callers do not retry the submission.
+        comment += "; sample uploaded, but MWDB comments could not be added"
+    return {"results": [{"types": "link", "values": link, "comment": comment}]}
 
 
 def introspection():
@@ -170,5 +227,4 @@ def introspection():
 
 
 def version():
-    moduleinfo["config"] = moduleconfig
-    return moduleinfo
+    return dict(moduleinfo, config=moduleconfig)
