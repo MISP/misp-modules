@@ -81,6 +81,43 @@ served directly, like the existing history and toast modules.
 The existing endpoint payloads, query history/pivot relationships, authentication,
 and module execution semantics are preserved. This change provides a light theme.
 
+## Investigation paths
+
+Session history and Investigation trees use a focused path explorer. A compact
+investigation list sits beside the selected path; small screens use a native
+investigation picker. Overview cards show the number of investigations, total
+queries, and longest path. Query cards expose the indicator, MISP attribute,
+modules, timestamp, parent query, and a direct link to results.
+
+Search matches indicators, module names, and attributes across every path. Parent
+queries remain visible so a matching pivot keeps its context, and matching paths
+expand automatically. Per-branch toggles and Expand all / Collapse branches help
+navigate large investigations. Indentation is capped on deep paths; step labels
+and parent links continue to identify each relationship. Keyboard navigation uses
+ordinary links and buttons inside semantic nested lists, with explicit expanded
+states on branch controls.
+
+Session-only paths have a clear save action and a link to saved trees. Branch
+removal shows an inline confirmation with the **full** subtree size, including
+queries hidden by search. A successful removal reloads server state; failures
+keep the existing path visible. Removing a branch changes tree membership, while
+the enrichment results remain available. Session and saved trees are independent.
+
+The removal endpoints accept an optional `root_id` query parameter, used by the
+new interface to scope a mutation to the selected investigation. Calls without
+this parameter remain supported. Missing nodes return HTTP 404. The underlying
+traversal searches all sibling branches, preserves the root when deleting a
+child, persists nested session changes, and clears a deleted current-query
+pointer. Repeated saves compare the stored topology and do not create duplicates.
+No database migration is required.
+
+![Investigation trees](investigation_trees.png)
+
+![Session history](session_history.png)
+
+[View the mobile investigation layout](investigation_mobile.png). These are
+illustrative fixture paths, not observed DNS or threat intelligence data.
+
 ## Build assets
 
 ```sh
@@ -99,7 +136,7 @@ In a Python environment containing the website's dependencies:
 ```sh
 python -m pip install playwright
 python -m playwright install chromium
-python -m unittest discover -s website/tests -p 'browser_checks.py' -v
+python -m unittest discover -s website/tests -p '*_checks.py' -v
 ```
 
 For a system Chromium, set `CHROMIUM_EXECUTABLE=/usr/bin/chromium` instead of
@@ -110,7 +147,9 @@ access. They cover request payloads and CSRF, validation, configuration, selecti
 reset, network failures/retry, duplicate submissions, settings save/toggle failures,
 login/navigation, result/error grouping, query parent relationships, copy and
 related-query actions, official brand assets, safe text rendering, object cards,
-and layouts at 320, 768, and 1440 pixels.
+and layouts at 320, 768, and 1440 pixels. History checks also cover populated and
+12-level paths, ancestor-preserving search, save/update, filtered root removal,
+API error/retry, scoped mutations, sibling preservation, and session persistence.
 
 Optional screenshots and automated accessibility checks:
 
@@ -118,7 +157,7 @@ Optional screenshots and automated accessibility checks:
 npm install --prefix /tmp/misp-ui-a11y axe-core
 AXE_SCRIPT_PATH=/tmp/misp-ui-a11y/node_modules/axe-core/axe.min.js \
 UI_SCREENSHOT_DIR=/tmp/misp-ui-screenshots \
-python -m unittest discover -s website/tests -p 'browser_checks.py' -v
+python -m unittest discover -s website/tests -p '*_checks.py' -v
 ```
 
 The dedicated `Test website interface` GitHub Actions workflow builds the assets,
@@ -137,8 +176,13 @@ For interactive review with the same isolated fixture data:
 python website/tests/preview_server.py --port 7010
 ```
 
-Open `http://127.0.0.1:7010`. Enrichments return the stored sample result; no module
-is executed. To check real execution, use a normally initialized website with its
+Open `http://127.0.0.1:7010`. For populated history review, visit
+`http://127.0.0.1:7010/history_tree?sample=saved` (session and saved paths) or
+`http://127.0.0.1:7010/history_session?sample=session` (unsaved session paths).
+Sample paths initialize once per browser session; a fresh browser context resets
+the fixture data. These options exist only in the test preview server.
+
+Enrichments return the stored sample result; no module is executed. To check real execution, use a normally initialized website with its
 misp-modules daemon running. The redesign was also checked this way using the
 `extract_url_components` module on an example.org URL, including results and JSON
 download controls.

@@ -49,6 +49,9 @@ def create_fixture_app(database_path):
     @app.before_request
     def fixture_enrichment():
         from flask import request
+        if request.args.get("sample") in ("session", "saved"):
+            from history_samples import seed_history_samples
+            seed_history_samples(request.args["sample"])
         if request.endpoint == "home.run_modules":
             return {"id": "test-query"}, 201
 

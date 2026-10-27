@@ -1,103 +1,29 @@
-import {display_toast} from '../toaster.js'
+const {computed} = Vue
 export default {
-	name: "History_view",
-	delimiters: ['[[', ']]'],
-	props: {
-		history: Object,
-		key_loop: Number,
-		tree_view: Boolean
-	},
-	emits: ['delete_node'],
-	setup(props, {emit}) {
-		async function remove_node(history_uuid){
-			const res = await fetch('/history/remove_node_session/' + history_uuid)
-			display_toast(res)
-			emit('delete_node', true)
-		}
-		async function remove_node_tree(history_uuid){
-			const res = await fetch('/history/remove_node_tree/' + history_uuid)
-			display_toast(res)
-			emit('delete_node', true)
-		}
-
-		return {
-			remove_node, 
-			remove_node_tree,
-			emit
-		}
-	},
-
-	template: `
-	<div style="display: flex;">
-		<div style="list-style-type: none; padding: 10px; font-size: large; margin-left: 13px">
-			<a v-if="'children' in history && history['children'].length" 
-				data-bs-toggle="collapse" style="color: black;" 
-				:href="'#collapseChild-'+history.uuid" 
-				role="button" aria-expanded="true" 
-				:aria-controls="'collapseChild-'+history.uuid">
-
-				<i class="fa-solid fa-caret-down"></i>
-			</a>
-		</div>
-		<a style="text-decoration: none; color: black;" 
-			data-bs-toggle="collapse" 
-			:href="'#collapse'+history.uuid" 
-			role="button" 
-			aria-expanded="false" 
-			:aria-controls="'collapse'+history.uuid">
-
-			<ul class="list-group list-group-horizontal" style="padding-top: 5px;">
-				<li class="list-group-item">
-					<h5>[[history.query.join(", ")]]</h5>
-				</li>
-				<li class="list-group-item">
-					<h5 style="color: brown"><u>Input Attributes</u></h5>
-					[[history.input]]
-				</li>
-				<li class="list-group-item">
-					<h5 style="color: brown"><u>Modules</u></h5>
-					[[history.modules.join(", ")]]
-				</li>
-			</ul>
-		</a>
-		<div style="display: flex; align-items: center; margin-left: 3px">
-			<button v-if="!tree_view" class="btn btn-danger btn-sm" title="Remove this node" @click="remove_node(history.uuid)"><i class="fa-solid fa-trash"></i></button>
-			<button v-else class="btn btn-danger btn-sm" title="Remove this node" @click="remove_node_tree(history.uuid)"><i class="fa-solid fa-trash"></i></button>
-		</div>
-	</div>
-	<div>
-		<div class="collapse" :id="'collapse'+history.uuid" style="width: 70%; margin-left: 30px">
-			<div class="card card-body">
-				<div class="d-flex w-100 justify-content-between">
-					<h5 class="mb-1">[[history.query.join(", ")]]</h5>
-					<small><i>[[history.uuid]]</i></small>
-				</div>
-				<p class="mb-1" style="color: green;"><u>Input Attribute</u>:</p>
-				<div>[[history.input]]</div>
-				<br>
-				<p class="mb-1" style="color: #2000ff;"><u>Modules</u>:</p>
-				<div>
-					[[history.modules.join(", ")]]
-				</div>
-				<div></div>
-				<div class="d-flex w-100 justify-content-between">
-					<div><a :href="'/query/'+history.uuid">See results</a></div>
-					<small><i>[[history.query_date]]</i></small>
-				</div>
-			</div>
-		</div>
-
-		<div class="collapse show" :id="'collapseChild-'+history.uuid">
-			<ul style="list-style-type: none;">
-				<li>
-					<div class="card-body">
-						<template v-for="h, key in history['children']">
-							<history_view :history="h" :key_loop="key" :tree_view="tree_view" @delete_node="(msg) => emit('delete_node', msg)"/>
-						</template>
-					</div>
-				</li>
-			</ul>
-		</div>
-	</div>
-	`
+    name: 'InvestigationNode',
+    delimiters: ['[[', ']]'],
+    props: {
+        node: {type: Object, required: true}, scope: {type: String, required: true},
+        depth: {type: Number, default: 0}, parentQuery: {type: String, default: ''}, parentId: {type: String, default: ''},
+        collapsed: {type: Set, required: true}, searching: Boolean, busy: Boolean, pendingRemoval: String,
+    },
+    emits: ['toggle', 'remove-request', 'remove-cancel', 'remove-confirm'],
+    setup(props) {
+        const nodeId = computed(() => 'path-' + encodeURIComponent(props.scope) + '-' + encodeURIComponent(props.node.uuid))
+        const expanded = computed(() => props.searching || !props.collapsed.has(props.node.uuid))
+        const branchSize = computed(() => props.node.totalQueries)
+        return {nodeId, expanded, branchSize}
+    },
+    template: `
+    <li class="investigation-node" :class="{'depth-limit': depth >= 2}" :data-depth="depth">
+        <article class="path-query-card" :class="{'search-match': searching && node.match}" :id="nodeId">
+            <div class="path-query-topline"><span class="path-query-step"><i :class="depth === 0 ? 'fa-solid fa-circle-dot' : 'fa-solid fa-code-branch'" aria-hidden="true"></i>[[depth === 0 ? 'Starting query' : 'Pivot · Step '+(depth+1)]]</span><span v-if="searching" class="path-match-label">[[node.match ? 'Match' : 'Parent path']]</span><time v-if="node.query_date" :datetime="node.query_date.replace(' ', 'T')">[[node.query_date]]</time></div>
+            <h3><a :href="'/query/'+encodeURIComponent(node.uuid)">[[node.query.join(', ')]]</a></h3>
+            <a v-if="parentQuery" :href="'#'+parentId" class="path-parent"><i class="fa-solid fa-arrow-turn-up" aria-hidden="true"></i>From [[parentQuery]]</a>
+            <div class="path-query-metadata"><span class="path-attribute"><i class="fa-solid fa-fingerprint" aria-hidden="true"></i>[[node.input]]</span><span v-for="module in node.modules" :key="module" class="path-module">[[module]]</span></div>
+            <div class="path-query-actions"><button v-if="node.children.length" type="button" class="path-branch-toggle" @click="$emit('toggle', node.uuid)" :aria-expanded="expanded" :aria-controls="nodeId+'-children'" :disabled="searching"><i :class="expanded ? 'fa-solid fa-chevron-down' : 'fa-solid fa-chevron-right'" aria-hidden="true"></i>[[node.children.length]] [[node.children.length === 1 ? 'branch' : 'branches']]</button><span v-else class="path-leaf"><i class="fa-solid fa-check" aria-hidden="true"></i>End of path</span><a :href="'/query/'+encodeURIComponent(node.uuid)" class="path-results-link">View results <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a><button type="button" class="path-remove" :id="nodeId+'-remove'" :aria-label="'Remove query '+node.query.join(', ')" @click="$emit('remove-request', node.uuid)" :disabled="busy"><i class="fa-solid fa-trash-can" aria-hidden="true"></i></button></div>
+            <div v-if="pendingRemoval === node.uuid" class="path-removal-confirmation" role="group" aria-label="Confirm branch removal" tabindex="-1" data-removal-confirmation><p><strong>Remove [[branchSize === 1 ? 'this query' : 'this branch of '+branchSize+' queries']] from this investigation?</strong><span>Enrichment results remain available. Other branches are kept.</span></p><div><button type="button" class="btn btn-sm btn-outline-secondary" @click="$emit('remove-cancel', node.uuid)" :disabled="busy">Cancel</button><button type="button" class="btn btn-sm btn-danger" @click="$emit('remove-confirm', node.uuid)" :disabled="busy">[[busy ? 'Removing…' : 'Remove branch']]</button></div></div>
+        </article>
+        <ol v-if="node.children.length" v-show="expanded" :id="nodeId+'-children'" class="path-children"><investigation-node v-for="child in node.children" :key="child.uuid" :node="child" :scope="scope" :depth="depth+1" :parent-query="node.query.join(', ')" :parent-id="nodeId" :collapsed="collapsed" :searching="searching" :busy="busy" :pending-removal="pendingRemoval" @toggle="$emit('toggle', $event)" @remove-request="$emit('remove-request', $event)" @remove-cancel="$emit('remove-cancel', $event)" @remove-confirm="$emit('remove-confirm', $event)" /></ol>
+    </li>`,
 }

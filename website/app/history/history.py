@@ -88,11 +88,13 @@ def get_history_session_uuid(sid):
 
 @history_blueprint.route("/history/remove_node_session/<sid>", methods=["GET"])
 def remove_node_session(sid):
-    HistoryModel.remove_node_session(sid)
-    return {"message": "Node deleted", "toast_class": "success-subtle"}
+    if HistoryModel.remove_node_session(sid, request.args.get("root_id")):
+        return {"message": "Branch removed", "toast_class": "success-subtle"}
+    return {"message": "Query not found in this investigation", "toast_class": "danger-subtle"}, 404
 
 
 @history_blueprint.route("/history/remove_node_tree/<sid>", methods=["GET"])
 def remove_node_tree(sid):
-    HistoryModel.remove_node_tree(sid)
-    return {"message": "Node deleted", "toast_class": "success-subtle"}
+    if HistoryModel.remove_node_tree(sid, request.args.get("root_id")):
+        return {"message": "Branch removed", "toast_class": "success-subtle"}
+    return {"message": "Query not found in this investigation", "toast_class": "danger-subtle"}, 404

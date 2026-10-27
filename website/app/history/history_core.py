@@ -75,29 +75,22 @@ def util_save_history(session):
 
 
 def save_history_core(sid):
-    """Save history from session to db"""
-    if sid in sess:
-        session = sess.get(sid)
-        # Doesn't already exist
-        history_tree_db = History_Tree.query.filter_by(
-            session_uuid=session["uuid"]
-        ).first()
-        if not history_tree_db:
-            # Get all children before add to db
-            loc_dict = util_save_history(session)
-            h = History_Tree(session_uuid=session["uuid"], tree=json.dumps(loc_dict))
-            db.session.add(h)
-            db.session.commit()
-            return {"message": "History Save", "toast_class": "success-subtle"}
-        # Save same session but with new value
-        elif not json.loads(history_tree_db.tree) == session:
-            # Get all children before add to db
-            loc_dict = util_save_history(session)
-            history_tree_db.tree = json.dumps(loc_dict)
-            db.session.commit()
-            return {"message": "History updated", "toast_class": "success-subtle"}
+    """Save the selected investigation's topology without duplicating queries."""
+    if sid not in sess:
+        return {"message": "Session not found", "toast_class": "danger-subtle"}
+    session = sess[sid]
+    topology = util_save_history(session)
+    history_tree_db = History_Tree.query.filter_by(session_uuid=session["uuid"]).first()
+    if not history_tree_db:
+        db.session.add(History_Tree(session_uuid=session["uuid"], tree=json.dumps(topology)))
+        message = "Investigation saved"
+    elif json.loads(history_tree_db.tree) != topology:
+        history_tree_db.tree = json.dumps(topology)
+        message = "Saved tree updated"
+    else:
         return {"message": "History already saved", "toast_class": "warning-subtle"}
-    return {"message": "Session not found", "toast_class": "danger-subtle"}
+    db.session.commit()
+    return {"message": message, "toast_class": "success-subtle"}
 
 
 def util_get_history_tree(child):
@@ -139,58 +132,60 @@ def get_history_tree_uuid(history_uuid):
     return {}
 
 
-def util_remove_node_session(node_uuid, parent, parent_path):
-    for i in range(0, len(parent["children"])):
-        child = parent["children"][i]
+def util_remove_node_session(node_uuid, parent):
+    """Remove a descendant and its subtree, searching every sibling branch."""
+    children = parent.get("children", [])
+    for index, child in enumerate(children):
         if child["uuid"] == node_uuid:
-            del parent_path["children"][i]
+            del children[index]
             return True
-        elif "children" in child and child["children"]:
-            return util_remove_node_session(
-                node_uuid, child, parent_path["children"][i]
-            )
+        if util_remove_node_session(node_uuid, child):
+            return True
+    return False
 
 
-def remove_node_session(node_uuid):
-    keys_list = list(sess.keys())
-    loc = None
-    for i in range(0, len(keys_list)):
-        if isUUID(keys_list[i]):
-            q_value = sess.get(keys_list[i])
-            if q_value["uuid"] == node_uuid:
-                loc = i
-                break
-            elif q_value["children"]:
-                if util_remove_node_session(node_uuid, q_value, sess[keys_list[i]]):
-                    loc = i
-                    break
-    if loc:
-        del sess[keys_list[i]]
+def remove_node_session(node_uuid, root_uuid=None):
+    for root_id in list(sess):
+        if not isUUID(root_id) or (root_uuid is not None and root_id != root_uuid):
+            continue
+        root = sess[root_id]
+        if root["uuid"] == node_uuid:
+            del sess[root_id]
+            if sess.get("current_query") == root_id:
+                sess.pop("current_query", None)
+            return True
+        if util_remove_node_session(node_uuid, root):
+            # Reassign the root so nested changes persist in the Flask session.
+            sess[root_id] = root
+            sess.modified = True
+            return True
+    return False
 
 
-def util_remove_node_tree(node_uuid, parent, parent_path):
-    for i in range(0, len(parent)):
-        child = parent[i]
-        for key in child:
-            if key == node_uuid:
-                del parent_path[i]
-                return
-            elif parent[i][key]:
-                return util_remove_node_tree(node_uuid, parent[i][key], parent[i][key])
+def util_remove_node_tree(node_uuid, children):
+    for index, child in enumerate(children):
+        for uuid, descendants in child.items():
+            if uuid == node_uuid:
+                del children[index]
+                return True
+            if util_remove_node_tree(node_uuid, descendants):
+                return True
+    return False
 
 
-def remove_node_tree(node_uuid):
-    histories_tree = History_Tree.query.order_by(desc(History_Tree.id))
-    for history_tree in histories_tree:
-        tree = json.loads(history_tree.tree)
-        for e in tree:
-            if e == node_uuid:
-                db.session.delete(history_tree)
-                db.session.commit()
-                return
-            else:
-                if tree[e]:
-                    util_remove_node_tree(node_uuid, tree[e], tree[e])
-                    history_tree.tree = json.dumps(tree)
-                    db.session.commit()
-                    return
+def remove_node_tree(node_uuid, root_uuid=None):
+    histories = History_Tree.query.order_by(desc(History_Tree.id))
+    if root_uuid is not None:
+        histories = histories.filter_by(session_uuid=root_uuid)
+    for history_tree in histories:
+        topology = json.loads(history_tree.tree)
+        if history_tree.session_uuid == node_uuid:
+            db.session.delete(history_tree)
+            db.session.commit()
+            return True
+        children = topology.get(history_tree.session_uuid, [])
+        if util_remove_node_tree(node_uuid, children):
+            history_tree.tree = json.dumps(topology)
+            db.session.commit()
+            return True
+    return False
