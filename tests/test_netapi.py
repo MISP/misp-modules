@@ -19,19 +19,20 @@ CHECK_LISTED_NOW = {
 }
 CHECK_VIA_REGISTERED_DOMAIN = dict(CHECK_LISTED_NOW, value="www.000359.xyz")
 CHECK_LISTED_PAST = {
-    "value": "1.1.1.1",
-    "type": "ip",
+    "value": "0-07.ru",
+    "type": "domain",
     "listed_now": False,
     "listed_ever": True,
-    "matched_value": "1.1.1.1",
-    "first_seen": "2026-06-14",
-    "last_seen": "2026-06-17 01:05:02 UTC",
-    "block_reason": "urlhaus.abuse.ch",
+    "matched_value": "0-07.ru",
+    "first_seen": "2019-12-18",
+    "last_seen": "2019-12-25 00:00:00 UTC",
+    "block_reason": "suspicious",
     "registrar": None,
 }
 CHECK_CLEAN = {"value": "github.com", "type": "domain", "listed_now": False, "listed_ever": False}
 RANK_IN_TOP_1M = {"domain": "github.com", "in_top_1m": True, "rank": 11, "snapshot_date": "2026-10-26"}
 RANK_NOT_IN_TOP_1M = {"domain": "000359.xyz", "in_top_1m": False, "rank": None, "snapshot_date": "2026-10-26"}
+RANK_PAST_NOT_IN_TOP_1M = dict(RANK_NOT_IN_TOP_1M, domain="0-07.ru")
 
 
 class MockResponse:
@@ -96,13 +97,13 @@ def test_hostname_listed_through_its_registered_domain_says_so():
 
 
 def test_past_listing_is_not_reported_as_current():
-    with patch.object(netapi.requests, "get", _api(CHECK_LISTED_PAST)):
-        results = netapi.handler(_query("1.1.1.1", "ip-dst"))
+    with patch.object(netapi.requests, "get", _api(CHECK_LISTED_PAST, RANK_PAST_NOT_IN_TOP_1M)):
+        results = netapi.handler(_query("0-07.ru"))
 
-    texts = _texts(results)
-    assert len(texts) == 1  # an IP has no Top 1M rank
-    assert "listed in the past (last seen 2026-06-17), not in the current feed" in texts[0]
-    assert "reported by urlhaus.abuse.ch" in texts[0]
+    listing, rank = _texts(results)
+    assert "listed in the past (last seen 2019-12-25), not in the current feed" in listing
+    assert "reported by suspicious" in listing
+    assert rank == "NetAPI Top 1M: 0-07.ru is not in the NetAPI Top 1M"
 
 
 def test_a_clean_value_is_an_answer_not_an_error():
@@ -184,9 +185,22 @@ def test_a_failed_rank_lookup_keeps_the_listing():
 def test_unsupported_type_is_refused_without_a_request():
     calls = []
     with patch.object(netapi.requests, "get", _api(CHECK_CLEAN, calls=calls)):
-        results = netapi.handler(_query("d41d8cd98f00b204e9800998ecf8427e", "md5"))
+        md5 = netapi.handler(_query("d41d8cd98f00b204e9800998ecf8427e", "md5"))
+        ip = netapi.handler(_query("1.1.1.1", "ip-dst"))
 
-    assert results == {"error": "Unsupported attribute type."}
+    assert md5 == ip == {"error": "Unsupported attribute type."}
+    assert calls == []
+
+
+def test_url_with_an_ip_host_is_refused_without_a_request():
+    """NetAPI covers domain names only, so an IP host is not sent to the API."""
+    calls = []
+    with patch.object(netapi.requests, "get", _api(CHECK_CLEAN, calls=calls)):
+        ipv4 = netapi.handler(_query("http://192.0.2.10/payload.exe", "url"))
+        ipv6 = netapi.handler(_query("http://[2001:db8::1]:8080/", "url"))
+
+    expected = {"error": "NetAPI covers domain names only. IP addresses are not looked up."}
+    assert ipv4 == ipv6 == expected
     assert calls == []
 
 

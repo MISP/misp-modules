@@ -1,3 +1,4 @@
+import ipaddress
 import json
 from urllib.parse import urlparse
 
@@ -8,7 +9,7 @@ from . import check_input_attribute, standard_error_message
 
 misperrors = {"error": "Error"}
 mispattributes = {
-    "input": ["domain", "hostname", "url", "ip-src", "ip-dst", "domain|ip"],
+    "input": ["domain", "hostname", "url", "domain|ip"],
     "output": ["text"],
     "format": "misp_standard",
 }
@@ -16,21 +17,22 @@ moduleinfo = {
     "version": "1.0",
     "author": "Slava Olesik",
     "description": (
-        "Check a domain, hostname, URL or IP against the NetAPI compromised feed and get the domain's position in"
-        " the NetAPI Top 1M."
+        "Check a domain, hostname or URL against the NetAPI compromised feed and get the domain's position in the"
+        " NetAPI Top 1M."
     ),
     "module-type": ["expansion", "hover"],
     "name": "NetAPI Lookup",
     "logo": "netapi.png",
     "requirements": [],
     "features": (
-        "The module takes a domain, hostname, URL (by its host) or IP attribute and queries two free methods of the"
+        "The module takes a domain, hostname or URL (by its host) attribute and queries two free methods of the"
         " NetAPI JSON API. compromised-check says whether the value, or the registered domain a hostname belongs"
         " to, is in the NetAPI feed of hosts that public threat feeds report for malware or phishing: listed now"
         " (seen within the last 24 hours), listed in the past only, or never listed, with the first and last seen"
         " dates, the reporting feed and the registrar of the domain. domain-rank gives the position of the"
         " registered domain in the NetAPI Top 1M, a daily popularity ranking: a top-ranked domain in the feed is"
-        " more likely a compromised legitimate site than infrastructure set up by the attacker."
+        " more likely a compromised legitimate site than infrastructure set up by the attacker. IP addresses are"
+        " not covered, so a URL whose host is an IP address is not looked up."
         "\n\nNo API key is required. An optional NetAPI API token only raises the request limits (30 requests a"
         " minute and 1,000 a day per IP address without one). Only the queried indicator leaves the MISP instance."
     ),
@@ -39,7 +41,7 @@ moduleinfo = {
         "https://netapi.com/top-1-mln-websites/",
         "https://netapi.com/help/api/#json-api",
     ],
-    "input": "A domain, hostname, URL or IP address.",
+    "input": "A domain, hostname or URL.",
     "output": "Text attributes describing the feed listing and the Top 1M rank.",
 }
 # No API key is needed: api_token only raises the request limits, and api_url is exposed
@@ -56,20 +58,26 @@ class NetAPIError(Exception):
 
 
 def _query_value(attribute):
-    """Return the value to look up, and whether it is an IP address."""
+    """Return the host name to look up."""
     value = str(attribute.get("value", "")).strip()
     attribute_type = attribute.get("type")
 
     if attribute_type == "domain|ip" and "|" in value:
-        return value.split("|", 1)[0].strip(), False
-    if attribute_type in ("ip-src", "ip-dst"):
-        return value, True
+        return value.split("|", 1)[0].strip()
     if attribute_type == "url":
         # A URL stored without a scheme is still a URL to MISP; urlparse only finds the
         # host after "//".
         parsed = urlparse(value if "://" in value else "//" + value)
-        return (parsed.hostname or "").rstrip("."), False
-    return value.rstrip(".").lower(), False
+        return (parsed.hostname or "").rstrip(".")
+    return value.rstrip(".").lower()
+
+
+def _is_ip(value):
+    try:
+        ipaddress.ip_address(value)
+    except ValueError:
+        return False
+    return True
 
 
 def _get(api_url, token, method, **params):
@@ -145,9 +153,11 @@ def handler(q=False):
     if attribute.get("type") not in mispattributes["input"]:
         return {"error": "Unsupported attribute type."}
 
-    query, is_ip = _query_value(attribute)
+    query = _query_value(attribute)
     if not query:
         return {"error": "The provided attribute value is empty."}
+    if _is_ip(query):
+        return {"error": "NetAPI covers domain names only. IP addresses are not looked up."}
 
     config = request.get("config") or {}
     api_url = str(config.get("api_url") or DEFAULT_API_URL)
@@ -166,19 +176,18 @@ def handler(q=False):
         disable_correlation=True,
     )
 
-    if not is_ip:
-        # The rank is context, so a failure here is reported next to the listing instead of
-        # discarding the answer that was already obtained.
-        try:
-            rank_value = _rank_summary(_get(api_url, token, "domain-rank", domain=query))
-        except NetAPIError as error:
-            rank_value = f"NetAPI Top 1M rank unavailable: {error}"
-        misp_event.add_attribute(
-            type="text",
-            value=rank_value,
-            comment="NetAPI: Top 1M popularity rank",
-            disable_correlation=True,
-        )
+    # The rank is context, so a failure here is reported next to the listing instead of
+    # discarding the answer that was already obtained.
+    try:
+        rank_value = _rank_summary(_get(api_url, token, "domain-rank", domain=query))
+    except NetAPIError as error:
+        rank_value = f"NetAPI Top 1M rank unavailable: {error}"
+    misp_event.add_attribute(
+        type="text",
+        value=rank_value,
+        comment="NetAPI: Top 1M popularity rank",
+        disable_correlation=True,
+    )
 
     event = json.loads(misp_event.to_json())
     return {"results": {key: event[key] for key in ("Attribute", "Object") if event.get(key)}}
