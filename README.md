@@ -17,6 +17,11 @@ For more information: [Extending MISP with Python modules](https://www.misp-proj
 
 Installation instructions can be found in the [installation documentation](https://misp.github.io/misp-modules/install/).
 
+For optional server-local defaults for module API keys, URLs, and other settings,
+see [Local module configuration defaults](documentation/mkdocs/module-config.md).
+Enable them with `--module-config /etc/misp-modules/modules.json`; API-supplied
+values take precedence and existing operation is unchanged without this option.
+
 # How to add your own MISP modules?
 
 Developing a MISP module yourself is fairly easy. Start with a template or existing module and continue from there.

@@ -44,6 +44,14 @@ search path used for executables).
 misp-modules
 ~~~~
 
+### Optional local module defaults
+
+Use `--module-config /etc/misp-modules/modules.json` to provide local defaults for
+module API keys, service URLs, and other configuration. API-supplied values take
+precedence. Without this option, configuration works as before. See
+[Local module configuration defaults](module-config.md) for the file format,
+empty-value policy, service setup, and credential handling.
+
 ### Debugging outbound HTTP requests
 
 Use `-d` / `--debug` for the usual server debug logs. To also trace HTTP requests
