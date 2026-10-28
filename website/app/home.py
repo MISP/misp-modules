@@ -1,13 +1,16 @@
 import json
+from io import BytesIO
 
-from flask import Blueprint, jsonify, render_template, request
+from flask import Blueprint, jsonify, render_template, request, send_file
 from flask import session as sess
 from flask_login import current_user
+from werkzeug.utils import secure_filename
 
 from app.utils import admin_user_active
 
 from . import home_core as HomeModel
 from . import session_class as SessionModel
+from .csv_export import export_result
 from .external_tools import external_tools_core as ToolModel
 
 home_blueprint = Blueprint(
@@ -185,44 +188,37 @@ def result(sid):
 
 @home_blueprint.route("/download/<sid>")
 def download(sid):
-    """Download a module result as json"""
-    sess = HomeModel.get_session(sid)
-    if "module" in request.args:
-        if sess:
-            loc = json.loads(sess.result)
-            module = request.args.get("module")
-            query = request.args.get("query")
-            if query in loc:
-                if module in loc[query]:
-                    return (
-                        jsonify(loc[query][module]),
-                        200,
-                        {
-                            "Content-Disposition": f"attachment; filename={query}-{module}.json"
-                        },
-                    )
-            return {
-                "message": "Module not in result",
-                "toast_class": "danger-subtle",
-            }, 400
-        else:
-            for s in SessionModel.sessions:
-                if s.uuid == sid:
-                    module = request.args.get("module")
-                    if module in s.result:
-                        return (
-                            jsonify(s.result[module]),
-                            200,
-                            {
-                                "Content-Disposition": f"attachment; filename={s.query}-{module}.json"
-                            },
-                        )
-                    return {
-                        "message": "Module not in result ",
-                        "toast_class": "danger-subtle",
-                    }, 400
-        return {"message": "Session not found", "toast_class": "danger-subtle"}, 404
-    return {"message": "Need to pass a module", "toast_class": "warning-subtle"}, 400
+    """Download a saved or in-memory module result as JSON or CSV."""
+    module = request.args.get("module")
+    query = request.args.get("query")
+    format_name = request.args.get("format", "json")
+    if not module:
+        return {"message": "Need to pass a module", "toast_class": "warning-subtle"}, 400
+    if format_name not in ("json", "csv"):
+        return {"message": "Unsupported download format", "toast_class": "warning-subtle"}, 400
+    saved = HomeModel.get_session(sid)
+    if saved:
+        results = json.loads(saved.result)
+    else:
+        live = next((s for s in SessionModel.sessions if s.uuid == sid), None)
+        if live is None:
+            return {"message": "Session not found", "toast_class": "danger-subtle"}, 404
+        results = live.result
+    if query not in results or module not in results[query]:
+        return {"message": "Module not in result", "toast_class": "danger-subtle"}, 400
+    result = results[query][module]
+    filename = secure_filename(f"{query}-{module}") or "module-result"
+    if format_name == "csv":
+        try:
+            data = export_result(result, query, module)
+        except ValueError as exc:
+            return {"message": str(exc), "toast_class": "danger-subtle"}, 400
+        return send_file(BytesIO(data), mimetype="text/csv", as_attachment=True, download_name=f"{filename}.csv")
+    return (
+        jsonify(result),
+        200,
+        {"Content-Disposition": f"attachment; filename={filename}.json"},
+    )
 
 
 @home_blueprint.route("/modules_config")

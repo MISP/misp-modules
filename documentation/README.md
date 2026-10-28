@@ -3817,6 +3817,22 @@ Module to export malicious network activity attributes to Cisco fireSIGHT manage
 
 -----
 
+#### [CSV Export](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/csv_export.py)
+
+Export event and object attributes of any type as CSV.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/csv_export.py)]
+
+- **features**:
+>Exports one row per attribute, including object attributes and non-IDS attributes, from every supplied event. Retains event and object context, tags and composite values. Deleted events, objects and attributes are excluded. UTF-8 CSV cells are quoted as needed and formula-like cells are prefixed with an apostrophe for spreadsheet safety. No additional dependencies are required.
+
+- **input**:
+>MISP events in standard, bare or legacy export format.
+
+- **output**:
+>Base64-encoded UTF-8 CSV with a fixed header, including for empty input.
+
+-----
+
 #### [Microsoft Defender for Endpoint KQL Export](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/defender_endpoint_export.py)
 
 <img src=logos/defender_endpoint.png height=60>
