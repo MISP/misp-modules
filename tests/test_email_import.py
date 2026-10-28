@@ -221,3 +221,61 @@ def test_plain_text_body_starts_after_headers():
 def test_html_links_without_attribute_values():
     body = HTML_FORWARD.replace("Please review</a>", "Please review</a><a href>Text</a><img src>")
     assert len(run_import(carrier(body, "html"), extract_forwarded_emails="true")) == 2
+
+
+@pytest.mark.parametrize("body, subtype", [(PLAIN_FORWARD, "plain"), (HTML_FORWARD, "html")])
+def test_carrier_and_forward_share_url_object(body, subtype):
+    objects = run_import(carrier(body, subtype), extract_forwarded_emails="true", extract_urls="true")
+    urls = [obj for obj in objects if obj["name"] == "url"]
+    assert len(urls) == 1
+    assert values(urls[0], "url") == ["https://example.org/review"]
+    for email in (obj for obj in objects if obj["name"] == "email"):
+        references = [ref for ref in email["ObjectReference"] if ref["referenced_uuid"] == urls[0]["uuid"]]
+        assert len(references) == 1
+
+
+def test_repeated_urls_across_multiple_forwards():
+    body = PLAIN_FORWARD + "\n" + PLAIN_FORWARD
+    objects = run_import(carrier(body), extract_forwarded_emails="true", extract_urls="true")
+    urls = [obj for obj in objects if obj["name"] == "url"]
+    assert len(urls) == 1
+    emails = [obj for obj in objects if obj["name"] == "email"]
+    assert len(emails) == 3
+    for email in emails:
+        assert sum(ref["referenced_uuid"] == urls[0]["uuid"] for ref in email["ObjectReference"]) == 1
+
+
+@pytest.mark.parametrize("indent", [" ", "\t"])
+@pytest.mark.parametrize("quote", ["", "> ", "> > "])
+def test_folded_forwarded_headers(indent, quote):
+    body = (
+        "From: Sender <sender@example.org>\n"
+        "To: First <first@example.org>,\n"
+        f"{indent}Second <second@example.org>\n"
+        "Cc: Third <third@example.org>,\n"
+        f"{indent}Fourth <fourth@example.org>\n"
+        "Subject: A long\n"
+        f"{indent}forwarded subject\n\n"
+        "Message body.\n"
+    )
+    body = "\r\n".join(quote + line for line in body.splitlines())
+    objects = run_import(carrier(body), extract_forwarded_emails="true")
+    assert len(objects) == 2
+    forwarded = objects[1]
+    assert values(forwarded, "to") == ["first@example.org", "second@example.org"]
+    assert values(forwarded, "cc") == ["third@example.org", "fourth@example.org"]
+    assert values(forwarded, "subject") == ["A long forwarded subject"]
+    assert values(forwarded, "email-body") == ["Message body."]
+
+
+def test_indented_body_after_blank_line_is_not_a_continuation():
+    body = PLAIN_FORWARD.replace("\n\nPlease review", "\n\n    Please review")
+    forwarded = run_import(carrier(body), extract_forwarded_emails="true")[1]
+    assert values(forwarded, "subject") == ["Are you in the office?"]
+    assert values(forwarded, "email-body") == ["Please review https://example.org/review"]
+
+
+def test_forwarded_subject_cleanup_preserves_upstream_metadata_fix():
+    body = PLAIN_FORWARD.replace("Subject: Are", "Subject: [TLP:AMBER] Fwd: Re: Are")
+    objects = run_import(carrier(body), extract_forwarded_emails="true", remove_subject_markers="true")
+    assert values(objects[1], "subject") == ["[TLP:AMBER] Are you in the office?"]

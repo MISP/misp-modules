@@ -33,11 +33,13 @@ moduleinfo = {
         " and extract partial inline forwarded emails (extract_forwarded_emails, disabled by default):"
         " set each one of them to True or False to process or not the respective corresponding actions."
         "\nForward extraction supports English From/To/Cc/Bcc/Reply-To/Sent/Date/Subject header blocks in plain text"
-        " and HTML, including Outlook. Each block needs a sender address, a subject, and a recipient or date."
+        " and HTML, including Outlook. Folded header values are supported. Each block needs a sender address,"
+        " a subject, and a recipient or date."
         " At most 20 partial email objects are linked to the carrier with includes references. Plain text is preferred;"
         " HTML is used if no forwards are found in plain text. Reconstructed attributes have to_ids disabled;"
         " the original email is retained as evidence. Local or unparseable timestamps are preserved as text in the"
         " reconstructed headers. Existing extract_urls and remove_subject_markers settings also apply to forwards."
+        " URL objects are shared between the carrier and forwards that contain the same URL."
     ),
     "references": ["https://github.com/MISP/mail_to_misp"],
     "input": "E-mail file",
@@ -176,6 +178,7 @@ def dict_handler(request: dict):
             file_objects += sections
             email_object.add_reference(f_object.uuid, "includes", "Email attachment")
 
+    url_objects = {}  # Shared by the carrier and all its reconstructed forwards.
     if str(config.get("extract_forwarded_emails", "")).lower() in acceptable_config_yes:
         for message in inline_forwarded_messages(email_object.email):
             forwarded = EMailObject(
@@ -201,10 +204,10 @@ def dict_handler(request: dict):
                 strip_subject_markers(forwarded)
             file_objects.append(forwarded)
             if extract_urls:
-                add_body_urls(forwarded, file_objects)
+                add_body_urls(forwarded, file_objects, url_objects)
 
     if extract_urls:
-        add_body_urls(email_object, file_objects)
+        add_body_urls(email_object, file_objects, url_objects)
 
     objects = [email_object.to_dict()]
     if file_objects:
@@ -213,7 +216,7 @@ def dict_handler(request: dict):
     return r
 
 
-def add_body_urls(email_object, file_objects):
+def add_body_urls(email_object, file_objects, url_objects):
     mail_body = email_object.email.get_body(preferencelist=("html", "plain"))
     if mail_body:
         charset = mail_body.get_content_charset("utf-8")
@@ -226,15 +229,21 @@ def add_body_urls(email_object, file_objects):
                 r"""https?://[^\s<>"']+""",
                 mail_body.get_payload(decode=True).decode(charset, errors="ignore"),
             )
+        referenced_urls = set()
         for url in urls:
             if not url:
                 continue
-            try:
-                url_object = URLObject(url, standalone=False)
-            except (ValueError, MISPObjectException):
-                continue
-            file_objects.append(url_object)
-            email_object.add_reference(url_object.uuid, "includes", "URL in email body")
+            url_object = url_objects.get(url)
+            if url_object is None:
+                try:
+                    url_object = URLObject(url, standalone=False)
+                except (ValueError, MISPObjectException):
+                    continue
+                url_objects[url] = url_object
+                file_objects.append(url_object)
+            if url_object.uuid not in referenced_urls:
+                email_object.add_reference(url_object.uuid, "includes", "URL in email body")
+                referenced_urls.add(url_object.uuid)
 
 
 SUBJECT_MARKER_RE = re.compile(

@@ -11,7 +11,8 @@ from email.utils import format_datetime, getaddresses, parsedate_to_datetime
 from html.parser import HTMLParser
 
 HEADER = re.compile(r"^\s*(From|To|Cc|Bcc|Reply-To|Sent|Date|Subject)\s*:\s*(.*)$", re.IGNORECASE)
-QUOTE = re.compile(r"^\s*(?:>\s*)+")
+# Remove quoting while preserving indentation used by folded header values.
+QUOTE = re.compile(r"^[ \t]*(?:>[ \t]?)+")
 MAX_FORWARDS = 20
 
 
@@ -59,19 +60,28 @@ class ForwardHTMLParser(HTMLParser):
 def _header_block(lines, start):
     headers = {}
     end = start
+    previous = None
+    after_blank = False
     # Real forwarded headers form a short block, not scattered body keywords.
     for index in range(start, min(start + 40, len(lines))):
         line = lines[index]
         if not line.strip():
+            after_blank = True
             continue
         match = HEADER.match(line)
         if not match:
+            if previous is not None and line.startswith((" ", "\t")) and not after_blank:
+                headers[previous] += " " + line.strip()
+                end = index + 1
+                continue
             break
         name, value = match.groups()
         name = name.lower()
         if name in headers:
             break
         headers[name] = value.strip()
+        previous = name
+        after_blank = False
         end = index + 1
     if not headers.get("subject") or not (headers.get("to") or headers.get("sent") or headers.get("date")):
         return None
