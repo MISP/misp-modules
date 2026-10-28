@@ -91,6 +91,7 @@ nav:
     - Install Guides: install.md
     - Local Module Configuration: module-config.md
     - PAP RED Restrictions: pap-red.md
+    - Result Caching: caching.md
     - Contribute: contribute.md
     #   - 'Ubuntu 18.04': 'INSTALL.ubuntu1804.md'
     #   - 'Kali Linux': 'INSTALL.kali.md'
