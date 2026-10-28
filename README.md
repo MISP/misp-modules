@@ -114,6 +114,7 @@ For further Information see the [license file](https://misp.github.io/misp-modul
 * [GeoIP ASN Lookup](https://misp.github.io/misp-modules/expansion/#geoip-asn-lookup) - Query a local copy of the Maxmind Geolite ASN database (MMDB format)
 * [GeoIP City Lookup](https://misp.github.io/misp-modules/expansion/#geoip-city-lookup) - An expansion module to query a local copy of Maxmind's Geolite database with an IP address, in order to get information about the city where it is located.
 * [GeoIP Country Lookup](https://misp.github.io/misp-modules/expansion/#geoip-country-lookup) - Query a local copy of Maxminds Geolite database, updated for MMDB format
+* [geoPlugin Lookup](https://misp.github.io/misp-modules/expansion/#geoplugin-lookup) - An expansion and hover module to geolocate an IP address with geoPlugin.
 * [Google Safe Browsing Lookup](https://misp.github.io/misp-modules/expansion/#google-safe-browsing-lookup) - Google safe browsing expansion module
 * [Google Threat Intelligence Lookup](https://misp.github.io/misp-modules/expansion/#google-threat-intelligence-lookup) - An expansion module to have the observable's threat score assessed by Google Threat Intelligence.
 * [GreyNoise Lookup](https://misp.github.io/misp-modules/expansion/#greynoise-lookup) - Module to query IP and CVE information from GreyNoise

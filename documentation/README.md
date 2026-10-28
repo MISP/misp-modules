@@ -1099,6 +1099,33 @@ Query a local copy of Maxminds Geolite database, updated for MMDB format
 
 -----
 
+#### [geoPlugin Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/geoplugin.py)
+
+An expansion and hover module to geolocate an IP address with geoPlugin.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/geoplugin.py)]
+
+- **features**:
+>Queries the geoPlugin HTTPS API using the configured `api_key`. Returns available country, region, city, postal code, coordinates and accuracy radius in a geolocation object linked to the source attribute. Continent and timezone are included as text. Empty fields are omitted. Only public IPv4 addresses are queried, following the API's documented address support. The IP component of domain|ip is used without resolving the domain. See documentation/expansion/geoplugin.md for configuration and an example request.
+
+- **config**:
+>api_key
+
+- **input**:
+>A public IPv4 address in an ip-src, ip-dst or domain|ip attribute.
+
+- **output**:
+>A geolocation object referencing the original attribute. New attributes have to_ids=false.
+
+- **references**:
+> - https://www.geoplugin.com/docs
+> - https://github.com/MISP/misp-modules/issues/438
+
+- **requirements**:
+> - A geoPlugin API key
+> - requests
+
+-----
+
 #### [Google Safe Browsing Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/google_safe_browsing.py)
 
 Google safe browsing expansion module
