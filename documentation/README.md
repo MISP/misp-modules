@@ -1288,7 +1288,10 @@ Module to access haveibeenpwned.com API.
 [[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/hibp.py)]
 
 - **features**:
->The module takes an email address as input and queries haveibeenpwned.com API to find additional information about it. This additional information actually tells if any account using the email address has already been compromised in a data breach.
+>The module takes an email address as input and queries haveibeenpwned.com API to find additional information about it. This additional information actually tells if any account using the email address has already been compromised in a data breach, and returns one breach object per breach it appears in. Results are available in hover lookups and can be imported into an event through enrichment.
+
+- **requirements**:
+>A Have I Been Pwned API key with access to the breached account API.
 
 - **config**:
 >api_key
@@ -1297,7 +1300,7 @@ Module to access haveibeenpwned.com API.
 >An email address
 
 - **output**:
->Additional information about the email address.
+>One breach object per data breach the email address appears in.
 
 - **references**:
 >https://haveibeenpwned.com/
