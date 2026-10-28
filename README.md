@@ -87,6 +87,7 @@ For further Information see the [license file](https://misp.github.io/misp-modul
 * [binGraph](documentation/expansion/bingraph.md) - Generate entropy and byte histogram PNG images from attachments and malware samples.
 * [BTC Scam Check](https://misp.github.io/misp-modules/expansion/#btc-scam-check) - An expansion hover module to query a special dns blacklist to check if a bitcoin address has been abused.
 * [BTC Steroids](https://misp.github.io/misp-modules/expansion/#btc-steroids) - An expansion hover module to get a blockchain balance from a BTC address in MISP.
+* [CCCS YARA Metadata Validator](https://misp.github.io/misp-modules/expansion/#cccs-yara-metadata-validator) - Validate YARA rule metadata against the CCCS YARA specification.
 * [Censys Enrich](https://misp.github.io/misp-modules/expansion/#censys-enrich) - An expansion module to enrich attributes in MISP by quering the censys.io API
 * [CIRCL Passive DNS](https://misp.github.io/misp-modules/expansion/#circl-passive-dns) - Module to access CIRCL Passive DNS.
 * [CIRCL Passive SSL](https://misp.github.io/misp-modules/expansion/#circl-passive-ssl) - Modules to access CIRCL Passive SSL.

@@ -317,6 +317,31 @@ An expansion hover module to get a blockchain balance from a BTC address in MISP
 
 -----
 
+#### [CCCS YARA Metadata Validator](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/cccs_yara.py)
+
+<img src=../logos/yara.png height=60>
+
+Validate YARA rule metadata against the CCCS YARA specification.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/cccs_yara.py)]
+
+- **features**:
+>Checks every rule in a YARA attribute using the upstream CCCS specification and returns errors and warnings per rule. Metadata generation is disabled and the original attribute is preserved. YARA file includes are disabled. Install the ATT&CK dataset before starting the module server; see the [setup and examples](https://github.com/MISP/misp-modules/blob/main/documentation/expansion/cccs_yara.md).
+
+- **input**:
+>A YARA attribute containing one or more rules.
+
+- **output**:
+>Text describing CCCS metadata validity, errors and warnings for each rule.
+
+- **references**:
+>https://github.com/CybercentreCanada/CCCS-Yara
+
+- **requirements**:
+> - cccs-yara Python library
+> - Local MITRE ATT&CK STIX data (MITRE_STIX_DATA_PATH)
+
+-----
+
 #### [Censys Enrich](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/censys_enrich.py)
 
 An expansion module to enrich attributes in MISP by quering the censys.io API
