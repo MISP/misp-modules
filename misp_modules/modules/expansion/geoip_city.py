@@ -3,6 +3,7 @@ import logging
 import sys
 
 import geoip2.database
+from maxminddb import InvalidDatabaseError
 from pymisp import MISPAttribute, MISPEvent, MISPObject
 
 from . import check_input_attribute, standard_error_message
@@ -15,27 +16,26 @@ formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(messag
 ch.setFormatter(formatter)
 log.addHandler(ch)
 
-misperrors = {"error": "Error"}
 mispattributes = {
     "input": ["ip-src", "ip-dst", "domain|ip"],
     "format": "misp_standard",
 }
-moduleconfig = ["local_geolite_db"]
+moduleconfig = ["local_geoip_db", "local_geolite_db"]
 # possible module-types: 'expansion', 'hover' or both
 moduleinfo = {
-    "version": "0.2",
+    "version": "0.3",
     "author": "GlennHD",
     "description": (
-        "An expansion module to query a local copy of Maxmind's Geolite database with an IP address, in order to get"
-        " information about the city where it is located."
+        "An expansion module to query a local copy of MaxMind GeoIP2 or GeoLite2 database with an IP address, in order"
+        " to get information about the city where it is located."
     ),
     "module-type": ["expansion", "hover"],
     "name": "GeoIP City Lookup",
     "logo": "maxmind.png",
-    "requirements": ["A local copy of Maxmind's Geolite database"],
+    "requirements": ["A local MaxMind GeoIP2 or GeoLite2 City database (.mmdb)"],
     "features": (
-        "The module takes an IP address attribute as input and queries a local copy of the Maxmind's Geolite database"
-        " to get information about the city where this IP address is located."
+        "The module takes an IP address attribute as input and queries a local copy of the MaxMind GeoIP2 or GeoLite2"
+        " database to get information about the city where this IP address is located."
     ),
     "references": ["https://www.maxmind.com/en/home"],
     "input": "An IP address MISP attribute.",
@@ -71,9 +71,14 @@ def handler(q=False):
         return False
     request = json.loads(q)
 
-    if not request.get("config") or not request["config"].get("local_geolite_db"):
-        return {"error": "Please specify the path of your local copy of Maxminds Geolite database"}
-    path_to_geolite = request["config"]["local_geolite_db"]
+    config = request.get("config") or {}
+    if not isinstance(config, dict):
+        return {"error": "Invalid GeoIP configuration: expected an object."}
+    path_to_geoip = config.get("local_geoip_db") or config.get("local_geolite_db")
+    if not isinstance(path_to_geoip, str) or not path_to_geoip.strip():
+        return {
+            "error": "Please set local_geoip_db (or local_geolite_db) to the path of a local MaxMind MMDB database."
+        }
 
     if not request.get("attribute") or not check_input_attribute(request["attribute"]):
         return {"error": f"{standard_error_message}, which should contain at least a type, a value and an uuid."}
@@ -83,15 +88,18 @@ def handler(q=False):
     toquery = attribute["value"].split("|")[1] if attribute["type"] == "domain|ip" else attribute["value"]
 
     try:
-        reader = geoip2.database.Reader(path_to_geolite)
+        reader = geoip2.database.Reader(path_to_geoip)
     except FileNotFoundError:
-        return {"error": f"Unable to locate the GeoLite database you specified ({path_to_geolite})."}
+        return {"error": f"Unable to locate the GeoIP database you specified ({path_to_geoip})."}
+    except (OSError, ValueError, InvalidDatabaseError) as e:
+        return {"error": f"Unable to load the GeoIP database ({path_to_geoip}): {e}"}
     log.debug(toquery)
     try:
         answer = reader.city(toquery)
     except Exception as e:
-        misperrors["error"] = f"GeoIP resolving error: {e}"
-        return misperrors
+        return {"error": f"GeoIP resolving error: {e}"}
+    finally:
+        reader.close()
 
     misp_event = MISPEvent()
     input_attribute = MISPAttribute()
