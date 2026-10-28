@@ -2,6 +2,10 @@ import json
 from types import SimpleNamespace
 from unittest.mock import patch
 
+import geoip2.errors
+import pytest
+from maxminddb import InvalidDatabaseError
+
 from misp_modules.modules.expansion import geoip_asn, geoip_city, geoip_country
 
 UUID = "5b582d80-7a7e-4b6a-9f22-77656e72bb3b"
@@ -128,3 +132,88 @@ def test_introspection_and_version():
         assert module.introspection() == module.mispattributes
         assert module.mispattributes["format"] == "misp_standard"
         assert "config" in module.version()
+
+
+LOOKUPS = [
+    (geoip_country, "country", _COUNTRY_ANSWER),
+    (geoip_city, "city", _CITY_ANSWER),
+    (geoip_asn, "asn", _ASN_ANSWER),
+]
+
+
+def _query(module, config):
+    return json.dumps(
+        {
+            "module": module.__name__.split(".")[-1],
+            "attribute": {"type": "ip-src", "value": "149.13.33.14", "uuid": UUID},
+            "config": config,
+        }
+    )
+
+
+@pytest.mark.parametrize("module,method,answer", LOOKUPS)
+@pytest.mark.parametrize(
+    "config,expected_path",
+    [
+        ({"local_geoip_db": "/srv/GeoIP/database.mmdb"}, "/srv/GeoIP/database.mmdb"),
+        ({"local_geolite_db": "/srv/GeoIP/legacy.mmdb"}, "/srv/GeoIP/legacy.mmdb"),
+        (
+            {"local_geoip_db": "/srv/GeoIP/paid.mmdb", "local_geolite_db": "/srv/GeoIP/free.mmdb"},
+            "/srv/GeoIP/paid.mmdb",
+        ),
+        ({"local_geoip_db": "", "local_geolite_db": "/srv/GeoIP/free.mmdb"}, "/srv/GeoIP/free.mmdb"),
+    ],
+)
+def test_local_database_path_and_reader_cleanup(module, method, answer, config, expected_path):
+    with patch.object(module.geoip2.database, "Reader") as factory:
+        reader = factory.return_value
+        getattr(reader, method).return_value = answer
+        result = module.handler(_query(module, config))
+        assert "results" in result, result
+        factory.assert_called_once_with(expected_path)
+        getattr(reader, method).assert_called_once_with("149.13.33.14")
+        reader.close.assert_called_once_with()
+
+
+@pytest.mark.parametrize("module,method,answer", LOOKUPS)
+@pytest.mark.parametrize("config", [None, {}, {"local_geoip_db": "   "}, {"local_geoip_db": 42}, "invalid"])
+def test_invalid_database_configuration_does_not_open_reader(module, method, answer, config):
+    with patch.object(module.geoip2.database, "Reader") as factory:
+        assert "error" in module.handler(_query(module, config))
+        factory.assert_not_called()
+
+
+@pytest.mark.parametrize("module,method,answer", LOOKUPS)
+@pytest.mark.parametrize(
+    "error",
+    [FileNotFoundError("missing"), PermissionError("denied"), InvalidDatabaseError("corrupt"), ValueError("bad path")],
+)
+def test_database_load_errors_do_not_fall_back(module, method, answer, error):
+    config = {"local_geoip_db": "/srv/paid.mmdb", "local_geolite_db": "/srv/free.mmdb"}
+    with patch.object(module.geoip2.database, "Reader", side_effect=error) as factory:
+        result = module.handler(_query(module, config))
+        assert "error" in result
+        assert "/srv/paid.mmdb" in result["error"]
+        factory.assert_called_once_with("/srv/paid.mmdb")
+
+
+@pytest.mark.parametrize("module,method,answer", LOOKUPS)
+@pytest.mark.parametrize("contents", [b"", b"not a MaxMind database"])
+def test_real_invalid_database_file_returns_error(module, method, answer, contents, tmp_path):
+    database = tmp_path / "invalid.mmdb"
+    database.write_bytes(contents)
+    result = module.handler(_query(module, {"local_geoip_db": str(database)}))
+    assert "Unable to load" in result["error"]
+
+
+@pytest.mark.parametrize("module,method,answer", LOOKUPS)
+@pytest.mark.parametrize("error", [geoip2.errors.AddressNotFoundError("not found"), ValueError("wrong database type")])
+def test_lookup_errors_close_reader_and_remain_independent(module, method, answer, error):
+    with patch.object(module.geoip2.database, "Reader") as factory:
+        reader = factory.return_value
+        getattr(reader, method).side_effect = [error, ValueError("second error")]
+        first = module.handler(_query(module, CONFIG))
+        second = module.handler(_query(module, CONFIG))
+        assert str(error) in first["error"]
+        assert "second error" in second["error"]
+        assert reader.close.call_count == 2

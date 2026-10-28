@@ -1014,17 +1014,27 @@ Expand CPE attributes with GCVE CPE catalog metadata, package mappings and vulne
 
 <img src=../logos/maxmind.png height=60>
 
-Query a local copy of the Maxmind Geolite ASN database (MMDB format)
+Query a local copy of the MaxMind GeoLite2 ASN database (MMDB format)
 [[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/geoip_asn.py)]
 
 - **features**:
->The module takes an IP address attribute as input and queries a local copy of the Maxmind's Geolite database to get information about the related AS number.
+>The module takes an IP address attribute as input and queries a local copy of the MaxMind GeoLite2 ASN database to get information about the related AS number.
 
 - **config**:
->local_geolite_db
+>local_geoip_db, local_geolite_db
+
+Set `local_geoip_db` to the full path of the database on the **misp-modules server** (or inside its container). The service user must have read access to the file. Use an extracted GeoLite2 ASN `.mmdb` file. The ASN module requires the ASN database; GeoIP2 ISP and other database products are not compatible with this lookup. Download and extract the database before configuring the module; compressed archives, CSV files, and legacy `.dat` files are not supported.
+
+Existing `local_geolite_db` configurations remain supported. A nonempty `local_geoip_db` takes precedence; if it cannot be loaded, the module returns an error without falling back to another database.
+
+Example query configuration:
+
+```json
+{"config": {"local_geoip_db": "/var/lib/GeoIP/GeoLite2-ASN.mmdb"}}
+```
 
 - **descrption**:
->An expansion module to query a local copy of Maxmind's Geolite database with an IP address, in order to get information about its related AS number.
+>An expansion module to query a local copy of MaxMind GeoLite2 ASN database with an IP address, in order to get information about its related AS number.
 
 - **input**:
 >An IP address MISP attribute.
@@ -1036,7 +1046,7 @@ Query a local copy of the Maxmind Geolite ASN database (MMDB format)
 >https://www.maxmind.com/en/home
 
 - **requirements**:
->A local copy of Maxmind's Geolite database
+>A local copy of MaxMind GeoLite2 ASN database
 
 -----
 
@@ -1044,14 +1054,24 @@ Query a local copy of the Maxmind Geolite ASN database (MMDB format)
 
 <img src=../logos/maxmind.png height=60>
 
-An expansion module to query a local copy of Maxmind's Geolite database with an IP address, in order to get information about the city where it is located.
+An expansion module to query a local copy of MaxMind GeoIP2 or GeoLite2 database with an IP address, in order to get information about the city where it is located.
 [[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/geoip_city.py)]
 
 - **features**:
->The module takes an IP address attribute as input and queries a local copy of the Maxmind's Geolite database to get information about the city where this IP address is located.
+>The module takes an IP address attribute as input and queries a local copy of the MaxMind GeoIP2 or GeoLite2 database to get information about the city where this IP address is located.
 
 - **config**:
->local_geolite_db
+>local_geoip_db, local_geolite_db
+
+Set `local_geoip_db` to the full path of the database on the **misp-modules server** (or inside its container). The service user must have read access to the file. Use an extracted GeoIP2 City (paid) or GeoLite2 City `.mmdb` file. Download and extract the database before configuring the module; compressed archives, CSV files, and legacy `.dat` files are not supported.
+
+Existing `local_geolite_db` configurations remain supported, including paths to paid databases. A nonempty `local_geoip_db` takes precedence; if it cannot be loaded, the module returns an error without falling back to another database.
+
+Example query configuration:
+
+```json
+{"config": {"local_geoip_db": "/var/lib/GeoIP/GeoIP2-City.mmdb"}}
+```
 
 - **input**:
 >An IP address MISP attribute.
@@ -1063,7 +1083,7 @@ An expansion module to query a local copy of Maxmind's Geolite database with an 
 >https://www.maxmind.com/en/home
 
 - **requirements**:
->A local copy of Maxmind's Geolite database
+>A local copy of MaxMind GeoIP2 or GeoLite2 database
 
 -----
 
@@ -1071,16 +1091,26 @@ An expansion module to query a local copy of Maxmind's Geolite database with an 
 
 <img src=../logos/maxmind.png height=60>
 
-Query a local copy of Maxminds Geolite database, updated for MMDB format
+Query a local MaxMind GeoIP2 or GeoLite2 Country database (MMDB format)
 [[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/geoip_country.py)]
 
 - **features**:
->This module takes an IP address MISP attribute as input and queries a local copy of the Maxmind's Geolite database to get information about the location of this IP address.
+>This module takes an IP address MISP attribute as input and queries a local copy of the MaxMind GeoIP2 or GeoLite2 database to get information about the location of this IP address.
 >
 >Please note that composite attributes domain|ip are also supported.
 
 - **config**:
->local_geolite_db
+>local_geoip_db, local_geolite_db
+
+Set `local_geoip_db` to the full path of the database on the **misp-modules server** (or inside its container). The service user must have read access to the file. Use an extracted GeoIP2 Country (paid) or GeoLite2 Country `.mmdb` file. Download and extract the database before configuring the module; compressed archives, CSV files, and legacy `.dat` files are not supported.
+
+Existing `local_geolite_db` configurations remain supported, including paths to paid databases. A nonempty `local_geoip_db` takes precedence; if it cannot be loaded, the module returns an error without falling back to another database.
+
+Example query configuration:
+
+```json
+{"config": {"local_geoip_db": "/var/lib/GeoIP/GeoIP2-Country.mmdb"}}
+```
 
 - **input**:
 >An IP address MISP Attribute.
@@ -1092,7 +1122,7 @@ Query a local copy of Maxminds Geolite database, updated for MMDB format
 >https://www.maxmind.com/en/home
 
 - **requirements**:
->A local copy of Maxmind's Geolite database
+>A local copy of MaxMind GeoIP2 or GeoLite2 database
 
 -----
 

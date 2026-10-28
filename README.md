@@ -111,9 +111,9 @@ For further Information see the [license file](https://misp.github.io/misp-modul
 * [URL Components Extractor](https://misp.github.io/misp-modules/expansion/#url-components-extractor) - Extract URL components
 * [Farsight DNSDB Lookup](https://misp.github.io/misp-modules/expansion/#farsight-dnsdb-lookup) - Module to access Farsight DNSDB Passive DNS.
 * [GCVE CPE](https://misp.github.io/misp-modules/expansion/#gcve-cpe) - Expand CPE attributes with GCVE CPE catalog metadata, package mappings and vulnerability references.
-* [GeoIP ASN Lookup](https://misp.github.io/misp-modules/expansion/#geoip-asn-lookup) - Query a local copy of the Maxmind Geolite ASN database (MMDB format)
-* [GeoIP City Lookup](https://misp.github.io/misp-modules/expansion/#geoip-city-lookup) - An expansion module to query a local copy of Maxmind's Geolite database with an IP address, in order to get information about the city where it is located.
-* [GeoIP Country Lookup](https://misp.github.io/misp-modules/expansion/#geoip-country-lookup) - Query a local copy of Maxminds Geolite database, updated for MMDB format
+* [GeoIP ASN Lookup](https://misp.github.io/misp-modules/expansion/#geoip-asn-lookup) - Query a local copy of the MaxMind GeoLite2 ASN database (MMDB format)
+* [GeoIP City Lookup](https://misp.github.io/misp-modules/expansion/#geoip-city-lookup) - An expansion module to query a local copy of MaxMind GeoIP2 or GeoLite2 database with an IP address, in order to get information about the city where it is located.
+* [GeoIP Country Lookup](https://misp.github.io/misp-modules/expansion/#geoip-country-lookup) - Query a local MaxMind GeoIP2 or GeoLite2 Country database (MMDB format)
 * [geoPlugin Lookup](https://misp.github.io/misp-modules/expansion/#geoplugin-lookup) - An expansion and hover module to geolocate an IP address with geoPlugin.
 * [Google Safe Browsing Lookup](https://misp.github.io/misp-modules/expansion/#google-safe-browsing-lookup) - Google safe browsing expansion module
 * [Google Threat Intelligence Lookup](https://misp.github.io/misp-modules/expansion/#google-threat-intelligence-lookup) - An expansion module to have the observable's threat score assessed by Google Threat Intelligence.
