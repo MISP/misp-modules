@@ -3,6 +3,10 @@
 `csv_export` exports attributes of any MISP type without a vendor-specific
 schema. It requires no configuration or additional Python packages.
 
+The website bundles the same standard-library exporter in its own package, so
+CSV downloads also work with the older `misp-modules` versions in its lockfile.
+A synchronization test keeps the bundled copy identical to the API module.
+
 In the MISP Modules website, open an enrichment result and select **Download
 CSV** underneath the module name. The action is available in every result tab
 for both active and saved queries. **Download JSON** remains available beside

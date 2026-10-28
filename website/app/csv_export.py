@@ -3,7 +3,7 @@
 import base64
 import json
 
-from misp_modules.modules.export_mod.csv_export import handler
+from ._csv_export import handler
 
 
 def export_result(result, query, module):

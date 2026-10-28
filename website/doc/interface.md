@@ -134,10 +134,14 @@ the vendor assets from the versions in `package-lock.json`.
 In a Python environment containing the website's dependencies:
 
 ```sh
-python -m pip install playwright
+python -m pip install playwright poetry-core
 python -m playwright install chromium
 python -m unittest discover -s website/tests -p '*_checks.py' -v
 ```
+
+The suite also builds the website wheel and checks startup and CSV downloads
+outside the checkout with `misp_modules` imports blocked. This catches accidental
+dependencies on modules absent from the website's locked backend release.
 
 For a system Chromium, set `CHROMIUM_EXECUTABLE=/usr/bin/chromium` instead of
 installing a Playwright browser. Tests start the real Flask application with a

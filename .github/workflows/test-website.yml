@@ -39,7 +39,7 @@ jobs:
         run: >-
           python -m pip install
           flask flask-sqlalchemy flask-session flask-wtf flask-migrate flask-login
-          requests python-dotenv playwright psutil
+          requests python-dotenv playwright poetry-core
       - name: Install browser and accessibility checker
         run: |
           python -m playwright install --with-deps chromium

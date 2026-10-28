@@ -150,6 +150,14 @@ def test_invalid_json_and_metadata():
     assert csv_export.introspection()["outputFileExtension"] == "csv"
 
 
+def test_website_bundled_exporter_stays_in_sync():
+    # The website must work with older locked misp-modules releases. Keep its
+    # bundled copy identical so CSV behavior and safety fixes cannot drift.
+    root = Path(__file__).resolve().parents[1]
+    bundled = (root / "website/app/_csv_export.py").read_text()
+    assert bundled.split("\n", 1)[1] == Path(csv_export.__file__).read_text()
+
+
 class TestCSVExportHTTP(AsyncHTTPTestCase):
     def get_app(self):
         self.previous_handlers = service.MODULES_HANDLERS.copy()
