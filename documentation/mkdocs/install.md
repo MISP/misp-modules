@@ -93,6 +93,10 @@ For example your module is `custom_module.py` and its type is `expansion` the mo
 `/path/to/your/module/root/expansion/custom_module.py` and the option to pass to `misp-modules` 
 would be `-c /path/to/your/module/root/`.
 
+See [Install and enable your module](contribute.md#install-and-enable-your-module)
+for service restart instructions, discovery checks and the MISP settings needed
+to make a custom module available in the UI.
+
 
 ## Install from cloned repository
 

@@ -8,7 +8,13 @@ Create your module in [misp_modules/modules/expansion/](https://github.com/MISP/
 
 Don't forget to return an error key and value if an error is raised to propagate it to the MISP user-interface.
 
-Your module's script name should also be added in the `__all__` list of `<module type folder>/__init__.py` in order for it to be loaded.
+The current loader discovers `.py` files in these directories automatically; you
+do not need to edit `__all__` in `__init__.py`. Files whose names start with `_`
+are ignored. The filename without `.py` is the module's API identifier, which is
+also used in MISP settings; `moduleinfo['name']` is its display name.
+
+After writing a module, follow [Install and enable your module](#install-and-enable-your-module)
+below to make it available in MISP.
 
 ~~~python
 ...
@@ -19,6 +25,138 @@ Your module's script name should also be added in the `__all__` list of `<module
 ...
 ~~~
 
+
+### Install and enable your module
+
+Adding a file to a source checkout does not necessarily add it to the running
+service. Discovery by misp-modules and enabling a module in MISP are separate
+steps. The following example uses an export module named `my_export.py`.
+
+#### 1. Place the module where the service can load it
+
+For a module contributed to this repository, place it in
+`misp_modules/modules/export_mod/`. Use the Python environment that runs the
+service when installing dependencies and the modified package. For example,
+`python -m pip install .` from the checkout installs a copy of the package;
+repeat it after editing the source, or use `python -m pip install -e .` for an
+editable development installation. With Poetry, use `poetry install` and
+`poetry run misp-modules`. From outside the source checkout, run this with the
+service's Python interpreter to check the installed package path:
+
+~~~bash
+python -c 'import misp_modules; print(misp_modules.__file__)'
+~~~
+
+For a local module kept outside the installed package, use a custom root with a
+subdirectory identifying its type:
+
+~~~text
+/opt/misp-custom-modules/
+└── export_mod/
+    └── my_export.py
+~~~
+
+Start misp-modules with the **root**, not the `export_mod` directory:
+
+~~~bash
+misp-modules -l 127.0.0.1 --custom /opt/misp-custom-modules
+~~~
+
+The other supported directory names are `expansion`, `import_mod` and
+`action_mod`. Ensure the service account can read the files and traverse their
+directories. Choose a unique filename: a custom module with the same API
+identifier as an installed module replaces it.
+
+For systemd, persist `--custom` in the service's `ExecStart` (for example with
+`sudo systemctl edit misp-modules`). Retain the existing executable, Python
+environment and other options. An override needs an empty `ExecStart=` line
+before the replacement command; see the [systemd override example](module-config.md#running-with-systemd).
+Then run `sudo systemctl daemon-reload` and `sudo systemctl restart misp-modules`.
+For a container, mount the custom root and pass its path inside the container.
+
+#### 2. Check the module interface and restart
+
+Start from an existing module of the same type, such as
+[testexport.py](https://github.com/MISP/misp-modules/blob/main/misp_modules/modules/export_mod/testexport.py).
+For an export module:
+
+* `version()` must return metadata including `'module-type': ['export']`.
+  The directory is named `export_mod`, but the metadata type is `export`.
+* `introspection()` must return the export setup, including `inputSource`
+  (for example `['event']`), `outputFileExtension` and `responseType`, as in
+  `testexport.py`.
+* `handler()` receives a JSON string. For event exports, process the events in
+  `json.loads(q)['data']` and return `{'data': ...}` with the exported file
+  content encoded as a base64 string.
+
+Install any required Python libraries into the service's environment and any
+required system libraries on its host. Listing a dependency in module metadata
+does not install it.
+
+Restart the running misp-modules service after adding or changing a module;
+modules are loaded at startup. For a foreground process, stop and start it with
+the same options. For systemd, use `sudo systemctl restart misp-modules`.
+Check startup logs for `my_export` and any import errors. The supplied systemd
+unit writes to `/var/log/misp-modules_message.log` and
+`/var/log/misp-modules_error.log`; other units may use the journal
+(`sudo journalctl -u misp-modules -n 100 --no-pager`). A missing dependency
+causes the loader to skip that module; syntax errors can stop startup.
+
+#### 3. Verify discovery before opening MISP
+
+Query the running service, replacing the example URL and port with yours:
+
+~~~bash
+curl --fail --silent --show-error http://127.0.0.1:6666/modules | jq '.[] | select(.name == "my_export")'
+~~~
+
+The result must include `"name": "my_export"`, `"type": "export_mod"`, the
+export setup under `mispattributes`, and `"module-type": ["export"]` under
+`meta`. If there is no result, check the imported package path, the `--custom`
+root, file permissions, startup errors and whether you restarted the correct
+process. If `/modules` fails, check the service logs and that every loaded
+module's `introspection()` and `version()` functions return valid metadata.
+
+You can also exercise the handler directly, using a request appropriate to your
+module. For an event export, save this as `body.json`:
+
+~~~json
+{
+  "module": "my_export",
+  "data": [{"Event": {"info": "Custom export test"}, "Attribute": []}],
+  "config": {}
+}
+~~~
+
+~~~bash
+curl --fail --silent --show-error http://127.0.0.1:6666/query -H 'Content-Type: application/json' --data @body.json | jq .
+~~~
+
+A successful export returns a `data` field containing the base64-encoded file.
+The [Testing your modules](#testing-your-modules) section covers expansion queries.
+
+#### 4. Enable the module in MISP
+
+Log in as a MISP site administrator and open **Administration → Server Settings
+& Maintenance → Plugin settings**. For this export example:
+
+1. Set `Plugin.Export_services_enable` to `true`.
+2. Set `Plugin.Export_services_url` (for example `http://127.0.0.1`) and
+   `Plugin.Export_services_port` (for example `6666`) to the service you checked.
+   Run the `/modules` check from the MISP host or container as well: `127.0.0.1`
+   refers to that host or container, which may differ from the module server.
+3. Reload the settings page after enabling the service. MISP discovers module
+   settings from `/modules`; check for `Plugin.Export_my_export_enabled` and set
+   it to `true`. Fill in any module-specific settings returned in `meta.config`.
+4. Check `Plugin.Export_my_export_restrict` if other organisations cannot use
+   the module. Once enabled, try it from an event's **Download as…** export menu.
+
+For expansion/hover modules use the `Plugin.Enrichment_*` settings, and for
+import modules use `Plugin.Import_*`. Enabling only the enrichment service does
+not enable the export service. If the module appears in `/modules` but has no
+MISP setting, check the relevant service settings, connectivity from MISP and
+`meta['module-type']`. If it is enabled but unavailable to a user, check its
+organisation restriction and supported input.
 
 ### introspection
 
