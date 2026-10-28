@@ -263,7 +263,7 @@ For further Information see the [license file](https://misp.github.io/misp-modul
 * [Lastline Import](https://misp.github.io/misp-modules/import_mod/#lastline-import) - Deprecation notice: this module will be deprecated by December 2021, please use vmware_nsx module.  Module to import and parse reports from Lastline analysis links.
 * [MISP JSON Import](https://misp.github.io/misp-modules/import_mod/#misp-json-import) - Module to import MISP JSON format for merging MISP events.
 * [OCR Import](https://misp.github.io/misp-modules/import_mod/#ocr-import) - Optical Character Recognition (OCR) module for MISP.
-* [OpenIOC Import](https://misp.github.io/misp-modules/import_mod/#openioc-import) - Module to import OpenIOC packages.
+* [OpenIOC Import](https://misp.github.io/misp-modules/import_mod/#openioc-import) - Import legacy OpenIOC 1.0 and 1.1 files into MISP.
 * [PCAP Import](https://misp.github.io/misp-modules/import_mod/#pcap-import) - Import a PCAP or PCAPNG capture, including reassembled files, emails and network indicators.
 * [TAXII 2.1 Import](https://misp.github.io/misp-modules/import_mod/#taxii-2.1-import) - Import content from a TAXII 2.1 server
 * [CSV Test Import](https://misp.github.io/misp-modules/import_mod/#csv-test-import) - Simple CSV import tool with mapable columns

@@ -149,7 +149,7 @@ class TestModules(unittest.TestCase):
             print(response)
 
             print("OpenIOC :: {}".format(response))
-            values = [x["values"][0] for x in response["results"]]
+            values = [x["value"] for x in response["results"]["Attribute"]]
             assert "mrxcls.sys" in values
             assert "mdmcpq3.PNF" in values
 
