@@ -139,6 +139,7 @@ For further Information see the [license file](https://misp.github.io/misp-modul
 * [Macaddress.io Lookup](https://misp.github.io/misp-modules/expansion/#macaddress.io-lookup) - MISP hover module for macaddress.io
 * [Macvendors Lookup](https://misp.github.io/misp-modules/expansion/#macvendors-lookup) - Module to access Macvendors API.
 * [MalShare Upload](https://misp.github.io/misp-modules/expansion/#malshare-upload) - Module to push malware samples to MalShare
+* [Manalyze](documentation/expansion/manalyze.md) - Analyze PE attachments and malware samples locally with Manalyze.
 * [Malware Bazaar Lookup](https://misp.github.io/misp-modules/expansion/#malware-bazaar-lookup) - Query Malware Bazaar to get additional information about the input hash.
 * [McAfee MVISION Insights Lookup](https://misp.github.io/misp-modules/expansion/#mcafee-mvision-insights-lookup) - Lookup McAfee MVISION Insights Details
 * [GeoIP Enrichment](https://misp.github.io/misp-modules/expansion/#geoip-enrichment) - A hover and expansion module to enrich an ip with geolocation and ASN information from an mmdb server instance, such as CIRCL's ip.circl.lu.
