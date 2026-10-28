@@ -4,6 +4,7 @@ from io import BytesIO
 from flask import Blueprint, jsonify, render_template, request, send_file
 from flask import session as sess
 from flask_login import current_user
+from werkzeug.exceptions import RequestEntityTooLarge
 from werkzeug.utils import secure_filename
 
 from app.utils import admin_user_active
@@ -12,6 +13,7 @@ from . import home_core as HomeModel
 from . import session_class as SessionModel
 from .csv_export import export_result
 from .external_tools import external_tools_core as ToolModel
+from .import_core import build_import_request
 
 home_blueprint = Blueprint(
     "home", __name__, template_folder="templates", static_folder="static"
@@ -47,7 +49,7 @@ def home_query(sid):
     sess["admin_user"] = admin_user_active()
     if "query" in request.args:
         sess["query"] = [request.args.get("query")]
-        return render_template("home.html", query=query, sid=sid)
+        return render_template("home.html", sid=sid)
     return render_template("404.html")
 
 
@@ -121,6 +123,38 @@ def get_modules():
     return res, 200
 
 
+@home_blueprint.route("/import")
+def import_data():
+    sess["admin_user"] = bool(admin_user_active())
+    return render_template("import.html")
+
+
+@home_blueprint.route("/get_import_modules")
+def get_import_modules():
+    res = HomeModel.get_modules(("import",))
+    return res, 404 if "message" in res else 200
+
+
+@home_blueprint.route("/run_import", methods=["POST"])
+def run_import():
+    try:
+        request_json, payload = build_import_request(request.form, request.files)
+    except RequestEntityTooLarge:
+        return {"message": "Import data must be at most 20 MiB."}, 413
+    except ValueError as error:
+        return {"message": str(error)}, 400
+    session = SessionModel.Session_class(request_json, import_payload=payload)
+    HomeModel.set_flask_session(session, "")
+    SessionModel.sessions.append(session)
+    session.start()
+    return {"id": session.uuid}, 201
+
+
+@home_blueprint.errorhandler(RequestEntityTooLarge)
+def import_too_large(error):
+    return {"message": "Import data must be at most 20 MiB."}, 413
+
+
 @home_blueprint.route("/get_list_misp_attributes")
 def get_list_misp_attributes():
     """Return all misp attributes for input and output"""
@@ -152,8 +186,8 @@ def run_modules():
                 else:
                     session = SessionModel.Session_class(request.json)
                 HomeModel.set_flask_session(session, request.json["parent_id"])
-                session.start()
                 SessionModel.sessions.append(session)
+                session.start()
                 return jsonify(session.status()), 201
             return {"message": "Need a module type"}, 400
         return {"message": "Need an input (misp attribute)"}, 400

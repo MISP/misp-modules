@@ -2,16 +2,20 @@
     Author: David Cruciani
 -->
 {% extends "base.html" %}
-{% block title %}Enrichment results · MISP Modules{% endblock %}
+{% block title %}{{ 'Import' if input_query == 'import' else 'Enrichment' }} results · MISP Modules{% endblock %}
 {% block content %}
     <input type="hidden" id="share" value="{{ sid }}">
     <div id="top" class="page-heading results-heading">
         <div>
-            <p class="eyebrow">ENRICHMENT RESULTS</p>
+            <p class="eyebrow">{{ 'IMPORT' if input_query == 'import' else 'ENRICHMENT' }} RESULTS</p>
             <h1 title="{{ ', '.join(query) }}">{{ query_str }}</h1>
             <p class="page-description">Explore the results, download data, or continue your investigation.</p>
         </div>
         <div class="results-actions">
+            {% if input_query == 'import' %}
+            <a class="btn btn-outline-secondary" href="/import">New import</a>
+            <a class="btn btn-outline-secondary" href="/">New enrichment</a>
+            {% else %}
             <a class="btn btn-outline-secondary" href="/">New enrichment</a><a class="btn btn-outline-secondary"
    href="/?query={{ query|tojson|urlencode }}"
    title="Start a new query using these indicators">Reuse indicators</a>
@@ -31,11 +35,12 @@
                             @click="query_as_params()">Run with same settings</button>
                 </div>
             </div>
+            {% endif %}
         </div>
     </div>
     <dl class="workspace-card result-metadata">
         <div>
-            <dt>Input attribute</dt>
+            <dt>{{ 'Input source' if input_query == 'import' else 'Input attribute' }}</dt>
             <dd>
                 {{ input_query }}
             </dd>
@@ -231,18 +236,21 @@
                                         <!-- visual part -->
                                         <template v-if="tab_list == 'visual'">
                                             <div class="accordion-body enrichment-visual">
-                                                <template v-if="'Object' in result.results">
+                                                <template v-if="!Array.isArray(result.results)">
                                                     <template v-for="obj in result.results.Object">
                                                         <div class="enrichment-object-wrapper"
-                                                             v-html="parseMispObject(obj, '/home/{{ sid }}?query=', query_as_same)[0].outerHTML">
+                                                             v-html="parseMispObject(obj, '/home/{{ sid }}?query=', {{ 'null' if input_query == 'import' else 'query_as_same' }})[0].outerHTML">
                                                         </div>
                                                     </template>
+                                                    <div v-for="(attr, index) in result.results.Attribute"
+                                                         class="enrichment-attribute-wrapper"
+                                                         v-html="parseMispAttr(attr.value, [attr.type], index, '/home/{{ sid }}?query=', {{ 'null' if input_query == 'import' else 'query_as_same' }})[0].outerHTML"></div>
                                                 </template>
                                                 <template v-else>
                                                     <template v-for="misp_attrs, key_loop in result.results">
-                                                        <div v-for="misp_attr in misp_attrs.values"
+                                                        <div v-for="misp_attr in (Array.isArray(misp_attrs.values) ? misp_attrs.values : [misp_attrs.values])"
                                                              class="enrichment-attribute-wrapper"
-                                                             v-html="parseMispAttr(misp_attr, misp_attrs.types, key_loop, '/home/{{ sid }}?query=', query_as_same)[0].outerHTML">
+                                                             v-html="parseMispAttr(misp_attr, misp_attrs.types, key_loop, '/home/{{ sid }}?query=', {{ 'null' if input_query == 'import' else 'query_as_same' }})[0].outerHTML">
                                                         </div>
                                                     </template>
                                                 </template>

@@ -9,6 +9,24 @@ Use all MISP modules through a dedicated website without requiring a MISP instan
 See the [interface guide](doc/interface.md) for design references, asset builds,
 and browser regression tests.
 
+## Import modules
+
+Choose **Import data** in the sidebar to test an active import module without a
+MISP instance. Select a module, then upload a file or paste text according to its
+supported input sources (up to 20 MiB). Modules that retrieve remote reports show
+their configuration fields instead of a file input.
+
+The form displays the module's import options, including boolean defaults and
+required fields. Saved module settings are used automatically; **Override module
+settings** supplies values for this run. An administrator can enable modules and
+configure shared settings under **Module configuration**.
+
+Imports open in the same results view as enrichments, with visual, JSON, and
+Markdown views, downloads, and session history. Use **Choose modules** on an
+imported attribute to start an enrichment. To repeat an import, choose **New
+import** and provide the input again; the website does not retain uploaded input
+for replay. Import results may themselves contain attachments supplied by a module.
+
 ## Installation
 
 The MISP Modules website uses [Poetry](https://python-poetry.org/) for dependency management. It is recommended to install dependencies in a virtual environment managed by Poetry.

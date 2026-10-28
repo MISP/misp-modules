@@ -64,6 +64,66 @@ class InterfaceTests(unittest.TestCase):
     def select_module(self, name):
         self.page.locator(".module-card").filter(has=self.page.locator(".module-name", has_text=name)).get_by_role("checkbox").check()
 
+    def test_import_file_submission_and_results(self):
+        self.home()
+        self.page.get_by_role("link", name="Import data", exact=True).click()
+        self.page.get_by_label("Import module", exact=True).select_option("url_import")
+        expect(self.page.get_by_label("include_scheme", exact=True)).to_be_checked()
+        self.page.get_by_role("button", name="Run import", exact=True).click()
+        expect(self.page.get_by_role("alert")).to_contain_text("Choose a file")
+        self.page.get_by_label("File to import", exact=True).set_input_files({"name": "urls.txt", "mimeType": "text/plain", "buffer": b"https://example.org/"})
+        with self.page.expect_request("**/run_import") as submitted:
+            self.page.route("**/run_import", lambda route: route.fulfill(status=201, content_type="application/json", body='{"id":"import-query"}'))
+            self.page.get_by_role("button", name="Run import", exact=True).click()
+        self.assertIn('filename="urls.txt"', submitted.value.post_data)
+        self.page.wait_for_url(self.base + "/query/import-query")
+        expect(self.page.locator(".eyebrow").filter(has_text="IMPORT RESULTS")).to_be_visible()
+        expect(self.page.locator(".enrichment-attribute-card")).to_contain_text("https://example.org/")
+        expect(self.page.get_by_role("button", name="Run same modules", exact=True)).to_have_count(0)
+        expect(self.page.get_by_role("button", name="Run again", exact=True)).to_have_count(0)
+        self.page.get_by_role("link", name="Choose modules", exact=True).click()
+        expect(self.page.get_by_role("textbox", name="Indicator 1", exact=True)).to_have_value("https://example.org/")
+
+    def test_import_paste_and_config_only_options(self):
+        self.page.goto(self.base + "/import")
+        self.page.get_by_label("Import module", exact=True).select_option("url_import")
+        self.page.get_by_label("Input source", exact=True).select_option("paste")
+        self.page.get_by_label("Data to import", exact=True).fill("https://example.org/café")
+        self.page.get_by_label("include_scheme", exact=True).uncheck()
+        self.page.route("**/run_import", lambda route: route.fulfill(status=400, content_type="application/json", body='{"message":"Import unavailable; try again."}'))
+        with self.page.expect_request("**/run_import") as submitted:
+            self.page.get_by_role("button", name="Run import", exact=True).click()
+        self.assertIn('"include_scheme":"0"', submitted.value.post_data)
+        self.assertIn("https://example.org/café", submitted.value.post_data)
+        expect(self.page.get_by_role("alert")).to_contain_text("Import unavailable")
+        expect(self.page.get_by_role("button", name="Run import", exact=True)).to_be_enabled()
+        self.page.get_by_label("Import module", exact=True).select_option("remote_import")
+        expect(self.page.get_by_label("Input source", exact=True)).to_have_count(0)
+        self.page.get_by_label("report_id (required)", exact=True).fill("12")
+        self.page.get_by_label("Override module settings", exact=True).check()
+        self.page.get_by_label("apikey", exact=True).fill("test-only-key")
+        with self.page.expect_request("**/run_import") as submitted:
+            self.page.get_by_role("button", name="Run import", exact=True).click()
+        self.assertIn('"report_id":"12"', submitted.value.post_data)
+        self.assertIn('"apikey":"test-only-key"', submitted.value.post_data)
+        expect(self.page.get_by_role("alert")).to_contain_text("Import unavailable")
+        self.page.set_viewport_size({"width": 390, "height": 844})
+        self.assertFalse(self.page.evaluate("document.documentElement.scrollWidth > innerWidth + 1"))
+        self.screenshot("import-mobile.png")
+
+    def test_import_results_render_mixed_and_legacy_attributes(self):
+        for result, objects in [
+            ({"Attribute": [{"type": "domain", "value": "example.org"}], "Object": [{"name": "url", "Attribute": [{"type": "url", "value": "https://example.org/", "object_relation": "url"}]}]}, 1),
+            ([{"types": "domain", "values": "example.org"}], 0),
+        ]:
+            with self.subTest(result=result):
+                self.page.route("**/result/import-query", lambda route: route.fulfill(status=200, content_type="application/json", body=json.dumps({"urls.txt": {"url_import": {"results": result}}})))
+                self.page.goto(self.base + "/query/import-query")
+                expect(self.page.locator(".enrichment-attribute-card")).to_have_count(1)
+                expect(self.page.locator(".enrichment-attribute-card")).to_contain_text("example.org")
+                expect(self.page.locator(".enrichment-object-card")).to_have_count(objects)
+                self.page.unroute("**/result/import-query")
+
     def screenshot(self, name):
         if directory := os.environ.get("UI_SCREENSHOT_DIR"):
             Path(directory).mkdir(parents=True, exist_ok=True)
@@ -122,7 +182,7 @@ class InterfaceTests(unittest.TestCase):
 
     @unittest.skipUnless(os.environ.get("AXE_SCRIPT_PATH"), "Set AXE_SCRIPT_PATH to an installed axe.min.js")
     def test_accessibility_scan(self):
-        for path in ("/", "/modules_config", "/history", "/history_session", "/history_tree", "/external_tools", "/add_external_tool", "/login", "/query/test-query", "/query/object-query"):
+        for path in ("/", "/import", "/modules_config", "/history", "/history_session", "/history_tree", "/external_tools", "/add_external_tool", "/login", "/query/test-query", "/query/object-query", "/query/import-query"):
             with self.subTest(path=path):
                 self.page.goto(self.base + path + ("?sample=saved" if path in ("/history_session", "/history_tree") else ""))
                 if path == "/":
@@ -130,6 +190,8 @@ class InterfaceTests(unittest.TestCase):
                     self.select_module("virustotal")
                 if path == "/modules_config":
                     self.page.get_by_role("button", name="virustotal", exact=False).click()
+                if path == "/import":
+                    self.page.get_by_label("Import module", exact=True).select_option("url_import")
                 if path.startswith("/query/"):
                     expect(self.page.get_by_role("link", name="Choose modules", exact=True).first).to_be_visible()
                 self.page.add_script_tag(path=os.environ["AXE_SCRIPT_PATH"])

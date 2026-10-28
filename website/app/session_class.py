@@ -1,7 +1,7 @@
 import datetime
 import json
 import uuid
-from queue import Queue
+from queue import Empty, Queue
 from threading import Thread
 from uuid import uuid4
 
@@ -17,7 +17,9 @@ sessions = list()
 
 
 class Session_class:
-    def __init__(self, request_json, query_as_same=False, parent_id=None) -> None:
+    def __init__(
+        self, request_json, query_as_same=False, parent_id=None, import_payload=None
+    ) -> None:
         self.uuid = str(uuid4())
         self.thread_count = 4
         self.jobs = Queue(maxsize=0)
@@ -28,6 +30,7 @@ class Session_class:
         self.query = request_json["query"]
         self.input_query = request_json["input"]
         self.modules_list = request_json["modules"]
+        self.import_payload = import_payload
         self.nb_errors = 0
         self.config_module = self.config_module_setter(
             request_json, query_as_same, parent_id
@@ -59,11 +62,11 @@ class Session_class:
             for query in self.modules_list:
                 if query not in request_json["config"]:
                     request_json["config"][query] = {}
-                    module = HomeModel.get_module_by_name(query)
-                    mcs = HomeModel.get_module_config_module(module.id)
-                    for mc in mcs:
-                        config_db = HomeModel.get_config(mc.config_id)
-                        request_json["config"][query][config_db.name] = mc.value
+                module = HomeModel.get_module_by_name(query)
+                mcs = HomeModel.get_module_config_module(module.id)
+                for mc in mcs:
+                    config_db = HomeModel.get_config(mc.config_id)
+                    request_json["config"][query].setdefault(config_db.name, mc.value)
         return request_json["config"]
 
     def start(self):
@@ -82,13 +85,13 @@ class Session_class:
 
     def status(self):
         """Status of the current queue"""
-        if self.jobs.empty():
+        if not self.jobs.unfinished_tasks and not self.stopped:
             self.stop()
 
-        total = len(self.modules_list)
-        remaining = max(self.jobs.qsize(), len(self.threads))
+        total = len(self.query) * len(self.modules_list)
+        remaining = self.jobs.unfinished_tasks
         complete = total - remaining
-        registered = len(self.result)
+        registered = complete
 
         return {
             "id": self.uuid,
@@ -102,23 +105,27 @@ class Session_class:
 
     def stop(self):
         """Stop the current queue and worker"""
-        self.jobs.queue.clear()
-
         for worker in self.threads:
             worker.join(3.5)
 
         self.threads.clear()
-        sessions.remove(self)
+        self.import_payload = None
+        self.stopped = True
+        if self in sessions:
+            sessions.remove(self)
         self.save_info()
 
     def process(self):
         """Threaded function for queue processing."""
-        while not self.jobs.empty():
-            work = self.jobs.get()
+        while True:
+            try:
+                work = self.jobs.get_nowait()
+            except Empty:
+                break
 
             modules = query_get_module()
             loc_query = {}
-            self.result[work[1]] = dict()
+            self.result.setdefault(work[1], {})
             # If Misp format
             for module in modules:
                 if module["name"] == work[2]:
@@ -134,7 +141,13 @@ class Session_class:
             if work[2] in self.config_module:
                 loc_config = self.config_module[work[2]]
 
-            if loc_query:
+            if self.import_payload is not None:
+                send_to = {
+                    "module": work[2],
+                    "config": loc_config,
+                    **self.import_payload,
+                }
+            elif loc_query:
                 send_to = {
                     "module": work[2],
                     "attribute": loc_query,
@@ -146,7 +159,13 @@ class Session_class:
                     self.input_query: work[1],
                     "config": loc_config,
                 }
-            res = query_post_query(send_to)
+            try:
+                res = query_post_query(send_to)
+            except Exception as error:
+                res = {"error": str(error)}
+            if not isinstance(res, dict) or not ({"results", "error"} & res.keys()):
+                message = res.get("message") if isinstance(res, dict) else None
+                res = {"error": message or "The module returned no usable result."}
 
             # Sort attr in object by ui-priority
             if res:
