@@ -62,8 +62,8 @@ jobs:
       - name: Install dependencies
         run: poetry install --with test -E all
 
-      - name: Install TShark for PCAP integration tests
-        run: sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y tshark
+      - name: Install packet capture tools for integration tests
+        run: sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y tshark tcpdump
 
       - name: Build package
         run: poetry build

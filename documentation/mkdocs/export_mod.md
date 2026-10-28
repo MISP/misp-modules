@@ -1,4 +1,23 @@
 
+#### [BPF Export](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/bpf_export.py)
+
+Export IDS-marked event and object network attributes as a tcpdump/libpcap capture filter.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/bpf_export.py)]
+
+- **features**:
+>Produces a sorted, deduplicated BPF capture expression for IPv4/IPv6 hosts and networks, IP/port pairs, domains, hostname/port pairs, domain/IP pairs, ports and MAC addresses. Only to_ids attributes are included; deleted data is excluded. Names are resolved by libpcap at filter compilation time. Empty matches return an error rather than an unfiltered capture. See the [usage guide](https://github.com/MISP/misp-modules/blob/main/documentation/export_mod/bpf_export.md).
+
+- **input**:
+>MISP events and object attributes in standard, bare or legacy export format.
+
+- **output**:
+>Base64-encoded libpcap capture filter for tcpdump -F; skipped counts and warnings in the API response.
+
+- **references**:
+>https://www.tcpdump.org/manpages/pcap-filter.7.html
+
+-----
+
 #### [CEF Export](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/cef_export.py)
 
 Module to export a MISP event in CEF format.

@@ -219,6 +219,7 @@ For further Information see the [license file](https://misp.github.io/misp-modul
 * [Yeti Lookup](https://misp.github.io/misp-modules/expansion/#yeti-lookup) - Module to process a query on Yeti.
 
 ### Export Modules
+* [BPF Export](https://misp.github.io/misp-modules/export_mod/#bpf-export) - Export IDS-marked event and object network attributes as a tcpdump/libpcap capture filter.
 * [CEF Export](https://misp.github.io/misp-modules/export_mod/#cef-export) - Module to export a MISP event in CEF format.
 * [Cisco IOS ACL Export](https://misp.github.io/misp-modules/export_mod/#cisco-ios-acl-export) - Export IDS-marked network attributes as Cisco IOS/IOS-XE IPv4 and IPv6 ACL fragments.
 * [Cisco ASA ACL Export](https://misp.github.io/misp-modules/export_mod/#cisco-asa-acl-export) - Export IDS-marked network attributes as Cisco ASA 9.x IPv4/IPv6 extended ACL entries.
