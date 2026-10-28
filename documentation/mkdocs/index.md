@@ -187,6 +187,7 @@ For more information: [Extending MISP with Python modules](https://www.misp-proj
 * [PDNS COF Importer](https://misp.github.io/misp-modules/import_mod/#pdns-cof-importer) - Passive DNS Common Output Format (COF) MISP importer
 * [CSV Import](https://misp.github.io/misp-modules/import_mod/#csv-import) - Module to import MISP attributes from a csv file.
 * [Cuckoo Sandbox Import](https://misp.github.io/misp-modules/import_mod/#cuckoo-sandbox-import) - Module to import Cuckoo JSON.
+* [DMARC Import](https://misp.github.io/misp-modules/import_mod/#dmarc-import) - Import DMARC aggregate XML reports, including gzip and ZIP files.
 * [Email Import](https://misp.github.io/misp-modules/import_mod/#email-import) - Email import module for MISP
 * [GoAML Import](https://misp.github.io/misp-modules/import_mod/#goaml-import) - Module to import MISP objects about financial transactions from GoAML files.
 * [Import Blueprint](https://misp.github.io/misp-modules/import_mod/#import-blueprint) - Generic blueprint to be copy-pasted to quickly boostrap creation of import module.

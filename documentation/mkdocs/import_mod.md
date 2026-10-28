@@ -98,6 +98,29 @@ Module to import Cuckoo JSON.
 
 -----
 
+#### [DMARC Import](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/dmarc_import.py)
+
+Import DMARC aggregate XML reports, including gzip and ZIP files.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/dmarc_import.py)]
+
+- **features**:
+>Upload an aggregate XML report (.xml, .xml.gz, or a ZIP containing exactly one XML file), or paste XML. Creates an annotation object with report metadata, published policy and the original XML attachment. Each aggregate record becomes a linked domain-ip object with its source IP (ip-src), header-from domain, reporting interval and a JSON text attribute preserving counts, disposition, SPF/DKIM results, identifiers and extension fields. Additional identifier and authentication domains are included for correlation. All attributes have to_ids disabled: DMARC observations do not by themselves identify malicious senders. No API key or network access is needed. Input and decompressed XML are limited to 20 MiB each, with at most 10,000 records and 32 XML nesting levels. DTDs, encrypted or multi-file ZIPs, nested archives and forensic/failure reports (RUF/ARF) are not supported. Invalid records reject the entire import.
+
+- **input**:
+>DMARC aggregate XML, optionally gzip- or ZIP-compressed
+
+- **output**:
+>MISP annotation and domain-ip objects with report context and authentication results
+
+- **references**:
+> - https://www.rfc-editor.org/rfc/rfc7489.html
+> - https://github.com/MISP/misp-modules/issues/508
+
+- **requirements**:
+>PyMISP
+
+-----
+
 #### [Email Import](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/email_import.py)
 
 Email import module for MISP
