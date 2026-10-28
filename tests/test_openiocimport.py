@@ -135,6 +135,61 @@ def test_legacy_ipv4_with_port():
     assert (attr["type"], attr["value"]) == ("ip-dst|port", "192.0.2.1|443")
 
 
+@pytest.mark.parametrize("condition", ["is", "contains", "matches"])
+@pytest.mark.parametrize("path", ["DnsEntryItem/Host", "SystemInfoItem/HostName"])
+def test_invalid_domain_and_hostname_strings_survive_as_other(path, condition):
+    value = r"^.*example\.com$"
+    attr = observable(document(item(path, value, condition=condition)))[0]
+    assert (attr["type"], attr["value"]) == ("other", value)
+    assert attr["disable_correlation"] is True
+    assert f"condition={condition}" in attr["comment"]
+    assert path in attr["comment"]
+
+
+@pytest.mark.parametrize(
+    "path,value",
+    [
+        ("DnsEntryItem/Host", "*.example.test"),
+        ("SystemInfoItem/HostName", "host name.example.test"),
+        ("Email/From", "partial-address"),
+        ("Email/To", "@example"),
+        ("ServiceItem/name", r"Legacy\Service"),
+        ("ServiceItem/descriptiveName", "name/with/slashes"),
+        ("ServiceItem/name", "x" * 257),
+        ("ServiceItem/descriptiveName", "é" * 129),
+    ],
+)
+def test_other_strict_mapped_strings_survive_as_other(path, value):
+    attr = observable(document(item(path, value)))[0]
+    assert (attr["type"], attr["value"]) == ("other", value)
+    assert attr["disable_correlation"] is True
+
+
+@pytest.mark.parametrize("port", ["0", "000", "65536", "-1", "١"])
+@pytest.mark.parametrize("path", ["PortItem/remotePort", "PortItem/localPort", "PortItem/remoteIP"])
+def test_invalid_ports_are_retained_as_other(path, port):
+    value = "192.0.2.1:" + port if path.endswith("IP") else port
+    attr = observable(document(item(path, value)))[0]
+    assert (attr["type"], attr["value"]) == ("other", value)
+    assert attr["disable_correlation"] is True
+
+
+@pytest.mark.parametrize("port", ["1", "443", "65535"])
+@pytest.mark.parametrize("path", ["PortItem/remotePort", "PortItem/localPort", "PortItem/remoteIP"])
+def test_valid_ports_keep_their_misp_types(path, port):
+    composite = path.endswith("IP")
+    value = "192.0.2.1:" + port if composite else port
+    attr = observable(document(item(path, value)))[0]
+    assert attr["type"] == ("ip-dst|port" if composite else "port")
+    assert attr["value"] == ("192.0.2.1|" + port if composite else port)
+    assert attr["disable_correlation"] is False
+
+
+def test_zero_remains_valid_for_file_size():
+    attr = observable(document(item("FileItem/SizeInBytes", "0")))[0]
+    assert (attr["type"], attr["value"]) == ("size-in-bytes", "0")
+
+
 @pytest.mark.parametrize("enabled", [True, 1, "1", "true", "yes", "on"])
 def test_attachment_can_be_disabled(enabled):
     attrs = attributes(document(item()), config={"not save ioc": enabled})

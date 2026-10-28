@@ -136,6 +136,10 @@ def _enabled(value):
     return str(value).strip().lower() in {"1", "true", "yes", "on"}
 
 
+def _is_port(value):
+    return bool(re.fullmatch(r"[0-9]+", value) and 1 <= int(value) <= 65535)
+
+
 def _mapped_value(attribute_type, value):
     """Keep patterns and partial values out of types with strict MISP validation."""
     if attribute_type in {"md5", "sha1", "sha256"}:
@@ -149,14 +153,29 @@ def _mapped_value(attribute_type, value):
             # Older producers sometimes store IPv4:port in an IP context.
             address, separator, port = value.rpartition(":")
             try:
-                if not separator or not port.isdecimal() or not 0 <= int(port) <= 65535:
+                if not separator or not _is_port(port):
                     return "other", value
                 ip_interface(address)
             except ValueError:
                 return "other", value
             return attribute_type + "|port", address + "|" + port
-    elif attribute_type in {"port", "size-in-bytes"}:
-        if not value.isdecimal() or (attribute_type == "port" and int(value) > 65535):
+    elif attribute_type == "port":
+        if not _is_port(value):
+            return "other", value
+    elif attribute_type == "size-in-bytes":
+        if not re.fullmatch(r"[0-9]+", value):
+            return "other", value
+    # PyMISP checks attribute structure, not these server-side value rules.
+    # Match MISP's strict string validators so invalid patterns are not lost
+    # when the result is imported by the server.
+    elif attribute_type in {"domain", "hostname"}:
+        if not re.fullmatch(r"[A-Za-z0-9._-]+\.[A-Za-z0-9-]{2,}", value):
+            return "other", value
+    elif attribute_type in {"email-src", "email-dst"}:
+        if not re.fullmatch(r".[^\s]*@.*\..*", value):
+            return "other", value
+    elif attribute_type in {"windows-service-name", "windows-service-displayname"}:
+        if len(value.encode("utf-8")) > 256 or "/" in value or "\\" in value:
             return "other", value
     return attribute_type, value
 
