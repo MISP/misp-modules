@@ -60,6 +60,7 @@ minimal = [
     "mattermostdriver",
     "oauth2",
     "passivetotal",
+    "phonenumbers>=9.0,<10.0",
     "ptrclassify>=0.3.0,<0.4.0",
     "pycountry",
     "pyeti-python3",
@@ -117,6 +118,7 @@ all = [
     "openpyxl",
     "pandoc",
     "passivetotal",   ## in minimal
+    "phonenumbers>=9.0,<10.0",  ## in minimal
     "pdftotext",
     "ptrclassify>=0.3.0,<0.4.0",  ## in minimal
     "pycountry",  ## in minimal
