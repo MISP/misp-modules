@@ -143,6 +143,7 @@ class CytomicParser:
             if json_result_query_endpoint_fileinformation:
 
                 cytomic_object = MISPObject("cytomic-orion-file")
+                cytomic_object.first_seen = json_result_query_endpoint_fileinformation["firstSeen"]
 
                 cytomic_object.add_attribute(
                     "fileName",
@@ -200,6 +201,7 @@ class CytomicParser:
                             if json_result_endpoint_machines_client:
 
                                 cytomic_machine_object = MISPObject("cytomic-orion-machine")
+                                cytomic_machine_object.first_seen = machine["firstSeen"]
 
                                 clienttag = [{"name": json_result_endpoint_machines_client["clientName"]}]
 
