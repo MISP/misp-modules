@@ -1865,7 +1865,7 @@ Module to push malware samples to a MWDB instance
 [[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/mwdb.py)]
 
 - **features**:
->An expansion module to push malware samples to a MWDB (https://github.com/CERT-Polska/mwdb-core) instance. This module does not push samples to a sandbox. This can be achieved via Karton (connected to the MWDB). Does: * Upload of attachment or malware sample to MWDB * Tags of events and/or attributes are added to MWDB. * Comment of the MISP attribute is added to MWDB. * A link back to the MISP event is added to MWDB via the MWDB attribute.  * A link to the MWDB attribute is added as an enrichted attribute to the MISP event.
+>Uploads an attachment or unpacked MISP malware sample to MWDB using an API key. Optionally forwards event and attribute tags, the attribute comment and the MISP event ID. Returns a link to the uploaded sample. mwdb_url accepts an instance URL or an API URL ending in /api/. Boolean settings accept true/false, yes/no, on/off and 1/0. mwdb_public defaults to true for compatibility; set it to false to use normal instance sharing. See documentation/expansion/mwdb.md for configuration.
 
 - **config**:
 > - mwdb_apikey
@@ -1879,10 +1879,15 @@ Module to push malware samples to a MWDB instance
 >Attachment or malware sample
 
 - **output**:
->Link attribute that points to the sample at the MWDB instane
+>Link attribute pointing to the uploaded MWDB sample
+
+- **references**:
+>https://mwdb.readthedocs.io/en/latest/user-guide/8-REST-and-mwdblib.html
 
 - **requirements**:
->* mwdblib installed (pip install mwdblib) ; * (optional) keys.py file to add tags of events/attributes to MWDB * (optional) MWDB attribute created for the link back to MISP (defined in mwdb_misp_attribute)
+> - mwdblib>=4.0.0 and MWDB Core>=2.6.0
+> - Optional keys.py file for MISP event and attribute tags
+> - Optional MWDB attribute key configured in mwdb_misp_attribute
 
 -----
 

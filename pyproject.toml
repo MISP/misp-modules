@@ -109,7 +109,7 @@ all = [
     "matplotlib",   ## in minimal
     "mattermostdriver",   ## in minimal
     "misp-stix>=2026.6.1",
-    "mwdblib",
+    "mwdblib>=4.0.0",
     "ndjson",  ## in minimal
     "oauth2",   ## in minimal
     "opencv-python",
