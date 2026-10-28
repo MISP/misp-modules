@@ -43,6 +43,7 @@ from tornado import ioloop
 import misp_modules
 from misp_modules import openapi as openapi_builder
 from misp_modules.http_debug import configure_http_debug, module_context
+from misp_modules.lib.gathering import get_jobs
 from misp_modules.module_config import ModuleConfig, ModuleConfigError
 from misp_modules.statistics import ModuleStatistics
 
@@ -237,6 +238,50 @@ class Statistics(tornado.web.RequestHandler):
         self.write(orjson.dumps(MODULE_STATISTICS.snapshot(module_types)))
 
 
+class GatheringJob(tornado.web.RequestHandler):
+    """Small job-status responses; the capability ID also authorizes deletion."""
+
+    def get(self, identifier):
+        self.set_header("Cache-Control", "no-store")
+        try:
+            self.write(get_jobs().status(identifier))
+        except (FileNotFoundError, ValueError):
+            self.send_error(404)
+
+    def delete(self, identifier):
+        try:
+            get_jobs().delete(identifier)
+            self.set_status(204)
+        except (FileNotFoundError, ValueError):
+            self.send_error(404)
+
+
+class GatheringArchive(tornado.web.RequestHandler):
+    """Stream a ZIP in bounded chunks with backpressure; never serialize it as JSON."""
+
+    async def get(self, identifier):
+        try:
+            path = get_jobs().archive_path(identifier)
+            source = path.open("rb")
+        except FileNotFoundError:
+            self.send_error(404)
+            return
+        except ValueError:
+            self.send_error(409)
+            return
+        self.set_header("Content-Type", "application/zip")
+        self.set_header("Content-Length", os.fstat(source.fileno()).st_size)
+        self.set_header("Content-Disposition", 'attachment; filename="feed.zip"')
+        self.set_header("Cache-Control", "no-store")
+        with source:
+            while chunk := source.read(64 * 1024):
+                self.write(chunk)
+                try:
+                    await self.flush()
+                except tornado.iostream.StreamClosedError:
+                    return
+
+
 class QueryModule(tornado.web.RequestHandler):
     """QueryModule handler."""
 
@@ -382,6 +427,8 @@ def main():
                 [
                     (r"/modules", ListModules),
                     (r"/query", QueryModule),
+                    (r"/gathering/jobs/([0-9a-f]{64})", GatheringJob),
+                    (r"/gathering/jobs/([0-9a-f]{64})/feed\.zip", GatheringArchive),
                     (r"/statistics", Statistics),
                     (r"/healthcheck", HealthCheck),
                     (r"/version", VersionCheck),
@@ -413,6 +460,8 @@ def main():
         return 0
 
     try:
+        cleanup = ioloop.PeriodicCallback(lambda: ioloop.IOLoop.current().run_in_executor(None, get_jobs().reap), 60000)
+        cleanup.start()
         ioloop.IOLoop.instance().start()
     finally:
         ioloop.IOLoop.instance().stop()

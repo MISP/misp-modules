@@ -6,8 +6,6 @@ import datetime as dt
 import ipaddress
 import json
 import re
-import sqlite3
-import time
 from collections import Counter
 from html.parser import HTMLParser
 from urllib.parse import urljoin, urlsplit
@@ -15,21 +13,20 @@ from urllib.parse import urljoin, urlsplit
 import requests
 from pymisp import MISPObject
 
-from misp_modules.lib.gathering import NAMESPACE, FeedBuilder, canonical_json, stable_uuid
+from misp_modules.lib.gathering import NAMESPACE, canonical_json, get_jobs, stable_uuid
 
 SOURCE = "https://witha.name/data/"
 SOURCE_NAMESPACE = stable_uuid(NAMESPACE, "witha.name/data")
 FILENAME = re.compile(r"^(\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2})_DDoSia-target-list-full\.json$")
 MAX_SOURCE_BYTES = 8 * 1024 * 1024
-MAX_TOTAL_BYTES = 16 * 1024 * 1024
 
 moduleinfo = {
-    "version": "0.1",
+    "version": "0.2",
     "author": "MISP Project",
     "description": "Gather witha.name DDoSia configurations as a deterministic MISP feed.",
     "module-type": ["gathering"],
     "name": "WithAName",
-    "timeout": 150,
+    "timeout": 10,
     "references": ["https://witha.name/"],
 }
 moduleconfig = []
@@ -39,7 +36,12 @@ PARAMETERS = {
     "properties": {
         "date_from": {"type": "string", "format": "date", "description": "Inclusive UTC date; defaults to yesterday."},
         "date_to": {"type": "string", "format": "date", "description": "Exclusive UTC date; defaults to tomorrow."},
-        "max_events": {"type": "integer", "minimum": 1, "maximum": 100, "default": 20},
+        "max_events": {
+            "type": "integer",
+            "minimum": 0,
+            "default": 0,
+            "description": "Optional event count budget; 0 means all matching snapshots.",
+        },
         "deduplicate_entries": {"type": "boolean", "default": True},
     },
 }
@@ -67,12 +69,12 @@ def parameters(value):
     today = dt.datetime.now(dt.timezone.utc).date()
     start = dt.date.fromisoformat(value.get("date_from", str(today - dt.timedelta(days=1))))
     end = dt.date.fromisoformat(value.get("date_to", str(today + dt.timedelta(days=1))))
-    limit = value.get("max_events", 20)
+    limit = value.get("max_events", 0)
     deduplicate = value.get("deduplicate_entries", True)
     if start >= end:
         raise ValueError("date_from must precede the exclusive date_to")
-    if type(limit) is not int or not 1 <= limit <= 100:
-        raise ValueError("max_events must be an integer between 1 and 100")
+    if type(limit) is not int or limit < 0:
+        raise ValueError("max_events must be a non-negative integer")
     if type(deduplicate) is not bool:
         raise ValueError("deduplicate_entries must be a boolean")
     return start, end, limit, deduplicate
@@ -171,24 +173,20 @@ def convert(config, filename, deduplicate=True):
     return event, int(observed.timestamp())
 
 
-def gather(params, builder=None):
+def gather(params, builder, config=None):
     start, end, limit, deduplicate = parameters(params)
-    deadline = time.monotonic() + 120
-    downloaded = 0
 
     def fetch(session, url):
-        nonlocal downloaded
-        if time.monotonic() >= deadline:
-            raise ValueError("Gathering time budget exceeded; select a smaller date range")
+        builder.check_cancel()
         with session.get(url, timeout=(5, 15), stream=True, allow_redirects=False) as response:
             if response.status_code != 200:
                 raise ValueError(f"Source returned HTTP {response.status_code}")
             chunks, size = [], 0
             for chunk in response.iter_content(65536):
+                builder.check_cancel()
                 size += len(chunk)
-                downloaded += len(chunk)
-                if size > MAX_SOURCE_BYTES or downloaded > MAX_TOTAL_BYTES or time.monotonic() >= deadline:
-                    raise ValueError("Source size or time budget exceeded; select a smaller date range")
+                if size > MAX_SOURCE_BYTES:
+                    raise ValueError("Source file size budget exceeded")
                 chunks.append(chunk)
             return b"".join(chunks)
 
@@ -199,16 +197,15 @@ def gather(params, builder=None):
         if not listing.filenames:
             raise ValueError("Source listing contains no recognized configuration files")
         filenames = sorted(name for name in listing.filenames if str(start) <= name[:10] < str(end))
-        if len(filenames) > limit:
+        if limit and len(filenames) > limit:
             raise ValueError(
                 f"Date range contains {len(filenames)} configurations, exceeding max_events; narrow the range"
             )
-        builder = builder or FeedBuilder()
         for filename in filenames:
             config = json.loads(fetch(session, SOURCE + filename))
             event, timestamp = convert(config, filename, deduplicate)
             builder.add(event, timestamp)
-        return builder.build()
+            del config, event
 
 
 def handler(q=False):
@@ -218,18 +215,15 @@ def handler(q=False):
         request = json.loads(q)
         if not isinstance(request, dict) or request.get("operation", "prepare") != "prepare":
             raise ValueError("Expected gathering operation prepare")
-        return gather(request.get("parameters", {}))
-    except (ValueError, TypeError, KeyError, requests.RequestException, OSError, sqlite3.Error) as exc:
-        # Network exceptions can contain credentials or provider-controlled bodies.
-        if isinstance(exc, requests.RequestException):
-            return {"error": "Could not retrieve the WithAName dataset"}
-        return {
-            "error": str(exc) if isinstance(exc, ValueError) else "Invalid configuration or gathering state unavailable"
-        }
+        params = request.get("parameters", {})
+        parameters(params)
+        return get_jobs().submit("withaname", params, request.get("config", {}), gather)
+    except (ValueError, TypeError, OSError):
+        return {"error": "Invalid gathering parameters or job queue unavailable"}
 
 
 def introspection():
-    return {"input": [], "output": ["MISP feed"], "gathering_version": 1, "parameters": PARAMETERS}
+    return {"input": [], "output": ["MISP feed"], "gathering_version": 2, "parameters": PARAMETERS}
 
 
 def version():

@@ -69,6 +69,51 @@ def build_document(
         },
         "servers": servers,
         "paths": {
+            "/gathering/jobs/{job_id}": {
+                "parameters": [
+                    {
+                        "name": "job_id",
+                        "in": "path",
+                        "required": True,
+                        "schema": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+                    }
+                ],
+                "get": {
+                    "summary": "Poll a background gathering job",
+                    "responses": {
+                        "200": {"description": "Queued, running, ready or failed job metadata"},
+                        "404": {"description": "Unknown or expired job"},
+                    },
+                },
+                "delete": {
+                    "summary": "Cancel generation or delete a completed artifact",
+                    "responses": {
+                        "204": {"description": "Released or cancellation requested"},
+                        "404": {"description": "Unknown job"},
+                    },
+                },
+            },
+            "/gathering/jobs/{job_id}/feed.zip": {
+                "parameters": [
+                    {
+                        "name": "job_id",
+                        "in": "path",
+                        "required": True,
+                        "schema": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+                    }
+                ],
+                "get": {
+                    "summary": "Stream the completed standard MISP feed ZIP",
+                    "responses": {
+                        "200": {
+                            "description": "Binary archive, never a JSON/base64 response",
+                            "content": {"application/zip": {"schema": {"type": "string", "format": "binary"}}},
+                        },
+                        "409": {"description": "Generation is not ready"},
+                        "404": {"description": "Unknown or expired job"},
+                    },
+                },
+            },
             "/modules": {
                 "get": {
                     "operationId": "listModules",

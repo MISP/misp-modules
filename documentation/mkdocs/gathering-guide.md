@@ -1,119 +1,137 @@
 # Gathering modules
 
-Gathering modules collect source data and produce complete MISP events as a
-standard MISP feed. They are discovered alongside expansion, import, export and
-action modules. They do not connect to a MISP instance or remember whether a
-particular consumer imported an event.
+Gathering modules collect source data into a complete standard MISP feed directory,
+ZIP that directory and return the archive through a streaming endpoint. Source
+conversion stays in the producer; MISP keeps its existing event importer and
+UUID/timestamp deduplication. No consumer import state is stored by the module.
 
-## Version 1 API
+## Version 2: background generation and binary download
 
-Discover producers using `GET /modules`: `type` and `meta.module-type` identify
-`gathering`; `mispattributes.gathering_version` is `1` and
-`mispattributes.parameters` describes the source-specific JSON parameters.
-
-```json
-{
-  "module": "withaname",
-  "operation": "prepare",
-  "parameters": {
-    "date_from": "2023-06-24",
-    "date_to": "2023-06-25",
-    "max_events": 20,
-    "deduplicate_entries": true
-  }
-}
-```
-
-Send this request to `POST /query`. The response transports the contents of
-`manifest.json` and `<event-uuid>.json` together in a bounded, consistent snapshot:
+`GET /modules` advertises `type: gathering`, `meta.module-type: [gathering]`,
+`mispattributes.gathering_version: 2` and a module-specific parameter schema.
+Start generation through the ordinary module interface:
 
 ```json
-{
-  "gathering_version": 1,
-  "source_format": "misp",
-  "manifest": {"<event-uuid>": {"info": "...", "date": "...", "timestamp": "...", "Orgc": {"uuid": "...", "name": "..."}}},
-  "events": {"<event-uuid>": {"Event": {"uuid": "<event-uuid>", "info": "...", "date": "...", "timestamp": "...", "Orgc": {"uuid": "...", "name": "..."}}}}
-}
+{"module":"withaname","operation":"prepare","parameters":{"date_from":"2023-06-24","date_to":"2023-06-25","deduplicate_entries":true},"config":{}}
 ```
 
-All manifest entries have a matching complete event. Empty results contain empty
-JSON objects. Failures return `{"error": "..."}` without a partial feed.
-Version 1 allows at most 100 events and a 32 MiB encoded bundle. There is no
-pagination, background generation, protected-event signature transport or
-`hashes.csv` yet. Exceeding a limit is an error; select a smaller date range.
+`POST /query` returns promptly with a small job descriptor:
 
-Standalone consumers can materialize the conventional feed directory:
-
-```python
-from misp_modules.lib.gathering import write_feed
-
-write_feed(response, "/srv/feeds/new-generation")
+```json
+{"gathering_version":2,"source_format":"misp","job_id":"<64 lowercase hex characters>","module":"withaname","status":"queued","created_at":1790856000}
 ```
 
-The destination must not exist. Publish the completed directory with an atomic
-rename or deployment step; the helper does not publish it automatically.
+Poll `GET /gathering/jobs/<job_id>` until `status` is `ready` or `failed`.
+Ready status adds `event_count`, `archive_size`, `sha256` and `expires_at`.
+Download `GET /gathering/jobs/<job_id>/feed.zip` directly to a local file; this
+returns binary `application/zip` in 64 KiB chunks with backpressure. It does not
+return base64 data or a JSON array of events. No caller-provided download URL
+is used. The random job ID is a capability: keep it within the trusted MISP/module
+service connection, just like the other module APIs.
+
+The ZIP contains flat, ordinary feed files:
+
+```text
+manifest.json
+<event-uuid>.json
+<event-uuid>.json
+...
+```
+
+Every event uses the standard `{"Event": {...}}` wrapper. The complete manifest
+and archive are published only after generation finishes; failed jobs expose no
+archive. `DELETE /gathering/jobs/<job_id>` releases ready artifacts or requests
+cooperative cancellation of queued/running generation. Clients should release
+artifacts in a finally block. Unclaimed terminal jobs expire after the configured
+retention period and are reaped periodically by the module service.
+
+This replaces the unmerged version 1 in-memory bundle proposal. The former
+100-event / 32 MiB bundle restrictions no longer apply. `hashes.csv` generation,
+daily aggregation and protected-event signatures remain outside this first
+producer's scope.
+
+## Memory and disk use
+
+`FeedBuilder(directory)` writes each complete event to its own JSON file as it
+arrives. A temporary SQLite manifest index is streamed into `manifest.json` at
+completion. ZIP creation reads those files in 64 KiB chunks; the full feed and
+archive are never assembled in memory. The temporary feed directory and index
+are deleted after the ZIP is ready. Peak event-content memory is proportional
+to the largest event, with additional source-listing and ZIP central-directory
+metadata proportional to the number of files. A single unusually large event
+still needs to fit in the producer and MISP importer memory budgets.
+
+Allow disk space for the uncompressed feed plus its ZIP during finalization.
+Operator budgets fail a generation explicitly; they never silently truncate it:
+
+| Environment variable | Default |
+| --- | --- |
+| `MISP_MODULES_GATHERING_STATE_DIR` | Service-UID directory under the system temporary directory; set a durable directory in production. |
+| `MISP_MODULES_GATHERING_WORKERS` | 2 background generation workers per service process. |
+| `MISP_MODULES_GATHERING_QUEUE` | 8 additional queued jobs per service process. |
+| `MISP_MODULES_GATHERING_TIMEOUT` | 86400 seconds; producers must check cooperative cancellation. |
+| `MISP_MODULES_GATHERING_RETENTION` | 86400 seconds after success/failure. |
+| `MISP_MODULES_GATHERING_MAX_BYTES` | 10 GiB of event JSON per generation. |
+| `MISP_MODULES_GATHERING_MAX_EVENT_BYTES` | 256 MiB per event JSON. |
+
+Generation runs outside the `/query` HTTP request timeout. Ready artifacts and
+job status survive a service restart when storage is durable. A generation whose
+owning process died is marked failed, identified using PID and process start time;
+its partial files are removed and the consumer can submit again. Jobs do not
+resume halfway through a source after restart. Long sources use finite network
+timeouts and `builder.check_cancel()` between requests/chunks. Cancellation is
+cooperative, so producers must implement those checks. Queue capacity is bounded.
 
 ## WithAName
 
-`withaname` reads only `https://witha.name/data/` and recognized timestamped JSON
-files from that directory. It never contacts the systems listed in a configuration.
-Requests do not follow redirects. A collection has a 120-second budget, an 8 MiB
-per-file limit and a 16 MiB aggregate download limit, including the listing.
+The producer reads only `https://witha.name/data/` and recognized timestamped
+configuration filenames. It never contacts the systems listed in the dataset,
+and source requests do not follow redirects. Each source file has an 8 MiB limit;
+the whole collection no longer has a 120-second / 16 MiB download limit.
 
 | Parameter | Meaning |
 | --- | --- |
-| `date_from` | Inclusive observation date; defaults to yesterday in UTC. |
-| `date_to` | Exclusive observation date; defaults to tomorrow in UTC. |
-| `max_events` | Integer from 1 to 100, default 20. Fails rather than truncating. |
-| `deduplicate_entries` | Boolean, default true; collapse identical target entries within each configuration. |
+| `date_from` | Inclusive UTC observation date; defaults to yesterday. |
+| `date_to` | Exclusive UTC observation date; defaults to tomorrow. |
+| `max_events` | Optional non-negative count budget. Default 0 collects every matching snapshot. Exceeding a positive budget fails. |
+| `deduplicate_entries` | Boolean, default true; collapse identical rules within a configuration. |
 
-Filename timestamps are interpreted as UTC. Each snapshot becomes one event,
-with one `ddos-config` object per target rule. Distinct rules for the same host
-remain distinct. IDs are UUIDv5; object and attribute IDs are scoped to the event.
-Changing the duplicate-entry policy selects a separate event identity, preventing
-different views from overwriting each other. Date filters only select events.
+One snapshot becomes one event; each target rule becomes a `ddos-config` object.
+Filename timestamps are interpreted as UTC. Rules for the same hostname remain
+separate when their meaning differs. Source fields with underscores map to the
+corresponding hyphenated relations; bodies and headers use canonical JSON text.
+Random placeholders remain literal. A canonical JSON attachment preserves the
+configuration, including `randoms` and unmapped fields. Array ordering of targets
+and random definitions is normalized for reproducibility.
 
-`target_id`, `request_id` and `use_ssl` map to the corresponding hyphenated object
-relations. Bodies and headers use canonical JSON text; random placeholders remain
-literal. All attributes explicitly disable correlation and IDS export because the
-listed systems are victims. Each event includes a source link and a canonical
-JSON attachment preserving `randoms` and unmapped fields. Top-level target and
-random-definition arrays are sorted for stable generation; their source ordering
-is not preserved. Daily aggregation and cross-snapshot deduplication are deferred.
+Listed systems are victim targets: all generated attributes disable IDS export
+and correlation. UUIDv5 identifiers are stable and scoped to the source, event,
+rule and attribute. Switching entry deduplication selects a separate view identity;
+date windows only select complete events. Content changes keep the event UUID
+and advance its timestamp through the shared revision index. A changed rule has
+a new object UUID; no deletion tombstones are emitted, so normal MISP merge
+semantics can retain previous rule versions after a historical correction.
 
-## Persistent revisions
+## Durable revisions and additional producers
 
-Set `MISP_MODULES_GATHERING_STATE_DIR` in the module service environment to a
-durable directory writable by its service account. All workers serving the same
-feed must share this directory on storage suitable for SQLite locking. Back it up
-and preserve it across upgrades. It contains a SQLite index of event UUIDs,
-content digests and revision timestamps, not consumer import checkpoints.
+Preserve the SQLite revision index in `MISP_MODULES_GATHERING_STATE_DIR` across
+upgrades. All workers/replicas serving the same feed need the same conversion
+version and shared storage suitable for SQLite locking, or one designated
+producer. Losing the index can prevent a historical correction from receiving a
+newer revision than an already imported copy. Credentials and request parameters
+are not written to job status files; normal module config/defaults are available
+to the background producer in memory.
 
-Without this setting, the development default is a service-UID-specific directory
-under the system temporary directory. Losing the index can prevent a corrected
-historical event from receiving a newer revision than a previously imported copy;
-use durable storage in production. Separate replicas must use the same source
-conversion version and revision store, or a single designated producer.
+To add another source:
 
-Initial revisions use the source observation timestamp. Identical event content
-keeps its revision, including after a service restart. Content changes keep the
-event UUID and advance its timestamp monotonically. These revisions allow MISP's
-normal manifest comparison to skip repeated imports. The default object identity
-preserves rule versions: a changed rule has a new object UUID. Version 1 emits no
-deletion tombstones; normal MISP merge semantics can retain old rule objects after
-a historical source correction.
-
-## Adding another producer
-
-1. Add `misp_modules/modules/gathering/<name>.py` with `handler`, `version` and
-   `introspection`, using `module-type: ["gathering"]` and `gathering_version: 1`.
-2. Publish the parameter schema in introspection; validate it before fetching.
-   Existing module `config` and server-local defaults remain available for source
-   credentials. Collection parameters and service credentials are separate.
-3. Build events with stable source, event, object and attribute identities.
-   Include all data that affects meaning in the revision digest, and exclude
-   volatile retrieval times. Scope IDs to distinct content-filtered views.
-4. Use `FeedBuilder.add(event, source_timestamp)` and `FeedBuilder.build()`.
-   Reject partial or oversized collections rather than silently omitting data.
-5. Test source mapping, retries, reordered input, corrections, limits and the
-   discovery/query contract with fixtures. No MISP source-specific code is needed.
+1. Add a module under `misp_modules/modules/gathering/` with normal metadata and
+   introspection, advertising contract version 2 and its parameter schema.
+2. Validate parameters, then call `get_jobs().submit(name, parameters, config,
+   producer)` from its handler. Return that small descriptor to `/query`.
+3. Implement `producer(parameters, builder, config)`, calling
+   `builder.add(event, source_timestamp)` once per complete event and checking
+   cancellation during slow work. The framework builds the manifest and ZIP.
+4. Use stable UUIDs throughout and include meaningful content in revisions.
+   Exclude volatile retrieval timestamps and scope content-filtered views.
+5. Test reordered data, retries, corrections, limits and job lifecycle. The MISP
+   integration discovers producers without a source-specific allowlist.
