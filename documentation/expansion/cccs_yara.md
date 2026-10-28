@@ -15,6 +15,15 @@ Install the `all` extra, which includes `cccs-yara`:
 poetry install -E all
 ```
 
+The dependency constraint keeps `plyara` below 2.2.7, whose bundled `ply`
+package conflicts with Pandoc. When downgrading an existing environment from
+`plyara` 2.2.7 or 2.2.8, reinstall `ply` after installing the dependencies to
+restore the files overwritten by those releases:
+
+```bash
+poetry run python -m pip install --force-reinstall ply==3.11
+```
+
 CCCS-YARA uses a local ATT&CK STIX store to validate technique IDs and actor
 metadata. Provision it before starting the module server, using the ATT&CK
 version expected by CCCS-YARA 2.11:

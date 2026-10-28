@@ -193,3 +193,19 @@ def test_module_interface():
     info = cccs_yara.version()
     assert info["module-type"] == ["expansion", "hover"]
     assert info["config"] == []
+
+
+def test_yara_and_pandoc_parsers_can_coexist():
+    # plyara 2.2.7+ ships a top-level ply package that overwrites Pandoc's
+    # dependency and crashes both server startup and documentation discovery.
+    # Use a fresh interpreter so already imported modules cannot mask this.
+    script = """
+import plyara
+from misp_modules.modules.expansion import cccs_yara, convert_markdown_to_pdf
+rules = plyara.Plyara().parse_string("rule example { condition: true }")
+assert rules[0]["rule_name"] == "example"
+assert cccs_yara.introspection()["input"] == ["yara"]
+assert convert_markdown_to_pdf.version()["name"] == "Markdown to PDF converter"
+"""
+    completed = subprocess.run([sys.executable, "-c", script], capture_output=True, text=True)
+    assert completed.returncode == 0, completed.stderr

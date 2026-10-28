@@ -1,0 +1,44 @@
+{
+  "name": "DuckDuckGo Search",
+  "description": "Search DuckDuckGo for web references to an attribute without an API key.",
+  "module-type": [
+    "expansion"
+  ],
+  "requirements": [
+    "ddgs>=9.16.1,<10",
+    "pymisp"
+  ],
+  "features": "Searches the attribute value using the ddgs DuckDuckGo backend, without automatic provider fallback. Returns annotation objects containing result links, titles and snippets, related to the input attribute. max_results defaults to 5 (1-25); timeout defaults to 10 seconds (1-60) per search request. Blank settings use defaults. Searches use the library's us-en region and moderate safe search. This unofficial search integration can be rate-limited or broken by upstream changes. The attribute value is sent to DuckDuckGo; result pages are not downloaded. Search results are references for review, not maliciousness verdicts.",
+  "references": [
+    "https://github.com/deedy5/ddgs",
+    "https://github.com/MISP/misp-modules/issues/601"
+  ],
+  "input": "A URL, domain, hostname or text attribute.",
+  "output": "Related annotation objects with search result links, titles and snippets; to_ids is false.",
+  "config": {
+    "max_results": "Optional integer 1-25 (default 5).",
+    "timeout": "Optional integer 1-60 seconds per search request (default 10)."
+  },
+  "module": "duckduckgo_search",
+  "installation": "Install the minimal/all extra, or pip install 'ddgs>=9.16.1,<10' in the misp-modules virtual environment. Restart the service and enable the duckduckgo_search expansion in MISP. Requires Python >=3.10; old Python 3.8 installations must upgrade.",
+  "limitations": [
+    "Unofficial scraping integration: rate limiting, CAPTCHAs and upstream HTML changes can prevent results.",
+    "ddgs can report no results as DDGSException; the module reports this as a search error rather than claiming a confirmed empty result.",
+    "No automatic retries or fallback to another provider. DDGS_PROXY or HTTPS_PROXY/https_proxy can configure the proxy; SSL_CERT_FILE can configure CA trust.",
+    "timeout applies to individual library search requests; it is not a guaranteed wall-clock deadline for the full enrichment. Set the module-server and MISP enrichment timeouts accordingly."
+  ],
+  "examples": [
+    {
+      "module": "duckduckgo_search",
+      "attribute": {
+        "type": "domain",
+        "value": "misp-project.org",
+        "uuid": "32876e4a-916d-4935-9e51-7b69a76718f8"
+      },
+      "config": {
+        "max_results": "5",
+        "timeout": "10"
+      }
+    }
+  ]
+}

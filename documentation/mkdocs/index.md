@@ -44,6 +44,7 @@ For more information: [Extending MISP with Python modules](https://www.misp-proj
 * [DNS Resolver](https://misp.github.io/misp-modules/expansion/#dns-resolver) - Simple DNS expansion service to resolve IP address from MISP attributes
 * [DOCX Enrich](https://misp.github.io/misp-modules/expansion/#docx-enrich) - Module to extract freetext from a .docx document.
 * [DomainTools Lookup](https://misp.github.io/misp-modules/expansion/#domaintools-lookup) - DomainTools MISP expansion module.
+* [DuckDuckGo Search](https://misp.github.io/misp-modules/expansion/#duckduckgo-search) - Search DuckDuckGo for web references to an attribute without an API key.
 * [EQL Query Generator](https://misp.github.io/misp-modules/expansion/#eql-query-generator) - EQL query generation for a MISP attribute.
 * [EUPI Lookup](https://misp.github.io/misp-modules/expansion/#eupi-lookup) - A module to query the Phishing Initiative service (https://phishing-initiative.lu).
 * [URL Components Extractor](https://misp.github.io/misp-modules/expansion/#url-components-extractor) - Extract URL components
@@ -192,7 +193,7 @@ For more information: [Extending MISP with Python modules](https://www.misp-proj
 * [Lastline Import](https://misp.github.io/misp-modules/import_mod/#lastline-import) - Deprecation notice: this module will be deprecated by December 2021, please use vmware_nsx module.  Module to import and parse reports from Lastline analysis links.
 * [MISP JSON Import](https://misp.github.io/misp-modules/import_mod/#misp-json-import) - Module to import MISP JSON format for merging MISP events.
 * [OCR Import](https://misp.github.io/misp-modules/import_mod/#ocr-import) - Optical Character Recognition (OCR) module for MISP.
-* [OpenIOC Import](https://misp.github.io/misp-modules/import_mod/#openioc-import) - Module to import OpenIOC packages.
+* [OpenIOC Import](https://misp.github.io/misp-modules/import_mod/#openioc-import) - Import legacy OpenIOC 1.0 and 1.1 files into MISP.
 * [PCAP Import](https://misp.github.io/misp-modules/import_mod/#pcap-import) - Import a PCAP or PCAPNG capture, including reassembled files, emails and network indicators.
 * [TAXII 2.1 Import](https://misp.github.io/misp-modules/import_mod/#taxii-2.1-import) - Import content from a TAXII 2.1 server
 * [CSV Test Import](https://misp.github.io/misp-modules/import_mod/#csv-test-import) - Simple CSV import tool with mapable columns
