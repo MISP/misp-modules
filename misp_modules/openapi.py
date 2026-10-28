@@ -292,6 +292,22 @@ def build_document(
                             "type": "object",
                             "description": "MISP attribute payload for modules expecting standard input.",
                         },
+                        "tags": {
+                            "type": "array",
+                            "items": {"oneOf": [{"type": "string"}, {"type": "object"}]},
+                            "description": (
+                                "Effective attribute, object and event tags. With --restrict-pap-red, PAP:RED blocks "
+                                "hover and external expansion. Tags inside supplied MISP containers are also checked. "
+                                "Omitted tags cannot be inferred by the service."
+                            ),
+                        },
+                        "hover": {
+                            "type": "boolean",
+                            "description": (
+                                "Set true for automatic hover requests. With --restrict-pap-red, PAP:RED hover "
+                                "requests are blocked even for modules declaring an internal data source."
+                            ),
+                        },
                         "config": {
                             "type": "object",
                             "description": "Module configuration or credentials.",
