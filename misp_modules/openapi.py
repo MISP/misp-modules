@@ -271,7 +271,7 @@ def build_document(
                         "name": {"type": "string"},
                         "type": {
                             "type": "string",
-                            "enum": [module_type.name for module_type in ModuleType],
+                            "enum": [module_type.value for module_type in ModuleType],
                         },
                         "mispattributes": {"type": "object"},
                         "meta": {"type": "object"},
