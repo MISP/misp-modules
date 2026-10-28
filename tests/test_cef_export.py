@@ -108,7 +108,7 @@ def test_valid_severity(severity):
 
 
 @pytest.mark.parametrize(
-    "severity", [-1, 11, "11", "-1", 1.5, 1.0, True, False, None, "", "critical", "low", "1|bad", "1\n", "１"]
+    "severity", [-1, 11, "11", "-1", 1.5, 1.0, True, False, "", "critical", "low", "1|bad", "1\n", "１"]
 )
 def test_invalid_severity_returns_error(severity):
     result = export.handler(json.dumps({"data": [], "config": {"Default_Severity": severity}}))
@@ -118,7 +118,7 @@ def test_invalid_severity_returns_error(severity):
 @pytest.mark.parametrize("key,limit", [("Device_Vendor", 63), ("Device_Product", 63), ("Device_Version", 31)])
 def test_header_field_limits(key, limit):
     assert run([attribute()], {key: "é" * limit})
-    for value in ("x" * (limit + 1), "", " ", "bad\nheader", "bad\rheader", "bad\x00header", None, True, [], "\ud800"):
+    for value in ("x" * (limit + 1), "", " ", "bad\nheader", "bad\rheader", "bad\x00header", True, [], "\ud800"):
         result = export.handler(json.dumps({"data": [], "config": {key: value}}))
         assert "error" in result and "data" not in result
 
@@ -177,6 +177,7 @@ def test_defaults_empty_events_unsupported_types_and_optional_metadata():
     for data in ([], {}, {"Event": {}}, [{"Attribute": []}]):
         assert export.handler(json.dumps({"data": data}))["data"] == ""
     assert run([attribute()], {}) == run([attribute()])
+    assert run([attribute()], dict.fromkeys(export.moduleconfig)) == run([attribute()])
     text = run([attribute("unsupported", "anything"), {"type": "domain", "value": "example.org", "to_ids": False}])
     assert parse(text) == (
         ["CEF:0", "MISP", "MISP", "1", "domain", "domain", "1"],
