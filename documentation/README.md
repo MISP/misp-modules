@@ -1886,6 +1886,32 @@ Module to push malware samples to a MWDB instance
 
 -----
 
+#### [MWDB Query](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/mwdb_query.py)
+
+Query an MWDB instance for an existing file by hash.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/mwdb_query.py)]
+
+- **features**:
+>Looks up MD5, SHA-1, SHA-256 or SHA-512 using GET /file/{hash} with Bearer authentication. Reuses the MWDB Submit configuration names mwdb_apikey and mwdb_url (the API base URL ending in /api/). Returns a file object, a sample link and an annotation containing MWDB tags, file type and upload time. Tags remain contextual data rather than being applied as MISP tags. No samples are uploaded or downloaded.
+
+- **config**:
+> - mwdb_apikey
+> - mwdb_url
+
+- **input**:
+>md5, sha1, sha256 or sha512 MISP attribute.
+
+- **output**:
+>File metadata, MWDB context and a link to the sample.
+
+- **references**:
+>https://mwdb.readthedocs.io/
+
+- **requirements**:
+>requests
+
+-----
+
 #### [OCR Enrich](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/ocr_enrich.py)
 
 Module to process some optical character recognition on pictures.
