@@ -1,6 +1,6 @@
 import json
 import os
-from urllib.parse import urlsplit
+from urllib.parse import parse_qs, urlsplit
 from uuid import UUID
 
 from pymisp import MISPEvent, MISPObject
@@ -73,6 +73,34 @@ def _search(value, max_results, timeout):
         raise ModuleError("DuckDuckGo search failed or returned no results. Try again later.") from None
 
 
+def _result_url(url):
+    # The HTML backend can return //duckduckgo.com/l/?uddg=<encoded destination>.
+    # Decode one wrapper locally; never follow redirects or repeatedly unquote destinations.
+    for _ in range(2):
+        if not isinstance(url, str) or any(c.isspace() or ord(c) < 32 or ord(c) == 127 for c in url):
+            return None
+        if url.startswith("//"):
+            url = "https:" + url
+        try:
+            parsed = urlsplit(url)
+            if parsed.scheme not in ("http", "https") or not parsed.hostname or parsed.username or parsed.password:
+                return None
+            parsed.port
+        except ValueError:
+            return None
+        if parsed.hostname in ("duckduckgo.com", "www.duckduckgo.com", "html.duckduckgo.com") and parsed.path in (
+            "/l/",
+            "/l",
+        ):
+            destinations = parse_qs(parsed.query).get("uddg", [])
+            if len(destinations) != 1:
+                return None
+            url = destinations[0]
+            continue
+        return url
+    return None
+
+
 def _expand(event, attribute, rows, max_results):
     if not isinstance(rows, list):
         raise ModuleError("DuckDuckGo returned an invalid search response.")
@@ -80,17 +108,8 @@ def _expand(event, attribute, rows, max_results):
     for row in rows[:max_results]:
         if not isinstance(row, dict):
             continue
-        url = row.get("href")
-        if not isinstance(url, str) or any(character.isspace() for character in url):
-            continue
-        try:
-            parsed = urlsplit(url)
-            if parsed.scheme not in ("http", "https") or not parsed.hostname or parsed.username or parsed.password:
-                continue
-            parsed.port
-        except ValueError:
-            continue
-        if url in seen:
+        url = _result_url(row.get("href"))
+        if url is None or url in seen:
             continue
         seen.add(url)
         title, snippet = row.get("title"), row.get("body")

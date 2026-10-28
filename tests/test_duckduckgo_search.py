@@ -2,6 +2,7 @@ import builtins
 import json
 from importlib import resources
 from unittest.mock import Mock, patch
+from urllib.parse import quote
 
 import pytest
 from pymisp import MISPObject
@@ -150,6 +151,75 @@ def test_invalid_results_and_duplicates_are_skipped(client):
     ]
     result = module.handler(query())
     assert len(result["results"]["Object"]) == 1
+
+
+@pytest.mark.parametrize(
+    "prefix",
+    [
+        "//duckduckgo.com/l/",
+        "https://duckduckgo.com/l/",
+        "http://www.duckduckgo.com/l",
+        "https://html.duckduckgo.com/l/",
+    ],
+)
+def test_redirect_wrappers_return_decoded_destination(client, prefix):
+    destination = "https://example.org/é/report?next=%2Fpath%3Fx%3D1&label=a+b#section"
+    client[1].text.return_value = [dict(ROW, href=prefix + "?uddg=" + quote(destination, safe="") + "&rut=tracking")]
+    result = module.handler(query())
+    annotation = result["results"]["Object"][0]
+    assert {a["object_relation"]: a["value"] for a in annotation["Attribute"]} == {
+        "ref": destination,
+        "text": "A report\n\nAn example snippet.",
+    }
+
+
+def test_protocol_relative_destination_uses_https(client):
+    client[1].text.return_value = [dict(ROW, href="//example.org/report")]
+    result = module.handler(query())
+    annotation = result["results"]["Object"][0]
+    assert next(a["value"] for a in annotation["Attribute"] if a["object_relation"] == "ref") == ROW["href"]
+
+
+def test_wrapped_and_direct_results_are_deduplicated(client):
+    client[1].text.return_value = [
+        dict(ROW, href="//duckduckgo.com/l/?uddg=" + quote(ROW["href"], safe="")),
+        ROW,
+    ]
+    assert len(module.handler(query())["results"]["Object"]) == 1
+
+
+@pytest.mark.parametrize(
+    "destination",
+    [
+        "javascript:alert(1)",
+        "file:///etc/passwd",
+        "https:///missing-host",
+        "https://example.org:bad/",
+        "https://user:pass@example.org/",
+        "https://example.org/\npath",
+        "https://example.org/\x00path",
+    ],
+)
+def test_wrapped_invalid_destinations_are_skipped(client, destination):
+    client[1].text.return_value = [dict(ROW, href="//duckduckgo.com/l/?uddg=" + quote(destination, safe=""))]
+    result = module.handler(query())
+    assert result["results"]["Object"] == []
+    assert result["results"]["Attribute"][0]["uuid"] == SOURCE_UUID
+
+
+@pytest.mark.parametrize(
+    "query_string", ["", "rut=tracking", "uddg=", "uddg=https%3A%2F%2Fexample.org&uddg=https%3A%2F%2Fother.example"]
+)
+def test_incomplete_or_ambiguous_wrappers_are_skipped(client, query_string):
+    client[1].text.return_value = [dict(ROW, href="//duckduckgo.com/l/?" + query_string)]
+    assert module.handler(query())["results"]["Object"] == []
+
+
+def test_other_sites_with_uddg_parameters_are_preserved(client):
+    url = "https://duckduckgo.com.example.org/l/?uddg=https%3A%2F%2Fother.example"
+    client[1].text.return_value = [dict(ROW, href=url)]
+    annotation = module.handler(query())["results"]["Object"][0]
+    assert next(a["value"] for a in annotation["Attribute"] if a["object_relation"] == "ref") == url
 
 
 def test_link_only_result(client):
