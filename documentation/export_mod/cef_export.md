@@ -6,7 +6,7 @@ It produces a base64-encoded UTF-8 `.cef` file, with one line per supported attr
 
 ## Configuration
 
-Missing configuration keys use these defaults. Explicit invalid values return a module error with no file.
+Missing configuration keys, and settings MISP sends as null because they are not set, use these defaults. Explicit invalid values return a module error with no file.
 
 | Setting | Default | Accepted values |
 | --- | --- | --- |

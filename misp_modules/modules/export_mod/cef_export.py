@@ -146,7 +146,8 @@ def handler(q=False):
         supplied_config = request.get("config", {})
         if not isinstance(supplied_config, dict):
             raise ValueError("config must be an object.")
-        config = {**DEFAULT_CONFIG, **supplied_config}
+        # MISP sends null for the settings an administrator has not set
+        config = {**DEFAULT_CONFIG, **{key: value for key, value in supplied_config.items() if value is not None}}
         severity = _severity(config["Default_Severity"])
         device = [
             _header(config[key], key, limit)
