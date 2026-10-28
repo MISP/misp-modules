@@ -88,6 +88,19 @@ def test_namespaces_and_xml_encodings(namespace, encoding):
     assert "results" in dmarc_import.handler(_request(xml.encode(encoding)))
 
 
+@pytest.mark.parametrize("namespace", ["", ' xmlns="urn:ietf:params:xml:ns:dmarc-2.0"'])
+def test_pass_disposition_under_enforcing_policy(namespace):
+    xml = REPORT.replace(b"<disposition>none</disposition>", b"<disposition>pass</disposition>")
+    xml = xml.replace(b"<feedback>", f"<feedback{namespace}>".encode())
+    result = dmarc_import.handler(_request(xml))
+    assert "error" not in result
+    report, passing, rejected = result["results"]["Object"]
+    assert json.loads(_values(report, "text")[0])["policy_published"][0]["p"] == ["reject"]
+    assert json.loads(_values(passing, "text")[0])["row"][0]["policy_evaluated"][0]["disposition"] == ["pass"]
+    assert json.loads(_values(rejected, "text")[0])["row"][0]["policy_evaluated"][0]["disposition"] == ["reject"]
+    assert all(a["to_ids"] is False for obj in (report, passing, rejected) for a in obj["Attribute"])
+
+
 def test_same_ip_with_different_results_keeps_separate_records():
     xml = REPORT.replace(b"2001:db8::20", b"192.0.2.10")
     objects = dmarc_import.handler(_request(xml))["results"]["Object"]

@@ -159,7 +159,8 @@ def _parse_report(data):
         source = str(ipaddress.ip_address(source))
         integer(record, "row/count", 1)
         disposition = text(record, "row/policy_evaluated/disposition")
-        if disposition not in ("none", "quarantine", "reject"):
+        # RFC 9990 adds "pass" alongside the legacy dispositions.
+        if disposition not in ("none", "pass", "quarantine", "reject"):
             raise ValueError(f"Invalid disposition in record {index}.")
         for mechanism in ("dkim", "spf"):
             if text(record, f"row/policy_evaluated/{mechanism}") not in ("pass", "fail"):
