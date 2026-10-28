@@ -105,18 +105,24 @@ Email import module for MISP
 
 - **features**:
 >This module can be used to import e-mail text as well as attachments and urls.
->3 configuration parameters are then used to unzip attachments, guess zip attachment passwords, and extract urls: set each one of them to True or False to process or not the respective corresponding actions.
+>Configuration parameters are used to unzip attachments, guess zip attachment passwords, extract urls, remove common subject markers, and extract partial inline forwarded emails (extract_forwarded_emails, disabled by default): set each one of them to True or False to process or not the respective corresponding actions.
+>Forward extraction supports English From/To/Cc/Bcc/Reply-To/Sent/Date/Subject header blocks in plain text and HTML, including Outlook. Each block needs a sender address, a subject, and a recipient or date. At most 20 partial email objects are linked to the carrier with includes references. Plain text is preferred; HTML is used if no forwards are found in plain text. Reconstructed attributes have to_ids disabled; the original email is retained as evidence. Local or unparseable timestamps are preserved as text in the reconstructed headers. Existing extract_urls and remove_subject_markers settings also apply to forwards.
 
 - **config**:
 > - unzip_attachments
 > - guess_zip_attachment_passwords
 > - extract_urls
+> - remove_subject_markers
+> - extract_forwarded_emails
 
 - **input**:
 >E-mail file
 
 - **output**:
 >MISP Event attributes
+
+- **references**:
+>https://github.com/MISP/mail_to_misp
 
 -----
 

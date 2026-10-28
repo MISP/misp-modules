@@ -10,6 +10,8 @@ from pathlib import Path
 from pymisp.exceptions import MISPObjectException
 from pymisp.tools import EMailObject, URLObject, make_binary_objects
 
+from misp_modules.lib.email_forward import inline_forwarded_messages
+
 misperrors = {"error": "Error"}
 
 mispattributes = {
@@ -27,10 +29,17 @@ moduleinfo = {
     "requirements": [],
     "features": (
         "This module can be used to import e-mail text as well as attachments and urls.\nConfiguration parameters are"
-        " used to unzip attachments, guess zip attachment passwords, extract urls, and remove common subject markers:"
+        " used to unzip attachments, guess zip attachment passwords, extract urls, remove common subject markers,"
+        " and extract partial inline forwarded emails (extract_forwarded_emails, disabled by default):"
         " set each one of them to True or False to process or not the respective corresponding actions."
+        "\nForward extraction supports English From/To/Cc/Bcc/Reply-To/Sent/Date/Subject header blocks in plain text"
+        " and HTML, including Outlook. Each block needs a sender address, a subject, and a recipient or date."
+        " At most 20 partial email objects are linked to the carrier with includes references. Plain text is preferred;"
+        " HTML is used if no forwards are found in plain text. Reconstructed attributes have to_ids disabled;"
+        " the original email is retained as evidence. Local or unparseable timestamps are preserved as text in the"
+        " reconstructed headers. Existing extract_urls and remove_subject_markers settings also apply to forwards."
     ),
-    "references": [],
+    "references": ["https://github.com/MISP/mail_to_misp"],
     "input": "E-mail file",
     "output": "MISP Event attributes",
     "logo": "",
@@ -39,7 +48,13 @@ moduleinfo = {
 # unzip_attachments : Unzip all zip files that are not password protected
 # guess_zip_attachment_passwords : This attempts to unzip all password protected zip files using all the strings found in the email body and subject
 # extract_urls : This attempts to extract all URL's from text/html parts of the email
-moduleconfig = ["unzip_attachments", "guess_zip_attachment_passwords", "extract_urls", "remove_subject_markers"]
+moduleconfig = [
+    "unzip_attachments",
+    "guess_zip_attachment_passwords",
+    "extract_urls",
+    "remove_subject_markers",
+    "extract_forwarded_emails",
+]
 
 
 def dict_handler(request: dict):
@@ -161,8 +176,46 @@ def dict_handler(request: dict):
             file_objects += sections
             email_object.add_reference(f_object.uuid, "includes", "Email attachment")
 
+    if str(config.get("extract_forwarded_emails", "")).lower() in acceptable_config_yes:
+        for message in inline_forwarded_messages(email_object.email):
+            forwarded = EMailObject(
+                pseudofile=BytesIO(message.as_bytes()), attach_original_email=False, standalone=False
+            )
+            # Some PyMISP versions attach the EML even for False. A reconstruction
+            # must not be presented as an original message; the carrier keeps it.
+            for attribute in forwarded.get_attributes_by_relation("eml"):
+                forwarded.attributes.remove(attribute)
+            for name in ("from", "to", "cc", "bcc", "reply-to"):
+                for attribute in forwarded.get_attributes_by_relation(name):
+                    if "@" not in attribute.value:
+                        forwarded.attributes.remove(attribute)
+                if name in message:
+                    for address in message[name].addresses:
+                        if not address.domain and (address.display_name or address.username):
+                            forwarded.add_attribute(f"{name}-display-name", address.display_name or address.username)
+            for attribute in forwarded.attributes:
+                attribute.to_ids = False
+            forwarded.comment = "Heuristically reconstructed from an inline forward; headers are unverified claims."
+            email_object.add_reference(forwarded.uuid, "includes", "Inline forwarded email (heuristic extraction)")
+            if remove_subject_markers is not None and remove_subject_markers.lower() in acceptable_config_yes:
+                strip_subject_markers(forwarded)
+            file_objects.append(forwarded)
+            if extract_urls:
+                add_body_urls(forwarded, file_objects)
+
+    if extract_urls:
+        add_body_urls(email_object, file_objects)
+
+    objects = [email_object.to_dict()]
+    if file_objects:
+        objects += [o.to_dict() for o in file_objects if o]
+    r = {"results": {"Object": objects}}
+    return r
+
+
+def add_body_urls(email_object, file_objects):
     mail_body = email_object.email.get_body(preferencelist=("html", "plain"))
-    if extract_urls and mail_body:
+    if mail_body:
         charset = mail_body.get_content_charset("utf-8")
         if mail_body.get_content_type() == "text/html":
             url_parser = HTMLURLParser()
@@ -182,12 +235,6 @@ def dict_handler(request: dict):
                 continue
             file_objects.append(url_object)
             email_object.add_reference(url_object.uuid, "includes", "URL in email body")
-
-    objects = [email_object.to_dict()]
-    if file_objects:
-        objects += [o.to_dict() for o in file_objects if o]
-    r = {"results": {"Object": objects}}
-    return r
 
 
 SUBJECT_MARKER_RE = re.compile(
