@@ -190,22 +190,25 @@ def dict_handler(request: dict):
     return r
 
 
-SUBJECT_MARKER_RE = re.compile(r"""
+SUBJECT_MARKER_RE = re.compile(
+    r"""
     ^\s*
-    (?:(?:\[[^\]]+\]\s*)*)
+    (?P<prefix>(?:\[[^\]]+\]\s*)*)
     (?:
         (?:re|fw|fwd|wg|aw|sv|tr|rv|vs)
         (?:\[\d+\])?
         \s*:\s*
     )
-    """, re.IGNORECASE | re.VERBOSE)
+    """,
+    re.IGNORECASE | re.VERBOSE,
+)
 
 
 def remove_common_subject_markers(subject):
-    """Remove leading reply/forward markers from an e-mail subject."""
+    """Remove leading reply/forward markers while preserving bracketed metadata."""
     cleaned_subject = subject
     while True:
-        stripped_subject, substitutions = SUBJECT_MARKER_RE.subn("", cleaned_subject, count=1)
+        stripped_subject, substitutions = SUBJECT_MARKER_RE.subn(r"\g<prefix>", cleaned_subject, count=1)
         if not substitutions:
             return cleaned_subject.strip()
         cleaned_subject = stripped_subject
