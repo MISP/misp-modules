@@ -20,6 +20,11 @@ so those names use the DNS label boundary instead. Unknown suffixes use the
 Public Suffix List's wildcard rule; names without a registrable-domain prefix
 fall back to the first DNS label as the local part.
 
+Only unquoted ASCII email local parts and hostname-style domains containing a
+dot are emitted. Mailbox names with unsupported characters (including escaped
+spaces, control characters, and extra `@` signs) or single-label domains are
+retained as raw SOA data without producing an email attribute.
+
 Derived email attributes have `to_ids` disabled and a comment describing the
 heuristic. Malformed SOA records and absent mailboxes are retained as raw data
 without creating an email attribute. No additional network lookup is required

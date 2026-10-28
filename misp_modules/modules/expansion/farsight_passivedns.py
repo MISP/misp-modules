@@ -1,4 +1,5 @@
 import json
+import re
 from datetime import datetime
 
 import dns.exception
@@ -65,6 +66,8 @@ DEFAULT_DNSDB_SERVER = "https://api.dnsdb.info"
 DEFAULT_LIMIT = 10
 DEFAULT_DISTRIBUTION_SETTING = Distribution.your_organisation_only.value
 _PSL = PublicSuffixList()
+_EMAIL_LOCAL_PART = re.compile(r"[A-Za-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[A-Za-z0-9!#$%&'*+/=?^_`{|}~-]+)*")
+_EMAIL_DOMAIN_LABEL = re.compile(r"[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?")
 TYPE_TO_FEATURE = {
     "btc": "Bitcoin address",
     "dkim": "domainkeys identified mail",
@@ -178,7 +181,19 @@ def _soa_email(rdata):
         domain = _PSL.privatesuffix(".".join(labels))
         if domain:
             boundary = max(1, len(labels) - len(domain.split(".")))
-    return f"{'.'.join(labels[:boundary])}@{'.'.join(labels[boundary:])}"
+    local_part = ".".join(labels[:boundary])
+    domain_labels = labels[boundary:]
+    # DNS labels can encode bytes that cannot be emitted in an unquoted email
+    # address. Keep those records as raw data rather than exporting an invalid
+    # attribute. MISP also requires a dot in the email's domain.
+    if (
+        len(local_part) > 64
+        or not _EMAIL_LOCAL_PART.fullmatch(local_part)
+        or len(domain_labels) < 2
+        or any(not _EMAIL_DOMAIN_LABEL.fullmatch(label) for label in domain_labels)
+    ):
+        return None
+    return f"{local_part}@{'.'.join(domain_labels)}"
 
 
 def handler(q=False):
