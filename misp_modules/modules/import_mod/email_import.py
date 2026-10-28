@@ -192,7 +192,6 @@ def dict_handler(request: dict):
 
 SUBJECT_MARKER_RE = re.compile(r"""
     ^\s*
-    (?:(?:\[[^\]]+\]\s*)*)
     (?:
         (?:re|fw|fwd|wg|aw|sv|tr|rv|vs)
         (?:\[\d+\])?
