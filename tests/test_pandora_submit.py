@@ -5,6 +5,7 @@ import zipfile
 from email import policy
 from email.parser import BytesParser
 from unittest.mock import Mock
+from urllib.parse import parse_qs, urlsplit
 
 import pytest
 import requests
@@ -52,7 +53,6 @@ def test_default_instance_without_configuration(service, config):
         "https://pandora.circl.lu/submit",
         files={"file": ("sample.exe", DATA)},
         params={"validity": 0},
-        data={},
         headers={},
         timeout=30,
         allow_redirects=False,
@@ -71,8 +71,8 @@ def test_custom_instance_authentication_and_options(service, url):
     assert service.call_args.args == (url.rstrip("/") + "/submit",)
     options = service.call_args.kwargs
     assert options["headers"] == {"Authorization": SECRET}
-    assert options["params"] == {"validity": 3600}
-    assert options["data"] == {"password": "archive-password"}
+    assert options["params"] == {"validity": 3600, "password": "archive-password"}
+    assert "data" not in options
     assert options["timeout"] == 60
     assert "verify" not in options  # requests keeps certificate verification enabled.
 
@@ -154,14 +154,15 @@ def archive(members):
     return base64.b64encode(buffer.getvalue()).decode()
 
 
-def malware_query(data):
-    return json.dumps({"malware-sample": "original.exe|" + "b" * 32, "data": data})
+def malware_query(data, filename="original.exe"):
+    return json.dumps({"malware-sample": filename + "|" + "b" * 32, "data": data})
 
 
-def test_malware_archive_skips_filename_metadata_and_directories(service):
-    data = archive([("folder/", b""), ("sample.filename.txt", b"original.exe"), ("sample", DATA)])
-    assert "results" in module.handler(malware_query(data))
-    assert service.call_args.kwargs["files"] == {"file": ("original.exe", DATA)}
+@pytest.mark.parametrize("filename", ["original.exe", "archive|sample.exe", "archive|nested|sample.exe"])
+def test_malware_archive_preserves_filename_and_skips_metadata(service, filename):
+    data = archive([("folder/", b""), ("sample.filename.txt", filename.encode()), ("sample", DATA)])
+    assert "results" in module.handler(malware_query(data, filename))
+    assert service.call_args.kwargs["files"] == {"file": (filename, DATA)}
 
 
 def test_password_protected_misp_archive(service):
@@ -252,10 +253,16 @@ def test_errors_are_not_shared_between_requests(service):
     assert "results" in module.handler(query())
 
 
-def test_real_requests_multipart_serialization(monkeypatch):
+@pytest.mark.parametrize("password", [None, "", "archive-password", "päss &?=+#/%"])
+def test_real_requests_multipart_serialization(monkeypatch, password):
     def respond(session, prepared, **options):
         assert prepared.method == "POST"
-        assert prepared.url == "https://pandora.example/prefix/submit?validity=3600"
+        parsed = urlsplit(prepared.url)
+        assert (parsed.scheme, parsed.netloc, parsed.path) == ("https", "pandora.example", "/prefix/submit")
+        params = {"validity": ["3600"]}
+        if password:
+            params["password"] = [password]
+        assert parse_qs(parsed.query) == params
         assert prepared.headers["Authorization"] == SECRET
         assert options["timeout"] == 45
         assert options["verify"] is True or isinstance(options["verify"], str)  # An environment CA bundle is valid too.
@@ -266,7 +273,7 @@ def test_real_requests_multipart_serialization(monkeypatch):
         parts = {part.get_param("name", header="content-disposition"): part for part in message.iter_parts()}
         assert parts["file"].get_filename() == "sample.exe"
         assert parts["file"].get_payload(decode=True) == DATA
-        assert parts["password"].get_payload(decode=True) == b"archive-password"
+        assert set(parts) == {"file"}
         response = requests.Response()
         response.status_code = 200
         response._content = json.dumps({"success": True, "taskId": TASK, "seed": SEED}).encode()
@@ -280,7 +287,7 @@ def test_real_requests_multipart_serialization(monkeypatch):
                 "apikey": SECRET,
                 "timeout": 45,
                 "validity": 3600,
-                "password": "archive-password",
+                "password": password,
             }
         )
     )

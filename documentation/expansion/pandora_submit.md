@@ -28,7 +28,8 @@ verification remains enabled. HTTP URLs are supported for local deployments.
 For `malware-sample` attributes, the module decodes the base64 data and unpacks
 MISP's ZIP container locally using the standard `infected` password. It skips
 directory entries and `.filename.txt` metadata and requires exactly one sample.
-The original filename (before `|md5`) and extracted bytes are sent to Pandora.
+Only the final `|md5` suffix is removed from the filename, preserving any `|`
+characters within it. The original filename and extracted bytes are sent to Pandora.
 Attachments are submitted as supplied; ZIP attachments are not unpacked locally.
 
 Example request to the misp-modules `/query` endpoint:
@@ -48,7 +49,8 @@ Example request to the misp-modules `/query` endpoint:
 
 Omit `config` entirely to use the public CIRCL instance anonymously with the
 defaults. The module uses Pandora's multipart `POST /submit` API with the
-`validity` query parameter and builds the report URL from the returned `taskId`
+`validity` and optional `password` query parameters, matching PyPandora, and builds
+the report URL from the returned `taskId`
 and `seed`, preserving the configured instance path. It does not poll, follow
 redirects or automatically retry submissions. After a timeout, check the instance
 before resubmitting, since the analysis may already have been created.

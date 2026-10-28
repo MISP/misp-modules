@@ -86,7 +86,7 @@ def _sample(request):
     if not isinstance(filename, str) or not filename.strip():
         raise ModuleError("A sample filename is required.")
     if kind == "malware-sample":
-        filename = filename.split("|", 1)[0]
+        filename = filename.rsplit("|", 1)[0]
     if not filename.strip():
         raise ModuleError("A sample filename is required.")
     encoded = request.get("data")
@@ -137,14 +137,16 @@ def handler(q=False):
             raise ModuleError("password must be a string.")
         filename, data = _sample(request)
         headers = {"Authorization": api_key.strip()} if api_key.strip() else {}
-        # Pandora reads validity from query parameters, not multipart form fields.
+        params = {"validity": validity}
+        if password:
+            params["password"] = password
+        # Match PyPandora: validity and password are query parameters.
         # Do not retry or follow redirects: a submission starts a new analysis.
         try:
             with requests.post(
                 base + "/submit",
                 files={"file": (filename, data)},
-                params={"validity": validity},
-                data={"password": password} if password else {},
+                params=params,
                 headers=headers,
                 timeout=timeout,
                 allow_redirects=False,
