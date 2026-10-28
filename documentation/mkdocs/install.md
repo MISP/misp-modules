@@ -142,6 +142,61 @@ systemctl daemon-reload
 systemctl enable --now misp-modules
 ~~~~
 
+### Configure environment variables for the service
+
+The systemd service starts the executable directly. It does not source your shell
+profile or the virtual environment's `bin/activate` script, and it does not
+inherit variables exported in your interactive shell. Settings configured in
+MISP's `/servers/serverSettings` are also separate from the environment of the
+misp-modules process.
+
+For settings read from environment variables, use a systemd drop-in:
+
+```bash
+sudo systemctl edit misp-modules
+```
+
+#### Redis cache helper in older releases
+
+Older releases containing `misp_modules/helpers/cache.py` read the following
+variables. The cache helper has been removed from current releases, so these
+settings only apply to installations that still use it.
+
+| Variable | Default | Purpose |
+| --- | --- | --- |
+| `REDIS_BACKEND` | `127.0.0.1` | Redis hostname or IP address. |
+| `REDIS_PORT` | `6379` | Redis TCP port. |
+| `REDIS_DATABASE` | `0` | Redis database number. |
+| `REDIS_PW` | Unset | Redis password, if authentication is required. |
+
+For example, add the following to the drop-in to connect the legacy cache helper
+to a remote Redis instance. Replace the hostname, port, and database with values
+supported by your Redis deployment:
+
+```ini
+[Service]
+Environment="REDIS_BACKEND=redis.example.org"
+Environment="REDIS_PORT=6379"
+Environment="REDIS_DATABASE=0"
+```
+
+Save the drop-in, then reload the unit and restart the service so the process
+receives the new environment:
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl restart misp-modules
+sudo systemctl status misp-modules
+sudo journalctl -u misp-modules -n 50 --no-pager
+```
+
+On an installation with the legacy helper, check that the
+`Helpers failed cache.py due to Redis not running or not installed` warning no
+longer appears after restarting. If it persists, verify that the service host can
+reach Redis and that the configured port, database, and authentication match the
+Redis server. A drop-in keeps local configuration separate from the service unit
+supplied by the installation.
+
 
 ## Run the tests
 
@@ -309,3 +364,4 @@ Now you can move the wheels to your offline instance, and install them using the
 ~~~~bash
 pip install --no-cache-dir ./wheels/*.whl
 ~~~~
+
