@@ -91,7 +91,7 @@ class XforceExchange:
         try:
             result = requests.get(url, auth=HTTPBasicAuth(self._apikey, self._apipassword))
         except Exception as e:
-            self.result["error"] = e
+            self.result["error"] = str(e)
             return
         status_code = result.status_code
         if status_code != 200:
@@ -100,7 +100,10 @@ class XforceExchange:
             except KeyError:
                 self.result["error"] = "An error with the API has occurred."
             return
-        return result.json()
+        try:
+            return result.json()
+        except ValueError:
+            self.result["error"] = "Invalid JSON response from Xforce Exchange."
 
     def _create_file(self, malware, relationship):
         file_object = MISPObject("file")
@@ -140,7 +143,7 @@ class XforceExchange:
 
     def _parse_dns(self, value):
         dns_result = self._api_call(f"{self.base_url}/resolve/{value}")
-        if dns_result.get("Passive") and dns_result["Passive"].get("records"):
+        if dns_result and dns_result.get("Passive") and dns_result["Passive"].get("records"):
             itype, ftype, value = self._fetch_types(dns_result["Passive"]["query"])
             misp_object = MISPObject("domain-ip")
             misp_object.add_attribute(itype, value)
