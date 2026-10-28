@@ -15,6 +15,7 @@ moduleinfo = {
     "author": "Alexandre Dulaunoy",
     "description": "Simple DNS expansion service to resolve IP address from MISP attributes",
     "module-type": ["expansion", "hover"],
+    "data-source": "external",
     "name": "DNS Resolver",
     "logo": "",
     "requirements": ["dnspython3: DNS python3 library"],

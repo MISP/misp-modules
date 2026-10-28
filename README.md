@@ -22,6 +22,10 @@ see [Local module configuration defaults](documentation/mkdocs/module-config.md)
 Enable them with `--module-config /etc/misp-modules/modules.json`; API-supplied
 values take precedence and existing operation is unchanged without this option.
 
+To optionally restrict PAP:RED expansion, start with `--restrict-pap-red`.
+See [PAP:RED restrictions](documentation/mkdocs/pap-red.md) for source declarations
+and the tag and hover context clients must supply. The default behavior is unchanged.
+
 # How to add your own MISP modules?
 
 Developing a MISP module yourself is fairly easy. Start with a template or existing module and continue from there.

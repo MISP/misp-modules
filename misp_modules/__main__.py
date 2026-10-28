@@ -44,6 +44,7 @@ import misp_modules
 from misp_modules import openapi as openapi_builder
 from misp_modules.http_debug import configure_http_debug, module_context
 from misp_modules.module_config import ModuleConfig, ModuleConfigError
+from misp_modules.pap import pap_red_error
 from misp_modules.statistics import ModuleStatistics
 
 # See https://github.com/MISP/misp-modules/issues/662
@@ -54,6 +55,7 @@ MODULES_HANDLERS = {}
 OPENAPI_DOCUMENT = {}
 MODULE_STATISTICS = ModuleStatistics()
 MODULE_CONFIG = ModuleConfig()
+RESTRICT_PAP_RED = False
 LOGGER = logging.getLogger("misp-modules")
 
 SWAGGER_UI_TEMPLATE = (
@@ -247,6 +249,10 @@ class QueryModule(tornado.web.RequestHandler):
 
     @tornado_concurrent.run_on_executor
     def run_request(self, module_name, json_payload, dict_payload):
+        if RESTRICT_PAP_RED and MODULES_HANDLERS.get(f"type:{module_name}") == "expansion":
+            error = pap_red_error(MODULES_HANDLERS[module_name], dict_payload)
+            if error:
+                return orjson.dumps({"error": error}), "module_errors"
         # Log only the original request, before any server-local secrets are added.
         LOGGER.debug("QueryModule %s request %s", module_name, json_payload)
         resolved_payload = MODULE_CONFIG.resolve(module_name, dict_payload)
@@ -318,8 +324,17 @@ def main():
     arg_parser.add_argument("-l", "--listen", default="localhost", help="address (default localhost)")
     arg_parser.add_argument("-c", "--custom", default=None, help="custom modules root")
     arg_parser.add_argument("--module-config", default=None, help="JSON file containing optional per-module defaults")
+    arg_parser.add_argument(
+        "--restrict-pap-red",
+        default=False,
+        action="store_true",
+        help="block PAP:RED hover and external expansion when tags are supplied (disabled by default)",
+    )
     arg_parser.add_argument("-s", "--system", default=None, help="legacy option that now has no effect")
     args = arg_parser.parse_args()
+
+    global RESTRICT_PAP_RED  # noqa: PLW0603
+    RESTRICT_PAP_RED = args.restrict_pap_red
 
     # Initialize
     init_logger(debug=args.debug, debug_extended=args.debug_extended)

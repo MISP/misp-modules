@@ -174,6 +174,13 @@ def introspection():
 
 The function that returns a dict with the version and the associated meta-data including potential configurations required of the module.
 
+Expansion modules can declare `"data-source": "internal"` or `"data-source": "external"`
+in this metadata. This supports the optional global
+[PAP:RED policy](pap-red.md). Omitted declarations are treated as external when
+the policy is enabled. Only declare `internal` for passive processing that cannot
+expose intelligence outside the trusted environment. Hover requests marked
+PAP:RED are blocked for either source when the policy is enabled.
+
 
 ### Additional Configuration Values
 
