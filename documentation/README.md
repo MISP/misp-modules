@@ -4647,20 +4647,20 @@ Optical Character Recognition (OCR) module for MISP.
 
 #### [OpenIOC Import](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/openiocimport.py)
 
-Module to import OpenIOC packages.
+Import legacy OpenIOC 1.0 and 1.1 files into MISP.
 [[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/openiocimport.py)]
 
 - **features**:
->The module imports MISP Attributes from OpenIOC packages, there is then no special feature for users to make it work.
+>A backup import path for legacy .ioc files after removal of the core OpenIOC importer in MISP 3.0. Upload an OpenIOC 1.0 (ioc/definition) or 1.1 (OpenIOC/criteria) XML file through Import from modules, using openiocimport. Common file, network, email, registry, mutex and service fields become MISP attributes; unmapped fields are retained as other attributes. The original XML is attached by default; the existing not save ioc and default tag options are supported. XML DTDs and custom entities are rejected. This extracts observables, rather than evaluating OpenIOC rules: conditions, negation, case sensitivity, item IDs and the AND/OR group path are recorded in attribute comments. All attributes have to_ids=false for review. Correlation is disabled for grouped AND terms, non-exact or negated conditions and unmapped fields, so these are not treated as independent exact indicators. Keep the attachment for the full rule.
 
 - **input**:
->OpenIOC packages
+>OpenIOC 1.0 or 1.1 XML (.ioc or .xml), including namespace-free legacy files
 
 - **output**:
->MISP Event attributes
+>MISP Event attributes and the optional original IOC attachment
 
 - **references**:
->https://www.fireeye.com/blog/threat-research/2013/10/openioc-basics.html
+>https://github.com/mandiant/ioc_writer
 
 - **requirements**:
 >PyMISP
