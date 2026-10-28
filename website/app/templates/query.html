@@ -222,6 +222,12 @@
                                     </h2>
                                     <div :id="'panelsStayOpen-'+key_query+'-'+key"
                                          class="accordion-collapse collapse show">
+                                        <div class="btn-group m-2" role="group" aria-label="Download result">
+                                            <a class="btn btn-outline-primary btn-sm"
+                                               :href="`/download/${encodeURIComponent(sid)}?query=${encodeURIComponent(key_query)}&module=${encodeURIComponent(key)}`">Download JSON</a>
+                                            <a class="btn btn-outline-primary btn-sm"
+                                               :href="`/download/${encodeURIComponent(sid)}?query=${encodeURIComponent(key_query)}&module=${encodeURIComponent(key)}&format=csv`">Download CSV</a>
+                                        </div>
                                         <!-- visual part -->
                                         <template v-if="tab_list == 'visual'">
                                             <div class="accordion-body enrichment-visual">
@@ -244,15 +250,6 @@
                                         </template>
                                         <!-- json part -->
                                         <template v-if="tab_list == 'json'">
-                                            <div class="btn-group"
-                                                 role="group"
-                                                 style="padding: 5px;
-                                                        margin-left: 5px;
-                                                        margin-top: 5px">
-                                                <a class="btn btn-primary"
-                                                   :href="`/download/${encodeURIComponent(sid)}?query=${encodeURIComponent(key_query)}&module=${encodeURIComponent(key)}`"
-                                                   title="Download the json">Download</a>
-                                            </div>
                                             <div class="accordion-body"
                                                  v-html="generateCoreFormatUI(result)[0].outerHTML"></div>
                                         </template>

@@ -3,6 +3,8 @@
 Run: python -m unittest discover -s website/tests -p 'browser_checks.py' -v
 Requires website dependencies, playwright, and Chromium (see doc/interface.md).
 """
+import csv
+import io
 import json
 import os
 import threading
@@ -144,6 +146,24 @@ class InterfaceTests(unittest.TestCase):
         expect(self.page.locator(".investigation-choice")).to_have_count(3)
         self.page.locator(".investigation-choice").filter(has_text="circl.lu").click()
         expect(self.page.locator(".path-query-card")).to_have_count(6)
+
+    def test_csv_downloads_from_legacy_and_object_results(self):
+        for sid, expected in [("test-query", ["192.0.2.1"]), ("object-query", ["example.org", "443"])]:
+            with self.subTest(sid=sid):
+                self.page.goto(self.base + "/query/" + sid)
+                csv_link = self.page.get_by_role("link", name="Download CSV", exact=True)
+                expect(csv_link).to_be_visible()
+                # Downloads remain available while changing result views.
+                self.page.get_by_role("tab", name="JSON", exact=True).click()
+                expect(csv_link).to_be_visible()
+                with self.page.expect_download() as pending:
+                    csv_link.click()
+                download = pending.value
+                self.assertTrue(download.suggested_filename.endswith(".csv"))
+                data = Path(download.path()).read_text(encoding="utf-8")
+                rows = list(csv.DictReader(io.StringIO(data)))
+                self.assertTrue(set(expected).issubset({row["value"] for row in rows}))
+                expect(self.page.get_by_role("link", name="Download JSON", exact=True)).to_be_visible()
 
     def test_investigation_paths_search_and_branch_controls(self):
         self.sample_history()
@@ -324,7 +344,7 @@ class InterfaceTests(unittest.TestCase):
             self.screenshot(f"object-results-{width}.png")
         self.page.get_by_role("tab", name="JSON", exact=True).click()
         with self.page.expect_download() as downloaded:
-            self.page.get_by_role("link", name="Download", exact=True).click()
+            self.page.get_by_role("link", name="Download JSON", exact=True).click()
         result = json.loads(Path(downloaded.value.path()).read_text())
         self.assertIn("&view=details", result["results"]["Object"][0]["Attribute"][0]["value"])
         self.page.route("**/result/test-query", lambda route: route.fulfill(json={"example.org": {"dns": {"results": [
@@ -501,7 +521,7 @@ class InterfaceTests(unittest.TestCase):
         expect(self.page.get_by_role("status").filter(has_text="Complete:")).to_be_visible()
         expect(self.page.get_by_role("heading", name="Errors", exact=True)).to_have_count(0)
         self.page.get_by_role("tab", name="JSON", exact=True).click()
-        expect(self.page.get_by_role("link", name="Download", exact=True)).to_be_visible()
+        expect(self.page.get_by_role("link", name="Download JSON", exact=True)).to_be_visible()
         expect(self.page.get_by_role("tab", name="JSON", exact=True)).to_have_attribute("aria-selected", "true")
         self.page.get_by_role("tab", name="JSON", exact=True).focus()
         self.page.keyboard.press("ArrowRight")
