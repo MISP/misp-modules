@@ -168,7 +168,9 @@ def build_document(
                         "Process-local counters since startup, including unused modules. Only queries dispatched to"
                         " loaded modules are counted. Errors include module errors, exceptions and timeouts. Response"
                         " times include executor queueing and serialization, ending at response preparation or timeout;"
-                        " timed-out workers may continue running. No request or response contents are retained."
+                        " timed-out workers may continue running. Statistics retain no request or response contents."
+                        " When result caching is explicitly enabled, an optional cache section reports per-module"
+                        " cache counters without exposing cached contents or keys."
                     ),
                     "responses": {
                         "200": {
@@ -213,6 +215,38 @@ def build_document(
                             "description": "Statistics keyed by loaded module name, including custom modules.",
                             "additionalProperties": {"$ref": "#/components/schemas/QueryStatistics"},
                         },
+                        "cache": {
+                            "type": "object",
+                            "description": "Present only for loaded expansion modules with caching explicitly enabled.",
+                            "properties": {
+                                "modules": {
+                                    "type": "object",
+                                    "additionalProperties": {"$ref": "#/components/schemas/CacheStatistics"},
+                                }
+                            },
+                        },
+                    },
+                },
+                "CacheStatistics": {
+                    "type": "object",
+                    "properties": {
+                        name: {"type": "integer", "minimum": 0, "description": description}
+                        for name, description in {
+                            "ttl_seconds": "Configured lifetime after successful execution; hits do not extend it.",
+                            "max_entries": "Configured per-module entry limit.",
+                            "max_bytes": "Configured per-module cached response body byte limit.",
+                            "entries": "Currently retained unexpired results.",
+                            "response_bytes": "Bytes in retained response bodies; excludes Python object overhead.",
+                            "in_flight": "Distinct cache misses currently executing, including timed-out workers.",
+                            "hits": "Queries served from an unexpired cached result.",
+                            "misses": "Queries that executed the module after a cache miss.",
+                            "coalesced": "Queries sharing an identical in-flight execution.",
+                            "stores": "Successful results stored in the cache.",
+                            "evictions": "Results removed to satisfy entry or byte limits.",
+                            "expired": "Results removed after their lifetime elapsed.",
+                            "skipped": "Completed results not stored due to errors, null, size, or deadline.",
+                            "saved_queries": "Sum of hits and coalesced; avoided module invocations, not HTTP calls.",
+                        }.items()
                     },
                 },
                 "QueryStatistics": {

@@ -23,6 +23,7 @@ import os.path
 import pathlib
 import signal
 import sys
+import time
 
 logging.captureWarnings(True)
 
@@ -42,6 +43,7 @@ from tornado import ioloop
 
 import misp_modules
 from misp_modules import openapi as openapi_builder
+from misp_modules.cache import CacheConfigError, ModuleCache
 from misp_modules.http_debug import configure_http_debug, module_context
 from misp_modules.module_config import ModuleConfig, ModuleConfigError
 from misp_modules.pap import pap_red_error
@@ -56,6 +58,7 @@ OPENAPI_DOCUMENT = {}
 MODULE_STATISTICS = ModuleStatistics()
 MODULE_CONFIG = ModuleConfig()
 RESTRICT_PAP_RED = False
+MODULE_CACHE = ModuleCache()
 LOGGER = logging.getLogger("misp-modules")
 
 SWAGGER_UI_TEMPLATE = (
@@ -236,7 +239,11 @@ class Statistics(tornado.web.RequestHandler):
         }
         self.set_header("Content-Type", "application/json")
         self.set_header("Cache-Control", "no-store")
-        self.write(orjson.dumps(MODULE_STATISTICS.snapshot(module_types)))
+        snapshot = MODULE_STATISTICS.snapshot(module_types)
+        cache_statistics = MODULE_CACHE.snapshot(module_types)
+        if cache_statistics:
+            snapshot["cache"] = {"modules": cache_statistics}
+        self.write(orjson.dumps(snapshot))
 
 
 class QueryModule(tornado.web.RequestHandler):
@@ -259,23 +266,30 @@ class QueryModule(tornado.web.RequestHandler):
         if resolved_payload is not dict_payload:
             dict_payload = resolved_payload
             json_payload = orjson.dumps(dict_payload)
-        with module_context(module_name):
-            try:
-                response = MODULES_HANDLERS[module_name].dict_handler(request=dict_payload)
-            except AttributeError:
-                response = MODULES_HANDLERS[module_name].handler(q=json_payload)
-        outcome = (
-            "module_errors"
-            if isinstance(response, dict) and (response.get("error") or response.get("errors"))
-            else "successes"
-        )
-        return orjson.dumps(response, default=pymisp.pymisp_json_default), outcome
+
+        def execute():
+            with module_context(module_name):
+                try:
+                    response = MODULES_HANDLERS[module_name].dict_handler(request=dict_payload)
+                except AttributeError:
+                    response = MODULES_HANDLERS[module_name].handler(q=json_payload)
+            outcome = (
+                "module_errors"
+                if isinstance(response, dict) and (response.get("error") or response.get("errors"))
+                else "successes"
+            )
+            return orjson.dumps(response, default=pymisp.pymisp_json_default), outcome
+
+        if MODULE_CACHE.enabled_for(module_name) and MODULES_HANDLERS.get(f"type:{module_name}") == "expansion":
+            return MODULE_CACHE.run(module_name, dict_payload, execute, deadline=getattr(self, "_cache_deadline", None))
+        return execute()
 
     @tornado.gen.coroutine
     def post(self):
         json_payload = self.request.body
         dict_payload = orjson.loads(json_payload)
         timeout = datetime.timedelta(seconds=int(dict_payload.get("timeout", self.DEFAULT_TIMEOUT)))
+        self._cache_deadline = time.monotonic() + timeout.total_seconds()
         module_name = dict_payload.get("module")
         tracked = (
             isinstance(module_name, str) and not module_name.startswith("type:") and module_name in MODULES_HANDLERS
@@ -330,6 +344,9 @@ def main():
         action="store_true",
         help="block PAP:RED hover and external expansion when tags are supplied (disabled by default)",
     )
+    arg_parser.add_argument(
+        "--cache-config", default=None, help="JSON file enabling optional per-module result caching"
+    )
     arg_parser.add_argument("-s", "--system", default=None, help="legacy option that now has no effect")
     args = arg_parser.parse_args()
 
@@ -343,6 +360,12 @@ def main():
     try:
         MODULE_CONFIG = ModuleConfig.from_file(args.module_config) if args.module_config is not None else ModuleConfig()
     except ModuleConfigError as exc:
+        arg_parser.error(str(exc))
+
+    global MODULE_CACHE  # noqa: PLW0603
+    try:
+        MODULE_CACHE = ModuleCache.from_file(args.cache_config) if args.cache_config is not None else ModuleCache()
+    except CacheConfigError as exc:
         arg_parser.error(str(exc))
 
     # Alert if needed
@@ -379,6 +402,11 @@ def main():
             MODULES_HANDLERS[module_name] = imported_module
             MODULES_HANDLERS[f"type:{module_name}"] = module_type.name
             LOGGER.info("CUSTOM MISP module %s (type=%s) imported", module_name, module_type.name)
+
+    try:
+        MODULE_CACHE.validate_modules(MODULES_HANDLERS)
+    except CacheConfigError as exc:
+        arg_parser.error(str(exc))
 
     global OPENAPI_DOCUMENT  # noqa: PLW0603
     try:

@@ -65,6 +65,15 @@ Statistics are held in memory per server process and reset on restart. See
 [statistics details](documentation/mkdocs/install.md#module-statistics) for metric semantics.
 The endpoint is also described in `/openapi.json` and the `/openapi` explorer.
 
+## Optional result caching
+
+Use `--cache-config /etc/misp-modules/cache.json` to enable bounded, in-memory
+result caching for individually selected expansion modules. Each module has its
+own lifetime, entry limit and response byte limit. Identical concurrent queries
+share one execution, and `/statistics` reports cache hits and avoided executions.
+Caching is disabled by default and adds no dependencies or external services.
+See [result caching](documentation/mkdocs/caching.md) for configuration and limits.
+
 ## Extended HTTP debugging
 
 Run `misp-modules --debug-extended` to enable normal debug logging plus full outbound
