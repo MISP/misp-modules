@@ -883,6 +883,34 @@ DomainTools MISP expansion module.
 
 -----
 
+#### [DuckDuckGo Search](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/duckduckgo_search.py)
+
+Search DuckDuckGo for web references to an attribute without an API key.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/duckduckgo_search.py)]
+
+- **features**:
+>Searches the attribute value using the ddgs DuckDuckGo backend, without automatic provider fallback. Returns annotation objects containing result links, titles and snippets, related to the input attribute. max_results defaults to 5 (1-25); timeout defaults to 10 seconds (1-60) per search request. Blank settings use defaults. Searches use the library's us-en region and moderate safe search. This unofficial search integration can be rate-limited or broken by upstream changes. The attribute value is sent to DuckDuckGo; result pages are not downloaded. Search results are references for review, not maliciousness verdicts.
+
+- **config**:
+> - max_results
+> - timeout
+
+- **input**:
+>A URL, domain, hostname or text attribute.
+
+- **output**:
+>Related annotation objects with search result links, titles and snippets; to_ids is false.
+
+- **references**:
+> - https://github.com/deedy5/ddgs
+> - https://github.com/MISP/misp-modules/issues/601
+
+- **requirements**:
+> - ddgs>=9.16.1,<10
+> - pymisp
+
+-----
+
 #### [EQL Query Generator](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/eql.py)
 
 <img src=../logos/eql.png height=60>
