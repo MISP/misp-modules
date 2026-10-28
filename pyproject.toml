@@ -32,6 +32,7 @@ dependencies = [
     "jinja2",
     "markdownify",
     "pymisp>=2.5.34.1",
+    "python-dateutil>=2.9.0.post0,<3.0.0",  # pypssl requires dateutil <3
     "publicsuffixlist",
     "setuptools",
 ]
