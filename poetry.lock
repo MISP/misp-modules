@@ -347,6 +347,18 @@ stix2 = "*"
 urllib3 = "*"
 
 [[package]]
+name = "args"
+version = "0.1.0"
+description = "Command Arguments for Humans."
+optional = true
+python-versions = "*"
+groups = ["main"]
+markers = "extra == \"all\""
+files = [
+    {file = "args-0.1.0.tar.gz", hash = "sha256:a785b8d837625e9b61c39108532d95b85274acd679693b71ebb5156848fcf814"},
+]
+
+[[package]]
 name = "assemblyline-client"
 version = "4.10.1"
 description = "Assemblyline v4 client library"
@@ -849,6 +861,29 @@ tomllib = ["tomli (>=1.1.0) ; python_version < \"3.11\"", "tomli-w (>=1.1.0)"]
 ujson = ["ujson (>=5.10.0)"]
 
 [[package]]
+name = "cccs-yara"
+version = "2.11"
+description = "A CCCS utility for YARA rule metadata validation"
+optional = true
+python-versions = "*"
+groups = ["main"]
+markers = "extra == \"all\""
+files = [
+    {file = "cccs_yara-2.11-py3-none-any.whl", hash = "sha256:a1a21c4f6279e476ce8656b87a012b12eb283a157e1d6eca7d71dda8ac3775a3"},
+    {file = "cccs_yara-2.11.tar.gz", hash = "sha256:1f5e1b8abadc0b4737f1406e6dc6a7fcc47ad80bd2bba5975031f42e0ecbd65c"},
+]
+
+[package.dependencies]
+clint = ">=0.5.1"
+GitPython = ">=3.1.59,<3.2"
+packaging = ">=26.3"
+plyara = "*"
+python-baseconv = ">=1.2.2"
+PyYAML = ">=6.0.3"
+stix2 = ">=3.0.2"
+yara-python = ">=4.5.4"
+
+[[package]]
 name = "censys"
 version = "2.0.9"
 description = "An easy-to-use and lightweight API wrapper for Censys APIs (censys.io)."
@@ -1272,6 +1307,21 @@ typing-extensions = ">=4.7.0"
 
 [package.extras]
 testing = ["flake8 (>=6.0.0)", "mypy (>=1.9.0)", "pytest (>=7.2.1)", "pytest-cov (>=4.0.0)", "tox (>=4.4.3)"]
+
+[[package]]
+name = "clint"
+version = "0.5.1"
+description = "Python Command Line Interface Tools"
+optional = true
+python-versions = "*"
+groups = ["main"]
+markers = "extra == \"all\""
+files = [
+    {file = "clint-0.5.1.tar.gz", hash = "sha256:05224c32b1075563d0b16d0015faaf9da43aa214e4a2140e51f08789e7a4c5aa"},
+]
+
+[package.dependencies]
+args = "*"
 
 [[package]]
 name = "codecov"
@@ -2768,6 +2818,42 @@ python-dateutil = ">=2.8.1"
 
 [package.extras]
 dev = ["flake8", "markdown", "twine", "wheel"]
+
+[[package]]
+name = "gitdb"
+version = "4.0.12"
+description = "Git Object Database"
+optional = true
+python-versions = ">=3.7"
+groups = ["main"]
+markers = "extra == \"all\""
+files = [
+    {file = "gitdb-4.0.12-py3-none-any.whl", hash = "sha256:67073e15955400952c6565cc3e707c554a4eea2e428946f7a4c162fab9bd9bcf"},
+    {file = "gitdb-4.0.12.tar.gz", hash = "sha256:5ef71f855d191a3326fcfbc0d5da835f26b13fbcba60c32c21091c349ffdb571"},
+]
+
+[package.dependencies]
+smmap = ">=3.0.1,<6"
+
+[[package]]
+name = "gitpython"
+version = "3.1.62"
+description = "GitPython is a Python library used to interact with Git repositories"
+optional = true
+python-versions = ">=3.7"
+groups = ["main"]
+markers = "extra == \"all\""
+files = [
+    {file = "gitpython-3.1.62-py3-none-any.whl", hash = "sha256:7002251225e10e29d2e1f49e6532613fe5d5d9f0b6f1f02997a52b38fe56899e"},
+    {file = "gitpython-3.1.62.tar.gz", hash = "sha256:1791de66309bc0c7cfca40bf8d2e3de7ca091cbf94e6051be1ad0722c61062af"},
+]
+
+[package.dependencies]
+gitdb = ">=4.0.1,<5"
+
+[package.extras]
+doc = ["sphinx (>=7.4.7,<8)", "sphinx-autodoc-typehints", "sphinx_rtd_theme"]
+test = ["basedpyright (==1.39.9) ; python_version >= \"3.9\" and sys_platform != \"cygwin\"", "coverage[toml]", "ddt (>=1.1.1,!=1.4.3)", "mock ; python_version < \"3.8\"", "mypy (==1.18.2) ; python_version >= \"3.9\"", "pre-commit", "pytest (>=7.3.1)", "pytest-cov", "pytest-instafail", "pytest-mock", "pytest-sugar", "typing-extensions ; python_version < \"3.11\""]
 
 [[package]]
 name = "greynoise"
@@ -6204,6 +6290,22 @@ files = [
 ]
 
 [[package]]
+name = "plyara"
+version = "2.2.8"
+description = "Parse YARA rules"
+optional = true
+python-versions = ">=3.10"
+groups = ["main"]
+markers = "extra == \"all\""
+files = [
+    {file = "plyara-2.2.8-py3-none-any.whl", hash = "sha256:8b2a3b46c0963976010a69d3ddd280a77dcd6cf1097408ff573b5af5df04d06d"},
+    {file = "plyara-2.2.8.tar.gz", hash = "sha256:ce6a5be6bdc172f78bb10d2e220409c76bd46b3da9ff43e53bbe84d1eede9700"},
+]
+
+[package.extras]
+tests = ["coverage", "pycodestyle", "pydocstyle", "pyflakes"]
+
+[[package]]
 name = "pre-commit"
 version = "4.6.2"
 description = "A framework for managing and maintaining multi-language pre-commit hooks."
@@ -8475,6 +8577,19 @@ files = [
 optional = ["SQLAlchemy (>=2.0.52,<3)", "aiodns (>1.0,<3.3) ; python_version < \"3.9\"", "aiodns (>1.0,<4) ; python_version == \"3.9\"", "aiodns (>=4.0.4) ; python_version >= \"3.10\"", "aiohttp (>=3.13.5,<3.14) ; python_version == \"3.9\"", "aiohttp (>=3.14.3,<4) ; python_version >= \"3.10\"", "aiohttp (>=3.7.3,<3.11) ; python_version == \"3.8\"", "aiohttp (>=3.7.3,<3.9) ; python_version == \"3.7\"", "boto3 (<=2)", "websocket-client (>=1,<1.6.2) ; python_version == \"3.7\"", "websocket-client (>=1,<1.9.0) ; python_version == \"3.8\"", "websocket-client (>=1,<1.9.1) ; python_version == \"3.9\"", "websocket-client (>=1.9.1,<2) ; python_version >= \"3.10\"", "websockets (>=16.1.1,<17) ; python_version >= \"3.10\"", "websockets (>=9.1,<12) ; python_version == \"3.7\"", "websockets (>=9.1,<14) ; python_version == \"3.8\"", "websockets (>=9.1,<16) ; python_version == \"3.9\""]
 
 [[package]]
+name = "smmap"
+version = "5.0.3"
+description = "A pure Python implementation of a sliding window memory map manager"
+optional = true
+python-versions = ">=3.7"
+groups = ["main"]
+markers = "extra == \"all\""
+files = [
+    {file = "smmap-5.0.3-py3-none-any.whl", hash = "sha256:c106e05d5a61449cf6ba9a1e650227ecfb141590d2a98412103ff35d89fc7b2f"},
+    {file = "smmap-5.0.3.tar.gz", hash = "sha256:4d9debb8b99007ae47165abc08670bd74cb74b5227dda7f643eccc4e9eb5642c"},
+]
+
+[[package]]
 name = "socialscan"
 version = "1.4.2"
 description = "Open-source intelligence tool for checking email address and username usage on online platforms"
@@ -9928,93 +10043,74 @@ files = [
 
 [[package]]
 name = "yara-python"
-version = "4.5.0"
+version = "4.5.4"
 description = "Python interface for YARA"
 optional = true
 python-versions = "*"
 groups = ["main"]
 markers = "extra == \"minimal\" or extra == \"all\""
 files = [
-    {file = "yara-python-4.5.0.tar.gz", hash = "sha256:4feecc56d2fe1d23ecb17cb2d3bc2e3859ebf7a2201d0ca3ae0756a728122b27"},
-    {file = "yara_python-4.5.0-cp310-cp310-macosx_10_9_universal2.whl", hash = "sha256:3feb72c2146c50e583d7e3cacbb49f280fb5cac0494cae1b48e5980ecbdc1571"},
-    {file = "yara_python-4.5.0-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:1a036c41eaebdf6c0a674e0bd9d37c9d06d1d7427455866ace09d3a159c442b0"},
-    {file = "yara_python-4.5.0-cp310-cp310-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:acbc950b051a576dd4c6825bf4ebb1c0f0c5eea35b3e01bde921b744e2cc92e1"},
-    {file = "yara_python-4.5.0-cp310-cp310-manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:11bb478dee0450af1f6643a138b9eaec085ab79aa4a4aef786390c5dfc70f0d0"},
-    {file = "yara_python-4.5.0-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:1633d5653d37b6ef6517113ed446159d8de67d02893c00c43daecd9bbcb9700b"},
-    {file = "yara_python-4.5.0-cp310-cp310-musllinux_1_1_aarch64.whl", hash = "sha256:82109dd8c932c3326a9747ac3ac62857868fcc9d9fe55d6f46ff0b4dcf14eb57"},
-    {file = "yara_python-4.5.0-cp310-cp310-musllinux_1_1_i686.whl", hash = "sha256:85af2755732081e5fb99fc4295659690f97b61b7a1428e857dbfe91f12f9cf7d"},
-    {file = "yara_python-4.5.0-cp310-cp310-musllinux_1_1_x86_64.whl", hash = "sha256:a776f86060aebd4e31c74927ddd13e6b3c21a59e4586da8667e69849e5008872"},
-    {file = "yara_python-4.5.0-cp310-cp310-win32.whl", hash = "sha256:535f274738d6ad5501b4450b0bf3cd3c0d1547e9773a7ca1cf9e855d8a1cf741"},
-    {file = "yara_python-4.5.0-cp310-cp310-win_amd64.whl", hash = "sha256:5de0bf8ea0d530e8af2b59c56c5506219f060b4b25b196ba88fd19753529246d"},
-    {file = "yara_python-4.5.0-cp311-cp311-macosx_10_9_universal2.whl", hash = "sha256:aeadaa62aa523e71abcb438f6f07761b9d62177021bb0e919a180d5b1e8cc05f"},
-    {file = "yara_python-4.5.0-cp311-cp311-macosx_10_9_x86_64.whl", hash = "sha256:0b4cc4eb937c1fd3747682cae639179a6bc03a24c86dde861ca2ba1abafe8404"},
-    {file = "yara_python-4.5.0-cp311-cp311-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:7c77dfe89038a1e0a134d44aacb05d48b268312ca3a58df1fc0cf212aaaa79ff"},
-    {file = "yara_python-4.5.0-cp311-cp311-manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:570d1f0f9893ec114a25ed9704e992ce58fb28c3399f6a3d81ea42d4e90c6a9d"},
-    {file = "yara_python-4.5.0-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:b4650def8807d5b6736a1144ca2d880198deafec2313816a4fcc365c00f9b61b"},
-    {file = "yara_python-4.5.0-cp311-cp311-musllinux_1_1_aarch64.whl", hash = "sha256:f557ce581e35ae23f19da6e80be1f84a1ac98b17b67b04cf46a9877d8d4fa870"},
-    {file = "yara_python-4.5.0-cp311-cp311-musllinux_1_1_i686.whl", hash = "sha256:2d400917ebaf35663975ff001a6c13e432af68e641879194152212b8e87dd974"},
-    {file = "yara_python-4.5.0-cp311-cp311-musllinux_1_1_x86_64.whl", hash = "sha256:c5de6ed584bf59005186628f88df718475ccb6818912b0b12a151a2e61f0c29c"},
-    {file = "yara_python-4.5.0-cp311-cp311-win32.whl", hash = "sha256:17bee3e24258ef9d31cbc11342d22d513e005b7a551083adbb01d3ffc748c945"},
-    {file = "yara_python-4.5.0-cp311-cp311-win_amd64.whl", hash = "sha256:36acc235bf7aa61145daf364c97d3723e9c0e350cca6ae00bf717088a2c72f3b"},
-    {file = "yara_python-4.5.0-cp312-cp312-macosx_10_9_universal2.whl", hash = "sha256:6918ddc68d89f4da1eb851d6a841ebc615cec31532f74698e4f51e58b44213e0"},
-    {file = "yara_python-4.5.0-cp312-cp312-macosx_10_9_x86_64.whl", hash = "sha256:9a9d666acc4d6d1ec59da4864ac4e25552169bd92520b050e5fcf92212d3ab1e"},
-    {file = "yara_python-4.5.0-cp312-cp312-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:a96d7b4a7e060c40b290d2264c17623f063a5604e6502b06cd145f2f0e6e82ed"},
-    {file = "yara_python-4.5.0-cp312-cp312-manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:91f782bdea16441c87f0231f038cf6d151e36718154871f5c5fb274364d144e7"},
-    {file = "yara_python-4.5.0-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:006f4af0cf30725425b6777016e6d6d7b2854955f0402b227f70d6fbdc594272"},
-    {file = "yara_python-4.5.0-cp312-cp312-musllinux_1_1_aarch64.whl", hash = "sha256:7645a4d23d7749c390da92de105831762499eba22e39e956d0fddfda05d949eb"},
-    {file = "yara_python-4.5.0-cp312-cp312-musllinux_1_1_i686.whl", hash = "sha256:244fd95d0e4f4f1fbe85032f7e9b779e2cb4c6678787725482d2b43925ff2ed3"},
-    {file = "yara_python-4.5.0-cp312-cp312-musllinux_1_1_x86_64.whl", hash = "sha256:c17980d60ff3f7cfabab2df28965efb8e0b38508a5c47a0ad6917016edc0328c"},
-    {file = "yara_python-4.5.0-cp312-cp312-win32.whl", hash = "sha256:86549302cae8f9c5fb1394e2e9fd9dc802e3c488723935e50fdcb0d6b639ab51"},
-    {file = "yara_python-4.5.0-cp312-cp312-win_amd64.whl", hash = "sha256:36423ffd5e2e1f39562df6bd569be997c2fd06e0f30019dfadf339ff88278a4f"},
-    {file = "yara_python-4.5.0-cp37-cp37m-macosx_10_9_x86_64.whl", hash = "sha256:49f8e215c9ebd0b43a782d3cfbeee6f82e2a647482cff6c676e96da57014d878"},
-    {file = "yara_python-4.5.0-cp37-cp37m-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:262be4841add4d7e978db317e63f657291b4c9a64469bcdf43cdee8b3f28e0c0"},
-    {file = "yara_python-4.5.0-cp37-cp37m-manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:a0ee9e222daa982d31dc4be5fabf838726a3fb6a6425253c73f53aa0f0e2f457"},
-    {file = "yara_python-4.5.0-cp37-cp37m-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:d6d7d16fffc0fe92cd8d4ead9fbd58f1da7fcd9d39ff5c32924691db66257927"},
-    {file = "yara_python-4.5.0-cp37-cp37m-musllinux_1_1_aarch64.whl", hash = "sha256:6ebbe0c112da598828d8fad15356a20b739dd2ef0dd0d90f6ec0f00ce9aa7ae1"},
-    {file = "yara_python-4.5.0-cp37-cp37m-musllinux_1_1_i686.whl", hash = "sha256:a08162e9b4bdbae1e2e34ab83b6f145d334d650399aab9afb5341ce67a866a5c"},
-    {file = "yara_python-4.5.0-cp37-cp37m-musllinux_1_1_x86_64.whl", hash = "sha256:65b0e4c168f0210d9b6be7b95bb7e2a97a545d52e9d3403370c3c5506b9d31f1"},
-    {file = "yara_python-4.5.0-cp37-cp37m-win32.whl", hash = "sha256:3393eced9af44507193f7724b8f37ed5f0c5620fb402b886d6f07f578aab43af"},
-    {file = "yara_python-4.5.0-cp37-cp37m-win_amd64.whl", hash = "sha256:de539783415e5b73e81d0a26fbe21cf2ade1b32fbd653be8a0f7430907337883"},
-    {file = "yara_python-4.5.0-cp38-cp38-macosx_10_9_universal2.whl", hash = "sha256:067610dfedfe361b748bbf9148183df11141748f2a83b4bdb873fde96a62e204"},
-    {file = "yara_python-4.5.0-cp38-cp38-macosx_10_9_x86_64.whl", hash = "sha256:8342783942dd8bdc46f1047cdb45ff68dcfe7aef0499b644deabd3d685a2d7e6"},
-    {file = "yara_python-4.5.0-cp38-cp38-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:f14db61a8e54c61cced58d070630033b68e276036053f402e76a1b7ebc5ad0f0"},
-    {file = "yara_python-4.5.0-cp38-cp38-manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:468743b991341440fa4fd6c1414b2f5948970d26330ac1ae811f10d559c57771"},
-    {file = "yara_python-4.5.0-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:cde3be15f16c3b24a3e7a08327deeec9225cecf060c930fef58d38ae4554b17e"},
-    {file = "yara_python-4.5.0-cp38-cp38-musllinux_1_1_aarch64.whl", hash = "sha256:1b07363c9b44796fe991e29a5756a48ae195f3cbe4d72bb70b1932f5ccadd153"},
-    {file = "yara_python-4.5.0-cp38-cp38-musllinux_1_1_i686.whl", hash = "sha256:8072d6f89d7352d09d1eeda6a8fa15582ff141495f24ceb448c7b7f7592d1820"},
-    {file = "yara_python-4.5.0-cp38-cp38-musllinux_1_1_x86_64.whl", hash = "sha256:29735530650093e251abe11f76d78382fb8e87f24e7bc154e4fe28c624e7d4f7"},
-    {file = "yara_python-4.5.0-cp38-cp38-win32.whl", hash = "sha256:016a7ce7ec60b1dcecec6a23557abd3b78b442a8ac7dd14c4e8047ac07227ea6"},
-    {file = "yara_python-4.5.0-cp38-cp38-win_amd64.whl", hash = "sha256:47fe5195687fff0f7ec435ce75b46a35b05b257c7550de5cb417bad9750bebde"},
-    {file = "yara_python-4.5.0-cp39-cp39-macosx_10_9_universal2.whl", hash = "sha256:aea5ba7084b48fb3d5edd6b01c7e45763a1f0a4dd83bc0c3c1975e61aeae86cf"},
-    {file = "yara_python-4.5.0-cp39-cp39-macosx_10_9_x86_64.whl", hash = "sha256:16894888f599b4acdf57a4fc157108fb804823149f60e81a0afba0b7d2ebbf5f"},
-    {file = "yara_python-4.5.0-cp39-cp39-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:5e80d2d8e5f7e9c25c8150f7281183abb2e53d81c0d33cecdf1459faeb042572"},
-    {file = "yara_python-4.5.0-cp39-cp39-manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:898fbdc6c5f5913935ce2586242dd94673d27f3a031dc0704598237c25ed4431"},
-    {file = "yara_python-4.5.0-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:8e94d576dd98f7b957d34b8b03cabdf0372d11e9f65cd45bb823cbc3a086ec25"},
-    {file = "yara_python-4.5.0-cp39-cp39-musllinux_1_1_aarch64.whl", hash = "sha256:d95e525074624c2618cb8146b4cc22455e786fbbe575b99bf191824a23f460db"},
-    {file = "yara_python-4.5.0-cp39-cp39-musllinux_1_1_i686.whl", hash = "sha256:185d542aefc154c28d59b7385f3d8d7baacbb74451f2f153a51c1216ae063d70"},
-    {file = "yara_python-4.5.0-cp39-cp39-musllinux_1_1_x86_64.whl", hash = "sha256:e7571f164a2da121fbc3a0d4df68fec82d2ae39bb8ea48b5a77467a467741573"},
-    {file = "yara_python-4.5.0-cp39-cp39-win32.whl", hash = "sha256:692ae9d9647026908d5202a9ec68da6c8b4e4fb161828a425bc847ad03e66341"},
-    {file = "yara_python-4.5.0-cp39-cp39-win_amd64.whl", hash = "sha256:b08ebeab39aab6fd80da875aa9fe0ec21ab8432f4656a0f4011a5069a9c3aab4"},
-    {file = "yara_python-4.5.0-pp310-pypy310_pp73-macosx_10_9_x86_64.whl", hash = "sha256:cf9758f5b22cd0d9e14cec363d5eda3af637d93728bf5287ee0887a2fce036b1"},
-    {file = "yara_python-4.5.0-pp310-pypy310_pp73-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:2b68c7367df3d10d55fbeda985c02425ef9b549805fa9893505e25d68ef039e8"},
-    {file = "yara_python-4.5.0-pp310-pypy310_pp73-manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:fe47ea00cd442eeb0bfea9ffea3cec97074e0e88843358a0552063b978655736"},
-    {file = "yara_python-4.5.0-pp310-pypy310_pp73-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:344b679576d51fc6397eac3282e4ad27b1ab093cf9571a47e47b50debcd03dbf"},
-    {file = "yara_python-4.5.0-pp310-pypy310_pp73-win_amd64.whl", hash = "sha256:5c02545da623e58f5df8292a7d214b97667989904271d30b5e389b9ab1a81395"},
-    {file = "yara_python-4.5.0-pp37-pypy37_pp73-macosx_10_9_x86_64.whl", hash = "sha256:e344f6953be0f60dc4fa94f629568e12ed9d2b981997e22bf32bd83083774c2f"},
-    {file = "yara_python-4.5.0-pp37-pypy37_pp73-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:77da34bac1807d270df4840d28c01a7d879e0ce0a0c692a0b0bd8f2adf4f6d1c"},
-    {file = "yara_python-4.5.0-pp37-pypy37_pp73-manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:2d262ddf7032f1a9efe9c7533315c37db86ad58c10b5888d704f50f0f82bdfb8"},
-    {file = "yara_python-4.5.0-pp37-pypy37_pp73-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:7d04c17b27e33f9541a47f12972fc1a5836d2dfa947f48ed3242c5c9c32fc47b"},
-    {file = "yara_python-4.5.0-pp37-pypy37_pp73-win_amd64.whl", hash = "sha256:847c249bbf6847f6d056921315eeef2d9c2ac79fcf063384d9b752b51e087afd"},
-    {file = "yara_python-4.5.0-pp38-pypy38_pp73-macosx_10_9_x86_64.whl", hash = "sha256:0361820a3a8ec522cbb259d6af664d5f7dd19b29e4bcce9c36e480832b4172fc"},
-    {file = "yara_python-4.5.0-pp38-pypy38_pp73-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:00a7c3d593ef0d065d84c06ed365ce24735f553669de1e066851e8f6cdfc2051"},
-    {file = "yara_python-4.5.0-pp38-pypy38_pp73-manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:a45b201d634be0f37bcb5fcf898fc91c66032c3f87b3e7656953f111e475f409"},
-    {file = "yara_python-4.5.0-pp38-pypy38_pp73-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:7c1cbcfc262840ea1fb19bc961eaff51d764896bd411643f5695a46046cae99b"},
-    {file = "yara_python-4.5.0-pp38-pypy38_pp73-win_amd64.whl", hash = "sha256:445d80c3a327345cae346cb12c86b01265127319a9cf3a1d93e301ee080fb2c7"},
-    {file = "yara_python-4.5.0-pp39-pypy39_pp73-macosx_10_9_x86_64.whl", hash = "sha256:c966f098254d6883ea9b1bba9743a298658cc58f43904ea6564e31e3e0d699d8"},
-    {file = "yara_python-4.5.0-pp39-pypy39_pp73-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:c901ce071141261a857ea779bcdf0c1e63e238d1b597a411dc2f816796a25c63"},
-    {file = "yara_python-4.5.0-pp39-pypy39_pp73-manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:26085645d894bdfa75e2e88ba57d8297ed89c415ae3c2224ef27095c13c0c050"},
-    {file = "yara_python-4.5.0-pp39-pypy39_pp73-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:a0778e2d41bde173dd5e4758bb2f6d58832f149ff10d333e8751ae3cc4b195b2"},
-    {file = "yara_python-4.5.0-pp39-pypy39_pp73-win_amd64.whl", hash = "sha256:648072ba075b930d976b5f6ae8c4563e4e32a057a2a8bd5be0e82ac98b682c60"},
+    {file = "yara_python-4.5.4-cp310-cp310-macosx_14_0_arm64.whl", hash = "sha256:721d341bd2013fbada4df5aba0eb79a9e4e21c4b86441f7f111ab8c31671f125"},
+    {file = "yara_python-4.5.4-cp310-cp310-macosx_14_0_x86_64.whl", hash = "sha256:c785fd16475f2a3191cd4fae0cd608b1ba6271f495ec86fa26a3c5ac53f5f2e1"},
+    {file = "yara_python-4.5.4-cp310-cp310-macosx_15_0_arm64.whl", hash = "sha256:5eefa3b157cd5f4454a317907bab334036f61385324b70cb61dbc656c44168d5"},
+    {file = "yara_python-4.5.4-cp310-cp310-macosx_15_0_x86_64.whl", hash = "sha256:bbc0c5a2ee67e6043e4c2622093ebfc7d2c173dc643dd089742aedbdea48d6a4"},
+    {file = "yara_python-4.5.4-cp310-cp310-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:1b091f1bd6c5d2a9b5c0c682ba67ba31b87bb71b27876430775998b71c8e3f97"},
+    {file = "yara_python-4.5.4-cp310-cp310-manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:91276c90bb5e148e10050015fec8a1d4009a95eee9eb832d154f80355d0b4080"},
+    {file = "yara_python-4.5.4-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:7e20e1f69b6239fe4f4da97e9ff361d9be25d6f1d747589ea44b8a9ec412a12d"},
+    {file = "yara_python-4.5.4-cp310-cp310-musllinux_1_2_aarch64.whl", hash = "sha256:a83773b561727fc360f7a6874f7fac1409bc9c391134dc3e070f1c2515c0db98"},
+    {file = "yara_python-4.5.4-cp310-cp310-musllinux_1_2_i686.whl", hash = "sha256:14f203bd9fb33ad591e046429560133127fa4a6201dac28c525fa7c6c7ca36a7"},
+    {file = "yara_python-4.5.4-cp310-cp310-musllinux_1_2_x86_64.whl", hash = "sha256:e632daf9f38f8d4b433f08f798b07a45756e6c396e9e0ec54aac10045f6d241d"},
+    {file = "yara_python-4.5.4-cp310-cp310-win32.whl", hash = "sha256:a3866830f7f2d071f94cbce7c41d91444ac29e2cbbe279914abf518d57a2d41f"},
+    {file = "yara_python-4.5.4-cp310-cp310-win_amd64.whl", hash = "sha256:135c1097ea0445a323038acd509162675ce6d5e21f848aa856779632d48dec42"},
+    {file = "yara_python-4.5.4-cp311-cp311-macosx_14_0_arm64.whl", hash = "sha256:e3e2a5575d61adc2b4ff2007737590783a43d16386b061ac12e6e70a82e5d1de"},
+    {file = "yara_python-4.5.4-cp311-cp311-macosx_14_0_x86_64.whl", hash = "sha256:f79a27dbdafb79fc2dc03c7c3ba66751551e3e0b350ab69cc499870b78a6cb95"},
+    {file = "yara_python-4.5.4-cp311-cp311-macosx_15_0_arm64.whl", hash = "sha256:9d9acf6f8135bcee03f47b1096ad69f4a2788abe37dd070aab6e9dd816742ecc"},
+    {file = "yara_python-4.5.4-cp311-cp311-macosx_15_0_x86_64.whl", hash = "sha256:0e762e6c5b47ddf30b0128ba723da46fcc2aa7959a252748497492cb452d1c84"},
+    {file = "yara_python-4.5.4-cp311-cp311-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:adcfac4b225e76ab6dcbeaf10101f0de2731fdbee51610dbc77b96e667e85a3a"},
+    {file = "yara_python-4.5.4-cp311-cp311-manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:a82c87038f0da2d90051bfd6449cf9a4b977a15ee8372f3512ce0a413ef822fd"},
+    {file = "yara_python-4.5.4-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:1a1721b61ee4e625a143e8e5bf32fa6774797c06724c45067f3e8919a8e5f8f3"},
+    {file = "yara_python-4.5.4-cp311-cp311-musllinux_1_2_aarch64.whl", hash = "sha256:57d80c7591bbc6d9e73934e0fa4cbbb35e3e733b2706c5fd6756edf495f42678"},
+    {file = "yara_python-4.5.4-cp311-cp311-musllinux_1_2_i686.whl", hash = "sha256:3872b5f5575d6f5077f86e2b8bcdfe8688f859a50854334a4085399331167abc"},
+    {file = "yara_python-4.5.4-cp311-cp311-musllinux_1_2_x86_64.whl", hash = "sha256:fd84af5b6da3429236b61f3ad8760fdc739d0e1d6a08b8f3d90cd375e71594df"},
+    {file = "yara_python-4.5.4-cp311-cp311-win32.whl", hash = "sha256:491c9de854e4a47dfbef7b3a38686c574459779915be19dcf4421b65847a57ce"},
+    {file = "yara_python-4.5.4-cp311-cp311-win_amd64.whl", hash = "sha256:2a1bf52cb7b9178cc1ee2acd1697a0c8468af0c76aa1beffe22534bd4f62698b"},
+    {file = "yara_python-4.5.4-cp312-cp312-macosx_14_0_arm64.whl", hash = "sha256:ade234700c492bce0efda96c1cdcd763425016e40df4a8d30c4c4e6897be5ace"},
+    {file = "yara_python-4.5.4-cp312-cp312-macosx_14_0_x86_64.whl", hash = "sha256:e1dedd149be61992781f085b592d169d1d813f9b5ffc7c8c2b74e429b443414c"},
+    {file = "yara_python-4.5.4-cp312-cp312-macosx_15_0_arm64.whl", hash = "sha256:92b233aae320ee9e59728ee23f9faf4a423ae407d4768b47c8f0e472a34dbae2"},
+    {file = "yara_python-4.5.4-cp312-cp312-macosx_15_0_x86_64.whl", hash = "sha256:1f238f10d26e4701559f73a69b22e1e192a6fa20abdd76f57a7054566780aa89"},
+    {file = "yara_python-4.5.4-cp312-cp312-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:d29d0e137e0d77dd110186369276e88381f784bdc45b5932a2fb3463e2a1b1c7"},
+    {file = "yara_python-4.5.4-cp312-cp312-manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:e7d0039d734705b123494acad7a00b67df171dd5b1c16ff7b18ff07578efd4cd"},
+    {file = "yara_python-4.5.4-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:e5eae935b05a9f8dc71df55a79c38f52abd93f8840310fe4e0d75fbd78284f24"},
+    {file = "yara_python-4.5.4-cp312-cp312-musllinux_1_2_aarch64.whl", hash = "sha256:30fc7959394532c6e3f48faf59337f5da124f1630668258276b6cfa54e555a6e"},
+    {file = "yara_python-4.5.4-cp312-cp312-musllinux_1_2_i686.whl", hash = "sha256:e6d8c2acaf33931338fdb78aba8a68462b0151d833b2eeda712db87713ac2abf"},
+    {file = "yara_python-4.5.4-cp312-cp312-musllinux_1_2_x86_64.whl", hash = "sha256:a3c7bc8cd0db5fb87ab579c755de83723030522f3c0cd5b3374044055a8ce6c6"},
+    {file = "yara_python-4.5.4-cp312-cp312-win32.whl", hash = "sha256:d12e57101683e9270738a1bccf676747f93e86b5bc529e7a7fb7adf94f20bd77"},
+    {file = "yara_python-4.5.4-cp312-cp312-win_amd64.whl", hash = "sha256:bf14a8af06b2b980a889bdc3f9e8ccd6e703d2b3fa1c98da5fd3a1c3b551eb47"},
+    {file = "yara_python-4.5.4-cp313-cp313-macosx_14_0_arm64.whl", hash = "sha256:fe8ad189843c729eae74be3b8447a4753fac2cebe705e5e2a7280badfcc7e3b4"},
+    {file = "yara_python-4.5.4-cp313-cp313-macosx_14_0_x86_64.whl", hash = "sha256:94e290d5035be23059d0475bff3eac8228acd51145bf0cabe355b1ddabab742b"},
+    {file = "yara_python-4.5.4-cp313-cp313-macosx_15_0_arm64.whl", hash = "sha256:4537f8499d166d22a54739f440fb306f65b0438be2c6c4ecb2352ecb5adb5f1c"},
+    {file = "yara_python-4.5.4-cp313-cp313-macosx_15_0_x86_64.whl", hash = "sha256:ab5133a16e466db6fe9c1a08d1b171013507896175010fb85fc1b92da32e558c"},
+    {file = "yara_python-4.5.4-cp313-cp313-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:93f5f5aba88e2ed2aaebfbb697433a0c8020c6a6c6a711e900a29e9b512d5c3a"},
+    {file = "yara_python-4.5.4-cp313-cp313-manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:473c52b53c39d5daedc1912bd8a82a1c88702a3e393688879d77f9ff5f396543"},
+    {file = "yara_python-4.5.4-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:9d9a58b7dc87411a2443d2e0382a111bd892aef9f6db2a1ebb4a9215eef0db71"},
+    {file = "yara_python-4.5.4-cp313-cp313-musllinux_1_2_aarch64.whl", hash = "sha256:0b9de86fbe8a646c0644df9e1396d6941dc6ed0f89be2807e6c52ab39161fd9f"},
+    {file = "yara_python-4.5.4-cp313-cp313-musllinux_1_2_i686.whl", hash = "sha256:973f0bc24470ac86b6009baf2800ad3eadfa4ab653b6546ba5c65e9239850f47"},
+    {file = "yara_python-4.5.4-cp313-cp313-musllinux_1_2_x86_64.whl", hash = "sha256:cb0f0e7183165426b09e2b1235e70909e540ac18e2c6be96070dfe17d7db4d78"},
+    {file = "yara_python-4.5.4-cp313-cp313-win32.whl", hash = "sha256:7707b144c8fcdb30c069ea57b94799cd7601f694ba01b696bbd1832721f37fd0"},
+    {file = "yara_python-4.5.4-cp313-cp313-win_amd64.whl", hash = "sha256:5f1288448991d63c1f6351c9f6d112916b0177ceefaa27d1419427a6ff09f829"},
+    {file = "yara_python-4.5.4-cp39-cp39-macosx_14_0_arm64.whl", hash = "sha256:7205c36a6798251925e4c1763eba0737fec7a95360df8aaa4e74e2f2f6b5cdcf"},
+    {file = "yara_python-4.5.4-cp39-cp39-macosx_14_0_x86_64.whl", hash = "sha256:9c77711a4e469ea97bdd16e85b5ab0720d6a481862a540ea7216897a10e93d19"},
+    {file = "yara_python-4.5.4-cp39-cp39-macosx_15_0_arm64.whl", hash = "sha256:9e6f0ca64cf9b0125be8fe8b821ba7e0f80427bcee136f83914dff0d81b4f27a"},
+    {file = "yara_python-4.5.4-cp39-cp39-macosx_15_0_x86_64.whl", hash = "sha256:8caad9de64dc4fc9614f331a04ea220d57aea3fbf997f3e23a298ee67cf4a69c"},
+    {file = "yara_python-4.5.4-cp39-cp39-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:9d5fcf99187cb6ec0a27c755aec22774a1ea578fdc2a5734f484c601de4ad6c0"},
+    {file = "yara_python-4.5.4-cp39-cp39-manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:bdbb62003cced7739d5c98c5af7a08c819baedf12e09276b2bbf0f3cb47828af"},
+    {file = "yara_python-4.5.4-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:5f901ec61db76a326f77882c8000139b29f218a7c6b8dd997195bab265602345"},
+    {file = "yara_python-4.5.4-cp39-cp39-musllinux_1_2_aarch64.whl", hash = "sha256:99f8d1145c11f61340fcd19fd6f3f3ef6306910829f4218daece45e831ceb54e"},
+    {file = "yara_python-4.5.4-cp39-cp39-musllinux_1_2_i686.whl", hash = "sha256:da826f12c6fa459c6b2f9e7dff3a57416ac3a6536264f7a10d1ff839d4bc943f"},
+    {file = "yara_python-4.5.4-cp39-cp39-musllinux_1_2_x86_64.whl", hash = "sha256:ebacf0b3325b3fb6f15bc3526f39f39c3576bafa4857493cc90afd2651ec8d36"},
+    {file = "yara_python-4.5.4-cp39-cp39-win32.whl", hash = "sha256:e6eba7d4387f8123dd69852ba6776799150c4019fcb3e1212a3b053d42e151ab"},
+    {file = "yara_python-4.5.4-cp39-cp39-win_amd64.whl", hash = "sha256:9addd1d6fe9d3b1efe40c7a37fa5d88fe6cd7e22c7e454617beb382c9c74b11b"},
+    {file = "yara_python-4.5.4.tar.gz", hash = "sha256:4c682170f3d5cb3a73aa1bd0dc9ab1c0957437b937b7a83ff6d7ffd366415b9c"},
 ]
 
 [[package]]
@@ -10306,10 +10402,10 @@ files = [
 cffi = ["cffi (>=1.17,<2.0) ; platform_python_implementation != \"PyPy\" and python_version < \"3.14\"", "cffi (>=2.0.0b0) ; platform_python_implementation != \"PyPy\" and python_version >= \"3.14\""]
 
 [extras]
-all = ["anyrun-sdk", "apiosintds", "assemblyline_client", "backscatter", "blockchain", "censys", "clamd", "crowdstrike-falconpy", "dnsdb2", "dnspython", "domaintools_api", "geoip2", "greynoise", "jbxapi", "lief", "lxml", "maclookup", "matplotlib", "mattermostdriver", "misp-stix", "mwdblib", "ndjson", "numpy", "oauth2", "opencv-python", "openpyxl", "pandas", "pandas_ods_reader", "pandoc", "passivetotal", "pdftotext", "ptrclassify", "pycountry", "pyeti-python3", "pyeupi", "pygeoip", "pyintel471", "pyipasnhistory", "pymisp", "pymispwarninglists", "pyonyphe", "pypdns", "pypssl", "pysafebrowsing", "pytesseract", "python-docx", "python-pptx", "pyzbar", "requests", "rstapi", "setuptools", "shodan", "sigmatools", "sigmf", "slack-sdk", "socialscan", "sparqlwrapper", "tau-clients", "taxii2-client", "trustar", "urlarchiver", "vt-graph-api", "vt-py", "vulners", "vysion", "wand", "whisper-misp", "xlrd", "yara-python"]
+all = ["anyrun-sdk", "apiosintds", "assemblyline_client", "backscatter", "blockchain", "cccs-yara", "censys", "clamd", "crowdstrike-falconpy", "dnsdb2", "dnspython", "domaintools_api", "geoip2", "greynoise", "jbxapi", "lief", "lxml", "maclookup", "matplotlib", "mattermostdriver", "misp-stix", "mwdblib", "ndjson", "numpy", "oauth2", "opencv-python", "openpyxl", "pandas", "pandas_ods_reader", "pandoc", "passivetotal", "pdftotext", "ptrclassify", "pycountry", "pyeti-python3", "pyeupi", "pygeoip", "pyintel471", "pyipasnhistory", "pymisp", "pymispwarninglists", "pyonyphe", "pypdns", "pypssl", "pysafebrowsing", "pytesseract", "python-docx", "python-pptx", "pyzbar", "requests", "rstapi", "setuptools", "shodan", "sigmatools", "sigmf", "slack-sdk", "socialscan", "sparqlwrapper", "tau-clients", "taxii2-client", "trustar", "urlarchiver", "vt-graph-api", "vt-py", "vulners", "vysion", "wand", "whisper-misp", "xlrd", "yara-python"]
 minimal = ["backscatter", "blockchain", "censys", "clamd", "crowdstrike-falconpy", "dnsdb2", "dnspython", "domaintools_api", "geoip2", "greynoise", "jbxapi", "maclookup", "matplotlib", "mattermostdriver", "ndjson", "oauth2", "passivetotal", "ptrclassify", "pycountry", "pyeti-python3", "pyeupi", "pygeoip", "pyintel471", "pyipasnhistory", "pymispwarninglists", "pyonyphe", "pypdns", "pypssl", "pysafebrowsing", "requests", "rstapi", "slack-sdk", "socialscan", "urlarchiver", "vt-graph-api", "vt-py", "vulners", "whisper-misp", "yara-python"]
 
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10,<4.0"
-content-hash = "8fad2303fed3bb459f60a436f69294660c6ef7246b7c2160ae61085438069e6c"
+content-hash = "9c04d432a0883e81b4e3eba73109578ff21309cbeb5e7a664a5ae9e9bc5f9255"

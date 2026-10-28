@@ -42,7 +42,7 @@ minimal = [
     ## pinned module dependencies
     "censys==2.0.9",
     "socialscan<2.0.0",
-    "yara-python==4.5.0",
+    "yara-python==4.5.4",
     ## module dependencies
     "backscatter",
     "blockchain",
@@ -86,7 +86,7 @@ all = [
     ## pinned module dependencies
     "censys==2.0.9",  ## in minimal
     "socialscan<2.0.0",  ## in minimal
-    "yara-python==4.5.0",  ## in minimal
+    "yara-python==4.5.4",  ## in minimal
     "numpy>=2.0.0",
     "pandas>=2.0.0,<3.0.0",
     "pandas_ods_reader>=1.0.0",
@@ -98,6 +98,7 @@ all = [
     "assemblyline_client",
     "backscatter",  ## in minimal
     "blockchain",   ## in minimal
+    "cccs-yara>=2.11,<3",
     "clamd",   ## in minimal
     "crowdstrike-falconpy",   ## in minimal
     "dnsdb2",  ## in minimal
