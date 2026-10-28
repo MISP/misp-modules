@@ -26,6 +26,8 @@ values take precedence and existing operation is unchanged without this option.
 
 Developing a MISP module yourself is fairly easy. Start with a template or existing module and continue from there.
 More information can be found in the [contribute](https://misp.github.io/misp-modules/contribute/) section of the documentation.
+To make a custom module appear in MISP, follow the
+[installation, discovery and enablement checklist](documentation/mkdocs/contribute.md#install-and-enable-your-module).
 
 # Documentation
 
