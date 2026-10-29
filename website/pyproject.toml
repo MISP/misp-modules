@@ -54,7 +54,8 @@ packages = [
   { include = "app" }
 ]
 include = [
-  "main.py"
+  { path = "main.py", format = ["sdist", "wheel"] },
+  { path = "migrations", format = ["sdist", "wheel"] },
 ]
 
 [tool.poetry.dependencies]

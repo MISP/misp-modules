@@ -5,6 +5,7 @@ import subprocess
 import time
 
 from dotenv import load_dotenv
+from flask_migrate import downgrade, migrate, upgrade
 from app import create_app, db
 
 # Load environment variables from .env
@@ -72,15 +73,18 @@ def db_init():
 
 
 def db_migrate():
-    subprocess.run(["flask", "db", "migrate"])
+    with app.app_context():
+        migrate()
 
 
 def db_upgrade():
-    subprocess.run(["flask", "db", "upgrade"])
+    with app.app_context():
+        upgrade()
 
 
 def db_downgrade():
-    subprocess.run(["flask", "db", "downgrade"])
+    with app.app_context():
+        downgrade()
 
 
 def main():
@@ -100,9 +104,6 @@ def main():
     db_sub.add_parser("downgrade", help="Revert the last migration")
 
     args = parser.parse_args()
-
-    # ensure flask commands know where to find the app
-    os.environ["FLASK_APP"] = "app:create_app()"
 
     if args.command == "dev":
         run_dev()

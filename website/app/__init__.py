@@ -45,7 +45,12 @@ def create_app():
     # Initialize extensions
     db.init_app(app)
     csrf.init_app(app)
-    migrate.init_app(app, db, render_as_batch=True)
+    migrate.init_app(
+        app,
+        db,
+        directory=os.path.join(app.root_path, "..", "migrations"),
+        render_as_batch=True,
+    )
     app.config["SESSION_SQLALCHEMY"] = db
     session.init_app(app)
     login_manager.login_view = "account.login"
