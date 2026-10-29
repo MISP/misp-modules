@@ -110,3 +110,28 @@ def test_lookup_limits_results_and_rejects_missing_key():
     with patch.object(module.requests, "request") as request:
         assert "error" in module.handler(query(config={}))
     request.assert_not_called()
+
+
+def test_pivots_normalize_source_and_use_the_url_template():
+    from pymisp import MISPEvent
+
+    event = MISPEvent()
+    attribute = {"type": "sha256", "value": "A" * 64, "uuid": UUID}
+    module._pivot(event, attribute, "sha256", "a" * 64)
+    assert not event.objects
+    module._pivot(event, attribute, "url", "https://example.com/path")
+    assert event.objects[0].name == "url"
+    assert event.objects[0].attributes[0].object_relation == "url"
+
+
+def test_sandbox_classification_matches_template_contract():
+    from pymisp import MISPEvent
+
+    event = MISPEvent()
+    attribute = {"uuid": UUID}
+    obj = module._sandbox(event, attribute, {"score": 0})
+    fields = {a.object_relation: a.value for a in obj.attributes}
+    assert fields["sandbox-type"] == "saas"
+    assert fields["saas-sandbox"] == "any.run"
+    assert set(obj._definition.get("required", [])) <= set(fields)
+    assert set(obj._definition["requiredOneOf"]) & set(fields)
