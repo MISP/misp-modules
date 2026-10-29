@@ -1,12 +1,15 @@
 import base64
 import json
+import re
 from collections import Counter, defaultdict
+from datetime import datetime, timedelta, timezone
+from xml.sax.saxutils import escape
 
 from pymisp import MISPEvent
 
 misperrors = {"error": "Error"}
 moduleinfo = {
-    "version": "1",
+    "version": "2",
     "author": "Christian Studer",
     "description": "This module is used to export MISP events containing transaction objects into GoAML format.",
     "module-type": ["export"],
@@ -28,6 +31,13 @@ moduleinfo = {
         " Signatory of a bank-account - the reference from bank-account to a signatory is required, but the"
         " relation-type is optional at the moment since this reference will always describe a signatory.\n\t- 'entity':"
         " Entity owning the bank account - optional.\n- person:\n\t- 'address': Address of a person - optional."
+        "\n\nReport metadata is configured with rentity_id (required FIU-assigned reporting entity ID),"
+        " submission_code (default E), submission_date (default current UTC time), report_code, and"
+        " currency_code_local. An explicit report_code overrides bank-account report-code attributes; otherwise"
+        " STR takes precedence, then the most frequent code (first encountered on a tie). Configure"
+        " currency_code_local explicitly; the legacy fallback requires exactly one distinct account currency."
+        " Transaction amounts must already be in the report's local currency; no conversion is performed."
+        " See documentation/export_mod/goamlexport.md for configuration examples and migration notes."
     ),
     "references": ["http://goaml.unodc.org/"],
     "input": (
@@ -39,7 +49,7 @@ moduleinfo = {
         " entities)."
     ),
 }
-moduleconfig = ["rentity_id"]
+moduleconfig = ["rentity_id", "submission_code", "submission_date", "currency_code_local", "report_code"]
 mispattributes = {"input": ["MISPEvent"], "output": ["xml file"]}
 outputFileExtension = "xml"
 responseType = "application/xml"
@@ -134,8 +144,49 @@ referencesMapping = {
 
 class GoAmlGeneration(object):
     def __init__(self, config):
-        self.config = config
+        if not isinstance(config, dict):
+            raise ValueError("Configuration error: rentity_id is required.")
+        self.config = {}
+        for key in moduleconfig:
+            value = config.get(key)
+            if value is None or value == "":
+                continue
+            if key == "rentity_id" and type(value) is int:
+                value = str(value)
+            if not isinstance(value, str):
+                raise ValueError(f"Configuration error: {key} must be a string.")
+            if value.strip():
+                self.config[key] = value.strip()
+        rentity_id = self.config.get("rentity_id", "")
+        if not re.fullmatch(r"[0-9]+", rentity_id) or not int(rentity_id):
+            raise ValueError("Configuration error: rentity_id must be a positive integer assigned by the FIU.")
+        for key in ("submission_code", "report_code"):
+            if key in self.config and not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_-]*", self.config[key]):
+                raise ValueError(f"Configuration error: {key} must contain a code, without its description.")
+        if "currency_code_local" in self.config:
+            self.config["currency_code_local"] = self.currency_code(self.config["currency_code_local"])
+        if "submission_date" in self.config:
+            value = self.config["submission_date"]
+            if not re.fullmatch(
+                r"[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\.[0-9]{1,6})?(Z|[+-][0-9]{2}:[0-5][0-9])?",
+                value,
+            ):
+                raise ValueError("Configuration error: submission_date must be an ISO 8601 date-time.")
+            try:
+                date = datetime.fromisoformat(value.replace("Z", "+00:00"))
+                if date.utcoffset() is not None and abs(date.utcoffset()) > timedelta(hours=14):
+                    raise ValueError
+            except ValueError:
+                raise ValueError("Configuration error: submission_date must be a valid ISO 8601 date-time.") from None
+            self.config["submission_date"] = date.isoformat()
         self.parsed_uuids = defaultdict(list)
+
+    @staticmethod
+    def currency_code(value):
+        value = str(value).strip().upper()
+        if not re.fullmatch(r"[A-Z]{3}", value):
+            raise ValueError("Configuration error: currency_code_local must be a three-letter currency code.")
+        return value
 
     def from_event(self, event):
         self.misp_event = MISPEvent()
@@ -149,11 +200,13 @@ class GoAmlGeneration(object):
             obj_type = obj.name
             uuids[obj_type].append(obj.uuid)
             if obj_type == "bank-account":
-                try:
-                    report_code.append(obj.get_attributes_by_relation("report-code")[0].value.split(" ")[0])
-                    currency_code.append(obj.get_attributes_by_relation("currency-code")[0].value)
-                except IndexError:
-                    print("report_code or currency_code error")
+                for attribute in obj.get_attributes_by_relation("report-code"):
+                    parts = str(attribute.value).split()
+                    if parts:
+                        report_code.append(parts[0])
+                for attribute in obj.get_attributes_by_relation("currency-code"):
+                    if str(attribute.value).strip():
+                        currency_code.append(str(attribute.value))
         self.uuids, self.report_codes, self.currency_codes = (
             uuids,
             report_code,
@@ -161,26 +214,42 @@ class GoAmlGeneration(object):
         )
 
     def build_xml(self):
+        if "report_code" in self.config:
+            report_code = self.config["report_code"]
+        elif "STR" in self.report_codes:
+            report_code = "STR"
+        elif self.report_codes:
+            report_code = Counter(self.report_codes).most_common(1)[0][0]
+        else:
+            raise ValueError("Report metadata error: configure report_code or supply a bank-account report-code.")
+        currency = self.config.get("currency_code_local")
+        if currency is None:
+            currencies = {self.currency_code(value) for value in self.currency_codes}
+            if len(currencies) != 1:
+                raise ValueError(
+                    "Report metadata error: configure currency_code_local; account currencies are missing or ambiguous."
+                )
+            currency = currencies.pop()
+        header = (
+            ("rentity_id", self.config["rentity_id"]),
+            ("submission_code", self.config.get("submission_code", "E")),
+            ("report_code", report_code),
+            (
+                "submission_date",
+                self.config.get("submission_date") or datetime.now(timezone.utc).isoformat(timespec="seconds"),
+            ),
+            ("currency_code_local", currency),
+        )
         self.xml = {
-            "header": "<report><rentity_id>{}</rentity_id><submission_code>E</submission_code>".format(self.config),
+            "header": "<report>" + "".join(f"<{key}>{escape(value)}</{key}>" for key, value in header),
             "data": "",
         }
-        if "STR" in self.report_codes:
-            report_code = "STR"
-        else:
-            report_code = Counter(self.report_codes).most_common(1)[0][0]
-        self.xml["header"] += "<report_code>{}</report_code>".format(report_code)
-        submission_date = str(self.misp_event.timestamp).replace(" ", "T")
-        self.xml["header"] += "<submission_date>{}</submission_date>".format(submission_date)
-        self.xml["header"] += "<currency_code_local>{}</currency_code_local>".format(
-            Counter(self.currency_codes).most_common(1)[0][0]
-        )
         for trans_uuid in self.uuids.get("transaction"):
             self.itterate("transaction", "transaction", trans_uuid, "data")
         person_to_parse = [
             person_uuid
-            for person_uuid in self.uuids.get("person")
-            if person_uuid not in self.parsed_uuids.get("person")
+            for person_uuid in self.uuids.get("person", [])
+            if person_uuid not in self.parsed_uuids.get("person", [])
         ]
         if len(person_to_parse) == 1:
             self.itterate("person", "reporting_person", person_to_parse[0], "header")
@@ -309,11 +378,10 @@ def handler(q=False):
     request = json.loads(q)
     if "data" not in request:
         return False
-    if not request.get("config") and not request["config"].get("rentity_id"):
-        misperrors["error"] = "Configuration error."
-        return misperrors
-    config = request["config"].get("rentity_id")
-    export_doc = GoAmlGeneration(config)
+    try:
+        export_doc = GoAmlGeneration(request.get("config"))
+    except ValueError as error:
+        return {"error": str(error)}
     export_doc.from_event(request["data"][0])
     if not export_doc.misp_event.Object:
         misperrors["error"] = "There is no object in this event."
@@ -325,7 +393,10 @@ def handler(q=False):
         misperrors["error"] = "There is no transaction object in this event."
         return misperrors
     export_doc.parse_objects()
-    export_doc.build_xml()
+    try:
+        export_doc.build_xml()
+    except ValueError as error:
+        return {"error": str(error)}
     exp_doc = "{}{}".format(export_doc.xml.get("header"), export_doc.xml.get("data"))
     return {
         "response": [],

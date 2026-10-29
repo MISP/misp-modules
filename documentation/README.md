@@ -3936,9 +3936,15 @@ This module is used to export MISP events containing transaction objects into Go
 >	- 'entity': Entity owning the bank account - optional.
 >- person:
 >	- 'address': Address of a person - optional.
+>
+>Report metadata is configured with rentity_id (required FIU-assigned reporting entity ID), submission_code (default E), submission_date (default current UTC time), report_code, and currency_code_local. An explicit report_code overrides bank-account report-code attributes; otherwise STR takes precedence, then the most frequent code (first encountered on a tie). Configure currency_code_local explicitly; the legacy fallback requires exactly one distinct account currency. Transaction amounts must already be in the report's local currency; no conversion is performed. See documentation/export_mod/goamlexport.md for configuration examples and migration notes.
 
 - **config**:
->rentity_id
+> - rentity_id
+> - submission_code
+> - submission_date
+> - currency_code_local
+> - report_code
 
 - **input**:
 >MISP objects (transaction, bank-account, person, legal-entity, geolocation), with references, describing financial transactions and their origin and target.
