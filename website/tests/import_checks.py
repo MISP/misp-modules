@@ -38,7 +38,10 @@ class ImportTests(unittest.TestCase):
 
     def post(self, **data):
         return self.client.post(
-            "/run_import", data=data, headers={"X-CSRFToken": self.token}
+            "/run_import",
+            data=data,
+            content_type="multipart/form-data",
+            headers={"X-CSRFToken": self.token},
         )
 
     def finish(self, response):
@@ -217,6 +220,40 @@ class ImportTests(unittest.TestCase):
             self.assertEqual(
                 self.post(
                     module="url_import", source="paste", data="x" * (1024 * 1024 + 11)
+                ).status_code,
+                413,
+            )
+
+    def test_large_paste_is_parsed_before_csrf_validation(self):
+        # Exercise multipart form parsing above Werkzeug's default 500 kB
+        # field limit, including Flask 3.0's read-only request properties.
+        data = "https://example.org/\n" * 30000
+        with patch(
+            "app.session_class.query_post_query", return_value={"results": []}
+        ) as query:
+            self.finish(self.post(module="url_import", source="paste", data=data))
+        self.assertEqual(
+            base64.b64decode(query.call_args.args[0]["data"]).decode(), data
+        )
+
+    def test_oversized_body_is_rejected_before_csrf_parses_it(self):
+        with patch("app.import_core.MAX_IMPORT_SIZE", 10):
+            response = self.client.post(
+                "/run_import",
+                data={
+                    "module": "url_import",
+                    "source": "paste",
+                    "data": "x" * (1024 * 1024 + 11),
+                },
+            )
+        self.assertEqual(response.status_code, 413)
+        self.assertIn("20 MiB", response.get_json()["message"])
+
+    def test_configured_body_limit_still_applies(self):
+        with patch.dict(self.app.config, {"MAX_CONTENT_LENGTH": 128}):
+            self.assertEqual(
+                self.post(
+                    module="url_import", source="paste", data="x" * 1024
                 ).status_code,
                 413,
             )

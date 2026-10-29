@@ -15,6 +15,23 @@ permissions:
   contents: read
 
 jobs:
+  imports-compatibility:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.10'
+      - name: Install Flask 3.0 test dependencies
+        run: >-
+          python -m pip install
+          Flask==3.0.3 Werkzeug==3.0.6
+          flask-sqlalchemy flask-session flask-wtf flask-migrate flask-login
+          requests python-dotenv
+      - name: Check imports on Flask 3.0
+        run: python -m unittest discover -s website/tests -p 'import_checks.py' -v
+
   interface:
     runs-on: ubuntu-24.04
     timeout-minutes: 15
