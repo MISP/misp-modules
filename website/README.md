@@ -27,6 +27,31 @@ imported attribute to start an enrichment. To repeat an import, choose **New
 import** and provide the input again; the website does not retain uploaded input
 for replay. Import results may themselves contain attachments supplied by a module.
 
+## Export modules
+
+Choose **Export data** in the sidebar, select an active export module, and upload
+a MISP JSON file (up to 20 MiB) or choose an event from the **CIRCL OSINT** feed.
+The feed picker searches event titles and UUIDs and paginates the feed manifest.
+Feed access happens on the website server and requires outbound HTTPS access to
+`www.circl.lu`. Feed failures can be retried without losing module options.
+
+Standard `Event` JSON, bare events, lists, and `response` event collections are
+accepted. Modules advertising single-event input reject collections. Module
+options and saved settings work like imports, including per-run overrides.
+
+Exports open in the results view and session history. Text files have an escaped
+preview; binary files have a download action. **Download** retrieves the original
+decoded output with the module's file extension; **Download JSON** retrieves the
+response envelope. Long previews are shortened without changing the download.
+Use **New export** to run another module or provide another event. Uploaded input
+is not saved for replay. Some export modules contact external services according
+to their description and configuration.
+
+Supported feed endpoints are explicitly registered in `app/export_core.py`.
+To add another public MISP JSON feed, add its HTTPS base URL to `FEEDS`; it must
+provide `manifest.json` and UUID-named event JSON files. Responses are bounded,
+manifests are cached for five minutes, and redirects are rejected.
+
 ## Installation
 
 The MISP Modules website uses [Poetry](https://python-poetry.org/) for dependency management. It is recommended to install dependencies in a virtual environment managed by Poetry.

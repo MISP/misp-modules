@@ -13,7 +13,9 @@ from tempfile import TemporaryDirectory
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-MODULES = [
+EXPORT_MODULE = {"name": "file_export", "mispattributes": {"inputSource": ["event", "event-collection"], "outputFileExtension": "txt", "responseType": "text/plain", "userConfig": {"include_context": {"type": "Boolean", "checked": "True", "message": "Include context"}}}, "meta": {"description": "Export MISP events to a file.", "config": ["prefix"], "module-type": ["export"]}}
+
+MODULES = [EXPORT_MODULE,
     {"name": "dns", "mispattributes": {"input": ["domain", "hostname"]}, "meta": {"description": "Resolve domains and hostnames into IP addresses.", "config": [], "module-type": ["expansion"]}},
     {"name": "whois", "mispattributes": {"input": ["domain", "ip-dst"]}, "meta": {"description": "Look up registration details and ownership information.", "config": ["server"], "module-type": ["expansion"]}},
     {"name": "virustotal", "mispattributes": {"input": ["domain", "ip-dst", "sha256", "url"]}, "meta": {"description": "Investigate reputation, detections, and related indicators.", "config": ["apikey"], "module-type": ["expansion"]}},
@@ -66,6 +68,15 @@ def create_fixture_app(database_path):
             modules_list=json.dumps(["dns"]), input_query="domain", nb_errors=0,
             query_date=datetime(2026, 10, 27, 12), config_module="{}",
             result=json.dumps({"example.org": {"dns": {"results": [{"types": ["ip-dst"], "values": ["192.0.2.1"]}]}}}),
+        ))
+        import base64
+        from app.export_core import prepare_export_result
+        export_result = prepare_export_result({"data": base64.b64encode(b"Exported <script>alert(1)</script> caf\xc3\xa9\n").decode()}, EXPORT_MODULE["mispattributes"], "event.json")
+        db.session.add(Session_db(
+            uuid="export-query", query_enter=json.dumps(["event.json"]),
+            modules_list=json.dumps(["file_export"]), input_query="export", nb_errors=0,
+            query_date=datetime(2026, 10, 27, 12), config_module="{}",
+            result=json.dumps({"event.json": {"file_export": export_result}}),
         ))
         db.session.add(Session_db(
             uuid="import-query", query_enter=json.dumps(["urls.txt"]),
