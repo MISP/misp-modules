@@ -1,3 +1,4 @@
+import idna
 import ipaddress
 import json
 import re
@@ -43,7 +44,7 @@ def _normalise(kind, value):
     if kind in ("ip-src", "ip-dst"):
         return str(ipaddress.ip_address(value))
     if kind in ("domain", "hostname"):
-        value = value.rstrip(".").encode("idna").decode("ascii").lower()
+        value = idna.encode(value.rstrip("."), uts46=True, transitional=False).decode("ascii").lower()
         if len(value) > 253 or not all(
             re.fullmatch("[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?", p) for p in value.split(".")
         ):
@@ -199,7 +200,17 @@ def _expand(event, attribute, value, config, limit):
         obj.add_attribute("text", value=json.dumps({"fuzzer": row.get("fuzzer"), "dns_checked": resolve}), to_ids=False)
         for key in ("dns_a", "dns_aaaa"):
             for address in row.get(key, [])[:limit]:
-                obj.add_attribute("ip", value=str(ipaddress.ip_address(address)), to_ids=False)
+                try:
+                    parsed_address = str(ipaddress.ip_address(address))
+                except ValueError:
+                    _annotation(
+                        event,
+                        attribute,
+                        "DNSTwist DNS lookup failure",
+                        {"domain": candidate, "record": key, "status": str(address)},
+                    )
+                    continue
+                obj.add_attribute("ip", value=parsed_address, to_ids=False)
         for key in ("dns_ns", "dns_mx"):
             if row.get(key):
                 _annotation(event, attribute, "DNSTwist DNS observation", {"domain": candidate, key: row[key]})

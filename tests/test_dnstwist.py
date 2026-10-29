@@ -105,3 +105,20 @@ def test_timeout_becomes_an_actionable_error():
 
     with patch("subprocess.run", side_effect=subprocess.TimeoutExpired("dnstwist", 30)):
         assert "timeout" in module.handler(query())["error"]
+
+
+def test_idna2008_domain_identity():
+    assert module._normalise("domain", "faß.de") == "xn--fa-hia.de"
+
+
+def test_dns_failure_sentinels_preserve_other_results():
+    import subprocess
+
+    def run(command, **kwargs):
+        kwargs["stdout"].write(json.dumps([{"domain": "a.example", "dns_a": ["!ServFail", "192.0.2.1"]}]).encode())
+        return subprocess.CompletedProcess(command, 0)
+
+    with patch("subprocess.run", side_effect=run):
+        result = module.handler(query(config={"resolve": True}))
+    assert_source(result)
+    assert values(objects(result, "domain-ip")[0], "ip") == ["192.0.2.1"]
