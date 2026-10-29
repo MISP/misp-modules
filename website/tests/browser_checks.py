@@ -64,6 +64,96 @@ class InterfaceTests(unittest.TestCase):
     def select_module(self, name):
         self.page.locator(".module-card").filter(has=self.page.locator(".module-name", has_text=name)).get_by_role("checkbox").check()
 
+    def test_export_upload_preview_and_download(self):
+        self.home()
+        self.page.get_by_role("link", name="Export data", exact=True).click()
+        self.page.get_by_label("Export module", exact=True).select_option("file_export")
+        expect(self.page.get_by_label("include_context", exact=True)).to_be_checked()
+        self.page.get_by_role("button", name="Run export", exact=True).click()
+        expect(self.page.get_by_role("alert")).to_contain_text("Choose a MISP JSON file")
+        self.page.get_by_label("MISP JSON file (up to 20 MiB)", exact=True).set_input_files({"name": "event.json", "mimeType": "application/json", "buffer": b'{"Event":{"info":"Example"}}'})
+        self.page.get_by_label("Input source", exact=True).select_option("feed")
+        self.page.get_by_label("Input source", exact=True).select_option("file")
+        self.page.get_by_role("button", name="Run export", exact=True).click()
+        expect(self.page.get_by_role("alert")).to_contain_text("Choose a MISP JSON file")
+        self.page.get_by_label("MISP JSON file (up to 20 MiB)", exact=True).set_input_files({"name": "event.json", "mimeType": "application/json", "buffer": b'{"Event":{"info":"Example"}}'})
+        self.page.route("**/run_export", lambda route: route.fulfill(status=201, content_type="application/json", body='{"id":"export-query"}'))
+        with self.page.expect_request("**/run_export") as submitted:
+            self.page.get_by_role("button", name="Run export", exact=True).click()
+        self.assertIn('filename="event.json"', submitted.value.post_data)
+        self.page.wait_for_url(self.base + "/query/export-query")
+        expect(self.page.locator(".eyebrow").filter(has_text="EXPORT RESULTS")).to_be_visible()
+        expect(self.page.locator("pre code")).to_contain_text("Exported <script>alert(1)</script> café")
+        expect(self.page.locator("pre script")).to_have_count(0)
+        expect(self.page.get_by_role("button", name="Run again", exact=True)).to_have_count(0)
+        with self.page.expect_download() as downloaded:
+            self.page.get_by_role("link", name="Download event.txt", exact=True).click()
+        self.assertEqual(Path(downloaded.value.path()).read_bytes(), "Exported <script>alert(1)</script> café\n".encode())
+        self.page.get_by_role("tab", name="JSON", exact=True).click()
+        expect(self.page.locator("#result-panel")).to_contain_text("data")
+        self.page.get_by_role("tab", name="Markdown", exact=True).click()
+        expect(self.page.locator("pre code")).to_contain_text("Exported")
+
+    def test_export_feed_selection_retry_and_payload(self):
+        uuid = "55b7c901-614c-44d1-a638-440e950d210b"
+        self.page.goto(self.base + "/export")
+        self.page.get_by_label("Export module", exact=True).select_option("file_export")
+        self.page.get_by_label("Input source", exact=True).select_option("feed")
+        self.page.route("**/export_feed_events?**", lambda route: route.fulfill(status=502, content_type="application/json", body='{"message":"Feed temporarily unavailable"}'))
+        self.page.get_by_label("OSINT feed", exact=True).select_option("circl")
+        expect(self.page.get_by_role("alert")).to_contain_text("Feed temporarily unavailable")
+        self.page.unroute("**/export_feed_events?**")
+        self.page.route("**/export_feed_events?**", lambda route: route.fulfill(status=200, content_type="application/json", body=json.dumps({"events": [{"uuid": uuid, "info": "OSINT sample", "date": "2026-10-29"}], "total": 1, "page": 1})))
+        self.page.get_by_role("button", name="Try again", exact=True).click()
+        self.page.get_by_label("MISP event", exact=True).select_option(uuid)
+        self.page.set_viewport_size({"width": 320, "height": 800})
+        self.assertFalse(self.page.evaluate("document.documentElement.scrollWidth > innerWidth"))
+        self.page.get_by_role("checkbox", name="Override module settings").check()
+        self.page.get_by_label("prefix", exact=True).fill("test prefix")
+        self.page.route("**/run_export", lambda route: route.fulfill(status=201, content_type="application/json", body='{"id":"export-query"}'))
+        with self.page.expect_request("**/run_export") as submitted:
+            self.page.get_by_role("button", name="Run export", exact=True).click()
+        self.assertIn(uuid, submitted.value.post_data)
+        self.assertIn('name="feed"', submitted.value.post_data)
+        self.assertIn("test prefix", submitted.value.post_data)
+        self.page.wait_for_url(self.base + "/query/export-query")
+
+    def test_export_access_requires_login_and_is_revoked_on_logout(self):
+        from app.utils import utils
+        utils.ADMIN_PASSWORD = "local-export-password"
+        try:
+            self.home()
+            self.page.get_by_role("link", name="Export data", exact=True).click()
+            self.page.wait_for_url("**/login?next=/export")
+            self.page.get_by_label("Password", exact=True).fill("local-export-password")
+            self.page.get_by_role("button", name="Log in", exact=True).click()
+            self.page.wait_for_url(self.base + "/export")
+            self.page.get_by_label("Export module", exact=True).select_option("file_export")
+            self.page.goto(self.base + "/query/export-query")
+            expect(self.page.get_by_role("link", name="Download event.txt", exact=True)).to_be_visible()
+            self.page.get_by_role("link", name="Log out", exact=True).click()
+            self.assertEqual(self.context.request.get(self.base + "/result/export-query").status, 403)
+            self.page.goto(self.base + "/query/export-query")
+            self.page.wait_for_url("**/login?next=/query/export-query")
+        finally:
+            utils.ADMIN_PASSWORD = None
+
+    def test_export_embedded_credentials_have_placeholders_instead_of_inputs(self):
+        self.page.route("**/get_export_modules", lambda route: route.fulfill(
+            status=200, content_type="application/json", body=json.dumps([{
+                "name": "cisco_firesight_manager_ACL_rule_export",
+                "meta": {"description": "FireSIGHT script export", "config": ["fmc_ip_addr", "fmc_login", "fmc_pass"]},
+                "mispattributes": {}, "credential_placeholders": ["fmc_login", "fmc_pass"],
+            }]),
+        ))
+        self.page.goto(self.base + "/export")
+        self.page.get_by_label("Export module", exact=True).select_option("cisco_firesight_manager_ACL_rule_export")
+        expect(self.page.get_by_text("The website replaces them with placeholders.", exact=False)).to_be_visible()
+        self.page.get_by_role("checkbox", name="Override module settings").check()
+        expect(self.page.get_by_label("fmc_ip_addr", exact=True)).to_be_visible()
+        expect(self.page.get_by_label("fmc_login", exact=True)).to_have_count(0)
+        expect(self.page.get_by_label("fmc_pass", exact=True)).to_have_count(0)
+
     def test_import_file_submission_and_results(self):
         self.home()
         self.page.get_by_role("link", name="Import data", exact=True).click()
@@ -182,17 +272,21 @@ class InterfaceTests(unittest.TestCase):
 
     @unittest.skipUnless(os.environ.get("AXE_SCRIPT_PATH"), "Set AXE_SCRIPT_PATH to an installed axe.min.js")
     def test_accessibility_scan(self):
-        for path in ("/", "/import", "/modules_config", "/history", "/history_session", "/history_tree", "/external_tools", "/add_external_tool", "/login", "/query/test-query", "/query/object-query", "/query/import-query"):
+        for path in ("/", "/import", "/export", "/modules_config", "/history", "/history_session", "/history_tree", "/external_tools", "/add_external_tool", "/login", "/query/test-query", "/query/object-query", "/query/import-query", "/query/export-query"):
             with self.subTest(path=path):
                 self.page.goto(self.base + path + ("?sample=saved" if path in ("/history_session", "/history_tree") else ""))
                 if path == "/":
                     self.page.get_by_role("combobox", name="MISP attribute").select_option("domain")
                     self.select_module("virustotal")
+                if path == "/export":
+                    self.page.get_by_label("Export module", exact=True).select_option("file_export")
                 if path == "/modules_config":
                     self.page.get_by_role("button", name="virustotal", exact=False).click()
                 if path == "/import":
                     self.page.get_by_label("Import module", exact=True).select_option("url_import")
-                if path.startswith("/query/"):
+                if path == "/query/export-query":
+                    expect(self.page.get_by_role("link", name="Download event.txt", exact=True)).to_be_visible()
+                elif path.startswith("/query/"):
                     expect(self.page.get_by_role("link", name="Choose modules", exact=True).first).to_be_visible()
                 self.page.add_script_tag(path=os.environ["AXE_SCRIPT_PATH"])
                 violations = self.page.evaluate("""async () => (await axe.run({runOnly: {type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21aa']}})).violations.map(v => ({id: v.id, targets: v.nodes.map(n => n.target)}))""")
@@ -599,11 +693,13 @@ class InterfaceTests(unittest.TestCase):
     def test_responsive_pages_and_mobile_navigation(self):
         for width in (320, 768, 1440):
             self.page.set_viewport_size({"width": width, "height": 1000})
-            for path in ("/", "/modules_config", "/history", "/history_session", "/history_tree", "/query/test-query", "/external_tools", "/add_external_tool", "/login", "/missing"):
+            for path in ("/", "/export", "/modules_config", "/history", "/history_session", "/history_tree", "/query/test-query", "/query/export-query", "/external_tools", "/add_external_tool", "/login", "/missing"):
                 with self.subTest(width=width, path=path):
                     response = self.page.goto(self.base + path)
                     self.assertLess(response.status, 500)
                     expect(self.page.locator("h1").first).to_be_visible()
+                    if path == "/export":
+                        self.page.get_by_label("Export module", exact=True).select_option("file_export")
                     self.assertFalse(self.page.evaluate("document.documentElement.scrollWidth > innerWidth"), f"Overflow at {width}px on {path}")
             self.page.goto(self.base + "/")
             self.page.get_by_role("combobox", name="MISP attribute").select_option("domain")

@@ -18,7 +18,8 @@ sessions = list()
 
 class Session_class:
     def __init__(
-        self, request_json, query_as_same=False, parent_id=None, import_payload=None
+        self, request_json, query_as_same=False, parent_id=None, import_payload=None,
+        export_payload=None, export_metadata=None,
     ) -> None:
         self.uuid = str(uuid4())
         self.thread_count = 4
@@ -31,11 +32,19 @@ class Session_class:
         self.input_query = request_json["input"]
         self.modules_list = request_json["modules"]
         self.import_payload = import_payload
+        self.export_payload = export_payload
+        self.export_metadata = export_metadata
         self.nb_errors = 0
         self.config_module = self.config_module_setter(
             request_json, query_as_same, parent_id
         )
         self.query_date = datetime.datetime.now(tz=datetime.timezone.utc)
+
+    @property
+    def history_config(self):
+        # Exports cannot be replayed. Keep their execution settings (which may
+        # contain API credentials) out of browser sessions and saved history.
+        return {} if self.input_query == "export" else self.config_module
 
     def util_config_as_same(self, child, parent_id):
         if child["uuid"] == parent_id:
@@ -110,6 +119,7 @@ class Session_class:
 
         self.threads.clear()
         self.import_payload = None
+        self.export_payload = None
         self.stopped = True
         if self in sessions:
             sessions.remove(self)
@@ -123,7 +133,7 @@ class Session_class:
             except Empty:
                 break
 
-            modules = query_get_module()
+            modules = [] if self.export_payload is not None else query_get_module()
             loc_query = {}
             self.result.setdefault(work[1], {})
             # If Misp format
@@ -141,7 +151,9 @@ class Session_class:
             if work[2] in self.config_module:
                 loc_config = self.config_module[work[2]]
 
-            if self.import_payload is not None:
+            if self.export_payload is not None:
+                send_to = {"module": work[2], "config": loc_config, **self.export_payload}
+            elif self.import_payload is not None:
                 send_to = {
                     "module": work[2],
                     "config": loc_config,
@@ -161,14 +173,19 @@ class Session_class:
                 }
             try:
                 res = query_post_query(send_to)
+                if (self.export_payload is not None and isinstance(res, dict)
+                        and "error" not in res and "message" not in res):
+                    from .export_core import prepare_export_result
+
+                    res = prepare_export_result(res, self.export_metadata, work[1])
             except Exception as error:
                 res = {"error": str(error)}
-            if not isinstance(res, dict) or not ({"results", "error"} & res.keys()):
+            if not isinstance(res, dict) or not ({"results", "error", "export"} & res.keys()):
                 message = res.get("message") if isinstance(res, dict) else None
                 res = {"error": message or "The module returned no usable result."}
 
             # Sort attr in object by ui-priority
-            if res:
+            if res and self.export_payload is None:
                 if "results" in res:
                     if "Object" in res["results"]:
                         for obj in res["results"]["Object"]:
@@ -201,7 +218,7 @@ class Session_class:
             modules_list=json.dumps(self.modules_list),
             query_enter=json.dumps(self.query),
             input_query=self.input_query,
-            config_module=json.dumps(self.config_module),
+            config_module=json.dumps(self.history_config),
             result=json.dumps(self.result),
             nb_errors=self.nb_errors,
             query_date=self.query_date,

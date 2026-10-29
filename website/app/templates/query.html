@@ -2,17 +2,19 @@
     Author: David Cruciani
 -->
 {% extends "base.html" %}
-{% block title %}{{ 'Import' if input_query == 'import' else 'Enrichment' }} results · MISP Modules{% endblock %}
+{% block title %}{{ 'Export' if input_query == 'export' else 'Import' if input_query == 'import' else 'Enrichment' }} results · MISP Modules{% endblock %}
 {% block content %}
     <input type="hidden" id="share" value="{{ sid }}">
     <div id="top" class="page-heading results-heading">
         <div>
-            <p class="eyebrow">{{ 'IMPORT' if input_query == 'import' else 'ENRICHMENT' }} RESULTS</p>
+            <p class="eyebrow">{{ 'EXPORT' if input_query == 'export' else 'IMPORT' if input_query == 'import' else 'ENRICHMENT' }} RESULTS</p>
             <h1 title="{{ ', '.join(query) }}">{{ query_str }}</h1>
             <p class="page-description">Explore the results, download data, or continue your investigation.</p>
         </div>
         <div class="results-actions">
-            {% if input_query == 'import' %}
+            {% if input_query == 'export' %}
+            <a class="btn btn-outline-secondary" href="/export">New export</a>
+            {% elif input_query == 'import' %}
             <a class="btn btn-outline-secondary" href="/import">New import</a>
             <a class="btn btn-outline-secondary" href="/">New enrichment</a>
             {% else %}
@@ -40,7 +42,7 @@
     </div>
     <dl class="workspace-card result-metadata">
         <div>
-            <dt>{{ 'Input source' if input_query == 'import' else 'Input attribute' }}</dt>
+            <dt>{{ 'Input source' if input_query in ('import', 'export') else 'Input attribute' }}</dt>
             <dd>
                 {{ input_query }}
             </dd>
@@ -230,9 +232,24 @@
                                         <div class="btn-group m-2" role="group" aria-label="Download result">
                                             <a class="btn btn-outline-primary btn-sm"
                                                :href="`/download/${encodeURIComponent(sid)}?query=${encodeURIComponent(key_query)}&module=${encodeURIComponent(key)}`">Download JSON</a>
-                                            <a class="btn btn-outline-primary btn-sm"
-                                               :href="`/download/${encodeURIComponent(sid)}?query=${encodeURIComponent(key_query)}&module=${encodeURIComponent(key)}&format=csv`">Download CSV</a>
+                                            {% if input_query == 'export' %}
+                                            <a v-if="result.export" class="btn btn-primary btn-sm" :href="`/download/${encodeURIComponent(sid)}?query=${encodeURIComponent(key_query)}&module=${encodeURIComponent(key)}&format=export`">Download [[result.export.filename]]</a>
+                                            {% else %}
+                                            <a class="btn btn-outline-primary btn-sm" :href="`/download/${encodeURIComponent(sid)}?query=${encodeURIComponent(key_query)}&module=${encodeURIComponent(key)}&format=csv`">Download CSV</a>
+                                            {% endif %}
                                         </div>
+                                        {% if input_query == 'export' %}
+                                        <div class="accordion-body" v-if="tab_list !== 'json' && result.export">
+                                            <p>[[result.export.size]] bytes</p>
+                                            <ul v-if="result.warnings?.length"><li v-for="warning in result.warnings">[[warning]]</li></ul>
+                                            <template v-if="result.export.preview !== null">
+                                                <p v-if="result.export.truncated" role="status">Preview shortened. Download the file for the complete output.</p>
+                                                <pre style="white-space: pre-wrap; overflow-wrap: anywhere;"><code>[[result.export.preview]]</code></pre>
+                                                <p v-if="!result.export.size" role="status">The export module produced an empty file.</p>
+                                            </template>
+                                            <p v-else role="status">This is a binary file. Download it to view the result.</p>
+                                        </div>
+                                        {% else %}
                                         <!-- visual part -->
                                         <template v-if="tab_list == 'visual'">
                                             <div class="accordion-body enrichment-visual">
@@ -256,11 +273,13 @@
                                                 </template>
                                             </div>
                                         </template>
+                                        {% endif %}
                                         <!-- json part -->
                                         <template v-if="tab_list == 'json'">
                                             <div class="accordion-body"
                                                  v-html="generateCoreFormatUI(result)[0].outerHTML"></div>
                                         </template>
+                                        {% if input_query != 'export' %}
                                         <!-- markdown part -->
                                         <template v-if="tab_list == 'markdown'">
                                             <div class="accordion-body">
@@ -290,6 +309,7 @@ Value: [[misp_attr]]
                                                 </template>
                                             </div>
                                         </template>
+                                        {% endif %}
                                     </div>
                                 </template> <!-- Not error -->
                             </div>

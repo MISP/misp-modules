@@ -1,23 +1,47 @@
 import json
 from io import BytesIO
 
-from flask import Blueprint, jsonify, render_template, request, send_file
+from flask import Blueprint, jsonify, redirect, render_template, request, send_file, url_for
 from flask import session as sess
 from flask_login import current_user
 from werkzeug.exceptions import RequestEntityTooLarge
 from werkzeug.utils import secure_filename
 
-from app.utils import admin_user_active
+from app.utils import admin_user_active, query_get_module
 
 from . import home_core as HomeModel
 from . import session_class as SessionModel
 from .csv_export import export_result
 from .external_tools import external_tools_core as ToolModel
 from .import_core import build_import_request
+from .export_core import FEEDS, OUTPUT_CREDENTIAL_PLACEHOLDERS, FeedError, build_export_request, decode_export, list_feed_events
 
 home_blueprint = Blueprint(
     "home", __name__, template_folder="templates", static_folder="static"
 )
+
+
+@home_blueprint.before_request
+def authorize_export_access():
+    """Apply the site's admin policy to execution and every export result format."""
+    if not admin_user_active() or current_user.is_authenticated:
+        return None
+    protected = request.endpoint in {
+        "home.export_data", "home.get_export_modules", "home.export_feeds",
+        "home.export_feed_events", "home.run_export",
+    }
+    if request.endpoint in {
+        "home.query", "home.get_query_info", "home.status", "home.result", "home.download",
+    }:
+        sid = request.view_args["sid"]
+        query_session = HomeModel.get_session(sid)
+        if query_session is None:
+            query_session = next((s for s in SessionModel.sessions if s.uuid == sid), None)
+        protected = query_session is not None and query_session.input_query == "export"
+    if protected:
+        if request.endpoint in {"home.export_data", "home.query"}:
+            return redirect(url_for("account.login", next=request.path))
+        return {"message": "Admin login is required to access exports."}, 403
 
 
 @home_blueprint.route("/", methods=["GET", "POST"])
@@ -152,7 +176,59 @@ def run_import():
 
 @home_blueprint.errorhandler(RequestEntityTooLarge)
 def import_too_large(error):
+    if request.endpoint == "home.run_export":
+        return {"message": "MISP JSON must be at most 20 MiB."}, 413
     return {"message": "Import data must be at most 20 MiB."}, 413
+
+
+@home_blueprint.route("/export")
+def export_data():
+    sess["admin_user"] = bool(admin_user_active())
+    return render_template("export.html")
+
+
+@home_blueprint.route("/get_export_modules")
+def get_export_modules():
+    res = HomeModel.get_modules(("export",))
+    if isinstance(res, list):
+        res = [{**module, "credential_placeholders": list(OUTPUT_CREDENTIAL_PLACEHOLDERS.get(module["name"], {}))}
+               for module in res]
+    return res, 404 if "message" in res else 200
+
+
+@home_blueprint.route("/export_feeds")
+def export_feeds():
+    return [{"id": key, **value} for key, value in FEEDS.items()]
+
+
+@home_blueprint.route("/export_feed_events")
+def export_feed_events():
+    try:
+        page = int(request.args.get("page", "1"))
+        if page < 1:
+            raise ValueError("Page must be a positive integer.")
+        return list_feed_events(request.args.get("feed", ""), request.args.get("search", "")[:200], page)
+    except FeedError as error:
+        return {"message": str(error)}, 502
+    except ValueError as error:
+        return {"message": str(error)}, 400
+
+
+@home_blueprint.route("/run_export", methods=["POST"])
+def run_export():
+    try:
+        request_json, payload, metadata = build_export_request(request.form, request.files)
+    except RequestEntityTooLarge:
+        return {"message": "MISP JSON must be at most 20 MiB."}, 413
+    except FeedError as error:
+        return {"message": str(error)}, 502
+    except ValueError as error:
+        return {"message": str(error)}, 400
+    session = SessionModel.Session_class(request_json, export_payload=payload, export_metadata=metadata)
+    HomeModel.set_flask_session(session, "")
+    SessionModel.sessions.append(session)
+    session.start()
+    return {"id": session.uuid}, 201
 
 
 @home_blueprint.route("/get_list_misp_attributes")
@@ -168,6 +244,14 @@ def get_list_misp_attributes():
 @home_blueprint.route("/run_modules", methods=["POST"])
 def run_modules():
     """Run modules"""
+    # Export requests must pass through the export authorization, input validation,
+    # and credential-placeholder policy, even when called outside the UI.
+    catalogue = query_get_module()
+    if not isinstance(catalogue, list):
+        return {"message": "Unable to load the module catalogue."}, 503
+    export_names = {m["name"] for m in catalogue if "export" in m["meta"]["module-type"]}
+    if any(name in export_names for name in request.json.get("modules", [])):
+        return {"message": "Use the export form to run export modules."}, 400
     if "query" in request.json:
         if "input" in request.json and request.json["input"]:
             if "modules" in request.json:
@@ -228,7 +312,7 @@ def download(sid):
     format_name = request.args.get("format", "json")
     if not module:
         return {"message": "Need to pass a module", "toast_class": "warning-subtle"}, 400
-    if format_name not in ("json", "csv"):
+    if format_name not in ("json", "csv", "export"):
         return {"message": "Unsupported download format", "toast_class": "warning-subtle"}, 400
     saved = HomeModel.get_session(sid)
     if saved:
@@ -241,6 +325,15 @@ def download(sid):
     if query not in results or module not in results[query]:
         return {"message": "Module not in result", "toast_class": "danger-subtle"}, 400
     result = results[query][module]
+    if format_name == "export":
+        if not isinstance(result.get("export"), dict) or "error" in result:
+            return {"message": "No generated export file is available."}, 400
+        try:
+            data = decode_export(result)
+        except ValueError as error:
+            return {"message": str(error)}, 400
+        return send_file(BytesIO(data), mimetype="application/octet-stream", as_attachment=True,
+                         download_name=secure_filename(result["export"]["filename"]) or "misp-export.bin")
     filename = secure_filename(f"{query}-{module}") or "module-result"
     if format_name == "csv":
         try:

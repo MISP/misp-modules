@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+{% block title %}Export data · MISP Modules{% endblock %}
+{% block content %}
+    <div class="page-heading">
+        <div>
+            <p class="eyebrow">EXPORT & EXPLORE</p>
+            <h1>Export MISP events.</h1>
+            <p class="page-description">Upload MISP JSON or choose an OSINT feed event, then preview and download the exported file.</p>
+        </div>
+    </div>
+    <div v-cloak>
+        <div v-if="loadError" class="alert alert-danger" role="alert">
+            [[loadError]] <button type="button" class="btn btn-sm btn-outline-danger" @click="loadModules">Try again</button>
+        </div>
+        <form class="enrichment-layout" @submit.prevent="runExport" :aria-busy="submitting">
+            <div class="query-builder">
+                <section class="workspace-card" aria-labelledby="export-module-heading">
+                    <div class="section-heading">
+                        <span class="step-number">1</span>
+                        <div><h2 id="export-module-heading">Choose an export module</h2><p>Only active export modules are listed.</p></div>
+                    </div>
+                    <label for="export-module" class="form-label">Export module</label>
+                    <select id="export-module" class="form-select" v-model="moduleName" :disabled="loading || submitting || !!loadError">
+                        <option value="">[[loading ? 'Loading export modules…' : 'Select an export module…']]</option>
+                        <option v-for="module in modules" :key="module.name" :value="module.name">[[module.name]]</option>
+                    </select>
+                    <p v-if="activeModule" class="text-muted mt-3">[[activeModule.meta.description]]</p>
+                    <p v-if="activeModule?.credential_placeholders?.length" class="alert alert-info mt-3">This exporter embeds credentials in its output. The website replaces them with placeholders. Add credentials to the downloaded script before using it.</p>
+                    <p v-else-if="!loading && !modules.length && !loadError" role="status">No active export modules were found. Check the module service and configuration.</p>
+                </section>
+                <section v-if="activeModule" class="workspace-card" aria-labelledby="export-input-heading">
+                    <div class="section-heading">
+                        <span class="step-number">2</span>
+                        <div><h2 id="export-input-heading">Provide input</h2><p>Choose a local event or browse the public feed.</p></div>
+                    </div>
+                    <label for="export-source" class="form-label">Input source</label>
+                    <select id="export-source" class="form-select mb-3" v-model="source" :disabled="submitting">
+                        <option value="file">Upload MISP JSON</option>
+                        <option value="feed">Choose an OSINT feed event</option>
+                    </select>
+                    <template v-if="source === 'file'">
+                        <label for="export-file" class="form-label">MISP JSON file (up to 20 MiB)</label>
+                        <input id="export-file" type="file" accept=".json,application/json" class="form-control" @change="file = $event.target.files[0] || null" :disabled="submitting">
+                        <p class="small text-muted mt-2">Single events and event collections are accepted where the module supports them.</p>
+                    </template>
+                    <template v-else>
+                        <label for="export-feed" class="form-label">OSINT feed</label>
+                        <select id="export-feed" class="form-select mb-3" v-model="feed" :disabled="submitting || feedLoading">
+                            <option value="">Select a feed…</option>
+                            <option v-for="item in feeds" :value="item.id" :key="item.id">[[item.name]]</option>
+                        </select>
+                        <label for="feed-search" class="form-label">Find an event by title or UUID</label>
+                        <div class="d-flex gap-2 mb-3">
+                            <input id="feed-search" type="search" class="form-control" v-model="search" @keydown.enter.prevent="loadEvents(1)" :disabled="submitting || !feed">
+                            <button type="button" class="btn btn-outline-secondary" @click="loadEvents(1)" :disabled="!feed || feedLoading || submitting">Search</button>
+                        </div>
+                        <div v-if="feedError" class="alert alert-danger" role="alert">[[feedError]] <button type="button" class="btn btn-sm btn-outline-danger" @click="loadEvents(page)">Try again</button></div>
+                        <label for="feed-event" class="form-label">MISP event</label>
+                        <select id="feed-event" class="form-select mb-3" v-model="event" :disabled="feedLoading || submitting || !events.length || !!feedError">
+                            <option value="">[[feedLoading ? 'Loading events…' : 'Select an event…']]</option>
+                            <option v-for="item in events" :value="item.uuid" :key="item.uuid">[[item.date]] · [[item.info]]</option>
+                        </select>
+                        <p v-if="selectedEvent" class="small text-muted">[[selectedEvent.uuid]]</p>
+                        <div v-if="feed && !feedError" class="d-flex gap-2 align-items-center" role="status" aria-live="polite">
+                            <button type="button" class="btn btn-sm btn-outline-secondary" @click="loadEvents(page - 1)" :disabled="feedLoading || submitting || page <= 1">Previous</button>
+                            <span>[[total]] events · Page [[page]] of [[Math.max(1, Math.ceil(total / 100))]]</span>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" @click="loadEvents(page + 1)" :disabled="feedLoading || submitting || page * 100 >= total">Next</button>
+                        </div>
+                        <p v-if="feed && !feedLoading && !events.length && !feedError" role="status">No events match your search.</p>
+                    </template>
+                    <fieldset v-if="Object.keys(userFields).length" class="query-config mt-3">
+                        <legend>Export options</legend>
+                        <div v-for="(field, key) in userFields" :key="key" class="mb-3">
+                            <template v-if="field.type === 'Boolean'">
+                                <label class="config-toggle" :for="'option-'+key">
+                                    <input :id="'option-'+key" type="checkbox" class="form-check-input" v-model="options[key]" :disabled="submitting"><span>[[key]]</span>
+                                </label>
+                            </template>
+                            <template v-else>
+                                <label :for="'option-'+key" class="form-label">[[key]][[field.required ? ' (required)' : '']]</label>
+                                <input :id="'option-'+key" class="form-control" :type="field.type === 'Integer' ? 'number' : isSecret(key) ? 'password' : 'text'" :step="field.type === 'Integer' ? '1' : undefined" v-model="options[key]" :required="!!field.required" :aria-describedby="'help-'+key" :disabled="submitting" autocomplete="off">
+                            </template>
+                            <p :id="'help-'+key" class="small text-muted mt-1">[[field.message]]</p>
+                        </div>
+                    </fieldset>
+                </section>
+                <section v-if="serverFields.length" class="workspace-card" aria-labelledby="export-config-heading">
+                    <h2 id="export-config-heading">Module configuration</h2>
+                    <p>Leave a setting empty to use its saved value.</p>
+                    <div v-for="key in serverFields" :key="key" class="mb-3">
+                        <label :for="'config-'+key" class="form-label">[[key]]</label>
+                        <input :id="'config-'+key" class="form-control" :type="isSecret(key) ? 'password' : 'text'" v-model="config[key]" :disabled="submitting" autocomplete="off">
+                    </div>
+                </section>
+            </div>
+            <aside class="query-summary">
+                <section class="workspace-card summary-card" aria-labelledby="export-summary-heading">
+                    <p class="eyebrow">READY WHEN YOU ARE</p>
+                    <h2 id="export-summary-heading">Your export</h2>
+                    <p>[[moduleName || 'Select an export module to begin.']]</p>
+                    <label v-if="activeModule && activeModule.meta.config?.length" class="config-toggle">
+                        <input type="checkbox" class="form-check-input" v-model="overrideConfig" :disabled="submitting"><span>Override module settings</span>
+                    </label>
+                    <div v-if="error" class="alert alert-danger query-error" role="alert" tabindex="-1" ref="errorBox">[[error]]</div>
+                    <button type="submit" class="btn btn-primary run-query" :disabled="loading || submitting || !activeModule || !!loadError">[[submitting ? 'Starting export…' : 'Run export']]</button>
+                    <p class="summary-hint">Preview text output and download the generated file in the results view. Exports also appear in your session history.</p>
+                </section>
+            </aside>
+        </form>
+    </div>
+    <noscript><div class="alert alert-warning">Enable JavaScript to select modules and run an export.</div></noscript>
+{% endblock %}
+{% block script %}<script type="module" src="{{ url_for('static', filename='js/export.js') }}"></script>{% endblock %}

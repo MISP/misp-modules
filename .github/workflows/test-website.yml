@@ -29,8 +29,10 @@ jobs:
           Flask==3.0.3 Werkzeug==3.0.6
           flask-sqlalchemy flask-session flask-wtf flask-migrate flask-login
           requests python-dotenv
-      - name: Check imports on Flask 3.0
-        run: python -m unittest discover -s website/tests -p 'import_checks.py' -v
+      - name: Check imports and exports on Flask 3.0
+        run: |
+          python -m unittest discover -s website/tests -p 'import_checks.py' -v
+          python -m unittest discover -s website/tests -p 'export_checks.py' -v
 
   interface:
     runs-on: ubuntu-24.04

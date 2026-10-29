@@ -187,7 +187,7 @@ def create_new_session_tree(current_session, parent_id):
         "query": current_session.query,
         "input": current_session.input_query,
         "query_date": current_session.query_date.strftime("%Y-%m-%d"),
-        "config": current_session.config_module,
+        "config": current_session.history_config,
         "children": list(),
     }
     loc_json = {
@@ -196,7 +196,7 @@ def create_new_session_tree(current_session, parent_id):
         "query": json.loads(loc_session.query_enter),
         "input": loc_session.input_query,
         "query_date": loc_session.query_date.strftime("%Y-%m-%d %H:%M"),
-        "config": json.loads(loc_session.config_module),
+        "config": {} if loc_session.input_query == "export" else json.loads(loc_session.config_module),
         "children": [loc_json_child],
     }
 
@@ -212,7 +212,7 @@ def util_set_flask_session(parent_id, loc_session, current_session):
             "query": current_session.query,
             "input": current_session.input_query,
             "query_date": current_session.query_date.strftime("%Y-%m-%d %H:%M"),
-            "config": current_session.config_module,
+            "config": current_session.history_config,
         }
         loc_session["children"].append(loc_json)
         return True
@@ -262,7 +262,7 @@ def set_flask_session(current_session, parent_id):
             "query": current_session.query,
             "input": current_session.input_query,
             "query_date": current_session.query_date.strftime("%Y-%m-%d %H:%M"),
-            "config": current_session.config_module,
+            "config": current_session.history_config,
             "children": list(),
         }
 
