@@ -24,9 +24,9 @@ def test_creation_uses_one_post_and_environment_authentication():
     ):
         result = module.handler(query(action="create_alert", entity="https://bad.example"))
     assert result["data"]["alert_id"] == "ACM-1"
-    assert request.call_count == 1
-    assert request.call_args.args[0] == "POST"
-    assert request.call_args.kwargs["json"] == {"entity": "https://bad.example"}
+    assert request.call_count == 2
+    assert request.call_args_list[0].args[0] == "POST"
+    assert request.call_args_list[0].kwargs["json"] == {"entity": "https://bad.example"}
     assert "test-secret" not in str(result)
 
 
@@ -94,3 +94,17 @@ def test_discovery():
     assert module.handler(False) is False
     assert module.introspection()["config"]["blocking"] is True
     assert module.version()["config"] == module.moduleconfig
+
+
+def test_creation_fetches_state_and_preserves_provider_link():
+    responses = [
+        reply({"id": "ACM-1"}),
+        reply({"id": "ACM-1", "queue_state": "doppel_review", "doppel_link": "https://vision.doppel.com/drp/ACM-1"}),
+    ]
+    with (
+        patch.dict("os.environ", {"DOPPEL_API_KEY": "test-secret"}),
+        patch.object(module.requests, "request", side_effect=responses),
+    ):
+        result = module.handler(query(action="create_alert", entity="https://bad.example"))
+    assert result["data"]["queue_state"] == "doppel_review"
+    assert result["data"]["link"] == "https://vision.doppel.com/drp/ACM-1"

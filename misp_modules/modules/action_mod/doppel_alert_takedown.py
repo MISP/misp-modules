@@ -103,6 +103,7 @@ def handler(q=False):
         performed = True
         if action == "create_alert":
             data = _request("POST", headers, json={"entity": entity})
+            data = _request("GET", headers, params={"id": data["id"]})
         else:
             selector = {"id": alert_id} if alert_id else {"entity": entity}
             data = _request("GET", headers, params=selector)
@@ -122,7 +123,7 @@ def handler(q=False):
                 "action": action,
                 "alert_id": data["id"],
                 "queue_state": data.get("queue_state"),
-                "link": "https://app.doppel.com/alerts/" + data["id"],
+                "link": data.get("doppel_link"),
                 "request_performed": performed,
             }
         }
