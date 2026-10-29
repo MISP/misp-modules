@@ -78,9 +78,11 @@ def _annotation(event, attribute, title, data):
 
 def _pivot(event, attribute, kind, value):
     value = _normalise(kind, value)
-    if kind == attribute["type"] and value == attribute["value"]:
+    if kind == attribute["type"] and value == _normalise(attribute["type"], attribute["value"]):
         return
-    obj = _object(event, attribute, "file" if kind in ("md5", "sha1", "sha256") else "domain-ip")
+    obj = _object(
+        event, attribute, "file" if kind in ("md5", "sha1", "sha256") else ("url" if kind == "url" else "domain-ip")
+    )
     relation = "ip" if kind in ("ip-src", "ip-dst") else kind
     obj.add_attribute(relation, value=value, to_ids=False)
 

@@ -107,3 +107,15 @@ def test_empty_search_keeps_only_source():
         result = module.handler(query(kind="text"))
     assert_source(result)
     assert not result["results"]["Object"]
+
+
+def test_pivots_normalize_source_and_use_the_url_template():
+    from pymisp import MISPEvent
+
+    event = MISPEvent()
+    attribute = {"type": "sha256", "value": "A" * 64, "uuid": UUID}
+    module._pivot(event, attribute, "sha256", "a" * 64)
+    assert not event.objects
+    module._pivot(event, attribute, "url", "https://example.com/path")
+    assert event.objects[0].name == "url"
+    assert event.objects[0].attributes[0].object_relation == "url"
