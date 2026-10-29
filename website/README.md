@@ -39,6 +39,13 @@ Standard `Event` JSON, bare events, lists, and `response` event collections are
 accepted. Modules advertising single-event input reject collections. Module
 options and saved settings work like imports, including per-run overrides.
 
+When `ADMIN_PASSWORD` is configured, log in as the administrator to run exports
+and access export results or downloads, including previously saved exports.
+Export execution settings are not retained in browser-session trees or saved
+history. The FireSIGHT script exporter always receives login/password placeholders
+instead of saved or submitted credentials; add credentials to the script after
+downloading it. Other module settings still use their configured defaults.
+
 Exports open in the results view and session history. Text files have an escaped
 preview; binary files have a download action. **Download** retrieves the original
 decoded output with the module's file extension; **Download JSON** retrieves the

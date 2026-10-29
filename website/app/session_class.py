@@ -40,6 +40,12 @@ class Session_class:
         )
         self.query_date = datetime.datetime.now(tz=datetime.timezone.utc)
 
+    @property
+    def history_config(self):
+        # Exports cannot be replayed. Keep their execution settings (which may
+        # contain API credentials) out of browser sessions and saved history.
+        return {} if self.input_query == "export" else self.config_module
+
     def util_config_as_same(self, child, parent_id):
         if child["uuid"] == parent_id:
             return child["config"]
@@ -212,7 +218,7 @@ class Session_class:
             modules_list=json.dumps(self.modules_list),
             query_enter=json.dumps(self.query),
             input_query=self.input_query,
-            config_module=json.dumps(self.config_module),
+            config_module=json.dumps(self.history_config),
             result=json.dumps(self.result),
             nb_errors=self.nb_errors,
             query_date=self.query_date,

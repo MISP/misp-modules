@@ -118,6 +118,42 @@ class InterfaceTests(unittest.TestCase):
         self.assertIn("test prefix", submitted.value.post_data)
         self.page.wait_for_url(self.base + "/query/export-query")
 
+    def test_export_access_requires_login_and_is_revoked_on_logout(self):
+        from app.utils import utils
+        utils.ADMIN_PASSWORD = "local-export-password"
+        try:
+            self.home()
+            self.page.get_by_role("link", name="Export data", exact=True).click()
+            self.page.wait_for_url("**/login?next=/export")
+            self.page.get_by_label("Password", exact=True).fill("local-export-password")
+            self.page.get_by_role("button", name="Log in", exact=True).click()
+            self.page.wait_for_url(self.base + "/export")
+            self.page.get_by_label("Export module", exact=True).select_option("file_export")
+            self.page.goto(self.base + "/query/export-query")
+            expect(self.page.get_by_role("link", name="Download event.txt", exact=True)).to_be_visible()
+            self.page.get_by_role("link", name="Log out", exact=True).click()
+            self.assertEqual(self.context.request.get(self.base + "/result/export-query").status, 403)
+            self.page.goto(self.base + "/query/export-query")
+            self.page.wait_for_url("**/login?next=/query/export-query")
+        finally:
+            utils.ADMIN_PASSWORD = None
+
+    def test_export_embedded_credentials_have_placeholders_instead_of_inputs(self):
+        self.page.route("**/get_export_modules", lambda route: route.fulfill(
+            status=200, content_type="application/json", body=json.dumps([{
+                "name": "cisco_firesight_manager_ACL_rule_export",
+                "meta": {"description": "FireSIGHT script export", "config": ["fmc_ip_addr", "fmc_login", "fmc_pass"]},
+                "mispattributes": {}, "credential_placeholders": ["fmc_login", "fmc_pass"],
+            }]),
+        ))
+        self.page.goto(self.base + "/export")
+        self.page.get_by_label("Export module", exact=True).select_option("cisco_firesight_manager_ACL_rule_export")
+        expect(self.page.get_by_text("The website replaces them with placeholders.", exact=False)).to_be_visible()
+        self.page.get_by_role("checkbox", name="Override module settings").check()
+        expect(self.page.get_by_label("fmc_ip_addr", exact=True)).to_be_visible()
+        expect(self.page.get_by_label("fmc_login", exact=True)).to_have_count(0)
+        expect(self.page.get_by_label("fmc_pass", exact=True)).to_have_count(0)
+
     def test_import_file_submission_and_results(self):
         self.home()
         self.page.get_by_role("link", name="Import data", exact=True).click()

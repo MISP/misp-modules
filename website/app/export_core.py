@@ -16,6 +16,14 @@ from .module_config import build_module_config
 MAX_EXPORT_SIZE = 20 * 1024 * 1024
 FEEDS = {"circl": {"name": "CIRCL OSINT", "url": "https://www.circl.lu/doc/misp/feed-osint/"}}
 UUID_PATTERN = re.compile(r"[0-9a-fA-F]{8}(?:-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12}")
+# This exporter writes its login/password into a downloadable shell script.
+# Nonempty placeholders also prevent the daemon from filling its own defaults.
+OUTPUT_CREDENTIAL_PLACEHOLDERS = {
+    "cisco_firesight_manager_ACL_rule_export": {
+        "fmc_login": "SET_FIRESIGHT_LOGIN",
+        "fmc_pass": "SET_FIRESIGHT_PASSWORD",
+    }
+}
 
 
 class FeedError(ValueError):
@@ -111,6 +119,10 @@ def build_export_request(form, files):
     if not module:
         raise ValueError("Select an active export module.")
     config = build_module_config(module, form.get("config", "{}"))
+    placeholders = OUTPUT_CREDENTIAL_PLACEHOLDERS.get(module["name"], {})
+    if config.keys() & placeholders.keys():
+        raise ValueError("Add FireSIGHT credentials to the downloaded script. The website uses placeholders.")
+    config.update(placeholders)
     if form.get("source") == "file":
         upload = files.get("file")
         if not upload or not upload.filename:

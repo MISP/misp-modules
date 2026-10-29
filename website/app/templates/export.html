@@ -25,6 +25,7 @@
                         <option v-for="module in modules" :key="module.name" :value="module.name">[[module.name]]</option>
                     </select>
                     <p v-if="activeModule" class="text-muted mt-3">[[activeModule.meta.description]]</p>
+                    <p v-if="activeModule?.credential_placeholders?.length" class="alert alert-info mt-3">This exporter embeds credentials in its output. The website replaces them with placeholders. Add credentials to the downloaded script before using it.</p>
                     <p v-else-if="!loading && !modules.length && !loadError" role="status">No active export modules were found. Check the module service and configuration.</p>
                 </section>
                 <section v-if="activeModule" class="workspace-card" aria-labelledby="export-input-heading">

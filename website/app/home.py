@@ -1,24 +1,47 @@
 import json
 from io import BytesIO
 
-from flask import Blueprint, jsonify, render_template, request, send_file
+from flask import Blueprint, jsonify, redirect, render_template, request, send_file, url_for
 from flask import session as sess
 from flask_login import current_user
 from werkzeug.exceptions import RequestEntityTooLarge
 from werkzeug.utils import secure_filename
 
-from app.utils import admin_user_active
+from app.utils import admin_user_active, query_get_module
 
 from . import home_core as HomeModel
 from . import session_class as SessionModel
 from .csv_export import export_result
 from .external_tools import external_tools_core as ToolModel
 from .import_core import build_import_request
-from .export_core import FEEDS, FeedError, build_export_request, decode_export, list_feed_events
+from .export_core import FEEDS, OUTPUT_CREDENTIAL_PLACEHOLDERS, FeedError, build_export_request, decode_export, list_feed_events
 
 home_blueprint = Blueprint(
     "home", __name__, template_folder="templates", static_folder="static"
 )
+
+
+@home_blueprint.before_request
+def authorize_export_access():
+    """Apply the site's admin policy to execution and every export result format."""
+    if not admin_user_active() or current_user.is_authenticated:
+        return None
+    protected = request.endpoint in {
+        "home.export_data", "home.get_export_modules", "home.export_feeds",
+        "home.export_feed_events", "home.run_export",
+    }
+    if request.endpoint in {
+        "home.query", "home.get_query_info", "home.status", "home.result", "home.download",
+    }:
+        sid = request.view_args["sid"]
+        query_session = HomeModel.get_session(sid)
+        if query_session is None:
+            query_session = next((s for s in SessionModel.sessions if s.uuid == sid), None)
+        protected = query_session is not None and query_session.input_query == "export"
+    if protected:
+        if request.endpoint in {"home.export_data", "home.query"}:
+            return redirect(url_for("account.login", next=request.path))
+        return {"message": "Admin login is required to access exports."}, 403
 
 
 @home_blueprint.route("/", methods=["GET", "POST"])
@@ -167,6 +190,9 @@ def export_data():
 @home_blueprint.route("/get_export_modules")
 def get_export_modules():
     res = HomeModel.get_modules(("export",))
+    if isinstance(res, list):
+        res = [{**module, "credential_placeholders": list(OUTPUT_CREDENTIAL_PLACEHOLDERS.get(module["name"], {}))}
+               for module in res]
     return res, 404 if "message" in res else 200
 
 
@@ -218,6 +244,14 @@ def get_list_misp_attributes():
 @home_blueprint.route("/run_modules", methods=["POST"])
 def run_modules():
     """Run modules"""
+    # Export requests must pass through the export authorization, input validation,
+    # and credential-placeholder policy, even when called outside the UI.
+    catalogue = query_get_module()
+    if not isinstance(catalogue, list):
+        return {"message": "Unable to load the module catalogue."}, 503
+    export_names = {m["name"] for m in catalogue if "export" in m["meta"]["module-type"]}
+    if any(name in export_names for name in request.json.get("modules", [])):
+        return {"message": "Use the export form to run export modules."}, 400
     if "query" in request.json:
         if "input" in request.json and request.json["input"]:
             if "modules" in request.json:

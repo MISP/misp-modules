@@ -75,7 +75,7 @@ class ExportTests(unittest.TestCase):
                 from app.models import Session_db
                 with self.app.app_context():
                     saved = Session_db.query.filter_by(uuid=sid).one()
-                    self.assertNotIn("data", json.loads(saved.config_module)["file_export"])
+                    self.assertEqual(json.loads(saved.config_module), {})
                     self.assertNotIn("example.org", saved.query_enter)
 
     def test_real_legacy_and_modern_exporters_accept_normalized_events(self):
@@ -193,6 +193,117 @@ class ExportTests(unittest.TestCase):
         with patch("app.export_core.requests.get", return_value=response):
             with self.assertRaises(FeedError):
                 read_feed_json("circl", "manifest.json")
+
+    def login(self):
+        response = self.client.post("/login", data={"password": "export-test-admin"},
+                                    headers={"X-CSRFToken": self.token})
+        self.assertEqual(response.status_code, 302)
+
+    def test_export_authorization_covers_execution_live_and_saved_results(self):
+        from app.utils import utils
+        with patch.object(utils, "ADMIN_PASSWORD", "export-test-admin"):
+            # Anonymous users can still obtain CSRF tokens; tokens do not grant access.
+            self.assertEqual(self.client.get("/export").status_code, 302)
+            with patch("app.session_class.Session_class.start") as start:
+                self.assertEqual(self.post().status_code, 403)
+                self.assertEqual(self.post(source="feed", feed="circl", event=UUID).status_code, 403)
+                start.assert_not_called()
+            for path in ("/get_export_modules", "/export_feeds", "/export_feed_events?feed=circl",
+                         "/get_query_info/export-query", "/status/export-query", "/result/export-query",
+                         "/download/export-query?module=file_export&query=event.json&format=export",
+                         "/download/export-query?module=file_export&query=event.json",
+                         "/download/export-query?module=file_export&query=event.json&format=csv"):
+                with self.subTest(path=path):
+                    self.assertEqual(self.client.get(path).status_code, 403)
+            self.assertEqual(self.client.get("/query/export-query").status_code, 302)
+            self.assertEqual(self.client.get("/result/test-query").status_code, 200)
+            self.login()
+            try:
+                self.assertEqual(self.client.get("/export").status_code, 200)
+                self.assertEqual(self.client.get("/get_export_modules").status_code, 200)
+                with patch("app.session_class.query_post_query", return_value={"data": ""}):
+                    response = self.post()
+                    sid = response.json["id"]
+                    # Before status finalizes persistence, access must also protect live results.
+                    guest = self.app.test_client()
+                    for path in ("/status/", "/result/", "/get_query_info/"):
+                        self.assertEqual(guest.get(path + sid).status_code, 403)
+                    self.finish(response)
+                self.assertEqual(self.client.get("/result/" + sid).status_code, 200)
+                self.client.get("/logout")
+                self.assertEqual(self.client.get("/result/" + sid).status_code, 403)
+                self.assertEqual(self.client.get(f"/download/{sid}?module=file_export&query=event.json&format=export").status_code, 403)
+            finally:
+                self.client.get("/logout")
+
+    def test_firesight_uses_placeholders_instead_of_saved_credentials(self):
+        from app import db
+        from app.home_core import get_module_by_name, get_module_config_module, get_config
+        from app.models import Session_db
+        from app.utils import utils
+        from app.utils.init_modules import create_modules_db
+        from preview_server import MODULES
+
+        name = "cisco_firesight_manager_ACL_rule_export"
+        path = Path(__file__).resolve().parents[2] / f"misp_modules/modules/export_mod/{name}.py"
+        spec = importlib.util.spec_from_file_location(name, path)
+        exporter = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(exporter)
+        module = {"name": name, "meta": exporter.version(), "mispattributes": exporter.introspection()}
+        saved_credentials = {"fmc_login": "shared-fmc-admin", "fmc_pass": "shared-fmc-password"}
+        with patch.object(utils, "MODULES", [*MODULES, module]), patch.object(utils, "ADMIN_PASSWORD", "export-test-admin"):
+            with self.app.app_context():
+                create_modules_db()
+                for setting in get_module_config_module(get_module_by_name(name).id):
+                    setting.value = saved_credentials.get(get_config(setting.config_id).name, "fixture-setting")
+                db.session.commit()
+            self.assertEqual(self.post(module=name).status_code, 403)
+            self.login()
+            try:
+                catalogue = self.client.get("/get_export_modules").json
+                advertised = next(m for m in catalogue if m["name"] == name)
+                self.assertEqual(set(advertised["credential_placeholders"]), set(saved_credentials))
+                event = {"Event": {"id": "123", "info": "Fixture", "Attribute": []}}
+                with patch("app.session_class.query_post_query", side_effect=lambda payload: exporter.handler(json.dumps(payload))) as query:
+                    sid = self.finish(self.post(event, module=name))
+                config = query.call_args.args[0]["config"]
+                self.assertEqual(config["fmc_login"], "SET_FIRESIGHT_LOGIN")
+                self.assertEqual(config["fmc_pass"], "SET_FIRESIGHT_PASSWORD")
+                download = self.client.get(f"/download/{sid}?module={name}&query=event.json&format=export")
+                self.assertEqual(download.status_code, 200)
+                self.assertIn(b"SET_FIRESIGHT_LOGIN:SET_FIRESIGHT_PASSWORD", download.data)
+                for secret in saved_credentials.values():
+                    self.assertNotIn(secret.encode(), download.data)
+                    self.assertNotIn(secret.encode(), self.client.get("/result/" + sid).data)
+                self.assertEqual(self.post(event, module=name, config=json.dumps(saved_credentials)).status_code, 400)
+                with self.app.app_context():
+                    self.assertEqual(Session_db.query.filter_by(uuid=sid).one().config_module, "{}")
+                self.assertEqual(self.client.get("/get_current_query_history").json["config"], {})
+            finally:
+                self.client.get("/logout")
+
+    def test_export_settings_are_not_retained_in_session_or_saved_history(self):
+        from app.models import Session_db
+        secret = "run-only-api-credential"
+        with patch("app.session_class.query_post_query", return_value={"data": ""}):
+            sid = self.finish(self.post(config=json.dumps({"prefix": secret})))
+        self.assertNotIn(secret.encode(), self.client.get("/get_history_session").data)
+        self.assertEqual(self.client.get("/get_current_query_history").json["config"], {})
+        with self.app.app_context():
+            self.assertEqual(Session_db.query.filter_by(uuid=sid).one().config_module, "{}")
+
+    def test_generic_module_endpoint_cannot_bypass_export_policy(self):
+        # The preview fixture normally intercepts enrichment requests. Exercise
+        # the real endpoint for this boundary test, preserving Flask's CSRF hook.
+        hooks = [hook for hook in self.app.before_request_funcs[None] if hook.__name__ != "fixture_enrichment"]
+        with patch.dict(self.app.before_request_funcs, {None: hooks}), patch("app.session_class.Session_class.start") as start:
+            for input_type in ("export", "data", "domain"):
+                response = self.client.post("/run_modules", json={
+                    "query": ["event"], "input": input_type, "modules": ["file_export"],
+                    "config": {}, "parent_id": "",
+                }, headers={"X-CSRFToken": self.token})
+                self.assertEqual(response.status_code, 400)
+            start.assert_not_called()
 
 
 if __name__ == "__main__":

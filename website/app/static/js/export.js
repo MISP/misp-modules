@@ -31,7 +31,8 @@ createApp({
         const activeModule = computed(() => modules.value.find(module => module.name === moduleName.value))
         const userFields = computed(() => activeModule.value?.mispattributes.userConfig || {})
         const serverFields = computed(() => (overrideConfig.value || activeModule.value?.request_on_query)
-            ? (activeModule.value?.meta.config || []).filter(key => !Object.hasOwn(userFields.value, key)) : [])
+            ? (activeModule.value?.meta.config || []).filter(key => !Object.hasOwn(userFields.value, key)
+                && !activeModule.value.credential_placeholders?.includes(key)) : [])
         watch(moduleName, () => {
             config.value = {}
             error.value = ''
