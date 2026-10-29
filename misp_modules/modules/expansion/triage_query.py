@@ -96,16 +96,19 @@ def _annotation(event, attribute, title, data):
 
 def _pivot(event, attribute, kind, value):
     value = _normalise(kind, value)
-    if kind == attribute["type"] and value == attribute["value"]:
+    if kind == attribute["type"] and value == _normalise(attribute["type"], attribute["value"]):
         return
-    obj = _object(event, attribute, "file" if kind in ("md5", "sha1", "sha256") else "domain-ip")
+    obj = _object(
+        event, attribute, "file" if kind in ("md5", "sha1", "sha256") else ("url" if kind == "url" else "domain-ip")
+    )
     relation = "ip" if kind in ("ip-src", "ip-dst") else kind
     obj.add_attribute(relation, value=value, to_ids=False)
 
 
 def _sandbox(event, attribute, payload, link=None):
     obj = _object(event, attribute, "sandbox-report")
-    obj.add_attribute("sandbox-type", value=moduleinfo["name"], to_ids=False)
+    obj.add_attribute("sandbox-type", value="saas", to_ids=False)
+    obj.add_attribute("saas-sandbox", value="hatching-triage", to_ids=False)
     obj.add_attribute("results", value=json.dumps(payload, sort_keys=True), to_ids=False, disable_correlation=True)
     if link:
         obj.add_attribute("permalink", value=link, to_ids=False)
