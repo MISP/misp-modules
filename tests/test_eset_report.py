@@ -109,7 +109,7 @@ def test_portal_reference_uses_fixed_api_download_endpoint():
         request.call_args.args[0]
         == "https://eti.eset.com/api/v2/apt-reports/123e4567-e89b-12d3-a456-426614174000/download/pdf"
     )
-    assert request.call_args.kwargs["headers"]["Authorization"] == "Bearer " + SECRET + "|" + SECRET
+    assert request.call_args.kwargs["headers"]["Authorization"] == "Bearer " + SECRET
 
 
 @pytest.mark.parametrize("chunks", [[b"<html>login</html>"], [b"%PDF-" + b"x" * 1048576]])
@@ -123,7 +123,7 @@ def test_non_pdf_and_oversized_reports_are_rejected(chunks):
             query(
                 kind="link",
                 value="https://eti.eset.com/reports/apt/123e4567-e89b-12d3-a456-426614174000/download",
-                config={"api_key": SECRET, "api_secret": SECRET, "max_size_mb": 1},
+                config={"api_token": SECRET, "max_size_mb": 1},
             )
         )
     assert "error" in result
@@ -135,3 +135,20 @@ def test_download_failure_does_not_expose_credentials():
             query(kind="link", value="https://eti.eset.com/reports/apt/123e4567-e89b-12d3-a456-426614174000/download")
         )
     assert "error" in result and SECRET not in str(result)
+
+
+def test_documented_portal_link_and_complete_token():
+    response = Mock(status_code=200)
+    response.iter_content.return_value = [b"%PDF-1.7"]
+    response.__enter__ = Mock(return_value=response)
+    response.__exit__ = Mock(return_value=False)
+    with patch.object(module.requests, "get", return_value=response) as request:
+        result = module.handler(
+            query(
+                kind="link",
+                value="https://eti.eset.com/reports/apt/download/123e4567-e89b-12d3-a456-426614174000",
+                config={"api_token": "whole|token"},
+            )
+        )
+    assert_source(result)
+    assert request.call_args.kwargs["headers"]["Authorization"] == "Bearer whole|token"

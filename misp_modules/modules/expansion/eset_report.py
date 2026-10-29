@@ -119,10 +119,10 @@ moduleinfo = {
     "name": "ESET Threat Intelligence Report",
     "description": (
         "Download an ESET ETI PDF from a supported report download link and return a file object with its content and"
-        " SHA-256. Only HTTPS report paths on eti.eset.com, www.eset.com or eset.com are accepted. API key and secret"
-        " form the provider Bearer credential. Redirects are rejected to keep credentials on the selected host."
-        " max_size_mb defaults to 25 (1–100); streamed responses are capped before importing. The report content hash"
-        " supports duplicate detection when reviewing enrichment results."
+        " SHA-256. Only HTTPS report paths on eti.eset.com, www.eset.com or eset.com are accepted. The complete"
+        " generated api_token is forwarded unchanged as the provider Bearer credential. Redirects are rejected to keep"
+        " credentials on the selected host. max_size_mb defaults to 25 (1–100); streamed responses are capped before"
+        " importing. The report content hash supports duplicate detection when reviewing enrichment results."
     ),
     "module-type": ["expansion"],
     "data-source": "external",
@@ -130,18 +130,18 @@ moduleinfo = {
     "requirements": ["requests", "pymisp"],
     "features": (
         "Download an ESET ETI PDF from a supported report download link and return a file object with its content and"
-        " SHA-256. Only HTTPS report paths on eti.eset.com, www.eset.com or eset.com are accepted. API key and secret"
-        " form the provider Bearer credential. Redirects are rejected to keep credentials on the selected host."
-        " max_size_mb defaults to 25 (1–100); streamed responses are capped before importing. The report content hash"
-        " supports duplicate detection when reviewing enrichment results."
+        " SHA-256. Only HTTPS report paths on eti.eset.com, www.eset.com or eset.com are accepted. The complete"
+        " generated api_token is forwarded unchanged as the provider Bearer credential. Redirects are rejected to keep"
+        " credentials on the selected host. max_size_mb defaults to 25 (1–100); streamed responses are capped before"
+        " importing. The report content hash supports duplicate detection when reviewing enrichment results."
     ),
     "references": ["https://help.eset.com/eti_portal/en-US/"],
     "input": "link",
     "output": "MISP objects linked to the original attribute.",
 }
 mispattributes = {"input": ["link"], "format": "misp_standard"}
-moduleconfig = ["api_key", "api_secret", "max_size_mb", "max_results"]
-REQUIRED = ["api_key", "api_secret"]
+moduleconfig = ["api_token", "max_size_mb", "max_results"]
+REQUIRED = ["api_token"]
 
 
 def _expand(event, attribute, value, config, limit):
@@ -153,6 +153,8 @@ def _expand(event, attribute, value, config, limit):
     ):
         raise ModuleError("A supported ESET ETI report link is required.")
     match = re.fullmatch("/reports/apt/([a-zA-Z0-9-]+)(?:/download)?", parsed.path)
+    if match is None:
+        match = re.fullmatch(r"/reports/apt/download/([a-zA-Z0-9-]+)", parsed.path)
     if parsed.hostname == "eti.eset.com" and match is None:
         match = re.fullmatch("/api/v2/apt-reports/([a-zA-Z0-9-]+)/download/pdf", parsed.path)
     if match is None:
@@ -163,7 +165,7 @@ def _expand(event, attribute, value, config, limit):
     try:
         with requests.get(
             download,
-            headers={"Authorization": "Bearer " + config["api_key"] + "|" + config["api_secret"]},
+            headers={"Authorization": "Bearer " + config["api_token"]},
             timeout=(5, 30),
             verify=True,
             allow_redirects=False,
