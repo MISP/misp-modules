@@ -41,6 +41,16 @@ def create_app():
 
     # Initialize extensions
     db.init_app(app)
+
+    @app.before_request
+    def limit_import_size():
+        from flask import request
+        from .import_core import MAX_IMPORT_SIZE
+
+        if request.endpoint == "home.run_import":
+            request.max_content_length = MAX_IMPORT_SIZE + 1024 * 1024
+            request.max_form_memory_size = MAX_IMPORT_SIZE + 1024 * 1024
+
     csrf.init_app(app)
     migrate.init_app(app, db, render_as_batch=True)
     app.config["SESSION_SQLALCHEMY"] = db

@@ -13,6 +13,7 @@
     <p class="sidebar-caption">WORKSPACE</p>
     <nav>
         {{ nav_item('/', 'fa-layer-group', 'New enrichment', request.path == '/' or request.path.startswith('/home/')) }}
+        {{ nav_item('/import', 'fa-file-import', 'Import data', request.path == '/import') }}
         {{ nav_item('/history_session', 'fa-clock-rotate-left', 'Session history', request.path == '/history_session') }}
         {{ nav_item('/history_tree', 'fa-diagram-project', 'Investigation trees', request.path == '/history_tree') }}
         {% if not session.admin_user or current_user.is_authenticated %}

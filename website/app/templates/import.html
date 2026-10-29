@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% block title %}Import data · MISP Modules{% endblock %}
+{% block content %}
+    <div class="page-heading">
+        <div>
+            <p class="eyebrow">IMPORT & EXPLORE</p>
+            <h1>Import data into MISP format.</h1>
+            <p class="page-description">Test import modules with a file, pasted data, or a remote report.</p>
+        </div>
+    </div>
+    <div v-cloak>
+        <div v-if="loadError" class="alert alert-danger" role="alert">
+            [[loadError]] <button type="button" class="btn btn-sm btn-outline-danger" @click="loadModules">Try again</button>
+        </div>
+        <form class="enrichment-layout" @submit.prevent="runImport" :aria-busy="submitting">
+            <div class="query-builder">
+                <section class="workspace-card" aria-labelledby="import-module-heading">
+                    <div class="section-heading">
+                        <span class="step-number">1</span>
+                        <div><h2 id="import-module-heading">Choose an import module</h2><p>Only active import modules are listed.</p></div>
+                    </div>
+                    <label for="import-module" class="form-label">Import module</label>
+                    <select id="import-module" class="form-select" v-model="moduleName" :disabled="loading || submitting || !!loadError">
+                        <option value="">[[loading ? 'Loading import modules…' : 'Select an import module…']]</option>
+                        <option v-for="module in modules" :key="module.name" :value="module.name">[[module.name]]</option>
+                    </select>
+                    <p v-if="activeModule" class="text-muted mt-3">[[activeModule.meta.description]]</p>
+                    <p v-else-if="!loading && !modules.length && !loadError" role="status">No active import modules were found. Check the module service and configuration.</p>
+                </section>
+                <section v-if="activeModule" class="workspace-card" aria-labelledby="import-input-heading">
+                    <div class="section-heading">
+                        <span class="step-number">2</span>
+                        <div><h2 id="import-input-heading">Provide input</h2><p>[[sources.length ? 'Files and pasted data can be up to 20 MiB.' : 'This module retrieves data using the configuration below.']]</p></div>
+                    </div>
+                    <template v-if="sources.length">
+                        <label for="import-source" class="form-label">Input source</label>
+                        <select id="import-source" class="form-select mb-3" v-model="source" :disabled="submitting">
+                            <option v-for="item in sources" :key="item" :value="item">[[item === 'file' ? 'Upload a file' : 'Paste data']]</option>
+                        </select>
+                        <template v-if="source === 'file'">
+                            <label for="import-file" class="form-label">File to import</label>
+                            <input id="import-file" :key="moduleName" type="file" class="form-control" @change="file = $event.target.files[0] || null" :disabled="submitting">
+                        </template>
+                        <template v-else>
+                            <label for="import-data" class="form-label">Data to import</label>
+                            <textarea id="import-data" class="form-control" rows="10" v-model="data" spellcheck="false" :disabled="submitting"></textarea>
+                        </template>
+                    </template>
+                    <fieldset v-if="Object.keys(userFields).length" class="query-config mt-3">
+                        <legend>Import options</legend>
+                        <div v-for="(field, key) in userFields" :key="key" class="mb-3">
+                            <template v-if="field.type === 'Boolean'">
+                                <label class="config-toggle" :for="'option-'+key">
+                                    <input :id="'option-'+key" type="checkbox" class="form-check-input" v-model="options[key]" :disabled="submitting"><span>[[key]]</span>
+                                </label>
+                            </template>
+                            <template v-else>
+                                <label :for="'option-'+key" class="form-label">[[key]][[field.required ? ' (required)' : '']]</label>
+                                <input :id="'option-'+key" class="form-control" :type="field.type === 'Integer' ? 'number' : isSecret(key) ? 'password' : 'text'" :step="field.type === 'Integer' ? '1' : undefined" v-model="options[key]" :required="!!field.required" :aria-describedby="'help-'+key" :disabled="submitting" autocomplete="off">
+                            </template>
+                            <p :id="'help-'+key" class="small text-muted mt-1">[[field.message]]</p>
+                        </div>
+                    </fieldset>
+                </section>
+                <section v-if="serverFields.length" class="workspace-card" aria-labelledby="import-config-heading">
+                    <h2 id="import-config-heading">Module configuration</h2>
+                    <p>Leave a setting empty to use its saved value.</p>
+                    <div v-for="key in serverFields" :key="key" class="mb-3">
+                        <label :for="'config-'+key" class="form-label">[[key]]</label>
+                        <input :id="'config-'+key" class="form-control" :type="isSecret(key) ? 'password' : 'text'" v-model="config[key]" :disabled="submitting" autocomplete="off">
+                    </div>
+                </section>
+            </div>
+            <aside class="query-summary">
+                <section class="workspace-card summary-card" aria-labelledby="import-summary-heading">
+                    <p class="eyebrow">READY WHEN YOU ARE</p>
+                    <h2 id="import-summary-heading">Your import</h2>
+                    <p>[[moduleName || 'Select an import module to begin.']]</p>
+                    <label v-if="activeModule && activeModule.meta.config?.length" class="config-toggle">
+                        <input type="checkbox" class="form-check-input" v-model="overrideConfig" :disabled="submitting"><span>Override module settings</span>
+                    </label>
+                    <div v-if="error" class="alert alert-danger query-error" role="alert" tabindex="-1" ref="errorBox">[[error]]</div>
+                    <button type="submit" class="btn btn-primary run-query" :disabled="loading || submitting || !activeModule || !!loadError">[[submitting ? 'Starting import…' : 'Run import']]</button>
+                    <p class="summary-hint">Explore and download results in the results view. Imports also appear in your session history.</p>
+                </section>
+            </aside>
+        </form>
+    </div>
+    <noscript><div class="alert alert-warning">Enable JavaScript to select modules and run an import.</div></noscript>
+{% endblock %}
+{% block script %}<script type="module" src="{{ url_for('static', filename='js/import.js') }}"></script>{% endblock %}
