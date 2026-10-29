@@ -119,3 +119,52 @@ def test_sample_requires_explicit_submission_and_is_sent_once():
             )
         )
     request.assert_not_called()
+
+
+def test_current_sample_zip_metadata_digest_and_pipe_filename():
+    import base64, hashlib, io, zipfile
+
+    payload = b"actual sample"
+    digest = hashlib.md5(payload).hexdigest()
+    output = io.BytesIO()
+    with zipfile.ZipFile(output, "w") as archive:
+        archive.writestr(digest, payload)
+        archive.writestr(digest + ".filename.txt", "sample|name.exe")
+    attribute = {
+        "type": "malware-sample",
+        "value": "sample|name.exe|" + digest,
+        "data": base64.b64encode(output.getvalue()).decode(),
+    }
+    assert module._binary(attribute, {})[:2] == ("sample|name.exe", payload)
+    attribute["value"] = "sample|name.exe|" + "0" * 32
+    with pytest.raises(module.ModuleError):
+        module._binary(attribute, {})
+    assert (
+        module._binary({"type": "attachment", "value": "sample|name.exe", "data": "c2FtcGxl"}, {})[0]
+        == "sample|name.exe"
+    )
+
+
+def test_pivots_normalize_source_and_use_the_url_template():
+    from pymisp import MISPEvent
+
+    event = MISPEvent()
+    attribute = {"type": "sha256", "value": "A" * 64, "uuid": UUID}
+    module._pivot(event, attribute, "sha256", "a" * 64)
+    assert not event.objects
+    module._pivot(event, attribute, "url", "https://example.com/path")
+    assert event.objects[0].name == "url"
+    assert event.objects[0].attributes[0].object_relation == "url"
+
+
+def test_sandbox_classification_matches_template_contract():
+    from pymisp import MISPEvent
+
+    event = MISPEvent()
+    attribute = {"uuid": UUID}
+    obj = module._sandbox(event, attribute, {"score": 0})
+    fields = {a.object_relation: a.value for a in obj.attributes}
+    assert fields["sandbox-type"] == "on-premise"
+    assert fields["on-premise-sandbox"] == "cape"
+    assert set(obj._definition.get("required", [])) <= set(fields)
+    assert set(obj._definition["requiredOneOf"]) & set(fields)
