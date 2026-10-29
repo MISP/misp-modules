@@ -1,3 +1,4 @@
+from urllib.parse import urlsplit
 import ipaddress
 import json
 import re
@@ -178,7 +179,7 @@ def _expand(event, attribute, value, config, limit):
     if kind in ("ip-src", "ip-dst"):
         if ipaddress.ip_address(value).version != 4:
             raise ModuleError("Criminal IP IP reports require IPv4.")
-        data = _response("GET", "/v1/asset/ip/report", config, params={"ip": value})
+        data = _response("GET", "/v1/asset/ip/report", config, params={"ip": value, "full": "true"})
     elif kind == "text":
         if not re.fullmatch("[0-9]+", value):
             raise ModuleError("text input must contain a domain scan ID.")
@@ -186,6 +187,17 @@ def _expand(event, attribute, value, config, limit):
     else:
         data = _response("GET", "/v1/domain/reports", config, params={"query": value, "offset": 0})
         rows = (data or {}).get("data", {}).get("reports", [])
+
+        def exact(row):
+            candidate = row.get("url", "")
+            parsed = urlsplit(candidate if "://" in candidate else "https://" + candidate)
+            try:
+                return _normalise("hostname", parsed.hostname or "") == value
+            except (ValueError, TypeError):
+                return False
+
+        rows = [row for row in rows if isinstance(row, dict) and exact(row)]
+
         if not rows and _enabled(config, "submit_unknown"):
             receipt = _response("POST", "/v1/domain/scan", config, files={"query": (None, value)})
             if not (receipt or {}).get("data", {}).get("scan_id"):
@@ -204,5 +216,5 @@ def _expand(event, attribute, value, config, limit):
                 port = row.get("open_port_no")
                 if port is not None:
                     obj = _object(event, attribute, "network-connection")
-                    obj.add_attribute("ip-dst", value=value, to_ids=False)
-                    obj.add_attribute("dst-port", value=int(port), to_ids=False)
+                    obj.add_attribute(kind, value=value, to_ids=False)
+                    obj.add_attribute("src-port" if kind == "ip-src" else "dst-port", value=int(port), to_ids=False)

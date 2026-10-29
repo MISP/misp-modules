@@ -90,7 +90,7 @@ def test_ip_report_preserves_provider_scores():
     with patch.object(module.requests, "request", return_value=reply(data)) as request:
         result = module.handler(query(kind="ip-src", value="192.0.2.1"))
     assert_source(result)
-    assert request.call_args.kwargs["params"] == {"ip": "192.0.2.1"}
+    assert request.call_args.kwargs["params"] == {"ip": "192.0.2.1", "full": "true"}
     assert objects(result, "network-connection")
 
 
@@ -116,7 +116,7 @@ def test_submission_is_explicit_and_returns_receipt():
 
 def test_existing_domain_scan_is_retrieved_without_resubmission():
     replies = [
-        reply({"status": 200, "data": {"reports": [{"scan_id": 123}]}}),
+        reply({"status": 200, "data": {"reports": [{"scan_id": 123, "url": "https://example.com/path"}]}}),
         reply({"status": 200, "data": {"summary": {"url_phishing_prob": 0}}}),
     ]
     with patch.object(module.requests, "request", side_effect=replies) as request:
@@ -125,3 +125,22 @@ def test_existing_domain_scan_is_retrieved_without_resubmission():
     assert request.call_count == 2
     assert request.call_args.args == ("GET", "https://api.criminalip.io/v2/domain/report/123")
     assert json.loads(values(objects(result, "annotation")[0], "text")[0])["data"]["summary"]["url_phishing_prob"] == 0
+
+
+def test_domain_search_ignores_nonmatching_hosts():
+    replies = [
+        reply(
+            {
+                "data": {
+                    "reports": [
+                        {"scan_id": 1, "url": "https://other.example"},
+                        {"scan_id": 2, "url": "https://example.com/path"},
+                    ]
+                }
+            }
+        ),
+        reply({"data": {"summary": {}}}),
+    ]
+    with patch.object(module.requests, "request", side_effect=replies) as request:
+        assert_source(module.handler(query(kind="domain")))
+    assert request.call_args.args[1].endswith("/report/2")
