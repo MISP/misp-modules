@@ -52,7 +52,7 @@ moduleinfo = {
         "A Domaintools API access (username & apikey)",
     ],
     "features": (
-        "This legacy module does not appear to be actively maintained. See documentation/expansion/domaintools.md "
+        "This legacy module does not appear to be actively maintained. See https://misp.github.io/misp-modules/domaintools/ "
         "for API coverage and the provider-supported MISP integration.\n\n"
         "This module takes a MISP attribute as input to query the Domaintools API. The API returns then the result of"
         " the query with some types we map into compatible types we add as MISP attributes.\n\nPlease note that"
