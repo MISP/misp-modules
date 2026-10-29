@@ -108,3 +108,11 @@ def test_domain_requests_two_web_properties_and_keeps_partial_results():
     assert request.call_count == 2
     assert request.call_args.args[1].endswith("webproperty/example.com%3A443")
     assert len(objects(result, "annotation")) == 1
+
+
+def test_ip_source_direction_is_preserved():
+    with patch.object(
+        module.requests, "request", return_value=reply({"result": {"resource": {"services": [{"port": 443}]}}})
+    ):
+        result = module.handler(query(kind="ip-src", value="192.0.2.1"))
+    assert values(objects(result, "network-connection")[0], "ip-src") == ["192.0.2.1"]

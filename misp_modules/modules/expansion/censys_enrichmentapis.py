@@ -183,9 +183,11 @@ def _expand(event, attribute, value, config, limit):
         if kind in ("ip-src", "ip-dst"):
             for service in resource.get("services", [])[:limit]:
                 obj = _object(event, attribute, "network-connection")
-                obj.add_attribute("ip-dst", value=value, to_ids=False)
+                obj.add_attribute(kind, value=value, to_ids=False)
                 if service.get("port") is not None:
-                    obj.add_attribute("dst-port", value=int(service["port"]), to_ids=False)
+                    obj.add_attribute(
+                        "src-port" if kind == "ip-src" else "dst-port", value=int(service["port"]), to_ids=False
+                    )
                 if service.get("transport_protocol"):
                     obj.add_attribute("layer4-protocol", value=service["transport_protocol"], to_ids=False)
             if len(resource.get("services", [])) > limit:
