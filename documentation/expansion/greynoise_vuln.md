@@ -4,8 +4,10 @@ Retrieve dedicated GreyNoise CVE intelligence, including available exploitation 
 
 Input: vulnerability.
 
-Configuration: api_key, max_results. Required: api_key.
+Configuration: api_key. Required: api_key.
 
-max_results defaults to 25 and accepts 1–100. New attributes use `to_ids=false`; the source UUID, detection flag and metadata are preserved. Objects reference the source attribute. Requests verify TLS, reject redirects and use connection/read timeouts of 5/30 seconds. API errors do not echo credentials. No automatic submission retries or background polling occur.
+New attributes use `to_ids=false`; the source UUID, detection flag and metadata are preserved. Objects reference the source attribute. Requests verify TLS, reject redirects and use connection/read timeouts of 5/30 seconds. API errors do not echo credentials. No automatic submission retries or background polling occur.
 
 Reference: https://docs.greynoise.io/reference/getcve
+
+One complete provider report is retained per lookup; there is no result-count setting.

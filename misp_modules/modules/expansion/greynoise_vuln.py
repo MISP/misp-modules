@@ -94,7 +94,7 @@ def handler(q=False):
         for key in REQUIRED:
             if not isinstance(config.get(key), str) or not config[key].strip():
                 raise ModuleError(f"Missing {key} configuration.")
-        limit = _integer(config, "max_results", 25)
+        limit = 25
         event = MISPEvent()
         event.add_attribute(**attribute)
         _expand(event, attribute, value, config, limit)
@@ -147,7 +147,7 @@ moduleinfo = {
     "output": "MISP objects linked to the original attribute.",
 }
 mispattributes = {"input": ["vulnerability"], "format": "misp_standard"}
-moduleconfig = ["api_key", "max_results"]
+moduleconfig = ["api_key"]
 REQUIRED = ["api_key"]
 
 
