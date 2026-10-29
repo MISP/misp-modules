@@ -159,6 +159,27 @@ poetry run mmw db upgrade   # Apply migrations
 poetry run mmw db downgrade # Revert the latest migration
 ```
 
+### Updating an existing installation
+
+After updating the code and installing dependencies, stop the website, back up
+its database, and apply migrations before restarting it. Run this from `website/`
+with the same `.env` / `DATABASE_URI` as the running service:
+
+```bash
+poetry install
+poetry run mmw db upgrade
+```
+
+Only restart the website if the upgrade succeeds. `db migrate` generates migration
+files for developers; it does not apply the migrations shipped with an update.
+Likewise, `db init` creates missing tables but does not add columns to existing ones.
+
+If `/external_tools/list` fails with `no such column: external_tools.api_key`,
+run the upgrade above. It repairs the missing column and index even if the legacy
+API-key migration was already recorded as applied, preserving existing tools,
+API keys, and query history. Existing tools without a key will need one configured
+on the **External tools** page before use.
+
 ## Systemd Services
 
 Template systemd service files are provided in `etc/` for `misp-modules` and the website.
