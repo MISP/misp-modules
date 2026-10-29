@@ -108,6 +108,61 @@ def test_failed_rating_still_closes_session_and_hides_password():
     ]
     config = {"api_url": "https://sandbox.example", "username": "analyst", "password": SECRET}
     with patch.object(module.requests, "request", side_effect=responses) as request:
-        result = module.handler(query(kind="md5", value="a" * 32, config=config))
+        result = module.handler(query(kind="sha1", value="a" * 40, config=config))
     assert "error" in result and SECRET not in str(result)
     assert request.call_count == 3
+
+
+def test_current_sample_zip_metadata_digest_and_pipe_filename():
+    import base64, hashlib, io, zipfile
+
+    payload = b"actual sample"
+    digest = hashlib.md5(payload).hexdigest()
+    output = io.BytesIO()
+    with zipfile.ZipFile(output, "w") as archive:
+        archive.writestr(digest, payload)
+        archive.writestr(digest + ".filename.txt", "sample|name.exe")
+    attribute = {
+        "type": "malware-sample",
+        "value": "sample|name.exe|" + digest,
+        "data": base64.b64encode(output.getvalue()).decode(),
+    }
+    assert module._binary(attribute, {})[:2] == ("sample|name.exe", payload)
+    attribute["value"] = "sample|name.exe|" + "0" * 32
+    with pytest.raises(module.ModuleError):
+        module._binary(attribute, {})
+    assert (
+        module._binary({"type": "attachment", "value": "sample|name.exe", "data": "c2FtcGxl"}, {})[0]
+        == "sample|name.exe"
+    )
+
+
+def test_sandbox_classification_matches_template_contract():
+    from pymisp import MISPEvent
+
+    event = MISPEvent()
+    attribute = {"uuid": UUID}
+    obj = module._sandbox(event, attribute, {"score": 0})
+    fields = {a.object_relation: a.value for a in obj.attributes}
+    assert fields["sandbox-type"] == "on-premise"
+    assert fields["on-premise-sandbox"] == "fortisandbox"
+    assert set(obj._definition.get("required", [])) <= set(fields)
+    assert set(obj._definition["requiredOneOf"]) & set(fields)
+
+
+def test_unknown_rating_array_submits_encoded_filename():
+    import base64
+
+    replies = [
+        reply({"session": "session-id"}),
+        reply({"result": {"data": {"rating": ["Unknown"]}}}),
+        reply({"result": {"data": {"sid": "1"}}}),
+        reply({"result": {}}),
+    ]
+    config = {"api_url": "https://sandbox.example", "username": "analyst", "password": SECRET, "submit_samples": True}
+    with patch.object(module.requests, "request", side_effect=replies) as request:
+        result = module.handler(query(kind="attachment", value="sample.bin", data="c2FtcGxl", config=config))
+    assert_source(result)
+    params = request.call_args_list[2].kwargs["json"]["params"][0]
+    assert params["filename"] == base64.b64encode(b"sample.bin").decode()
+    assert not objects(result, "sandbox-report")

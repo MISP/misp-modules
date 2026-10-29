@@ -110,7 +110,8 @@ def _annotation(event, attribute, title, data):
 
 def _sandbox(event, attribute, payload, link=None):
     obj = _object(event, attribute, "sandbox-report")
-    obj.add_attribute("sandbox-type", value=moduleinfo["name"], to_ids=False)
+    obj.add_attribute("sandbox-type", value="on-premise", to_ids=False)
+    obj.add_attribute("on-premise-sandbox", value="fortisandbox", to_ids=False)
     obj.add_attribute("results", value=json.dumps(payload, sort_keys=True), to_ids=False, disable_correlation=True)
     if link:
         obj.add_attribute("permalink", value=link, to_ids=False)
@@ -123,16 +124,24 @@ def _binary(attribute, config):
     if not isinstance(encoded, str) or len(encoded) > 2 * limit:
         raise ModuleError("Missing or oversized base64 sample data.")
     content = base64.b64decode(encoded, validate=True)
-    filename = attribute["value"].split("|", 1)[0].replace("\\", "/").rsplit("/", 1)[-1]
+    filename = attribute["value"]
     if attribute["type"] == "malware-sample":
+        filename, separator, digest = filename.rpartition("|")
+        if not separator or not re.fullmatch(r"[a-fA-F0-9]{32}", digest):
+            raise ModuleError("A malware-sample value must contain filename|md5.")
         with zipfile.ZipFile(io.BytesIO(content)) as archive:
-            entries = [entry for entry in archive.infolist() if not entry.is_dir()]
+            entries = [
+                e for e in archive.infolist() if not e.is_dir() and e.filename != digest.lower() + ".filename.txt"
+            ]
             if len(entries) != 1 or entries[0].file_size > limit:
-                raise ModuleError("A malware-sample archive must contain one file within max_size_mb.")
+                raise ModuleError("A malware-sample archive must contain one payload within max_size_mb.")
             content = archive.read(entries[0], pwd=b"infected")
+        if hashlib.md5(content).hexdigest() != digest.lower():
+            raise ModuleError("The unpacked sample does not match the declared MD5.")
+    filename = filename.replace("\\", "/").rsplit("/", 1)[-1]
     if not filename or not content or len(content) > limit:
         raise ModuleError("The sample is empty or exceeds max_size_mb.")
-    return (filename, content, hashlib.sha256(content).hexdigest())
+    return filename, content, hashlib.sha256(content).hexdigest()
 
 
 def handler(q=False):
@@ -188,7 +197,7 @@ moduleinfo = {
     "author": "MISP Project",
     "name": "FortiSandbox Enrichment",
     "description": (
-        "Authenticate to a FortiSandbox appliance and retrieve an existing rating by MD5, SHA-1 or SHA-256. Set api_url"
+        "Authenticate to a FortiSandbox appliance and retrieve an existing rating by SHA-1 or SHA-256. Set api_url"
         " to the appliance HTTPS origin, without /jsonrpc. For supplied files, calculate SHA-256 and look up the rating"
         " first. submit_samples defaults to false; true permits submission when the rating is unknown. max_size_mb"
         " defaults to 25 (1–100). A submission receipt is returned without polling. Provider ratings remain in their"
@@ -199,17 +208,17 @@ moduleinfo = {
     "logo": "",
     "requirements": ["requests", "pymisp"],
     "features": (
-        "Authenticate to a FortiSandbox appliance and retrieve an existing rating by MD5, SHA-1 or SHA-256. Set api_url"
+        "Authenticate to a FortiSandbox appliance and retrieve an existing rating by SHA-1 or SHA-256. Set api_url"
         " to the appliance HTTPS origin, without /jsonrpc. For supplied files, calculate SHA-256 and look up the rating"
         " first. submit_samples defaults to false; true permits submission when the rating is unknown. max_size_mb"
         " defaults to 25 (1–100). A submission receipt is returned without polling. Provider ratings remain in their"
         " original vocabulary."
     ),
     "references": ["https://www.fortinet.com/products/sandbox/fortisandbox"],
-    "input": "md5, sha1, sha256, attachment, malware-sample",
+    "input": "sha1, sha256, attachment, malware-sample",
     "output": "MISP objects linked to the original attribute.",
 }
-mispattributes = {"input": ["md5", "sha1", "sha256", "attachment", "malware-sample"], "format": "misp_standard"}
+mispattributes = {"input": ["sha1", "sha256", "attachment", "malware-sample"], "format": "misp_standard"}
 moduleconfig = ["api_url", "username", "password", "submit_samples", "max_size_mb", "max_results"]
 REQUIRED = ["api_url", "username", "password"]
 
@@ -248,7 +257,8 @@ def _expand(event, attribute, value, config, limit):
         if isinstance(payload, list):
             payload = payload[0] if payload else {}
         rating = payload.get("rating") if isinstance(payload, dict) else None
-        if rating is not None and str(rating).lower() not in ("unknown", ""):
+        ratings = rating if isinstance(rating, list) else [rating]
+        if any(r is not None and str(r).lower() not in ("unknown", "") for r in ratings):
             _sandbox(event, attribute, payload)
         elif sample and _enabled(config, "submit_samples"):
             _, receipt = _rpc(
@@ -257,7 +267,7 @@ def _expand(event, attribute, value, config, limit):
                 "/alert/ondemand/submit-file",
                 session,
                 type="file",
-                filename=sample[0],
+                filename=base64.b64encode(sample[0].encode("utf-8")).decode(),
                 file=base64.b64encode(sample[1]).decode(),
             )
             _annotation(event, attribute, "FortiSandbox submission receipt", receipt)
