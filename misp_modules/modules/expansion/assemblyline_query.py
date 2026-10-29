@@ -16,7 +16,7 @@ moduleinfo = {
     "version": "1",
     "author": "Christian Studer",
     "description": (
-        "A module tu query the AssemblyLine API with a submission ID to get the submission report and parse it."
+        "A module to query the AssemblyLine API with a submission ID to get the submission report and parse it."
     ),
     "module-type": ["expansion"],
     "name": "AssemblyLine Query",
