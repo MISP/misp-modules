@@ -65,7 +65,7 @@ def test_invalid_result_limit(raw):
         module._integer({"max_results": raw}, "max_results", 25)
 
 
-def test_pdf_is_streamed_and_becomes_a_file_attachment():
+def test_pdf_is_streamed_and_becomes_a_report_attachment():
     response = Mock(status_code=200)
     response.iter_content.return_value = [b"%PDF-1.7\nreport"]
     response.__enter__ = Mock(return_value=response)
@@ -75,8 +75,21 @@ def test_pdf_is_streamed_and_becomes_a_file_attachment():
             query(kind="link", value="https://eti.eset.com/reports/apt/123e4567-e89b-12d3-a456-426614174000/download")
         )
     assert_source(result)
-    obj = objects(result, "file")[0]
-    assert values(obj, "filename") == ["123e4567-e89b-12d3-a456-426614174000.pdf"]
+    obj = objects(result, "report")[0]
+    assert values(obj, "report-file") == ["123e4567-e89b-12d3-a456-426614174000.pdf"]
+    assert values(obj, "title") == ["ESET APT report 123e4567-e89b-12d3-a456-426614174000"]
+    assert values(obj, "type") == ["Report"]
+    assert not objects(result, "file")
+    assert set(values(obj, "link")) == {
+        "https://eti.eset.com/reports/apt/123e4567-e89b-12d3-a456-426614174000/download",
+        "https://eti.eset.com/api/v2/apt-reports/123e4567-e89b-12d3-a456-426614174000/download/pdf",
+    }
+    attachment = next(a for a in obj["Attribute"] if a["object_relation"] == "report-file")
+    import base64
+    import hashlib
+
+    assert base64.b64decode(attachment["data"]) == b"%PDF-1.7\nreport"
+    assert attachment["comment"] == "SHA-256: " + hashlib.sha256(b"%PDF-1.7\nreport").hexdigest()
     assert any(a.get("data") for a in obj["Attribute"])
     assert request.call_args.kwargs["allow_redirects"] is False
 
@@ -152,3 +165,22 @@ def test_documented_portal_link_and_complete_token():
         )
     assert_source(result)
     assert request.call_args.kwargs["headers"]["Authorization"] == "Bearer whole|token"
+
+
+def test_report_relations_match_the_object_template():
+    from pymisp import MISPObject
+
+    response = Mock(status_code=200)
+    response.iter_content.return_value = [b"%PDF-1.7"]
+    response.__enter__ = Mock(return_value=response)
+    response.__exit__ = Mock(return_value=False)
+    link = "https://eti.eset.com/api/v2/apt-reports/123e4567-e89b-12d3-a456-426614174000/download/pdf"
+    with patch.object(module.requests, "get", return_value=response):
+        result = module.handler(query(kind="link", value=link))
+    assert_source(result)
+    report = objects(result, "report")[0]
+    definition = MISPObject("report")._definition
+    relations = {a["object_relation"] for a in report["Attribute"]}
+    assert relations <= set(definition["attributes"])
+    assert relations & set(definition["requiredOneOf"])
+    assert values(report, "link") == [link]

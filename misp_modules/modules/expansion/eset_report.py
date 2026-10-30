@@ -118,26 +118,26 @@ moduleinfo = {
     "author": "MISP Project",
     "name": "ESET Threat Intelligence Report",
     "description": (
-        "Download an ESET ETI PDF from a supported report download link and return a file object with its content and"
-        " SHA-256. Only HTTPS report paths on eti.eset.com, www.eset.com or eset.com are accepted. The complete"
-        " generated api_token is forwarded unchanged as the provider Bearer credential. Redirects are rejected to keep"
-        " credentials on the selected host. max_size_mb defaults to 25 (1–100); streamed responses are capped before"
-        " importing. The report content hash supports duplicate detection when reviewing enrichment results."
+        "Download an ESET ETI PDF from a supported report download link and return a report object with its PDF"
+        " attachment and SHA-256. Only HTTPS report paths on eti.eset.com, www.eset.com or eset.com are accepted. The"
+        " complete generated api_token is forwarded unchanged as the provider Bearer credential. Redirects are rejected"
+        " to keep credentials on the selected host. max_size_mb defaults to 25 (1–100); streamed responses are capped"
+        " before importing. The report content hash supports duplicate detection when reviewing enrichment results."
     ),
     "module-type": ["expansion"],
     "data-source": "external",
     "logo": "",
     "requirements": ["requests", "pymisp"],
     "features": (
-        "Download an ESET ETI PDF from a supported report download link and return a file object with its content and"
-        " SHA-256. Only HTTPS report paths on eti.eset.com, www.eset.com or eset.com are accepted. The complete"
-        " generated api_token is forwarded unchanged as the provider Bearer credential. Redirects are rejected to keep"
-        " credentials on the selected host. max_size_mb defaults to 25 (1–100); streamed responses are capped before"
-        " importing. The report content hash supports duplicate detection when reviewing enrichment results."
+        "Download an ESET ETI PDF from a supported report download link and return a report object with its PDF"
+        " attachment and SHA-256. Only HTTPS report paths on eti.eset.com, www.eset.com or eset.com are accepted. The"
+        " complete generated api_token is forwarded unchanged as the provider Bearer credential. Redirects are rejected"
+        " to keep credentials on the selected host. max_size_mb defaults to 25 (1–100); streamed responses are capped"
+        " before importing. The report content hash supports duplicate detection when reviewing enrichment results."
     ),
     "references": ["https://help.eset.com/eti_portal/en-US/"],
     "input": "link",
-    "output": "MISP objects linked to the original attribute.",
+    "output": "A report object with title, type, source links and PDF attachment, linked to the original attribute.",
 }
 mispattributes = {"input": ["link"], "format": "misp_standard"}
 moduleconfig = ["api_token", "max_size_mb", "max_results"]
@@ -183,7 +183,15 @@ def _expand(event, attribute, value, config, limit):
     if not content.startswith(b"%PDF-"):
         raise ModuleError("ESET did not return a PDF report.")
     digest = hashlib.sha256(content).hexdigest()
-    obj = _object(event, attribute, "file")
-    obj.add_attribute("filename", value=report_id + ".pdf", to_ids=False)
-    obj.add_attribute("sha256", value=digest, to_ids=False)
-    obj.add_attribute("attachment", value=report_id + ".pdf", data=io.BytesIO(content), to_ids=False)
+    obj = _object(event, attribute, "report")
+    obj.add_attribute("title", value="ESET APT report " + report_id, to_ids=False)
+    obj.add_attribute("type", value="Report", to_ids=False)
+    for reference in dict.fromkeys((value, download)):
+        obj.add_attribute("link", value=reference, to_ids=False)
+    obj.add_attribute(
+        "report-file",
+        value=report_id + ".pdf",
+        data=io.BytesIO(content),
+        comment="SHA-256: " + digest,
+        to_ids=False,
+    )
