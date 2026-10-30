@@ -42,6 +42,7 @@ class ModuleType(enum.Enum):
     EXPORT_MOD = "export_mod"
     IMPORT_MOD = "import_mod"
     ACTION_MOD = "action_mod"
+    GATHERING = "gathering"
 
 
 def get_version() -> str:
