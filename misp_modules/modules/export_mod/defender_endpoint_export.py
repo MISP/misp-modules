@@ -41,7 +41,7 @@ moduleinfo = {
 
 def handle_sha256(value, period):
     query = f"""find in (DeviceEvents, DeviceAlertEvents,AlertInfo, AlertEvidence,  DeviceFileEvents, DeviceImageLoadEvents, DeviceProcessEvents)
-        where (SHA256 == '{value}' or InitiatingProcessSHA1 == '{value}') and
+        where (SHA256 == '{value}' or InitiatingProcessSHA256 == '{value}') and
         Timestamp between(ago({period}) .. now())"""
     return query.replace("\n", " ")
 

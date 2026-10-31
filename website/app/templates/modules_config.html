@@ -1,181 +1,121 @@
-<!-- 
-    Author: David Cruciani
--->
-
-{% extends 'base.html' %}
-
+{% extends "base.html" %}
+{% block title %}Module configuration · MISP Modules{% endblock %}
 {% block content %}
-    <div id="top"> <h1>Modules Config</h1> </div>
-    <small>[[modules_config.length]] modules found</small>
-    <hr>
-    
-
-    <div style="width:50%; transform: translate(50%, 0);">
+    <div class="page-heading" id="top">
         <div>
-            <input type="search" @input="onInput" id="search_modules" placeholder="Search modules" autofocus class="form-control" style="border-radius: 5px;" />
+            <p class="eyebrow">WORKSPACE SETTINGS</p>
+            <h1>Module configuration</h1>
+            <p class="page-description">Manage available modules and their default settings.</p>
+        </div>
+        <a href="/"
+           class="btn btn-outline-secondary">New enrichment <i class="fa-solid fa-arrow-right ms-2"
+    aria-hidden="true"></i></a>
+    </div>
+    <div v-cloak>
+        <div v-if="error" class="alert alert-danger" role="alert">
+            [[error]]
+            <button class="btn btn-sm btn-outline-danger" @click="loadModules">Try again</button>
+        </div>
+        <div class="settings-toolbar">
+            <div class="search-field">
+                <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+                <input type="search"
+                       v-model="search"
+                       id="search_modules"
+                       placeholder="Search by module name, description, or attribute"
+                       aria-label="Search modules"
+                       class="form-control">
+            </div>
+            <select class="form-select"
+                    v-model="filter"
+                    aria-label="Filter module status">
+                <option value="all">All modules</option>
+                <option value="enabled">Enabled modules</option>
+                <option value="disabled">Disabled modules</option>
+            </select>
+            <span class="text-muted small" role="status">[[filteredModules.length]] of [[modules.length]] modules</span>
+        </div>
+        <div class="settings-layout">
+            <div class="settings-list">
+                <div v-if="loading" class="empty-state" role="status">Loading module configuration…</div>
+                <div v-else-if="!filteredModules.length" class="empty-state">
+                    <h2>No matching modules</h2>
+                    <p>Try a different search or status filter.</p>
+                </div>
+                <div class="settings-row"
+                     :class="{selected: current?.id === module.id}"
+                     v-for="module in filteredModules"
+                     :key="module.id">
+                    <input type="checkbox"
+                           class="form-check-input"
+                           :checked="module.is_active !== false"
+                           @change="toggleModule(module, $event)"
+                           :aria-label="'Enable '+module.name"
+                           :disabled="pending.includes(module.id)">
+                    <button type="button"
+                            class="settings-open"
+                            @click="openModule(module)"
+                            :aria-pressed="current?.id === module.id"
+                            :id="'module-'+module.id"><strong>[[module.name]]</strong><small>[[module.description || (module.input_attr || []).join(', ') || 'No description available']]</small><small>[[module.config.length ? 'Configurable' : 'No configuration required']]</small></button>
+                    <i class="fa-solid fa-chevron-right text-muted" aria-hidden="true"></i>
+                </div>
+            </div>
+            <section v-if="current"
+                     class="workspace-card settings-panel"
+                     aria-labelledby="config-title">
+                <div class="settings-panel-header">
+                    <div>
+                        <p class="eyebrow">MODULE SETTINGS</p>
+                        <h2 id="config-title" tabindex="-1">[[current.name]]</h2>
+                    </div>
+                    <button type="button"
+                            class="btn btn-sm btn-outline-secondary"
+                            @click="closeModule"
+                            aria-label="Close module configuration">
+                        <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+                    </button>
+                </div>
+                <p class="small text-muted">[[current.description]]</p>
+                <p class="small text-muted">Input attributes: <strong>[[ (current.input_attr || []).join(', ') || 'None' ]]</strong></p>
+                <form v-if="Object.keys(values).length" @submit.prevent="saveConfig">
+                    <div class="form-check mb-4">
+                        <input type="checkbox"
+                               id="request-config"
+                               class="form-check-input"
+                               v-model="requestConfig"
+                               :disabled="saving"><label for="request-config" class="form-check-label">Ask for configuration on each query</label>
+                    </div>
+                    <template v-if="!requestConfig">
+                        <div class="mb-3" v-for="(value, key) in values" :key="key">
+                            <label :for="'setting-'+key" class="form-label">[[key]]</label><input :id="'setting-'+key"
+       :type="isSecret(key) ? 'password' : 'text'"
+       class="form-control"
+       v-model="values[key]"
+       :disabled="saving"
+       autocomplete="off">
+                        </div>
+                    </template>
+                    <p v-else class="small text-muted">Users will provide these settings when they run this module.</p>
+                    <div v-if="saveError" class="alert alert-danger" role="alert">[[saveError]]</div>
+                    <p v-if="saved" class="alert alert-success" role="status">Module settings saved.</p>
+                    <button class="btn btn-primary"
+                            type="submit"
+                            :disabled="saving">[[saving ? 'Saving…' : 'Save settings']]</button>
+                </form>
+                <div v-else class="empty-state">
+                    <h3>Ready to use</h3>
+                    <p>This module has no settings to configure.</p>
+                </div>
+            </section>
+            <div v-else class="workspace-card empty-state">
+                <i class="fa-solid fa-sliders" aria-hidden="true"></i>
+                <h2>Select a module</h2>
+                <p>Choose a module to review its attributes and configure its defaults.</p>
+            </div>
         </div>
     </div>
-    <br>
-
-    <div class="row" style="margin-bottom: 100px;">
-        <div class="col" style="flex: 0 0 50%">
-            <div class="list-group">
-                <div v-for="module in modules_config" style="display:flex; ">
-                    <input v-if="module.is_active || module.is_active == null" type="checkbox" style="margin-right: 5px;" checked @click="change_status(module)">
-                    <input v-else type="checkbox" style="margin-right: 5px;" @click="change_status(module)">
-                    <a class="list-group-item list-group-item-action" style="border-radius: 10px;" :title="module.description" @click="display_config(module)">
-                        [[module.name]]
-                        <i v-if="!module.config.length" style="color: brown;">No config</i>
-                    </a>
-                </div>
-            </div>
-        </div>
-        <!-- Right panel -->
-        <div v-if="Object.keys(current_config).length" class="side-panel-config">
-            <div class="round-button" title="close" style="margin-top: 3px;">
-                <div class="round-button-circle">
-                    <a @click="close_panel()" class="round-button">x</a>
-                </div>
-            </div>
-            <br>
-            <h4>[[ current_config['module_name'] ]]</h4>
-            <i>
-                <small>
-                    Attributes: [[current_config['input_attr'].join(", ")]]
-                </small> 
-            </i>
-            <template v-for="conf, key in current_config">
-                <div class="mb-3" v-if="key != 'module_name' && !current_config['request_on_query'] && key != 'request_on_query' && key != 'input_attr'">
-                    <label :for="'form-'+key" class="form-label">[[key]]</label>
-                    <input type="text" class="form-control" :id="'form-'+key+'-'+current_config['module_name']" :value="conf">
-                </div>
-            </template>
-            <div class="mb-3" v-if="Object.keys(current_config).length > 3">
-                <label :for="'form-'+current_config['module_name']+'-checkbox'" class="form-label">Request for config on query</label>
-                <div>
-                    <input type="checkbox" :checked="current_config['request_on_query']" @click="check_request_on_query()" :id="'form-'+current_config['module_name']+'-checkbox'">
-                </div>
-            </div>
-            <button v-if="Object.keys(current_config).length > 3" class="btn btn-primary" @click="change_config()">Save</button>
-        </div>
-    </div>
-    
-    <span id="goTop">[<a href="#top">Go Back Top</a>]</span>
 {% endblock %}
-
 {% block script %}
-<script type="module">
-    const { createApp, ref, onMounted, nextTick, defineComponent} = Vue
-    import {display_toast, message_list} from '/static/js/toaster.js'
-    createApp({
-        delimiters: ['[[', ']]'],
-        setup() {
-            const modules_config = ref({})
-            const current_config = ref({})
-            let loc_modules = {}
-
-            async function query_modules(){
-                let res = await fetch("/modules_config_data")
-                let loc = await res.json()
-                modules_config.value = loc
-                loc_modules = modules_config.value
-            }
-            query_modules()
-
-            async function display_config(module){
-                current_config.value = {}
-                if(module.config.length){
-                    for(let i in module.config){
-                        for(let j in module.config[i]){
-                            if(module.config[i][j]){
-                                current_config.value[j] = module.config[i][j]
-                            }else{
-                                current_config.value[j] = null
-                            }
-                        }
-                    }
-                    current_config.value["request_on_query"] = module.request_on_query
-                }
-                current_config.value["module_name"] = module.name
-                current_config.value["input_attr"] = module.input_attr
-            }
-
-            function close_panel(){
-                current_config.value = {}
-            }
-
-            async function change_config(){
-                let result_dict = {}
-                for(let key in current_config.value){
-                    if(key != "module_name" && key != "request_on_query" && key != "input_attr"){
-                        let loc = $("#form-"+key+"-"+current_config.value["module_name"]).val()
-                        result_dict[key] = loc
-                        current_config.value[key] = loc
-
-                        for(let i in modules_config.value){
-                            if(modules_config.value[i].name == current_config.value["module_name"] ){
-                                for(let j in modules_config.value[i].config){
-                                    for(let k in modules_config.value[i].config[j]){
-                                        if(k == key){
-                                            modules_config.value[i].config[j][k] = loc
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-                result_dict["module_name"] = current_config.value["module_name"]
-                result_dict["request_on_query"] = current_config.value["request_on_query"]
-
-                const res = await fetch('/change_config',{
-                                    headers: { "X-CSRFToken": $("#csrf_token").val(), "Content-Type": "application/json" },
-                                    method: "POST",
-                                    body: JSON.stringify({
-                                        result_dict
-                                    })
-                                })
-                display_toast(res)
-            }
-
-            async function change_status(module){
-                let res = await fetch("/change_status?module_id="+module.id)
-                if(await res.status_code == 200){
-                    module.is_active = !module.is_active
-                }
-                display_toast(res)
-            }
-
-            function check_request_on_query(){
-                current_config.value["request_on_query"] = !current_config.value["request_on_query"]
-            }
-
-
-            function onInput(e){
-				modules_config.value = []
-				if(e.target.value){
-                    modules_config.value = loc_modules.filter((module) => {
-                        return module.name.toLowerCase().includes(e.target.value.toLowerCase())
-                    })
-				}else{
-                    modules_config.value = loc_modules
-                }
-			}
-
-
-            return {
-                message_list,
-                modules_config,
-                current_config,
-                display_config,
-                close_panel,
-                change_config,
-                change_status,
-                check_request_on_query,
-                onInput
-            }
-        }
-    }).mount('.container-fluid')
-
-</script>
+    <script type="module"
+            src="{{ url_for('static', filename='js/modules-config.js') }}"></script>
 {% endblock %}

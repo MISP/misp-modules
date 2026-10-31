@@ -132,7 +132,7 @@ def handler(q=False):
     if isinstance(client, dict):
         return client
     submission = submit_request(client, request)
-    if "error" in submission:
+    if isinstance(submission, dict) and "error" in submission:
         return submission
     sid = _extract_submission_id(submission)
     if not sid:

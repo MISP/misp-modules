@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import json
+from urllib.parse import quote
 
 import requests
 from pymisp import MISPAttribute, MISPEvent, MISPObject
@@ -12,17 +13,18 @@ mispattributes = {
     "format": "misp_standard",
 }
 moduleinfo = {
-    "version": "0.3",
+    "version": "0.4",
     "author": "Corsin Camichel, Aurélien Schwab",
     "description": "Module to access haveibeenpwned.com API.",
-    "module-type": ["hover"],
+    "module-type": ["expansion", "hover"],
     "name": "Have I Been Pwned Lookup",
     "logo": "hibp.png",
-    "requirements": [],
+    "requirements": ["A Have I Been Pwned API key with access to the breached account API."],
     "features": (
         "The module takes an email address as input and queries haveibeenpwned.com API to find additional information"
         " about it. This additional information actually tells if any account using the email address has already been"
         " compromised in a data breach, and returns one breach object per breach it appears in."
+        " Results are available in hover lookups and can be imported into an event through enrichment."
     ),
     "references": ["https://haveibeenpwned.com/"],
     "input": "An email address",
@@ -31,7 +33,6 @@ moduleinfo = {
 moduleconfig = ["api_key"]
 
 haveibeenpwned_api_url = "https://haveibeenpwned.com/api/v3/breachedaccount/"
-API_KEY = ""  # details at https://www.troyhunt.com/authentication-and-the-have-i-been-pwned-api/
 
 # HIBP breach fields (v3) mapped to breach object relations and their types.
 _FIELD_MAPPING = (
@@ -76,17 +77,21 @@ def handler(q=False):
         return {"error": "Unsupported attributes type"}
     email = attribute["value"]
 
-    if request.get("config") is None or request["config"].get("api_key") is None:
+    if not isinstance(request.get("config"), dict) or not request["config"].get("api_key"):
         return {"error": "Have I Been Pwned authentication is incomplete (no API key)"}
-    API_KEY = request["config"].get("api_key")
+    api_key = request["config"]["api_key"]
 
     # Without truncateResponse=false the v3 API answers with breach names only,
-    # and there is nothing to fill a breach object with.
-    r = requests.get(
-        haveibeenpwned_api_url + email,
-        params={"truncateResponse": "false"},
-        headers={"hibp-api-key": API_KEY},
-    )
+    # so request the details needed to populate breach objects.
+    try:
+        r = requests.get(
+            haveibeenpwned_api_url + quote(email, safe=""),
+            params={"truncateResponse": "false"},
+            headers={"hibp-api-key": api_key, "User-Agent": "MISP-misp-modules/hibp"},
+            timeout=10,
+        )
+    except requests.RequestException:
+        return {"error": "haveibeenpwned.com API request failed."}
     if r.status_code == 404:
         # HIBP answers 404 when the address appears in no breach at all.
         return {"error": f"haveibeenpwned.com has no breach for {email}."}
@@ -96,6 +101,11 @@ def handler(q=False):
         breaches = r.json()
     except ValueError:
         return {"error": "haveibeenpwned.com returned an invalid JSON response."}
+    if not isinstance(breaches, list) or any(
+        not isinstance(breach, dict) or not isinstance(breach.get("Name"), str) or not breach["Name"]
+        for breach in breaches
+    ):
+        return {"error": "haveibeenpwned.com returned an invalid breach response."}
     if not breaches:
         return {"error": f"haveibeenpwned.com has no breach for {email}."}
 

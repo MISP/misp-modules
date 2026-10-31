@@ -1,71 +1,95 @@
 <!-- 
     Author: David Cruciani
 -->
-
-{% extends 'base.html' %}
-
+{% extends "base.html" %}
+{% block title %}External tools · MISP Modules{% endblock %}
 {% block content %}
-    <div style="display: flex;">
-        <h2>External tools</h2>
-        <span style="margin-top: 4px; margin-left: 7px;">
-            <a class="btn btn-primary btn-sm" href="/add_external_tool" title="Add a new external tool"><i class="fa-solid fa-plus"></i></a>
-        </span>
-    </div>
-    <hr>
-
-    <div id="top"></div>
-
-    <div style="width:50%; transform: translate(50%, 0);">
+    <div class="page-heading" id="top">
         <div>
-            <input type="search" @input="onInput" placeholder="Search tools" autofocus class="form-control" style="border-radius: 5px;" />
+            <p class="eyebrow">CONNECTED WORKFLOWS</p>
+            <h1>External tools</h1>
+            <p class="page-description">Configure destinations for your enrichment results.</p>
         </div>
+        <a class="btn btn-primary"
+           href="/add_external_tool"><i class="fa-solid fa-plus me-2"
+   aria-hidden="true"></i>Add external tool</a>
     </div>
-    <br>
-
-    <div class="row" style="margin-bottom: 100px;">
-        <div class="col" style="flex: 0 0 50%">
-            <div class="list-group">
-                <div v-for="tool in tools_config" style="display:flex; ">
-                    <input v-if="tool.is_active || tool.is_active == null" type="checkbox" style="margin-right: 5px;" checked @click="change_status(tool)">
-                    <input v-else type="checkbox" style="margin-right: 5px;" @click="change_status(tool)">
-                    <a class="list-group-item list-group-item-action" style="border-radius: 10px;" :title="tool.description" @click="display_config(tool)">
-                        [[tool.name]]
-                    </a>
+    <div v-cloak>
+        <div class="settings-toolbar">
+            <div class="search-field">
+                <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+                <input type="search"
+                       @input="onInput"
+                       placeholder="Search tools"
+                       aria-label="Search external tools"
+                       class="form-control">
+            </div>
+        </div>
+        <div class="settings-layout">
+            <div class="settings-list">
+                <div v-if="!tools_config.length" class="workspace-card empty-state">
+                    <h2>No matching tools</h2>
+                    <p>Add a destination or try a different search.</p>
+                </div>
+                <div class="settings-row" v-for="tool in tools_config" :key="tool.id">
+                    <input type="checkbox"
+                           class="form-check-input"
+                           :checked="tool.is_active !== false"
+                           @change="change_status(tool, $event)"
+                           :aria-label="'Enable '+tool.name">
+                    <button type="button"
+                            class="settings-open"
+                            @click="display_config(tool)"><strong>[[tool.name]]</strong><small>[[tool.url]]</small></button>
+                    <i class="fa-solid fa-chevron-right text-muted" aria-hidden="true"></i>
                 </div>
             </div>
-        </div>
-        <!-- Right panel -->
-        <div v-if="Object.keys(current_config).length" class="side-panel-config">
-            <div class="round-button" title="close" style="margin-top: 3px;">
-                <div class="round-button-circle">
-                    <a @click="close_panel()" class="round-button">x</a>
+            <section v-if="Object.keys(current_config).length"
+                     class="workspace-card settings-panel">
+                <div class="settings-panel-header">
+                    <h2>[[current_config.tool_name]]</h2>
+                    <button type="button"
+                            class="btn btn-sm btn-outline-secondary"
+                            @click="close_panel()"
+                            aria-label="Close external tool settings">
+                        <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+                    </button>
                 </div>
+                <form @submit.prevent="change_config()">
+                    <div class="mb-3">
+                        <label :for="'form-name-'+current_config.tool_id" class="form-label">Name</label><input type="text"
+       class="form-control"
+       :id="'form-name-'+current_config.tool_id"
+       :value="current_config.tool_name">
+                        <span class="field-error" :id="'error-name-'+current_config.tool_id"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label :for="'form-url-'+current_config.tool_id" class="form-label">URL</label><input type="url"
+       class="form-control"
+       :id="'form-url-'+current_config.tool_id"
+       :value="current_config.tool_url">
+                        <span class="field-error" :id="'error-url-'+current_config.tool_id"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label :for="'form-api-key-'+current_config.tool_id" class="form-label">API key</label><input type="password"
+       autocomplete="off"
+       class="form-control"
+       :id="'form-api-key-'+current_config.tool_id"
+       :value="current_config.tool_api_key">
+                        <span class="field-error" :id="'error-api-key-'+current_config.tool_id"></span>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Save settings</button><button type="button"
+        class="btn btn-outline-danger ms-2"
+        @click="delete_tool()">Delete tool</button>
+                </form>
+            </section>
+            <div v-else class="workspace-card empty-state">
+                <i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i>
+                <h2>Select a destination</h2>
+                <p>Review or update an external tool’s connection settings.</p>
             </div>
-            <br>
-            <h4>[[ current_config.tool_name ]]</h4>
-            <div class="mb-3">
-                <label :for="'form-name-'+current_config.tool_id" class="form-label">Name: </label>
-                <input type="text" class="form-control" :id="'form-name-'+current_config.tool_id" :value="current_config.tool_name">
-                <span style="color: brown" :id="'error-name-'+current_config.tool_id"></span>
-            </div>
-            <div class="mb-3">
-                <label :for="'form-url-'+current_config.tool_id" class="form-label">Url: </label>
-                <input type="text" class="form-control" :id="'form-url-'+current_config.tool_id" :value="current_config.tool_url">
-                <span style="color: brown" :id="'error-url-'+current_config.tool_id"></span>
-            </div>
-            <div class="mb-3">
-                <label :for="'form-api-key-'+current_config.tool_id" class="form-label">API key: </label>
-                <input type="text" class="form-control" :id="'form-api-key-'+current_config.tool_id" :value="current_config.tool_api_key">
-                <span style="color: brown" :id="'error-api-key-'+current_config.tool_id"></span>
-            </div>
-            <button class="btn btn-primary" @click="change_config()">Save</button>
-            <button class="btn btn-danger" @click="delete_tool()" style="margin-left: 5px;">Delete</button>
         </div>
     </div>
-    <span id="goTop">[<a href="#top">Go Back Top</a>]</span>
 {% endblock %}
-
-
 {% block script %}
     <script type="module">
         const { createApp, ref, onMounted, nextTick } = Vue
@@ -74,9 +98,9 @@
         createApp({
             delimiters: ['[[', ']]'],
             setup() {
-                const tools_config = ref({})
+                const tools_config = ref([])
                 const current_config = ref({})
-                let loc_tools = {}
+                let loc_tools = []
 
                 async function query_tools(){
                     let res = await fetch("/external_tools/list")
@@ -150,10 +174,12 @@
                     display_toast(res)
                 }
 
-                async function change_status(tool){
+                async function change_status(tool, event){
                     let res = await fetch("/external_tools/change_status?tool_id="+tool.id)
-                    if(await res.status_code == 200){
-                        tool.is_active = !tool.is_active
+                    if(res.ok){
+                        tool.is_active = tool.is_active === false
+                    }else{
+                        event.target.checked = tool.is_active !== false
                     }
                     display_toast(res)
                 }
@@ -172,7 +198,7 @@
                 async function delete_tool(){
                     let loc_id = current_config.value["tool_id"]
                     let res = await fetch("/external_tools/"+loc_id+"/delete_tool")
-                    if(await res.status_code == 200){
+                    if(res.ok){
                         current_config.value = {}
                         let index 
                         for(let i in tools_config.value){
@@ -181,7 +207,8 @@
                                 break
                             }
                         }
-                        delete tools_config.value[index]
+                        tools_config.value.splice(index, 1)
+                        loc_tools = loc_tools.filter(tool => tool.id !== loc_id)
                     }
                     display_toast(res)
                 }

@@ -1,0 +1,62 @@
+{
+  "attributes": {
+    "description": {
+      "description": "Description published by the warninglist.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 0
+    },
+    "matching-mode": {
+      "description": "Whether the check used exact membership or type-aware smart matching.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 0
+    },
+    "reference": {
+      "description": "Reference to the warninglist or its source.",
+      "disable_correlation": true,
+      "misp-attribute": "link",
+      "to_ids": false,
+      "ui-priority": 0
+    },
+    "value": {
+      "description": "The observable value checked against the warninglist.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "warninglist-name": {
+      "description": "Name published by the matching warninglist.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "warninglist-type": {
+      "description": "Matching type declared by the list: string, substring, hostname, cidr or regex.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 0
+    },
+    "warninglist-version": {
+      "description": "Version of the warninglist used for this check.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 0
+    }
+  },
+  "description": "An observable's membership in a MISP warninglist. This records list provenance and matching mode for analyst review; membership alone does not establish a benign verdict.",
+  "meta-category": "misc",
+  "name": "warninglist-match",
+  "required": [
+    "value",
+    "warninglist-name"
+  ],
+  "uuid": "159d1082-6ebf-4575-adb8-083b3c10ff66",
+  "version": 1
+}

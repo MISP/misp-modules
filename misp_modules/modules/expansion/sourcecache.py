@@ -1,6 +1,8 @@
 import base64
+import ipaddress
 import json
 import os
+import socket
 from datetime import datetime, timezone
 from io import BytesIO
 from urllib.parse import urlparse
@@ -40,6 +42,63 @@ def _filename(url):
     return os.path.basename(parsed.path) or parsed.hostname or "capture"
 
 
+NAT64_PREFIX = ipaddress.ip_network("64:ff9b::/96")
+
+
+def _embedded_ipv4(address):
+    """The IPv4 address an IPv6 address carries and is routed to: IPv4-mapped
+    (::ffff:0:0/96), 6to4 (2002::/16) or the NAT64 well-known prefix
+    (64:ff9b::/96). None for an IPv4 address or any other IPv6 address."""
+    if address.version != 6:
+        return None
+    if address.ipv4_mapped is not None:
+        return address.ipv4_mapped
+    if address.sixtofour is not None:
+        return address.sixtofour
+    if address in NAT64_PREFIX:
+        return ipaddress.IPv4Address(int(address) & 0xFFFFFFFF)
+    return None
+
+
+def _is_public_address(ip):
+    """Whether an address, IPv4 or IPv6, is globally routable, and so is the
+    IPv4 address an IPv6 one carries: 64:ff9b::7f00:1 reaches 127.0.0.1."""
+    try:
+        address = ipaddress.ip_address(ip)
+    except ValueError:
+        return False
+    embedded = _embedded_ipv4(address)
+    return address.is_global and (embedded is None or embedded.is_global)
+
+
+def is_safe_url(url):
+    """Whether the URL may be fetched: an http or https URL whose host resolves
+    only to globally routable addresses, IPv4 and IPv6 alike, so that enriching
+    an attribute cannot make the server request loopback, private, unique local
+    or link-local targets such as cloud metadata endpoints. An IPv6 address
+    that carries an IPv4 one must be routable on both counts.
+
+    A backslash, whitespace or control character is refused outright: urlparse
+    and the requests stack behind url_archiver split such a URL differently, so
+    "http://127.0.0.1\\@example.com/" would be checked as example.com and
+    fetched from 127.0.0.1."""
+    if "\\" in url or any(ord(char) <= 32 or ord(char) == 127 for char in url):
+        return False
+    try:
+        parsed = urlparse(url)
+        hostname = parsed.hostname
+    except ValueError:
+        # an unclosed or invalid bracketed IPv6 host, as in "http://[::1/"
+        return False
+    if parsed.scheme not in ("http", "https") or not hostname:
+        return False
+    try:
+        resolved = socket.getaddrinfo(hostname, None)
+    except (socket.gaierror, UnicodeError):
+        return False
+    return all(_is_public_address(info[4][0]) for info in resolved)
+
+
 def handler(q=False):
     if q is False:
         return False
@@ -53,6 +112,8 @@ def handler(q=False):
         misperrors["error"] = "Link is missing"
         return misperrors
     tocache = attribute["value"]
+    if not is_safe_url(tocache):
+        return {"error": f"Blocked URL {tocache}: only http and https URLs of public addresses are cached."}
 
     try:
         data = __archiveLink(archive_path, tocache)

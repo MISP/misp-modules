@@ -1,332 +1,248 @@
-<!-- 
-    Author: David Cruciani
--->
-
-{% extends 'base.html' %}
-
+{% extends "base.html" %}
+{% block title %}New enrichment · MISP Modules{% endblock %}
 {% block content %}
-    <div>
-        <header>
-        </header>
-        <h1>MISP Modules</h1>
-    </div>
-
-    <hr>
-    <br>
-    <div class="row">
-        <div class="col-1">
-            <button style="position: fixed; top: 35%" class="btn btn-primary" @click="actionQuery()">Query</button>
+    <div class="page-heading">
+        <div>
+            <p class="eyebrow">INVESTIGATE & ENRICH</p>
+            <h1>Turn indicators into intelligence.</h1>
+            <p class="page-description">Explore your observables with MISP’s enrichment modules.</p>
         </div>
-        <div class="col-11">
-            <div style="width:50%; transform: translate(50%, 0);">
-                <template v-for="elem in cp_entries">
-                    <div style="margin-top: 10px;">
-                        <input type="hidden" id="parent_id" value="{{sid}}">
-                        <input type="text" v-if="queries" :value="queries[elem-1]" :id="'process-query-'+elem" placeholder="Enter here..." autofocus class="form-control" style="border-radius: 5px;" />
-                        <input type="text" v-else :id="'process-query-'+elem" placeholder="Enter here..." autofocus class="form-control" style="border-radius: 5px;" />
-                    </div>
-                </template>
-                <button @click="add_entry()" class="btn btn-secondary" style="margin-top: 10px;">Add new entry</button>
-                <button @click="delete_entry()" class="btn btn-danger" style="margin-top: 10px;">Delete entry</button>
-                <span v-if="status_site" style="color: brown;" id="status">[[status_site]]</span>
-            </div>
-        
-            <br>
-            <!-- Attributes selection -->
-            <div v-if="misp_attributes_list.length" style="margin-top: 10px; transform: translate(25%, 0);">
-                <div>
-                    <h4>Input Attributes</h4>
-                </div>
-                <div>
-                    <select data-placeholder="Input" class="select2-input form-control" name="input_select" id="input_select">
-                        <option value="None">--</option>
-                        <template v-for="attributes in misp_attributes_list">
-                            <option :value="attributes">[[attributes]]</option>
-                        </template>
-                    </select>
-                </div>
-            </div>
-        
-            <!-- Results modules selection -->
-            <template v-if="modules_list.length">
-                <div v-if="attr_selected.length" style="margin-top: 10px; width: 50%; transform: translate(50%, 0);">
-                    <h4>Modules</h4>
-                    <select data-placeholder="Modules" class="select2-modules form-control" multiple name="modules_select" id="modules_select">
-                        <template v-for="key in modules_list">
-                            <option v-if="checked_attr(key.mispattributes.input)" :value="key.name" :title="key.meta.description">[[key.name]]</option>
-                        </template>
-                    </select>
-                </div>
-            </template>
-
-            <div title="Configure modules even if a configuration as already been given" style="margin-top: 10px; transform: translate(25%, 0);">
-                <input type="checkbox" id="own_config" name="own_config" @click="own_config()" style="margin-right: 5px;">
-                <label for="own_config">Configure all modules </label>
-            </div>
-        
-            <!-- Display in case a module as request_on_query activate -->
-            <div v-if="config_query.length" style="margin-top: 10px; padding: 6px" class="row">
-                <h4>Config</h4>
-                <div class="card col-4" style="margin-top: 10px; padding: 15px" v-for="module in config_query">
-                    <h4>[[module.name]]</h4>
-                    <div v-for="conf in module.meta.config" class="mb-3">
-                        <label :for="'form-'+conf+'-'+module.name" class="form-label">[[conf]]</label>
-                        <input type="text" class="form-control" :id="'form-'+conf+'-'+module.name">
-                        <span style="color: brown;" :id="'error-'+conf+'-'+module.name"></span>
-                    </div>
-                </div>
-            </div>
-        
-            <br/>
-        </div>
+        <a href="/history_session"
+           class="btn btn-outline-secondary"><i class="fa-solid fa-clock-rotate-left me-2"
+   aria-hidden="true"></i>Session history</a>
     </div>
-
+    <div v-cloak>
+        <div v-if="load_error" class="alert alert-danger" role="alert">
+            <strong>Unable to load modules.</strong> [[load_error]]
+            <button class="btn btn-sm btn-outline-danger ms-2"
+                    @click="loadModules"
+                    :disabled="loading">Try again</button>
+        </div>
+        <form class="enrichment-layout"
+              @submit.prevent="runQuery"
+              :aria-busy="submitting">
+            <div class="query-builder">
+                <section class="workspace-card" aria-labelledby="indicators-heading">
+                    <div class="section-heading">
+                        <span class="step-number">1</span>
+                        <div>
+                            <h2 id="indicators-heading">Add your indicators</h2>
+                            <p>Enter a domain, IP address, hash, URL, or another observable.</p>
+                        </div>
+                    </div>
+                    <div class="indicator-entry"
+                         v-for="(entry, index) in entries"
+                         :key="entry.id">
+                        <label :for="'indicator-'+entry.id" class="form-label">Indicator [[index + 1]]</label>
+                        <div class="d-flex gap-2">
+                            <input :id="'indicator-'+entry.id"
+                                   v-model="entry.value"
+                                   type="text"
+                                   class="form-control indicator-input"
+                                   placeholder="e.g. example.org"
+                                   autocomplete="off"
+                                   spellcheck="false"
+                                   :aria-invalid="attempted && !hasIndicators"
+                                   aria-describedby="indicator-help"
+                                   :disabled="submitting">
+                            <button v-if="entries.length > 1"
+                                    type="button"
+                                    class="btn btn-outline-secondary"
+                                    @click="removeEntry(index)"
+                                    :aria-label="'Remove indicator '+(index+1)"
+                                    :disabled="submitting">
+                                <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="entry-toolbar">
+                        <button type="button"
+                                class="btn btn-sm btn-outline-secondary"
+                                @click="addEntry"
+                                :disabled="submitting"><i class="fa-solid fa-plus me-2" aria-hidden="true"></i>Add indicator</button><span id="indicator-help" class="text-muted small">Use one attribute type for all indicators in a query.</span>
+                    </div>
+                </section>
+                <section class="workspace-card" aria-labelledby="attribute-heading">
+                    <div class="section-heading">
+                        <span class="step-number">2</span>
+                        <div>
+                            <h2 id="attribute-heading">Choose an attribute type</h2>
+                            <p>This determines which modules can process your indicators.</p>
+                        </div>
+                    </div>
+                    <label for="attribute-type" class="form-label">MISP attribute</label>
+                    <select id="attribute-type"
+                            v-model="attribute"
+                            class="form-select"
+                            :disabled="loading || submitting || !!load_error"
+                            :aria-invalid="attempted && !attribute">
+                        <option value="">[[loading ? 'Loading attribute types…' : 'Select an attribute type…']]</option>
+                        <option v-for="type in attributes" :key="type" :value="type">[[type]]</option>
+                    </select>
+                    <div class="attribute-shortcuts" v-if="commonAttributes.length">
+                        <span class="text-muted small">Quick select</span><button v-for="type in commonAttributes"
+        :key="type"
+        type="button"
+        class="attribute-chip"
+        :class="{selected: attribute === type}"
+        :aria-pressed="attribute === type"
+        @click="attribute = type"
+        :disabled="submitting">[[type]]</button>
+                    </div>
+                </section>
+                <section class="workspace-card" aria-labelledby="modules-heading">
+                    <div class="section-heading">
+                        <span class="step-number">3</span>
+                        <div>
+                            <h2 id="modules-heading">Select enrichment modules <span class="count-badge" v-if="attribute">[[compatibleModules.length]]</span></h2>
+                            <p>Choose the sources you want to query. Select a card to add it.</p>
+                        </div>
+                    </div>
+                    <div v-if="loading" class="empty-state" role="status">
+                        <i class="fa-solid fa-circle-notch fa-spin" aria-hidden="true"></i>
+                        <p>Loading available modules…</p>
+                    </div>
+                    <div v-else-if="!attribute" class="empty-state">
+                        <i class="fa-solid fa-cubes" aria-hidden="true"></i>
+                        <h3>Your modules will appear here</h3>
+                        <p>Select an attribute type to see compatible enrichment sources.</p>
+                    </div>
+                    <template v-else>
+                        <div class="module-toolbar">
+                            <div class="search-field">
+                                <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+                                <input type="search"
+                                       v-model="search"
+                                       class="form-control"
+                                       aria-label="Search compatible modules"
+                                       placeholder="Search by name or description">
+                            </div>
+                            <button type="button"
+                                    class="btn btn-sm btn-outline-secondary"
+                                    @click="selectVisible"
+                                    :disabled="!filteredModules.length || submitting">Select visible</button>
+                        </div>
+                        <div class="module-grid" v-if="filteredModules.length">
+                            <label class="module-card"
+                                   :class="{selected: selected.includes(module.name)}"
+                                   v-for="module in filteredModules"
+                                   :key="module.name">
+                                <input type="checkbox"
+                                       class="form-check-input"
+                                       :value="module.name"
+                                       v-model="selected"
+                                       :disabled="submitting">
+                                <span><span class="module-name">[[module.name]]</span><span class="module-description">[[module.meta.description || 'Enrich this attribute with '+module.name+'.']]</span><span class="module-note" v-if="module.request_on_query"><i class="fa-solid fa-key me-1" aria-hidden="true"></i>Configuration required</span></span>
+                            </label>
+                        </div>
+                        <div v-else class="empty-state">
+                            <h3>[[compatibleModules.length ? 'No matching modules' : 'No compatible modules']]</h3>
+                            <p>[[compatibleModules.length ? 'Try another name or clear your search.' : 'Choose another attribute type or check the module configuration.']]</p>
+                            <button v-if="search"
+                                    type="button"
+                                    class="btn btn-sm btn-outline-secondary"
+                                    @click="search = ''">Clear search</button>
+                        </div>
+                    </template>
+                </section>
+                <section class="workspace-card"
+                         v-if="configModules.length"
+                         aria-labelledby="config-heading">
+                    <div class="section-heading">
+                        <span class="step-number"><i class="fa-solid fa-sliders" aria-hidden="true"></i></span>
+                        <div>
+                            <h2 id="config-heading">Query configuration</h2>
+                            <p>These settings apply to this query only.</p>
+                        </div>
+                    </div>
+                    <fieldset v-for="module in configModules"
+                              :key="module.name"
+                              class="query-config">
+                        <legend>[[module.name]]</legend>
+                        <div v-for="key in module.meta.config" :key="key" class="mb-3">
+                            <label :for="'config-'+module.name+'-'+key" class="form-label">[[key]]</label>
+                            <input :id="'config-'+module.name+'-'+key"
+                                   v-model="config[module.name][key]"
+                                   :type="isSecret(key) ? 'password' : 'text'"
+                                   class="form-control"
+                                   autocomplete="off"
+                                   :disabled="submitting"
+                                   :aria-invalid="!!configErrors[module.name+' / '+key]"
+                                   :aria-describedby="configErrors[module.name+' / '+key] ? 'error-'+module.name+'-'+key : undefined">
+                            <span v-if="configErrors[module.name+' / '+key]"
+                                  :id="'error-'+module.name+'-'+key"
+                                  class="field-error">Enter a value for [[key]].</span>
+                        </div>
+                    </fieldset>
+                </section>
+            </div>
+            <aside class="query-summary">
+                <section class="workspace-card summary-card" aria-labelledby="summary-heading">
+                    <p class="eyebrow">READY WHEN YOU ARE</p>
+                    <h2 id="summary-heading">Your enrichment</h2>
+                    <dl class="summary-facts">
+                        <div>
+                            <dt>Indicators</dt>
+                            <dd>
+                                [[indicatorCount]]
+                            </dd>
+                        </div>
+                        <div>
+                            <dt>Attribute</dt>
+                            <dd>
+                                [[attribute || 'Not selected']]
+                            </dd>
+                        </div>
+                        <div>
+                            <dt>Modules</dt>
+                            <dd>
+                                [[selected.length]] selected
+                            </dd>
+                        </div>
+                    </dl>
+                    <div class="selected-modules" v-if="selected.length">
+                        <button v-for="name in selected"
+                                :key="name"
+                                type="button"
+                                class="selected-module"
+                                @click="selected = selected.filter(item => item !== name)"
+                                :disabled="submitting"
+                                :aria-label="'Remove module '+name">[[name]] <i class="fa-solid fa-xmark" aria-hidden="true"></i></button><button type="button"
+        class="text-button"
+        @click="selected = []"
+        :disabled="submitting">Clear selection</button>
+                    </div>
+                    <label class="config-toggle">
+                        <input type="checkbox"
+                               v-model="customConfig"
+                               class="form-check-input"
+                               :disabled="submitting"><span>Override module settings<span class="d-block small text-muted">Provide configuration for this query.</span></span>
+                    </label>
+                    <div v-if="status"
+                         class="alert alert-danger query-error"
+                         role="alert"
+                         tabindex="-1"
+                         ref="errorBox">[[status]]</div>
+                    <button type="submit"
+                            class="btn btn-primary run-query"
+                            :disabled="loading || submitting || !!load_error || !modules.length"><i :class="submitting ? 'fa-solid fa-circle-notch fa-spin' : 'fa-solid fa-play'"
+   class="me-2"
+   aria-hidden="true"></i>[[submitting ? 'Starting enrichment…' : 'Run enrichment']]</button>
+                    <p class="summary-hint">Results open in a dedicated view where you can explore, download, and pivot to another query.</p>
+                </section>
+                <div class="workflow-note">
+                    <i class="fa-solid fa-lightbulb" aria-hidden="true"></i>
+                    <div>
+                        <h3>Follow the connections</h3>
+                        <p>Use an attribute in your results to start a related query. Your session history keeps the investigation connected.</p>
+                    </div>
+                </div>
+            </aside>
+        </form>
+    </div>
+    <noscript>
+        <div class="alert alert-warning">Enable JavaScript to select modules and run an enrichment.</div>
+    </noscript>
+    <input type="hidden" id="parent_id" value="{{ sid | default('', true) }}">
 {% endblock %}
-
-{% block script %}
-<script type="module">
-    const { createApp, ref, onMounted, nextTick, defineComponent} = Vue
-    import {message_list} from '/static/js/toaster.js'
-    createApp({
-        delimiters: ['[[', ']]'],
-        setup() {
-            const modules_list = ref([])
-            const misp_attributes_list = ref({})
-            const attr_selected = ref([])
-
-            const progress = ref(0)
-
-            const current_query = ref([])
-            const status_site = ref()
-
-            const config_query = ref([])
-
-            const cp_entries = ref(1)
-            const queries = ref()
-
-            let own_config_bool = false
-
-
-            async function fetchQuery(){
-                const res = await fetch('/get_query')
-                let loc = await res.json()
-                if("message" in loc){
-                    queries.value = false
-                }else{
-                    queries.value = loc["query"]
-                    cp_entries.value = queries.value.length
-                }
-            }
-            fetchQuery()
-
-
-            async function actionQuery(){
-                current_query.value = []
-                for(let i=1;i<=cp_entries.value;i++){
-                    let loc_query_res = $("#process-query-"+i).val()
-                    if(loc_query_res)
-                        current_query.value.push(loc_query_res)
-                }
-                if (!current_query.value) {
-                    status_site.value = '↖ You need to type something'
-                    window.scrollTo(0, 0);
-                    return
-                }else{
-                    status_site.value = ""
-                }
-
-                progress.value = 0
-                let error_flag = false
-
-                let loc = undefined
-                if($("#input_select").val() != "None"){
-                    loc = $("#input_select").val()
-                }
-
-                let loc_modules = undefined
-                if($("#modules_select").val().length){
-                    loc_modules = $("#modules_select").val()
-                }
-
-                let result_dict = {"modules": loc_modules, 
-                                    "input": loc,
-                                    "query": current_query.value,
-                                    "parent_id": $("#parent_id").val()
-                                }
-                result_dict["config"] = {}
-                for(let el in config_query.value){
-                    result_dict["config"][config_query.value[el].name] = {}
-                    for(let conf in config_query.value[el].meta.config){
-                        $("#error-"+config_query.value[el].meta.config[conf]+"-"+config_query.value[el].name).text("")
-                        let loc = $("#form-"+config_query.value[el].meta.config[conf]+"-"+config_query.value[el].name).val()
-                        if(!loc){
-                            error_flag = true
-                            $("#error-"+config_query.value[el].meta.config[conf]+"-"+config_query.value[el].name).text("Please enter value")
-                        }else{
-                            result_dict["config"][config_query.value[el].name][config_query.value[el].meta.config[conf]] = loc
-                        }
-                    }
-                }
-                if(!error_flag){
-                    const res = await fetch('/run_modules',{
-                                    headers: { "X-CSRFToken": $("#csrf_token").val(), "Content-Type": "application/json" },
-                                    method: "POST",
-                                    body: JSON.stringify(result_dict)
-                                })
-                    if(await res.status == 201){
-                        let loc = await res.json()
-                        await nextTick()
-                        window.location.href="/query/" + loc['id']
-                    }else{
-                        let loc = await res.json()
-                        status_site.value = loc['message'] || 'Something went wrong'
-
-                        if(status_site.value.includes("]")){
-                            status_site.value = status_site.value.split("]")[1]
-                        }
-                    }
-                }
-            }
-
-
-            async function query_modules(){
-                let res = await fetch("/get_modules")
-                let loc = await res.json()
-                modules_list.value = loc
-
-                await query_misp_attributes()
-            }
-            query_modules()
-
-            async function query_misp_attributes(){
-                let res = await fetch("/get_list_misp_attributes")
-                let loc = await res.json()
-                misp_attributes_list.value = loc
-
-                await nextTick()
-
-                if (!$('.select2-input').hasClass("select2-hidden-accessible")) {
-                    $('.select2-input').select2({
-                        theme: 'bootstrap-5',
-                        width: '50%'
-                    })
-                }
-
-                $('#input_select').on('change.select2', async function (e) {
-                    attr_selected.value = $(this).select2('data').map(item => item.id)[0]
-                    if(attr_selected.value == 'None' ){
-                        attr_selected.value = []
-                    }
-
-                    await nextTick()
-
-                    if (!$('.select2-modules').hasClass("select2-hidden-accessible")) {
-                        $('.select2-modules').select2({
-                            theme: 'bootstrap-5',
-                            closeOnSelect: false
-                        })
-                        $('#modules_select').on('change.select2', async function (e) {
-                            let loc_list = $(this).select2('data').map(item => item.id)
-                            config_query.value = []
-                            for(let el in loc_list){
-                                for(let index in modules_list.value){
-                                    if(modules_list.value[index].name == loc_list[el]){
-                                        if (own_config_bool){
-                                            config_query.value.push(modules_list.value[index])
-                                        }
-                                        else if(modules_list.value[index].request_on_query){
-                                            config_query.value.push(modules_list.value[index])
-                                        }
-                                        break
-                                    }
-                                }
-                            }
-                        })
-                    }
-                })
-
-                $('#input_select').on('select2:open', function (e) {
-                    document.querySelector('.select2-search__field').focus();
-                })
-            }
-
-            function pairedList() {
-                let pairs = [];
-                for (let i = 0; i < this.items.length; i += 2) {
-                    pairs.push(this.items.slice(i, i + 2));
-                }
-                return pairs;
-            }
-
-            function checked_attr(arr1){
-                let loc = arr1.includes(attr_selected.value)
-                if(!loc && attr_selected.value == 'ip'){
-                    loc = arr1.includes('ip-dst')
-                    if(!loc && attr_selected.value == 'ip'){
-                        loc = arr1.includes('ip-src')
-                    }
-                }
-                return loc
-            }
-
-            function add_entry(){
-                cp_entries.value += 1
-            }
-            function delete_entry(){
-                cp_entries.value -= 1
-            }
-
-            
-            function own_config(){
-                own_config_bool = !own_config_bool
-                if(own_config_bool){
-                    let loc_list = $('#modules_select').val()
-                    config_query.value = []
-                    for(let el in loc_list){
-                        for(let index in modules_list.value){
-                            if(modules_list.value[index].name == loc_list[el]){
-                                config_query.value.push(modules_list.value[index])
-                                break
-                            }
-                        }
-                    }
-                }else{
-                    let loc_list = $('#modules_select').val()
-                    config_query.value = []
-                    for(let el in loc_list){
-                        for(let index in modules_list.value){
-                            if(modules_list.value[index].name == loc_list[el]){
-                                if(modules_list.value[index].request_on_query){
-                                    config_query.value.push(modules_list.value[index])
-                                }
-                                break
-                            }
-                        }
-                    }
-                }
-            }
-
-
-            return {
-                message_list,
-                progress,
-                modules_list,
-                misp_attributes_list,
-                attr_selected,
-                status_site,
-                config_query,
-                cp_entries,
-                queries,
-                actionQuery,
-                pairedList,
-                checked_attr,
-                add_entry,
-                delete_entry,
-                generateCoreFormatUI,
-                own_config
-            }
-        }
-    }).mount('.container-fluid')
-
-</script>
-{% endblock %}
+{% block script %}<script type="module" src="{{ url_for('static', filename='js/home.js') }}"></script>{% endblock %}

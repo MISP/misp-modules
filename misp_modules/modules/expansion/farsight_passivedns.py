@@ -1,7 +1,12 @@
 import json
+import re
 from datetime import datetime
 
+import dns.exception
+import dns.name
+import dns.rdata
 import dnsdb2
+from publicsuffixlist import PublicSuffixList
 from pymisp import Distribution, MISPEvent, MISPObject
 
 from . import check_input_attribute, standard_error_message
@@ -31,7 +36,7 @@ mispattributes = {
     "format": "misp_standard",
 }
 moduleinfo = {
-    "version": "0.5",
+    "version": "0.6",
     "author": "Christophe Vandeplas",
     "description": "Module to access Farsight DNSDB Passive DNS.",
     "module-type": ["expansion", "hover"],
@@ -45,6 +50,8 @@ moduleinfo = {
         " to set a limit of results to get.\n  This limit is set for each lookup, which means we can have an up to the"
         " limit number of passive-dns objects resulting from an rdata query about an IP address, but an up to the limit"
         " number of passive-dns objects for each lookup queries about a domain or a hostname (== twice the limit)."
+        "\n  SOA contact emails are also returned as dns-soa-email attributes. For unescaped mailbox names, the"
+        " Public Suffix List is used to infer the email domain; this is a heuristic. Raw SOA records are preserved."
     ),
     "references": [
         "https://www.farsightsecurity.com/",
@@ -58,6 +65,9 @@ moduleconfig = ["apikey", "server", "limit", "flex_queries"]
 DEFAULT_DNSDB_SERVER = "https://api.dnsdb.info"
 DEFAULT_LIMIT = 10
 DEFAULT_DISTRIBUTION_SETTING = Distribution.your_organisation_only.value
+_PSL = PublicSuffixList()
+_EMAIL_LOCAL_PART = re.compile(r"[A-Za-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[A-Za-z0-9!#$%&'*+/=?^_`{|}~-]+)*")
+_EMAIL_DOMAIN_LABEL = re.compile(r"[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?")
 TYPE_TO_FEATURE = {
     "btc": "Bitcoin address",
     "dkim": "domainkeys identified mail",
@@ -83,6 +93,7 @@ class FarsightDnsdbParser:
         self.attribute = attribute
         self.misp_event = MISPEvent()
         self.misp_event.add_attribute(**attribute)
+        self._soa_emails = {}
         self.passivedns_mapping = {
             "bailiwick": {"type": "domain", "object_relation": "bailiwick"},
             "count": {"type": "counter", "object_relation": "count"},
@@ -110,11 +121,12 @@ class FarsightDnsdbParser:
             for result in results:
                 passivedns_object = MISPObject("passive-dns")
                 passivedns_object.distribution = DEFAULT_DISTRIBUTION_SETTING
-                if result.get("rdata") and isinstance(result["rdata"], list):
-                    for rdata in result.pop("rdata"):
-                        passivedns_object.add_attribute(**self._parse_attribute(comment, "rdata", rdata))
                 for feature, value in result.items():
-                    passivedns_object.add_attribute(**self._parse_attribute(comment, feature, value))
+                    values = value if feature == "rdata" and isinstance(value, list) else [value]
+                    for item in values:
+                        passivedns_object.add_attribute(**self._parse_attribute(comment, feature, item))
+                        if feature == "rdata" and result.get("rrtype") == "SOA":
+                            self._add_soa_email(passivedns_object, item, comment)
                 if result.get("time_first"):
                     passivedns_object.first_seen = result["time_first"]
                 if result.get("time_last"):
@@ -127,6 +139,20 @@ class FarsightDnsdbParser:
         results = {key: event[key] for key in ("Attribute", "Object")}
         return {"results": results}
 
+    def _add_soa_email(self, passivedns_object, rdata, comment):
+        email = _soa_email(rdata)
+        if email is None:
+            return
+        if email not in self._soa_emails:
+            self._soa_emails[email] = self.misp_event.add_attribute(
+                type="dns-soa-email",
+                value=email,
+                comment=f"SOA contact email (public-suffix heuristic for unescaped names). {comment}",
+                distribution=DEFAULT_DISTRIBUTION_SETTING,
+                to_ids=False,
+            )
+        passivedns_object.add_reference(self._soa_emails[email].uuid, "related-to")
+
     def _parse_attribute(self, comment, feature, value):
         attribute = {
             "value": value,
@@ -135,6 +161,39 @@ class FarsightDnsdbParser:
         }
         attribute.update(self.passivedns_mapping[feature])
         return attribute
+
+
+def _soa_email(rdata):
+    """Infer an SOA mailbox's domain while honouring escaped local-part dots."""
+    try:
+        record = dns.rdata.from_text("IN", "SOA", rdata, origin=dns.name.root, relativize=False)
+        labels = [label.decode("utf-8") for label in record.rname.labels[:-1]]
+    except (dns.exception.DNSException, UnicodeDecodeError):
+        return None
+    if len(labels) < 2:
+        return None
+    # An escaped dot in the first DNS label explicitly belongs to the local part.
+    # Otherwise infer the boundary from the registrable domain, including private
+    # suffixes and multi-label suffixes such as co.uk. Unknown suffixes use the
+    # PSL's prevailing wildcard rule. Fall back to the first label for local names.
+    boundary = 1
+    if "." not in labels[0]:
+        domain = _PSL.privatesuffix(".".join(labels))
+        if domain:
+            boundary = max(1, len(labels) - len(domain.split(".")))
+    local_part = ".".join(labels[:boundary])
+    domain_labels = labels[boundary:]
+    # DNS labels can encode bytes that cannot be emitted in an unquoted email
+    # address. Keep those records as raw data rather than exporting an invalid
+    # attribute. MISP also requires a dot in the email's domain.
+    if (
+        len(local_part) > 64
+        or not _EMAIL_LOCAL_PART.fullmatch(local_part)
+        or len(domain_labels) < 2
+        or any(not _EMAIL_DOMAIN_LABEL.fullmatch(label) for label in domain_labels)
+    ):
+        return None
+    return f"{local_part}@{'.'.join(domain_labels)}"
 
 
 def handler(q=False):

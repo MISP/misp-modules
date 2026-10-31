@@ -43,6 +43,29 @@ class TestHtmlToMarkdownUrlSafety(unittest.TestCase):
         ):
             self.assertFalse(is_safe_url("http://example.test/"))
 
+    def test_blocks_unspecified_shared_ula_and_link_local_literals(self):
+        blocked_urls = (
+            "http://0.0.0.0/",
+            "http://100.64.0.1/",
+            "http://[::]/",
+            "http://[fc00::1]/",
+            "http://[fd12:3456::1]/",
+            "http://[fe80::1]/",
+            "http://[::ffff:0.0.0.0]/",
+            "http://[::ffff:100.64.0.1]/",
+        )
+
+        for url in blocked_urls:
+            with self.subTest(url=url):
+                self.assertFalse(is_safe_url(url))
+
+    def test_blocks_hostnames_resolving_to_ula_addresses(self):
+        with patch(
+            "misp_modules.modules.expansion.html_to_markdown.socket.getaddrinfo",
+            return_value=[(None, None, None, None, ("fd00::1", 0, 0, 0))],
+        ):
+            self.assertFalse(is_safe_url("http://example.test/"))
+
     def test_rejects_url_without_hostname(self):
         self.assertFalse(is_safe_url("http:///missing-host"))
 

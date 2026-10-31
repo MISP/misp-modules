@@ -1,12 +1,30 @@
 
+#### [BPF Export](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/bpf_export.py)
+
+Export IDS-marked event and object network attributes as a tcpdump/libpcap capture filter.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/bpf_export.py)]
+
+- **features**:
+>Produces a sorted, deduplicated BPF capture expression for IPv4/IPv6 hosts and networks, IP/port pairs, domains, hostname/port pairs, domain/IP pairs, ports and MAC addresses. Only to_ids attributes are included; deleted data is excluded. Names are resolved by libpcap at filter compilation time. Empty matches return an error rather than an unfiltered capture. See the [usage guide](https://github.com/MISP/misp-modules/blob/main/documentation/export_mod/bpf_export.md).
+
+- **input**:
+>MISP events and object attributes in standard, bare or legacy export format.
+
+- **output**:
+>Base64-encoded libpcap capture filter for tcpdump -F; skipped counts and warnings in the API response.
+
+- **references**:
+>https://www.tcpdump.org/manpages/pcap-filter.7.html
+
+-----
+
 #### [CEF Export](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/cef_export.py)
 
 Module to export a MISP event in CEF format.
 [[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/cef_export.py)]
 
 - **features**:
->The module takes a MISP event in input, to look every attribute. Each attribute matching with some predefined types is then exported in Common Event Format.
->Thus, there is no particular feature concerning MISP Events since any event can be exported. However, 4 configuration parameters recognized by CEF format are required and should be provided by users before exporting data: the device vendor, product and version, as well as the default severity of data.
+>Exports supported event and object attributes as UTF-8 CEF file records, with standard escaping and field validation. IPv6 address records use CEF:1; other records use CEF:0. Device settings and severity have defaults. See the [usage guide](https://github.com/MISP/misp-modules/blob/main/documentation/export_mod/cef_export.md) for mappings and compatibility changes.
 
 - **config**:
 > - Default_Severity
@@ -15,13 +33,64 @@ Module to export a MISP event in CEF format.
 > - Device_Version
 
 - **input**:
->MISP Event attributes
+>MISP events and object attributes in standard, bare or legacy export format.
 
 - **output**:
 >Common Event Format file
 
 - **references**:
->https://community.softwaregrp.com/t5/ArcSight-Connectors/ArcSight-Common-Event-Format-CEF-Guide/ta-p/1589306?attachment-id=65537
+>https://www.microfocus.com/documentation/arcsight/arcsight-smartconnectors-24.3/pdfdoc/cef-implementation-standard/cef-implementation-standard.pdf
+
+-----
+
+#### [Cisco IOS ACL Export](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/cisco_acl_export.py)
+
+<img src=../logos/cisco.png height=60>
+
+Export IDS-marked network attributes as Cisco IOS/IOS-XE IPv4 and IPv6 ACL fragments.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/cisco_acl_export.py)]
+
+- **features**:
+>Exports validated event and object network attributes as named IPv4 extended and IPv6 ACL fragments. Defaults to deny entries; mode=log emits permit entries with log. Cisco ACL logging is first-match and permits matching traffic, so it cannot preserve later deny decisions. Only to_ids attributes are included; deleted data is excluded. DNS-only attributes require opt-in resolve_dns. See the [usage guide](https://github.com/MISP/misp-modules/blob/main/documentation/export_mod/cisco_acl_export.md).
+
+- **config**:
+> - mode
+> - acl_name
+> - resolve_dns
+
+- **input**:
+>MISP events and object attributes in standard, bare or legacy export format.
+
+- **output**:
+>Base64-encoded IOS/IOS-XE ACL configuration fragments; skipped counts and integration warnings.
+
+- **references**:
+> - https://www.cisco.com/c/en/us/td/docs/routers/ios/config/17-x/sec-vpn/b-security-vpn/m_sec-create-ip-apply-0.html
+> - https://www.cisco.com/c/en/us/td/docs/routers/ios/config/17-x/sec-vpn/b-security-vpn/m_ip6-acls-xe.html
+
+-----
+
+#### [Cisco ASA ACL Export](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/cisco_asa_export.py)
+
+Export IDS-marked network attributes as Cisco ASA 9.x IPv4/IPv6 extended ACL entries.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/cisco_asa_export.py)]
+
+- **features**:
+>Exports validated IDS-marked event and object network attributes as deduplicated IPv4/IPv6 configuration fragments. Preserves source/destination address and port constraints. Deleted data is excluded. DNS-only attributes require opt-in resolve_dns. No device connection or additional dependency is required. See the [usage guide](https://github.com/MISP/misp-modules/blob/main/documentation/export_mod/cisco_asa_export.md) for configuration, logging semantics and policy integration.
+
+- **config**:
+> - mode
+> - name_prefix
+> - resolve_dns
+
+- **input**:
+>MISP events and object attributes in standard, bare or legacy export format.
+
+- **output**:
+>Base64-encoded configuration fragment; rule counts, skipped counts and integration warnings.
+
+- **references**:
+>https://www.cisco.com/c/en/us/td/docs/security/asa/asa-cli-reference/A-H/asa-command-ref-A-H/aa-ac-commands.html
 
 -----
 
@@ -53,6 +122,22 @@ Module to export malicious network activity attributes to Cisco fireSIGHT manage
 
 -----
 
+#### [CSV Export](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/csv_export.py)
+
+Export event and object attributes of any type as CSV.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/csv_export.py)]
+
+- **features**:
+>Exports one row per attribute, including object attributes and non-IDS attributes, from every supplied event. Retains event and object context, tags and composite values. Deleted events, objects and attributes are excluded. UTF-8 CSV cells are quoted as needed and formula-like cells are prefixed with an apostrophe for spreadsheet safety. No additional dependencies are required.
+
+- **input**:
+>MISP events in standard, bare or legacy export format.
+
+- **output**:
+>Base64-encoded UTF-8 CSV with a fixed header, including for empty input.
+
+-----
+
 #### [Microsoft Defender for Endpoint KQL Export](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/defender_endpoint_export.py)
 
 <img src=../logos/defender_endpoint.png height=60>
@@ -74,6 +159,59 @@ Defender for Endpoint KQL hunting query export module
 
 - **references**:
 >https://docs.microsoft.com/en-us/windows/security/threat-protection/microsoft-defender-atp/advanced-hunting-schema-reference
+
+-----
+
+#### [Elastic ECS Export](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/elastic_ecs_export.py)
+
+Export event and object indicators as ECS threat indicators in Elasticsearch Bulk NDJSON.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/elastic_ecs_export.py)]
+
+- **features**:
+>Exports all supplied events, including object attributes, to ECS 9.2 threat.indicator fields. Bulk index actions use stable source-based IDs. Only to_ids attributes are included by default; include_non_ids enables contextual attributes. Deleted data is excluded. Source UUIDs, object context, tags, observation times and TLP markings are preserved. No Elasticsearch connection is required. See the [usage guide](https://github.com/MISP/misp-modules/blob/main/documentation/export_mod/elastic_ecs_export.md) for the index template, import procedure, matching fields and lifecycle limitations.
+
+- **config**:
+> - index
+> - include_non_ids
+> - misp_url
+
+- **input**:
+>A list of MISP events in standard or legacy export format.
+
+- **output**:
+>Base64-encoded Bulk NDJSON containing ECS indicator documents; optional API warnings.
+
+- **references**:
+> - https://www.elastic.co/docs/reference/ecs/ecs-threat
+> - https://github.com/elastic/ecs/blob/v9.2.0/schemas/threat.yml
+> - https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-bulk
+
+-----
+
+#### [Fortinet FortiOS ACL Export](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/fortios_export.py)
+
+Export IDS-marked network attributes as FortiOS 7.4+ address objects, services and firewall policies.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/fortios_export.py)]
+
+- **features**:
+>Exports validated IDS-marked event and object network attributes as deduplicated IPv4/IPv6 configuration fragments. Preserves source/destination address and port constraints. Deleted data is excluded. DNS-only attributes require opt-in resolve_dns. No device connection or additional dependency is required. See the [usage guide](https://github.com/MISP/misp-modules/blob/main/documentation/export_mod/fortios_export.md) for configuration, logging semantics and policy integration.
+
+- **config**:
+> - mode
+> - name_prefix
+> - resolve_dns
+> - srcintf
+> - dstintf
+> - start_policy_id
+
+- **input**:
+>MISP events and object attributes in standard, bare or legacy export format.
+
+- **output**:
+>Base64-encoded configuration fragment; rule counts, skipped counts and integration warnings.
+
+- **references**:
+>https://docs.fortinet.com/document/fortigate/7.4.8/cli-reference/333889629/config-firewall-policy
 
 -----
 
@@ -125,6 +263,30 @@ This module is used to export MISP events containing transaction objects into Go
 
 -----
 
+#### [Juniper Junos ACL Export](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/junos_export.py)
+
+Export IDS-marked network attributes as Junos inet/inet6 stateless firewall filter set commands.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/junos_export.py)]
+
+- **features**:
+>Exports validated IDS-marked event and object network attributes as deduplicated IPv4/IPv6 configuration fragments. Preserves source/destination address and port constraints. Deleted data is excluded. DNS-only attributes require opt-in resolve_dns. No device connection or additional dependency is required. See the [usage guide](https://github.com/MISP/misp-modules/blob/main/documentation/export_mod/junos_export.md) for configuration, logging semantics and policy integration.
+
+- **config**:
+> - mode
+> - name_prefix
+> - resolve_dns
+
+- **input**:
+>MISP events and object attributes in standard, bare or legacy export format.
+
+- **output**:
+>Base64-encoded configuration fragment; rule counts, skipped counts and integration warnings.
+
+- **references**:
+>https://www.juniper.net/documentation/us/en/software/junos/routing-policy/topics/concept/firewall-filter-overview.html
+
+-----
+
 #### [Lite Export](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/liteexport.py)
 
 Lite export of a MISP event.
@@ -165,6 +327,55 @@ Export MISP event in Event Query Language
 
 -----
 
+#### [MikroTik RouterOS ACL Export](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/mikrotik_export.py)
+
+Export IDS-marked network attributes as RouterOS IPv4/IPv6 firewall filter commands.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/mikrotik_export.py)]
+
+- **features**:
+>Exports validated IDS-marked event and object network attributes as deduplicated IPv4/IPv6 configuration fragments. Preserves source/destination address and port constraints. Deleted data is excluded. DNS-only attributes require opt-in resolve_dns. No device connection or additional dependency is required. See the [usage guide](https://github.com/MISP/misp-modules/blob/main/documentation/export_mod/mikrotik_export.md) for configuration, logging semantics and policy integration.
+
+- **config**:
+> - mode
+> - name_prefix
+> - resolve_dns
+> - chain
+
+- **input**:
+>MISP events and object attributes in standard, bare or legacy export format.
+
+- **output**:
+>Base64-encoded configuration fragment; rule counts, skipped counts and integration warnings.
+
+- **references**:
+>https://help.mikrotik.com/docs/spaces/ROS/pages/48660574/Filter
+
+-----
+
+#### [Netfilter nftables Export](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/netfilter_export.py)
+
+Export IDS-marked event and object network attributes as nftables block or logging rules.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/netfilter_export.py)]
+
+- **features**:
+>Exports validated IPv4/IPv6 addresses and networks, IP/port pairs, domain/IP pairs, ports and source MAC addresses as deduplicated nftables chain-body rules. Defaults to dropping matches; mode=log logs without changing the firewall verdict. Only to_ids attributes are included, and deleted data is excluded. DNS-only attributes require opt-in resolve_dns and are resolved to address snapshots at export time. See the [usage guide](https://github.com/MISP/misp-modules/blob/main/documentation/export_mod/netfilter_export.md).
+
+- **config**:
+> - mode
+> - resolve_dns
+
+- **input**:
+>MISP events and object attributes in standard, bare or legacy export format.
+
+- **output**:
+>Base64-encoded nftables chain-body fragment; skipped counts and warnings in the API response.
+
+- **references**:
+> - https://netfilter.org/projects/nftables/
+> - https://www.netfilter.org/projects/nftables/manpage.html
+
+-----
+
 #### [Nexthink NXQL Export](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/nexthinkexport.py)
 
 <img src=../logos/nexthink.svg height=60>
@@ -193,17 +404,52 @@ Nexthink NXQL query export module
 
 <img src=../logos/osquery.png height=60>
 
-OSQuery export of a MISP event.
+Export MISP event and object indicators as an osquery query pack.
 [[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/osqueryexport.py)]
 
 - **features**:
->This module export an event as osquery queries that can be used in packs or in fleet management solution like Kolide.
+>Produces a JSON query pack with per-query platform selectors and intervals. Validated against osquery 5.24.0. Defaults to IDS-marked attributes, includes object attributes and excludes deleted data. File scans require an explicit scan_path. Set format=sql for legacy SQL text. See the [usage guide](https://github.com/MISP/misp-modules/blob/main/documentation/export_mod/osqueryexport.md).
+
+- **config**:
+> - format
+> - interval
+> - scan_path
+> - include_non_ids
 
 - **input**:
->MISP Event attributes
+>MISP events and object attributes.
 
 - **output**:
->osquery SQL queries
+>Base64-encoded JSON query pack (default) or SQL text, with counts and provenance.
+
+- **references**:
+>https://osquery.readthedocs.io/en/stable/deployment/configuration/
+
+-----
+
+#### [Palo Alto PAN-OS ACL Export](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/panos_export.py)
+
+Export IDS-marked network attributes as PAN-OS local security policy set commands.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/panos_export.py)]
+
+- **features**:
+>Exports validated IDS-marked event and object network attributes as deduplicated IPv4/IPv6 configuration fragments. Preserves source/destination address and port constraints. Deleted data is excluded. DNS-only attributes require opt-in resolve_dns. No device connection or additional dependency is required. See the [usage guide](https://github.com/MISP/misp-modules/blob/main/documentation/export_mod/panos_export.md) for configuration, logging semantics and policy integration.
+
+- **config**:
+> - mode
+> - name_prefix
+> - resolve_dns
+> - from_zone
+> - to_zone
+
+- **input**:
+>MISP events and object attributes in standard, bare or legacy export format.
+
+- **output**:
+>Base64-encoded configuration fragment; rule counts, skipped counts and integration warnings.
+
+- **references**:
+>https://docs.paloaltonetworks.com/pan-os/11-1/pan-os-cli-quick-start
 
 -----
 
@@ -245,6 +491,96 @@ Simple export of a MISP event to PDF.
 - **requirements**:
 > - PyMISP
 > - reportlab
+
+-----
+
+#### [OpenBSD PF Export](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/pf_export.py)
+
+Export IDS-marked event and object network attributes as OpenBSD PF block or logging rules.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/pf_export.py)]
+
+- **features**:
+>Exports validated IPv4/IPv6 addresses and networks, IP/port pairs, domains, hostnames, domain/IP pairs, hostname/port pairs and ports as deduplicated block drop quick rules by default, or match log (all) rules with mode=log. Logging preserves the existing pass/block policy. Only to_ids attributes are included; deleted data is excluded. DNS names are resolved by PF at ruleset load time. No network access or additional Python dependency is required. See the [usage guide](https://github.com/MISP/misp-modules/blob/main/documentation/export_mod/pf_export.md).
+
+- **config**:
+>mode
+
+- **input**:
+>MISP events and object attributes in standard, bare or legacy export format.
+
+- **output**:
+>Base64-encoded PF ruleset fragment; skipped counts and warnings in the API response.
+
+- **references**:
+> - https://man.openbsd.org/pf.conf
+> - https://man.openbsd.org/pfctl
+
+-----
+
+#### [QRadar Reference Set Export](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/qradar_reference_set_export.py)
+
+Export deduplicated, typed MISP indicators as QRadar reference-set CSV or JSON values.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/qradar_reference_set_export.py)]
+
+- **features**:
+>Exports one selected indicator type from supplied event and object attributes, with validation, normalization and deduplication. Produces a headerless single-column CSV for Reference Set Management, or a JSON value array. Defaults to IDS-marked IPv4 addresses; IPv6 uses a separate text set. No QRadar connection is required. See the [usage guide](https://github.com/MISP/misp-modules/blob/main/documentation/export_mod/qradar_reference_set_export.md).
+
+- **config**:
+> - indicator_type
+> - format
+> - include_non_ids
+
+- **input**:
+>MISP events, including object attributes, in standard, bare or legacy format.
+
+- **output**:
+>Base64-encoded UTF-8 CSV or JSON; counts and provenance are returned separately from the file.
+
+- **references**:
+>https://www.ibm.com/docs/en/qradar-on-cloud?topic=overview-importing-iocs-reference-set
+
+-----
+
+#### [Splunk Lookup Export](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/splunk_export.py)
+
+Export event and object indicators as a Splunk CSV lookup with CIM field mapping hints.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/splunk_export.py)]
+
+- **features**:
+>Exports attributes from every supplied event, including object attributes, to a UTF-8 CSV lookup. Only attributes marked to_ids are included by default; set include_non_ids to true to include other attributes. Deleted attributes and objects are always excluded. Composite attributes are split into independent hunting pivots while retaining the original value, port, UUIDs and object context. Event, object and attribute tags are combined in a JSON array. Unsupported or malformed indicators are counted in the API response warnings. No Splunk connection or additional Python package is required. See the [usage guide](https://github.com/MISP/misp-modules/blob/main/documentation/export_mod/splunk_export.md) for supported types, lookup setup and bounded SPL examples.
+
+- **config**:
+>include_non_ids
+
+- **input**:
+>A list of MISP events in standard or legacy export format.
+
+- **output**:
+>Base64-encoded UTF-8 CSV lookup; optional warnings describe skipped indicators.
+
+- **references**:
+> - https://help.splunk.com/en/splunk-enterprise/search/spl-search-reference/9.4/search-commands/lookup
+> - https://help.splunk.com/en/data-management/common-information-model/6.0/overview/overview-of-the-splunk-common-information-model
+
+-----
+
+#### [Squid Proxy Export](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/squid_export.py)
+
+Export IDS-marked event and object attributes as Squid proxy ACLs and deny rules.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/squid_export.py)]
+
+- **features**:
+>Exports validated addresses/networks, domains, hostnames, HTTP(S) URLs and destination ports as deduplicated Squid ACLs with http_access deny rules. Composite attributes retain their constraints. Only to_ids attributes are included; deleted data is excluded. No network access or additional dependency is required. See the [usage guide](https://github.com/MISP/misp-modules/blob/main/documentation/export_mod/squid_export.md).
+
+- **input**:
+>MISP events and object attributes in standard, bare or legacy export format.
+
+- **output**:
+>Base64-encoded Squid .conf fragment; skipped counts and integration warnings in the API response.
+
+- **references**:
+> - https://www.squid-cache.org/Doc/config/acl/
+> - https://www.squid-cache.org/Doc/config/http_access/
 
 -----
 
@@ -380,6 +716,29 @@ This module is used to create a VirusTotal Graph from a MISP event.
 
 -----
 
+#### [Wazuh CDB Export](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/wazuh_cdb_export.py)
+
+Export MISP event and object indicators as a typed Wazuh CDB source list.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/wazuh_cdb_export.py)]
+
+- **features**:
+>Produces a sorted, deduplicated key-only CDB list for one indicator type: IPv4, IPv6, domain, MD5, SHA-1, SHA-256 or SHA-512. Defaults to to_ids IPv4 attributes. Includes object attributes, normalizes values, quotes IPv6 keys and excludes deleted data. No Wazuh connection is needed. Register the list and reload analysisd through the Wazuh API to activate detection. See the [usage guide](https://github.com/MISP/misp-modules/blob/main/documentation/export_mod/wazuh_cdb_export.md).
+
+- **config**:
+> - indicator_type
+> - include_non_ids
+
+- **input**:
+>MISP events, including object attributes, in standard, bare or legacy format.
+
+- **output**:
+>Base64-encoded CDB source text, with counts, warnings and provenance outside the file.
+
+- **references**:
+>https://documentation.wazuh.com/current/user-manual/ruleset/cdb-list.html
+
+-----
+
 #### [YARA Rule Export](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/yara_export.py)
 
 <img src=../logos/yara.png height=60>
@@ -402,5 +761,30 @@ This module is used to export MISP events to YARA.
 
 - **requirements**:
 >yara-python python library
+
+-----
+
+#### [Zeek Intel Export](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/zeek_intel_export.py)
+
+Export validated MISP event and object indicators as a Zeek Intel Framework feed.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/zeek_intel_export.py)]
+
+- **features**:
+>Produces a tab-separated Intel input file with native indicator types, escaped fields, stable source labels and MISP provenance. Supports addresses/subnets, domains, HTTP(S) URLs, emails, file names/hashes, certificate SHA-1 hashes and SSH MD5 fingerprints. Defaults to IDS-marked attributes and excludes deleted data. No Zeek connection or additional dependency is required. See the [usage guide](https://github.com/MISP/misp-modules/blob/main/documentation/export_mod/zeek_intel_export.md).
+
+- **config**:
+> - source
+> - misp_url
+> - include_non_ids
+
+- **input**:
+>MISP events and object attributes in standard, bare or legacy export format.
+
+- **output**:
+>Base64-encoded ASCII Zeek Intel TSV, with skipped counts and provenance in the API response.
+
+- **references**:
+> - https://docs.zeek.org/en/current/frameworks/intel.html
+> - https://docs.zeek.org/en/current/scripts/base/frameworks/intel/main.zeek.html
 
 -----

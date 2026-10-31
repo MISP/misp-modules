@@ -1,6 +1,9 @@
 import json
 from unittest.mock import patch
 
+import pytest
+import requests
+
 from misp_modules.modules.expansion import hibp
 
 UUID = "5b582d80-7a7e-4b6a-9f22-77656e72bb3b"
@@ -148,3 +151,66 @@ def test_introspection_and_version():
     assert hibp.introspection() == hibp.mispattributes
     assert hibp.mispattributes["format"] == "misp_standard"
     assert hibp.version()["name"] == "Have I Been Pwned Lookup"
+    assert set(hibp.version()["module-type"]) == {"expansion", "hover"}
+
+
+@pytest.mark.parametrize("attribute_type", ["email-src", "email-dst"])
+def test_issue_691_breach_names_are_scalar_object_attributes(attribute_type):
+    names = [
+        "AntiPublic",
+        "ExploitIn",
+        "LinkedIn",
+        "LinkedInScrape",
+        "OnlinerSpambot",
+        "PDL",
+        "Trillian",
+        "VerificationsIO",
+        "Zynga",
+    ]
+    attribute = {"type": attribute_type, "value": "example@example.com", "uuid": UUID}
+    result, _ = _run(attribute, payload=[{"Name": name} for name in names])
+    breaches = _objects(result)
+    assert len(breaches) == len(names)
+    assert [next(a["value"] for a in obj["Attribute"] if a["object_relation"] == "name") for obj in breaches] == names
+    assert all(not isinstance(a["value"], (list, dict)) for obj in breaches for a in obj["Attribute"])
+    assert result["results"]["Attribute"][0]["uuid"] == UUID
+
+
+def test_email_is_encoded_as_a_single_path_segment():
+    attribute = {"type": "email-src", "value": "test+tag/#?%@example.com", "uuid": UUID}
+    _, mock_get = _run(attribute)
+    mock_get.assert_called_once_with(
+        hibp.haveibeenpwned_api_url + "test%2Btag%2F%23%3F%25%40example.com",
+        params={"truncateResponse": "false"},
+        headers={"hibp-api-key": "k", "User-Agent": "MISP-misp-modules/hibp"},
+        timeout=10,
+    )
+
+
+@pytest.mark.parametrize("failure", [requests.Timeout, requests.ConnectionError])
+def test_request_failure_returns_an_error_without_request_details(failure):
+    attribute = {"type": "email-src", "value": "example@example.com", "uuid": UUID}
+    with patch.object(hibp.requests, "get", side_effect=failure("secret request details")):
+        result = hibp.handler(json.dumps({"attribute": attribute, "config": {"api_key": "secret"}}))
+    assert result == {"error": "haveibeenpwned.com API request failed."}
+
+
+def test_invalid_json_returns_an_error():
+    attribute = {"type": "email-src", "value": "example@example.com", "uuid": UUID}
+    result, _ = _run(attribute, payload=None)
+    assert result == {"error": "haveibeenpwned.com returned an invalid JSON response."}
+
+
+@pytest.mark.parametrize("payload", [{}, {"error": "API error"}, "unexpected", ["LinkedIn"], [None], [{}]])
+def test_invalid_breach_response_returns_an_error(payload):
+    attribute = {"type": "email-src", "value": "example@example.com", "uuid": UUID}
+    result, _ = _run(attribute, payload=payload)
+    assert result == {"error": "haveibeenpwned.com returned an invalid breach response."}
+
+
+@pytest.mark.parametrize("config", [{}, {"api_key": ""}, {"api_key": None}])
+def test_incomplete_authentication_does_not_query_hibp(config):
+    attribute = {"type": "email-src", "value": "example@example.com", "uuid": UUID}
+    result, mock_get = _run(attribute, config=config)
+    assert "error" in result
+    mock_get.assert_not_called()

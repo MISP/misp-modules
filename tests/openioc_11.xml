@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<OpenIOC xmlns="http://openioc.org/schemas/OpenIOC_1.1" id="legacy-example" last-modified="2015-12-18T23:05:08Z">
+  <metadata>
+    <short_description>Legacy OpenIOC 1.1 example</short_description>
+    <description>Archived indicators for analyst review.</description>
+    <authored_by>Example analyst</authored_by>
+    <authored_date>2015-12-18T18:47:14Z</authored_date>
+  </metadata>
+  <criteria>
+    <Indicator operator="OR" id="root">
+      <IndicatorItem id="hash" condition="is" preserve-case="false" negate="false">
+        <Context document="FileItem" search="FileItem/Md5sum" type="mir"/>
+        <Content type="md5">d41d8cd98f00b204e9800998ecf8427e</Content>
+      </IndicatorItem>
+      <Indicator operator="AND" id="group">
+        <IndicatorItem id="name" condition="contains" preserve-case="true" negate="false">
+          <Context document="FileItem" search="FileItem/FileName" type="mir"/>
+          <Content type="string">legacy.exe</Content>
+          <Comment>Only meaningful with the other group member.</Comment>
+        </IndicatorItem>
+        <IndicatorItem id="excluded-host" condition="is" preserve-case="false" negate="true">
+          <Context document="DnsEntryItem" search="DnsEntryItem/Host" type="mir"/>
+          <Content type="string">trusted.example</Content>
+        </IndicatorItem>
+      </Indicator>
+      <IndicatorItem id="custom" condition="matches">
+        <Context document="CustomItem" search="CustomItem/Pattern" type="mir"/>
+        <Content type="string">^custom.*$</Content>
+      </IndicatorItem>
+    </Indicator>
+  </criteria>
+</OpenIOC>

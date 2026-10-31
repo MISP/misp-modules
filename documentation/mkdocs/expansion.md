@@ -98,28 +98,29 @@ On demand query API for OSINT.digitalside.it project.
 
 <img src=../logos/apivoid.png height=60>
 
-Module to query APIVoid with some domain attributes.
+Query APIVoid v2 for DNS records, SSL certificates and email verification.
 [[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/apivoid.py)]
 
 - **features**:
->This module takes a domain name and queries API Void to get the related DNS records and the SSL certificates. It returns then those pieces of data as MISP objects that can be added to the event.
+>This module queries APIVoid v2 for DNS records and SSL certificates of domains and hostnames, or verifies email addresses. Results are returned as MISP objects.
 >
->To make it work, a valid API key and enough credits to proceed 2 queries (0.06 + 0.07 credits) are required.
+>Configure `apikey` with a key from the APIVoid v2 dashboard (https://dash.apivoid.com/); v1 keys must be replaced. Each successful API call costs 1 credit: domain and hostname enrichment uses 2 calls, and email verification uses 1. Account overage settings apply.
 
 - **config**:
 >apikey
 
 - **input**:
->A domain attribute.
+>A domain, hostname or email attribute.
 
 - **output**:
->DNS records and SSL certificates related to the domain.
+>DNS records, X.509 certificates or an APIVoid email verification object.
 
 - **references**:
->https://www.apivoid.com/
+> - https://www.apivoid.com/
+> - https://docs.apivoid.com/
 
 - **requirements**:
->A valid APIVoid API key with enough credits to proceed 2 queries
+>An APIVoid v2 API key with 2 credits for domain lookups or 1 credit for email verification
 
 -----
 
@@ -313,6 +314,31 @@ An expansion hover module to get a blockchain balance from a BTC address in MISP
 
 - **output**:
 >Text to describe the blockchain balance and the transactions related to the btc address in input.
+
+-----
+
+#### [CCCS YARA Metadata Validator](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/cccs_yara.py)
+
+<img src=../logos/yara.png height=60>
+
+Validate YARA rule metadata against the CCCS YARA specification.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/cccs_yara.py)]
+
+- **features**:
+>Checks every rule in a YARA attribute using the upstream CCCS specification and returns errors and warnings per rule. Metadata generation is disabled and the original attribute is preserved. YARA file includes are disabled. Install the ATT&CK dataset before starting the module server; see the [setup and examples](https://github.com/MISP/misp-modules/blob/main/documentation/expansion/cccs_yara.md).
+
+- **input**:
+>A YARA attribute containing one or more rules.
+
+- **output**:
+>Text describing CCCS metadata validity, errors and warnings for each rule.
+
+- **references**:
+>https://github.com/CybercentreCanada/CCCS-Yara
+
+- **requirements**:
+> - cccs-yara Python library
+> - Local MITRE ATT&CK STIX data (MITRE_STIX_DATA_PATH)
 
 -----
 
@@ -882,6 +908,34 @@ DomainTools MISP expansion module.
 
 -----
 
+#### [DuckDuckGo Search](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/duckduckgo_search.py)
+
+Search DuckDuckGo for web references to an attribute without an API key.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/duckduckgo_search.py)]
+
+- **features**:
+>Searches the attribute value using the ddgs DuckDuckGo backend, without automatic provider fallback. Returns annotation objects containing result links, titles and snippets, related to the input attribute. max_results defaults to 5 (1-25); timeout defaults to 10 seconds (1-60) per search request. Blank settings use defaults. Searches use the library's us-en region and moderate safe search. This unofficial search integration can be rate-limited or broken by upstream changes. The attribute value is sent to DuckDuckGo; result pages are not downloaded. Search results are references for review, not maliciousness verdicts.
+
+- **config**:
+> - max_results
+> - timeout
+
+- **input**:
+>A URL, domain, hostname or text attribute.
+
+- **output**:
+>Related annotation objects with search result links, titles and snippets; to_ids is false.
+
+- **references**:
+> - https://github.com/deedy5/ddgs
+> - https://github.com/MISP/misp-modules/issues/601
+
+- **requirements**:
+> - ddgs>=9.16.1,<10
+> - pymisp
+
+-----
+
 #### [EQL Query Generator](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/eql.py)
 
 <img src=../logos/eql.png height=60>
@@ -980,21 +1034,60 @@ Module to access Farsight DNSDB Passive DNS.
 
 -----
 
+#### [GCVE CPE](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/gcve_cpe.py)
+
+Expand CPE attributes with GCVE CPE catalog metadata, package mappings and vulnerability references.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/gcve_cpe.py)]
+
+- **features**:
+>Query the public CPE Editor API without an API key. Search results are checked for an exact CPE URI match. Catalog metadata, deprecation information and PURL mappings are retained in a related annotation. Vulnerability references become vulnerability objects with their cpe_applicability and rationale preserved. Only references marked vulnerable populate vulnerable-configuration; other applicability states are context. api_url defaults to https://cpe.gcve.eu (instance root, without /api); timeout defaults to 30 seconds per request (maximum 120); max_pages defaults to 5 (1-20), with 100 search results per page. Blank or null settings use defaults. CPE 2.3 and URI bindings are looked up literally, without conversion.
+
+- **config**:
+> - api_url
+> - timeout
+> - max_pages
+
+- **input**:
+>CPE attribute.
+
+- **output**:
+>A catalog annotation and related vulnerability objects in MISP standard format.
+
+- **references**:
+> - https://cpe.gcve.eu/api/docs
+> - https://cpe.gcve.eu/api/openapi.yaml
+
+- **requirements**:
+> - requests
+> - pymisp
+
+-----
+
 #### [GeoIP ASN Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/geoip_asn.py)
 
 <img src=../logos/maxmind.png height=60>
 
-Query a local copy of the Maxmind Geolite ASN database (MMDB format)
+Query a local copy of the MaxMind GeoLite2 ASN database (MMDB format)
 [[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/geoip_asn.py)]
 
 - **features**:
->The module takes an IP address attribute as input and queries a local copy of the Maxmind's Geolite database to get information about the related AS number.
+>The module takes an IP address attribute as input and queries a local copy of the MaxMind GeoLite2 ASN database to get information about the related AS number.
 
 - **config**:
->local_geolite_db
+>local_geoip_db, local_geolite_db
+
+Set `local_geoip_db` to the full path of the database on the **misp-modules server** (or inside its container). The service user must have read access to the file. Use an extracted GeoLite2 ASN `.mmdb` file. The ASN module requires the ASN database; GeoIP2 ISP and other database products are not compatible with this lookup. Download and extract the database before configuring the module; compressed archives, CSV files, and legacy `.dat` files are not supported.
+
+Existing `local_geolite_db` configurations remain supported. A nonempty `local_geoip_db` takes precedence; if it cannot be loaded, the module returns an error without falling back to another database.
+
+Example query configuration:
+
+```json
+{"config": {"local_geoip_db": "/var/lib/GeoIP/GeoLite2-ASN.mmdb"}}
+```
 
 - **descrption**:
->An expansion module to query a local copy of Maxmind's Geolite database with an IP address, in order to get information about its related AS number.
+>An expansion module to query a local copy of MaxMind GeoLite2 ASN database with an IP address, in order to get information about its related AS number.
 
 - **input**:
 >An IP address MISP attribute.
@@ -1006,7 +1099,7 @@ Query a local copy of the Maxmind Geolite ASN database (MMDB format)
 >https://www.maxmind.com/en/home
 
 - **requirements**:
->A local copy of Maxmind's Geolite database
+>A local copy of MaxMind GeoLite2 ASN database
 
 -----
 
@@ -1014,14 +1107,24 @@ Query a local copy of the Maxmind Geolite ASN database (MMDB format)
 
 <img src=../logos/maxmind.png height=60>
 
-An expansion module to query a local copy of Maxmind's Geolite database with an IP address, in order to get information about the city where it is located.
+An expansion module to query a local copy of MaxMind GeoIP2 or GeoLite2 database with an IP address, in order to get information about the city where it is located.
 [[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/geoip_city.py)]
 
 - **features**:
->The module takes an IP address attribute as input and queries a local copy of the Maxmind's Geolite database to get information about the city where this IP address is located.
+>The module takes an IP address attribute as input and queries a local copy of the MaxMind GeoIP2 or GeoLite2 database to get information about the city where this IP address is located.
 
 - **config**:
->local_geolite_db
+>local_geoip_db, local_geolite_db
+
+Set `local_geoip_db` to the full path of the database on the **misp-modules server** (or inside its container). The service user must have read access to the file. Use an extracted GeoIP2 City (paid) or GeoLite2 City `.mmdb` file. Download and extract the database before configuring the module; compressed archives, CSV files, and legacy `.dat` files are not supported.
+
+Existing `local_geolite_db` configurations remain supported, including paths to paid databases. A nonempty `local_geoip_db` takes precedence; if it cannot be loaded, the module returns an error without falling back to another database.
+
+Example query configuration:
+
+```json
+{"config": {"local_geoip_db": "/var/lib/GeoIP/GeoIP2-City.mmdb"}}
+```
 
 - **input**:
 >An IP address MISP attribute.
@@ -1033,7 +1136,7 @@ An expansion module to query a local copy of Maxmind's Geolite database with an 
 >https://www.maxmind.com/en/home
 
 - **requirements**:
->A local copy of Maxmind's Geolite database
+>A local copy of MaxMind GeoIP2 or GeoLite2 database
 
 -----
 
@@ -1041,16 +1144,26 @@ An expansion module to query a local copy of Maxmind's Geolite database with an 
 
 <img src=../logos/maxmind.png height=60>
 
-Query a local copy of Maxminds Geolite database, updated for MMDB format
+Query a local MaxMind GeoIP2 or GeoLite2 Country database (MMDB format)
 [[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/geoip_country.py)]
 
 - **features**:
->This module takes an IP address MISP attribute as input and queries a local copy of the Maxmind's Geolite database to get information about the location of this IP address.
+>This module takes an IP address MISP attribute as input and queries a local copy of the MaxMind GeoIP2 or GeoLite2 database to get information about the location of this IP address.
 >
 >Please note that composite attributes domain|ip are also supported.
 
 - **config**:
->local_geolite_db
+>local_geoip_db, local_geolite_db
+
+Set `local_geoip_db` to the full path of the database on the **misp-modules server** (or inside its container). The service user must have read access to the file. Use an extracted GeoIP2 Country (paid) or GeoLite2 Country `.mmdb` file. Download and extract the database before configuring the module; compressed archives, CSV files, and legacy `.dat` files are not supported.
+
+Existing `local_geolite_db` configurations remain supported, including paths to paid databases. A nonempty `local_geoip_db` takes precedence; if it cannot be loaded, the module returns an error without falling back to another database.
+
+Example query configuration:
+
+```json
+{"config": {"local_geoip_db": "/var/lib/GeoIP/GeoIP2-Country.mmdb"}}
+```
 
 - **input**:
 >An IP address MISP Attribute.
@@ -1062,7 +1175,34 @@ Query a local copy of Maxminds Geolite database, updated for MMDB format
 >https://www.maxmind.com/en/home
 
 - **requirements**:
->A local copy of Maxmind's Geolite database
+>A local copy of MaxMind GeoIP2 or GeoLite2 database
+
+-----
+
+#### [geoPlugin Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/geoplugin.py)
+
+An expansion and hover module to geolocate an IP address with geoPlugin.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/geoplugin.py)]
+
+- **features**:
+>Queries the geoPlugin HTTPS API using the configured `api_key`. Returns available country, region, city, postal code, coordinates and accuracy radius in a geolocation object linked to the source attribute. Continent and timezone are included as text. Empty fields are omitted. Only public IPv4 addresses are queried, following the API's documented address support. The IP component of domain|ip is used without resolving the domain. See documentation/expansion/geoplugin.md for configuration and an example request.
+
+- **config**:
+>api_key
+
+- **input**:
+>A public IPv4 address in an ip-src, ip-dst or domain|ip attribute.
+
+- **output**:
+>A geolocation object referencing the original attribute. New attributes have to_ids=false.
+
+- **references**:
+> - https://www.geoplugin.com/docs
+> - https://github.com/MISP/misp-modules/issues/438
+
+- **requirements**:
+> - A geoPlugin API key
+> - requests
 
 -----
 
@@ -1198,7 +1338,10 @@ Module to access haveibeenpwned.com API.
 [[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/hibp.py)]
 
 - **features**:
->The module takes an email address as input and queries haveibeenpwned.com API to find additional information about it. This additional information actually tells if any account using the email address has already been compromised in a data breach.
+>The module takes an email address as input and queries haveibeenpwned.com API to find additional information about it. This additional information actually tells if any account using the email address has already been compromised in a data breach, and returns one breach object per breach it appears in. Results are available in hover lookups and can be imported into an event through enrichment.
+
+- **requirements**:
+>A Have I Been Pwned API key with access to the breached account API.
 
 - **config**:
 >api_key
@@ -1207,7 +1350,7 @@ Module to access haveibeenpwned.com API.
 >An email address
 
 - **output**:
->Additional information about the email address.
+>One breach object per data breach the email address appears in.
 
 - **references**:
 >https://haveibeenpwned.com/
@@ -1831,7 +1974,7 @@ Module to push malware samples to a MWDB instance
 [[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/mwdb.py)]
 
 - **features**:
->An expansion module to push malware samples to a MWDB (https://github.com/CERT-Polska/mwdb-core) instance. This module does not push samples to a sandbox. This can be achieved via Karton (connected to the MWDB). Does: * Upload of attachment or malware sample to MWDB * Tags of events and/or attributes are added to MWDB. * Comment of the MISP attribute is added to MWDB. * A link back to the MISP event is added to MWDB via the MWDB attribute.  * A link to the MWDB attribute is added as an enrichted attribute to the MISP event.
+>Uploads an attachment or unpacked MISP malware sample to MWDB using an API key. Optionally forwards event and attribute tags, the attribute comment and the MISP event ID. Returns a link to the uploaded sample. mwdb_url accepts an instance URL or an API URL ending in /api/. Boolean settings accept true/false, yes/no, on/off and 1/0. mwdb_public defaults to true for compatibility; set it to false to use normal instance sharing. See documentation/expansion/mwdb.md for configuration.
 
 - **config**:
 > - mwdb_apikey
@@ -1845,10 +1988,41 @@ Module to push malware samples to a MWDB instance
 >Attachment or malware sample
 
 - **output**:
->Link attribute that points to the sample at the MWDB instane
+>Link attribute pointing to the uploaded MWDB sample
+
+- **references**:
+>https://mwdb.readthedocs.io/en/latest/user-guide/8-REST-and-mwdblib.html
 
 - **requirements**:
->* mwdblib installed (pip install mwdblib) ; * (optional) keys.py file to add tags of events/attributes to MWDB * (optional) MWDB attribute created for the link back to MISP (defined in mwdb_misp_attribute)
+> - mwdblib>=4.0.0 and MWDB Core>=2.6.0
+> - Optional keys.py file for MISP event and attribute tags
+> - Optional MWDB attribute key configured in mwdb_misp_attribute
+
+-----
+
+#### [MWDB Query](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/mwdb_query.py)
+
+Query an MWDB instance for an existing file by hash.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/mwdb_query.py)]
+
+- **features**:
+>Looks up MD5, SHA-1, SHA-256 or SHA-512 using GET /file/{hash} with Bearer authentication. Reuses the MWDB Submit configuration names mwdb_apikey and mwdb_url (the API base URL ending in /api/). Returns a file object, a sample link and an annotation containing MWDB tags, file type and upload time. Tags remain contextual data rather than being applied as MISP tags. No samples are uploaded or downloaded.
+
+- **config**:
+> - mwdb_apikey
+> - mwdb_url
+
+- **input**:
+>md5, sha1, sha256 or sha512 MISP attribute.
+
+- **output**:
+>File metadata, MWDB context and a link to the sample.
+
+- **references**:
+>https://mwdb.readthedocs.io/
+
+- **requirements**:
+>requests
 
 -----
 
@@ -1983,6 +2157,35 @@ Module to process a full query on Onyphe.
 - **requirements**:
 > - onyphe python library
 > - An access to the Onyphe API (apikey)
+
+-----
+
+#### [OpenCTI Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/opencti.py)
+
+Query an OpenCTI instance for exact observable matches and their context and source references.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/opencti.py)]
+
+- **features**:
+>Read-only GraphQL lookup using OpenCTI's FilterGroup API (OpenCTI 5.12 or later). Set url to the instance base URL (optionally ending in /graphql) and token to its API token. max_results defaults to 20 (1-100) and timeout to 30 seconds (1-120). Domains and IPs are normalized; file hashes, including filename|hash attributes, are matched against the specific hash algorithm. Results contain text context (description, score, author, labels, markings and timestamps), links to OpenCTI and external references. Imported attributes have to_ids=false; TLP markings are retained as tags and other markings as text. Custom markings and OpenCTI access controls are not translated into MISP sharing restrictions. No data is written to OpenCTI and no relationship traversal or synchronization is performed. A result cap notice is returned when more matches are available. No matches produce an empty Attribute list.
+
+- **config**:
+> - url
+> - token
+> - max_results
+> - timeout
+
+- **input**:
+>A domain, hostname, IP address, URL, email address or file hash (including filename|hash).
+
+- **output**:
+>MISP text and link attributes with provenance and TLP tags.
+
+- **references**:
+>https://docs.opencti.io/latest/reference/api/
+
+- **requirements**:
+> - requests
+> - An OpenCTI instance and an API token with knowledge read access.
 
 -----
 
@@ -2680,6 +2883,35 @@ An expansion modules for SecurityTrails.
 
 -----
 
+#### [Sherlock Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/sherlock.py)
+
+Find social media accounts by username with Sherlock.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/sherlock.py)]
+
+- **features**:
+>Runs the Sherlock CLI and returns user-account objects for claimed usernames only. Text is searched as a single literal username, without extracting names or generating variants. Email input uses the local part before @ as a candidate username; matches do not verify email ownership or identity. Install Sherlock for the misp-modules service user and put sherlock on its PATH, or set sherlock_path to the executable's absolute path (not a shell command). Optional sites is a comma-separated list of Sherlock site names; github-username defaults to GitHub only. timeout is the per-site timeout in seconds (default 10); scan_timeout bounds the whole process (default 120). Both must be positive finite numbers. Keep scan_timeout below the MISP enrichment and module-server request timeouts, or raise those timeouts for broad searches. Sherlock contacts the selected sites and downloads its current site definitions. Results can contain false positives and should be reviewed.
+
+- **config**:
+> - sherlock_path
+> - sites
+> - timeout
+> - scan_timeout
+
+- **input**:
+>A target-user, github-username, text, or email attribute. A leading @ on a username is removed.
+
+- **output**:
+>One user-account object per match, with username, platform, profile link and a reference to the input.
+
+- **references**:
+> - https://github.com/sherlock-project/sherlock
+> - https://sherlockproject.xyz/usage
+
+- **requirements**:
+>Install the sherlock-project CLI separately (for example: pipx install sherlock-project). No API key required.
+
+-----
+
 #### [Shodan Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/shodan.py)
 
 <img src=../logos/shodan.png height=60>
@@ -2766,6 +2998,37 @@ Expands a SigMF Recording object into a SigMF Expanded Recording object, extract
 
 - **features**:
 >
+
+-----
+
+#### [SoChain](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/sochain.py)
+
+Get the balance, activity, counterparties and address poisoning findings of a BTC, LTC, DOGE or ZEC address from SoChain.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/sochain.py)]
+
+- **features**:
+>Query the SoChain API v3 for a btc attribute or a coin-address object. A btc attribute is looked up on Bitcoin. A coin-address object is looked up on the network named by its symbol (BTC, LTC, DOGE or ZEC); without a symbol, the network is the first of Bitcoin, Litecoin, Dogecoin and Zcash on which SoChain says the address is valid.
+>
+>The result is a coin-address object with the balance, total received and sent, the number of transactions and the first and last activity, referencing the input. Recent counterparties are returned as coin-address objects linked with `paid` references (5 on hover, 50 when the magnifying glass is clicked), whose comments give the amount, transaction and block. When look-alike addresses sent the address dust to poison its history, each one is returned as a coin-address object that `impersonates` the address it copies.
+>
+>No API key is needed for up to 2,500 lookups a day per IP. With a key from https://sochain.com/dashboard, lookups count against that account's plan.
+
+- **config**:
+>apikey
+
+- **input**:
+>A btc attribute, or a coin-address object with a BTC, LTC, DOGE or ZEC address.
+
+- **output**:
+>coin-address objects: the address, its recent counterparties and any look-alike addresses.
+
+- **references**:
+> - https://sochain.com/docs
+> - https://sochain.com/api/v3/openapi.json
+
+- **requirements**:
+> - requests
+> - PyMISP
 
 -----
 
@@ -3096,6 +3359,38 @@ Look up an IOC in TweetFeed (tweetfeed.live), the free CC0 feed of URLs, domains
 
 - **requirements**:
 >No API key required.
+
+-----
+
+#### [URL Shortener Resolver](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/url_shortener.py)
+
+Resolve known HTTP(S) URL shorteners into a shortened-link object.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/url_shortener.py)]
+
+- **features**:
+>Resolve known shorteners and optional additional_shorteners (comma-separated exact hostnames). Follow at most max_redirects HTTP redirects (default 10, maximum 20), using HEAD with streamed GET fallback on HTTP 405/501. timeout is per request (default 10 seconds, maximum 30); DNS uses the system resolver. Every hop must resolve exclusively to public addresses on ports 80/443. Connections are pinned to a validated address with TLS hostname verification. Return the original attribute and a shortened-link object with the final destination and ordered redirect history. No API key, proxy, browser, JavaScript or HTML redirect processing is used. Generated attributes have to_ids=false.
+
+- **config**:
+> - additional_shorteners
+> - max_redirects
+> - timeout
+
+- **input**:
+>A URL attribute containing type, value and UUID.
+
+- **output**:
+>A shortened-link object referencing the original URL attribute.
+
+- **references**:
+> - https://github.com/MISP/misp-modules/issues/260
+> - https://github.com/MISP/misp-objects/blob/main/objects/shortened-link/definition.json
+
+- **requirements**:
+> - urllib3
+> - certifi
+> - idna
+> - PyMISP
+> - Direct outbound HTTP(S) and DNS access
 
 -----
 
