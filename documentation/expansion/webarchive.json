@@ -1,0 +1,33 @@
+{
+  "name": "Webarchive (Wayback Machine)",
+  "module": "webarchive",
+  "module-type": ["expansion"],
+  "description": "Find an existing accessible snapshot using the Wayback Availability API.",
+  "requirements": ["requests", "PyMISP"],
+  "features": [
+    "Accept url, link, domain and hostname attributes using the misp_standard format. Domains and hostnames query http://<value>/; this is a root URL lookup, not a search of all archived pages on the domain.",
+    "Without timestamp, retrieve the most recent accessible snapshot returned by the API. With timestamp, retrieve the closest snapshot; it may be before or after the requested date. Only an available snapshot with HTTP status 200 produces an object.",
+    "Return a page-capture object containing url (queried URL), archive (snapshot link) and capture-date (actual snapshot time in UTC). Preserve the original attribute and reference its UUID with related-to. Generated attributes have to_ids=false.",
+    "Reuse the upstream page-capture template, bundled for compatibility with PyMISP releases that do not include it yet. Import/update this standard template in MISP if your server does not have it.",
+    "No API key or new archive submission is required. Only metadata is queried; the module does not contact the original site or download archived page contents. Each API request has a 15-second timeout.",
+    "Missing or inaccessible snapshots return an explanatory error without an object. HTTP failures, timeouts, malformed JSON and invalid snapshot metadata also return errors."
+  ],
+  "config": {
+    "timestamp": "Optional string of 1-14 digits (YYYYMMDDhhmmss), for example 20060101. Omit or leave empty for the latest accessible snapshot."
+  },
+  "references": [
+    "https://archive.org/help/wayback_api.php",
+    "https://github.com/MISP/misp-objects/blob/main/objects/page-capture/definition.json"
+  ],
+  "examples": [
+    {
+      "module": "webarchive",
+      "attribute": {
+        "type": "url",
+        "value": "https://example.com/",
+        "uuid": "5b582d80-7a7e-4b6a-9f22-77656e72bb3b"
+      },
+      "config": {"timestamp": "20060101"}
+    }
+  ]
+}

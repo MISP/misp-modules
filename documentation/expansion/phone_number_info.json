@@ -1,0 +1,86 @@
+{
+  "name": "Phone Number Information",
+  "module": "phone_number_info",
+  "module-type": ["expansion"],
+  "description": "Offline phone-number normalization, numbering-plan geography and original carrier lookup.",
+  "requirements": [
+    "phonenumbers >=9.0,<10.0, included in the minimal and all installation extras",
+    "The existing phone-number MISP object template"
+  ],
+  "features": [
+    "Use libphonenumber metadata locally. No API credentials, network requests, calls or SMS messages are required.",
+    "Normalize valid numbers to E.164 and report the calling code, inferred region, number type, numbering-plan area, original carrier and possible time zones.",
+    "Preserve the original attribute, UUID, tags, comment and detection flag. The returned phone-number object references the original attribute with derived-from.",
+    "Preserve extensions in the summary rather than appending them to the E.164 number. All newly generated attributes use to_ids=false. Descriptive text attributes disable correlation.",
+    "Location describes numbering-plan allocation, not the subscriber's current physical location. Number portability can change the current operator; carrier results describe original allocation when applicable.",
+    "Validity means the number matches the library's numbering-plan metadata. It does not establish assignment, reachability, ownership or maliciousness. Metadata may lag numbering-plan changes; the summary records the installed library version.",
+    "Shared calling codes are interpreted using the full number. Non-geographic calling codes do not produce a country-code attribute. Missing geographic, carrier or time-zone metadata is labeled Unknown.",
+    "Parseable but invalid numbers return the original attribute plus a text diagnostic showing possible and valid status, without creating a normalized phone-number object. Malformed or ambiguous input returns an error. Short codes are outside this module's scope."
+  ],
+  "references": [
+    "https://github.com/daviddrysdale/python-phonenumbers",
+    "https://github.com/google/libphonenumber/blob/master/FAQ.md",
+    "https://github.com/MISP/misp-modules/issues/538"
+  ],
+  "input": {
+    "format": "misp_standard",
+    "types": ["phone-number", "whois-registrant-phone"],
+    "required_attribute_fields": ["type", "value", "uuid"],
+    "value": "A nonempty phone-number string. Use a leading + for an international number, or set default_region for national numbers and international dialling prefixes. The module never guesses a default region."
+  },
+  "output": {
+    "format": "misp_standard",
+    "response": "results.Attribute retains the queried attribute. results.Object contains one phone-number object for valid numbers, or is empty for invalid numbers; the latter add a non-correlating text diagnostic to results.Attribute.",
+    "object_relations": {
+      "phone-number": "Normalized E.164 number without an extension",
+      "country-code-numeric": "Calling code with leading +",
+      "country-code": "Numbering-plan region when geographic; the non-geographic pseudo-region 001 is omitted",
+      "text": "One labeled summary containing original input, possible/valid status, number type, numbering-plan area, original carrier, possible time zones, extension, library version and interpretation limits"
+    }
+  },
+  "config": {
+    "default_region": {
+      "required": false,
+      "description": "Supported two-letter origin region, such as GB, FR or US. Required for national-format input and international dialling prefixes such as 00, whose interpretation depends on the origin region. Case-insensitive. Leave empty when all inputs begin with +."
+    },
+    "language": {
+      "required": false,
+      "default": "en",
+      "description": "Language code for geographic and carrier descriptions, such as en, fr or de. Missing translations remain Unknown. Number formatting does not depend on this setting."
+    }
+  },
+  "examples": [
+    {
+      "description": "Normalize an international fixed-line number and identify its numbering-plan area.",
+      "request": {
+        "module": "phone_number_info",
+        "attribute": {
+          "type": "phone-number",
+          "value": "+44 20 8366 1177",
+          "uuid": "5b582d80-7a7e-4b6a-9f22-77656e72bb3b"
+        },
+        "config": {}
+      },
+      "expected_object_values": {
+        "phone-number": "+442083661177",
+        "country-code": "GB",
+        "country-code-numeric": "+44"
+      },
+      "expected_summary_contains": ["Numbering-plan area: London", "Number type: FIXED_LINE"]
+    },
+    {
+      "description": "Interpret a national-format WHOIS phone number using an explicit origin region.",
+      "request": {
+        "module": "phone_number_info",
+        "attribute": {
+          "type": "whois-registrant-phone",
+          "value": "020 8366 1177 ext. 123",
+          "uuid": "5b582d80-7a7e-4b6a-9f22-77656e72bb3b"
+        },
+        "config": {"default_region": "GB", "language": "en"}
+      },
+      "expected_object_values": {"phone-number": "+442083661177"},
+      "expected_summary_contains": ["Extension: 123"]
+    }
+  ]
+}

@@ -44,20 +44,19 @@ def get_session(sid):
     return Session_db.query.filter_by(uuid=sid).first()
 
 
-def get_modules():
-    """Return all modules for expansion and hover types"""
+def get_modules(module_types=("expansion", "hover")):
+    """Return active modules of the requested types."""
     res = query_get_module()
     if "message" not in res:
         loc_list = list()
         for module in res:
             module_db = get_module_by_name(module["name"])
-            module_loc = module
+            if not module_db:
+                continue
+            module_loc = dict(module)
             module_loc["request_on_query"] = module_db.request_on_query
             if module_db.is_active:
-                if (
-                    "expansion" in module["meta"]["module-type"]
-                    or "hover" in module["meta"]["module-type"]
-                ):
+                if set(module_types).intersection(module["meta"]["module-type"]):
                     if module_loc not in loc_list:
                         loc_list.append(module_loc)
         loc_list.sort(key=lambda x: x["name"])
@@ -155,10 +154,10 @@ def get_status_db(session):
     result = json.loads(session.result)
     return {
         "id": session.uuid,
-        "total": len(modules_list),
-        "complete": len(modules_list),
+        "total": len(modules_list) * len(json.loads(session.query_enter)),
+        "complete": len(modules_list) * len(json.loads(session.query_enter)),
         "remaining": 0,
-        "registered": len(result),
+        "registered": sum(len(modules) for modules in result.values()),
         "stopped": True,
         "nb_errors": session.nb_errors,
     }
@@ -188,7 +187,7 @@ def create_new_session_tree(current_session, parent_id):
         "query": current_session.query,
         "input": current_session.input_query,
         "query_date": current_session.query_date.strftime("%Y-%m-%d"),
-        "config": current_session.config_module,
+        "config": current_session.history_config,
         "children": list(),
     }
     loc_json = {
@@ -197,7 +196,7 @@ def create_new_session_tree(current_session, parent_id):
         "query": json.loads(loc_session.query_enter),
         "input": loc_session.input_query,
         "query_date": loc_session.query_date.strftime("%Y-%m-%d %H:%M"),
-        "config": json.loads(loc_session.config_module),
+        "config": {} if loc_session.input_query == "export" else json.loads(loc_session.config_module),
         "children": [loc_json_child],
     }
 
@@ -213,7 +212,7 @@ def util_set_flask_session(parent_id, loc_session, current_session):
             "query": current_session.query,
             "input": current_session.input_query,
             "query_date": current_session.query_date.strftime("%Y-%m-%d %H:%M"),
-            "config": current_session.config_module,
+            "config": current_session.history_config,
         }
         loc_session["children"].append(loc_json)
         return True
@@ -263,7 +262,7 @@ def set_flask_session(current_session, parent_id):
             "query": current_session.query,
             "input": current_session.input_query,
             "query_date": current_session.query_date.strftime("%Y-%m-%d %H:%M"),
-            "config": current_session.config_module,
+            "config": current_session.history_config,
             "children": list(),
         }
 

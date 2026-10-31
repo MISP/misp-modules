@@ -44,6 +44,42 @@ search path used for executables).
 misp-modules
 ~~~~
 
+### Optional local module defaults
+
+Use `--module-config /etc/misp-modules/modules.json` to provide local defaults for
+module API keys, service URLs, and other configuration. API-supplied values take
+precedence. Without this option, configuration works as before. See
+[Local module configuration defaults](module-config.md) for the file format,
+empty-value policy, service setup, and credential handling.
+
+### Debugging outbound HTTP requests
+
+Use `-d` / `--debug` for the usual server debug logs. To also trace HTTP requests
+from modules to their services, enable extended debugging:
+
+```bash
+misp-modules --debug-extended
+```
+
+This option implies `--debug` and writes untruncated request methods, URLs, headers,
+bodies, response status codes, headers, and bodies to the server logs on stderr.
+Each exchange has a unique ID and the module name to help follow concurrent queries.
+Custom modules starting their own worker threads must propagate the current Python
+context to those workers to retain module attribution. WhoisFreaks does this for its
+parallel domain and IP lookups.
+It covers HTTP and HTTPS calls made through `requests` and service SDKs using its
+standard HTTP adapter, including redirects. SDKs using other HTTP clients or custom
+adapters that replace `HTTPAdapter.send` are not covered.
+
+Bodies are logged using their Python representation to preserve binary data.
+Streamed uploads and responses are logged in chunks as the module sends or reads
+them, without buffering or consuming them in advance. Unread response data is not
+logged. Response bodies are decompressed when the client normally decompresses them.
+
+**These logs include credentials, API keys, cookies, and potentially sensitive
+payloads without redaction.** Enable this option only while troubleshooting, protect
+the logs, and disable it afterwards. Normal `--debug` does not enable HTTP tracing.
+
 As a new feature, you can now run custom MISP modules installed on your system by using the `-c` option.
 
 ~~~~bash
@@ -56,6 +92,10 @@ Note that your module must be sited inside a directory identifying its type
 For example your module is `custom_module.py` and its type is `expansion` the module's absolute path should be
 `/path/to/your/module/root/expansion/custom_module.py` and the option to pass to `misp-modules` 
 would be `-c /path/to/your/module/root/`.
+
+See [Install and enable your module](contribute.md#install-and-enable-your-module)
+for service restart instructions, discovery checks and the MISP settings needed
+to make a custom module available in the UI.
 
 
 ## Install from cloned repository
@@ -105,6 +145,61 @@ Then, enable the `misp-modules` service and start it:
 systemctl daemon-reload
 systemctl enable --now misp-modules
 ~~~~
+
+### Configure environment variables for the service
+
+The systemd service starts the executable directly. It does not source your shell
+profile or the virtual environment's `bin/activate` script, and it does not
+inherit variables exported in your interactive shell. Settings configured in
+MISP's `/servers/serverSettings` are also separate from the environment of the
+misp-modules process.
+
+For settings read from environment variables, use a systemd drop-in:
+
+```bash
+sudo systemctl edit misp-modules
+```
+
+#### Redis cache helper in older releases
+
+Older releases containing `misp_modules/helpers/cache.py` read the following
+variables. The cache helper has been removed from current releases, so these
+settings only apply to installations that still use it.
+
+| Variable | Default | Purpose |
+| --- | --- | --- |
+| `REDIS_BACKEND` | `127.0.0.1` | Redis hostname or IP address. |
+| `REDIS_PORT` | `6379` | Redis TCP port. |
+| `REDIS_DATABASE` | `0` | Redis database number. |
+| `REDIS_PW` | Unset | Redis password, if authentication is required. |
+
+For example, add the following to the drop-in to connect the legacy cache helper
+to a remote Redis instance. Replace the hostname, port, and database with values
+supported by your Redis deployment:
+
+```ini
+[Service]
+Environment="REDIS_BACKEND=redis.example.org"
+Environment="REDIS_PORT=6379"
+Environment="REDIS_DATABASE=0"
+```
+
+Save the drop-in, then reload the unit and restart the service so the process
+receives the new environment:
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl restart misp-modules
+sudo systemctl status misp-modules
+sudo journalctl -u misp-modules -n 50 --no-pager
+```
+
+On an installation with the legacy helper, check that the
+`Helpers failed cache.py due to Redis not running or not installed` warning no
+longer appears after restarting. If it persists, verify that the service host can
+reach Redis and that the configured port, database, and authentication match the
+Redis server. A drop-in keeps local configuration separate from the service unit
+supplied by the installation.
 
 
 ## Run the tests
@@ -158,6 +253,47 @@ If you installed it using pip, you just need to execute the command `misp-module
 (source the virtual environment a second time to update the search paths).
 
 If you installed it from the cloned repository, just use poetry, i.e., `poetry run misp-modules`.
+
+### Module statistics
+
+Retrieve a live snapshot with:
+
+```bash
+curl http://localhost:6666/statistics
+```
+
+The JSON contains `started_at` (UTC), `uptime_seconds`, aggregate `totals`, and
+`modules`, keyed by module name. Every loaded module, including custom modules,
+appears with its `type`, even before its first query. Each entry and the totals contain:
+
+| Field | Meaning |
+| --- | --- |
+| `queries`, `completed`, `in_flight` | Dispatched queries, finished queries, and queries still awaiting a response. |
+| `successes`, `errors` | Successful and failed responses. `completed = successes + errors`. |
+| `module_errors` | Responses with a nonempty top-level `error` or `errors` field, including partial results with errors. |
+| `exceptions` | Unhandled module or response serialization failures. |
+| `timeouts` | Queries whose response deadline expired. `errors = module_errors + exceptions + timeouts`. |
+| `success_rate`, `error_rate` | Fractions of completed queries (0–1), or `null` before any complete. |
+| `request_bytes`, `response_bytes` | Total JSON body sizes, including server-generated error responses; HTTP headers are excluded. |
+| `last_query_at`, `last_completed_at` | UTC timestamps, or `null` before the corresponding event. |
+| `response_time_seconds` | `count`, `total`, `min`, `max`, `average`, `last`, and cumulative `buckets`. |
+
+Response times use a monotonic clock, include executor queueing, execution and
+serialization, and end when the response is prepared or the timeout fires. They
+exclude network transfer time. Timing count equals `completed`; min/max/average/last
+are `null` before any completion. Each histogram bucket counts durations less than
+or equal to its upper bound in seconds: `0.01`, `0.05`, `0.1`, `0.5`, `1`, `5`, `10`,
+`30`, `60`, `300`, and `+Inf` (all completed queries).
+
+Timeouts count exactly once as errors; a worker may continue executing afterwards.
+`in_flight` measures queries awaiting a response, not active worker threads.
+Malformed requests, invalid timeout values, unknown module names and calls to other
+endpoints are excluded. Existing `/query` response bodies and status codes are unchanged.
+
+Statistics are process-local, held in memory and reset when the server restarts.
+Multiple server instances have separate counters. Storage is bounded by the number
+of queried modules and histogram buckets; request bodies, results, credentials and
+error messages are never retained by the statistics collector.
 
 ## Run MISP modules in Docker
 
@@ -232,3 +368,4 @@ Now you can move the wheels to your offline instance, and install them using the
 ~~~~bash
 pip install --no-cache-dir ./wheels/*.whl
 ~~~~
+

@@ -31,6 +31,10 @@ moduleinfo = {
 
 moduleconfig = [
     "api_key",
+    "proxy_host",
+    "proxy_port",
+    "proxy_username",
+    "proxy_password",
     "os_type",
     "opt_timeout",
     "opt_network_connect",

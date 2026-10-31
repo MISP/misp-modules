@@ -5,33 +5,41 @@ import json
 from pymisp import MISPEvent, MISPObject
 from pyonyphe import Onyphe, OnypheError
 
+from . import onyphe_full
+
 misperrors = {"error": "Error"}
 
 mispattributes = {
-    "input": ["ip-src", "ip-dst", "hostname", "domain"],
+    "input": list(onyphe_full.mispattributes["input"]),
     "output": ["hostname", "domain", "ip-src", "ip-dst", "url"],
     "format": "misp_standard",
 }
 # possible module-types: 'expansion', 'hover' or both
 moduleinfo = {
-    "version": "3",
+    "version": "4",
     "author": "Sebastien Larinier @sebdraven",
     "description": "Module to process a query on Onyphe.",
     "module-type": ["expansion", "hover"],
     "name": "Onyphe Lookup",
     "logo": "onyphe.jpg",
-    "requirements": ["pyonyphe python library, version 3.0.3 or later", "An access to the Onyphe API (apikey)"],
+    "requirements": ["pyonyphe python library, version 3.1.0 or later", "An access to the Onyphe API (apikey)"],
     "features": (
-        "This module takes a domain, hostname, or IP address attribute as input in order to query the Onyphe Summary"
-        " API. Data fetched from the query is then parsed and MISP attributes and objects are extracted."
+        "Enriches IPs and hostnames using ctiscan Search and domains using riskscan/vulnscan Search. "
+        "Uses category-specific field names and returns service observations, endpoints, certificates and CVEs. "
+        "Set mode=summary to keep the legacy Summary lookup, which does not return ctiscan/ctiurl. "
+        "Install the bundled onyphe-service template in MISP for Search results."
     ),
-    "references": ["https://www.onyphe.io/", "https://github.com/onyphe/pyonyphe"],
-    "input": "A domain, hostname or IP address MISP attribute.",
+    "references": [
+        "https://www.onyphe.io/",
+        "https://github.com/onyphe/pyonyphe",
+        "https://github.com/onyphe/material/tree/master/openapi",
+    ],
+    "input": "An IP, domain, hostname, URL, CPE or X.509 fingerprint MISP attribute.",
     "output": "MISP attributes fetched from the Onyphe query.",
 }
 
 # config fields that your code expects from the site admin
-moduleconfig = ["apikey"]
+moduleconfig = ["apikey", "mode", "limit", "timeout", "since"]
 
 IP_TYPES = ("ip-src", "ip-dst")
 
@@ -45,13 +53,15 @@ def as_list(value):
     return [value]
 
 
-class OnypheClient:
+class OnypheClient(onyphe_full.OnypheFullClient):
 
     def __init__(self, api_key, attribute):
         self.onyphe_client = Onyphe(api_key=api_key)
         self.attribute = attribute
+        self.objects = {}
         self.misp_event = MISPEvent()
-        self.misp_event.add_attribute(**attribute)
+        source = self.misp_event.add_attribute(**attribute)
+        self.attribute = source.to_dict()
 
     def close(self):
         self.onyphe_client.close()
@@ -112,51 +122,7 @@ class OnypheClient:
                 self.__get_object_cve(r, cve)
 
     def __get_object_certificate(self, r):
-        object_certificate = MISPObject("x509")
-
-        # note: the x509 `ip` relation is a Subject Alternative Name, not the host serving the
-        # certificate -- the queried value is tied to the object through its reference instead.
-        if r.get("serial"):
-            object_certificate.add_attribute("serial-number", r["serial"])
-
-        fingerprint = r.get("fingerprint") or {}
-        for algorithm in ("md5", "sha1", "sha256"):
-            if fingerprint.get(algorithm):
-                object_certificate.add_attribute(f"x509-fingerprint-{algorithm}", fingerprint[algorithm])
-
-        signature = (r.get("signature") or {}).get("algorithm", "")
-        value = ""
-        if "sha256" in signature and "RSA" in signature:
-            value = "SHA256_WITH_RSA_ENCRYPTION"
-        elif "sha1" in signature and "RSA" in signature:
-            value = "SHA1_WITH_RSA_ENCRYPTION"
-        if value:
-            object_certificate.add_attribute("signature_algorithm", value)
-
-        publickey = r.get("publickey") or {}
-        if publickey.get("algorithm"):
-            object_certificate.add_attribute("pubkey-info-algorithm", publickey["algorithm"])
-        if "exponent" in publickey:
-            object_certificate.add_attribute("pubkey-info-exponent", publickey["exponent"])
-        if "length" in publickey:
-            object_certificate.add_attribute("pubkey-info-size", publickey["length"])
-
-        issuer = (r.get("issuer") or {}).get("commonname")
-        if issuer:
-            object_certificate.add_attribute("issuer", issuer)
-
-        subject = (r.get("subject") or {}).get("commonname")
-        if subject:
-            object_certificate.add_attribute("subject", subject)
-
-        validity = r.get("validity") or {}
-        if validity.get("notbefore"):
-            object_certificate.add_attribute("validity-not-before", validity["notbefore"])
-        if validity.get("notafter"):
-            object_certificate.add_attribute("validity-not-after", validity["notafter"])
-
-        object_certificate.add_reference(self.attribute["uuid"], "related-to")
-        self.misp_event.add_object(object_certificate)
+        self.parse_certificate(r)
 
     def __get_object_domain_ip(self, obs, relation):
         objet_domain_ip = MISPObject("domain-ip")
@@ -179,7 +145,6 @@ class OnypheClient:
     def __get_object_cve(self, item, cve):
         object_cve = MISPObject("vulnerability")
         object_cve.add_attribute("id", cve)
-        object_cve.add_attribute("state", "Published")
 
         for ip in as_list(item.get("ip")):
             for misp_object in self.misp_event.objects:
@@ -195,7 +160,20 @@ def handler(q=False):
         return False
 
     request = json.loads(q)
-    attribute = request["attribute"]
+    config = request.get("config") or {}
+    mode = config.get("mode") or "search"
+    if mode not in ("search", "summary"):
+        return {"error": "Invalid Onyphe mode; use search or summary"}
+    if mode == "search":
+        attribute_type = (request.get("attribute") or {}).get("type")
+        config["categories"] = (
+            "riskscan,vulnscan" if attribute_type == "domain" else "ctiurl" if attribute_type == "url" else "ctiscan"
+        )
+        request["config"] = config
+        return onyphe_full.handler(json.dumps(request))
+    attribute = request.get("attribute") or {}
+    if attribute.get("type") not in (*IP_TYPES, "domain", "hostname"):
+        return {"error": "Summary mode supports only IP, domain and hostname attributes"}
 
     if not request.get("config") or not request["config"].get("apikey"):
         misperrors["error"] = "Onyphe authentication is missing"

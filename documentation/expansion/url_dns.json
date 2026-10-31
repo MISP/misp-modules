@@ -1,0 +1,60 @@
+{
+  "name": "URL DNS and ASN Expansion",
+  "module": "url_dns",
+  "module-type": ["expansion"],
+  "description": "Resolve a URL into IPv4/IPv6 TCP endpoints and IPv4 origin ASNs, linked to the original URL attribute.",
+  "requirements": ["dnspython", "PyMISP", "DNS access to a recursive resolver, including Team Cymru TXT records"],
+  "references": ["https://www.team-cymru.com/ip-asn-mapping"],
+  "features": [
+    "Resolve all A and AAAA records with the system resolver or an optional nameserver; deduplicate addresses.",
+    "Create one standard ip-port object per address with ip, dst-port, protocol=tcp and hostname when the URL uses a hostname.",
+    "An explicit port overrides scheme defaults. HTTP defaults to 80 and HTTPS to 443. Other schemes require an explicit port from 1 to 65535.",
+    "Handle bracketed IPv6 literals and IDNA hostnames. IP literals skip forward DNS.",
+    "Query Team Cymru origin.asn.cymru.com TXT records for globally routable unicast IPv4 addresses. Multi-origin prefixes produce multiple ASN objects.",
+    "Deduplicate ASN objects within the expansion and preserve all announced IPv4 subnets. Retrieve the ASN description when available.",
+    "Each ip-port object is derived-from the original URL UUID and belongs-to its ASN objects. Each ASN object is related-to the original URL UUID.",
+    "Return the original attribute with its UUID and metadata; all newly generated object attributes use to_ids=false.",
+    "Missing records for one address family are normal. Partial DNS failures and unavailable IPv4 ASN data are reported in endpoint comments; successful endpoint results are retained.",
+    "IPv6 ASN enrichment is outside this module's scope. Non-global and multicast IPv4 addresses retain their endpoints without ASN queries.",
+    "This module performs DNS lookups only. The TCP protocol and port are inferred from the URL; no service reachability or protocol negotiation is performed."
+  ],
+  "input": {
+    "format": "misp_standard",
+    "types": ["url"],
+    "required_attribute_fields": ["type", "value", "uuid"]
+  },
+  "output": {
+    "format": "misp_standard",
+    "objects": ["ip-port", "asn"],
+    "errors": "Invalid requests, URLs or configuration, and failure to resolve any addresses return an error. ASN lookup failures retain endpoint results."
+  },
+  "config": {
+    "nameserver": {
+      "required": false,
+      "default": "System resolver",
+      "description": "Optional IPv4 or IPv6 address of a recursive DNS server. Used for both forward resolution and ASN TXT queries. Timeout is two seconds per attempt; lifetime is five seconds per DNS query."
+    }
+  },
+  "installation": [
+    "The module is installed at misp_modules/modules/expansion/url_dns.py and is automatically discovered by misp-modules.",
+    "Install dnspython and PyMISP in the service's Python environment if missing: python -m pip install dnspython pymisp. Both are already in the repository's minimal dependency set.",
+    "Restart the misp-modules service using your normal service manager, then enable url_dns in MISP's Enrichment plugin settings.",
+    "Expand an existing URL attribute. Its original UUID must be provided in the request; do not generate a replacement UUID.",
+    "No custom MISP object templates or API keys are required. The resolver must be able to retrieve A, AAAA and Team Cymru TXT records."
+  ],
+  "verification": {
+    "command": "python -m pytest -q tests/test_url_dns.py tests/test_rdap.py",
+    "result": "63 module tests and 6 existing RDAP tests passed with Python 3.12, PyMISP 2.5.34.4 and dnspython 2.9.0.",
+    "checks": "Strict standard object-template validation, module discovery, Black, isort and flake8 passed.",
+    "limitations": "DNS responses were mocked. Live DNS and installation into a running MISP instance have not been tested."
+  },
+  "example": {
+    "module": "url_dns",
+    "attribute": {
+      "type": "url",
+      "value": "https://example.com:8443/path",
+      "uuid": "5b582d80-7a7e-4b6a-9f22-77656e72bb3b"
+    },
+    "config": {}
+  }
+}

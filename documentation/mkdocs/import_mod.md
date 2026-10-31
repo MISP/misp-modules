@@ -98,6 +98,29 @@ Module to import Cuckoo JSON.
 
 -----
 
+#### [DMARC Import](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/dmarc_import.py)
+
+Import DMARC aggregate XML reports, including gzip and ZIP files.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/dmarc_import.py)]
+
+- **features**:
+>Upload an aggregate XML report (.xml, .xml.gz, or a ZIP containing exactly one XML file), or paste XML. Creates an annotation object with report metadata, published policy and the original XML attachment. Each aggregate record becomes a linked domain-ip object with its source IP (ip-src), header-from domain, reporting interval and a JSON text attribute preserving counts, disposition, SPF/DKIM results, identifiers and extension fields. Additional identifier and authentication domains are included for correlation. All attributes have to_ids disabled: DMARC observations do not by themselves identify malicious senders. No API key or network access is needed. Input and decompressed XML are limited to 20 MiB each, with at most 10,000 records and 32 XML nesting levels. DTDs, encrypted or multi-file ZIPs, nested archives and forensic/failure reports (RUF/ARF) are not supported. Invalid records reject the entire import.
+
+- **input**:
+>DMARC aggregate XML, optionally gzip- or ZIP-compressed
+
+- **output**:
+>MISP annotation and domain-ip objects with report context and authentication results
+
+- **references**:
+> - https://www.rfc-editor.org/rfc/rfc7489.html
+> - https://github.com/MISP/misp-modules/issues/508
+
+- **requirements**:
+>PyMISP
+
+-----
+
 #### [Email Import](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/email_import.py)
 
 Email import module for MISP
@@ -105,18 +128,24 @@ Email import module for MISP
 
 - **features**:
 >This module can be used to import e-mail text as well as attachments and urls.
->3 configuration parameters are then used to unzip attachments, guess zip attachment passwords, and extract urls: set each one of them to True or False to process or not the respective corresponding actions.
+>Configuration parameters are used to unzip attachments, guess zip attachment passwords, extract urls, remove common subject markers, and extract partial inline forwarded emails (extract_forwarded_emails, disabled by default): set each one of them to True or False to process or not the respective corresponding actions.
+>Forward extraction supports English From/To/Cc/Bcc/Reply-To/Sent/Date/Subject header blocks in plain text and HTML, including Outlook. Folded header values are supported. Each block needs a sender address, a subject, and a recipient or date. At most 20 partial email objects are linked to the carrier with includes references. Plain text is preferred; HTML is used if no forwards are found in plain text. Reconstructed attributes have to_ids disabled; the original email is retained as evidence. Local or unparseable timestamps are preserved as text in the reconstructed headers. Existing extract_urls and remove_subject_markers settings also apply to forwards. URL objects are shared between the carrier and forwards that contain the same URL.
 
 - **config**:
 > - unzip_attachments
 > - guess_zip_attachment_passwords
 > - extract_urls
+> - remove_subject_markers
+> - extract_forwarded_emails
 
 - **input**:
 >E-mail file
 
 - **output**:
 >MISP Event attributes
+
+- **references**:
+>https://github.com/MISP/mail_to_misp
 
 -----
 
@@ -242,20 +271,20 @@ Optical Character Recognition (OCR) module for MISP.
 
 #### [OpenIOC Import](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/openiocimport.py)
 
-Module to import OpenIOC packages.
+Import legacy OpenIOC 1.0 and 1.1 files into MISP.
 [[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/openiocimport.py)]
 
 - **features**:
->The module imports MISP Attributes from OpenIOC packages, there is then no special feature for users to make it work.
+>A backup import path for legacy .ioc files after removal of the core OpenIOC importer in MISP 3.0. Upload an OpenIOC 1.0 (ioc/definition) or 1.1 (OpenIOC/criteria) XML file through Import from modules, using openiocimport. Common file, network, email, registry, mutex and service fields become MISP attributes; unmapped fields are retained as other attributes. The original XML is attached by default; the existing not save ioc and default tag options are supported. XML DTDs and custom entities are rejected. This extracts observables, rather than evaluating OpenIOC rules: conditions, negation, case sensitivity, item IDs and the AND/OR group path are recorded in attribute comments. All attributes have to_ids=false for review. Correlation is disabled for grouped AND terms, non-exact or negated conditions and unmapped fields, so these are not treated as independent exact indicators. Keep the attachment for the full rule.
 
 - **input**:
->OpenIOC packages
+>OpenIOC 1.0 or 1.1 XML (.ioc or .xml), including namespace-free legacy files
 
 - **output**:
->MISP Event attributes
+>MISP Event attributes and the optional original IOC attachment
 
 - **references**:
->https://www.fireeye.com/blog/threat-research/2013/10/openioc-basics.html
+>https://github.com/mandiant/ioc_writer
 
 - **requirements**:
 >PyMISP
@@ -286,6 +315,33 @@ Simple CSV import tool with mapable columns
 
 - **features**:
 >
+
+-----
+
+#### [PCAP Import](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/pcap_import.py)
+
+Import a PCAP or PCAPNG capture, including reassembled files, emails and network indicators.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/pcap_import.py)]
+
+- **features**:
+>Parses captures offline with TShark, without capture privileges or network lookups. Extracts IPv4/IPv6 endpoints, DNS names and answers, HTTP URLs, hosts and user agents, and TLS SNI hostnames. Reassembles HTTP files and SMTP messages; reuses email_import for email objects, attachments and body URLs. Requires complete, unencrypted application traffic for payload extraction; HTTPS yields visible TLS metadata only. Other file-transfer protocols and TLS decryption are not supported. Observed network attributes have to_ids disabled for analyst review. Captures are limited to 50 MiB, exported data and JSON metadata to 100 MiB each. timeout is a positive number of seconds, at most 300 (default 60). Output sizes, including diagnostics, are checked every 50 ms while TShark runs; exceeding a limit kills the process. Bursts can overshoot between checks; these checks are not filesystem quotas.
+
+- **config**:
+>timeout
+
+- **input**:
+>Base64-encoded PCAP or PCAPNG file
+
+- **output**:
+>MISP network attributes, file and email objects, including attachments and hashes
+
+- **references**:
+> - https://github.com/MISP/misp-modules/issues/397
+> - https://www.wireshark.org/docs/man-pages/tshark.html
+
+- **requirements**:
+> - TShark >= 4.0 on the service user's PATH (Debian/Ubuntu: apt install tshark)
+> - PyMISP with email and fileobjects extras (included in misp-modules[all])
 
 -----
 

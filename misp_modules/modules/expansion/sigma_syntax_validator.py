@@ -10,6 +10,7 @@ moduleinfo = {
     "version": "0.1",
     "author": "Christian Studer",
     "module-type": ["expansion", "hover"],
+    "data-source": "internal",
     "name": "Sigma Syntax Validator",
     "description": "An expansion hover module to perform a syntax check on sigma rules.",
     "logo": "sigma.png",

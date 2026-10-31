@@ -1,41 +1,19 @@
-<!-- 
-    Author: David Cruciani
--->
-
-{% extends 'base.html' %}
-
+{% extends "base.html" %}
+{% block title %}Add external tool · MISP Modules{% endblock %}
 {% block content %}
-<form action="" method="post">
-    {{ form.hidden_tag() }}
-    <h2>Add External tool</h2>
-    <hr>
-    
-    <div class="row">
-        <div class="mb-3 w-50">
-            {{form.name.label(class_="col-form-label")}}:
-            {{form.name(class_="form-control")}}
-            {% if form.name.errors %}
-                <div style="color: red;">{{form.name.errors[0] | safe}}</div>
-            {%endif%}
+    <div class="page-heading">
+        <div>
+            <p class="eyebrow">CONNECTED WORKFLOWS</p>
+            <h1>Add external tool</h1>
+            <p class="page-description">Connect a destination for your enrichment results.</p>
         </div>
-        <div class="mb-3 w-50">
-            {{form.url.label(class_="col-form-label")}}:
-            {{form.url(class_="form-control")}}
-            {% if form.url.errors %}
-                <div style="color: red;">{{form.url.errors[0] | safe}}</div>
-            {%endif%}
-        </div>
+        <a href="/external_tools" class="btn btn-outline-secondary">Back to external tools</a>
     </div>
-    <div class="row">
-        <div class="mb-3 w-50">
-            {{form.api_key.label(class_="col-form-label")}}:
-            {{form.api_key(class_="form-control")}}
-            {% if form.api_key.errors %}
-                <div style="color: red;">{{form.api_key.errors[0] | safe}}</div>
-            {%endif%}
-        </div>
-    </div>
-    
-    {{form.submit(class='btn btn-primary')}}
-</form>
+    <form action="" method="post" class="workspace-card tool-form">
+        {{ form.hidden_tag() }}
+        {% for field in [form.name, form.url, form.api_key] %}
+            <div class="mb-4">{{ field.label(class_="form-label") }}{% if field.name == "api_key" %}{{ field(class_="form-control", type="password", autocomplete="off") }}{% else %}{{ field(class_="form-control") }}{% endif %}{% for error in field.errors %}<p class="field-error" role="alert">{{ error }}</p>{% endfor %}</div>
+        {% endfor %}
+        {{ form.submit(class_='btn btn-primary') }}
+    </form>
 {% endblock %}

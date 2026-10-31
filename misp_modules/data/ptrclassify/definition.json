@@ -1,0 +1,183 @@
+{
+  "attributes": {
+    "category": {
+      "description": "Classification category; the attribute comment identifies its classification machine tag.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "classification": {
+      "description": "Full ptrclassify taxonomy machine tag for a matched label. Related classification fields use this tag as their attribute comment.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "classification-description": {
+      "description": "Explanation of a classification; the attribute comment identifies its classification machine tag.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 0
+    },
+    "classifier-version": {
+      "description": "Version of the ptrclassify library used for classification.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 0
+    },
+    "cloud-region": {
+      "description": "Cloud region inferred from the hostname; not verified geolocation.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "confidence": {
+      "description": "Classification confidence from 0 to 1; the attribute comment identifies its classification machine tag.",
+      "disable_correlation": true,
+      "misp-attribute": "float",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "conflict": {
+      "description": "Conflicting classification labels reported by the classifier.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "embedded-ip": {
+      "description": "IPv4 address found encoded in the hostname.",
+      "disable_correlation": false,
+      "misp-attribute": "ip-dst",
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "evidence": {
+      "description": "Matched text supporting a classification; the attribute comment identifies its classification machine tag.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "hostname": {
+      "description": "PTR-style hostname classified by ptrclassify.",
+      "disable_correlation": false,
+      "misp-attribute": "hostname",
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "ip": {
+      "description": "Queried IPv4 or IPv6 address used as context for classification.",
+      "disable_correlation": false,
+      "misp-attribute": "ip-dst",
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "label": {
+      "description": "Classification label; the attribute comment identifies its classification machine tag.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "location-city": {
+      "description": "Possible city; the attribute comment identifies the candidate by its rule ID and code. Location hints are heuristic, not verified geolocation.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "location-code": {
+      "description": "Original geographic code; the attribute comment identifies the candidate by its rule ID and code. Location hints are heuristic, not verified geolocation.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "location-confidence": {
+      "description": "Location confidence from 0 to 1; the attribute comment identifies the candidate by its rule ID and code. Location hints are heuristic, not verified geolocation.",
+      "disable_correlation": true,
+      "misp-attribute": "float",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "location-country": {
+      "description": "Possible ISO 3166-1 alpha-2 country; the attribute comment identifies the candidate by its rule ID and code. Location hints are heuristic, not verified geolocation.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "location-description": {
+      "description": "Explanation and limitations of the location hint; the attribute comment identifies the candidate by its rule ID and code. Location hints are heuristic, not verified geolocation.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "location-evidence": {
+      "description": "Matched text supporting the location; the attribute comment identifies the candidate by its rule ID and code. Location hints are heuristic, not verified geolocation.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "location-region": {
+      "description": "Possible region; the attribute comment identifies the candidate by its rule ID and code. Location hints are heuristic, not verified geolocation.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "location-rule-id": {
+      "description": "Rule producing the location; the attribute comment identifies the candidate by its rule ID and code. Location hints are heuristic, not verified geolocation.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "matched": {
+      "description": "Whether at least one classification label matched this hostname.",
+      "disable_correlation": true,
+      "misp-attribute": "boolean",
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "rule-id": {
+      "description": "Rule producing a classification; the attribute comment identifies its classification machine tag.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    }
+  },
+  "description": "Heuristic classification of one PTR-style hostname, including labels, confidence, evidence, rule IDs and potential location hints. Repeated classification fields are grouped by machine-tag comments; location fields are grouped by rule-ID/code comments. PTR names are operator-controlled and inferred locations are not verified geolocation.",
+  "meta-category": "network",
+  "name": "ptrclassify",
+  "required": [
+    "hostname",
+    "matched"
+  ],
+  "uuid": "da14cf16-0274-4cb2-9b5f-bbe07281ac19",
+  "version": 1
+}

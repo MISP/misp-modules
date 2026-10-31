@@ -1,0 +1,12 @@
+public-key.asc: Public CIRCL certificate retrieved from https://pgp.circl.lu,
+fingerprint FF274336B4530375102C9EB270909C9C006694EB.
+
+rfc9580-v6-public-key.asc: Public certificate test vector from RFC 9580,
+Appendix A.3, https://www.rfc-editor.org/rfc/rfc9580.html#appendix-A.3.
+Primary fingerprint:
+CB186C4F0609A697E4D52DFA6C722B0C1F1E27C18A56708F6525EC27BAD9ACC9
+Subkey fingerprint:
+12C83F1E706F6308FE151A417743A1F033790E93E9978488D1DB378DA9930885
+
+Only public-key material is included. Synthetic packets constructed by the
+tests exercise metadata parsing and do not represent verified signatures.

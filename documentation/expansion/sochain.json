@@ -1,0 +1,32 @@
+{
+  "name": "SoChain",
+  "module": "sochain",
+  "module-type": ["expansion", "hover"],
+  "description": "Get the balance, activity, counterparties and address poisoning findings of a BTC, LTC, DOGE or ZEC address from SoChain.",
+  "requirements": ["requests", "PyMISP"],
+  "features": [
+    "Accept a btc attribute (looked up on Bitcoin) or a coin-address object (looked up on the network of its symbol: BTC, LTC, DOGE or ZEC). Without a symbol, the network is the first on which SoChain says the address is valid.",
+    "Return a coin-address object with current-balance, total-received, total-sent, total-transactions, first-seen, last-seen and last-updated, referencing the input with related-to.",
+    "Return recent counterparties as coin-address objects linked with paid references whose comments give the amount, transaction and block: 5 on hover, 50 when the magnifying glass is clicked.",
+    "Return each look-alike address that sent the address dust (address poisoning) as a coin-address object that impersonates the address it copies.",
+    "No API key is needed for up to 2,500 lookups a day per IP. Each request has a 15-second timeout."
+  ],
+  "config": {
+    "apikey": "Optional. A SoChain API key from https://sochain.com/dashboard, sent as the API-KEY header."
+  },
+  "references": [
+    "https://sochain.com/docs",
+    "https://sochain.com/api/v3/openapi.json"
+  ],
+  "examples": [
+    {
+      "module": "sochain",
+      "attribute": {
+        "type": "btc",
+        "value": "bc1qxhmdufsvnuaaaer4ynz88fspdsxq2h9e9cetdj",
+        "uuid": "5b582d80-7a7e-4b6a-9f22-77656e72bb3b"
+      },
+      "config": {"apikey": ""}
+    }
+  ]
+}

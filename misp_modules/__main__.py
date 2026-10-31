@@ -23,6 +23,7 @@ import os.path
 import pathlib
 import signal
 import sys
+import time
 
 logging.captureWarnings(True)
 
@@ -42,6 +43,11 @@ from tornado import ioloop
 
 import misp_modules
 from misp_modules import openapi as openapi_builder
+from misp_modules.cache import CacheConfigError, ModuleCache
+from misp_modules.http_debug import configure_http_debug, module_context
+from misp_modules.module_config import ModuleConfig, ModuleConfigError
+from misp_modules.pap import pap_red_error
+from misp_modules.statistics import ModuleStatistics
 
 # See https://github.com/MISP/misp-modules/issues/662
 MAX_BUFFER_SIZE = 1073741824
@@ -49,6 +55,10 @@ MAX_BUFFER_SIZE = 1073741824
 # Global variables
 MODULES_HANDLERS = {}
 OPENAPI_DOCUMENT = {}
+MODULE_STATISTICS = ModuleStatistics()
+MODULE_CONFIG = ModuleConfig()
+RESTRICT_PAP_RED = False
+MODULE_CACHE = ModuleCache()
 LOGGER = logging.getLogger("misp-modules")
 
 SWAGGER_UI_TEMPLATE = (
@@ -121,7 +131,7 @@ def handle_signal(sig: int, frame: types.FrameType) -> None:
     ioloop.IOLoop.instance().add_callback_from_signal(ioloop.IOLoop.instance().stop)
 
 
-def init_logger(debug: bool = False) -> None:
+def init_logger(debug: bool = False, debug_extended: bool = False) -> None:
     """Initialize the logger."""
     formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
     handler = logging.StreamHandler()
@@ -141,8 +151,11 @@ def init_logger(debug: bool = False) -> None:
 
     # Set application log
     LOGGER.propagate = False
-    LOGGER.setLevel(logging.DEBUG if debug else logging.INFO)
+    LOGGER.setLevel(logging.DEBUG if debug or debug_extended else logging.INFO)
     LOGGER.addHandler(handler)
+    configure_http_debug(debug_extended)
+    if debug_extended:
+        LOGGER.warning("Extended HTTP debugging enabled: logs contain unredacted credentials and full HTTP bodies")
 
 
 class VersionCheck(tornado.web.RequestHandler):
@@ -185,7 +198,7 @@ class SwaggerUI(tornado.web.RequestHandler):
             self.send_error(503)
             return
         self.set_header("Content-Type", "text/html; charset=utf-8")
-        self.write(SWAGGER_UI_TEMPLATE.replace('__SPEC_URL__', '/openapi.json'))
+        self.write(SWAGGER_UI_TEMPLATE.replace("__SPEC_URL__", "/openapi.json"))
 
 
 class ListModules(tornado.web.RequestHandler):
@@ -215,6 +228,24 @@ class ListModules(tornado.web.RequestHandler):
         self.write(self.CACHE)
 
 
+class Statistics(tornado.web.RequestHandler):
+    """Expose aggregate query statistics, including modules that have never been queried."""
+
+    def get(self):
+        module_types = {
+            name: MODULES_HANDLERS.get(f"type:{name}", "unknown")
+            for name in MODULES_HANDLERS
+            if not name.startswith("type:")
+        }
+        self.set_header("Content-Type", "application/json")
+        self.set_header("Cache-Control", "no-store")
+        snapshot = MODULE_STATISTICS.snapshot(module_types)
+        cache_statistics = MODULE_CACHE.snapshot(module_types)
+        if cache_statistics:
+            snapshot["cache"] = {"modules": cache_statistics}
+        self.write(orjson.dumps(snapshot))
+
+
 class QueryModule(tornado.web.RequestHandler):
     """QueryModule handler."""
 
@@ -225,29 +256,65 @@ class QueryModule(tornado.web.RequestHandler):
 
     @tornado_concurrent.run_on_executor
     def run_request(self, module_name, json_payload, dict_payload):
+        if RESTRICT_PAP_RED and MODULES_HANDLERS.get(f"type:{module_name}") == "expansion":
+            error = pap_red_error(MODULES_HANDLERS[module_name], dict_payload)
+            if error:
+                return orjson.dumps({"error": error}), "module_errors"
+        # Log only the original request, before any server-local secrets are added.
         LOGGER.debug("QueryModule %s request %s", module_name, json_payload)
-        try:
-            response = MODULES_HANDLERS[module_name].dict_handler(request=dict_payload)
-        except AttributeError:
-            response = MODULES_HANDLERS[module_name].handler(q=json_payload)
-        return orjson.dumps(response, default=pymisp.pymisp_json_default)
+        resolved_payload = MODULE_CONFIG.resolve(module_name, dict_payload)
+        if resolved_payload is not dict_payload:
+            dict_payload = resolved_payload
+            json_payload = orjson.dumps(dict_payload)
+
+        def execute():
+            with module_context(module_name):
+                try:
+                    response = MODULES_HANDLERS[module_name].dict_handler(request=dict_payload)
+                except AttributeError:
+                    response = MODULES_HANDLERS[module_name].handler(q=json_payload)
+            outcome = (
+                "module_errors"
+                if isinstance(response, dict) and (response.get("error") or response.get("errors"))
+                else "successes"
+            )
+            return orjson.dumps(response, default=pymisp.pymisp_json_default), outcome
+
+        if MODULE_CACHE.enabled_for(module_name) and MODULES_HANDLERS.get(f"type:{module_name}") == "expansion":
+            return MODULE_CACHE.run(module_name, dict_payload, execute, deadline=getattr(self, "_cache_deadline", None))
+        return execute()
 
     @tornado.gen.coroutine
     def post(self):
         json_payload = self.request.body
         dict_payload = orjson.loads(json_payload)
         timeout = datetime.timedelta(seconds=int(dict_payload.get("timeout", self.DEFAULT_TIMEOUT)))
+        self._cache_deadline = time.monotonic() + timeout.total_seconds()
+        module_name = dict_payload.get("module")
+        tracked = (
+            isinstance(module_name, str) and not module_name.startswith("type:") and module_name in MODULES_HANDLERS
+        )
+        if tracked:
+            started = MODULE_STATISTICS.start(module_name, len(json_payload))
+        outcome = "exceptions"
+        response = b""
         try:
             future = self.run_request(dict_payload["module"], json_payload, dict_payload)
-            response = yield tornado.gen.with_timeout(timeout, future)
+            response, outcome = yield tornado.gen.with_timeout(timeout, future)
             self.write(response)
         except tornado.gen.TimeoutError:
             LOGGER.warning("Timeout on {}".format(dict_payload["module"]))
-            self.write(orjson.dumps({"error": "Timeout."}))
+            outcome = "timeouts"
+            response = orjson.dumps({"error": "Timeout."})
+            self.write(response)
         except Exception:
-            self.write(orjson.dumps({"error": "Something went wrong, look in the server logs for details"}))
+            outcome = "exceptions"
+            response = orjson.dumps({"error": "Something went wrong, look in the server logs for details"})
+            self.write(response)
             LOGGER.exception("Something went wrong when processing query request")
         finally:
+            if tracked:
+                MODULE_STATISTICS.finish(module_name, started, outcome, len(response))
             self.finish()
 
 
@@ -261,14 +328,45 @@ def main():
     arg_parser = argparse.ArgumentParser(description="misp-modules", formatter_class=argparse.RawTextHelpFormatter)
     arg_parser.add_argument("-t", "--test", default=False, action="store_true", help="test mode")
     arg_parser.add_argument("-d", "--debug", default=False, action="store_true", help="enable debugging")
+    arg_parser.add_argument(
+        "--debug-extended",
+        default=False,
+        action="store_true",
+        help="enable debugging and log full outbound requests HTTP exchanges (including credentials)",
+    )
     arg_parser.add_argument("-p", "--port", type=int, default=6666, help="port (default 6666)")
     arg_parser.add_argument("-l", "--listen", default="localhost", help="address (default localhost)")
     arg_parser.add_argument("-c", "--custom", default=None, help="custom modules root")
+    arg_parser.add_argument("--module-config", default=None, help="JSON file containing optional per-module defaults")
+    arg_parser.add_argument(
+        "--restrict-pap-red",
+        default=False,
+        action="store_true",
+        help="block PAP:RED hover and external expansion when tags are supplied (disabled by default)",
+    )
+    arg_parser.add_argument(
+        "--cache-config", default=None, help="JSON file enabling optional per-module result caching"
+    )
     arg_parser.add_argument("-s", "--system", default=None, help="legacy option that now has no effect")
     args = arg_parser.parse_args()
 
+    global RESTRICT_PAP_RED  # noqa: PLW0603
+    RESTRICT_PAP_RED = args.restrict_pap_red
+
     # Initialize
-    init_logger(debug=args.debug)
+    init_logger(debug=args.debug, debug_extended=args.debug_extended)
+
+    global MODULE_CONFIG  # noqa: PLW0603
+    try:
+        MODULE_CONFIG = ModuleConfig.from_file(args.module_config) if args.module_config is not None else ModuleConfig()
+    except ModuleConfigError as exc:
+        arg_parser.error(str(exc))
+
+    global MODULE_CACHE  # noqa: PLW0603
+    try:
+        MODULE_CACHE = ModuleCache.from_file(args.cache_config) if args.cache_config is not None else ModuleCache()
+    except CacheConfigError as exc:
+        arg_parser.error(str(exc))
 
     # Alert if needed
     warn_if_degraded()
@@ -305,6 +403,11 @@ def main():
             MODULES_HANDLERS[f"type:{module_name}"] = module_type.name
             LOGGER.info("CUSTOM MISP module %s (type=%s) imported", module_name, module_type.name)
 
+    try:
+        MODULE_CACHE.validate_modules(MODULES_HANDLERS)
+    except CacheConfigError as exc:
+        arg_parser.error(str(exc))
+
     global OPENAPI_DOCUMENT  # noqa: PLW0603
     try:
         OPENAPI_DOCUMENT = openapi_builder.build_document(
@@ -322,6 +425,7 @@ def main():
                 [
                     (r"/modules", ListModules),
                     (r"/query", QueryModule),
+                    (r"/statistics", Statistics),
                     (r"/healthcheck", HealthCheck),
                     (r"/version", VersionCheck),
                     (r"/openapi.json", OpenAPISpec),

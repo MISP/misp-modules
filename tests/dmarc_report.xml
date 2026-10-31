@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feedback>
+  <version>1.0</version>
+  <report_metadata>
+    <org_name>Example Receiver</org_name>
+    <email>dmarc-reports@example.net</email>
+    <extra_contact_info>https://example.net/dmarc</extra_contact_info>
+    <report_id>example-report-001</report_id>
+    <date_range><begin>1704067200</begin><end>1704153599</end></date_range>
+    <error>Example diagnostic</error>
+  </report_metadata>
+  <policy_published>
+    <domain>example.org</domain><adkim>r</adkim><aspf>s</aspf>
+    <p>reject</p><sp>quarantine</sp><pct>100</pct><fo>1</fo>
+  </policy_published>
+  <record>
+    <row>
+      <source_ip>192.0.2.10</source_ip><count>42</count>
+      <policy_evaluated><disposition>none</disposition><dkim>pass</dkim><spf>fail</spf>
+        <reason><type>forwarded</type><comment>Known forwarder</comment></reason>
+        <reason><type>local_policy</type><comment>Receiver override</comment></reason>
+      </policy_evaluated>
+    </row>
+    <identifiers><envelope_to>recipient.example</envelope_to><envelope_from>bounce.example.org</envelope_from>
+      <header_from>example.org</header_from></identifiers>
+    <auth_results>
+      <dkim><domain>example.org</domain><selector>mail</selector><result>pass</result></dkim>
+      <dkim><domain>mailer.example</domain><selector>other</selector><result>fail</result>
+        <human_result>Signature mismatch</human_result></dkim>
+      <spf><domain>bounce.example.org</domain><scope>mfrom</scope><result>pass</result></spf>
+    </auth_results>
+  </record>
+  <record>
+    <row><source_ip>2001:db8::20</source_ip><count>3</count>
+      <policy_evaluated><disposition>reject</disposition><dkim>fail</dkim><spf>fail</spf></policy_evaluated>
+    </row>
+    <identifiers><header_from>example.org</header_from></identifiers>
+    <auth_results><spf><domain>other.example</domain><scope>helo</scope><result>softfail</result></spf></auth_results>
+  </record>
+</feedback>

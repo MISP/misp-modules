@@ -4,6 +4,9 @@ import sys
 import time
 
 import requests
+from pymisp import MISPAttribute, MISPEvent, MISPObject
+
+from . import check_input_attribute, standard_error_message
 
 log = logging.getLogger("urlscan")
 log.setLevel(logging.DEBUG)
@@ -14,7 +17,7 @@ ch.setFormatter(formatter)
 log.addHandler(ch)
 
 moduleinfo = {
-    "version": "0.1",
+    "version": "0.2",
     "author": "Dave Johnson",
     "description": "An expansion module to query urlscan.io.",
     "module-type": ["expansion"],
@@ -22,20 +25,33 @@ moduleinfo = {
     "logo": "urlscan.jpg",
     "requirements": ["An access to the urlscan.io API"],
     "features": (
-        "This module takes a MISP attribute as input and queries urlscan.io with it.\n\nThe result of this query is"
-        " then parsed and some data is mapped into MISP attributes in order to enrich the input attribute."
+        "This module takes a MISP attribute as input and queries urlscan.io with it.\n\nThe scan result is returned"
+        " as the objects it describes - the url and the domain-ip it resolved to, where it is hosted, the certificate"
+        " it presented, the screenshot urlscan took and any verdict against it - rather than as a flat list of"
+        " attributes that drops the relationships between them."
     ),
     "references": ["https://urlscan.io/"],
     "input": "A domain, hostname or url attribute.",
-    "output": "MISP attributes mapped from the result of the query on urlscan.io.",
+    "output": "url, domain-ip, geolocation, asn, x509, image and reputation objects describing the scan.",
 }
 
 moduleconfig = ["apikey"]
 misperrors = {"error": "Error"}
 mispattributes = {
     "input": ["hostname", "domain", "ip-src", "ip-dst", "url"],
-    "output": ["hostname", "domain", "ip-src", "ip-dst", "url", "text", "link", "hash"],
+    "format": "misp_standard",
 }
+
+# Page URLs whose wording gives the brand a phishing page is imitating.
+_PHISHING_THEMES = (
+    ("office", "Office"),
+    ("o365", "O365"),
+    ("0365", "O365"),
+    ("microsoft", "Microsoft"),
+    ("paypal", "PayPal"),
+    ("onedrive", "OneDrive"),
+    ("docusign", "DocuSign"),
+)
 
 
 def handler(q=False):
@@ -45,240 +61,166 @@ def handler(q=False):
     if not request.get("config") or not request["config"].get("apikey"):
         misperrors["error"] = "Urlscan apikey is missing"
         return misperrors
+
+    if not request.get("attribute") or not check_input_attribute(request["attribute"]):
+        return {"error": f"{standard_error_message}, which should contain at least a type, a value and an uuid."}
+    attribute = request["attribute"]
+    if attribute["type"] not in mispattributes["input"]:
+        misperrors["error"] = "Unsupported attributes type"
+        return misperrors
+
     client = urlscanAPI(request["config"]["apikey"])
+    try:
+        result = client.search_url(attribute["value"])
+    except Exception as e:
+        misperrors["error"] = str(e)
+        return misperrors
 
-    r = {"results": []}
+    failure = _unreachable(result)
+    if failure:
+        misperrors["error"] = failure
+        return misperrors
 
-    if "ip-src" in request:
-        r["results"] += lookup_indicator(client, request["ip-src"])
-    if "ip-dst" in request:
-        r["results"] += lookup_indicator(client, request["ip-dst"])
-    if "domain" in request:
-        r["results"] += lookup_indicator(client, request["domain"])
-    if "hostname" in request:
-        r["results"] += lookup_indicator(client, request["hostname"])
-    if "url" in request:
-        r["results"] += lookup_indicator(client, request["url"])
-
-    # Return any errors generated from lookup to the UI and remove duplicates
-
-    uniq = []
-    log.debug(r["results"])
-    for item in r["results"]:
-        log.debug(item)
-        if "error" in item:
-            misperrors["error"] = item["error"]
-            return misperrors
-        if item not in uniq:
-            uniq.append(item)
-    r["results"] = uniq
-    return r
+    parser = UrlscanParser(attribute)
+    parser.parse(result)
+    return parser.get_results()
 
 
-def lookup_indicator(client, query):
-    result = client.search_url(query)
-    log.debug("RESULTS: " + json.dumps(result))
-    r = []
-    misp_comment = "{}: Enriched via the urlscan module".format(query)
+def _unreachable(result):
+    """The scan failing to load the page at all, rather than loading it and
+    having nothing to say about it."""
+    for request in (result.get("data") or {}).get("requests") or []:
+        failed = (request.get("response") or {}).get("failed") or {}
+        error = failed.get("errorText")
+        if error and error not in ("net::ERR_ABORTED", "net::ERR_FAILED", "net::ERR_QUIC_PROTOCOL_ERROR"):
+            return f"Domain could not be resolved: {error}"
+    return None
 
-    # Determine if the page is reachable
-    for request in result["data"]["requests"]:
-        if request["response"].get("failed"):
-            if request["response"]["failed"]["errorText"]:
-                if request["response"]["failed"]["errorText"] in [
-                    "net::ERR_ABORTED",
-                    "net::ERR_FAILED",
-                    "net::ERR_QUIC_PROTOCOL_ERROR",
-                ]:
-                    continue
-                log.debug("The page could not load")
-                r.append(
-                    {"error": "Domain could not be resolved: {}".format(request["response"]["failed"]["errorText"])}
-                )
 
-    if result.get("page"):
-        if result["page"].get("domain"):
-            misp_val = result["page"]["domain"]
-            r.append(
-                {
-                    "types": "domain",
-                    "categories": ["Network activity"],
-                    "values": misp_val,
-                    "comment": f"{misp_comment} - Domain",
-                }
-            )
+def _threat_types(result):
+    matches = ((result.get("meta") or {}).get("processors") or {}).get("gsb", {}).get("data", {}).get("matches") or []
+    return sorted({match["threatType"] for match in matches if match.get("threatType")})
 
-        if result["page"].get("ip"):
-            misp_val = result["page"]["ip"]
-            r.append(
-                {
-                    "types": "ip-dst",
-                    "categories": ["Network activity"],
-                    "values": misp_val,
-                    "comment": f"{misp_comment} - IP",
-                }
-            )
 
-        if result["page"].get("ptr"):
-            misp_val = result["page"]["ptr"]
-            r.append(
-                {
-                    "types": "hostname",
-                    "categories": ["Network activity"],
-                    "values": misp_val,
-                    "comment": f"{misp_comment} - PTR",
-                }
-            )
+def _phishing_themes(result):
+    themes = set()
+    for url in (result.get("lists") or {}).get("urls") or []:
+        url = url.lower()
+        for needle, brand in _PHISHING_THEMES:
+            if needle in url:
+                themes.add(brand)
+    return sorted(themes)
 
-        if result["page"].get("country"):
-            misp_val = "country: " + result["page"]["country"]
-            if result["page"].get("city"):
-                misp_val += ", city: " + result["page"]["city"]
-            r.append(
-                {
-                    "types": "text",
-                    "categories": ["External analysis"],
-                    "values": misp_val,
-                    "comment": f"{misp_comment} - Country/City",
-                }
-            )
 
-        if result["page"].get("asn"):
-            misp_val = result["page"]["asn"]
-            r.append(
-                {
-                    "types": "AS",
-                    "categories": ["External analysis"],
-                    "values": misp_val,
-                    "comment": f"{misp_comment} - ASN",
-                }
-            )
+class UrlscanParser:
+    """One object per thing urlscan describes, with the relationships between
+    them kept: the url is hosted on the domain-ip, which is in the geolocation
+    and announced by the asn."""
 
-        if result["page"].get("asnname"):
-            misp_val = result["page"]["asnname"]
-            r.append(
-                {
-                    "types": "text",
-                    "categories": ["External analysis"],
-                    "values": misp_val,
-                    "comment": f"{misp_comment} - ASN name",
-                }
-            )
+    def __init__(self, attribute):
+        self.misp_event = MISPEvent()
+        self.input_attribute = MISPAttribute()
+        self.input_attribute.from_dict(**attribute)
+        self.misp_event.add_attribute(**self.input_attribute)
 
-        if result["page"].get("tlsIssuer"):
-            misp_val = result["page"]["tlsIssuer"]
-            r.append(
-                {
-                    "types": "text",
-                    "categories": ["External analysis"],
-                    "values": misp_val,
-                    "comment": f"{misp_comment} - TLS Issuer",
-                }
-            )
+    def _add(self, misp_object, referenced=None, relationship="related-to"):
+        misp_object.add_reference(self.input_attribute.uuid, "related-to")
+        if referenced is not None:
+            misp_object.add_reference(referenced.uuid, relationship)
+        self.misp_event.add_object(misp_object)
+        return misp_object
 
-        if result["page"].get("title"):
-            misp_val = result["page"]["title"]
-            r.append(
-                {
-                    "types": "text",
-                    "categories": ["External analysis"],
-                    "values": misp_val,
-                    "comment": f"{misp_comment} - Page title",
-                }
-            )
+    def parse(self, result):
+        page = result.get("page") or {}
+        task = result.get("task") or {}
 
-        if result["page"].get("server"):
-            misp_val = result["page"]["server"]
-            r.append(
-                {
-                    "types": "text",
-                    "categories": ["External analysis"],
-                    "values": misp_val,
-                    "comment": f"{misp_comment} - Server",
-                }
-            )
+        url_object = None
+        scanned_url = task.get("url") or page.get("url")
+        if scanned_url:
+            url_object = MISPObject("url")
+            url_object.add_attribute("url", scanned_url)
+            if page.get("domain"):
+                url_object.add_attribute("domain", page["domain"])
+            if page.get("ip"):
+                url_object.add_attribute("ip", page["ip"])
+            # The url template has one text relation and no home for a page
+            # title or a server banner, so both are labelled inside it.
+            notes = [
+                f"{label}: {value}"
+                for label, value in (("title", page.get("title")), ("server", page.get("server")))
+                if value
+            ]
+            if notes:
+                url_object.add_attribute("text", "; ".join(notes))
+            self._add(url_object)
 
-    if result.get("stats"):
-        if result["stats"].get("malicious"):
-            log.debug("There is something in results > stats > malicious")
-            threat_list = set()
+        domain_ip = None
+        if page.get("domain") or page.get("ip"):
+            domain_ip = MISPObject("domain-ip")
+            if page.get("domain"):
+                domain_ip.add_attribute("domain", page["domain"])
+            if page.get("ip"):
+                domain_ip.add_attribute("ip", page["ip"])
+            if page.get("ptr"):
+                domain_ip.add_attribute("hostname", page["ptr"])
+            self._add(domain_ip, referenced=url_object, relationship="resolves-to")
 
-            if "matches" in result["meta"]["processors"]["gsb"]["data"]:
-                for item in result["meta"]["processors"]["gsb"]["data"]["matches"]:
-                    if item["threatType"]:
-                        threat_list.add(item["threatType"])
+        if page.get("country") or page.get("city"):
+            geolocation = MISPObject("geolocation")
+            if page.get("country"):
+                geolocation.add_attribute("countrycode", page["country"])
+            if page.get("city"):
+                geolocation.add_attribute("city", page["city"])
+            self._add(geolocation, referenced=domain_ip)
 
-            threat_list = ", ".join(threat_list)
-            log.debug("threat_list values are: '" + threat_list + "'")
+        if page.get("asn"):
+            asn = MISPObject("asn")
+            asn.add_attribute("asn", page["asn"])
+            if page.get("asnname"):
+                asn.add_attribute("organization", page["asnname"])
+            self._add(asn, referenced=domain_ip)
 
-            if threat_list:
-                misp_val = "{} threat(s) detected".format(threat_list)
-                r.append(
-                    {
-                        "types": "text",
-                        "categories": ["External analysis"],
-                        "values": misp_val,
-                        "comment": misp_comment,
-                    }
-                )
+        if page.get("tlsIssuer"):
+            x509 = MISPObject("x509")
+            x509.add_attribute("issuer", page["tlsIssuer"])
+            self._add(x509, referenced=url_object)
 
-    if result.get("lists"):
-        if result["lists"].get("urls"):
-            for url in result["lists"]["urls"]:
-                url = url.lower()
-                if "office" in url:
-                    misp_val = "Possible Office-themed phishing"
-                elif "o365" in url or "0365" in url:
-                    misp_val = "Possible O365-themed phishing"
-                elif "microsoft" in url:
-                    misp_val = "Possible Microsoft-themed phishing"
-                elif "paypal" in url:
-                    misp_val = "Possible PayPal-themed phishing"
-                elif "onedrive" in url:
-                    misp_val = "Possible OneDrive-themed phishing"
-                elif "docusign" in url:
-                    misp_val = "Possible DocuSign-themed phishing"
-                r.append(
-                    {
-                        "types": "text",
-                        "categories": ["External analysis"],
-                        "values": misp_val,
-                        "comment": misp_comment,
-                    }
-                )
+        if task.get("screenshotURL"):
+            image = MISPObject("image")
+            image.add_attribute("link", task["screenshotURL"])
+            if scanned_url:
+                image.add_attribute("url", scanned_url)
+            self._add(image, referenced=url_object)
 
-    if result.get("task"):
-        if result["task"].get("reportURL"):
-            misp_val = result["task"]["reportURL"]
-            r.append(
-                {
-                    "types": "link",
-                    "categories": ["External analysis"],
-                    "values": misp_val,
-                    "comment": misp_comment,
-                }
-            )
+        self._parse_verdict(result, task, url_object)
 
-        if result["task"].get("screenshotURL"):
-            image_url = result["task"]["screenshotURL"]
-            r.append(
-                {
-                    "types": "link",
-                    "categories": ["External analysis"],
-                    "values": image_url,
-                    "comment": misp_comment,
-                }
-            )
-            # ## TO DO ###
-            # ## Add ability to add an in-line screenshot of the target website into an attribute
-            # screenshot = requests.get(image_url).content
-            # r.append({'types': ['attachment'],
-            #           'categories': ['External analysis'],
-            #           'values': image_url,
-            #           'image': str(base64.b64encode(screenshot), 'utf-8'),
-            #           'comment': 'Screenshot of website'})
+    def _parse_verdict(self, result, task, url_object):
+        threat_types = _threat_types(result)
+        themes = _phishing_themes(result)
+        malicious = (result.get("stats") or {}).get("malicious")
+        if not (threat_types or themes or malicious):
+            return
+        # Typed explicitly, since pymisp does not bundle the reputation
+        # template yet.
+        reputation = MISPObject("reputation")
+        reputation.add_attribute("classification", **{"type": "text", "value": "malicious"})
+        reputation.add_attribute("source", **{"type": "text", "value": "urlscan.io"})
+        if malicious:
+            reputation.add_attribute("score", **{"type": "float", "value": float(malicious)})
+        notes = []
+        if threat_types:
+            notes.append("Google Safe Browsing: " + ", ".join(threat_types))
+        if themes:
+            notes.append("possible phishing themes: " + ", ".join(themes))
+        if notes:
+            reputation.add_attribute("text", **{"type": "text", "value": "; ".join(notes)})
+        if task.get("reportURL"):
+            reputation.add_attribute("link", **{"type": "link", "value": task["reportURL"]})
+        self._add(reputation, referenced=url_object)
 
-    return r
+    def get_results(self):
+        event = json.loads(self.misp_event.to_json())
+        return {"results": {key: event[key] for key in ("Attribute", "Object") if (key in event and event[key])}}
 
 
 def introspection():

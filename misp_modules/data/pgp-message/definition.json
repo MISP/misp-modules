@@ -1,0 +1,83 @@
+{
+  "attributes": {
+    "armor-comment": {
+      "description": "Comment header in an ASCII-armored OpenPGP message.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 0
+    },
+    "armor-version": {
+      "description": "Version header in an ASCII-armored OpenPGP message.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 0
+    },
+    "format": {
+      "description": "Encoding of the message artifact.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "sane_default": [
+        "armored",
+        "binary"
+      ],
+      "to_ids": false,
+      "ui-priority": 0
+    },
+    "message": {
+      "description": "Original ASCII-armored OpenPGP message, signed message or detached signature.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "message-file": {
+      "description": "Original OpenPGP message or signature as an attachment, including binary packets.",
+      "disable_correlation": true,
+      "misp-attribute": "attachment",
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "message-type": {
+      "description": "Observed message type. This does not establish successful decryption or signature verification.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "sane_default": [
+        "encrypted",
+        "signed",
+        "signature",
+        "compressed",
+        "literal",
+        "unknown"
+      ],
+      "to_ids": false,
+      "ui-priority": 0
+    },
+    "sha256": {
+      "description": "SHA-256 of the exact original message bytes.",
+      "disable_correlation": false,
+      "misp-attribute": "sha256",
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "source": {
+      "description": "Source URL for the message artifact.",
+      "disable_correlation": true,
+      "misp-attribute": "link",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 0
+    }
+  },
+  "description": "An OpenPGP message or signature artifact. Link a pgp-meta object containing observed recipient or issuer key IDs using extracted-from. Extracted IDs alone do not prove that a message was signed or encrypted by a particular key holder.",
+  "meta-category": "misc",
+  "name": "pgp-message",
+  "requiredOneOf": [
+    "message",
+    "message-file"
+  ],
+  "uuid": "a4e8e4e8-1b8c-4a14-9eb6-95e1e71d36e1",
+  "version": 1
+}

@@ -41,6 +41,11 @@ event_types = {
 mispattributes = {"input": list(fieldmap.keys())}
 
 
+def _escape(value):
+    """Escape a value for a double-quoted EQL string literal."""
+    return value.replace("\\", "\\\\").replace('"', '\\"')
+
+
 def handler(q=False):
     """
     Convert a MISP query into a CSV file matching the ThreatConnect Structured Import file format.
@@ -67,14 +72,11 @@ def handler(q=False):
                 if event_type not in queryDict.keys():
                     queryDict[event_type] = {}
                 queryDict[event_type][attribute["value"]] = fieldmap[attribute["type"]]
-    i = 0
-    for query in queryDict.keys():
-        response.write("{} where\n".format(query))
-        for value in queryDict[query].keys():
-            if i != 0:
-                response.write(" or\n")
-            response.write('\t{} == "{}"'.format(queryDict[query][value], value))
-            i += 1
+    queries = []
+    for query, values in queryDict.items():
+        conditions = ['\t{} == "{}"'.format(field, _escape(value)) for value, field in values.items()]
+        queries.append("{} where\n{}\n".format(query, " or\n".join(conditions)))
+    response.write("\n".join(queries))
 
     return {
         "response": [],

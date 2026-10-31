@@ -1,11 +1,14 @@
 import json
 
 import dns.resolver
+from pymisp import MISPAttribute, MISPEvent, MISPObject
+
+from . import check_input_attribute, standard_error_message
 
 misperrors = {"error": "Error"}
-mispattributes = {"input": ["ip-src", "ip-dst"], "output": ["text"]}
+mispattributes = {"input": ["ip-src", "ip-dst"], "format": "misp_standard"}
 moduleinfo = {
-    "version": "0.2",
+    "version": "0.3",
     "author": "Christian Studer",
     "description": "Module to check an IPv4 address against known RBLs.",
     "module-type": ["expansion", "hover"],
@@ -14,15 +17,15 @@ moduleinfo = {
     "requirements": ["dnspython3: DNS python3 library"],
     "features": (
         "This module takes an IP address attribute as input and queries multiple know Real-time Blackhost Lists to"
-        " check if they have already seen this IP address.\n\nWe display then all the information we get from those"
-        " different sources."
+        " check if they have already seen this IP address.\n\nEach list that answers produces a reputation object"
+        " naming the zone and carrying its TXT record."
     ),
     "references": [
         "[RBLs"
         " list](https://github.com/MISP/misp-modules/blob/8817de476572a10a9c9d03258ec81ca70f3d926d/misp_modules/modules/expansion/rbl.py#L20)"
     ],
     "input": "IP address attribute.",
-    "output": "Text with additional data from Real-time Blackhost Lists about the IP address.",
+    "output": "One reputation object per Real-time Blackhost List the IP address is listed on.",
 }
 moduleconfig = ["timeout"]
 
@@ -86,37 +89,80 @@ rbls = (
 )
 
 
+# A clean "not listed" answer, as opposed to the resolver itself failing.
+_NOT_LISTED = (
+    dns.resolver.NXDOMAIN,
+    dns.resolver.NoAnswer,
+    dns.resolver.NoNameservers,
+    dns.exception.Timeout,
+)
+
+
+def _parse_listing(zone, records):
+    """A listing on a DNSBL zone, as a reputation object.
+
+    Typed explicitly, since pymisp does not bundle the reputation template yet.
+    The verdict is suspicious rather than malicious: the zones below are not
+    all accusations - bogons.cymru.com is a routing statement - and the zone in
+    list-name is what carries the real meaning."""
+    misp_object = MISPObject("reputation")
+    misp_object.add_attribute("classification", **{"type": "text", "value": "suspicious"})
+    misp_object.add_attribute("list-name", **{"type": "text", "value": zone})
+    if records:
+        misp_object.add_attribute("text", **{"type": "text", "value": "  -  ".join(records)})
+    return misp_object
+
+
 def handler(q=False):
     if q is False:
         return False
     request = json.loads(q)
-    if request.get("ip-src"):
-        ip = request["ip-src"]
-    elif request.get("ip-dst"):
-        ip = request["ip-dst"]
-    else:
+    if not request.get("attribute") or not check_input_attribute(request["attribute"]):
+        return {"error": f"{standard_error_message}, which should contain at least a type, a value and an uuid."}
+    attribute = request["attribute"]
+    if attribute["type"] not in mispattributes["input"]:
         misperrors["error"] = "Unsupported attributes type"
         return misperrors
+    ip = attribute["value"]
+
     resolver = dns.resolver.Resolver()
     try:
         timeout = float(request["config"]["timeout"])
-    except (KeyError, ValueError):
+    except (KeyError, TypeError, ValueError):
         timeout = 0.4
     resolver.timeout = timeout
     resolver.lifetime = timeout
+
     infos = {}
+    failures = []
     ipRev = ".".join(ip.split(".")[::-1])
     for rbl in rbls:
         query = "{}.{}".format(ipRev, rbl)
         try:
-            txt = resolver.query(query, "TXT")
-            infos[query] = [str(t) for t in txt]
-        except Exception:
+            infos[rbl] = [str(t) for t in resolver.resolve(query, "TXT")]
+        except _NOT_LISTED:
             continue
-    result = "\n".join([f"{rbl}: {'  -  '.join(info)}" for rbl, info in infos.items()])
-    if not result:
+        except Exception as e:
+            # Anything else is the resolver failing, not the zone answering
+            # "not listed" - worth telling apart from a clean negative.
+            failures.append(f"{rbl}: {e}")
+
+    if not infos:
+        if len(failures) == len(rbls):
+            return {"error": f"Not able to query the RBLs: {failures[0]}"}
         return {"error": "No data found by querying known RBLs"}
-    return {"results": [{"types": mispattributes.get("output"), "values": result}]}
+
+    misp_event = MISPEvent()
+    input_attribute = MISPAttribute()
+    input_attribute.from_dict(**attribute)
+    misp_event.add_attribute(**input_attribute)
+    for zone, records in infos.items():
+        misp_object = _parse_listing(zone, records)
+        misp_object.add_reference(input_attribute.uuid, "related-to")
+        misp_event.add_object(misp_object)
+
+    event = json.loads(misp_event.to_json())
+    return {"results": {key: event[key] for key in ("Attribute", "Object") if (key in event and event[key])}}
 
 
 def introspection():

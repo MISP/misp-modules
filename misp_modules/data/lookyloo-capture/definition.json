@@ -1,0 +1,127 @@
+{
+  "attributes": {
+    "capture-date": {
+      "description": "Timestamp when the capture began.",
+      "disable_correlation": true,
+      "misp-attribute": "datetime",
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "capture-id": {
+      "description": "Capture UUID assigned by this instance.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "download": {
+      "description": "Link to the capture archive, downloaded files or video. Availability is not guaranteed.",
+      "disable_correlation": true,
+      "misp-attribute": "link",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 0
+    },
+    "error": {
+      "description": "Capture error or endpoint failure; the comment identifies the endpoint.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 0
+    },
+    "hostname": {
+      "description": "Hostname observed among capture resources; no IP mapping is implied.",
+      "misp-attribute": "hostname",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 0
+    },
+    "instance": {
+      "description": "Base URL of the Lookyloo instance.",
+      "disable_correlation": true,
+      "misp-attribute": "link",
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "ip": {
+      "description": "IPv4 or IPv6 address observed among capture resources.",
+      "misp-attribute": "ip-dst",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 0
+    },
+    "permalink": {
+      "description": "Link to the capture tree.",
+      "disable_correlation": true,
+      "misp-attribute": "link",
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "raw-data": {
+      "description": "JSON response from an endpoint, named for that endpoint. Includes original node identifiers, third-party results and pagination metadata when available.",
+      "disable_correlation": true,
+      "misp-attribute": "attachment",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 0
+    },
+    "redirect": {
+      "description": "URL in the redirect chain; the comment records its position.",
+      "misp-attribute": "url",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 0
+    },
+    "referer": {
+      "description": "Referer used for the capture.",
+      "misp-attribute": "url",
+      "to_ids": false,
+      "ui-priority": 0
+    },
+    "status": {
+      "description": "Numeric capture status code returned by Lookyloo; this is not a verdict.",
+      "disable_correlation": true,
+      "misp-attribute": "integer",
+      "to_ids": false,
+      "ui-priority": 0
+    },
+    "text": {
+      "description": "Analyst notes, lookup warnings or output truncation notices.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 0
+    },
+    "title": {
+      "description": "Title of the captured page.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "url": {
+      "description": "URL originally captured.",
+      "misp-attribute": "url",
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "user-agent": {
+      "description": "User agent used by the capturing browser.",
+      "disable_correlation": true,
+      "misp-attribute": "user-agent",
+      "to_ids": false,
+      "ui-priority": 0
+    }
+  },
+  "description": "A Lookyloo web capture and its provenance, as returned by the public API (https://lookyloo.circl.lu/doc/). Identified by instance and capture-id. Captured resources, files, cookies and screenshots can be linked as separate objects. Presence in a capture is an observation, not a maliciousness verdict. Redirect order is recorded in attribute comments; raw-data attachments preserve endpoint responses and lookup pagination metadata.",
+  "meta-category": "network",
+  "name": "lookyloo-capture",
+  "required": [
+    "instance",
+    "capture-id"
+  ],
+  "uuid": "be1227c7-fbee-4e7a-a2d1-3aa1d327d1a8",
+  "version": 1
+}

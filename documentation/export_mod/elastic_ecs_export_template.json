@@ -1,0 +1,192 @@
+{
+  "index_patterns": [
+    "misp-indicators*"
+  ],
+  "_meta": {
+    "description": "Minimal ECS 9.2 mappings for elastic_ecs_export; adjust index_patterns for custom targets.",
+    "ecs_version": "9.2.0"
+  },
+  "template": {
+    "mappings": {
+      "dynamic": false,
+      "properties": {
+        "misp": {
+          "type": "flattened",
+          "ignore_above": 4096
+        },
+        "@timestamp": {
+          "type": "date"
+        },
+        "ecs": {
+          "properties": {
+            "version": {
+              "type": "keyword",
+              "ignore_above": 4096
+            }
+          }
+        },
+        "event": {
+          "properties": {
+            "category": {
+              "type": "keyword",
+              "ignore_above": 4096
+            },
+            "dataset": {
+              "type": "keyword",
+              "ignore_above": 4096
+            },
+            "id": {
+              "type": "keyword",
+              "ignore_above": 4096
+            },
+            "kind": {
+              "type": "keyword",
+              "ignore_above": 4096
+            },
+            "module": {
+              "type": "keyword",
+              "ignore_above": 4096
+            },
+            "type": {
+              "type": "keyword",
+              "ignore_above": 4096
+            }
+          }
+        },
+        "tags": {
+          "type": "keyword",
+          "ignore_above": 4096
+        },
+        "threat": {
+          "properties": {
+            "indicator": {
+              "properties": {
+                "as": {
+                  "properties": {
+                    "number": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "confidence": {
+                  "type": "keyword",
+                  "ignore_above": 4096
+                },
+                "description": {
+                  "type": "keyword",
+                  "ignore_above": 4096
+                },
+                "email": {
+                  "properties": {
+                    "address": {
+                      "type": "keyword",
+                      "ignore_above": 4096
+                    }
+                  }
+                },
+                "file": {
+                  "properties": {
+                    "hash": {
+                      "properties": {
+                        "md5": {
+                          "type": "keyword",
+                          "ignore_above": 4096
+                        },
+                        "sha1": {
+                          "type": "keyword",
+                          "ignore_above": 4096
+                        },
+                        "sha256": {
+                          "type": "keyword",
+                          "ignore_above": 4096
+                        },
+                        "sha384": {
+                          "type": "keyword",
+                          "ignore_above": 4096
+                        },
+                        "sha512": {
+                          "type": "keyword",
+                          "ignore_above": 4096
+                        }
+                      }
+                    },
+                    "name": {
+                      "type": "keyword",
+                      "ignore_above": 4096
+                    }
+                  }
+                },
+                "first_seen": {
+                  "type": "date"
+                },
+                "id": {
+                  "type": "keyword",
+                  "ignore_above": 4096
+                },
+                "ip": {
+                  "type": "ip"
+                },
+                "last_seen": {
+                  "type": "date"
+                },
+                "marking": {
+                  "properties": {
+                    "tlp": {
+                      "type": "keyword",
+                      "ignore_above": 4096
+                    },
+                    "tlp_version": {
+                      "type": "keyword",
+                      "ignore_above": 4096
+                    }
+                  }
+                },
+                "modified_at": {
+                  "type": "date"
+                },
+                "name": {
+                  "type": "keyword",
+                  "ignore_above": 4096
+                },
+                "port": {
+                  "type": "long"
+                },
+                "provider": {
+                  "type": "keyword",
+                  "ignore_above": 4096
+                },
+                "reference": {
+                  "type": "keyword",
+                  "ignore_above": 4096
+                },
+                "type": {
+                  "type": "keyword",
+                  "ignore_above": 4096
+                },
+                "url": {
+                  "properties": {
+                    "domain": {
+                      "type": "keyword",
+                      "ignore_above": 4096
+                    },
+                    "full": {
+                      "type": "wildcard",
+                      "ignore_above": 4096
+                    },
+                    "port": {
+                      "type": "long"
+                    },
+                    "scheme": {
+                      "type": "keyword",
+                      "ignore_above": 4096
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

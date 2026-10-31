@@ -11,6 +11,7 @@
 
 import base64
 import json
+import shlex
 from urllib.parse import quote
 
 misperrors = {"error": "Error"}
@@ -49,8 +50,10 @@ responseType = "application/txt"
 SH_FILE_HEADER = """#!/bin/sh\n\n"""
 
 BLOCK_JSON_TMPL = """
-BLOCK_RULE='{{ "action": "BLOCK", "enabled": true, "type": "AccessRule", "name": "{rule_name}", "destinationNetworks": {{ "literals": [ {dst_networks} ] }}, "urls": {{ "literals": [ {urls} ]  }}, "newComments": [ "{event_info_comment}" ] }}'\n
+BLOCK_RULE={block_rule}\n
 """
+
+BLOCK_JSON_CONTENT_TMPL = """{{ "action": "BLOCK", "enabled": true, "type": "AccessRule", "name": "{rule_name}", "destinationNetworks": {{ "literals": [ {dst_networks} ] }}, "urls": {{ "literals": [ {urls} ]  }}, "newComments": [ "{event_info_comment}" ] }}"""
 
 BLOCK_DST_JSON_TMPL = """{{ "type": "Host", "value": "{ipdst}" }} """
 BLOCK_URL_JSON_TMPL = """{{ "type": "Url", "url": "{url}" }} """
@@ -66,6 +69,7 @@ def handler(q=False):
     r = {"results": []}
     request = json.loads(q)
 
+    config = {}
     if "config" in request:
         config = request["config"]
 
@@ -103,11 +107,13 @@ def handler(q=False):
 
     # building the .sh file
     output += SH_FILE_HEADER
-    output += "FIRESIGHT_IP_ADDR='{}'\n".format(config["fmc_ip_addr"])
+    output += "FIRESIGHT_IP_ADDR={}\n".format(shlex.quote(config["fmc_ip_addr"]))
 
-    output += "LOGINPASS_BASE64=`echo -n '{}:{}' | base64`\n".format(config["fmc_login"], config["fmc_pass"])
-    output += "DOMAIN_ID='{}'\n".format(config["domain_id"])
-    output += "ACPOLICY_ID='{}'\n\n".format(config["acpolicy_id"])
+    output += "LOGINPASS_BASE64=`echo -n {} | base64`\n".format(
+        shlex.quote("{}:{}".format(config["fmc_login"], config["fmc_pass"]))
+    )
+    output += "DOMAIN_ID={}\n".format(shlex.quote(config["domain_id"]))
+    output += "ACPOLICY_ID={}\n\n".format(shlex.quote(config["acpolicy_id"]))
 
     output += (
         'ACC_TOKEN=`curl -X POST -v -k -sD - -o /dev/null -H "Authorization: Basic $LOGINPASS_BASE64" -i'
@@ -117,10 +123,14 @@ def handler(q=False):
 
     output += (
         BLOCK_JSON_TMPL.format(
-            rule_name="misp_event_{}".format(event_id),
-            dst_networks=", ".join(ipdst),
-            urls=", ".join(urls),
-            event_info_comment=event_info,
+            block_rule=shlex.quote(
+                BLOCK_JSON_CONTENT_TMPL.format(
+                    rule_name="misp_event_{}".format(event_id),
+                    dst_networks=", ".join(ipdst),
+                    urls=", ".join(urls),
+                    event_info_comment=event_info,
+                )
+            )
         )
         + "\n"
     )

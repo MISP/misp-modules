@@ -1,5 +1,6 @@
 import json
 from concurrent.futures import ThreadPoolExecutor
+from contextvars import copy_context
 
 import requests
 from pymisp import MISPAttribute, MISPEvent, MISPObject
@@ -183,9 +184,9 @@ def handle_domain(apikey, attribute):
     domain = attribute["value"]
 
     with ThreadPoolExecutor(max_workers=3) as executor:
-        whois_future = executor.submit(expand_whois, apikey, domain)
-        dns_future = executor.submit(expand_dns, apikey, domain)
-        reputation_future = executor.submit(get_domain_reputation, apikey, domain)
+        whois_future = executor.submit(copy_context().run, expand_whois, apikey, domain)
+        dns_future = executor.submit(copy_context().run, expand_dns, apikey, domain)
+        reputation_future = executor.submit(copy_context().run, get_domain_reputation, apikey, domain)
         whois_results, whois_error = whois_future.result()
         dns_results, dns_error = dns_future.result()
         reputation_data, reputation_error = reputation_future.result()
@@ -414,9 +415,9 @@ def handle_ip(apikey, attribute):
     ip = attribute["value"]
 
     with ThreadPoolExecutor(max_workers=3) as executor:
-        whois_future = executor.submit(get_ip_whois, apikey, ip)
-        geo_future = executor.submit(get_geolocation, apikey, ip)
-        security_future = executor.submit(get_ip_security, apikey, ip)
+        whois_future = executor.submit(copy_context().run, get_ip_whois, apikey, ip)
+        geo_future = executor.submit(copy_context().run, get_geolocation, apikey, ip)
+        security_future = executor.submit(copy_context().run, get_ip_security, apikey, ip)
         ip_whois_data, ip_whois_error = whois_future.result()
         geo_data, geo_error = geo_future.result()
         security_data, security_error = security_future.result()

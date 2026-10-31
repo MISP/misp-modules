@@ -8,7 +8,13 @@ Create your module in [misp_modules/modules/expansion/](https://github.com/MISP/
 
 Don't forget to return an error key and value if an error is raised to propagate it to the MISP user-interface.
 
-Your module's script name should also be added in the `__all__` list of `<module type folder>/__init__.py` in order for it to be loaded.
+The current loader discovers `.py` files in these directories automatically; you
+do not need to edit `__all__` in `__init__.py`. Files whose names start with `_`
+are ignored. The filename without `.py` is the module's API identifier, which is
+also used in MISP settings; `moduleinfo['name']` is its display name.
+
+After writing a module, follow [Install and enable your module](#install-and-enable-your-module)
+below to make it available in MISP.
 
 ~~~python
 ...
@@ -19,6 +25,138 @@ Your module's script name should also be added in the `__all__` list of `<module
 ...
 ~~~
 
+
+### Install and enable your module
+
+Adding a file to a source checkout does not necessarily add it to the running
+service. Discovery by misp-modules and enabling a module in MISP are separate
+steps. The following example uses an export module named `my_export.py`.
+
+#### 1. Place the module where the service can load it
+
+For a module contributed to this repository, place it in
+`misp_modules/modules/export_mod/`. Use the Python environment that runs the
+service when installing dependencies and the modified package. For example,
+`python -m pip install .` from the checkout installs a copy of the package;
+repeat it after editing the source, or use `python -m pip install -e .` for an
+editable development installation. With Poetry, use `poetry install` and
+`poetry run misp-modules`. From outside the source checkout, run this with the
+service's Python interpreter to check the installed package path:
+
+~~~bash
+python -c 'import misp_modules; print(misp_modules.__file__)'
+~~~
+
+For a local module kept outside the installed package, use a custom root with a
+subdirectory identifying its type:
+
+~~~text
+/opt/misp-custom-modules/
+└── export_mod/
+    └── my_export.py
+~~~
+
+Start misp-modules with the **root**, not the `export_mod` directory:
+
+~~~bash
+misp-modules -l 127.0.0.1 --custom /opt/misp-custom-modules
+~~~
+
+The other supported directory names are `expansion`, `import_mod` and
+`action_mod`. Ensure the service account can read the files and traverse their
+directories. Choose a unique filename: a custom module with the same API
+identifier as an installed module replaces it.
+
+For systemd, persist `--custom` in the service's `ExecStart` (for example with
+`sudo systemctl edit misp-modules`). Retain the existing executable, Python
+environment and other options. An override needs an empty `ExecStart=` line
+before the replacement command; see the [systemd override example](module-config.md#running-with-systemd).
+Then run `sudo systemctl daemon-reload` and `sudo systemctl restart misp-modules`.
+For a container, mount the custom root and pass its path inside the container.
+
+#### 2. Check the module interface and restart
+
+Start from an existing module of the same type, such as
+[testexport.py](https://github.com/MISP/misp-modules/blob/main/misp_modules/modules/export_mod/testexport.py).
+For an export module:
+
+* `version()` must return metadata including `'module-type': ['export']`.
+  The directory is named `export_mod`, but the metadata type is `export`.
+* `introspection()` must return the export setup, including `inputSource`
+  (for example `['event']`), `outputFileExtension` and `responseType`, as in
+  `testexport.py`.
+* `handler()` receives a JSON string. For event exports, process the events in
+  `json.loads(q)['data']` and return `{'data': ...}` with the exported file
+  content encoded as a base64 string.
+
+Install any required Python libraries into the service's environment and any
+required system libraries on its host. Listing a dependency in module metadata
+does not install it.
+
+Restart the running misp-modules service after adding or changing a module;
+modules are loaded at startup. For a foreground process, stop and start it with
+the same options. For systemd, use `sudo systemctl restart misp-modules`.
+Check startup logs for `my_export` and any import errors. The supplied systemd
+unit writes to `/var/log/misp-modules_message.log` and
+`/var/log/misp-modules_error.log`; other units may use the journal
+(`sudo journalctl -u misp-modules -n 100 --no-pager`). A missing dependency
+causes the loader to skip that module; syntax errors can stop startup.
+
+#### 3. Verify discovery before opening MISP
+
+Query the running service, replacing the example URL and port with yours:
+
+~~~bash
+curl --fail --silent --show-error http://127.0.0.1:6666/modules | jq '.[] | select(.name == "my_export")'
+~~~
+
+The result must include `"name": "my_export"`, `"type": "export_mod"`, the
+export setup under `mispattributes`, and `"module-type": ["export"]` under
+`meta`. If there is no result, check the imported package path, the `--custom`
+root, file permissions, startup errors and whether you restarted the correct
+process. If `/modules` fails, check the service logs and that every loaded
+module's `introspection()` and `version()` functions return valid metadata.
+
+You can also exercise the handler directly, using a request appropriate to your
+module. For an event export, save this as `body.json`:
+
+~~~json
+{
+  "module": "my_export",
+  "data": [{"Event": {"info": "Custom export test"}, "Attribute": []}],
+  "config": {}
+}
+~~~
+
+~~~bash
+curl --fail --silent --show-error http://127.0.0.1:6666/query -H 'Content-Type: application/json' --data @body.json | jq .
+~~~
+
+A successful export returns a `data` field containing the base64-encoded file.
+The [Testing your modules](#testing-your-modules) section covers expansion queries.
+
+#### 4. Enable the module in MISP
+
+Log in as a MISP site administrator and open **Administration → Server Settings
+& Maintenance → Plugin settings**. For this export example:
+
+1. Set `Plugin.Export_services_enable` to `true`.
+2. Set `Plugin.Export_services_url` (for example `http://127.0.0.1`) and
+   `Plugin.Export_services_port` (for example `6666`) to the service you checked.
+   Run the `/modules` check from the MISP host or container as well: `127.0.0.1`
+   refers to that host or container, which may differ from the module server.
+3. Reload the settings page after enabling the service. MISP discovers module
+   settings from `/modules`; check for `Plugin.Export_my_export_enabled` and set
+   it to `true`. Fill in any module-specific settings returned in `meta.config`.
+4. Check `Plugin.Export_my_export_restrict` if other organisations cannot use
+   the module. Once enabled, try it from an event's **Download as…** export menu.
+
+For expansion/hover modules use the `Plugin.Enrichment_*` settings, and for
+import modules use `Plugin.Import_*`. Enabling only the enrichment service does
+not enable the export service. If the module appears in `/modules` but has no
+MISP setting, check the relevant service settings, connectivity from MISP and
+`meta['module-type']`. If it is enabled but unavailable to a user, check its
+organisation restriction and supported input.
 
 ### introspection
 
@@ -35,6 +173,13 @@ def introspection():
 ### version
 
 The function that returns a dict with the version and the associated meta-data including potential configurations required of the module.
+
+Expansion modules can declare `"data-source": "internal"` or `"data-source": "external"`
+in this metadata. This supports the optional global
+[PAP:RED policy](pap-red.md). Omitted declarations are treated as external when
+the policy is enabled. Only declare `internal` for passive processing that cannot
+expose intelligence outside the trusted environment. Hover requests marked
+PAP:RED are blocked for either source when the policy is enabled.
 
 
 ### Additional Configuration Values
@@ -101,6 +246,66 @@ def handler(q=False):
                 codecs.encode(src, "rot-13")}
 ~~~
 
+#### Tagging and untagging attributes
+
+A result of an expansion module can also carry tags. Next to `values` and `types`, a result entry
+accepts:
+
+* `tags` - tags to attach to the attribute the entry resolves to,
+* `remove_tags` - tags to take off the attribute the event already holds for that value.
+
+Both accept a list or a single tag name.
+
+~~~python
+return {
+    "results": [
+        {
+            "types": ["ip-dst"],
+            "values": ["198.51.100.10"],
+            "tags": ["misp-module:verdict=\"benign\""],
+            "remove_tags": ["false-positive"],
+        }
+    ]
+}
+~~~
+
+`remove_tags` is how a module retracts a verdict - its own from an earlier run, or one another
+module left behind. The tags are matched against the attribute in the enriched event with the same
+type and value as the entry, which is usually the attribute the enrichment was triggered on, echoed
+back by the module:
+
+~~~python
+def handler(q=False):
+    if q is False:
+        return False
+    request = json.loads(q)
+    ip = request.get("ip-dst")
+    if ip is None:
+        return {"error": "An ip-dst attribute is required"}
+    if not is_false_positive(ip):
+        return {"results": [{"types": ["ip-dst"], "values": [ip], "remove_tags": ["false-positive"]}]}
+    return {"results": []}
+~~~
+
+Worth knowing about the way MISP applies this:
+
+* When the event already holds the attribute, the entry is a tag change only - MISP does not try to
+  create the attribute a second time, and the `tags` of the same entry are attached to the attribute
+  it found. One entry can therefore swap one verdict for another. When the event does not hold the
+  attribute, the entry creates it as usual and there is nothing to remove.
+* Only tags that exist and are actually attached to the attribute are taken off; a removal never
+  creates a tag, and naming a tag that is not there is not an error.
+* Galaxy clusters are tags too, so `misp-galaxy:...` values can be removed the same way.
+* In the *Enrichment Results* screen nothing is removed behind the analyst's back: the tags show up
+  in a *Tags to remove* field, where they can be edited or cleared before the results are submitted.
+  The *Enrich event* and *Enrich attribute* background jobs have no such screen and apply the tag
+  changes directly, as they do for the attributes a module returns.
+* The user the enrichment runs as needs tagging permission. When they cannot edit the event, the
+  results come in as proposals and tag changes are skipped.
+
+Attribute tags travel differently in the `misp_standard` format, where the returned objects and
+attributes carry their own `Tag` lists; `remove_tags` belongs to the simple format shown above.
+
 #### export module
 
 For an export module, the `request["data"]` object corresponds to a list of events (dictionaries) to handle.
@@ -113,6 +318,229 @@ for event in request["data"]:
         for attribute in event["Attribute"]:
           # do stuff w/ attribute['type'], attribute['value'], ...
 ...
+~~~
+
+#### object enrichment
+
+An expansion module can also be triggered on a whole MISP object instead of a single attribute. Instead of receiving one value, the module receives the object with all of its attributes, and it returns MISP objects and/or attributes that MISP proposes to add to the event.
+
+To make a module available for object enrichment:
+
+* list the **object template names** your module accepts in `mispattributes['input']` (object names and attribute types share the same namespace),
+* declare `'output': ['MISP objects']` and `'format': 'misp_standard'`,
+* read the object from the `object` key of the request in your handler.
+
+~~~python
+mispattributes = {
+    "input": ["domain-ip"],          # object template name, not an attribute type
+    "output": ["MISP objects"],
+    "format": "misp_standard",
+}
+~~~
+
+Once the module is enabled, MISP shows the *Add enrichment* icon on every `domain-ip` object of an event, and the module is listed in the enrichment choice popup.
+
+##### The request
+
+MISP posts the full object, with its attributes inlined under the `Attribute` key:
+
+~~~json
+{
+  "module": "test_domain_ip_expansion",
+  "event_id": "42",
+  "object": {
+    "id": "1337",
+    "name": "domain-ip",
+    "meta-category": "network",
+    "template_uuid": "43b3b146-77eb-4931-b4cc-b66c60f28734",
+    "uuid": "5a2b1c3d-0000-4000-8000-000000000000",
+    "Attribute": [
+      {
+        "type": "domain",
+        "object_relation": "domain",
+        "value": "example.com",
+        "uuid": "b2d1a2e0-0000-4000-8000-000000000001"
+      },
+      {
+        "type": "ip-dst",
+        "object_relation": "ip",
+        "value": "198.51.100.10",
+        "uuid": "b2d1a2e0-0000-4000-8000-000000000002"
+      }
+    ]
+  },
+  "config": {
+    "apikey": "..."
+  }
+}
+~~~
+
+Attributes of an attachment type (`attachment`, `malware-sample`) also carry their content base64 encoded in a `data` key, so a module can process files attached to the object without touching the MISP filesystem.
+
+Since object names and attribute types share one namespace, a module whose `input` list contains both will be offered in both contexts. In that case branch on which key is present:
+
+~~~python
+request = json.loads(q)
+if "object" in request:
+    return handle_object(request["object"])
+return handle_attribute(request["attribute"])
+~~~
+
+##### The response
+
+Build the result with [PyMISP](https://github.com/MISP/PyMISP) and return the `Object` and `Attribute` lists of the event under the `results` key:
+
+~~~python
+{
+  "results": {
+    "Object": [...],     # MISP objects to add to the event
+    "Attribute": [...]   # standalone attributes to add to the event
+  }
+}
+~~~
+
+`EventReport`, `Tag` and `Galaxy` are accepted in `results` as well, and an optional top-level `comment` key overrides the default import comment shown to the analyst.
+
+Nothing is written to the event directly: MISP renders the returned objects and attributes in the *Enrichment Results* screen, where the analyst picks what to keep.
+
+##### Full example
+
+The module below enriches a `domain-ip` object with a `whois` object and a standalone `comment` attribute. It has no external dependency, which makes it convenient to exercise the whole object enrichment flow end to end:
+
+~~~python
+# -*- coding: utf-8 -*-
+"""Test expansion module: enriches a `domain-ip` MISP object."""
+
+import json
+
+from pymisp import MISPEvent, MISPObject
+
+misperrors = {"error": "Error"}
+
+mispattributes = {
+    "input": ["domain-ip"],
+    "output": ["MISP objects"],
+    "format": "misp_standard",
+}
+
+moduleinfo = {
+    "version": "0.1",
+    "author": "Luciano Righetti",
+    "description": "Test module that enriches a domain-ip object with static data.",
+    "module-type": ["expansion"],
+    "name": "Test Domain-IP Expansion",
+    "logo": "",
+    "requirements": [],
+    "features": "Takes a domain-ip object and returns a fake whois object plus a comment attribute.",
+    "references": [],
+    "input": "A domain-ip object.",
+    "output": "A whois object and a comment attribute.",
+}
+
+
+def process_domain_ip(misp_object):
+    domain = None
+    ip = None
+    for attribute in misp_object.get("Attribute", []):
+        if attribute.get("object_relation") == "domain":
+            domain = attribute.get("value")
+        elif attribute.get("object_relation") == "ip":
+            ip = attribute.get("value")
+
+    if domain is None and ip is None:
+        return {"error": "No domain or ip attribute found in the domain-ip object."}
+
+    event = MISPEvent()
+
+    whois = MISPObject("whois")
+    whois.add_attribute("domain", type="domain", value=domain or "example.com")
+    whois.add_attribute("registrar", type="whois-registrar", value="Test Registrar Inc.")
+    whois.add_attribute("creation-date", type="datetime", value="2020-01-01T00:00:00+00:00")
+    if ip is not None:
+        whois.add_attribute("ip-address", type="ip-src", value=ip)
+    whois.comment = "Enriched by test_domain_ip_expansion"
+    event.add_object(whois)
+
+    event.add_attribute(
+        type="comment",
+        value="test_domain_ip_expansion enrichment of {}".format(domain or ip),
+        comment="Standalone attribute returned by the test module",
+    )
+
+    event = json.loads(event.to_json())
+
+    return {
+        "results": {
+            "Object": event.get("Object", []),
+            "Attribute": event.get("Attribute", []),
+        }
+    }
+
+
+def handler(q=False):
+    if q is False:
+        return False
+    request = json.loads(q)
+    misp_object = request.get("object")
+
+    if not misp_object:
+        return {"error": "No object provided."}
+
+    if "Attribute" not in misp_object:
+        return {"error": "Empty Attribute list."}
+
+    if misp_object.get("name") != "domain-ip":
+        return {"error": "Wrong object type, expected a domain-ip object."}
+
+    return process_domain_ip(misp_object)
+
+
+def introspection():
+    return mispattributes
+
+
+def version():
+    return moduleinfo
+~~~
+
+Note the guard clauses in the handler: an object enrichment module should always verify that an object was provided, that it carries attributes, and that its template is one it understands, returning an `error` otherwise so the message reaches the MISP user-interface.
+
+##### Testing it
+
+Save the request shown above as `body.json` and post it to the module server, exactly as for an attribute based module:
+
+~~~bash
+curl -s http://127.0.0.1:6666/query -H "Content-Type: application/json" --data @body.json -X POST | jq .
+~~~
+
+~~~json
+{
+  "results": {
+    "Object": [
+      {
+        "name": "whois",
+        "meta-category": "network",
+        "comment": "Enriched by test_domain_ip_expansion",
+        "Attribute": [
+          { "type": "domain", "object_relation": "domain", "value": "example.com" },
+          { "type": "whois-registrar", "object_relation": "registrar", "value": "Test Registrar Inc." },
+          { "type": "datetime", "object_relation": "creation-date", "value": "2020-01-01T00:00:00+00:00" },
+          { "type": "ip-src", "object_relation": "ip-address", "value": "198.51.100.10" }
+        ]
+      }
+    ],
+    "Attribute": [
+      {
+        "type": "comment",
+        "value": "test_domain_ip_expansion enrichment of example.com",
+        "comment": "Standalone attribute returned by the test module"
+      }
+    ]
+  }
+}
+~~~
+
+[sigmf_expand](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/sigmf_expand.py) is an object enrichment module shipped with misp-modules that follows the same structure.
 
 ### Returning Binary Data
 

@@ -8,6 +8,8 @@ from flask_session import Session
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf import CSRFProtect
 
+from .request_class import ModuleRequest
+
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -20,6 +22,7 @@ login_manager = LoginManager()
 
 def create_app():
     app = Flask(__name__)
+    app.request_class = ModuleRequest
 
     # Configure app from environment variables
     app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv(
@@ -42,7 +45,12 @@ def create_app():
     # Initialize extensions
     db.init_app(app)
     csrf.init_app(app)
-    migrate.init_app(app, db, render_as_batch=True)
+    migrate.init_app(
+        app,
+        db,
+        directory=os.path.join(app.root_path, "..", "migrations"),
+        render_as_batch=True,
+    )
     app.config["SESSION_SQLALCHEMY"] = db
     session.init_app(app)
     login_manager.login_view = "account.login"

@@ -6,6 +6,59 @@ Use all MISP modules through a dedicated website without requiring a MISP instan
 
 ![Query](https://github.com/MISP/misp-modules/blob/main/website/doc/query_misp_module.png?raw=true)
 
+See the [interface guide](doc/interface.md) for design references, asset builds,
+and browser regression tests.
+
+## Import modules
+
+Choose **Import data** in the sidebar to test an active import module without a
+MISP instance. Select a module, then upload a file or paste text according to its
+supported input sources (up to 20 MiB). Modules that retrieve remote reports show
+their configuration fields instead of a file input.
+
+The form displays the module's import options, including boolean defaults and
+required fields. Saved module settings are used automatically; **Override module
+settings** supplies values for this run. An administrator can enable modules and
+configure shared settings under **Module configuration**.
+
+Imports open in the same results view as enrichments, with visual, JSON, and
+Markdown views, downloads, and session history. Use **Choose modules** on an
+imported attribute to start an enrichment. To repeat an import, choose **New
+import** and provide the input again; the website does not retain uploaded input
+for replay. Import results may themselves contain attachments supplied by a module.
+
+## Export modules
+
+Choose **Export data** in the sidebar, select an active export module, and upload
+a MISP JSON file (up to 20 MiB) or choose an event from the **CIRCL OSINT** feed.
+The feed picker searches event titles and UUIDs and paginates the feed manifest.
+Feed access happens on the website server and requires outbound HTTPS access to
+`www.circl.lu`. Feed failures can be retried without losing module options.
+
+Standard `Event` JSON, bare events, lists, and `response` event collections are
+accepted. Modules advertising single-event input reject collections. Module
+options and saved settings work like imports, including per-run overrides.
+
+When `ADMIN_PASSWORD` is configured, log in as the administrator to run exports
+and access export results or downloads, including previously saved exports.
+Export execution settings are not retained in browser-session trees or saved
+history. The FireSIGHT script exporter always receives login/password placeholders
+instead of saved or submitted credentials; add credentials to the script after
+downloading it. Other module settings still use their configured defaults.
+
+Exports open in the results view and session history. Text files have an escaped
+preview; binary files have a download action. **Download** retrieves the original
+decoded output with the module's file extension; **Download JSON** retrieves the
+response envelope. Long previews are shortened without changing the download.
+Use **New export** to run another module or provide another event. Uploaded input
+is not saved for replay. Some export modules contact external services according
+to their description and configuration.
+
+Supported feed endpoints are explicitly registered in `app/export_core.py`.
+To add another public MISP JSON feed, add its HTTPS base URL to `FEEDS`; it must
+provide `manifest.json` and UUID-named event JSON files. Responses are bounded,
+manifests are cached for five minutes, and redirects are rejected.
+
 ## Installation
 
 The MISP Modules website uses [Poetry](https://python-poetry.org/) for dependency management. It is recommended to install dependencies in a virtual environment managed by Poetry.
@@ -105,6 +158,27 @@ poetry run mmw db migrate   # Generate a new migration
 poetry run mmw db upgrade   # Apply migrations
 poetry run mmw db downgrade # Revert the latest migration
 ```
+
+### Updating an existing installation
+
+After updating the code and installing dependencies, stop the website, back up
+its database, and apply migrations before restarting it. Run this from `website/`
+with the same `.env` / `DATABASE_URI` as the running service:
+
+```bash
+poetry install
+poetry run mmw db upgrade
+```
+
+Only restart the website if the upgrade succeeds. `db migrate` generates migration
+files for developers; it does not apply the migrations shipped with an update.
+Likewise, `db init` creates missing tables but does not add columns to existing ones.
+
+If `/external_tools/list` fails with `no such column: external_tools.api_key`,
+run the upgrade above. It repairs the missing column and index even if the legacy
+API-key migration was already recorded as applied, preserving existing tools,
+API keys, and query history. Existing tools without a key will need one configured
+on the **External tools** page before use.
 
 ## Systemd Services
 
