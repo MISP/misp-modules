@@ -42,7 +42,7 @@ class HistoryMutationTests(unittest.TestCase):
     def test_session_later_sibling_is_removed_without_losing_root(self):
         root = SAMPLE_PATHS[0]
         child = root['children'][1]['children'][0]
-        response = self.client.get(f"/history/remove_node_session/{child['uuid']}?root_id={root['uuid']}")
+        response = self.client.post(f"/history/remove_node_session/{child['uuid']}?root_id={root['uuid']}")
         self.assertEqual(response.status_code, 200)
         data = self.client.get('/get_history_session').get_json()
         self.assertEqual(len(data), 3)
@@ -56,7 +56,7 @@ class HistoryMutationTests(unittest.TestCase):
         child = root['children'][1]
         # No scope is also supported for existing clients; do not stop at the
         # first (newer) saved tree that does not contain the requested query.
-        response = self.client.get(f"/history/remove_node_tree/{child['uuid']}")
+        response = self.client.post(f"/history/remove_node_tree/{child['uuid']}")
         self.assertEqual(response.status_code, 200)
         roots = self.client.get('/get_history_tree').get_json()
         self.assertEqual(len(roots), 3)
@@ -70,13 +70,13 @@ class HistoryMutationTests(unittest.TestCase):
         other = SAMPLE_PATHS[1]['uuid']
         for mode, endpoint in [('session', '/get_history_session'), ('tree', '/get_history_tree')]:
             before = self.client.get(endpoint).get_json()
-            response = self.client.get(f"/history/remove_node_{mode}/{child['uuid']}?root_id={other}")
+            response = self.client.post(f"/history/remove_node_{mode}/{child['uuid']}?root_id={other}")
             self.assertEqual(response.status_code, 404)
             self.assertEqual(self.client.get(endpoint).get_json(), before)
 
     def test_root_removal_clears_current_session_and_preserves_saved_tree(self):
         root = SAMPLE_PATHS[0]['uuid']
-        self.assertEqual(self.client.get(f'/history/remove_node_session/{root}?root_id={root}').status_code, 200)
+        self.assertEqual(self.client.post(f'/history/remove_node_session/{root}?root_id={root}').status_code, 200)
         self.assertEqual(len(self.client.get('/get_history_session').get_json()), 2)
         self.assertEqual(self.client.get('/get_current_query_history').get_json(), {})
         self.assertEqual(len(self.client.get('/get_history_tree').get_json()), 3)
@@ -86,13 +86,13 @@ class HistoryMutationTests(unittest.TestCase):
         with self.client.session_transaction() as session:
             session.clear()
             session[root['uuid']] = root
-        self.assertEqual(self.client.get('/history/remove_node_session/' + root['uuid']).status_code, 200)
+        self.assertEqual(self.client.post('/history/remove_node_session/' + root['uuid']).status_code, 200)
         self.assertEqual(self.client.get('/get_history_session').get_json(), {})
 
     def test_save_is_idempotent_and_updates_changed_topology(self):
         root = SAMPLE_PATHS[0]
         self.assertEqual(self.client.get('/save_history/' + root['uuid']).get_json()['toast_class'], 'warning-subtle')
-        self.client.get('/history/remove_node_session/' + root['children'][1]['uuid'])
+        self.client.post('/history/remove_node_session/' + root['children'][1]['uuid'])
         self.assertEqual(self.client.get('/save_history/' + root['uuid']).get_json()['message'], 'Saved tree updated')
         saved = self.client.get('/get_history_tree/' + root['uuid']).get_json()
         self.assertEqual(len(saved['children']), 1)

@@ -21,8 +21,8 @@ createApp({
         const matchCount = computed(() => filteredRoots.value.reduce((total, root) => total + matchingQueries(root), 0))
         watch(filteredRoots, list => { if (!list.some(root => root.uuid === selectedId.value)) selectedId.value = list[0]?.uuid || '' }, {flush: 'sync'})
         watch(search, () => { pendingRemoval.value = '' })
-        async function readJSON(url) {
-            const response = await fetch(url)
+        async function readJSON(url, options) {
+            const response = await fetch(url, options)
             let data
             try { data = await response.json() } catch { throw new Error('The server returned an unreadable response. Please try again.') }
             if (!response.ok || String(data?.toast_class || '').startsWith('danger')) throw new Error(data?.message || `Request failed (${response.status}).`)
@@ -66,7 +66,10 @@ createApp({
             if (busy.value) return
             busy.value = id; error.value = ''; feedback.value = ''
             try {
-                await readJSON('/history/remove_node_' + (saved ? 'tree/' : 'session/') + encodeURIComponent(id) + '?root_id=' + encodeURIComponent(selectedId.value))
+                await readJSON('/history/remove_node_' + (saved ? 'tree/' : 'session/') + encodeURIComponent(id) + '?root_id=' + encodeURIComponent(selectedId.value), {
+                    method: 'POST',
+                    headers: {'X-CSRFToken': document.getElementById('csrf_token').value},
+                })
                 pendingRemoval.value = ''; busy.value = ''
                 // Reload server state; never splice a neighboring filtered root.
                 if (!await loadHistory()) return

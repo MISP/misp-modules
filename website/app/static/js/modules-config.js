@@ -48,7 +48,10 @@ createApp({
             const checkbox = event.target
             pending.value.push(module.id)
             try {
-                const response = await fetch(`/change_status?module_id=${encodeURIComponent(module.id)}`)
+                const response = await fetch(`/change_status?module_id=${encodeURIComponent(module.id)}`, {
+                    method: 'POST',
+                    headers: {'X-CSRFToken': document.getElementById('csrf_token').value},
+                })
                 if (!response.ok) {
                     const data = await response.json()
                     throw new Error(data.message || 'Unable to change module status.')
