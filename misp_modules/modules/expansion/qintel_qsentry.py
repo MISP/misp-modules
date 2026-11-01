@@ -54,7 +54,7 @@ def _return_error(message):
 
 def _make_tags(enriched_attr, result):
 
-    for tag in result["tags"]:
+    for tag in result.get("tags") or []:
         color = TAG_COLOR["suspicious"]
         if tag == "criminal":
             color = TAG_COLOR["malicious"]
@@ -149,7 +149,7 @@ def _format_hover(event, result):
 
     enriched_object = event.get_objects_by_name("Qintel Threat Enrichment")[0]
 
-    tags = ", ".join(result.get("tags"))
+    tags = ", ".join(result.get("tags") or [])
     enriched_object.add_attribute("Tags", type="text", value=tags)
 
     return event
