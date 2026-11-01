@@ -1,4 +1,4 @@
-# This module does not appear to be actively maintained.
+# Legacy Enterprise API module. Use the bundled domaintools_iris_* modules for Iris services.
 # Please see https://github.com/DomainTools/domaintools_misp
 # for the official DomainTools-supported MISP app
 
@@ -52,7 +52,7 @@ moduleinfo = {
         "A Domaintools API access (username & apikey)",
     ],
     "features": (
-        "This legacy module does not appear to be actively maintained. See https://misp.github.io/misp-modules/domaintools/ "
+        "Use domaintools_iris_enrich, domaintools_iris_investigate or domaintools_iris_pivot for Iris services. See https://misp.github.io/misp-modules/domaintools/ "
         "for API coverage and the provider-supported MISP integration.\n\n"
         "This module takes a MISP attribute as input to query the Domaintools API. The API returns then the result of"
         " the query with some types we map into compatible types we add as MISP attributes.\n\nPlease note that"
