@@ -124,7 +124,7 @@ def test_soa_preserves_full_rdata_and_decodes_mailbox(resolver):
             "1 svc.example.net. port=8443 ipv4hint=192.0.2.1 ipv6hint=2001:db8::1",
             {"domain": ["svc.example.net"], "port": ["8443"], "ip": ["192.0.2.1", "2001:db8::1"]},
         ),
-        ("TLSA", "3 1 1 aabbccdd", {}),
+        ("TLSA", "3 1 1 " + "aabbccdd" * 8, {}),
         ("TYPE65400", r"\# 4 aabbccdd", {}),
     ],
 )

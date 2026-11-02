@@ -12,7 +12,7 @@ export default defineConfig({
     },
     outDir: '../../static/js',
     emptyOutDir: false,
-    minify: 'esbuild',
+    minify: 'oxc',
     rollupOptions: {
       external: ['markdown-it'],
       output: {
