@@ -104,7 +104,7 @@ all = [
     "assemblyline_client",
     "backscatter",  ## in minimal
     "blockchain",   ## in minimal
-    "cccs-yara>=2.11,<3",
+    "cccs-yara>=2.12,<3",
     "clamd",   ## in minimal
     "crowdstrike-falconpy",   ## in minimal
     "dnsdb2",  ## in minimal
