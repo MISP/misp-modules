@@ -46,11 +46,11 @@ def check_query(request):
             continue
         misperrors["error"] = "Backscatter.io authentication is missing."
         return output
-    if not request.get("ip-src") and request.get("ip-dst"):
+    if not request.get("ip-src") and not request.get("ip-dst"):
         misperrors["error"] = "Unsupported attributes type."
         return output
     profile = {"success": True, "config": config, "playbook": "generic"}
-    if "ip-src" in request:
+    if request.get("ip-src"):
         profile.update({"value": request.get("ip-src")})
     else:
         profile.update({"value": request.get("ip-dst")})
