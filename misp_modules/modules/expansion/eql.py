@@ -55,6 +55,7 @@ def handler(q=False):
     config = request.get("config", {"Default_Source": ""})
     logging.info("Setting config to: %s", config)
 
+    attrType = None
     for supportedType in fieldmap.keys():
         if request.get(supportedType):
             attrType = supportedType
