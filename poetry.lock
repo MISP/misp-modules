@@ -4880,27 +4880,14 @@ files = [
 name = "more-itertools"
 version = "11.1.0"
 description = "More routines for operating on iterables, beyond itertools"
-optional = true
+optional = false
 python-versions = ">=3.10"
-groups = ["main"]
-markers = "extra == \"minimal\" or extra == \"all\""
+groups = ["main", "greynoise-compat"]
 files = [
     {file = "more_itertools-11.1.0-py3-none-any.whl", hash = "sha256:4b65538ae22f6fed0ce4874efd317463a7489796a0939fa66824dd542125a192"},
     {file = "more_itertools-11.1.0.tar.gz", hash = "sha256:48e8f4d9e7e5878571ecf6f2b4e57634f93cd474cc8cfbd2376f2d11b396e30d"},
 ]
-
-[[package]]
-name = "more-itertools"
-version = "11.2.1"
-description = "More routines for operating on iterables, beyond itertools"
-optional = true
-python-versions = ">=3.11"
-groups = ["main"]
-markers = "python_version >= \"3.11\" and extra == \"all\""
-files = [
-    {file = "more_itertools-11.2.1-py3-none-any.whl", hash = "sha256:35a7377edd1dd6608dcb2cdf534ded55ea32d49448875ad042cd3f879fb1ded0"},
-    {file = "more_itertools-11.2.1.tar.gz", hash = "sha256:cbf08fd0af284dc69718b9b76a8e6203df624d70209ea511e4219d350c856f63"},
-]
+markers = {main = "extra == \"minimal\" or extra == \"all\""}
 
 [[package]]
 name = "msoffcrypto-tool"
@@ -10710,4 +10697,4 @@ minimal = ["backscatter", "blockchain", "censys", "clamd", "crowdstrike-falconpy
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10,<4.0"
-content-hash = "0c05e3e66e81fd597b13210681bdd683d3168b8753ef4eb0b67447639f4fc74c"
+content-hash = "1e8bf679042f77b19d91fe437276a7e547b0ba7d2bc236e816e71a22c5c11a8e"

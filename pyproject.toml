@@ -180,6 +180,14 @@ packages = [{include = "misp_modules"}]
 requires = ["poetry-core>=2.5.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
 
+# GreyNoise pins this shared dependency. Keep the exported lock consistent
+# without adding a dependency to the base installation.
+[tool.poetry.group.greynoise-compat]
+optional = true
+
+[tool.poetry.group.greynoise-compat.dependencies]
+more-itertools = "11.1.0"
+
 [tool.poetry.group.test]
 optional = true
 
