@@ -1,7 +1,7 @@
 import json
 
 from pymisp import MISPAttribute, MISPEvent, MISPObject
-from socialscan.platforms import Platforms
+from socialscan.platforms import EmailQueryable, Platforms, UsernameQueryable
 from socialscan.util import sync_execute_queries
 
 from . import check_input_attribute, standard_error_message
@@ -40,22 +40,8 @@ mispattributes = {
 }
 moduleconfig = []
 
-_PLATFORMS = [
-    Platforms.INSTAGRAM,
-    Platforms.TWITTER,
-    Platforms.GITHUB,
-    Platforms.TUMBLR,
-    Platforms.LASTFM,
-]
-_EMAIL_PLATFORMS = [Platforms.PINTEREST, Platforms.SPOTIFY, Platforms.FIREFOX]
-_EMAIL_PLATFORMS.extend(_PLATFORMS)
-_USERNAME_PLATFORMS = [
-    Platforms.SNAPCHAT,
-    Platforms.GITLAB,
-    Platforms.REDDIT,
-    Platforms.YAHOO,
-]
-_USERNAME_PLATFORMS.extend(_PLATFORMS)
+_EMAIL_PLATFORMS = [platform for platform in Platforms if issubclass(platform.value, EmailQueryable)]
+_USERNAME_PLATFORMS = [platform for platform in Platforms if issubclass(platform.value, UsernameQueryable)]
 
 
 def parse_results(query_results, attribute, relation):

@@ -22,7 +22,7 @@ export default defineConfig({
         },
       },
     },
-    minify: 'esbuild',
+    minify: 'oxc',
   },
   resolve: {
     alias: {
@@ -72,12 +72,12 @@ export default defineConfig({
         {
           src: path.resolve(__dirname, 'node_modules/dayjs/plugin/utc.js'),
           dest: 'js/vendor/dayjs',
-          rename: 'dayjs-utc.js',
+          rename: { stripBase: true, name: 'dayjs-utc.js' },
         },
         {
           src: path.resolve(__dirname, 'node_modules/dayjs/plugin/relativeTime.js'),
           dest: 'js/vendor/dayjs',
-          rename: 'dayjs-relativeTime.js',
+          rename: { stripBase: true, name: 'dayjs-relativeTime.js' },
         },
         // CSS
         {
@@ -132,7 +132,7 @@ export default defineConfig({
           src: path.resolve(__dirname, 'node_modules/@fortawesome/fontawesome-free/webfonts/fa-{brands,solid}-*.{ttf,woff2}'),
           dest: 'fonts/vendor',
         },
-      ],
+      ].map(target => ({ rename: { stripBase: true }, ...target })),
     }),
   ],
 });

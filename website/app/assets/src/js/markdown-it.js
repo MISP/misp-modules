@@ -1,5 +1,5 @@
-import MarkdownIt from 'markdown-it/lib/index.js';
-import linkifyIt from 'linkify-it';
+import MarkdownIt from 'markdown-it';
+import { LinkifyIt } from 'linkify-it';
 import punycode from 'punycode';
 
 // Configure markdown-it with only non-default options
@@ -9,7 +9,7 @@ const md = new MarkdownIt({
 });
 
 // Attach linkify-it instance
-md.linkify = new linkifyIt();
+md.linkify = new LinkifyIt();
 
 // Attach punycode
 md.punycode = punycode;

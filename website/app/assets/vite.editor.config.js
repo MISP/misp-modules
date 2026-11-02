@@ -20,7 +20,7 @@ export default defineConfig({
         drop_debugger: true
       },
       mangle: true,
-      output: {
+      format: {
         comments: false
       }
     },

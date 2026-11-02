@@ -66,6 +66,7 @@ The MISP Modules website uses [Poetry](https://python-poetry.org/) for dependenc
 ### Prerequisites
 - Python 3.10 or higher
 - Poetry
+- Node.js 24 or higher when rebuilding the frontend assets
 
 ### Steps
 1. **Clone the Repository**:

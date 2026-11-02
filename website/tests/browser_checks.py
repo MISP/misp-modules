@@ -451,13 +451,13 @@ class InterfaceTests(unittest.TestCase):
         self.assertFalse(self.page.evaluate("document.documentElement.scrollWidth > innerWidth"))
 
     def test_visual_cards_preserve_values_and_related_queries(self):
-        value = "https://example.org/a?owner=O'Reilly&tag=<img src=x onerror=window.injected=true>#frag"
+        value = "https://example.org/a?owner=O'Reilly&tag=<img src=x onerror=window.mispXssExecuted=true>#frag"
         self.page.add_init_script("Object.defineProperty(navigator, 'clipboard', {configurable: true, value: {writeText: async value => { window.copiedValue = value }}})")
         self.page.route("**/result/test-query", lambda route: route.fulfill(json={"example.org": {"dns": {"results": [{"types": ["url"], "values": [value]}]}}}))
         self.page.goto(self.base + "/query/test-query")
         expect(self.page.locator(".enrichment-value")).to_have_text(value)
         expect(self.page.locator(".enrichment-value img")).to_have_count(0)
-        self.assertIsNone(self.page.evaluate("window.injected"))
+        self.assertIsNone(self.page.evaluate("window.mispXssExecuted"))
         self.page.get_by_role("button", name="Copy value", exact=True).click()
         expect(self.page.get_by_role("status").filter(has_text="Value copied.")).to_be_visible()
         self.assertEqual(self.page.evaluate("window.copiedValue"), value)
