@@ -176,6 +176,8 @@ For further Information see the [license file](https://misp.github.io/misp-modul
 * [PTR Classification](https://misp.github.io/misp-modules/expansion/#ptr-classification) - Classify IP reverse-DNS records or supplied hostnames into ptrclassify and dns-record objects, preserving confidence and evidence, and add matching taxonomy tags to the queried attribute. [JSON documentation](documentation/expansion/ptrclassify.json).
 * [PDF Enrich](https://misp.github.io/misp-modules/expansion/#pdf-enrich) - Module to extract freetext from a PDF document.
 * [phishunt Lookup](https://misp.github.io/misp-modules/expansion/#phishunt-lookup) - Look up a host in phishunt, the CC0 feed of live phishing domains: detected URLs, targeted brand, hosting and cross-feed corroboration.
+* [Plum Island IP History](documentation/expansion/plum_island.md) - Retrieve historical IP scan observations, UID tags and timestamps from the Plum Island Discovery API.
+* [Plum Island Search](documentation/expansion/plum_island_search.md) - Find observed IPs by domain, hostname, network or certificate fingerprint.
 * [PPTX Enrich](https://misp.github.io/misp-modules/expansion/#pptx-enrich) - Module to extract freetext from a .pptx document.
 * [Qintel QSentry Lookup](https://misp.github.io/misp-modules/expansion/#qintel-qsentry-lookup) - A hover and expansion module which queries Qintel QSentry for ip reputation data
 * [QR Code Decode](https://misp.github.io/misp-modules/expansion/#qr-code-decode) - Decode QR codes from attachments OR remote URLs (Anti-Quishing).
