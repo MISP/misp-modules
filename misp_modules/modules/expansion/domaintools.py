@@ -1,4 +1,4 @@
-# This module does not appear to be actively maintained.
+# Legacy Enterprise API module. Use the bundled domaintools_iris_* modules for Iris services.
 # Please see https://github.com/DomainTools/domaintools_misp
 # for the official DomainTools-supported MISP app
 
@@ -43,7 +43,7 @@ mispattributes = {
 moduleinfo = {
     "version": "0.1",
     "author": "Raphaël Vinot",
-    "description": "DomainTools MISP expansion module.",
+    "description": "Legacy DomainTools WHOIS, reputation and reverse lookup expansion module.",
     "module-type": ["expansion", "hover"],
     "name": "DomainTools Lookup",
     "logo": "domaintools.png",
@@ -52,6 +52,8 @@ moduleinfo = {
         "A Domaintools API access (username & apikey)",
     ],
     "features": (
+        "Use domaintools_iris_enrich, domaintools_iris_investigate or domaintools_iris_pivot for Iris services. See https://misp.github.io/misp-modules/domaintools/ "
+        "for API coverage and the provider-supported MISP integration.\n\n"
         "This module takes a MISP attribute as input to query the Domaintools API. The API returns then the result of"
         " the query with some types we map into compatible types we add as MISP attributes.\n\nPlease note that"
         " composite attributes composed by at least one of the input types mentionned below (domains, IPs, hostnames)"
