@@ -28,6 +28,7 @@ dependencies = [
     "Brotli>=1.2.1; platform_python_implementation == 'CPython'",
     "brotlicffi>=1.2.1.0; platform_python_implementation != 'CPython'",
     "click==8.4.1",  # greynoise 3.1 requires it on Python >=3.10
+    "more-itertools==11.1.0",  # greynoise 3.1 requires it on Python >=3.10
     ## minimum dependencies
     "beautifulsoup4",
     "jinja2",
@@ -179,14 +180,6 @@ packages = [{include = "misp_modules"}]
 [build-system]
 requires = ["poetry-core>=2.5.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
-
-# GreyNoise pins this shared dependency. Keep the exported lock consistent
-# without adding a dependency to the base installation.
-[tool.poetry.group.greynoise-compat]
-optional = true
-
-[tool.poetry.group.greynoise-compat.dependencies]
-more-itertools = "11.1.0"
 
 [tool.poetry.group.test]
 optional = true
