@@ -20,13 +20,10 @@ dependencies = [
     ## core dependencies
     "orjson>=3.13.0",
     "psutil",
-    "tornado>=6.5.10,<6.6; python_version < '3.11'",
-    "tornado>=6.6,<7; python_version >= '3.11'",
+    "tornado",
     "certifi>=2026.10.23",  # remove the compromised emSign root
     "urllib3>=2.8.0",
     "idna>=3.20,<4",
-    "Brotli>=1.2.1; platform_python_implementation == 'CPython'",
-    "brotlicffi>=1.2.1.0; platform_python_implementation != 'CPython'",
     "click==8.4.1",  # greynoise 3.1 requires it on Python >=3.10
     "more-itertools==11.1.0",  # greynoise 3.1 requires it on Python >=3.10
     ## minimum dependencies

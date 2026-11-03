@@ -17,7 +17,11 @@ def export(data):
     response = csv_export.handler(json.dumps({"data": data}))
     assert "error" not in response, response
     text = base64.b64decode(response["data"]).decode("utf-8")
-    return list(csv.DictReader(io.StringIO(text, newline="")))
+    PLACEHOLDER = "__NULL__"
+    return list(
+        {k: (v.replace(PLACEHOLDER, "\x00") if v else v) for k, v in row.items()}
+        for row in csv.DictReader(io.StringIO(text.replace("\x00", PLACEHOLDER), newline=""))
+    )
 
 
 def test_all_types_and_events_with_objects_keep_context_and_do_not_mutate():
