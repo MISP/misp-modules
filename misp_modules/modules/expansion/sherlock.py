@@ -1,9 +1,13 @@
 import csv
 import json
+import logging
 import math
+import os
+import shlex
 import shutil
 import subprocess
 import tempfile
+import time
 import unicodedata
 from pathlib import Path
 from urllib.parse import urlsplit
@@ -27,7 +31,7 @@ mispattributes = {
 }
 moduleconfig = ["sherlock_path", "sites", "timeout", "scan_timeout"]
 moduleinfo = {
-    "version": "1.0",
+    "version": "1.1",
     "author": "MISP Project",
     "description": "Find social media accounts by username with Sherlock.",
     "module-type": ["expansion", "hover"],
@@ -46,6 +50,9 @@ moduleinfo = {
         " scan_timeout bounds the whole process (default 120). Both must be positive finite numbers. Keep"
         " scan_timeout below the MISP enrichment and module-server request timeouts, or raise those timeouts"
         " for broad searches. Sherlock contacts the selected sites and downloads its current site definitions."
+        " Start misp-modules with --debug to log the command, live CLI output, elapsed time and report summary;"
+        " this also enables Sherlock's --verbose output. --debug-extended HTTP tracing runs in the server"
+        " process and cannot trace Sherlock's separate process. For troubleshooting, first limit sites to GitHub."
         " Results can contain false positives and should be reviewed."
     ),
     "references": ["https://github.com/sherlock-project/sherlock", "https://sherlockproject.xyz/usage"],
@@ -55,6 +62,77 @@ moduleinfo = {
 
 _EMAIL_TYPES = set(mispattributes["input"][3:])
 _STATUSES = {"Claimed", "Available", "Unknown", "Illegal", "WAF"}
+LOGGER = logging.getLogger("misp-modules.sherlock")
+_POLL_INTERVAL = 5
+_OUTPUT_LIMIT = 8192
+
+
+def _output_tail(output, limit=_OUTPUT_LIMIT):
+    if isinstance(output, bytes):
+        output = output.decode("utf-8", errors="replace")
+    return (output or "")[-limit:].strip()
+
+
+def _run_sherlock(command, directory, scan_timeout):
+    """Drain both streams while polling, including output from failed or timed-out scans."""
+    label = Path(directory).name
+    started = time.monotonic()
+    deadline = started + scan_timeout
+    LOGGER.debug("Sherlock [%s] starting: %s (scan_timeout=%ss)", label, shlex.join(command), scan_timeout)
+    # Sherlock is a Python CLI. Flush its progress even when stdout is a pipe.
+    environment = os.environ.copy()
+    environment["PYTHONUNBUFFERED"] = "1"
+    logged = 0
+
+    def log_output(output):
+        nonlocal logged
+        if len(output) > logged:
+            LOGGER.debug("Sherlock [%s] output: %r", label, _output_tail(output[logged:]))
+            logged = len(output)
+
+    with subprocess.Popen(
+        command,
+        cwd=directory,
+        stdin=subprocess.DEVNULL,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        env=environment,
+    ) as process:
+        try:
+            while True:
+                try:
+                    output, _ = process.communicate(
+                        timeout=max(0.001, min(_POLL_INTERVAL, deadline - time.monotonic()))
+                    )
+                except subprocess.TimeoutExpired as error:
+                    log_output(error.output or b"")
+                    elapsed = time.monotonic() - started
+                    if time.monotonic() >= deadline:
+                        process.kill()
+                        output, _ = process.communicate()
+                        log_output(output)
+                        LOGGER.warning("Sherlock [%s] exceeded scan_timeout after %.2fs", label, elapsed)
+                        raise subprocess.TimeoutExpired(command, scan_timeout, output=output) from None
+                    LOGGER.debug("Sherlock [%s] still running after %.2fs", label, elapsed)
+                else:
+                    log_output(output)
+                    break
+        except BaseException:
+            if process.poll() is None:
+                process.kill()
+                process.communicate()
+            raise
+        LOGGER.debug(
+            "Sherlock [%s] exited with status %s after %.2fs", label, process.returncode, time.monotonic() - started
+        )
+        if process.returncode:
+            raise subprocess.CalledProcessError(process.returncode, command, output=output)
+    return output
+
+
+def _with_output(message, output):
+    detail = _output_tail(output, limit=2000)
+    return f"{message} Sherlock output (last 2000 characters): {detail}" if detail else message
 
 
 def _username(attribute):
@@ -133,22 +211,31 @@ def _lookup(username, attribute_type, config):
     if not isinstance(sites, str):
         raise ValueError("sites must be a comma-separated list of Sherlock site names.")
     command = [executable, "--csv", "--print-all", "--no-color", "--timeout", str(timeout)]
+    if LOGGER.isEnabledFor(logging.DEBUG):
+        command.append("--verbose")
     for site in sites.split(","):
         if site.strip():
             command.extend(["--site", site.strip()])
     with tempfile.TemporaryDirectory(prefix="misp-sherlock-") as directory:
         command.extend(["--folderoutput", directory, "--", username])
         # Never invoke a shell. Isolate reports across requests and bound the entire scan.
-        subprocess.run(
-            command,
-            cwd=directory,
-            stdin=subprocess.DEVNULL,
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
-            timeout=scan_timeout,
-            check=True,
+        output = _run_sherlock(command, directory, scan_timeout)
+        report = Path(directory) / f"{username}.csv"
+        if not report.is_file():
+            raise ValueError(
+                _with_output(
+                    "Sherlock finished without creating the expected CSV report. Check the CLI version and output.",
+                    output,
+                )
+            )
+        matches, failures = _read_report(report, username)
+        LOGGER.debug(
+            "Sherlock [%s] report: %s matching accounts, %s failed or blocked sites",
+            Path(directory).name,
+            len(matches),
+            failures,
         )
-        return _read_report(Path(directory) / f"{username}.csv", username)
+        return matches, failures
 
 
 def _parse_results(attribute, username, matches, failures):
@@ -201,20 +288,25 @@ def handler(q=False):
         username = _username(attribute)
         matches, failures = _lookup(username, attribute["type"], config)
         return _parse_results(attribute, username, matches, failures)
-    except subprocess.TimeoutExpired:
-        return {"error": "Sherlock exceeded scan_timeout. Limit the sites queried or increase the timeout."}
+    except subprocess.TimeoutExpired as error:
+        message = _with_output(
+            "Sherlock exceeded scan_timeout. Limit the sites queried or increase the timeout.", error.output
+        )
     except subprocess.CalledProcessError as error:
-        return {
-            "error": f"Sherlock exited with status {error.returncode}. Check its installation and site configuration."
-        }
-    except (OSError, csv.Error, UnicodeError):
-        return {
-            "error": (
-                "Unable to execute Sherlock or read its CSV report. Check the installation and service permissions."
-            )
-        }
+        message = _with_output(
+            f"Sherlock exited with status {error.returncode}. Check its installation and site configuration.",
+            error.output,
+        )
+    except (OSError, csv.Error, UnicodeError) as error:
+        LOGGER.debug("Sherlock execution/report exception", exc_info=True)
+        message = (
+            "Unable to execute Sherlock or read its CSV report. Check the installation and service permissions."
+            f" Details: {error}"
+        )
     except ValueError as error:
-        return {"error": str(error)}
+        message = str(error)
+    LOGGER.warning("Sherlock lookup failed for attribute %s: %s", attribute["uuid"], message)
+    return {"error": message}
 
 
 def introspection():

@@ -2690,7 +2690,7 @@ Find social media accounts by username with Sherlock.
 [[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/sherlock.py)]
 
 - **features**:
->Runs the Sherlock CLI and returns user-account objects for claimed usernames only. Text is searched as a single literal username, without extracting names or generating variants. Email input uses the local part before @ as a candidate username; matches do not verify email ownership or identity. Install Sherlock for the misp-modules service user and put sherlock on its PATH, or set sherlock_path to the executable's absolute path (not a shell command). Optional sites is a comma-separated list of Sherlock site names; github-username defaults to GitHub only. timeout is the per-site timeout in seconds (default 10); scan_timeout bounds the whole process (default 120). Both must be positive finite numbers. Keep scan_timeout below the MISP enrichment and module-server request timeouts, or raise those timeouts for broad searches. Sherlock contacts the selected sites and downloads its current site definitions. Results can contain false positives and should be reviewed.
+>Runs the Sherlock CLI and returns user-account objects for claimed usernames only. Text is searched as a single literal username, without extracting names or generating variants. Email input uses the local part before @ as a candidate username; matches do not verify email ownership or identity. Install Sherlock for the misp-modules service user and put sherlock on its PATH, or set sherlock_path to the executable's absolute path (not a shell command). Optional sites is a comma-separated list of Sherlock site names; github-username defaults to GitHub only. timeout is the per-site timeout in seconds (default 10); scan_timeout bounds the whole process (default 120). Both must be positive finite numbers. Keep scan_timeout below the MISP enrichment and module-server request timeouts, or raise those timeouts for broad searches. Sherlock contacts the selected sites and downloads its current site definitions. Start misp-modules with --debug to log the command, live CLI output, elapsed time and report summary; this also enables Sherlock's --verbose output. --debug-extended HTTP tracing runs in the server process and cannot trace Sherlock's separate process. For troubleshooting, first limit sites to GitHub. Results can contain false positives and should be reviewed.
 
 - **config**:
 > - sherlock_path
@@ -2710,6 +2710,68 @@ Find social media accounts by username with Sherlock.
 
 - **requirements**:
 >Install the sherlock-project CLI separately (for example: pipx install sherlock-project). No API key required.
+
+**Troubleshooting**
+
+Restart the module server with `--debug` (or keep `--debug-extended`). The
+`misp-modules.sherlock` logger records the exact command, CLI output and a
+"still running" message every five seconds, exit status, elapsed time, and
+report summary. Debug mode also passes `--verbose` to Sherlock and disables
+Python stdout buffering. Each scan has a temporary-directory label to distinguish
+concurrent requests. Output is polled every five seconds and when the process exits;
+each logged chunk is limited to its last 8192 characters. Failed scans include the
+last 2000 characters of CLI output in the module error response. Reports are removed
+after the request, including on failure.
+
+`--debug-extended` instruments HTTP calls inside the module server. Sherlock runs
+in a separate process, so its HTTP exchanges are outside that tracing. For deeper
+inspection, run Sherlock directly with `--verbose`; add `--dump-response` to inspect
+site response bodies.
+
+Start with a single site to distinguish CLI or permission problems from a slow
+full scan. This request uses a five-second per-site timeout, a 40-second whole-scan
+timeout, and a 60-second module-server request timeout:
+
+```bash
+curl --max-time 65 -sS http://127.0.0.1:6666/query \
+  -H 'Content-Type: application/json' \
+  --data-binary '{
+    "module": "sherlock",
+    "timeout": 60,
+    "config": {
+      "sherlock_path": "/home/adulau/.venv/bin/sherlock",
+      "sites": "GitHub",
+      "timeout": "5",
+      "scan_timeout": "40"
+    },
+    "attribute": {
+      "type": "text",
+      "value": "chess",
+      "uuid": "3850286d-e887-5ab4-beae-1c33095b60d0"
+    }
+  }'
+```
+
+The top-level `timeout` bounds the module-server request; `config.timeout` bounds
+each site request. Keep `config.scan_timeout` below both the module-server request
+timeout and MISP's enrichment HTTP timeout. An empty `sites` setting for `text`
+searches all default Sherlock sites, which can exceed those limits. Sherlock also
+makes startup requests for site definitions and update checks.
+
+If it still fails, run the following as the same operating-system user that runs
+misp-modules, so executable permissions, network settings and environment match:
+
+```bash
+/home/adulau/.venv/bin/sherlock --version
+sherlock_debug_dir=$(mktemp -d)
+PYTHONUNBUFFERED=1 /home/adulau/.venv/bin/sherlock \
+  --verbose --csv --print-all --no-color --site GitHub --timeout 5 \
+  --folderoutput "$sherlock_debug_dir" -- chess
+cat "$sherlock_debug_dir/chess.csv"
+```
+
+This keeps the CLI report available for inspection. A nonzero exit, missing CSV,
+or traceback should now be visible directly and in the module diagnostics.
 
 -----
 

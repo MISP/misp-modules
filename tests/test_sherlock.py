@@ -1,5 +1,6 @@
 import csv
 import json
+import logging
 import subprocess
 import sys
 from pathlib import Path
@@ -24,23 +25,21 @@ def _row(site="GitHub", status="Claimed", username="alice", url="https://github.
 def _run(query=None, rows=None):
     directories = []
 
-    def execute(command, **kwargs):
-        directory = Path(command[command.index("--folderoutput") + 1])
+    def execute(command, directory, scan_timeout):
+        assert Path(directory) == Path(command[command.index("--folderoutput") + 1])
+        directory = Path(directory)
         directories.append(directory)
-        assert Path(kwargs["cwd"]) == directory
         assert command[-2] == "--"
         assert "--print-all" in command
-        assert kwargs["check"] is True
-        assert kwargs["stdin"] == subprocess.DEVNULL
-        assert not kwargs.get("shell", False)
         with (directory / f"{command[-1]}.csv").open("w", newline="") as report:
             writer = csv.writer(report)
             writer.writerow(HEADER)
             writer.writerows(rows if rows is not None else [_row(username=command[-1])])
+        return b""
 
     with (
         patch.object(sherlock.shutil, "which", return_value="/usr/bin/sherlock"),
-        patch.object(sherlock.subprocess, "run", side_effect=execute) as run,
+        patch.object(sherlock, "_run_sherlock", side_effect=execute) as run,
     ):
         result = sherlock.handler(query or _query())
     assert all(not directory.exists() for directory in directories)
@@ -118,7 +117,7 @@ def test_configuration_and_leading_dash_are_passed_as_separate_arguments():
     assert command[-2:] == ["--", "--version"]
     assert command[command.index("--timeout") + 1] == "2.5"
     assert [command[i + 1] for i, value in enumerate(command) if value == "--site"] == ["GitHub", "Reddit"]
-    assert run.call_args.kwargs["timeout"] == 42
+    assert run.call_args.args[2] == 42
 
 
 @pytest.mark.parametrize("value", ["", " ", None, 42, "../alice", "a/b", "a\\b", "a\x00b", "a\nb", "a{?}b", "é" * 121])
@@ -201,13 +200,13 @@ def test_missing_installation_has_actionable_error():
 def test_execution_errors_and_temporary_directory_cleanup(exception, message):
     directories = []
 
-    def fail(command, **kwargs):
-        directories.append(Path(kwargs["cwd"]))
+    def fail(command, directory, scan_timeout):
+        directories.append(Path(directory))
         raise exception
 
     with (
         patch.object(sherlock.shutil, "which", return_value="/usr/bin/sherlock"),
-        patch.object(sherlock.subprocess, "run", side_effect=fail),
+        patch.object(sherlock, "_run_sherlock", side_effect=fail),
     ):
         result = sherlock.handler(_query())
     assert message in result["error"]
@@ -221,7 +220,8 @@ def test_real_subprocess_with_a_local_cli_fixture(tmp_path):
         f"#!{sys.executable}\nimport argparse, csv, pathlib\nparser = argparse.ArgumentParser()\nfor flag in ('--csv',"
         " '--print-all', '--no-color'):\n    parser.add_argument(flag, action='store_true',"
         " required=True)\nparser.add_argument('--timeout', type=float,"
-        " required=True)\nparser.add_argument('--folderoutput', required=True)\nparser.add_argument('username')\nargs"
+        " required=True)\nparser.add_argument('--verbose', action='store_true')\n"
+        "parser.add_argument('--folderoutput', required=True)\nparser.add_argument('username')\nargs"
         " = parser.parse_args()\ndirectory = pathlib.Path(args.folderoutput)\nassert pathlib.Path.cwd() =="
         " directory\nwith (directory / (args.username + '.csv')).open('w', newline='') as f:\n    writer ="
         f" csv.writer(f)\n    writer.writerow({HEADER!r})\n    writer.writerow([args.username, 'GitHub',"
@@ -231,6 +231,93 @@ def test_real_subprocess_with_a_local_cli_fixture(tmp_path):
     executable.chmod(0o700)
     result = sherlock.handler(_query("--version", config={"sherlock_path": str(executable)}))
     assert _values(result["results"]["Object"][0])["username"] == "--version"
+
+
+@pytest.mark.parametrize("level, verbose", [(logging.INFO, False), (logging.DEBUG, True)])
+def test_server_debug_enables_sherlock_verbose(caplog, level, verbose):
+    caplog.set_level(level, logger=sherlock.LOGGER.name)
+    result, run = _run()
+    assert "results" in result
+    assert ("--verbose" in run.call_args.args[0]) is verbose
+    if verbose:
+        assert "1 matching accounts, 0 failed or blocked sites" in caplog.text
+
+
+@pytest.mark.skipif(sys.platform == "win32", reason="Fixture executable uses a POSIX shebang")
+@pytest.mark.parametrize("exit_code", [0, 2])
+def test_cli_errors_and_missing_reports_include_output(tmp_path, caplog, exit_code):
+    executable = tmp_path / "fixture-sherlock"
+    executable.write_text(
+        f"#!{sys.executable}\nimport sys\nprint('CLI diagnostic', file=sys.stderr)\nsys.exit({exit_code})\n",
+        encoding="utf-8",
+    )
+    executable.chmod(0o700)
+    caplog.set_level(logging.DEBUG, logger=sherlock.LOGGER.name)
+    result = sherlock.handler(_query(config={"sherlock_path": str(executable)}))
+    assert "CLI diagnostic" in result["error"]
+    assert ("without creating" if exit_code == 0 else "exited with status 2") in result["error"]
+    assert "starting:" in caplog.text
+    assert f"exited with status {exit_code}" in caplog.text
+    assert "CLI diagnostic" in caplog.text
+    assert "lookup failed for attribute" in caplog.text
+
+
+def test_live_subprocess_output_and_heartbeat(tmp_path, caplog, monkeypatch):
+    caplog.set_level(logging.DEBUG, logger=sherlock.LOGGER.name)
+    monkeypatch.setattr(sherlock, "_POLL_INTERVAL", 0.05)
+    command = [
+        sys.executable,
+        "-c",
+        "import sys, time; print('scan started'); print('site failed', file=sys.stderr); time.sleep(.2); print('done')",
+    ]
+    with patch.object(sherlock.subprocess, "Popen", wraps=subprocess.Popen) as popen:
+        output = sherlock._run_sherlock(command, str(tmp_path), 5)
+    assert b"scan started" in output and b"site failed" in output and b"done" in output
+    assert "still running after" in caplog.text
+    records = [record.getMessage() for record in caplog.records]
+    first_output = next(
+        index for index, message in enumerate(records) if "scan started" in message and "output:" in message
+    )
+    last_output = next(index for index, message in enumerate(records) if "output: 'done'" in message)
+    assert any("still running" in message for message in records[first_output:last_output])
+    assert sum("output: 'done'" in message for message in records) == 1
+    assert popen.call_args.kwargs["env"]["PYTHONUNBUFFERED"] == "1"
+    assert popen.call_args.kwargs["stdin"] == subprocess.DEVNULL
+    assert not popen.call_args.kwargs.get("shell", False)
+
+
+def test_real_timeout_preserves_output_and_kills_child(tmp_path, caplog):
+    caplog.set_level(logging.DEBUG, logger=sherlock.LOGGER.name)
+    command = [sys.executable, "-c", "import time; print('before timeout', flush=True); time.sleep(30)"]
+    processes = []
+    original_popen = subprocess.Popen
+
+    def spawn(*args, **kwargs):
+        process = original_popen(*args, **kwargs)
+        processes.append(process)
+        return process
+
+    with patch.object(sherlock.subprocess, "Popen", side_effect=spawn):
+        with pytest.raises(subprocess.TimeoutExpired) as caught:
+            sherlock._run_sherlock(command, str(tmp_path), 1)
+    assert b"before timeout" in caught.value.output
+    assert "before timeout" in caplog.text
+    assert "exceeded scan_timeout" in caplog.text
+    # The with block has reaped the child; there is no lingering process.
+    assert len(processes) == 1
+    assert processes[0].returncode is not None
+    assert processes[0].stdout.closed
+
+
+def test_error_output_is_bounded_and_decodes_invalid_utf8():
+    error = subprocess.CalledProcessError(2, "sherlock", output=b"x" * 10000 + b"\xfflast diagnostic")
+    with (
+        patch.object(sherlock.shutil, "which", return_value="/usr/bin/sherlock"),
+        patch.object(sherlock, "_run_sherlock", side_effect=error),
+    ):
+        result = sherlock.handler(_query())
+    assert "last diagnostic" in result["error"]
+    assert len(result["error"]) < 2300
 
 
 def test_metadata_and_empty_call():
