@@ -15,8 +15,10 @@ URLs and remote error bodies.
 The original attribute and its metadata are preserved. A referenced annotation
 retains risk, retirement state, risk factors, timestamps, linked threats and
 feed provenance. Observed DNS A/AAAA records produce a `domain-ip` object for
-domain queries. DNS names and redirect indicators become typed pivot attributes.
+domain queries. DNS names, reverse-DNS PTR names for IP queries and redirect
+indicators become typed pivot attributes.
 Historical property lists are flattened and DNS addresses deduplicated.
+Leading/trailing API key whitespace is removed; a blank key uses keyless lookup.
 All new enrichment has `to_ids=false`; risk does not automatically mark the
 source attribute as malicious. A 404/204 is labelled as no information.
 

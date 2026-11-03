@@ -187,6 +187,59 @@ def test_keyless_lookup_and_domain_normalization():
     assert call.call_args.kwargs["params"] == {"indicator": VALUE}
 
 
+@pytest.mark.parametrize("ptr", ["ptr.example.com.", ["ptr.example.com."], [["ptr.example.com.", "ptr.example.com."]]])
+def test_ip_ptr_records_become_hostname_pivots(ptr):
+    value = "44.238.122.172"
+    result, _ = handle(
+        {"indicator": value, "type": "ip", "properties": {"dns": {"ptr": ptr}}}, kind="ip-dst", value=value
+    )
+    assert_source(result)
+    hostnames = [item for item in result["results"]["Attribute"] if item["type"] == "hostname"]
+    assert len(hostnames) == 1
+    assert hostnames[0]["value"] == "ptr.example.com"
+    assert "DNS ptr" in hostnames[0]["comment"]
+    assert hostnames[0]["to_ids"] is False
+
+
+@pytest.mark.parametrize("key", ["  " + SECRET + "  ", "\t" + SECRET + "\n"])
+def test_api_key_is_trimmed_before_authentication(key):
+    result, call = handle(config={"api_key": key})
+    assert_source(result)
+    assert call.call_args.kwargs["params"]["key"] == SECRET
+
+
+def test_whitespace_only_optional_key_uses_keyless_lookup():
+    result, call = handle(config={"api_key": "  \t\n"})
+    assert_source(result)
+    assert "key" not in call.call_args.kwargs["params"]
+
+
+@pytest.mark.parametrize("key", [False, 0, [], {}])
+def test_non_string_optional_key_is_not_sent(key):
+    with patch.object(module.requests, METHOD) as call:
+        assert "error" in module.handler(query(config={"api_key": key}))
+    call.assert_not_called()
+
+
+@pytest.mark.parametrize(
+    "value",
+    [
+        "224.0.0.1",
+        "239.255.255.255",
+        "ff0e::1",
+        "ff02::1",
+        "240.0.0.1",
+        "64:ff9b::808:808",
+        "::ffff:8.8.8.8",
+        "::ffff:127.0.0.1",
+    ],
+)
+def test_special_use_ip_is_rejected_before_network_access(value):
+    with patch.object(module.requests, METHOD) as call:
+        assert "error" in module.handler(query(kind="ip-dst", value=value))
+    call.assert_not_called()
+
+
 @pytest.mark.parametrize("status", [204, 404])
 def test_missing_indicator_is_not_a_clean_verdict(status):
     result, _ = handle(status=status)

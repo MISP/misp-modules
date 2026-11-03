@@ -22,7 +22,8 @@ moduleinfo = {
         " optional, with stricter service limits for unauthenticated requests. The API requires the key as a query"
         " parameter, so avoid logging request URLs. Returns a referenced annotation containing risk, retirement state,"
         " risk factors, timestamps, threats and feed provenance. DNS addresses become domain-ip objects. Other DNS"
-        " names and observed redirects are pivotable attributes. A 404 returns a no-information annotation and does not"
+        " names, IP reverse-DNS PTR names and observed redirects are pivotable attributes. A 404 returns a"
+        " no-information annotation and does not"
         " imply that the indicator is benign. All enrichment has to_ids disabled."
     ),
     "references": [
@@ -114,8 +115,13 @@ def _ip(value):
     if not isinstance(value, str) or "%" in value:
         raise ModuleError("A public IPv4 or IPv6 address is required.")
     address = ip_address(value.strip())
-    if not address.is_global:
-        raise ModuleError("Only public IP addresses can be looked up.")
+    if (
+        not address.is_global
+        or address.is_multicast
+        or address.is_reserved
+        or getattr(address, "ipv4_mapped", None) is not None
+    ):
+        raise ModuleError("Only public unicast IP addresses without IPv4 mapping can be looked up.")
     return str(address)
 
 
@@ -172,10 +178,11 @@ def _expand(event, attribute, config):
     value = _indicator(attribute["type"], attribute["value"])
     params = {"indicator": value}
     key = config.get("api_key")
-    if key:
+    if key is not None:
         if not isinstance(key, str):
             raise ModuleError("api_key must be a string.")
-        params["key"] = key
+        if key.strip():
+            params["key"] = key.strip()
     response = requests.get(
         "https://pulsedive.com/api/indicator.php", params=params, timeout=TIMEOUT, allow_redirects=False
     )
@@ -225,7 +232,7 @@ def _expand(event, attribute, config):
                 obj.add_attribute("ip", value=str(ip_address(address)), to_ids=False)
             obj.add_reference(attribute["uuid"], "describes")
             event.add_object(obj)
-    for field in ("mx", "ns"):
+    for field in (("mx", "ns", "ptr") if expected == "ip" else ("mx", "ns")):
         for name in _strings(dns.get(field)):
             event.add_attribute("hostname", _domain(name), to_ids=False, comment=f"Pulsedive DNS {field} for {value}")
     redirects = data.get("redirects") or {}

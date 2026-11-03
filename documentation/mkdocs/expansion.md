@@ -2381,7 +2381,7 @@ Look up IP, domain and URL risk, linked threats, feeds and DNS observations in P
 [[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/pulsedive.py)]
 
 - **features**:
->Uses the existing indicator lookup API only; never submits an indicator or starts an active scan. `api_key` is optional, with stricter service limits for unauthenticated requests. The API requires the key as a query parameter, so avoid logging request URLs. Returns a referenced annotation containing risk, retirement state, risk factors, timestamps, threats and feed provenance. DNS addresses become domain-ip objects. Other DNS names and observed redirects are pivotable attributes. A 404 returns a no-information annotation and does not imply that the indicator is benign. All enrichment has to_ids disabled.
+>Uses the existing indicator lookup API only; never submits an indicator or starts an active scan. `api_key` is optional, with stricter service limits for unauthenticated requests. The API requires the key as a query parameter, so avoid logging request URLs. Returns a referenced annotation containing risk, retirement state, risk factors, timestamps, threats and feed provenance. DNS addresses become domain-ip objects. Other DNS names, IP reverse-DNS PTR names and observed redirects are pivotable attributes. A 404 returns a no-information annotation and does not imply that the indicator is benign. All enrichment has to_ids disabled.
 
 - **config**:
 >api_key
