@@ -129,7 +129,7 @@ def handler(q=False):
         if not isinstance(data, list) or any(not isinstance(event, dict) for event in data):
             raise ValueError("data must be a list of MISP events.")
         output = io.StringIO(newline="")
-        writer = csv.DictWriter(output, fieldnames=CSV_FIELDS)
+        writer = csv.DictWriter(output, fieldnames=CSV_FIELDS, escapechar="\\")
         writer.writeheader()
         for row in _rows(data):
             writer.writerow({field: _cell(value) for field, value in row.items()})
