@@ -111,8 +111,13 @@ def _ip(value):
     if not isinstance(value, str) or "%" in value:
         raise ModuleError("A public IPv4 or IPv6 address is required.")
     address = ip_address(value.strip())
-    if not address.is_global:
-        raise ModuleError("Only public IP addresses can be looked up.")
+    if (
+        not address.is_global
+        or address.is_multicast
+        or address.is_reserved
+        or getattr(address, "ipv4_mapped", None) is not None
+    ):
+        raise ModuleError("Only public unicast IP addresses without IPv4 mapping can be looked up.")
     return str(address)
 
 
@@ -128,7 +133,7 @@ def _expand(event, attribute, config):
         raise ModuleError("vpn_lookup must be true or false.")
     response = requests.post(
         "https://neutrinoapi.net/ip-blocklist",
-        headers={"User-ID": config["user_id"], "API-Key": config["api_key"]},
+        headers={"User-ID": config["user_id"].strip(), "API-Key": config["api_key"].strip()},
         data={"ip": address, "vpn-lookup": str(vpn).lower()},
         timeout=TIMEOUT,
         allow_redirects=False,

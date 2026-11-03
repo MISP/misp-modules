@@ -3,6 +3,9 @@
 Expand public IPv4/IPv6 `ip-src` and `ip-dst` attributes with NeutrinoAPI's
 IP Blocklist endpoint.
 
+Multicast, reserved and IPv4-mapped IPv6 inputs are rejected before network
+access. Leading/trailing whitespace is removed from both account credentials.
+
 | Setting | Purpose |
 | --- | --- |
 | `user_id` | Required NeutrinoAPI account user ID. |

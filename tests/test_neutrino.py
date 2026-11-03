@@ -169,6 +169,15 @@ def test_headers_form_body_and_detection_context():
     assert summary["sensors"][0]["description"] == "test sensor"
 
 
+@pytest.mark.parametrize("key", ["user_id", "api_key"])
+def test_credentials_are_trimmed_before_authentication(key):
+    config = dict(CONFIG)
+    config[key] = "  " + config[key] + "\n"
+    result, call = handle(config=config)
+    assert_source(result)
+    assert call.call_args.kwargs["headers"] == {"User-ID": "test-user", "API-Key": SECRET}
+
+
 @pytest.mark.parametrize("value", [True, "true", "1"])
 def test_vpn_lookup_is_explicit(value):
     result, call = handle(config=dict(CONFIG, vpn_lookup=value))
@@ -225,3 +234,22 @@ def test_public_ipv6_lookup():
     result, call = handle({"ip": address, "is-listed": False}, value=address)
     assert_source(result)
     assert call.call_args.kwargs["data"]["ip"] == address
+
+
+@pytest.mark.parametrize(
+    "value",
+    [
+        "224.0.0.1",
+        "239.255.255.255",
+        "ff0e::1",
+        "ff02::1",
+        "240.0.0.1",
+        "64:ff9b::808:808",
+        "::ffff:8.8.8.8",
+        "::ffff:127.0.0.1",
+    ],
+)
+def test_special_use_ip_is_rejected_before_network_access(value):
+    with patch.object(module.requests, METHOD) as call:
+        assert "error" in module.handler(query(value=value))
+    call.assert_not_called()
