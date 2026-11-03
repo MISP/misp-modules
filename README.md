@@ -179,6 +179,7 @@ For further Information see the [license file](https://misp.github.io/misp-modul
 * [Plum Island IP History](documentation/expansion/plum_island.md) - Retrieve historical IP scan observations, UID tags and timestamps from the Plum Island Discovery API.
 * [Plum Island Search](documentation/expansion/plum_island_search.md) - Find observed IPs by domain, hostname, network or certificate fingerprint.
 * [PPTX Enrich](https://misp.github.io/misp-modules/expansion/#pptx-enrich) - Module to extract freetext from a .pptx document.
+* [Pulsedive](https://misp.github.io/misp-modules/expansion/#pulsedive) - Look up IP, domain and URL risk, linked threats, feeds and DNS observations in Pulsedive.
 * [Qintel QSentry Lookup](https://misp.github.io/misp-modules/expansion/#qintel-qsentry-lookup) - A hover and expansion module which queries Qintel QSentry for ip reputation data
 * [QR Code Decode](https://misp.github.io/misp-modules/expansion/#qr-code-decode) - Decode QR codes from attachments OR remote URLs (Anti-Quishing).
 * [RandomcoinDB Lookup](https://misp.github.io/misp-modules/expansion/#randomcoindb-lookup) - Module to access the ransomcoinDB (see https://ransomcoindb.concinnity-risks.com)
