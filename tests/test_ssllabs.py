@@ -10,7 +10,7 @@ from misp_modules.modules.expansion import ssllabs as module
 METHOD = "get"
 KIND = "domain"
 VALUE = "example.com"
-CONFIG = {"email": "soc@example.com"}
+CONFIG = {"email": "soc@example.com", "allow_scan": True}
 PAYLOAD = {
     "host": "example.com",
     "status": "READY",
@@ -175,7 +175,7 @@ def test_success_preserves_source_and_disables_ids_on_enrichment():
     assert call.call_args.kwargs["allow_redirects"] is False
 
 
-def test_cached_request_and_tls_assessment():
+def test_cache_preference_and_tls_assessment_after_scan_consent():
     result, call = handle()
     assert call.call_args.args[0] == "https://api.ssllabs.com/api/v4/analyze"
     kwargs = call.call_args.kwargs
@@ -213,10 +213,29 @@ def test_opt_in_scan_does_not_force_restart_or_publish(value):
     result, call = handle(dict(PAYLOAD, status="IN_PROGRESS"), config=dict(CONFIG, allow_scan=value))
     assert_source(result)
     params = call.call_args.kwargs["params"]
-    assert "fromCache" not in params
+    assert params["fromCache"] == "on"
+    assert params["maxAge"] == 24
     assert "startNew" not in params
     assert params["publish"] == "off"
     assert call.call_count == 1
+
+
+@pytest.mark.parametrize("consent", [None, False, "false", "0", ""])
+def test_no_analyze_request_without_explicit_scan_consent(consent):
+    config = {"email": CONFIG["email"]}
+    if consent is not None:
+        config["allow_scan"] = consent
+    # Even an apparently cached READY response cannot make analyze safe on a cache miss.
+    with patch.object(module.requests, METHOD, return_value=response(PAYLOAD)) as call:
+        result = module.handler(query(config=config))
+    assert "allow_scan=true" in result["error"]
+    call.assert_not_called()
+
+
+def test_registered_email_is_trimmed_before_authentication():
+    result, call = handle(config=dict(CONFIG, email="  soc@example.com\n"))
+    assert_source(result)
+    assert call.call_args.kwargs["headers"] == {"email": "soc@example.com"}
 
 
 @pytest.mark.parametrize(

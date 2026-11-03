@@ -19,8 +19,9 @@ moduleinfo = {
     "requirements": ["requests", "An email registered with SSL Labs API v4"],
     "features": (
         "Requires an organization `email` already registered with SSL Labs API v4. No registration is performed by this"
-        " module. By default only cached reports are requested (`max_age` in hours, default 24). Set `allow_scan` to"
-        " true to let Qualys start an assessment when needed. Such assessments run on Qualys servers and can take"
+        " module. Set `allow_scan` to true before any API request is made. The analyze endpoint can start an assessment"
+        " even when cached results are requested. Cached reports up to `max_age` hours old (default 24) are preferred;"
+        " a cache miss can start a scan. Such assessments run on Qualys servers and can take"
         " minutes. Each invocation makes one API call and returns progress; run the module again later to retrieve the"
         " result. It never forces a restart with startNew and does not publish a report on the public results board."
         " Complete results include endpoint grades, protocols, cipher suites and weakness-test results as contextual"
@@ -182,18 +183,25 @@ def _certificate(event, attribute, cert):
 
 def _expand(event, attribute, config):
     host = _domain(attribute["value"])
+    scan = _boolean(config.get("allow_scan", False))
+    if not scan:
+        raise ModuleError(
+            "Set allow_scan=true to permit SSL Labs assessments. The analyze endpoint can start a scan when cached"
+            " results are unavailable."
+        )
     email = config.get("email")
+    if isinstance(email, str):
+        email = email.strip()
     if not isinstance(email, str) or not re.fullmatch(r"[^\s@]+@[^\s@]+\.[^\s@]+", email):
         raise ModuleError("An email already registered with SSL Labs API v4 is required.")
-    scan = _boolean(config.get("allow_scan", False))
     age = config.get("max_age", 24)
     if age == "":
         age = 24
     if isinstance(age, bool) or not str(age).isdigit() or not 1 <= int(age) <= 720:
         raise ModuleError("max_age must be an integer between 1 and 720 hours.")
-    params = {"host": host, "publish": "off", "all": "done"}
-    if not scan:
-        params.update({"fromCache": "on", "maxAge": int(age)})
+    # fromCache prefers an existing report; a cache miss can still start an assessment.
+    # Never call analyze without explicit scan consent, even when requesting cached data.
+    params = {"host": host, "publish": "off", "all": "done", "fromCache": "on", "maxAge": int(age)}
     response = requests.get(
         "https://api.ssllabs.com/api/v4/analyze",
         headers={"email": email},
@@ -206,7 +214,7 @@ def _expand(event, attribute, config):
         raise ModuleError("SSL Labs returned an unexpected assessment host.")
     status = data.get("status")
     if status == "ERROR":
-        raise ModuleError("SSL Labs assessment failed or no cached report is available. Check the SSL Labs report.")
+        raise ModuleError("SSL Labs assessment failed. Check the SSL Labs report.")
     if status not in ("DNS", "IN_PROGRESS", "READY"):
         raise ModuleError("SSL Labs returned an unknown assessment status.")
     summary = {
