@@ -911,6 +911,31 @@ DomainTools MISP expansion module.
 
 -----
 
+#### [DShield SANS ISC](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/dshield.py)
+
+Look up IP reports, target counts, network ownership and threat-feed observations in DShield / SANS ISC.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/dshield.py)]
+
+- **features**:
+>Queries the public ISC IP API without an API key. Set `user_agent` to identify your deployment and include a contact address, as requested by ISC. IPv4 and IPv6 are accepted; private and reserved addresses are rejected. Returns reported packet and unique target counts, first/last seen dates and per-feed observations as a referenced annotation, plus an ASN object and an abuse-contact email when available. Zero reports do not establish that an address is benign. HTTP 429 is returned as an error without automatic retries; wait at least five minutes and respect Retry-After before another lookup. All enrichment has to_ids disabled.
+
+- **config**:
+>user_agent
+
+- **input**:
+>ip-src, ip-dst MISP attribute.
+
+- **output**:
+>A referenced annotation and ASN object, and an abuse-contact email attribute.
+
+- **references**:
+>https://www.dshield.org/api/#ip
+
+- **requirements**:
+>requests
+
+-----
+
 #### [DuckDuckGo Search](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/duckduckgo_search.py)
 
 Search DuckDuckGo for web references to an attribute without an API key.
