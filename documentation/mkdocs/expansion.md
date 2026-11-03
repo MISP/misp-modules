@@ -3683,13 +3683,15 @@ Module to enrich a file or URL with VMware NSX Defender.
 
 <img src=../logos/vulndb.png height=60>
 
-Module to query VulnDB (RiskBasedSecurity.com).
+Module to query VulnDB (Flashpoint).
 [[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/vulndb.py)]
 
 - **features**:
 >This module takes a vulnerability attribute as input and queries VulnDB in order to get some additional data about it.
 >
 >The API gives the result of the query which can be displayed in the screen, and/or mapped into MISP attributes to add in the event.
+>
+>Register an OAuth client application in VulnDB under API > Overview. Set apikey to its client ID and apisecret to its client secret. Legacy OAuth 1 consumer credentials must be replaced with OAuth 2.0 client credentials. Authentication uses requests; the legacy oauth2 package is no longer required.
 
 - **config**:
 > - apikey
@@ -3708,10 +3710,10 @@ Module to query VulnDB (RiskBasedSecurity.com).
 >Additional data enriching the CVE input, fetched from VulnDB.
 
 - **references**:
->https://vulndb.cyberriskanalytics.com/
+>https://vulndb.flashpoint.io/
 
 - **requirements**:
->An access to the VulnDB API (apikey, apisecret)
+>VulnDB OAuth 2.0 client credentials (apikey: client ID, apisecret: client secret)
 
 -----
 
