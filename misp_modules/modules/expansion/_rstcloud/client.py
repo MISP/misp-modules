@@ -226,6 +226,14 @@ def _truthy(v) -> bool:
     return str(v).strip().lower() in ("1", "true", "yes", "on")
 
 
+def _verify_misp_certificate(config) -> bool:
+    """Only an explicit false setting opts out of certificate verification."""
+    value = config.get("misp_verifycert", True)
+    if isinstance(value, bool):
+        return value
+    return str(value).strip().lower() not in ("0", "false", "no", "off")
+
+
 class _RstClusterResolver:
     """Resolve an RST threat ``(stix_type, name)`` to its MISP cluster's real
     ``tag_name`` (``misp-galaxy:rst-*="<cluster-uuid>"``), so an enrichment tag
@@ -289,16 +297,15 @@ def rst_resolver_from_config(config: dict | None):
     key = config.get("misp_key")
     if not url or not key:
         return None
-    if url in _RESOLVER_CACHE:
-        return _RESOLVER_CACHE[url]
+    cache_key = (url, key, _verify_misp_certificate(config))
+    if cache_key in _RESOLVER_CACHE:
+        return _RESOLVER_CACHE[cache_key]
     try:
         from pymisp import PyMISP
     except Exception:
         return None
     try:
-        misp = PyMISP(
-            url, key, ssl=_truthy(config.get("misp_verifycert", False))
-        )
+        misp = PyMISP(url, key, ssl=cache_key[2])
         ids = {}
         for g in misp.galaxies(pythonify=False) or []:
             gd = g.get("Galaxy", g)
@@ -307,7 +314,7 @@ def rst_resolver_from_config(config: dict | None):
     except Exception:
         return None
     resolver = _RstClusterResolver(misp, ids)
-    _RESOLVER_CACHE[url] = resolver
+    _RESOLVER_CACHE[cache_key] = resolver
     return resolver
 
 
@@ -434,7 +441,7 @@ def _pymisp(cfg):
     url, key = cfg.get("misp_url"), cfg.get("misp_key")
     if not (url and key):
         return None
-    ck = (url, key, bool(_truthy(cfg.get("misp_verifycert", False))))
+    ck = (url, key, _verify_misp_certificate(cfg))
     if ck in _PYMISP_CACHE:
         return _PYMISP_CACHE[ck]
     try:
