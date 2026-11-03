@@ -3134,6 +3134,35 @@ Check an IPv4 address against the SpamCop Blocking List (SCBL).
 
 -----
 
+#### [Qualys SSL Labs](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/ssllabs.py)
+
+Retrieve SSL Labs API v4 TLS assessments, endpoint grades and certificate details for a hostname.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/ssllabs.py)]
+
+- **features**:
+>Requires an organization `email` already registered with SSL Labs API v4. No registration is performed by this module. By default only cached reports are requested (`max_age` in hours, default 24). Set `allow_scan` to true to let Qualys start an assessment when needed. Such assessments run on Qualys servers and can take minutes. Each invocation makes one API call and returns progress; run the module again later to retrieve the result. It never forces a restart with startNew and does not publish a report on the public results board. Complete results include endpoint grades, protocols, cipher suites and weakness-test results as contextual annotations, endpoint ip-port objects and x509 certificate objects. Partial or failed endpoints are labelled and are not assigned a successful grade. Numeric test statuses are retained without interpreting unknown/error values as vulnerabilities. All enrichment has to_ids disabled.
+
+- **config**:
+> - email
+> - allow_scan
+> - max_age
+
+- **input**:
+>domain, hostname MISP attribute.
+
+- **output**:
+>Referenced progress/assessment annotations, endpoint ip-port objects and x509 objects.
+
+- **references**:
+> - https://github.com/ssllabs/ssllabs-scan/blob/master/ssllabs-api-docs-v4.md
+> - https://www.ssllabs.com/about/terms.html
+
+- **requirements**:
+> - requests
+> - An email registered with SSL Labs API v4
+
+-----
+
 #### [Stairwell Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/stairwell.py)
 
 <img src=../logos/stairwell.png height=60>
