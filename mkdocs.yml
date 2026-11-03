@@ -88,6 +88,8 @@ nav:
       - Expansion Modules: expansion.md
       - Export Modules: export_mod.md
       - Import Modules: import_mod.md
+      - Gathering Modules: gathering.md
+      - Gathering Guide: gathering-guide.md
     - Install Guides: install.md
     - Local Module Configuration: module-config.md
     - PAP RED Restrictions: pap-red.md
