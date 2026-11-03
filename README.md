@@ -237,6 +237,7 @@ For further Information see the [license file](https://misp.github.io/misp-modul
 * [YARA Rule Generator](https://misp.github.io/misp-modules/expansion/#yara-rule-generator) - The module takes a hash attribute (md5, sha1, sha256, imphash) as input, and is returning a YARA rule from it.
 * [YARA Syntax Validator](https://misp.github.io/misp-modules/expansion/#yara-syntax-validator) - An expansion hover module to perform a syntax check on if yara rules are valid or not.
 * [Yeti Lookup](https://misp.github.io/misp-modules/expansion/#yeti-lookup) - Module to process a query on Yeti.
+* [ZoomEye](https://misp.github.io/misp-modules/expansion/#zoomeye) - Search ZoomEye API v2 for IP addresses, domains, hostnames and SHA-1 certificate fingerprints.
 
 ### Export Modules
 * [BPF Export](https://misp.github.io/misp-modules/export_mod/#bpf-export) - Export IDS-marked event and object network attributes as a tcpdump/libpcap capture filter.
