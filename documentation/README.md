@@ -2055,6 +2055,34 @@ Query an MWDB instance for an existing file by hash.
 
 -----
 
+#### [NeutrinoAPI IP Blocklist](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/neutrino.py)
+
+Enrich public IP addresses with NeutrinoAPI blocklist categories, detection flags, timestamps and sensor context.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/neutrino.py)]
+
+- **features**:
+>Requires `user_id` and `api_key`, sent in HTTP headers to the IP Blocklist API. Set `vpn_lookup` to true to include public VPN providers (default false). Returns a referenced annotation with the listing status, categories, flags, first/last seen times, counts and sensor details. Missing flags remain unknown; is-vpn is only included when VPN lookup was requested. An unlisted address is not declared benign. All enrichment has to_ids disabled. Supports public IPv4 and IPv6 addresses.
+
+- **config**:
+> - user_id
+> - api_key
+> - vpn_lookup
+
+- **input**:
+>ip-src, ip-dst MISP attribute.
+
+- **output**:
+>A referenced annotation containing IP blocklist intelligence.
+
+- **references**:
+>https://www.neutrinoapi.com/api/ip-blocklist/
+
+- **requirements**:
+> - requests
+> - NeutrinoAPI user ID and API key
+
+-----
+
 #### [OCR Enrich](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/ocr_enrich.py)
 
 Module to process some optical character recognition on pictures.
