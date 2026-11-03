@@ -140,7 +140,7 @@ For more information: [Extending MISP with Python modules](https://www.misp-proj
 * [VirusTotal Upload](https://misp.github.io/misp-modules/expansion/#virustotal-upload) - Module to push malware samples to VirusTotal
 * [VMRay Submit](https://misp.github.io/misp-modules/expansion/#vmray-submit) - Module to submit a sample to VMRay.
 * [VMware NSX Defender Enrich](https://misp.github.io/misp-modules/expansion/#vmware-nsx-defender-enrich) - Module to enrich a file or URL with VMware NSX Defender.
-* [VulnDB Lookup](https://misp.github.io/misp-modules/expansion/#vulndb-lookup) - Module to query VulnDB (RiskBasedSecurity.com).
+* [VulnDB Lookup](https://misp.github.io/misp-modules/expansion/#vulndb-lookup) - Module to query VulnDB (Flashpoint).
 * [Vulnerability Lookup](https://misp.github.io/misp-modules/expansion/#vulnerability-lookup) - An expansion module to query Vulnerability Lookup
 * [Vulners Lookup](https://misp.github.io/misp-modules/expansion/#vulners-lookup) - An expansion hover module to expand information about CVE id using Vulners API.
 * [Vysion Enrich](https://misp.github.io/misp-modules/expansion/#vysion-enrich) - Module to enrich the information by making use of the Vysion API.

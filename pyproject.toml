@@ -61,7 +61,6 @@ minimal = [
     "maclookup",
     "matplotlib",
     "mattermostdriver",
-    "oauth2",
     "passivetotal",
     "phonenumbers>=9.0.42,<10.0",
     "ptrclassify>=0.3.0,<0.4.0",
@@ -76,7 +75,7 @@ minimal = [
     "pymispwarninglists>=1.7.0",
     "pyonyphe>=3.1.1",
     "pysafebrowsing",
-    "requests[security]",
+    "requests>=2.34.2,<3",
     "rstapi>=1.2.0,<2",
     "slack-sdk",
     "urlarchiver",
@@ -120,7 +119,6 @@ all = [
     "misp-stix>=2026.10.12",
     "mwdblib>=4.8.0",
     "ndjson",  ## in minimal
-    "oauth2",   ## in minimal
     "opencv-python",
     "openpyxl",
     "pandoc",
@@ -144,7 +142,7 @@ all = [
     "python-docx",
     "python-pptx",
     "pyzbar",
-    "requests[security]",  ## in minimal
+    "requests>=2.34.2,<3",  ## in minimal
     "rstapi>=1.2.0,<2",  ## in minimal
     "setuptools",
     "shodan",
