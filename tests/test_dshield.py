@@ -202,6 +202,25 @@ def test_ipv6_uses_escaped_path():
 
 
 @pytest.mark.parametrize(
+    "value",
+    [
+        "224.0.0.1",
+        "239.255.255.255",
+        "ff0e::1",
+        "ff02::1",
+        "240.0.0.1",
+        "64:ff9b::808:808",
+        "::ffff:8.8.8.8",
+        "::ffff:127.0.0.1",
+    ],
+)
+def test_special_use_ip_is_rejected_before_network_access(value):
+    with patch.object(module.requests, METHOD) as call:
+        assert "error" in module.handler(query(value=value))
+    call.assert_not_called()
+
+
+@pytest.mark.parametrize(
     "changes",
     [
         {"number": "8.8.8.8"},

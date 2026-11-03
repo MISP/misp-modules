@@ -2,6 +2,7 @@
 
 Expand `ip-src` or `ip-dst` attributes with the public ISC IP summary API.
 No API key is required. Both public IPv4 and IPv6 addresses are accepted.
+Multicast, reserved and IPv4-mapped IPv6 inputs are rejected before network access.
 
 | Setting | Purpose |
 | --- | --- |

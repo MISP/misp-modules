@@ -112,8 +112,13 @@ def _ip(value):
     if not isinstance(value, str) or "%" in value:
         raise ModuleError("A public IPv4 or IPv6 address is required.")
     address = ip_address(value.strip())
-    if not address.is_global:
-        raise ModuleError("Only public IP addresses can be looked up.")
+    if (
+        not address.is_global
+        or address.is_multicast
+        or address.is_reserved
+        or getattr(address, "ipv4_mapped", None) is not None
+    ):
+        raise ModuleError("Only public unicast IP addresses without IPv4 mapping can be looked up.")
     return str(address)
 
 
