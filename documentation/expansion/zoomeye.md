@@ -1,16 +1,17 @@
 # ZoomEye API v2
 
 Expand IP addresses, domains, hostnames and SHA-1 certificate fingerprints.
-The module uses the documented v2 POST search API with an API-KEY header and
+The module uses `https://api.zoomeye.ai/v2/search` with an API-KEY header and
 a Base64-encoded query. It does not use the legacy host-search endpoint.
 
 | Setting | Purpose |
 | --- | --- |
-| `api_key` | Required ZoomEye API key. |
+| `api_key` | Required ZoomEye API key; leading/trailing whitespace is removed. |
 | `max_results` | First-page asset limit, 1–100; defaults to 20. |
 
-IPv4 and IPv6 queries select their corresponding datasets. Name searches use
-the web dataset; `x509-fingerprint-sha1` searches use all datasets. Fingerprints
+IPv4 and IPv6 queries select their corresponding datasets. Domain searches use
+the web dataset; hostnames and `x509-fingerprint-sha1` searches use all datasets,
+including hosts observed on non-web services. Fingerprints
 may contain colon separators. SHA-256 certificate search is not advertised
 because the referenced API documentation demonstrates SHA-1 fingerprints.
 Inputs are validated before constructing the query.
@@ -28,4 +29,4 @@ HTTP errors and non-success API codes are errors; remote messages are not expose
 Enable `zoomeye` in MISP's enrichment settings after restarting misp-modules.
 Validate offline with `python -m pytest tests/test_zoomeye.py`.
 
-[Official API v2 reference](https://github.com/knownsec/ZoomEye-python/blob/master/api.md)
+[Official API v2 reference](https://github.com/zoomeye-ai/ZoomEye-python/blob/master/api.md)

@@ -4058,7 +4058,7 @@ Search ZoomEye API v2 for IP addresses, domains, hostnames and SHA-1 certificate
 [[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/zoomeye.py)]
 
 - **features**:
->Requires `api_key`. Builds an escaped, Base64-encoded search query for API v2 and requests one page of up to `max_results` assets (default 20, maximum 100). Uses the v4/v6 dataset for IPs, web for names, and all datasets for certificate fingerprints. A result-limit notice is included when total exceeds the returned records; additional pages are not fetched automatically. Returns referenced ip-port objects with service/banner context, and an annotation retaining result counts and observed metadata. Certificate searches identify assets using an observed certificate, not a malicious verdict. All enrichment has to_ids disabled.
+>Requires `api_key`. Builds an escaped, Base64-encoded search query for API v2 and requests one page of up to `max_results` assets (default 20, maximum 100). Uses the v4/v6 dataset for IPs, web for domains, and all datasets for hostnames and certificate fingerprints. Leading/trailing API key whitespace is removed. A result-limit notice is included when total exceeds the returned records; additional pages are not fetched automatically. Returns referenced ip-port objects with service/banner context, and an annotation retaining result counts and observed metadata. Certificate searches identify assets using an observed certificate, not a malicious verdict. All enrichment has to_ids disabled.
 
 - **config**:
 > - api_key
@@ -4071,7 +4071,7 @@ Search ZoomEye API v2 for IP addresses, domains, hostnames and SHA-1 certificate
 >Referenced ip-port objects and an annotation with result count and search coverage.
 
 - **references**:
->https://github.com/knownsec/ZoomEye-python/blob/master/api.md
+>https://github.com/zoomeye-ai/ZoomEye-python/blob/master/api.md
 
 - **requirements**:
 > - requests

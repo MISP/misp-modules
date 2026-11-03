@@ -162,7 +162,7 @@ def test_success_preserves_source_and_disables_ids_on_enrichment():
 
 def test_v2_request_and_structured_service():
     result, call = handle()
-    assert call.call_args.args[0] == "https://api.zoomeye.org/v2/search"
+    assert call.call_args.args[0] == "https://api.zoomeye.ai/v2/search"
     kwargs = call.call_args.kwargs
     assert kwargs["headers"] == {"API-KEY": SECRET}
     assert base64.b64decode(kwargs["json"]["qbase64"]).decode() == 'ip="1.1.1.1"'
@@ -182,7 +182,7 @@ def test_v2_request_and_structured_service():
     [
         ("ip-src", "2606:4700:4700::1111", 'ip="2606:4700:4700::1111"', "v6"),
         ("domain", "EXAMPLE.COM.", 'domain="example.com"', "web"),
-        ("hostname", "www.example.com", 'hostname="www.example.com"', "web"),
+        ("hostname", "www.example.com", 'hostname="www.example.com"', "all"),
         ("x509-fingerprint-sha1", "AA:" * 19 + "AA", 'ssl.cert.fingerprint="' + "aa" * 20 + '"', "all"),
     ],
 )
@@ -192,6 +192,47 @@ def test_search_types_and_encoding(kind, value, expected, dataset):
     body = call.call_args.kwargs["json"]
     assert base64.b64decode(body["qbase64"]).decode() == expected
     assert body["sub_type"] == dataset
+
+
+def test_hostname_query_includes_non_web_hosts():
+    result, call = handle(
+        {
+            "code": 60000,
+            "total": 1,
+            "data": [{"ip": "1.1.1.1", "port": 22, "hostname": "ssh.example.com", "service": "ssh", "protocol": "TCP"}],
+        },
+        kind="hostname",
+        value="ssh.example.com",
+    )
+    assert_source(result)
+    assert call.call_args.kwargs["json"]["sub_type"] == "all"
+    assert values(objects(result, "ip-port")[0])["dst-port"] == "22"
+
+
+@pytest.mark.parametrize("key", ["  " + SECRET + "  ", "\t" + SECRET + "\n"])
+def test_api_key_is_trimmed_before_authentication(key):
+    result, call = handle(config=dict(CONFIG, api_key=key))
+    assert_source(result)
+    assert call.call_args.kwargs["headers"] == {"API-KEY": SECRET}
+
+
+@pytest.mark.parametrize(
+    "value",
+    [
+        "224.0.0.1",
+        "239.255.255.255",
+        "ff0e::1",
+        "ff02::1",
+        "240.0.0.1",
+        "64:ff9b::808:808",
+        "::ffff:8.8.8.8",
+        "::ffff:127.0.0.1",
+    ],
+)
+def test_special_use_ip_is_rejected_before_network_access(value):
+    with patch.object(module.requests, METHOD) as call:
+        assert "error" in module.handler(query(value=value))
+    call.assert_not_called()
 
 
 @pytest.mark.parametrize(

@@ -22,13 +22,14 @@ moduleinfo = {
     "requirements": ["requests", "ZoomEye API key"],
     "features": (
         "Requires `api_key`. Builds an escaped, Base64-encoded search query for API v2 and requests one page of up to"
-        " `max_results` assets (default 20, maximum 100). Uses the v4/v6 dataset for IPs, web for names, and all"
-        " datasets for certificate fingerprints. A result-limit notice is included when total exceeds the returned"
+        " `max_results` assets (default 20, maximum 100). Uses the v4/v6 dataset for IPs, web for domains, and all"
+        " datasets for hostnames and certificate fingerprints. Leading/trailing API key whitespace is removed."
+        " A result-limit notice is included when total exceeds the returned"
         " records; additional pages are not fetched automatically. Returns referenced ip-port objects with"
         " service/banner context, and an annotation retaining result counts and observed metadata. Certificate searches"
         " identify assets using an observed certificate, not a malicious verdict. All enrichment has to_ids disabled."
     ),
-    "references": ["https://github.com/knownsec/ZoomEye-python/blob/master/api.md"],
+    "references": ["https://github.com/zoomeye-ai/ZoomEye-python/blob/master/api.md"],
     "input": "ip-src, ip-dst, domain, hostname, x509-fingerprint-sha1 MISP attribute.",
     "output": "Referenced ip-port objects and an annotation with result count and search coverage.",
 }
@@ -114,8 +115,13 @@ def _ip(value):
     if not isinstance(value, str) or "%" in value:
         raise ModuleError("A public IPv4 or IPv6 address is required.")
     address = ip_address(value.strip())
-    if not address.is_global:
-        raise ModuleError("Only public IP addresses can be looked up.")
+    if (
+        not address.is_global
+        or address.is_multicast
+        or address.is_reserved
+        or getattr(address, "ipv4_mapped", None) is not None
+    ):
+        raise ModuleError("Only public unicast IP addresses without IPv4 mapping can be looked up.")
     return str(address)
 
 
@@ -147,7 +153,7 @@ def _search(attribute):
     if kind in ("domain", "hostname"):
         # Validate before interpolation so quotes/operators cannot broaden the search.
         host = _domain(value, require_dot=kind == "domain")
-        return f'{"domain" if kind == "domain" else "hostname"}="{host}"', "web"
+        return f'{"domain" if kind == "domain" else "hostname"}="{host}"', "web" if kind == "domain" else "all"
     size = 40
     fingerprint = value.replace(":", "").lower()
     if not re.fullmatch(r"[a-f0-9]{" + str(size) + r"}", fingerprint):
@@ -166,8 +172,8 @@ def _expand(event, attribute, config):
         raise ModuleError("max_results must be an integer between 1 and 100.")
     limit = int(limit)
     response = requests.post(
-        "https://api.zoomeye.org/v2/search",
-        headers={"API-KEY": config["api_key"]},
+        "https://api.zoomeye.ai/v2/search",
+        headers={"API-KEY": config["api_key"].strip()},
         json={
             "qbase64": base64.b64encode(query.encode()).decode(),
             "page": 1,
