@@ -3002,6 +3002,38 @@ each logged chunk is limited to its last 8192 characters. Failed scans include t
 last 2000 characters of CLI output in the module error response. Reports are removed
 after the request, including on failure.
 
+The `report: N matching accounts` message counts CSV matches. Successful conversion
+then logs `MISP response ready with N user-account objects` and the source attribute
+UUID. The server logs `response prepared: B bytes` after JSON serialization and
+`response flushed: B bytes (outcome=successes, ...)` after the HTTP write completes.
+The `/query` response uses `Content-Type: application/json`. A flush confirms the
+server's HTTP transport accepted the response; inspect the client body to confirm
+what the caller received. It does not confirm that MISP imported the objects.
+
+If a caller closes the connection while the module runs, the server logs
+`client disconnected before response` and reports the late response as undelivered.
+A timed-out request logs `outcome=timeouts`; a later CSV report or response-prepared
+message from the worker does not mean that request received those accounts.
+
+To check a direct request, save its JSON as `sherlock-request.json`, then save and
+count the returned objects:
+
+```bash
+curl --max-time 155 -sS http://127.0.0.1:6666/query \
+  -H 'Content-Type: application/json' \
+  --data-binary @sherlock-request.json \
+  --output sherlock-response.json \
+  --write-out 'HTTP %{http_code}; %{size_download} bytes\n'
+jq '{error, accounts: ((.results.Object // []) | length)}' sherlock-response.json
+```
+
+For an all-site scan using the default `config.scan_timeout` of 120 seconds, set
+the request's top-level `timeout` to 150 and allow at least 155 seconds in the HTTP
+client. Any reverse-proxy timeout must also allow the request to complete. A scan
+that logs 177 matching accounts should return 177 entries in `results.Object`, each
+with three attributes and a reference to the input UUID. Blocked and failed sites
+are mentioned in object comments and do not discard the accounts found.
+
 `--debug-extended` instruments HTTP calls inside the module server. Sherlock runs
 in a separate process, so its HTTP exchanges are outside that tracing. For deeper
 inspection, run Sherlock directly with `--verbose`; add `--dump-response` to inspect

@@ -31,7 +31,7 @@ mispattributes = {
 }
 moduleconfig = ["sherlock_path", "sites", "timeout", "scan_timeout"]
 moduleinfo = {
-    "version": "1.1",
+    "version": "1.2",
     "author": "MISP Project",
     "description": "Find social media accounts by username with Sherlock.",
     "module-type": ["expansion", "hover"],
@@ -248,6 +248,8 @@ def _parse_results(attribute, username, matches, failures):
                 )
             }
         return {"error": "Sherlock reported no matching accounts on the queried sites."}
+    started = time.monotonic()
+    LOGGER.debug("Sherlock attribute %s: building %s user-account objects", attribute["uuid"], len(matches))
     event = MISPEvent()
     source = MISPAttribute()
     source.from_dict(**attribute)
@@ -264,6 +266,15 @@ def _parse_results(attribute, username, matches, failures):
         account.add_reference(source.uuid, "related-to")
         event.add_object(account)
     result = json.loads(event.to_json())
+    LOGGER.debug(
+        "Sherlock attribute %s: MISP response ready with %s user-account objects, %s source attributes,"
+        " %s failed or blocked sites (%.2fs)",
+        source.uuid,
+        len(result["Object"]),
+        len(result["Attribute"]),
+        failures,
+        time.monotonic() - started,
+    )
     return {"results": {key: result[key] for key in ("Attribute", "Object")}}
 
 

@@ -39,7 +39,7 @@ import pymisp
 import tornado.process
 import tornado.web
 from tornado import concurrent as tornado_concurrent
-from tornado import ioloop
+from tornado import ioloop, iostream
 
 import misp_modules
 from misp_modules import openapi as openapi_builder
@@ -278,7 +278,20 @@ class QueryModule(tornado.web.RequestHandler):
                 if isinstance(response, dict) and (response.get("error") or response.get("errors"))
                 else "successes"
             )
-            return orjson.dumps(response, default=pymisp.pymisp_json_default), outcome
+            encoded = orjson.dumps(response, default=pymisp.pymisp_json_default)
+            if getattr(self, "_query_timed_out", False) or getattr(self, "_query_connection_closed", False):
+                reason = "request timeout" if getattr(self, "_query_timed_out", False) else "client disconnect"
+                LOGGER.warning(
+                    "QueryModule %s response prepared after %s: %s bytes; result cannot be delivered to this request",
+                    module_name,
+                    reason,
+                    len(encoded),
+                )
+            else:
+                LOGGER.debug(
+                    "QueryModule %s response prepared: %s bytes (outcome=%s)", module_name, len(encoded), outcome
+                )
+            return encoded, outcome
 
         if MODULE_CACHE.enabled_for(module_name) and MODULES_HANDLERS.get(f"type:{module_name}") == "expansion":
             return MODULE_CACHE.run(module_name, dict_payload, execute, deadline=getattr(self, "_cache_deadline", None))
@@ -291,6 +304,11 @@ class QueryModule(tornado.web.RequestHandler):
         timeout = datetime.timedelta(seconds=int(dict_payload.get("timeout", self.DEFAULT_TIMEOUT)))
         self._cache_deadline = time.monotonic() + timeout.total_seconds()
         module_name = dict_payload.get("module")
+        self._query_module_name = module_name
+        self._query_started = time.monotonic()
+        self._query_connection_closed = False
+        self._query_timed_out = False
+        self.set_header("Content-Type", "application/json")
         tracked = (
             isinstance(module_name, str) and not module_name.startswith("type:") and module_name in MODULES_HANDLERS
         )
@@ -303,6 +321,7 @@ class QueryModule(tornado.web.RequestHandler):
             response, outcome = yield tornado.gen.with_timeout(timeout, future)
             self.write(response)
         except tornado.gen.TimeoutError:
+            self._query_timed_out = True
             LOGGER.warning("Timeout on {}".format(dict_payload["module"]))
             outcome = "timeouts"
             response = orjson.dumps({"error": "Timeout."})
@@ -315,7 +334,41 @@ class QueryModule(tornado.web.RequestHandler):
         finally:
             if tracked:
                 MODULE_STATISTICS.finish(module_name, started, outcome, len(response))
-            self.finish()
+            try:
+                yield self.finish()
+            except iostream.StreamClosedError:
+                LOGGER.warning(
+                    "QueryModule %s response not delivered: client connection closed (%s bytes, outcome=%s)",
+                    module_name,
+                    len(response),
+                    outcome,
+                )
+            else:
+                if self._query_connection_closed:
+                    LOGGER.warning(
+                        "QueryModule %s response completed after client disconnected (%s bytes, outcome=%s)",
+                        module_name,
+                        len(response),
+                        outcome,
+                    )
+                else:
+                    LOGGER.debug(
+                        "QueryModule %s response flushed: %s bytes (outcome=%s, %.2fs)",
+                        module_name,
+                        len(response),
+                        outcome,
+                        time.monotonic() - self._query_started,
+                    )
+
+    def on_connection_close(self):
+        if hasattr(self, "_query_started"):
+            self._query_connection_closed = True
+            LOGGER.warning(
+                "QueryModule %s client disconnected before response after %.2fs; check the client/proxy timeout",
+                self._query_module_name,
+                time.monotonic() - self._query_started,
+            )
+        super().on_connection_close()
 
 
 def main():
