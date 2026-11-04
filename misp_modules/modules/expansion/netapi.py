@@ -10,52 +10,59 @@ from . import check_input_attribute, standard_error_message
 
 misperrors = {"error": "Error"}
 mispattributes = {
-    "input": ["domain", "hostname", "url", "domain|ip"],
+    "input": ["domain", "hostname", "url", "domain|ip", "ip-src", "ip-dst"],
     "output": ["text", "datetime", "link"],
     "format": "misp_standard",
 }
 moduleinfo = {
-    "version": "1.1",
+    "version": "1.2",
     "author": "Slava Olesik",
     "description": (
-        "Check a domain, hostname or URL against the NetAPI compromised feed and get the domain's position in the"
-        " NetAPI Top 1M."
+        "Check a domain, hostname, URL or IP address against the NetAPI compromised feeds and get the domain's"
+        " position in the NetAPI Top 1M."
     ),
     "module-type": ["expansion", "hover"],
     "name": "NetAPI Lookup",
     "logo": "netapi.png",
     "requirements": [],
     "features": (
-        "The module takes a domain, hostname or URL (by its host) attribute and queries two free methods of the"
-        " NetAPI JSON API. compromised-check says whether the value, or the registered domain a hostname belongs"
-        " to, is in the NetAPI feed of hosts that public threat feeds report for malware or phishing: listed now"
-        " (seen within the last 24 hours), listed in the past only, or never listed, with the first and last seen"
-        " dates, the reporting feed and the registrar of the domain. domain-rank gives the position of the"
-        " registered domain in the NetAPI Top 1M, a daily popularity ranking: a top-ranked domain in the feed is"
-        " more likely a compromised legitimate site than infrastructure set up by the attacker. IP addresses are"
-        " not covered, so a URL whose host is an IP address is not looked up."
+        "The module takes a domain, hostname, URL (by its host) or IP address attribute and queries the free"
+        " compromised-check method of the NetAPI JSON API."
+        "\n\nFor a domain or hostname it says whether the value, or the registered domain a hostname belongs to,"
+        " is in the NetAPI feed of hosts that public threat feeds report for malware or phishing: listed now (seen"
+        " within the last 24 hours), listed in the past only, or never listed, with the first and last seen dates,"
+        " the reporting feed and the registrar of the domain. A second free method, domain-rank, gives the position"
+        " of the registered domain in the NetAPI Top 1M, a daily popularity ranking: a top-ranked domain in the"
+        " feed is more likely a compromised legitimate site than infrastructure set up by the attacker."
+        "\n\nFor an IP address it checks the NetAPI compromised IP feed, the IPv4 addresses that attacked the"
+        " sensors of NetAPI Nightwatch, NetAPI's own honeypot network: listed now (seen within the last 48 hours),"
+        " listed in the past only, or never listed, with the first seen date, the time of the last attack and the"
+        " type of attack. Private, loopback and reserved addresses are not sent."
         "\n\nThe answer is a reputation object linked to the queried attribute: classification malicious when the"
         " value is listed now, suspicious when only its registered domain is, and unknown when it is listed in the"
         " past only or never (the feed holds no opinion on a value it does not list), with the first and last seen"
-        " dates, a link to the NetAPI domain lookup and the details and the Top 1M rank in its text."
+        " dates, a link to the NetAPI domain or IP lookup and the details (for a domain also the Top 1M rank) in"
+        " its text."
         "\n\nNo API key is required. An optional NetAPI API token only raises the request limits (30 requests a"
         " minute and 1,000 a day per IP address without one). Only the queried indicator leaves the MISP instance."
     ),
     "references": [
         "https://netapi.com/compromised-urls/",
+        "https://netapi.com/compromised-ips/",
         "https://netapi.com/top-1-mln-websites/",
         "https://netapi.com/help/api/#json-api",
     ],
-    "input": "A domain, hostname or URL.",
-    "output": "A reputation object with the feed listing and the Top 1M rank.",
+    "input": "A domain, hostname, URL or IP address.",
+    "output": "A reputation object with the feed listing and, for a domain, the Top 1M rank.",
 }
 # No API key is needed: api_token only raises the request limits, and api_url is exposed
 # only so an operator can point the module at a different deployment.
 moduleconfig = ["api_token", "api_url"]
 
 DEFAULT_API_URL = "https://netapi.com/api-json/"
-USER_AGENT = "netapi-misp/1.1 (+https://github.com/MISP/misp-modules)"
+USER_AGENT = "netapi-misp/1.2 (+https://github.com/MISP/misp-modules)"
 LOOKUP_URL = "https://netapi.com/lookup-domain/{}/"
+LOOKUP_IP_URL = "https://netapi.com/lookup-ip/{}/"
 TIMEOUT = 30
 
 
@@ -78,12 +85,12 @@ def _query_value(attribute):
     return value.rstrip(".").lower()
 
 
-def _is_ip(value):
+def _ip(value):
+    """The value as an IP address, or None for a host name."""
     try:
-        ipaddress.ip_address(value)
+        return ipaddress.ip_address(value)
     except ValueError:
-        return False
-    return True
+        return None
 
 
 def _get(api_url, token, method, **params):
@@ -117,7 +124,9 @@ def _listing_summary(value, check):
         return f"NetAPI compromised feed: {value} is not listed, now or in the past"
 
     if check.get("listed_now"):
-        status = "listed now (seen within the last 24 hours)"
+        # The IP feed keeps an address for 48 hours after its last attack, the domain feed 24 hours.
+        hours = 48 if check.get("type") == "ip" else 24
+        status = f"listed now (seen within the last {hours} hours)"
     else:
         last_seen = str(check.get("last_seen") or "")[:10]
         status = f"listed in the past (last seen {last_seen}), not in the current feed"
@@ -188,8 +197,9 @@ def handler(q=False):
     query = _query_value(attribute)
     if not query:
         return {"error": "The provided attribute value is empty."}
-    if _is_ip(query):
-        return {"error": "NetAPI covers domain names only. IP addresses are not looked up."}
+    address = _ip(query)
+    if address is not None and not address.is_global:
+        return {"error": "Private, loopback and reserved addresses are not looked up."}
 
     config = request.get("config") or {}
     api_url = str(config.get("api_url") or DEFAULT_API_URL)
@@ -200,12 +210,18 @@ def handler(q=False):
     except NetAPIError as error:
         return {"error": f"NetAPI lookup failed: {error}"}
 
-    # The rank is context, so a failure here is reported next to the listing instead of
-    # discarding the answer that was already obtained.
-    try:
-        rank_value = _rank_summary(_get(api_url, token, "domain-rank", domain=query))
-    except NetAPIError as error:
-        rank_value = f"NetAPI Top 1M rank unavailable: {error}"
+    text = _listing_summary(query, check)
+    if address is not None:
+        # The Top 1M ranks domains only.
+        list_name, lookup_url = "NetAPI compromised IPs", LOOKUP_IP_URL
+    else:
+        list_name, lookup_url = "NetAPI compromised domains", LOOKUP_URL
+        # The rank is context, so a failure here is reported next to the listing instead of
+        # discarding the answer that was already obtained.
+        try:
+            text += "\n" + _rank_summary(_get(api_url, token, "domain-rank", domain=query))
+        except NetAPIError as error:
+            text += f"\nNetAPI Top 1M rank unavailable: {error}"
 
     misp_event = MISPEvent()
     input_attribute = MISPAttribute()
@@ -219,11 +235,11 @@ def handler(q=False):
     fields = [
         ("classification", "text", _classification(query, check)),
         ("source", "text", "NetAPI"),
-        ("list-name", "text", "NetAPI compromised domains"),
+        ("list-name", "text", list_name),
         ("first-seen", "datetime", _iso_datetime(check.get("first_seen"))),
         ("last-seen", "datetime", _iso_datetime(check.get("last_seen"))),
-        ("link", "link", LOOKUP_URL.format(check.get("matched_value") or query)),
-        ("text", "text", f"{_listing_summary(query, check)}\n{rank_value}"),
+        ("link", "link", lookup_url.format(check.get("matched_value") or query)),
+        ("text", "text", text),
     ]
     for relation, attribute_type, value in fields:
         if value:
