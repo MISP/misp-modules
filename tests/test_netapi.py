@@ -33,6 +33,19 @@ CHECK_CLEAN = {"value": "github.com", "type": "domain", "listed_now": False, "li
 RANK_IN_TOP_1M = {"domain": "github.com", "in_top_1m": True, "rank": 11, "snapshot_date": "2026-10-26"}
 RANK_NOT_IN_TOP_1M = {"domain": "000359.xyz", "in_top_1m": False, "rank": None, "snapshot_date": "2026-10-26"}
 RANK_PAST_NOT_IN_TOP_1M = dict(RANK_NOT_IN_TOP_1M, domain="0-07.ru")
+# Answers of the live API on 2026-11-04 for an address of the NetAPI Nightwatch IP feed and an unlisted one.
+CHECK_IP_LISTED_NOW = {
+    "value": "102.90.101.252",
+    "type": "ip",
+    "listed_now": True,
+    "listed_ever": True,
+    "matched_value": "102.90.101.252",
+    "first_seen": "2026-11-02",
+    "last_seen": "2026-11-02 12:55:00 UTC",
+    "block_reason": "NetAPI network sensors: service exploit",
+    "registrar": None,
+}
+CHECK_IP_CLEAN = {"value": "8.8.8.8", "type": "ip", "listed_now": False, "listed_ever": False}
 
 
 class MockResponse:
@@ -227,21 +240,58 @@ def test_unsupported_type_is_refused_without_a_request():
     calls = []
     with patch.object(netapi.requests, "get", _api(CHECK_CLEAN, calls=calls)):
         md5 = netapi.handler(_query("d41d8cd98f00b204e9800998ecf8427e", "md5"))
-        ip = netapi.handler(_query("1.1.1.1", "ip-dst"))
+        email = netapi.handler(_query("user@example.com", "email-src"))
 
-    assert md5 == ip == {"error": "Unsupported attribute type."}
+    assert md5 == email == {"error": "Unsupported attribute type."}
     assert calls == []
 
 
-def test_url_with_an_ip_host_is_refused_without_a_request():
-    """NetAPI covers domain names only, so an IP host is not sent to the API."""
+def test_listed_ip_returns_the_listing_without_a_rank():
     calls = []
-    with patch.object(netapi.requests, "get", _api(CHECK_CLEAN, calls=calls)):
-        ipv4 = netapi.handler(_query("http://192.0.2.10/payload.exe", "url"))
+    with patch.object(netapi.requests, "get", _api(CHECK_IP_LISTED_NOW, calls=calls)):
+        results = netapi.handler(_query("102.90.101.252", "ip-src"))
+
+    reputation = _reputation(results)
+    assert reputation["classification"] == "malicious"
+    assert reputation["list-name"] == "NetAPI compromised IPs"
+    assert reputation["first-seen"] == "2026-11-02T00:00:00+00:00"
+    assert reputation["last-seen"] == "2026-11-02T12:55:00+00:00"
+    assert reputation["link"] == "https://netapi.com/lookup-ip/102.90.101.252/"
+
+    (listing,) = _texts(results)
+    assert listing.startswith("NetAPI compromised feed: 102.90.101.252 is listed now (seen within the last 48 hours)")
+    assert "reported by NetAPI network sensors: service exploit" in listing
+    # The Top 1M ranks domains, so an address costs a single request.
+    assert [params["method"] for _, params, _ in calls] == ["compromised-check"]
+
+
+def test_unlisted_ip_has_no_opinion():
+    with patch.object(netapi.requests, "get", _api(CHECK_IP_CLEAN)):
+        results = netapi.handler(_query("8.8.8.8", "ip-dst"))
+
+    reputation = _reputation(results)
+    assert reputation["classification"] == "unknown"
+    assert reputation["text"] == "NetAPI compromised feed: 8.8.8.8 is not listed, now or in the past"
+
+
+def test_url_with_an_ip_host_is_looked_up_by_the_address():
+    calls = []
+    with patch.object(netapi.requests, "get", _api(CHECK_IP_LISTED_NOW, calls=calls)):
+        netapi.handler(_query("http://102.90.101.252:8080/bins/x86", "url"))
+
+    assert [params.get("value") for _, params, _ in calls] == ["102.90.101.252"]
+
+
+def test_private_and_reserved_addresses_are_not_sent():
+    calls = []
+    with patch.object(netapi.requests, "get", _api(CHECK_IP_CLEAN, calls=calls)):
+        private = netapi.handler(_query("10.0.0.5", "ip-src"))
+        loopback = netapi.handler(_query("127.0.0.1", "ip-dst"))
+        documentation = netapi.handler(_query("http://192.0.2.10/payload.exe", "url"))
         ipv6 = netapi.handler(_query("http://[2001:db8::1]:8080/", "url"))
 
-    expected = {"error": "NetAPI covers domain names only. IP addresses are not looked up."}
-    assert ipv4 == ipv6 == expected
+    expected = {"error": "Private, loopback and reserved addresses are not looked up."}
+    assert private == loopback == documentation == ipv6 == expected
     assert calls == []
 
 
