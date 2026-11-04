@@ -42,7 +42,7 @@ def handler(q=False):
         summary = state["knownlevel"] if state and state["result"] == "SUCCESS" else state["message"]
     else:
         misperrors["error"] = "{} API not accessible".format(hashddapi_url)
-        return misperrors["error"]
+        return misperrors
 
     r = {"results": [{"types": mispattributes["output"], "values": summary}]}
     return r
