@@ -83,6 +83,8 @@ class Yeti:
 
     def parse_yeti_result(self):
         obs = self.search(self.attribute["value"])
+        if not obs:
+            return
 
         for obs_to_add, link in self.get_neighboors(obs["id"]):
             object_misp_domain_ip = self.__get_object_domain_ip(obs_to_add)
