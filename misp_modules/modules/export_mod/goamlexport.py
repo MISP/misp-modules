@@ -309,7 +309,7 @@ def handler(q=False):
     request = json.loads(q)
     if "data" not in request:
         return False
-    if not request.get("config") and not request["config"].get("rentity_id"):
+    if not request.get("config") or not request["config"].get("rentity_id"):
         misperrors["error"] = "Configuration error."
         return misperrors
     config = request["config"].get("rentity_id")
