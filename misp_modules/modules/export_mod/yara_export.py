@@ -70,17 +70,20 @@ class YaraRule:
         for key, values in self.meta.items():
             i = 0
             if len(values) == 1:
-                result.append(f'        {key} = "{values[0]}"')
+                escaped_value = values[0].replace("\\", "\\\\").replace('"', '\\"')
+                result.append(f'        {key} = "{escaped_value}"')
                 continue
             for value in values:
-                result.append(f'        {key}_{i} = "{value}"')
+                escaped_value = value.replace("\\", "\\\\").replace('"', '\\"')
+                result.append(f'        {key}_{i} = "{escaped_value}"')
                 i += 1
 
         result.append("    strings:")
         for key, values in self.strings.items():
             i = 0
             for value in values:
-                result.append(f'        ${key}_{i} = "{value}"')
+                escaped_value = value.replace("\\", "\\\\").replace('"', '\\"')
+                result.append(f'        ${key}_{i} = "{escaped_value}"')
                 i += 1
 
         result.append("    condition:")
@@ -267,9 +270,15 @@ def handler(q=False):
                     # ignore unsupported types
                     pass
         yara_rules.append(str(yr))
+    ruleset = "\n".join(yara_rules)
+    try:
+        yara.compile(source=ruleset)
+    except Exception:
+        misperrors["error"] = "The generated YARA ruleset does not compile."
+        return misperrors
     r = {
         "response": [],
-        "data": str(base64.b64encode(bytes("\n".join(yara_rules), "utf-8")), "utf-8"),
+        "data": str(base64.b64encode(bytes(ruleset, "utf-8")), "utf-8"),
     }
 
     return r
