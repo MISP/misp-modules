@@ -1066,7 +1066,8 @@ class VMRayParser:
         except ValueError:
             raise VMRayParseError("Could not convert sample id to integer.")
 
-        self.api = VMRayRESTAPI(url, api_key, False)
+        verify_cert = not self._config_from_string(config.get("disable_certificate_verification"))
+        self.api = VMRayRESTAPI(url, api_key, verify_cert)
 
         self.ignore_analysis_finished = self._config_from_string(config.get("ignore_analysis_finished"))
         self._setup_optional_config(config)
