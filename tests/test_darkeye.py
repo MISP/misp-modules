@@ -1,12 +1,64 @@
+import functools
+import http.client
+import io
 import json
+from types import SimpleNamespace
 from unittest.mock import patch
 
 import pytest
 import requests
-import responses
+import urllib3
 from pymisp import MISPEvent
 
 from misp_modules.modules.expansion import darkeye
+
+
+class FakeHTTP:
+    """Offline HTTP layer: the real requests.Session runs and the adapter returns canned replies."""
+
+    def __init__(self):
+        self.routes = {}
+        self.calls = []
+
+    def get(self, url, status=200, json=None, headers=None, body=None):
+        self.routes[url] = (status, json, headers or {}, body)
+
+    def _respond(self, adapter, request):
+        self.calls.append(SimpleNamespace(request=request))
+        url = request.url.split("?", 1)[0]
+        if url not in self.routes:
+            raise requests.ConnectionError("No synthetic reply for " + url)
+        status, payload, headers, body = self.routes[url]
+        if isinstance(body, Exception):
+            raise body
+        headers = {"Content-Type": "application/json", **headers}
+        message = http.client.HTTPMessage()
+        for name, value in headers.items():
+            message[name] = value
+        raw = urllib3.HTTPResponse(
+            body=io.BytesIO(b"" if payload is None else json.dumps(payload).encode()),
+            headers=headers,
+            status=status,
+            preload_content=False,
+            original_response=SimpleNamespace(msg=message, isclosed=lambda: True, close=lambda: None),
+        )
+        return adapter.build_response(request, raw)
+
+    def activate(self, func):
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            self.routes, self.calls = {}, []
+
+            def send(adapter, request, **send_kwargs):
+                return self._respond(adapter, request)
+
+            with patch.object(requests.adapters.HTTPAdapter, "send", send):
+                return func(*args, **kwargs)
+
+        return wrapper
+
+
+fake_http = FakeHTTP()
 
 HIBR_KEY = "synthetic-hibr-token"
 BH_KEY = "synthetic-bh-token"
@@ -56,7 +108,7 @@ def report(result):
     return json.loads(attributes[0]["value"])
 
 
-@responses.activate
+@fake_http.activate
 def test_both_products_share_one_report_with_metadata_only():
     sensitive = {
         "description": "DO_NOT_RETAIN",
@@ -66,8 +118,8 @@ def test_both_products_share_one_report_with_metadata_only():
         "hibr": {"data": "DO_NOT_RETAIN"},
     }
     item = {"id_source": "1", "leak_type": "ransomware_leak", "post_title": "Synthetic", "website": DOMAIN, **sensitive}
-    responses.get(HIBR_URL, json=hibr_page([item]))
-    responses.get(BH_URL, json=bh_page([item]))
+    fake_http.get(HIBR_URL, json=hibr_page([item]))
+    fake_http.get(BH_URL, json=bh_page([item]))
     output = darkeye.handler(query(haveibeenransom_api_key=HIBR_KEY, breachhouse_api_key=BH_KEY))
     r = report(output)
     assert r["provider"] == "DarkEye" and r["count"] == 2
@@ -76,53 +128,53 @@ def test_both_products_share_one_report_with_metadata_only():
     assert {row["category"] for row in r["records"]} == {"ransomware"}
     encoded = json.dumps(output)
     assert all(x not in encoded for x in ["DO_NOT_RETAIN", HIBR_KEY, BH_KEY, "Identities Found"])
-    assert [x.request.headers["Authorization"] for x in responses.calls] == ["Bearer " + HIBR_KEY, "Bearer " + BH_KEY]
+    assert [x.request.headers["Authorization"] for x in fake_http.calls] == ["Bearer " + HIBR_KEY, "Bearer " + BH_KEY]
 
 
 @pytest.mark.parametrize("product", ["hibr", "bh"])
-@responses.activate
+@fake_http.activate
 def test_either_key_works_independently(product):
     config = {"haveibeenransom_api_key": HIBR_KEY} if product == "hibr" else {"breachhouse_api_key": BH_KEY}
-    responses.get(HIBR_URL if product == "hibr" else BH_URL, json=hibr_page([]) if product == "hibr" else bh_page())
+    fake_http.get(HIBR_URL if product == "hibr" else BH_URL, json=hibr_page([]) if product == "hibr" else bh_page())
     r = report(darkeye.handler(query(**config)))
     assert r["count"] == 0 and r["status"] == "complete"
-    assert len(responses.calls) == 1
+    assert len(fake_http.calls) == 1
 
 
 @pytest.mark.parametrize("failed", ["hibr", "bh"])
 @pytest.mark.parametrize("status", [401, 403, 429, 500])
-@responses.activate
+@fake_http.activate
 def test_failure_of_one_product_keeps_the_other(failed, status):
-    responses.get(HIBR_URL, status=status if failed == "hibr" else 200, json=hibr_page())
-    responses.get(BH_URL, status=status if failed == "bh" else 200, json=bh_page([{"id": "2", "website": DOMAIN}]))
+    fake_http.get(HIBR_URL, status=status if failed == "hibr" else 200, json=hibr_page())
+    fake_http.get(BH_URL, status=status if failed == "bh" else 200, json=bh_page([{"id": "2", "website": DOMAIN}]))
     r = report(darkeye.handler(query(haveibeenransom_api_key=HIBR_KEY, breachhouse_api_key=BH_KEY)))
     assert r["count"] == 1 and r["status"] == "partial"
     assert len(r["errors"]) == 1
 
 
-@responses.activate
+@fake_http.activate
 def test_all_failed_is_not_an_empty_success():
-    responses.get(HIBR_URL, status=401)
-    responses.get(BH_URL, status=429)
+    fake_http.get(HIBR_URL, status=401)
+    fake_http.get(BH_URL, status=429)
     r = darkeye.handler(query(haveibeenransom_api_key=HIBR_KEY, breachhouse_api_key=BH_KEY))
     assert "error" in r and "results" not in r
 
 
-@responses.activate
+@fake_http.activate
 def test_pagination_empty_pages_dedup_and_documented_shape():
-    responses.get(HIBR_URL, json=hibr_page([], True))
-    responses.get(HIBR_URL + "/2", json=hibr_page(next_page=True, documented=True))
-    responses.get(HIBR_URL + "/3", json=hibr_page(documented=True))
+    fake_http.get(HIBR_URL, json=hibr_page([], True))
+    fake_http.get(HIBR_URL + "/2", json=hibr_page(next_page=True, documented=True))
+    fake_http.get(HIBR_URL + "/3", json=hibr_page(documented=True))
     r = report(darkeye.handler(query(haveibeenransom_api_key=HIBR_KEY)))
     assert r["count"] == 1 and not r["truncated"]
-    assert len(responses.calls) == 3
+    assert len(fake_http.calls) == 3
 
 
-@responses.activate
+@fake_http.activate
 def test_page_failure_does_not_silently_return_an_incomplete_product():
-    responses.get(HIBR_URL, json=hibr_page(next_page=True))
-    responses.get(HIBR_URL + "/2", status=500)
-    responses.get(BH_URL, json=bh_page())
+    fake_http.get(HIBR_URL, json=hibr_page(next_page=True))
+    fake_http.get(HIBR_URL + "/2", status=500)
+    fake_http.get(BH_URL, json=bh_page())
     r = report(darkeye.handler(query(haveibeenransom_api_key=HIBR_KEY, breachhouse_api_key=BH_KEY)))
     assert r["status"] == "partial" and r["count"] == 0
     assert r["products"] == [darkeye.BH]
@@ -130,17 +182,17 @@ def test_page_failure_does_not_silently_return_an_incomplete_product():
 
 
 @pytest.mark.parametrize("next_page,expected", [(False, False), (True, True)])
-@responses.activate
+@fake_http.activate
 def test_exact_record_limit_and_no_unneeded_page(next_page, expected):
-    responses.get(HIBR_URL, json=hibr_page(next_page=next_page))
+    fake_http.get(HIBR_URL, json=hibr_page(next_page=next_page))
     r = report(darkeye.handler(query(haveibeenransom_api_key=HIBR_KEY, max_records=1)))
     assert r["count"] == 1 and r["truncated"] == expected
-    assert len(responses.calls) == 1
+    assert len(fake_http.calls) == 1
 
 
-@responses.activate
+@fake_http.activate
 def test_page_limit_marks_truncation():
-    responses.get(HIBR_URL, json=hibr_page([], True))
+    fake_http.get(HIBR_URL, json=hibr_page([], True))
     r = report(darkeye.handler(query(haveibeenransom_api_key=HIBR_KEY, max_pages=1)))
     assert r["count"] == 0 and r["status"] == "partial" and r["truncated"]
 
@@ -160,18 +212,18 @@ def test_page_limit_marks_truncation():
         ("", "example.test.", True),
     ],
 )
-@responses.activate
+@fake_http.activate
 def test_domain_boundary_prevents_false_attribution(website, title, match):
-    responses.get(BH_URL, json=bh_page([{"id": "a", "website": website, "post_title": title}]))
+    fake_http.get(BH_URL, json=bh_page([{"id": "a", "website": website, "post_title": title}]))
     r = report(darkeye.handler(query(breachhouse_api_key=BH_KEY)))
     assert r["count"] == int(match)
 
 
-@responses.activate
+@fake_http.activate
 def test_bh_categories_dedup_and_limits():
     item = {"id": "a", "website": DOMAIN}
     body = {source: {"results": [item, item, {**item, "id": "b"}], "total": 7} for source in darkeye.BH_CATEGORIES}
-    responses.get(BH_URL, json=body)
+    fake_http.get(BH_URL, json=body)
     r = report(darkeye.handler(query(breachhouse_api_key=BH_KEY, max_records=7)))
     assert r["count"] == 7 and r["truncated"]
     assert {x["category"] for x in r["records"]} == {"ransomware", "breach", "leads", "stealer"}
@@ -189,18 +241,18 @@ def test_bh_categories_dedup_and_limits():
         {"sources": [{}], "has_next": False},
     ],
 )
-@responses.activate
+@fake_http.activate
 def test_malformed_hibr_fails_instead_of_reporting_clean(body):
-    responses.get(HIBR_URL, json=body)
+    fake_http.get(HIBR_URL, json=body)
     assert "error" in darkeye.handler(query(haveibeenransom_api_key=HIBR_KEY))
 
 
 @pytest.mark.parametrize(
     "body", [{}, {"ransomware": []}, {"ransomware": {"results": []}, "breaches": None, "leads": [], "stealers": []}]
 )
-@responses.activate
+@fake_http.activate
 def test_malformed_bh_is_not_an_empty_result(body):
-    responses.get(BH_URL, json=body)
+    fake_http.get(BH_URL, json=body)
     assert "error" in darkeye.handler(query(breachhouse_api_key=BH_KEY))
 
 
@@ -219,16 +271,16 @@ def test_malformed_bh_is_not_an_empty_result(body):
         "x.test?key=x",
     ],
 )
-@responses.activate
+@fake_http.activate
 def test_invalid_targets_never_leave_the_process(domain):
     assert "error" in darkeye.handler(query(value=domain, haveibeenransom_api_key=HIBR_KEY))
-    assert len(responses.calls) == 0
+    assert len(fake_http.calls) == 0
 
 
-@responses.activate
+@fake_http.activate
 def test_hostname_and_idna_are_normalized():
     url = darkeye.HIBR_URL + "xn--bcher-kva.test"
-    responses.get(url, json=hibr_page([]))
+    fake_http.get(url, json=hibr_page([]))
     r = report(
         darkeye.handler(query(value="BÜCHER.test.", attribute_type="hostname", haveibeenransom_api_key=HIBR_KEY))
     )
@@ -247,24 +299,24 @@ def test_hostname_and_idna_are_normalized():
         {"haveibeenransom_api_key": HIBR_KEY, "limit": 201},
     ],
 )
-@responses.activate
+@fake_http.activate
 def test_missing_keys_and_invalid_config_never_send_requests(config):
     assert "error" in darkeye.handler(query(**config))
-    assert len(responses.calls) == 0
+    assert len(fake_http.calls) == 0
 
 
-@responses.activate
+@fake_http.activate
 def test_redirect_and_exception_messages_cannot_leak_credentials():
-    responses.get(HIBR_URL, status=302, headers={"Location": "https://invalid.test/collect"})
+    fake_http.get(HIBR_URL, status=302, headers={"Location": "https://invalid.test/collect"})
     r = darkeye.handler(query(haveibeenransom_api_key=HIBR_KEY))
-    assert "302" in r["error"] and len(responses.calls) == 1
-    responses.replace(responses.GET, HIBR_URL, body=requests.ConnectionError(HIBR_KEY))
+    assert "302" in r["error"] and len(fake_http.calls) == 1
+    fake_http.get(HIBR_URL, body=requests.ConnectionError(HIBR_KEY))
     r = darkeye.handler(query(haveibeenransom_api_key=HIBR_KEY))
     assert HIBR_KEY not in json.dumps(r)
     assert "Request failed" in r["error"]
 
 
-@responses.activate
+@fake_http.activate
 def test_sessions_are_isolated_and_closed_on_failure():
     created = []
     real_session = requests.Session
@@ -279,12 +331,12 @@ def test_sessions_are_isolated_and_closed_on_failure():
             self.closed = True
             super().close()
 
-    responses.get(HIBR_URL, status=500, headers={"Set-Cookie": "sensitive=synthetic; Domain=.test"})
-    responses.get(BH_URL, json=bh_page())
+    fake_http.get(HIBR_URL, status=500, headers={"Set-Cookie": "sensitive=synthetic; Domain=.test"})
+    fake_http.get(BH_URL, json=bh_page())
     with patch.object(darkeye.requests, "Session", TrackingSession):
         report(darkeye.handler(query(haveibeenransom_api_key=HIBR_KEY, breachhouse_api_key=BH_KEY)))
     assert len(created) == 2 and all(x.closed and not x.trust_env for x in created)
-    assert "Cookie" not in responses.calls[1].request.headers
+    assert "Cookie" not in fake_http.calls[1].request.headers
 
 
 def test_interface_and_invalid_request():
