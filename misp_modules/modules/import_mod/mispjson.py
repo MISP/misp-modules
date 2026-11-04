@@ -45,8 +45,9 @@ def handler(q=False):
             if a.get("data"):
                 tmp["data"] = a["data"]
             r["results"].append(tmp)
-    except Exception:
-        pass
+    except Exception as e:
+        misperrors["error"] = "An error occured during parsing of input: '%s'" % (str(e),)
+        return misperrors
     return r
 
 
