@@ -1,5 +1,6 @@
 from flask import Blueprint, redirect, render_template, request
 from flask import session as sess
+from flask_login import current_user
 
 from app.utils import admin_user_active
 
@@ -27,11 +28,18 @@ def analyzers_data():
 @external_tools_blueprint.route("/add_external_tool", methods=["GET", "POST"])
 def add_external_tool():
     """Add a new tool"""
-    form = ExternalToolForm()
-    if form.validate_on_submit():
-        if ToolModel.add_tool_core(ToolModel.form_to_dict(form)):
-            return redirect("/external_tools")
-    return render_template("external_tools/add_external_tool.html", form=form)
+    sess["admin_user"] = admin_user_active()
+    flag = True
+    if sess.get("admin_user"):
+        if not current_user.is_authenticated:
+            flag = False
+    if flag:
+        form = ExternalToolForm()
+        if form.validate_on_submit():
+            if ToolModel.add_tool_core(ToolModel.form_to_dict(form)):
+                return redirect("/external_tools")
+        return render_template("external_tools/add_external_tool.html", form=form)
+    return render_template("404.html")
 
 
 @external_tools_blueprint.route(
@@ -39,11 +47,21 @@ def add_external_tool():
 )
 def delete_tool(tid):
     """Delete a tool"""
-    if ToolModel.get_tool(tid):
-        if ToolModel.delete_tool(tid):
-            return {"message": "Tool deleted", "toast_class": "success-subtle"}, 200
-        return {"message": "Error tool deleted", "toast_class": "danger-subtle"}, 400
-    return {"message": "Tool not found", "toast_class": "danger-subtle"}, 404
+    sess["admin_user"] = admin_user_active()
+    flag = True
+    if sess.get("admin_user"):
+        if not current_user.is_authenticated:
+            flag = False
+    if flag:
+        if ToolModel.get_tool(tid):
+            if ToolModel.delete_tool(tid):
+                return {"message": "Tool deleted", "toast_class": "success-subtle"}, 200
+            return {
+                "message": "Error tool deleted",
+                "toast_class": "danger-subtle",
+            }, 400
+        return {"message": "Tool not found", "toast_class": "danger-subtle"}, 404
+    return {"message": "Permission denied", "toast_class": "danger-subtle"}, 403
 
 
 @external_tools_blueprint.route(
@@ -51,15 +69,28 @@ def delete_tool(tid):
 )
 def change_status():
     """Active or disabled a tool"""
-    if "tool_id" in request.args:
-        res = ToolModel.change_status_core(request.args.get("tool_id"))
-        if res:
+    sess["admin_user"] = admin_user_active()
+    flag = True
+    if sess.get("admin_user"):
+        if not current_user.is_authenticated:
+            flag = False
+    if flag:
+        if "tool_id" in request.args:
+            res = ToolModel.change_status_core(request.args.get("tool_id"))
+            if res:
+                return {
+                    "message": "Tool status changed",
+                    "toast_class": "success-subtle",
+                }, 200
             return {
-                "message": "Tool status changed",
-                "toast_class": "success-subtle",
-            }, 200
-        return {"message": "Something went wrong", "toast_class": "danger-subtle"}, 400
-    return {"message": 'Need to pass "tool_id"', "toast_class": "warning-subtle"}, 400
+                "message": "Something went wrong",
+                "toast_class": "danger-subtle",
+            }, 400
+        return {
+            "message": 'Need to pass "tool_id"',
+            "toast_class": "warning-subtle",
+        }, 400
+    return {"message": "Permission denied", "toast_class": "danger-subtle"}, 403
 
 
 @external_tools_blueprint.route(
@@ -67,42 +98,52 @@ def change_status():
 )
 def change_config():
     """Change configuration for a tool"""
-    if (
-        "tool_id" in request.json["result_dict"]
-        and request.json["result_dict"]["tool_id"]
-    ):
+    sess["admin_user"] = admin_user_active()
+    flag = True
+    if sess.get("admin_user"):
+        if not current_user.is_authenticated:
+            flag = False
+    if flag:
         if (
-            "tool_name" in request.json["result_dict"]
-            and request.json["result_dict"]["tool_name"]
+            "tool_id" in request.json["result_dict"]
+            and request.json["result_dict"]["tool_id"]
         ):
             if (
-                "tool_url" in request.json["result_dict"]
-                and request.json["result_dict"]["tool_url"]
+                "tool_name" in request.json["result_dict"]
+                and request.json["result_dict"]["tool_name"]
             ):
                 if (
-                    "tool_api_key" in request.json["result_dict"]
-                    and request.json["result_dict"]["tool_api_key"]
+                    "tool_url" in request.json["result_dict"]
+                    and request.json["result_dict"]["tool_url"]
                 ):
-                    res = ToolModel.change_config_core(request.json["result_dict"])
-                    if res:
+                    if (
+                        "tool_api_key" in request.json["result_dict"]
+                        and request.json["result_dict"]["tool_api_key"]
+                    ):
+                        res = ToolModel.change_config_core(request.json["result_dict"])
+                        if res:
+                            return {
+                                "message": "Config changed",
+                                "toast_class": "success-subtle",
+                            }, 200
                         return {
-                            "message": "Config changed",
-                            "toast_class": "success-subtle",
-                        }, 200
+                            "message": "Something went wrong",
+                            "toast_class": "danger-subtle",
+                        }, 400
                     return {
-                        "message": "Something went wrong",
-                        "toast_class": "danger-subtle",
+                        "message": 'Need to pass "tool_api_key"',
+                        "toast_class": "warning-subtle",
                     }, 400
                 return {
-                    "message": 'Need to pass "tool_api_key"',
+                    "message": 'Need to pass "tool_url"',
                     "toast_class": "warning-subtle",
                 }, 400
             return {
-                "message": 'Need to pass "tool_url"',
+                "message": 'Need to pass "tool_name"',
                 "toast_class": "warning-subtle",
             }, 400
         return {
-            "message": 'Need to pass "tool_name"',
+            "message": 'Need to pass "tool_id"',
             "toast_class": "warning-subtle",
         }, 400
-    return {"message": 'Need to pass "tool_id"', "toast_class": "warning-subtle"}, 400
+    return {"message": "Permission denied", "toast_class": "danger-subtle"}, 403
