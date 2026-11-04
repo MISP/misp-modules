@@ -322,14 +322,18 @@ def handler(q=False):
         try:
             ipaddress.IPv4Address(attribute["value"])
             if "persistent" in request:
-                greynoise_parser.query_greynoise_ip_hover(request["config"]["api_key"])
+                error = greynoise_parser.query_greynoise_ip_hover(request["config"]["api_key"])
             else:
-                greynoise_parser.query_greynoise_ip_expansion(request["config"]["api_key"])
+                error = greynoise_parser.query_greynoise_ip_expansion(request["config"]["api_key"])
+            if error is not None:
+                return error
         except ValueError:
             return {"error": "Not a valid IPv4 address"}
 
     if attribute["type"] == "vulnerability":
-        greynoise_parser.query_greynoise_vulnerability(request["config"]["api_key"])
+        error = greynoise_parser.query_greynoise_vulnerability(request["config"]["api_key"])
+        if error is not None:
+            return error
 
     return greynoise_parser.get_result()
 
