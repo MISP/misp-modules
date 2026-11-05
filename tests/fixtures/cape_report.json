@@ -1,0 +1,53 @@
+{
+  "info": {
+    "id": 42,
+    "version": "2.5",
+    "CAPE_current_commit": "8d1729f26f60784e1a75175b2ac8e1d73b4c01bd",
+    "started": "2026-11-01 12:00:00",
+    "duration": 30,
+    "category": "file",
+    "machine": {"name": "vm", "label": "vm", "started_on": "2026-11-01 12:00:00"}
+  },
+  "malscore": 7.5,
+  "target": {
+    "category": "file",
+    "file": {
+      "name": "sample.exe",
+      "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "size": 42,
+      "type": "PE32 executable"
+    }
+  },
+  "behavior": {
+    "processtree": [{
+      "pid": 100,
+      "name": "sample.exe",
+      "parent_id": 0,
+      "module_path": "C:\\sample.exe",
+      "environ": {"CommandLine": "C:\\sample.exe --test"},
+      "children": [{"pid": 200, "name": "child.exe", "parent_id": 100, "children": [], "environ": {}}]
+    }]
+  },
+  "network": {
+    "dns": [{"type": "A", "request": "example.org", "answers": [{"type": "A", "data": "192.0.2.1"}]}],
+    "tcp": [{"src": "192.0.2.100", "sport": 1234, "dst": "192.0.2.1", "dport": 80, "offset": 24, "time": 1.5}],
+    "udp": [{"src": "192.0.2.100", "sport": 1234, "dst": "192.0.2.53", "dport": 53, "offset": 64, "time": 2}],
+    "http": [{"host": "example.org", "method": "GET", "uri": "http://example.org/", "user-agent": "test", "count": 1, "port": 80}]
+  },
+  "signatures": [{
+    "name": "example_signature",
+    "description": "Example CAPE signature",
+    "data": [{"file": "long-value-preserved-without-truncation-123456789"}],
+    "new_data": [{"description": "Additional details"}]
+  }],
+  "ttps": [{"signature": "example_signature", "ttps": ["T1059"], "mbcs": []}],
+  "dropped": [{
+    "name": ["payload.dll"],
+    "path": "/opt/CAPEv2/storage/analyses/42/files/payload",
+    "guest_paths": ["C:\\Users\\analyst\\AppData\\payload.dll"],
+    "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "size": 12,
+    "pids": [200]
+  }],
+  "CAPE": {"payloads": [], "configs": [{"ExampleFamily": {"C2": ["https://example.org/"]}}]}
+}
