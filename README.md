@@ -112,7 +112,7 @@ For further Information see the [license file](https://misp.github.io/misp-modul
 * [Country Code](https://misp.github.io/misp-modules/expansion/#country-code) - Module to expand country codes.
 * [CPE Lookup](https://misp.github.io/misp-modules/expansion/#cpe-lookup) - An expansion module to query the CVE search API with a cpe code to get its related vulnerabilities.
 * [CrowdSec CTI](https://misp.github.io/misp-modules/expansion/#crowdsec-cti) - Module to access CrowdSec CTI API.
-* [CrowdStrike Falcon](https://misp.github.io/misp-modules/expansion/#crowdstrike-falcon) - Module to query CrowdStrike Falcon.
+* [CrowdStrike Falcon](https://misp.github.io/misp-modules/expansion/#crowdstrike-falcon) - Query CrowdStrike Falcon Intelligence indicators on demand.
 * [Cuckoo Submit](https://misp.github.io/misp-modules/expansion/#cuckoo-submit) - Submit files and URLs to Cuckoo Sandbox
 * [CVE Lookup](https://misp.github.io/misp-modules/expansion/#cve-lookup) - An expansion hover module to expand information about CVE id.
 * [CVE Advanced Lookup](https://misp.github.io/misp-modules/expansion/#cve-advanced-lookup) - An expansion module to query the CIRCL CVE search API for more information about a vulnerability (CVE).

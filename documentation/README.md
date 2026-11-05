@@ -606,13 +606,11 @@ Module to access CrowdSec CTI API.
 
 <img src=logos/crowdstrike.png height=60>
 
-Module to query CrowdStrike Falcon.
+Query CrowdStrike Falcon Intelligence indicators on demand.
 [[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/crowdstrike_falcon.py)]
 
 - **features**:
->This module takes a MISP attribute as input to query a CrowdStrike Falcon API. The API returns then the result of the query with some types we map into compatible types we add as MISP attributes.
->
->Please note that composite attributes composed by at least one of the input types mentionned below (domains, IPs, hostnames) are also supported.
+>Run enrichment or hover on a supported attribute to query Falcon Intelligence and return related indicators and threat metadata. Set api_id to the OAuth2 client ID and apikey to the client secret. Publishing a MISP event does not run this lookup or create CrowdStrike sightings. See the [setup and verification guide](https://github.com/MISP/misp-modules/blob/main/documentation/expansion/crowdstrike_falcon.md).
 
 - **config**:
 > - api_id
@@ -659,10 +657,10 @@ Module to query CrowdStrike Falcon.
 >- x509-fingerprint-md5
 
 - **references**:
->https://www.crowdstrike.com/products/crowdstrike-falcon-faq/
+>https://www.falconpy.io/Service-Collections/Intel.html
 
 - **requirements**:
->A CrowdStrike API access (API id & key)
+>A Falcon OAuth2 API client with the Intel: Read scope and access to Falcon Intelligence
 
 -----
 
