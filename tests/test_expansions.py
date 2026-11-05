@@ -761,7 +761,15 @@ class TestExpansions(unittest.TestCase):
 
     def test_crowdstrike(self):
         module_name = "crowdstrike_falcon"
-        query = {"attribute": {"type": "sha256", "value": "", "uuid": ""}, "module": module_name, "config": {}}
+        query = {
+            "attribute": {
+                "type": "sha256",
+                "value": "a" * 64,
+                "uuid": "32876e4a-916d-4935-9e51-7b69a76718f8",
+            },
+            "module": module_name,
+            "config": {},
+        }
         if module_name in self.configs:
             query["config"] = self.configs[module_name]
             response = self.misp_modules_post(query)

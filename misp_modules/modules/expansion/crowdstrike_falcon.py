@@ -1,26 +1,27 @@
 import json
+from datetime import datetime, timezone
 
-from datetime import datetime
 from falconpy import Intel
 from pymisp import MISPAttribute, MISPEvent
+from pymisp.exceptions import PyMISPError
 
 from . import check_input_attribute, standard_error_message
 
 moduleinfo = {
-    "version": "0.3",
+    "version": "0.4",
     "author": "Christophe Vandeplas",
-    "description": "Module to query CrowdStrike Falcon.",
+    "description": "Query CrowdStrike Falcon Intelligence indicators on demand.",
     "module-type": ["expansion", "hover"],
     "name": "CrowdStrike Falcon",
     "logo": "crowdstrike.png",
-    "requirements": ["A CrowdStrike API access (API id & key)"],
+    "requirements": ["A Falcon OAuth2 API client with the Intel: Read scope and access to Falcon Intelligence"],
     "features": (
-        "This module takes a MISP attribute as input to query a CrowdStrike Falcon API. The API returns then the result"
-        " of the query with some types we map into compatible types we add as MISP attributes.\n\nPlease note that"
-        " composite attributes composed by at least one of the input types mentionned below (domains, IPs, hostnames)"
-        " are also supported."
+        "Run enrichment or hover on a supported attribute to query Falcon Intelligence and return related indicators"
+        " and threat metadata. Set api_id to the OAuth2 client ID and apikey to the client secret. Publishing a MISP"
+        " event does not run this lookup or create CrowdStrike sightings. See the [setup and verification"
+        " guide](https://github.com/MISP/misp-modules/blob/main/documentation/expansion/crowdstrike_falcon.md)."
     ),
-    "references": ["https://www.crowdstrike.com/products/crowdstrike-falcon-faq/"],
+    "references": ["https://www.falconpy.io/Service-Collections/Intel.html"],
     "input": (
         "A MISP attribute included in the following list:\n- domain\n- email-attachment\n- email-dst\n-"
         " email-reply-to\n- email-src\n- email-subject\n- filename\n- hostname\n- ip-src\n- ip-dst\n- md5\n- mutex\n-"
@@ -33,7 +34,6 @@ moduleinfo = {
     ),
 }
 moduleconfig = ["api_id", "apikey"]
-misperrors = {"error": "Error"}
 misp_type_in = [
     "domain",
     "email-attachment",
@@ -79,46 +79,56 @@ misp_type_out = [item["type"] for item in mapping_out.values()]
 mispattributes = {"input": misp_type_in, "format": "misp_standard"}
 
 
+class CrowdStrikeError(ValueError):
+    """A diagnostic that does not expose credentials or raw service errors."""
+
+
+API_ERROR_GUIDANCE = {
+    400: "Check the indicator and request parameters.",
+    401: "Check the OAuth2 client ID (api_id) and client secret (apikey).",
+    403: "Check the Intel: Read API scope and the account's Falcon Intelligence access.",
+    404: "Check Falcon Intelligence API availability for this account.",
+    429: "Falcon API rate limit reached; retry later.",
+}
+
+
 def handler(q=False):
     if q is False:
         return False
-    request = json.loads(q)
-    # validate CrowdStrike params
-    if request.get("config"):
-        if request["config"].get("apikey") is None:
-            misperrors["error"] = "CrowdStrike apikey is missing"
-            return misperrors
-        if request["config"].get("api_id") is None:
-            misperrors["error"] = "CrowdStrike api_id is missing"
-            return misperrors
+    try:
+        request = json.loads(q)
+    except (ValueError, TypeError):
+        return {"error": "The request must be a JSON object."}
+    if not isinstance(request, dict):
+        return {"error": "The request must be a JSON object."}
+    config = request.get("config")
+    if config is None:
+        config = {}
+    if not isinstance(config, dict):
+        return {"error": "CrowdStrike config must be an object."}
+    for key, description in (("apikey", "OAuth2 client secret"), ("api_id", "OAuth2 client ID")):
+        if not isinstance(config.get(key), str) or not config[key].strip():
+            return {"error": f"CrowdStrike {key} is missing; configure the {description}."}
 
     # validate attribute
-    if not request.get("attribute") or not check_input_attribute(request["attribute"]):
+    if not isinstance(request.get("attribute"), dict) or not check_input_attribute(request["attribute"]):
         return {"error": f"{standard_error_message}, which should contain at least a type, a value and an uuid."}
     attribute = request.get("attribute")
     if not any(input_type == attribute.get("type") for input_type in misp_type_in):
         return {"error": "Unsupported attribute type."}
 
-    client = CSIntelAPI(request["config"]["api_id"], request["config"]["apikey"])
-
-    attribute = MISPAttribute()
-    attribute.from_dict(**request.get("attribute"))
-    r = {"results": []}
-    valid_type = False
-
     try:
-        for k in misp_type_in:
-            if attribute.type == k:
-                # map the MISP type to the CrowdStrike type
-                r["results"].append(lookup_indicator(client, attribute))
-                valid_type = True
-    except Exception as e:
-        return {"error": f"{e}"}
-
-    if not valid_type:
-        misperrors["error"] = "Unsupported attributes type"
-        return misperrors
-    return {"results": r.get("results").pop()}
+        attribute = MISPAttribute()
+        attribute.from_dict(**request["attribute"])
+    except (ValueError, TypeError, PyMISPError):
+        return {"error": "Invalid MISP attribute; check its type, value and uuid."}
+    try:
+        client = CSIntelAPI(config["api_id"], config["apikey"])
+        return {"results": lookup_indicator(client, attribute)}
+    except CrowdStrikeError as exc:
+        return {"error": str(exc)}
+    except Exception:
+        return {"error": "Unable to query or parse Falcon Intelligence; check API access and network connectivity."}
 
 
 def lookup_indicator(client, ref_attribute):
@@ -127,14 +137,14 @@ def lookup_indicator(client, ref_attribute):
     misp_event.add_attribute(**ref_attribute)
 
     for item in result.get("resources", []):
-        for relation in item.get("relations"):
+        for relation in item.get("relations") or []:
             if mapping_out.get(relation.get("type")):
                 r = mapping_out[relation.get("type")].copy()
                 r["value"] = relation.get("indicator")
                 attribute = MISPAttribute()
                 attribute.from_dict(**r)
                 misp_event.add_attribute(**attribute)
-        for actor in item.get("actors"):
+        for actor in item.get("actors") or []:
             r = mapping_out.get("actors").copy()
             r["value"] = actor
             attribute = MISPAttribute()
@@ -146,7 +156,7 @@ def lookup_indicator(client, ref_attribute):
             attribute = MISPAttribute()
             attribute.from_dict(**r)
             misp_event.add_attribute(**attribute)
-        for ip_type in item.get("ip_address_types", []):
+        for ip_type in item.get("ip_address_types") or []:
             ip_type_attribute = {"type": "text", "category": "Other", "value": f"IP_Type: {ip_type}", "to_ids": False}
             attribute = MISPAttribute()
             attribute.from_dict(**ip_type_attribute)
@@ -161,11 +171,11 @@ def lookup_indicator(client, ref_attribute):
             attribute = MISPAttribute()
             attribute.from_dict(**confidence_attribute)
             misp_event.add_attribute(**attribute)
-        for label in item.get("labels", []):
+        for label in item.get("labels") or []:
             label_value = f"Label: {label.get('name')}"
             if label.get("created_on") and label.get("last_valid_on"):
-                iso_created_on = datetime.utcfromtimestamp(label["created_on"]).isoformat() + "Z"
-                iso_last_valid_on = datetime.utcfromtimestamp(label["last_valid_on"]).isoformat() + "Z"
+                iso_created_on = datetime.fromtimestamp(label["created_on"], timezone.utc).isoformat()
+                iso_last_valid_on = datetime.fromtimestamp(label["last_valid_on"], timezone.utc).isoformat()
                 label_value += f" (created_on: {iso_created_on}, last_valid_on: {iso_last_valid_on})"
             label_attribute = {
                 "type": "text",
@@ -199,7 +209,7 @@ def lookup_indicator(client, ref_attribute):
                 attribute.from_dict(**threat_type_attribute)
                 misp_event.add_attribute(**attribute)
         if item.get("last_updated"):
-            iso_last_updated = datetime.utcfromtimestamp(item["last_updated"]).isoformat() + "Z"
+            iso_last_updated = datetime.fromtimestamp(item["last_updated"], timezone.utc).isoformat()
             last_updated_attribute = {
                 "type": "datetime",
                 "category": "Other",
@@ -230,19 +240,26 @@ class CSIntelAPI:
 
     def search_indicator(self, query):
         r = self.falcon.query_indicator_entities(q=query)
-        # 400 - bad request
-        if r.get("status_code") == 400:
-            raise Exception("HTTP Error 400 - Bad request.")
-
-        # 404 - oh shit
-        if r.get("status_code") == 404:
-            raise Exception("HTTP Error 404 - awww snap.")
-
-        # catch all?
-        if r.get("status_code") != 200:
-            raise Exception("HTTP Error: " + str(r.get("status_code")))
-
-        if len(r.get("body").get("errors")):
-            raise Exception("API Error: " + " | ".join(r.get("body").get("errors")))
-
-        return r.get("body", {})
+        if not isinstance(r, dict) or not isinstance(r.get("status_code"), int):
+            raise CrowdStrikeError("Falcon Intelligence returned an invalid API response.")
+        status = r["status_code"]
+        if status != 200:
+            guidance = API_ERROR_GUIDANCE.get(status, "Check Falcon API availability and try again later.")
+            raise CrowdStrikeError(f"HTTP Error: {status}. {guidance}")
+        body = r.get("body")
+        if not isinstance(body, dict):
+            raise CrowdStrikeError("Falcon Intelligence returned an invalid API response body.")
+        errors = body.get("errors") or []
+        if errors:
+            # Falcon errors are normally dictionaries. Do not join them as
+            # strings or copy arbitrary service messages into MISP responses.
+            for error in errors:
+                if isinstance(error, dict):
+                    code = error.get("code")
+                    if isinstance(code, int) and code in API_ERROR_GUIDANCE:
+                        raise CrowdStrikeError(f"API Error: {code}. {API_ERROR_GUIDANCE[code]}")
+            raise CrowdStrikeError("API Error: Falcon Intelligence rejected the request.")
+        resources = body.get("resources")
+        if not isinstance(resources, list) or any(not isinstance(item, dict) for item in resources):
+            raise CrowdStrikeError("Falcon Intelligence returned invalid or missing indicator resources.")
+        return body
