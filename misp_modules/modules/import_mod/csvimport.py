@@ -1,16 +1,16 @@
 import base64
+import binascii
 import csv
 import io
 
 from pymisp import MISPEvent, MISPObject
 
-misperrors = {"error": "Error"}
 moduleinfo = {
-    "version": "0.2",
+    "version": "0.3",
     "author": "Christian Studer",
     "module-type": ["import"],
     "name": "CSV Import",
-    "description": "Module to import MISP attributes from a csv file.",
+    "description": "Import MISP attributes from base64-encoded UTF-8 CSV contents.",
     "requirements": ["PyMISP"],
     "features": (
         "In order to parse data from a csv file, a header is required to let the module know which column is matching"
@@ -22,12 +22,15 @@ moduleinfo = {
         " 'has_header' to avoid importing it and have potential issues. You can also redefine the header even if it is"
         " already contained in the file, by following the rules for headers explained earlier. One reason why you would"
         " redefine a header is for instance when you want to skip some fields, or some fields are not valid types."
+        "\n\nFor REST API requests, put the base64-encoded UTF-8 CSV contents in data; file is not a server-side"
+        " path to read. See the [REST API"
+        " guide](https://github.com/MISP/misp-modules/blob/main/documentation/import_mod/csvimport.md)."
     ),
     "references": [
         "https://tools.ietf.org/html/rfc4180",
         "https://tools.ietf.org/html/rfc7111",
     ],
-    "input": "CSV format file.",
+    "input": "Base64-encoded UTF-8 CSV contents in the JSON data field.",
     "output": "MISP Event attributes",
     "logo": "",
 }
@@ -86,7 +89,7 @@ misp_context_additional_fields = [
     "event_analysis",
     "event_date",
     "event_tag",
-    "event_timestamp"
+    "event_timestamp",
 ]
 misp_extended_csv_header = misp_standard_csv_header + misp_context_additional_fields
 
@@ -359,33 +362,69 @@ def __standard_parsing(data):
 
 
 def dict_handler(request: dict):
-    if request.get("data"):
-        try:
-            data = base64.b64decode(request["data"]).decode("utf-8")
-        except UnicodeDecodeError:
-            misperrors["error"] = "Input is not valid UTF-8"
-            return misperrors
-    else:
-        misperrors["error"] = "Unsupported attributes type"
-        return misperrors
-    has_header = request["config"].get("has_header")
-    has_header = True if has_header == "1" else False
-    header = request["config"]["header"].split(",") if request["config"].get("header").strip() else []
-    delimiter = request["config"]["special_delimiter"] if request["config"].get("special_delimiter").strip() else ","
-    data = __standard_parsing(data) if delimiter == "," else __special_parsing(data, delimiter)
+    if not isinstance(request, dict):
+        return {"error": "The CSV import request must be a JSON object."}
+    encoded = request.get("data")
+    if not isinstance(encoded, str) or not encoded.strip():
+        return {
+            "error": (
+                "Missing CSV data: set 'data' to the base64-encoded UTF-8 CSV contents."
+                " The 'file' field is not a server-side file path to read."
+            )
+        }
+    try:
+        # Accept line-wrapped base64 while rejecting non-base64 characters.
+        content = base64.b64decode("".join(encoded.split()), validate=True)
+    except (binascii.Error, ValueError):
+        return {"error": "CSV data is not valid base64; encode the UTF-8 file contents into 'data'."}
+    try:
+        data = content.decode("utf-8-sig")
+    except UnicodeDecodeError:
+        return {"error": "Input is not valid UTF-8"}
+    if not data.strip():
+        return {"error": "CSV input contains no data rows."}
+    config = request.get("config")
+    if config is None:
+        config = {}
+    if not isinstance(config, dict):
+        return {"error": "CSV import config must be a JSON object."}
+    has_header = config.get("has_header")
+    if has_header not in (None, "", "0", "1", 0, 1, False, True):
+        return {"error": "has_header must be a boolean, 0 or 1."}
+    has_header = has_header in ("1", 1, True)
+    header = config.get("header")
+    if header is None:
+        header = ""
+    if not isinstance(header, str):
+        return {"error": "The CSV header configuration must be a comma-separated string."}
+    header = header.split(",") if header.strip() else []
+    delimiter = config.get("special_delimiter")
+    if delimiter is None or delimiter == "":
+        delimiter = ","
+    if not isinstance(delimiter, str) or "\n" in delimiter or "\r" in delimiter:
+        return {"error": "special_delimiter must be a string without line breaks."}
+    try:
+        data = __standard_parsing(data) if delimiter == "," else __special_parsing(data, delimiter)
+    except csv.Error:
+        return {"error": "Input could not be parsed as CSV with the configured delimiter."}
+    if not data:
+        return {"error": "CSV input contains no data rows."}
     if not header:
         if has_header:
             header = data.pop(0)
         else:
-            misperrors["error"] = (
-                "Configuration error. Provide a header or use the one within the csv file and tick the checkbox"
-                " 'Has_header'."
-            )
-            return misperrors
+            return {
+                "error": (
+                    "Configuration error. Provide a header or use the one within the csv file and tick the checkbox"
+                    " 'Has_header'."
+                )
+            }
     else:
         header = [h.strip() for h in header]
         if has_header:
             del data[0]
+    if not data:
+        return {"error": "CSV input contains no data rows."}
     if header == misp_standard_csv_header or header == misp_extended_csv_header:
         header = misp_standard_csv_header
 
@@ -399,28 +438,29 @@ def dict_handler(request: dict):
                 h in ("", " ", "_", "object_id"),
             )
         ):
-            misperrors["error"] = (
-                "Wrong header field: {}. Please use a header value that can be recognized by MISP (or alternatively"
-                " skip it using a whitespace).".format(h)
-            )
-            return misperrors
-    from_misp = all((h in misp_extended_csv_header or h in ("", " ", "_", "object_id") for h in header))
+            return {
+                "error": (
+                    "Wrong header field: {}. Please use a header value that can be recognized by MISP (or alternatively"
+                    " skip it using a whitespace).".format(h)
+                )
+            }
+    from_misp = all(h in misp_extended_csv_header or h in ("", " ", "_", "object_id") for h in header)
     if from_misp:
         if not __any_mandatory_misp_field(header):
-            misperrors["error"] = (
-                "Please make sure the data you try to import can be identified with a type/value combinaison."
-            )
-            return misperrors
+            return {
+                "error": "Please make sure the data you try to import can be identified with a type/value combinaison."
+            }
     else:
         if __any_mandatory_misp_field(header):
             wrong_types = tuple(wrong_type for wrong_type in ("type", "value") if wrong_type in header)
-            misperrors["error"] = (
-                "Error with the following header: {}. It contains the following field(s): {}, which is(are) already"
-                " provided by the usage of at least on MISP attribute type in the header.".format(
-                    header, "and".join(wrong_types)
+            return {
+                "error": (
+                    "Error with the following header: {}. It contains the following field(s): {}, which is(are) already"
+                    " provided by the usage of at least on MISP attribute type in the header.".format(
+                        header, "and".join(wrong_types)
+                    )
                 )
-            )
-            return misperrors
+            }
     csv_parser = CsvParser(
         header,
         has_header,

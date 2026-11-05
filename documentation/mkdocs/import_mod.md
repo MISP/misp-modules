@@ -51,7 +51,7 @@ Passive DNS Common Output Format (COF) MISP importer
 
 #### [CSV Import](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/csvimport.py)
 
-Module to import MISP attributes from a csv file.
+Import MISP attributes from base64-encoded UTF-8 CSV contents.
 [[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/csvimport.py)]
 
 - **features**:
@@ -60,9 +60,11 @@ Module to import MISP attributes from a csv file.
 >This header either comes from the csv file itself or is part of the configuration of the module and should be filled out in MISP plugin settings, each field separated by COMMAS. Fields that do not match with any type known in MISP or are not MISP attribute fields should be ignored in import, using a space or simply nothing between two separators (example: 'ip-src, , comment, ').
 >
 >If the csv file already contains a header that does not start by a '#', you should tick the checkbox 'has_header' to avoid importing it and have potential issues. You can also redefine the header even if it is already contained in the file, by following the rules for headers explained earlier. One reason why you would redefine a header is for instance when you want to skip some fields, or some fields are not valid types.
+>
+>For REST API requests, put the base64-encoded UTF-8 CSV contents in data; file is not a server-side path to read. See the [REST API guide](https://github.com/MISP/misp-modules/blob/main/documentation/import_mod/csvimport.md).
 
 - **input**:
->CSV format file.
+>Base64-encoded UTF-8 CSV contents in the JSON data field.
 
 - **output**:
 >MISP Event attributes
