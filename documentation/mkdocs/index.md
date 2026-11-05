@@ -176,6 +176,7 @@ For more information: [Extending MISP with Python modules](https://www.misp-proj
 * [Palo Alto PAN-OS ACL Export](https://misp.github.io/misp-modules/export_mod/#palo-alto-pan-os-acl-export) - Export IDS-marked network attributes as PAN-OS local security policy set commands.
 * [Event to PDF Export](https://misp.github.io/misp-modules/export_mod/#event-to-pdf-export) - Simple export of a MISP event to PDF.
 * [QRadar Reference Set Export](https://misp.github.io/misp-modules/export_mod/#qradar-reference-set-export) - Export deduplicated, typed MISP indicators as QRadar reference-set CSV or JSON values.
+* [Sigma Rule Export](https://misp.github.io/misp-modules/export_mod/#sigma-rule-export) - Export stored Sigma rules and optionally generate Windows IOC detections.
 * [Splunk Lookup Export](https://misp.github.io/misp-modules/export_mod/#splunk-lookup-export) - Export event and object indicators as a Splunk CSV lookup with CIM field mapping hints.
 * [Squid Proxy Export](https://misp.github.io/misp-modules/export_mod/#squid-proxy-export) - Export IDS-marked event and object attributes as Squid proxy ACLs and deny rules.
 * [Test Export](https://misp.github.io/misp-modules/export_mod/#test-export) - Skeleton export module.
