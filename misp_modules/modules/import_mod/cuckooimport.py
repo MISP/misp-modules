@@ -1,4 +1,5 @@
 import base64
+import binascii
 import io
 import json
 import logging
@@ -7,8 +8,10 @@ import stat
 import tarfile
 import zipfile
 from collections import OrderedDict
+from contextlib import ExitStack
 
 from pymisp import MISPAttribute, MISPEvent, MISPObject
+from pymisp.exceptions import PyMISPError
 from pymisp.tools import make_binary_objects
 
 log = logging.getLogger(__name__)
@@ -16,22 +19,23 @@ log = logging.getLogger(__name__)
 misperrors = {"error": "Error"}
 
 moduleinfo = {
-    "version": "1.1",
+    "version": "1.2",
     "author": "Pierre-Jean Grenier",
     "module-type": ["import"],
     "name": "Cuckoo Sandbox Import",
-    "description": "Module to import Cuckoo JSON.",
+    "description": "Module to import Cuckoo and CAPE JSON reports or analysis archives.",
     "logo": "cuckoo.png",
     "requirements": [],
     "features": (
-        "Import a Cuckoo archive (zipfile or bzip2 tarball), either downloaded manually or exported from the API"
-        " (/tasks/report/<task_id>/all)."
+        "Import a standalone Cuckoo/CAPE JSON report or an analysis archive (ZIP or bzip2 tarball) containing"
+        " reports/report.json. Without bundled binaries, file metadata is imported without attachments."
     ),
     "references": [
         "https://cuckoosandbox.org/",
         "https://github.com/cuckoosandbox/cuckoo",
+        "https://capev2.readthedocs.io/en/latest/usage/api.html",
     ],
-    "input": "Cuckoo JSON file",
+    "input": "Cuckoo/CAPE JSON report, ZIP archive or bzip2 tarball",
     "output": "MISP Event attributes",
 }
 
@@ -58,6 +62,10 @@ ARTIFACTS_DROPPED = (
 
 # Same for the category "Payload delivery"
 PAYLOAD_DELIVERY = ARTIFACTS_DROPPED
+
+
+class ReportError(ValueError):
+    """An input error safe to display to the user."""
 
 
 class PrettyDict(OrderedDict):
@@ -209,58 +217,74 @@ class CuckooParser:
                 "checked": "true",
             },
         },
+        "CAPE configurations": {
+            "method": lambda self: self.add_cape_configurations(),
+            "userConfig": {
+                "type": "Boolean",
+                "message": "Add extracted CAPE configurations",
+                "checked": "true",
+            },
+        },
     }
 
     def __init__(self, config):
         self.event = MISPEvent()
-        self.files = None
+        self.files = {}
+        self.resources = ExitStack()
         self.malware_binary = None
         self.report = None
+        # Missing options use the defaults advertised to the MISP UI.
         self.config = {
-            # if an option is missing (we receive None as a value),
-            # fall back to the default specified in the options
-            key: int(on if on is not None else self.options[key]["userConfig"]["checked"] == "true")
-            for key, on in config.items()
+            key: int(config[key]) if config.get(key) is not None else option["userConfig"]["checked"] == "true"
+            for key, option in self.options.items()
         }
 
+    def close(self):
+        self.resources.close()
+
+    @property
+    def sandbox_name(self):
+        return "cape" if "CAPE" in self.report or "CAPE_current_commit" in self.report.get("info", {}) else "cuckoo"
+
     def get_file(self, relative_filepath):
-        """Return an io.BufferedIOBase for the corresponding relative_filepath
-        in the Cuckoo archive. If not found, return an empty io.BufferedReader
-        to avoid fatal errors."""
-        blackhole = io.BufferedReader(open("/dev/null", "rb"))
-        res = self.files.get(relative_filepath, blackhole)
-        if res == blackhole:
-            log.debug(f"Did not find file {relative_filepath}, returned an empty file instead")
-        return res
+        """Return an archive member, or an empty in-memory stream if absent."""
+        return self.files.get(relative_filepath, io.BytesIO())
 
     def read_archive(self, archive_encoded):
-        """Read the archive exported from Cuckoo and initialize the class"""
+        """Read a standalone report or the archive exported from Cuckoo/CAPE."""
         # archive_encoded is base 64 encoded content
         # we extract the info about each file but do not retrieve
         # it automatically, as it may take too much space in memory
-        buf_io = io.BytesIO(base64.b64decode(archive_encoded))
+        try:
+            content = base64.b64decode(archive_encoded, validate=True)
+        except (binascii.Error, ValueError, TypeError):
+            raise ReportError("The uploaded report must contain valid base64 data.") from None
+        buf_io = io.BytesIO(content)
         if zipfile.is_zipfile(buf_io):
             # the archive was probably downloaded from the WebUI
             buf_io.seek(0)  # don't forget this not to read an empty buffer
-            z = zipfile.ZipFile(buf_io, "r")
+            z = self.resources.enter_context(zipfile.ZipFile(buf_io, "r"))
             self.files = {
-                info.filename: z.open(info)
+                info.filename: self.resources.enter_context(z.open(info))
                 for info in z.filelist
-                # only extract the regular files and dirs, we don't
-                # want any symbolic link
-                if stat.S_ISREG(info.external_attr >> 16) or stat.S_ISDIR(info.external_attr >> 16)
+                # Keep regular files, including ZIPs without Unix type bits.
+                if not info.is_dir()
+                and (stat.S_ISREG(info.external_attr >> 16) or stat.S_IFMT(info.external_attr >> 16) == 0)
             }
-        else:
+        elif content.startswith(b"BZh"):
             # the archive was probably downloaded from the API
             buf_io.seek(0)  # don't forget this not to read an empty buffer
-            f = tarfile.open(fileobj=buf_io, mode="r:bz2")
+            f = self.resources.enter_context(tarfile.open(fileobj=buf_io, mode="r:bz2"))
             self.files = {
-                info.name: f.extractfile(info)
+                info.name: self.resources.enter_context(f.extractfile(info))
                 for info in f.getmembers()
-                # only extract the regular files and dirs, we don't
-                # want any symbolic link
-                if info.isreg() or info.isdir()
+                # Never follow symbolic links or hard links.
+                if info.isreg()
             }
+        else:
+            buf_io.seek(0)
+            self._read_report(buf_io)
+            return
 
         # We want to keep the order of the keys of sub-dicts in the report,
         # eg. the signatures have marks with unknown keys such as
@@ -274,15 +298,28 @@ class CuckooParser:
         # We use PrettyDict, a customization of OrderedDict to do so.
         # It will be instanced iteratively when parsing the json (ie. subdicts
         # will also be instanced as PrettyDict)
-        self.report = json.load(
-            self.get_file("reports/report.json"),
-            object_pairs_hook=PrettyDict,
-        )
+        report = self.files.get("reports/report.json", self.files.get("report.json"))
+        if report is None:
+            raise ReportError("The archive must contain reports/report.json or report.json as a regular file.")
+        self._read_report(report)
+
+    def _read_report(self, report):
+        try:
+            self.report = json.load(report, object_pairs_hook=PrettyDict)
+        except (ValueError, UnicodeError):
+            raise ReportError("Expected a valid Cuckoo/CAPE JSON report, ZIP archive or bzip2 tarball.") from None
+        if not isinstance(self.report, dict) or not any(
+            key in self.report for key in ("info", "target", "network", "behavior", "signatures", "CAPE")
+        ):
+            raise ReportError("The JSON must be a Cuckoo/CAPE report object containing analysis sections.")
+        for key in ("info", "target", "network", "behavior", "CAPE"):
+            if key in self.report and not isinstance(self.report[key], dict):
+                raise ReportError(f"The report section '{key}' must be a JSON object.")
 
     def read_malware(self):
         self.malware_binary = self.get_file("binary").read()
         if not self.malware_binary:
-            log.warn("No malware binary found")
+            log.warning("No malware binary found; importing file metadata only")
 
     def add_sandbox_info(self):
         info = self.report.get("info", {})
@@ -291,15 +328,19 @@ class CuckooParser:
             return False
 
         o = MISPObject(name="sandbox-report")
-        o.add_attribute("score", info["score"])
+        score = info.get("score", self.report.get("malscore"))
+        if score is not None:
+            o.add_attribute("score", score)
         o.add_attribute("sandbox-type", "on-premise")
-        o.add_attribute("on-premise-sandbox", "cuckoo")
+        o.add_attribute("on-premise-sandbox", self.sandbox_name)
+        machine = info.get("machine") or {}
+        if not isinstance(machine, dict):
+            machine = {"name": machine}
         o.add_attribute(
             "raw-report",
-            f'started on:{info["machine"]["started_on"]} '
-            f'duration:{info["duration"]}s '
-            f'vm:{info["machine"]["name"]}/'
-            f'{info["machine"]["label"]}',
+            f'started on:{info.get("started", machine.get("started_on", "unknown"))} '
+            f'duration:{info.get("duration", "unknown")}s '
+            f'vm:{machine.get("name", "unknown")}/{machine.get("label", "unknown")}',
         )
         self.event.add_object(o)
 
@@ -311,12 +352,12 @@ class CuckooParser:
             log.warning("Could not find info about the sample in the report, skipping")
             return False
 
-        if category == "file":
+        if category in ("file", "static"):
             log.debug("Sample is a file, uploading it")
             self.read_malware()
-            file_o, bin_type_o, bin_section_li = make_binary_objects(
-                pseudofile=io.BytesIO(self.malware_binary),
-                filename=target["file"]["name"],
+            file_o, bin_type_o, bin_section_li = self._file_objects(
+                target["file"],
+                self.malware_binary,
             )
 
             file_o.comment = "Submitted sample"
@@ -340,6 +381,25 @@ class CuckooParser:
             o.add_attribute("url", target["url"])
             o.add_attribute("text", "Submitted URL")
             self.event.add_object(o)
+
+    def _file_objects(self, metadata, content=b"", filename=None):
+        """Keep reported hashes when the upload does not contain the binary."""
+        filename = filename or metadata.get("name")
+        if isinstance(filename, list):
+            filename = next((name for name in filename if name), None)
+        if content:
+            return make_binary_objects(pseudofile=io.BytesIO(content), filename=filename)
+        obj = MISPObject("file")
+        if filename:
+            obj.add_attribute("filename", filename)
+        for relation in ("md5", "sha1", "sha256", "sha512", "ssdeep", "tlsh"):
+            if metadata.get(relation):
+                obj.add_attribute(relation, metadata[relation])
+        if metadata.get("size") is not None:
+            obj.add_attribute("size-in-bytes", metadata["size"])
+        if metadata.get("type"):
+            obj.add_attribute("magic", metadata["type"])
+        return obj, None, []
 
     def add_http(self):
         """Add the HTTP requests"""
@@ -389,7 +449,12 @@ class CuckooParser:
             o.add_attribute("dst-port", dport)
             o.add_attribute("layer3-protocol", "IP")
             o.add_attribute("layer4-protocol", proto.upper())
-            o.add_attribute("first-packet-seen", conn["time"])
+            # CAPE stores seconds since the first captured packet. The capture
+            # start is not exported in JSON and can differ from info.started.
+            if self.sandbox_name == "cape":
+                o.comment = f'First packet observed {conn["time"]} seconds after capture start'
+            else:
+                o.add_attribute("first-packet-seen", conn["time"])
             self.event.add_object(o)
 
     def add_dns(self):
@@ -414,7 +479,8 @@ class CuckooParser:
     def _get_marks_str(self, marks):
         marks_strings = []
         for m in marks:
-            m_type = m.pop("type")  # temporarily remove the type
+            m = m.copy()
+            m_type = m.pop("type")
 
             if m_type == "generic":
                 marks_strings.append(str(m))
@@ -434,7 +500,6 @@ class CuckooParser:
             else:
                 logging.debug(f"Unknown mark type '{m_type}', skipping")
 
-            m["type"] = m_type  # restore key 'type'
             # TODO implemented marks 'config' and 'volatility'
         return marks_strings
 
@@ -459,16 +524,23 @@ class CuckooParser:
             return False
 
         o = MISPObject(name="sb-signature")
-        o.add_attribute("software", "Cuckoo")
+        o.add_attribute("software", "CAPE" if self.sandbox_name == "cape" else "Cuckoo")
 
         for sign in signatures:
-            marks = sign["marks"]
+            marks = sign.get("marks", [])
             marks_strings = self._get_marks_str(marks)
+            # CAPE signatures use data/new_data rather than Cuckoo's marks.
+            for key in ("data", "new_data"):
+                if sign.get(key):
+                    marks_strings.append(json.dumps(sign[key], ensure_ascii=False))
+            for entry in self.report.get("ttps", []):
+                if entry.get("signature") == sign.get("name"):
+                    marks_strings.append("ATT&CK: " + ", ".join(entry.get("ttps", [])))
             summary = sign["description"]
             if marks_strings:
                 summary += "\n---\n"
 
-            marks_strings = set(marks_strings)
+            marks_strings = dict.fromkeys(marks_strings)
             description = summary + "\n".join(marks_strings)
 
             a = MISPAttribute()
@@ -501,9 +573,15 @@ class CuckooParser:
         o = MISPObject(name="process")
         accu.append(o)
         o.add_attribute("pid", proc["pid"])
-        o.add_attribute("command-line", proc["command_line"])
-        o.add_attribute("name", proc["process_name"])
-        o.add_attribute("parent-pid", proc["ppid"])
+        fields = {
+            "command-line": proc.get("command_line") or (proc.get("environ") or {}).get("CommandLine"),
+            "name": proc.get("process_name", proc.get("name")),
+            "parent-pid": proc.get("ppid", proc.get("parent_id")),
+            "image": proc.get("module_path"),
+        }
+        for relation, value in fields.items():
+            if value is not None and value != "":
+                o.add_attribute(relation, value)
         for child in proc.get("children", []):
             pos_child = len(accu)
             o.add_attribute("child-pid", child["pid"])
@@ -535,32 +613,35 @@ class CuckooParser:
         Return an empty string if the path given does not refer to a
         file from the analysis directory.
         """
-        head, tail = posixpath.split(path)
-        if not tail:
-            return ""
-        prev = self.get_relpath(head)
-        longer = posixpath.join(prev, tail)
-        if longer in self.files:
-            return longer
-        elif tail in self.files:
-            return tail
-        else:
-            return ""
+        # Archives need not contain separate directory entries. Match suffixes
+        # against actual members instead of recursing through those entries.
+        candidate = path.lstrip("/")
+        while candidate:
+            if candidate in self.files:
+                return candidate
+            _, separator, candidate = candidate.partition("/")
+            if not separator:
+                break
+        return ""
 
     def add_screenshots(self):
         """Add the screenshots taken by Cuckoo in a sandbox-report object"""
-        screenshots = self.report.get("screenshots", [])
+        screenshots = [shot["path"] for shot in self.report.get("screenshots", [])]
+        if not screenshots:
+            screenshots = [path for path in self.files if path.startswith("shots/") and path.endswith((".jpg", ".png"))]
         if not screenshots:
             log.info("No screenshot found in the report, skipping")
             return False
 
         o = MISPObject(name="sandbox-report")
         o.add_attribute("sandbox-type", "on-premise")
-        o.add_attribute("on-premise-sandbox", "cuckoo")
+        o.add_attribute("on-premise-sandbox", self.sandbox_name)
         for shot in screenshots:
             # The path given by Cuckoo is an absolute path, but we need a path
             # relative to the analysis folder.
-            path = self.get_relpath(shot["path"])
+            path = self.get_relpath(shot)
+            if not path:
+                continue
             img = self.get_file(path)
             # .decode('utf-8') in order to avoid the b'' format
             img_data = base64.b64encode(img.read()).decode("utf-8")
@@ -574,9 +655,10 @@ class CuckooParser:
                 category="External analysis",
             )
 
-        self.event.add_object(o)
+        if o.get_attributes_by_relation("sandbox-file"):
+            self.event.add_object(o)
 
-    def _get_dropped_objs(self, path, filename=None, comment=None):
+    def _get_dropped_objs(self, path, filename=None, comment=None, metadata=None):
         """
         Internal wrapper to get dropped files/buffers as file objects
         @ params
@@ -587,12 +669,9 @@ class CuckooParser:
             filename = posixpath.basename(path)
 
         dropped_file = self.get_file(path)
-        dropped_binary = io.BytesIO(dropped_file.read())
+        dropped_binary = dropped_file.read()
         # create ad hoc objects
-        file_o, bin_type_o, bin_section_li = make_binary_objects(
-            pseudofile=dropped_binary,
-            filename=filename,
-        )
+        file_o, bin_type_o, bin_section_li = self._file_objects(metadata or {}, dropped_binary, filename)
 
         if comment:
             file_o.comment = comment
@@ -639,7 +718,12 @@ class CuckooParser:
             #   - 'path' which is the local path of the stored file,
             #     in the cuckoo archive
             filename = d.get("name", "")
+            if isinstance(filename, list):
+                filename = next((name for name in filename if name), "")
             original_path = d.get("filepath", "")
+            guest_paths = d.get("guest_paths", [])
+            if not original_path and guest_paths:
+                original_path = guest_paths[0]
             sha256 = d.get("sha256", "")
             if original_path and sha256:
                 log.debug(f"Will now try to restore original filename from path {original_path}")
@@ -671,12 +755,14 @@ class CuckooParser:
                 log.warning(f"No filename found for dropped file! " f'Will use "{filename}"')
 
             file_o, bin_type_o, bin_section_o = self._get_dropped_objs(
-                self.get_relpath(d["path"]), filename=filename, comment="Dropped file"
+                self.get_relpath(d.get("path", "")), filename=filename, comment="Dropped file", metadata=d
             )
 
             self._add_yara(file_o, d.get("yara", []))
 
-            file_o.add_attribute("fullpath", original_path, category="Artifacts dropped")
+            for path in dict.fromkeys([original_path, *guest_paths]):
+                if path:
+                    file_o.add_attribute("fullpath", path, category="Artifacts dropped")
 
             # why is this a list? for when various programs drop the same file?
             for pid in d.get("pids", []):
@@ -701,9 +787,17 @@ class CuckooParser:
                 self.get_relpath(buf["path"]),
                 filename=f"buffer {i}",
                 comment="Dropped buffer",
+                metadata=buf,
             )
             self._add_yara(file_o, buf.get("yara", []))
             self.event.add_object(file_o)
+
+    def add_cape_configurations(self):
+        for config in self.report.get("CAPE", {}).get("configs", []):
+            obj = MISPObject("annotation")
+            obj.add_attribute("text", json.dumps(config, ensure_ascii=False), to_ids=False)
+            obj.comment = "CAPE extracted configuration"
+            self.event.add_object(obj)
 
     def parse(self):
         """Run the parsing"""
@@ -722,17 +816,39 @@ def handler(q=False):
     if q is False:
         return False
 
-    q = json.loads(q)
-    data = q["data"]
-
-    parser = CuckooParser(q["config"])
-    parser.read_archive(data)
-    parser.parse()
-    event = parser.get_misp_event()
-
-    event = json.loads(event.to_json())
-    results = {key: event[key] for key in ("Attribute", "Object") if (key in event and event[key])}
-    return {"results": results}
+    parser = None
+    try:
+        try:
+            request = json.loads(q)
+        except (ValueError, TypeError):
+            raise ReportError("The import request must be a JSON object containing base64 report data.") from None
+        if not isinstance(request, dict) or not isinstance(request.get("data"), str):
+            raise ReportError("The import request must contain base64 report data in 'data'.")
+        config = request.get("config", {})
+        if config is None:
+            config = {}
+        if not isinstance(config, dict):
+            raise ReportError("The import configuration must be a JSON object.")
+        for key in CuckooParser.options:
+            if config.get(key) not in (None, True, False, 0, 1, "0", "1"):
+                raise ReportError(f"The import option '{key}' must be 0 or 1.")
+        parser = CuckooParser(config)
+        parser.read_archive(request["data"])
+        parser.parse()
+        event = json.loads(parser.get_misp_event().to_json())
+        results = {key: event[key] for key in ("Attribute", "Object") if (key in event and event[key])}
+        return {"results": results}
+    except ReportError as exc:
+        return {"error": str(exc)}
+    except (tarfile.TarError, zipfile.BadZipFile, EOFError, OSError, RuntimeError):
+        log.exception("Unable to read Cuckoo/CAPE analysis archive")
+        return {"error": "Unable to read the analysis archive; check that it is complete and not encrypted."}
+    except (KeyError, TypeError, ValueError, AttributeError, IndexError, PyMISPError):
+        log.exception("Invalid or unsupported Cuckoo/CAPE report structure")
+        return {"error": "Invalid or unsupported Cuckoo/CAPE report structure; see the server log for details."}
+    finally:
+        if parser is not None:
+            parser.close()
 
 
 def introspection():

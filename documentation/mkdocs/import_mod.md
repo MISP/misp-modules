@@ -80,14 +80,14 @@ Module to import MISP attributes from a csv file.
 
 <img src=../logos/cuckoo.png height=60>
 
-Module to import Cuckoo JSON.
+Module to import Cuckoo and CAPE JSON reports or analysis archives.
 [[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/cuckooimport.py)]
 
 - **features**:
->Import a Cuckoo archive (zipfile or bzip2 tarball), either downloaded manually or exported from the API (/tasks/report/<task_id>/all).
+>Import a standalone Cuckoo/CAPE JSON report or an analysis archive (ZIP or bzip2 tarball) containing reports/report.json. Without bundled binaries, file metadata is imported without attachments.
 
 - **input**:
->Cuckoo JSON file
+>Cuckoo/CAPE JSON report, ZIP archive or bzip2 tarball
 
 - **output**:
 >MISP Event attributes
@@ -95,6 +95,7 @@ Module to import Cuckoo JSON.
 - **references**:
 > - https://cuckoosandbox.org/
 > - https://github.com/cuckoosandbox/cuckoo
+> - https://capev2.readthedocs.io/en/latest/usage/api.html
 
 -----
 
