@@ -22,6 +22,7 @@ import logging
 import os.path
 import pathlib
 import signal
+import ssl
 import sys
 import time
 
@@ -48,6 +49,7 @@ from misp_modules.http_debug import configure_http_debug, module_context
 from misp_modules.module_config import ModuleConfig, ModuleConfigError
 from misp_modules.pap import pap_red_error
 from misp_modules.statistics import ModuleStatistics
+from misp_modules.tls import server_context
 
 # See https://github.com/MISP/misp-modules/issues/662
 MAX_BUFFER_SIZE = 1073741824
@@ -336,6 +338,8 @@ def main():
     )
     arg_parser.add_argument("-p", "--port", type=int, default=6666, help="port (default 6666)")
     arg_parser.add_argument("-l", "--listen", default="localhost", help="address (default localhost)")
+    arg_parser.add_argument("--tls-certfile", help="PEM certificate chain for the TLS 1.3 API listener")
+    arg_parser.add_argument("--tls-keyfile", help="PEM private key for the TLS 1.3 API listener")
     arg_parser.add_argument("-c", "--custom", default=None, help="custom modules root")
     arg_parser.add_argument("--module-config", default=None, help="JSON file containing optional per-module defaults")
     arg_parser.add_argument(
@@ -350,11 +354,20 @@ def main():
     arg_parser.add_argument("-s", "--system", default=None, help="legacy option that now has no effect")
     args = arg_parser.parse_args()
 
+    try:
+        ssl_context = server_context(args.tls_certfile, args.tls_keyfile)
+    except (OSError, ValueError) as exc:
+        arg_parser.error(f"Unable to configure API TLS: {exc}")
+
     global RESTRICT_PAP_RED  # noqa: PLW0603
     RESTRICT_PAP_RED = args.restrict_pap_red
 
     # Initialize
     init_logger(debug=args.debug, debug_extended=args.debug_extended)
+    if ssl_context is not None:
+        LOGGER.info("API TLS enabled with %s; PQC negotiation depends on runtime policy and peers", ssl.OPENSSL_VERSION)
+    elif args.listen not in ("localhost", "127.0.0.1", "::1"):
+        LOGGER.warning("API listener uses plaintext HTTP; protect remote access with TLS or a local TLS proxy")
 
     global MODULE_CONFIG  # noqa: PLW0603
     try:
@@ -414,6 +427,7 @@ def main():
             MODULES_HANDLERS,
             listen=args.listen,
             port=args.port,
+            scheme="https" if ssl_context is not None else "http",
         )
     except Exception:
         LOGGER.exception("Failed to build OpenAPI document; continuing without it")
@@ -433,6 +447,7 @@ def main():
                 ]
             ),
             max_buffer_size=MAX_BUFFER_SIZE,
+            ssl_options=ssl_context,
         )
         server.listen(args.port, args.listen)
     except OSError as e:

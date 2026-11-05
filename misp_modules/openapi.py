@@ -42,7 +42,12 @@ def _module_descriptors(handlers: Mapping[str, Any]) -> list[dict[str, Any]]:
 
 
 def build_document(
-    handlers: Mapping[str, Any], listen: str, port: int, generated_at: datetime.datetime | None = None
+    handlers: Mapping[str, Any],
+    listen: str,
+    port: int,
+    generated_at: datetime.datetime | None = None,
+    *,
+    scheme: str = "http",
 ) -> Dict[str, Any]:
     """
     Build a coarse OpenAPI document for the misp-modules REST API.
@@ -52,7 +57,10 @@ def build_document(
     """
     descriptors = _module_descriptors(handlers)
     generated_at = generated_at or datetime.datetime.utcnow()
-    servers = [{"url": f"http://{listen}:{port}"}]
+    if scheme not in ("http", "https"):
+        raise ValueError("API scheme must be http or https")
+    host = f"[{listen}]" if ":" in listen and not listen.startswith("[") else listen
+    servers = [{"url": f"{scheme}://{host}:{port}"}]
 
     return {
         "openapi": OPENAPI_VERSION,
