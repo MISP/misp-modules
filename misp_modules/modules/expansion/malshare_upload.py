@@ -47,7 +47,7 @@ def handler(q=False):
         misperrors["error"] = "Unable to process submitted sample data"
         return misperrors
 
-    if request["config"].get("malshare_apikey") is None:
+    if (request.get("config") or {}).get("malshare_apikey") is None:
         misperrors["error"] = "Missing MalShare API key"
         return misperrors
 
