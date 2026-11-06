@@ -541,6 +541,35 @@ Export deduplicated, typed MISP indicators as QRadar reference-set CSV or JSON v
 
 -----
 
+#### [Sigma Rule Export](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/sigma_export.py)
+
+<img src=../logos/sigma.png height=60>
+
+Export stored Sigma rules and optionally generate Windows IOC detections.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/sigma_export.py)]
+
+- **features**:
+>Produces a ZIP of Sigma YAML files and a provenance manifest. The default rules mode preserves stored Sigma attributes, including those in objects. Select indicators or both to generate experimental Windows process_creation, dns_query and network_connection rules from supported IDS-marked indicators. Deleted data is excluded; duplicate rules are combined with all source references. See the [usage guide](https://github.com/MISP/misp-modules/blob/main/documentation/export_mod/sigma_export.md).
+
+- **config**:
+> - mode
+> - include_non_ids
+
+- **input**:
+>MISP events and object attributes in standard, bare or legacy export format.
+
+- **output**:
+>Base64-encoded ZIP containing rules/*.yml and manifest.json.
+
+- **references**:
+> - https://sigmahq.io/
+> - https://github.com/SigmaHQ/sigma-specification
+
+- **requirements**:
+>PyYAML
+
+-----
+
 #### [Splunk Lookup Export](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/splunk_export.py)
 
 Export event and object indicators as a Splunk CSV lookup with CIM field mapping hints.

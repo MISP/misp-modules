@@ -265,6 +265,7 @@ For further Information see the [license file](https://misp.github.io/misp-modul
 * [Event to PDF Export](https://misp.github.io/misp-modules/export_mod/#event-to-pdf-export) - Simple export of a MISP event to PDF.
 * [OpenBSD PF Export](https://misp.github.io/misp-modules/export_mod/#openbsd-pf-export) - Export IDS-marked event and object network attributes as OpenBSD PF block or logging rules.
 * [QRadar Reference Set Export](https://misp.github.io/misp-modules/export_mod/#qradar-reference-set-export) - Export deduplicated, typed MISP indicators as QRadar reference-set CSV or JSON values.
+* [Sigma Rule Export](https://misp.github.io/misp-modules/export_mod/#sigma-rule-export) - Export stored Sigma rules and optionally generate Windows IOC detections.
 * [Splunk Lookup Export](https://misp.github.io/misp-modules/export_mod/#splunk-lookup-export) - Export event and object indicators as a Splunk CSV lookup with CIM field mapping hints.
 * [Squid Proxy Export](https://misp.github.io/misp-modules/export_mod/#squid-proxy-export) - Export IDS-marked event and object attributes as Squid proxy ACLs and deny rules.
 * [Test Export](https://misp.github.io/misp-modules/export_mod/#test-export) - Skeleton export module.
