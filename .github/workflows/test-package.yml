@@ -30,6 +30,9 @@ jobs:
       - name: Install poetry
         run: python -m pip install poetry poetry-plugin-bundle poetry-plugin-export
 
+      - name: Check dependency lock selections
+        run: python tests/test_dependency_lock.py
+
       - name: Build docs
         run: make generate_docs
 
@@ -58,6 +61,9 @@ jobs:
 
       - name: Install poetry
         run: python -m pip install poetry poetry-plugin-bundle poetry-plugin-export
+
+      - name: Check dependency lock selections
+        run: python tests/test_dependency_lock.py
 
       - name: Install dependencies
         run: poetry install --with test -E all
