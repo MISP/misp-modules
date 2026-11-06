@@ -434,6 +434,37 @@ Modules to access CIRCL Passive SSL.
 
 -----
 
+#### [Cisco Umbrella Investigate](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/cisco_umbrella.py)
+
+Enrich a domain with Cisco Umbrella Investigate categorization and risk scores.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/cisco_umbrella.py)]
+
+- **features**:
+>Uses the Umbrella v2 OAuth client credentials flow. Returns a referenced annotation with domain status, security/content categories, risk score and contributing features. Partial results identify failed lookups. See https://github.com/MISP/misp-modules/blob/main/documentation/expansion/cisco_umbrella.md.
+
+- **config**:
+> - api_key
+> - api_secret
+> - timeout
+
+- **data-source**:
+>external
+
+- **input**:
+>A domain or hostname attribute with a UUID and a fully qualified DNS name.
+
+- **output**:
+>The original attribute and a non-IDS annotation containing the Umbrella report.
+
+- **references**:
+> - https://developer.cisco.com/docs/cloud-security/umbrella-api-getting-started/
+> - https://developer.cisco.com/docs/cloud-security/umbrella-api-reference-investigate-api-overview/
+
+- **requirements**:
+>An Umbrella Investigate entitlement and an API key with investigate.investigate:read access.
+
+-----
+
 #### [ClaamAV](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/clamav.py)
 
 Submit file to ClamAV
