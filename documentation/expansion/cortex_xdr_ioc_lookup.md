@@ -76,7 +76,9 @@ A standard `annotation` object references the original attribute with `describes
 Its text is JSON containing the canonical query, `found`/`not_found` status,
 returned count, `objects_count`, `truncated`, and matching rule context. Context
 includes rule ID, indicator/type, severity, expiry, comment, reputation and
-reliability when supplied. Other response fields are not copied. New attributes
+reliability when supplied. Other response fields are not copied. The report
+preserves the native `expiration_date: -1` sentinel for non-expiring rules.
+Other negative expiry values are rejected. New attributes
 use `to_ids=false` and `disable_correlation=true`; no verdict tags are inferred.
 
 The lookup requests one bounded result window. If the provider reports more

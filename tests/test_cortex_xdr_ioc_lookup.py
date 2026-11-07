@@ -68,6 +68,13 @@ def test_empty_lookup_is_not_found_not_a_benign_verdict(api):
     assert "reputation" not in data
 
 
+def test_non_expiring_rule_is_retained_in_lookup_result(api):
+    api.rows = [{"rule_id": 1, "type": "hash", "indicator": DIGEST, "expiration_date": -1}]
+    result = module.handler(json.dumps(query()))
+    assert report(result)["rules"][0]["expiration_date"] == -1
+    assert report(result)["status"] == "found"
+
+
 def test_limit_warning_and_metadata_whitelist(api):
     api.rows = [
         {"rule_id": 1, "type": "hash", "indicator": DIGEST, "comment": "provider context", "debug": CONFIG["api_key"]}

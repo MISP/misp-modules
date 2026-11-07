@@ -203,7 +203,7 @@ def metadata(row):
             result[field] = value
     expiry = row.get("expiration_date")
     if expiry is not None:
-        if type(expiry) is not int or expiry < 0:
+        if type(expiry) is not int or expiry < -1:
             raise XdrError("Cortex XDR returned an invalid IOC expiry.")
         result["expiration_date"] = expiry
     return result

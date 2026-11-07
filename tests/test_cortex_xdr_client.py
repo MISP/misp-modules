@@ -238,3 +238,15 @@ def test_response_size_and_resource_cleanup(api):
             with shared.Client(CONFIG) as client:
                 client.lookup("hash", DIGEST)
     assert close_session.call_count == close_response.call_count == 1
+
+
+@pytest.mark.parametrize("expiry", [-1, 0, 1900000000000])
+def test_native_expiration_values_preserve_non_expiring_sentinel(expiry):
+    row = {"rule_id": 1, "type": "hash", "indicator": DIGEST, "expiration_date": expiry}
+    assert shared.metadata(row)["expiration_date"] == expiry
+
+
+@pytest.mark.parametrize("expiry", [-2, -100, True, "-1", 1.5])
+def test_invalid_expiry_values_are_rejected(expiry):
+    with pytest.raises(shared.XdrError):
+        shared.metadata({"rule_id": 1, "type": "hash", "indicator": DIGEST, "expiration_date": expiry})
