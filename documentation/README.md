@@ -584,6 +584,40 @@ Render the markdown (under GFM) into PDF. Requires pandoc (https://pandoc.org/),
 
 -----
 
+#### [Cortex XDR IOC Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/cortex_xdr_ioc_lookup.py)
+
+Look up exact hash, domain and IP IOC rules in a Cortex XDR tenant.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/cortex_xdr_ioc_lookup.py)]
+
+- **features**:
+>Queries indicators/get with indicator and type filters. Supports Standard and Advanced API keys, IDNA2008 domain normalization and bounded results. Returns a referenced annotation without modifying Cortex XDR. IOC rule presence is not evidence of an endpoint detection. See https://github.com/MISP/misp-modules/blob/main/documentation/expansion/cortex_xdr_ioc_lookup.md.
+
+- **config**:
+> - url
+> - api_key
+> - api_key_id
+> - auth_type
+> - limit
+> - timeout
+
+- **data-source**:
+>external
+
+- **input**:
+>md5, sha256, domain, hostname, ip-src or ip-dst attribute with UUID.
+
+- **output**:
+>Original attribute and a non-IDS annotation of matching IOC rules and completeness.
+
+- **references**:
+> - https://cortex-docs.paloaltonetworks.com/xdr-api/make-your-first-api-call
+> - https://cortex-docs.paloaltonetworks.com/xdr-api/cortex-platform/iocs
+
+- **requirements**:
+>A Cortex XDR API key with Rules Edit permission, as required by the IOC lookup endpoint.
+
+-----
+
 #### [Country Code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/countrycode.py)
 
 Module to expand country codes.
