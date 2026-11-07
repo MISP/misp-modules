@@ -41,7 +41,10 @@ be listening for a test event. Use the production URL for unattended workflows.
 Pass exactly one selected event, with valid event, object and attribute UUIDs.
 Bare events, `{"Event": {...}}`, a one-element list and legacy core-format
 envelopes with selected `Attribute`/`Object` collections beside `Event` are
-supported. Workflow filters and multiple selected events are rejected.
+supported. Workflow filters and multiple selected events are rejected. Requests
+containing `filteredItems` or `matchingData` are rejected by key presence, including
+null or empty selections. Supply an explicit selected event in `data`; the module
+never falls back from extracted workflow data to a broader event.
 
 Example `/query` request:
 

@@ -133,8 +133,10 @@ def handler(q=False):
         request = json.loads(q)
         if not isinstance(request, dict) or not isinstance(request.get("params", {}), dict):
             raise n8n.N8nError("A JSON object with object params is required.")
-        if request.get("filters"):
-            raise n8n.N8nError("Workflow filters are unsupported; pass the selected event in data.")
+        if request.get("filters") or any(key in request for key in ("filteredItems", "matchingData")):
+            raise n8n.N8nError(
+                "Workflow filters and extracted data are unsupported; pass one explicit selected event in data."
+            )
         params = request.get("params", {})
         dry_run = n8n.boolean(params.get("dry_run"), "dry_run", default=True)
         ids_only = n8n.boolean(params.get("to_ids_only"), "to_ids_only")

@@ -186,6 +186,16 @@ def test_missing_credentials_is_not_attempted(http, monkeypatch):
     assert result["data"]["status"] == "not_attempted" and "error" in result and not http.calls
 
 
+@pytest.mark.parametrize("key", ["filteredItems", "matchingData"])
+@pytest.mark.parametrize("extracted", [None, [], {}])
+@pytest.mark.parametrize("dry_run", [True, False])
+def test_extracted_data_never_falls_back_to_unfiltered_event(http, key, extracted, dry_run):
+    envelope = query(dry_run=dry_run)
+    envelope[key] = extracted
+    result = handle(envelope)
+    assert "error" in result and "data" not in result and not http.calls
+
+
 @pytest.mark.parametrize(
     "envelope", [{}, [], None, {"params": []}, {"filters": [1]}, query(dry_run="bad"), query(to_ids_only="bad")]
 )
