@@ -302,6 +302,7 @@ For further Information see the [license file](https://misp.github.io/misp-modul
 * [VMRay Summary JSON Import](https://misp.github.io/misp-modules/import_mod/#vmray-summary-json-import) - Import a VMRay Summary JSON report.
 
 ### Action Modules
+* [Cortex XDR IOC Publish](https://misp.github.io/misp-modules/action_mod/#cortex-xdr-ioc-publish) - Upload missing Cortex XDR IOC rules from IDS-marked MISP event and object attributes.
 * [CrowdStrike IOC Publish](https://misp.github.io/misp-modules/action_mod/#crowdstrike-ioc-publish) - Create and renew module-owned Falcon custom IOCs from MISP event and object attributes.
 * [Export to Sentinel or Defender](https://misp.github.io/misp-modules/action_mod/#export-to-sentinel-or-defender) - Export indicators to Microsoft Sentinel or Microsoft Defender. Requires an existing installation of MISP2Sentinel or MISP2Defender.
 * [IRC](https://misp.github.io/misp-modules/action_mod/#irc) - Send a message to an IRC channel.
