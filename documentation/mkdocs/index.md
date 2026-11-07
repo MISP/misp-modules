@@ -227,6 +227,7 @@ For more information: [Extending MISP with Python modules](https://www.misp-proj
 * [OSQuery Pack Publish](https://misp.github.io/misp-modules/action_mod/#osquery-pack-publish) - Publish a MISP query pack to a configured local osquery pack directory.
 * [QRadar Reference Set Publish](https://misp.github.io/misp-modules/action_mod/#qradar-reference-set-publish) - Publish typed MISP indicators to an existing QRadar reference set and explicit domain.
 * [SentinelOne IOC Publish](https://misp.github.io/misp-modules/action_mod/#sentinelone-ioc-publish) - Publish MISP event and object indicators to SentinelOne Threat Intelligence with explicit scope.
+* [Shuffle Workflow Execute](https://misp.github.io/misp-modules/action_mod/#shuffle-workflow-execute) - Start a Shuffle workflow with selected MISP event and object attributes as its JSON execution argument.
 * [Signal](https://misp.github.io/misp-modules/action_mod/#signal) - Send a message to Signal recipients or a group through signal-cli-rest-api.
 * [Slack](https://misp.github.io/misp-modules/action_mod/#slack) - Simplistic module to send messages to a Slack channel.
 * [Test action](https://misp.github.io/misp-modules/action_mod/#test-action) - This module is merely a test, always returning true. Triggers on event publishing.
