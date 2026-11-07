@@ -311,6 +311,33 @@ Create a Tines Cases v2 case with a MISP event reference and selected-data count
 
 -----
 
+#### [Torq Case Create](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/action_mod/torq_case_create.py)
+
+Create a Torq case with a MISP event reference, provenance tags and selected-data counts.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/action_mod/torq_case_create.py)]
+
+- **features**:
+>Creates one new case using POST /public/v1alpha/cases. Includes a credential-free dry run by default, explicit reporter/severity and server-side credentials. Sends source UUID and counts rather than event contents. Repeated live invocations create new cases; no automatic retries. See https://github.com/MISP/misp-modules/blob/main/documentation/action_mod/torq_case_create.md.
+
+- **config**:
+>{'params': {'reporter_email': {'type': 'string', 'description': 'Required email of the Torq case reporter'}, 'title_prefix': {'type': 'string', 'description': '1–64 ASCII letters, digits, spaces, ._-', 'value': 'MISP event'}, 'severity': {'type': 'string', 'description': 'informational, low, medium, high or critical', 'value': 'medium'}, 'dry_run': {'type': 'string', 'description': 'true previews; false creates a new case', 'value': 'true'}}, 'blocking': True, 'support_filters': False, 'expect_misp_core_format': True}
+
+- **input**:
+>Exactly one explicitly selected MISP event in workflow data, with a valid event UUID.
+
+- **output**:
+>Planned case payload or confirmed Torq case ID, state, severity and source event UUID.
+
+- **references**:
+> - https://developers.torq.io/apidocs/overview
+> - https://developers.torq.io/apidocs/authentication
+> - https://developers.torq.io/apidocs/create-a-case
+
+- **requirements**:
+>Torq API credentials permitted to create cases and a valid case reporter email.
+
+-----
+
 #### [Wazuh CDB Publish](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/action_mod/wazuh_cdb_publish.py)
 
 Upload MISP event and object indicators to an explicitly named Wazuh CDB source list.
