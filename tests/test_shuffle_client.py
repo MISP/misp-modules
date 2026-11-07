@@ -144,7 +144,7 @@ def test_http_errors_never_redirect_retry_or_echo_credentials(api, status):
         {"success": 1},
         {"success": True, "errors": [CONFIG["api_key"]]},
         requests.Timeout(CONFIG["api_key"]),
-        b" " * (2 * 1024 * 1024 + 1),
+        pytest.param(b" " * (2 * 1024 * 1024 + 1), id="oversized-response"),
     ],
 )
 def test_malformed_unconfirmed_and_network_responses_are_safe(api, reply):
