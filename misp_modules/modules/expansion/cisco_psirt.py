@@ -243,8 +243,10 @@ def _advisory(row):
             raise PsirtError("Cisco PSIRT returned an invalid advisory version.")
         result["version"] = _text(str(row["version"]))
     for field in ("publicationUrl", "csafUrl"):
-        if row.get(field) not in (None, ""):
-            result[field] = _url(row[field])
+        value = row.get(field)
+        if value is None or (isinstance(value, str) and value.strip().upper() in ("", "NA", "N/A")):
+            continue
+        result[field] = _url(value)
     for field in ("firstPublished", "lastUpdated"):
         if row.get(field) not in (None, ""):
             result[field] = _date(row[field])

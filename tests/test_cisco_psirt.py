@@ -195,6 +195,31 @@ def test_multiple_cves_belong_to_one_advisory_and_multiple_advisories_are_retain
     assert values(objects(result, "vulnerability")[0], "id") == [ADVISORY, CVE, "CVE-2022-20715"]
 
 
+@pytest.mark.parametrize("field", ["publicationUrl", "csafUrl"])
+@pytest.mark.parametrize("placeholder", ["NA", "N/A", "na", " NA ", " n/a ", "", None])
+def test_unavailable_optional_url_keeps_advisory_and_other_results(api, field, placeholder):
+    api.replies[module.API_URL + "/cve/" + CVE] = {
+        "advisories": [{**ROW, field: placeholder}, {**ROW, "advisoryId": "cisco-sa-second-ABC"}]
+    }
+    result = module.handler(json.dumps(query()))
+    vulnerabilities = objects(result, "vulnerability")
+    assert len(vulnerabilities) == result["summary"]["count"] == 2
+    assert result["results"]["Attribute"] == [query()["attribute"]]
+    assert field not in contexts(result)[0]
+    remaining_field = "csafUrl" if field == "publicationUrl" else "publicationUrl"
+    assert values(vulnerabilities[0], "references") == [ROW[remaining_field]]
+    assert values(vulnerabilities[1], "references") == [ROW["publicationUrl"], ROW["csafUrl"]]
+
+
+def test_advisory_with_both_url_placeholders_still_imports(api):
+    api.replies[module.API_URL + "/cve/" + CVE] = {"advisories": [{**ROW, "publicationUrl": "NA", "csafUrl": "N/A"}]}
+    result = module.handler(json.dumps(query()))
+    vulnerability = objects(result, "vulnerability")[0]
+    assert values(vulnerability, "id") == [ADVISORY, CVE]
+    assert not values(vulnerability, "references")
+    assert "publicationUrl" not in contexts(result)[0] and "csafUrl" not in contexts(result)[0]
+
+
 def test_partial_bug_matches_are_filtered_and_not_claimed_as_related(api):
     api.replies[module.API_URL + "/bugid/" + BUG] = {
         "advisories": [ROW, {**ROW, "advisoryId": "cisco-sa-unrelated-ABC", "bugIDs": ["CSCvy48963"]}]

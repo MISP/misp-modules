@@ -52,6 +52,9 @@ and comment. Each imported advisory produces:
   CVEs in `id`, title in `summary`, plain-text advisory summary in `description`,
   CVSS base score, publication/update dates, publication status and references.
   References include the advisory page and CSAF document URL when supplied.
+  Optional URLs containing `NA` or `N/A` are treated as missing, including
+  surrounding whitespace and case variants; malformed non-placeholder URLs
+  still return an error.
 - A linked standard `annotation` containing the normalized advisory fields,
   including Cisco bug IDs, CWEs, product names, IPS signatures, severity (`sir`),
   advisory version and the other mapped values. It references both the source
