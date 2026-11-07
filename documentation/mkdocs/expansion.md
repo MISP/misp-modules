@@ -2147,6 +2147,41 @@ Query an MWDB instance for an existing file by hash.
 
 -----
 
+#### [n8n Data Table Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/n8n_data_table_lookup.py)
+
+Find an observable in a selected n8n Data Table string column using the public REST API.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/n8n_data_table_lookup.py)]
+
+- **features**:
+>Validates the configured column and queries one bounded row page with a literal equality filter. Preserves the source attribute and attaches matched rows in a referenced non-IDS annotation. Reports cursor truncation without following provider links or running any workflow. See https://github.com/MISP/misp-modules/blob/main/documentation/expansion/n8n_data_table_lookup.md.
+
+- **config**:
+> - url
+> - api_key
+> - data_table_id
+> - column
+> - limit
+> - timeout
+
+- **data-source**:
+>external
+
+- **input**:
+>A supported observable or text attribute with a UUID and non-empty string value.
+
+- **output**:
+>Original attribute and a non-IDS annotation with matching Data Table rows and completeness.
+
+- **references**:
+> - https://docs.n8n.io/connect/n8n-api
+> - https://docs.n8n.io/connect/n8n-api/authentication
+> - https://docs.n8n.io/connect/n8n-api/data-table
+
+- **requirements**:
+>n8n public API with Data Tables endpoints; dataTableColumn:read and dataTableRow:read access.
+
+-----
+
 #### [NeutrinoAPI IP Blocklist](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/neutrino.py)
 
 Enrich public IP addresses with NeutrinoAPI blocklist categories, detection flags, timestamps and sensor context.
