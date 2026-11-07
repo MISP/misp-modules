@@ -308,6 +308,7 @@ For further Information see the [license file](https://misp.github.io/misp-modul
 
 ### Action Modules
 * [Cortex XDR IOC Publish](https://misp.github.io/misp-modules/action_mod/#cortex-xdr-ioc-publish) - Upload missing Cortex XDR IOC rules from IDS-marked MISP event and object attributes.
+* [Cortex XSOAR Incident Create](https://misp.github.io/misp-modules/action_mod/#cortex-xsoar-incident-create) - Create a Cortex XSOAR 8 incident with a MISP event reference and selected-data counts.
 * [CrowdStrike IOC Publish](https://misp.github.io/misp-modules/action_mod/#crowdstrike-ioc-publish) - Create and renew module-owned Falcon custom IOCs from MISP event and object attributes.
 * [Export to Sentinel or Defender](https://misp.github.io/misp-modules/action_mod/#export-to-sentinel-or-defender) - Export indicators to Microsoft Sentinel or Microsoft Defender. Requires an existing installation of MISP2Sentinel or MISP2Defender.
 * [IRC](https://misp.github.io/misp-modules/action_mod/#irc) - Send a message to an IRC channel.

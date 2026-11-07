@@ -219,6 +219,7 @@ For more information: [Extending MISP with Python modules](https://www.misp-proj
 
 ### Action Modules
 * [Cortex XDR IOC Publish](https://misp.github.io/misp-modules/action_mod/#cortex-xdr-ioc-publish) - Upload missing Cortex XDR IOC rules from IDS-marked MISP event and object attributes.
+* [Cortex XSOAR Incident Create](https://misp.github.io/misp-modules/action_mod/#cortex-xsoar-incident-create) - Create a Cortex XSOAR 8 incident with a MISP event reference and selected-data counts.
 * [CrowdStrike IOC Publish](https://misp.github.io/misp-modules/action_mod/#crowdstrike-ioc-publish) - Create and renew module-owned Falcon custom IOCs from MISP event and object attributes.
 * [IRC](https://misp.github.io/misp-modules/action_mod/#irc) - Send a message to an IRC channel.
 * [Matrix](https://misp.github.io/misp-modules/action_mod/#matrix) - Send a message to an unencrypted Matrix room.
