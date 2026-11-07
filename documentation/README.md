@@ -5161,7 +5161,7 @@ Upload missing Cortex XDR IOC rules from IDS-marked MISP event and object attrib
 [[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/action_mod/cortex_xdr_ioc_publish.py)]
 
 - **features**:
->Publishes MD5/SHA-1/SHA-256, domain and IP indicators through indicators/insert_jsons with validation. Skips observed existing rules, supports Standard/Advanced API keys and defaults to a credential-free dry run. Explicit expiry and per-indicator outcomes are reported. See https://github.com/MISP/misp-modules/blob/main/documentation/action_mod/cortex_xdr_ioc_publish.md.
+>Publishes MD5/SHA-256, domain and IP indicators through indicators/insert_jsons with validation. Skips observed existing rules, supports Standard/Advanced API keys and defaults to a credential-free dry run. Explicit expiry and per-indicator outcomes are reported. See https://github.com/MISP/misp-modules/blob/main/documentation/action_mod/cortex_xdr_ioc_publish.md.
 
 - **config**:
 >{'params': {'source': {'type': 'string', 'description': 'Stable publisher label included in the IOC comment', 'value': 'misp-modules'}, 'severity': {'type': 'string', 'description': 'INFO, LOW, MEDIUM, HIGH or CRITICAL', 'value': 'MEDIUM'}, 'reputation': {'type': 'string', 'description': 'SUSPICIOUS or BAD', 'value': 'SUSPICIOUS'}, 'expiration_days': {'type': 'string', 'description': 'Explicit IOC lifetime: 7, 30, 90 or 180 days', 'value': '30'}, 'dry_run': {'type': 'string', 'description': 'true previews payloads without any network requests; false publishes', 'value': 'true'}}, 'blocking': True, 'support_filters': False, 'expect_misp_core_format': True}
@@ -5178,7 +5178,7 @@ Upload missing Cortex XDR IOC rules from IDS-marked MISP event and object attrib
 > - https://cortex-docs.paloaltonetworks.com/xdr-api/cortex-platform/indicator-rules
 
 - **requirements**:
->Cortex XDR API credentials with IOC lookup and upload permissions on the module server.
+>Cortex XDR Pro and API credentials with IOC lookup and upload permissions on the module server.
 
 -----
 

@@ -83,7 +83,6 @@ def test_existing_foreign_or_expired_rules_are_not_updated(api, expiry):
     "kind,value,xdr_type,canonical",
     [
         ("md5", "a" * 32, "HASH", "a" * 32),
-        ("sha1", "A" * 40, "HASH", "a" * 40),
         ("domain", "faß.de", "DOMAIN_NAME", "xn--fa-hia.de"),
         ("hostname", "BÜCHER.test.", "DOMAIN_NAME", "xn--bcher-kva.test"),
         ("ip-src", "192.0.2.1", "IP", "192.0.2.1"),
@@ -235,6 +234,16 @@ def test_deadline_marks_items_unattempted(api):
     assert "error" in result and result["data"]["not_attempted"] == 1 and not api.calls
 
 
+def test_deadline_reached_during_lookup_prevents_upload_and_later_items(api):
+    data = {"Attribute": [attribute(value=char * 64) for char in ("a", "b")]}
+    with patch.object(module.time, "monotonic", side_effect=[0, 119, 121]):
+        result = handle(query(data, dry_run=False))
+    assert "error" in result and result["data"]["not_attempted"] == 2
+    assert result["data"]["uploaded"] == result["data"]["failed"] == 0
+    assert len(api.calls) == 1 and api.calls[0][0].url.endswith("/get")
+    assert all(item["status"] == "not_attempted" for item in result["data"]["items"])
+
+
 def test_session_closed_after_failure(api):
     api.replies["get"] = (403, {})
     with patch.object(requests.Session, "close") as close:
@@ -273,3 +282,9 @@ class TestXdrPublishHTTP(AsyncHTTPTestCase):
                 body=json.dumps({"module": "cortex_xdr_ioc_publish", **query()}),
             )
         assert response.code == 200 and json.loads(response.body)["data"]["planned"] == 1
+
+
+def test_sha1_is_unsupported_for_native_xdr_ioc_rules(api):
+    result = handle(query({"Attribute": [attribute("sha1", "a" * 40)]}, dry_run=False))
+    assert result["data"]["skipped"] == {"unsupported": 1}
+    assert result["data"]["uploaded"] == 0 and not api.calls

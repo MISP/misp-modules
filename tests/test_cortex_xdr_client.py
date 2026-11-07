@@ -119,7 +119,6 @@ def test_advanced_auth_is_fresh_per_request_and_not_replaced_by_netrc(api):
     "kind,value,expected",
     [
         ("md5", "A" * 32, ("hash", "a" * 32)),
-        ("sha1", "A" * 40, ("hash", "a" * 40)),
         ("sha256", "A" * 64, ("hash", DIGEST)),
         ("domain", "faß.de", ("domain_name", "xn--fa-hia.de")),
         ("hostname", "BÜCHER.test.", ("domain_name", "xn--bcher-kva.test")),
@@ -135,6 +134,7 @@ def test_observable_normalization(kind, value, expected):
 @pytest.mark.parametrize(
     "kind,value",
     [
+        ("sha1", "a" * 40),
         ("md5", "bad"),
         ("sha256", "g" * 64),
         ("domain", "127.0.0.1"),

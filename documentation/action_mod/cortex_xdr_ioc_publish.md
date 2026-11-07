@@ -21,7 +21,7 @@ Configure these environment variables on the module server:
 | `CORTEX_XDR_API_KEY_ID` | Matching API key ID as a string of digits. |
 | `CORTEX_XDR_AUTH_TYPE` | `advanced` (default) or `standard`, matching the key's security level. |
 
-The key needs access to IOC lookup and upload. The lookup reference explicitly
+Creating IOC rules requires **Cortex XDR Pro**. The key needs access to IOC lookup and upload. The lookup reference explicitly
 requires **Rules Edit** permission. Cortex XDR licensing and RBAC remain enforced
 by the tenant. Connection settings cannot be supplied or overridden in workflow
 parameters. No additional Python dependency or MISP object template is required.
@@ -48,11 +48,11 @@ with collections beside `Event`, or a list of these. Event and object attributes
 are included only when `to_ids=true` and neither the event, object nor attribute
 is deleted. Source attributes need valid UUIDs for provenance.
 
-Supported types are `md5`, `sha1`, `sha256`, `domain`, `hostname`, `ip-src` and
+Supported types are `md5`, `sha256`, `domain`, `hostname`, `ip-src` and
 `ip-dst`. Hashes are checked and lowercased; IPs are canonicalized; domains use
 non-transitional IDNA2008/UTS-46 processing, preserving distinct identities such
 as `faß.de` and `fass.de`. CIDRs, scoped IPv6, wildcards, URLs, filenames and
-composites are unsupported. The module does not discard ports or other
+composites and SHA-1 hashes are unsupported. The module does not discard ports or other
 constraints to broaden an indicator. Unsupported and malformed attributes have
 separate skipped counts; malformed containers fail before network access.
 
@@ -98,7 +98,8 @@ indicators are `not_attempted`. Earlier confirmed uploads remain reported.
 Timeouts or lost acknowledgements can leave remote state uncertain; inspect the
 tenant before retrying. Uploads are never automatically retried.
 
-The action has a 120-second budget checked before each indicator. Individual
+The action has a 120-second budget checked before each indicator and again
+after preflight, before starting an upload. Individual
 requests use 20-second connect/read timeouts, so a current request can finish
 after the budget. Empty/no-eligible selections are explicit no-ops. Standard
 and Advanced authentication follow the same public API contract as the lookup
@@ -141,3 +142,5 @@ No live tenant was available and no live IOC rules were changed during testing.
 - [Authentication](https://cortex-docs.paloaltonetworks.com/xdr-api/make-your-first-api-call)
 - [IOC lookup](https://cortex-docs.paloaltonetworks.com/xdr-api/cortex-platform/iocs)
 - [Simple indicator JSON upload](https://cortex-docs.paloaltonetworks.com/xdr-api/cortex-platform/indicator-rules)
+
+- [Native IOC types and Pro license](https://cortex-docs.paloaltonetworks.com/cortex-xdr/detect-investigate-and-respond-to-threats/threat-management/detection-rules/whats-an-ioc/create-an-ioc-rule)

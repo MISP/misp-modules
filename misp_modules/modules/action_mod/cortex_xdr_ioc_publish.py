@@ -16,9 +16,9 @@ moduleinfo = {
     "description": "Upload missing Cortex XDR IOC rules from IDS-marked MISP event and object attributes.",
     "module-type": ["action"],
     "logo": "",
-    "requirements": ["Cortex XDR API credentials with IOC lookup and upload permissions on the module server."],
+    "requirements": ["Cortex XDR Pro and API credentials with IOC lookup and upload permissions on the module server."],
     "features": (
-        "Publishes MD5/SHA-1/SHA-256, domain and IP indicators through indicators/insert_jsons with validation."
+        "Publishes MD5/SHA-256, domain and IP indicators through indicators/insert_jsons with validation."
         " Skips observed existing rules, supports Standard/Advanced API keys and defaults to a credential-free dry"
         " run. Explicit expiry and per-indicator outcomes are reported. See"
         " https://github.com/MISP/misp-modules/blob/main/documentation/action_mod/cortex_xdr_ioc_publish.md."
@@ -234,6 +234,13 @@ def handler(q=False):
                             rules=[xdr.metadata(row) for row in rows],
                         )
                         summary["existing"] += 1
+                    elif time.monotonic() >= deadline:
+                        item.update(
+                            status="not_attempted",
+                            error="Publication deadline reached after lookup; no upload attempted.",
+                        )
+                        summary["not_attempted"] += 1
+                        summary["success"], failed = False, True
                     else:
                         _upload(client, payload)
                         item["status"] = "uploaded"
