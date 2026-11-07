@@ -3213,6 +3213,40 @@ Module to query on Shodan.
 
 -----
 
+#### [Shuffle Datastore Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/shuffle_datastore_lookup.py)
+
+Look up a MISP observable's key in a selected Shuffle organization and Datastore category.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/shuffle_datastore_lookup.py)]
+
+- **features**:
+>Uses the read-only get_cache API, validates returned key/category identity and preserves native record values. Returns a referenced non-IDS annotation with only selected metadata, excluding Datastore authorization tokens. Missing/inaccessible keys are errors, not benign verdicts. See https://github.com/MISP/misp-modules/blob/main/documentation/expansion/shuffle_datastore_lookup.md.
+
+- **config**:
+> - url
+> - api_key
+> - org_id
+> - category
+> - key_prefix
+> - timeout
+
+- **data-source**:
+>external
+
+- **input**:
+>A supported observable or text attribute with a UUID and a literal Datastore key value.
+
+- **output**:
+>Original attribute and referenced annotation with the Datastore value and selected metadata.
+
+- **references**:
+> - https://shuffler.io/docs/API
+> - https://github.com/Shuffle/shuffle-docs/blob/master/docs/API.md#get-a-key
+
+- **requirements**:
+>Shuffle API key with read access to the selected organization, Datastore category and key.
+
+-----
+
 #### [Sigma Rule Converter](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/sigma_queries.py)
 
 <img src=../logos/sigma.png height=60>
