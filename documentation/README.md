@@ -5339,6 +5339,32 @@ Simplistic module to send message to a Mattermost channel.
 
 -----
 
+#### [n8n Webhook](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/action_mod/n8n_webhook.py)
+
+Send selected MISP event attributes to an authenticated n8n Webhook trigger.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/action_mod/n8n_webhook.py)]
+
+- **features**:
+>Delivers one selected MISP event as bounded JSON to a server-configured webhook. Includes a credential-free dry run, optional IDS-only selection, source UUIDs and a deterministic payload digest. Excludes deleted data and binary attachments. HTTP delivery does not confirm downstream workflow execution. See https://github.com/MISP/misp-modules/blob/main/documentation/action_mod/n8n_webhook.md.
+
+- **config**:
+>{'params': {'dry_run': {'type': 'string', 'description': 'true previews; false delivers once to n8n', 'value': 'true'}, 'to_ids_only': {'type': 'string', 'description': 'Only include IDS attributes when true', 'value': 'false'}}, 'blocking': True, 'support_filters': False, 'expect_misp_core_format': True}
+
+- **input**:
+>One selected MISP event with event, object and attribute UUIDs in workflow data.
+
+- **output**:
+>Preview payload or HTTP delivery status, payload SHA-256 and selected/skipped counts.
+
+- **references**:
+> - https://docs.n8n.io/connect/n8n-api
+> - https://docs.n8n.io/integrations/builtin/core-nodes/n8n-nodes-base.webhook/
+
+- **requirements**:
+>Published n8n workflow with a POST Webhook trigger using Header authentication.
+
+-----
+
 #### [Nextcloud talk](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/action_mod/nextcloud_talk.py)
 
 Simplistic module to send a message to a Nextcloud talk conversation.
