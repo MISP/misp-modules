@@ -316,6 +316,7 @@ For further Information see the [license file](https://misp.github.io/misp-modul
 * [Signal](https://misp.github.io/misp-modules/action_mod/#signal) - Send a message to Signal recipients or a group through signal-cli-rest-api.
 * [Slack](https://misp.github.io/misp-modules/action_mod/#slack) - Simplistic module to send messages to a Slack channel.
 * [Test action](https://misp.github.io/misp-modules/action_mod/#test-action) - This module is merely a test, always returning true. Triggers on event publishing.
+* [Tines Case Create](https://misp.github.io/misp-modules/action_mod/#tines-case-create) - Create a Tines Cases v2 case with a MISP event reference and selected-data counts.
 * [Wazuh CDB Publish](https://misp.github.io/misp-modules/action_mod/#wazuh-cdb-publish) - Upload MISP event and object indicators to an explicitly named Wazuh CDB source list.
 
 
