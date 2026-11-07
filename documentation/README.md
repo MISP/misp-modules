@@ -618,6 +618,41 @@ Look up exact hash, domain and IP IOC rules in a Cortex XDR tenant.
 
 -----
 
+#### [Cortex XSOAR Indicator Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/cortex_xsoar_indicator_lookup.py)
+
+Look up a MISP observable in Cortex XSOAR 8's indicator store with reputation and expiration metadata.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/cortex_xsoar_indicator_lookup.py)]
+
+- **features**:
+>Uses /xsoar/public/v1/indicators/search with escaped value/type queries and local identity checks, including merged File hash fields and legacy hash indicator types. Supports Standard/Advanced API keys, bounded results, multi-account error checks and a referenced non-IDS annotation. This searches XSOAR indicators rather than XDR IOC rules. See https://github.com/MISP/misp-modules/blob/main/documentation/expansion/cortex_xsoar_indicator_lookup.md.
+
+- **config**:
+> - url
+> - api_key
+> - api_key_id
+> - auth_type
+> - limit
+> - timeout
+
+- **data-source**:
+>external
+
+- **input**:
+>Hash, domain/hostname, IP, URL, email or CVE attribute with a UUID.
+
+- **output**:
+>Original attribute and referenced non-IDS annotation with verified indicators and completeness.
+
+- **references**:
+> - https://cortex-docs.paloaltonetworks.com/cortex-xsoar-8-saas/troubleshoot-and-reference/reference/cortex-xsoar-api
+> - https://cortex-docs.paloaltonetworks.com/xsoar-8-api/make-your-first-api-call
+> - https://cortex-docs.paloaltonetworks.com/xsoar-8-api/cortex-xsoar-8.x-apis/indicators
+
+- **requirements**:
+>Cortex XSOAR 8 API credentials with permission to search indicators.
+
+-----
+
 #### [Country Code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/countrycode.py)
 
 Module to expand country codes.
