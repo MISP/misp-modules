@@ -135,6 +135,7 @@ For more information: [Extending MISP with Python modules](https://www.misp-proj
 * [ThreatCrowd Lookup](https://misp.github.io/misp-modules/expansion/#threatcrowd-lookup) - Module to get information from ThreatCrowd.
 * [ThreadFox Lookup](https://misp.github.io/misp-modules/expansion/#threadfox-lookup) - Module to search for an IOC on ThreatFox by abuse.ch.
 * [ThreatMiner Lookup](https://misp.github.io/misp-modules/expansion/#threatminer-lookup) - Module to get information from ThreatMiner.
+* [Tines Record Lookup](https://misp.github.io/misp-modules/expansion/#tines-record-lookup) - Find a MISP observable in a selected Tines record type and field using Records v2 search.
 * [Triage Submit](https://misp.github.io/misp-modules/expansion/#triage-submit) - Module to submit samples to tria.ge
 * [TruSTAR Enrich](https://misp.github.io/misp-modules/expansion/#trustar-enrich) - Module to get enrich indicators with TruSTAR.
 * [URL Shortener Resolver](https://misp.github.io/misp-modules/expansion/#url-shortener-resolver) - Resolve known HTTP(S) URL shorteners into a shortened-link object.
