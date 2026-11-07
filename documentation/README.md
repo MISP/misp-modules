@@ -5562,6 +5562,32 @@ Publish MISP event and object indicators to SentinelOne Threat Intelligence with
 
 -----
 
+#### [Shuffle Workflow Execute](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/action_mod/shuffle_workflow_execute.py)
+
+Start a Shuffle workflow with selected MISP event and object attributes as its JSON execution argument.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/action_mod/shuffle_workflow_execute.py)]
+
+- **features**:
+>Submits one selected event to the documented workflow execution API. Supports a credential-free dry run by default and optional IDS-only selection. Excludes deleted data and binary attachments, validates the execution acknowledgement, and returns the execution ID without its authorization token. See https://github.com/MISP/misp-modules/blob/main/documentation/action_mod/shuffle_workflow_execute.md.
+
+- **config**:
+>{'params': {'workflow_id': {'type': 'string', 'description': 'Required UUID of the Shuffle workflow to execute'}, 'dry_run': {'type': 'string', 'description': 'true previews; false submits a new workflow execution', 'value': 'true'}, 'to_ids_only': {'type': 'string', 'description': 'Only include IDS attributes when true', 'value': 'false'}}, 'blocking': True, 'support_filters': False, 'expect_misp_core_format': True}
+
+- **input**:
+>One explicitly selected MISP event with event, object and attribute UUIDs in workflow data.
+
+- **output**:
+>Preview request or submitted execution ID, source UUID, payload digest and selected/skipped counts.
+
+- **references**:
+> - https://shuffler.io/docs/API
+> - https://github.com/Shuffle/shuffle-docs/blob/master/docs/API.md#execute-workflow
+
+- **requirements**:
+>Shuffle API key permitted to execute the selected workflow in the configured organization.
+
+-----
+
 #### [Signal](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/action_mod/signal.py)
 
 Send a message to Signal recipients or a group through signal-cli-rest-api.
