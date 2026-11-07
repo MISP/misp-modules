@@ -3346,6 +3346,41 @@ Find a MISP observable in a selected Tines record type and field using Records v
 
 -----
 
+#### [Torq Observable Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/torq_observable_lookup.py)
+
+Look up a MISP observable in Torq and return verified matches with reputation and threat intelligence.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/torq_observable_lookup.py)]
+
+- **features**:
+>Uses the read-only observable query API and verifies typed values locally because search may be broader than equality. Returns a referenced non-IDS annotation with reputation, enrichment and completeness. Supports regional API bases, OAuth client credentials and existing bearer tokens. See https://github.com/MISP/misp-modules/blob/main/documentation/expansion/torq_observable_lookup.md.
+
+- **config**:
+> - region
+> - client_id
+> - client_secret
+> - access_token
+> - limit
+> - timeout
+
+- **data-source**:
+>external
+
+- **input**:
+>Domain/hostname, IP, MD5/SHA1/SHA256, URL, email or filename attribute with a valid UUID.
+
+- **output**:
+>Original attribute and referenced annotation with exact typed matches and search completeness.
+
+- **references**:
+> - https://developers.torq.io/apidocs/overview
+> - https://developers.torq.io/apidocs/authentication
+> - https://developers.torq.io/apidocs/query-observables
+
+- **requirements**:
+>Torq API credentials for the workspace with permission to query observables.
+
+-----
+
 #### [Triage Submit](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/triage_submit.py)
 
 Module to submit samples to tria.ge
