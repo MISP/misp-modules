@@ -431,6 +431,39 @@ Modules to access CIRCL Passive SSL.
 
 -----
 
+#### [Cisco PSIRT](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/cisco_psirt.py)
+
+Retrieve Cisco PSIRT security advisories by CVE, Cisco advisory ID or Cisco bug ID.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/cisco_psirt.py)]
+
+- **features**:
+>Uses OAuth client credentials and the openVuln v2 API. Returns linked vulnerability and annotation objects with advisory details, CVEs, CVSS, UTC dates, product names, bug IDs, CWEs and CSAF links. Filters partial bug-ID matches. See https://github.com/MISP/misp-modules/blob/main/documentation/expansion/cisco_psirt.md.
+
+- **config**:
+> - client_id
+> - client_secret
+> - max_advisories
+> - timeout
+
+- **data-source**:
+>external
+
+- **input**:
+>A vulnerability attribute containing a CVE, or a text attribute containing a CVE, cisco-sa-* or CSCxx12345 ID.
+
+- **output**:
+>The original attribute, advisory vulnerability objects and referenced context annotations; new attributes are non-IDS.
+
+- **references**:
+> - https://developer.cisco.com/docs/psirt/introduction/
+> - https://developer.cisco.com/docs/psirt/authentication/
+> - https://developer.cisco.com/docs/psirt/obtain-advisory-by-identifiers/
+
+- **requirements**:
+>Cisco API Console client credentials authorized for the PSIRT openVuln API.
+
+-----
+
 #### [Cisco Umbrella Investigate](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/cisco_umbrella.py)
 
 Enrich a domain with Cisco Umbrella Investigate categorization and risk scores.
