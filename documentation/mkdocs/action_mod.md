@@ -259,6 +259,32 @@ This module is merely a test, always returning true. Triggers on event publishin
 
 -----
 
+#### [Tines Case Create](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/action_mod/tines_case_create.py)
+
+Create a Tines Cases v2 case with a MISP event reference and selected-data counts.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/action_mod/tines_case_create.py)]
+
+- **features**:
+>Creates one OPEN case with POST /api/v2/cases. Sends the selected event UUID, active attribute/object counts and an optional MISP link, without copying observable values or attachments. Supports a credential-free dry run (default), explicit team/priority and server-side connection settings. Each live invocation creates a new case; no automatic retries or duplicate suppression. See https://github.com/MISP/misp-modules/blob/main/documentation/action_mod/tines_case_create.md.
+
+- **config**:
+>{'params': {'team_id': {'type': 'string', 'description': 'Required positive numeric Tines team ID'}, 'name_prefix': {'type': 'string', 'description': 'Case name prefix (1–64 ASCII letters, digits, spaces, ._-)', 'value': 'MISP event'}, 'priority': {'type': 'string', 'description': 'info, low, medium, high or critical', 'value': 'medium'}, 'dry_run': {'type': 'string', 'description': 'true previews without network access; false creates a new case', 'value': 'true'}}, 'blocking': True, 'support_filters': False, 'expect_misp_core_format': True}
+
+- **input**:
+>Exactly one selected MISP event in workflow data, with a valid event UUID.
+
+- **output**:
+>Planned case payload or acknowledged case ID, team, priority and event reference.
+
+- **references**:
+> - https://www.tines.com/stories/docs/api/authentication/
+> - https://www.tines.com/stories/docs/api/cases/create/
+
+- **requirements**:
+>Tines API key permitted to create cases in the configured team.
+
+-----
+
 #### [Wazuh CDB Publish](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/action_mod/wazuh_cdb_publish.py)
 
 Upload MISP event and object indicators to an explicitly named Wazuh CDB source list.
