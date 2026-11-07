@@ -10,6 +10,7 @@ from datetime import datetime, timezone
 from threading import Lock
 from uuid import UUID
 
+import idna
 import requests
 from pymisp import MISPEvent, MISPObject
 
@@ -123,7 +124,7 @@ def _settings(request):
         value = attribute["value"]
         if not isinstance(value, str):
             raise ValueError
-        domain = value.strip().removesuffix(".").encode("idna").decode("ascii").lower()
+        domain = idna.encode(value.strip(), uts46=True, transitional=False).decode("ascii").removesuffix(".")
         labels = domain.split(".")
         if len(domain) > 253 or len(labels) < 2 or labels[-1].isdigit():
             raise ValueError

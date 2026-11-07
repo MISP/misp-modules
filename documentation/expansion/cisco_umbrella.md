@@ -3,8 +3,10 @@
 `cisco_umbrella` is an expansion and hover module for fully qualified `domain`
 and `hostname` attributes. It queries the current Umbrella Investigate v2 API for
 domain status, security and content categories, and risk scores with contributing
-features. Domain names are lowercased and IDNA encoded; a trailing DNS dot is
-removed. Hostnames are queried exactly, without reducing them to a parent domain.
+features. Domain names use non-transitional IDNA2008/UTS-46 normalization through
+the `idna` library; a trailing DNS dot is removed. This preserves distinct domain
+identities, for example `faß.de` becomes `xn--fa-hia.de`, while `fass.de` remains
+`fass.de`. Hostnames are queried exactly, without reducing them to a parent domain.
 
 ## Configuration
 

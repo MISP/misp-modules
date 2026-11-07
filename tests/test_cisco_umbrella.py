@@ -95,7 +95,18 @@ def api():
 
 
 @pytest.mark.parametrize(
-    "kind,value,domain", [("domain", "EXAMPLE.org.", "example.org"), ("hostname", "BÜCHER.test", "xn--bcher-kva.test")]
+    "kind,value,domain",
+    [
+        ("domain", "EXAMPLE.org.", "example.org"),
+        ("hostname", "BÜCHER.test", "xn--bcher-kva.test"),
+        ("domain", "faß.de", "xn--fa-hia.de"),
+        ("hostname", "FAẞ.DE.", "xn--fa-hia.de"),
+        ("domain", "xn--fa-hia.de", "xn--fa-hia.de"),
+        ("domain", "fass.de", "fass.de"),
+        ("domain", "οδός.gr", "xn--pxavk3b.gr"),
+        ("hostname", "ｅｘａｍｐｌｅ。org", "example.org"),
+        ("domain", "EXAMPLE.org。", "example.org"),
+    ],
 )
 def test_documented_oauth_and_domain_endpoints(api, kind, value, domain):
     request = query(value, kind, timeout="7")
@@ -251,6 +262,9 @@ def test_only_documented_fields_are_retained(api):
         None,
         [],
         "\ud800.org",
+        "ab\u200ccd.example",
+        "ab\u200dcd.example",
+        "xn--.org",
     ],
 )
 def test_invalid_names_never_make_requests(api, value):
