@@ -601,7 +601,7 @@ Look up exact hash, domain and IP IOC rules in a Cortex XDR tenant.
 >external
 
 - **input**:
->md5, sha1, sha256, domain, hostname, ip-src or ip-dst attribute with UUID.
+>md5, sha256, domain, hostname, ip-src or ip-dst attribute with UUID.
 
 - **output**:
 >Original attribute and a non-IDS annotation of matching IOC rules and completeness.

@@ -43,7 +43,6 @@ def api():
     [
         ("sha256", DIGEST.upper(), DIGEST),
         ("md5", "a" * 32, "a" * 32),
-        ("sha1", "a" * 40, "a" * 40),
         ("domain", "faß.de", "xn--fa-hia.de"),
         ("ip-dst", "2001:0db8::1", "2001:db8::1"),
     ],
@@ -89,7 +88,9 @@ def test_invalid_envelope(api, raw):
     assert "error" in module.handler(raw) and not api.calls
 
 
-@pytest.mark.parametrize("field,value", [("type", "url"), ("uuid", "bad"), ("value", []), ("value", "bad")])
+@pytest.mark.parametrize(
+    "field,value", [("type", "sha1"), ("type", "url"), ("uuid", "bad"), ("value", []), ("value", "bad")]
+)
 def test_invalid_attribute_prevents_network(api, field, value):
     request = query()
     request["attribute"][field] = value

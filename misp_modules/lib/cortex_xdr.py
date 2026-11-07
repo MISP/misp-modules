@@ -12,7 +12,7 @@ import idna
 import requests
 
 CONFIG = ["url", "api_key", "api_key_id", "auth_type"]
-HASH_LENGTHS = {"md5": 32, "sha1": 40, "sha256": 64}
+HASH_LENGTHS = {"md5": 32, "sha256": 64}
 INPUT_TYPES = [*HASH_LENGTHS, "domain", "hostname", "ip-src", "ip-dst"]
 API_PATH = "/public_api/v1/indicators/"
 AUTH_REFERENCE = "https://cortex-docs.paloaltonetworks.com/xdr-api/make-your-first-api-call"

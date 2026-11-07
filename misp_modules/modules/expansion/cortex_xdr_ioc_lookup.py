@@ -25,7 +25,7 @@ moduleinfo = {
         " https://github.com/MISP/misp-modules/blob/main/documentation/expansion/cortex_xdr_ioc_lookup.md."
     ),
     "references": [xdr.AUTH_REFERENCE, xdr.IOC_REFERENCE],
-    "input": "md5, sha1, sha256, domain, hostname, ip-src or ip-dst attribute with UUID.",
+    "input": "md5, sha256, domain, hostname, ip-src or ip-dst attribute with UUID.",
     "output": "Original attribute and a non-IDS annotation of matching IOC rules and completeness.",
 }
 

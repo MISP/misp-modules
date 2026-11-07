@@ -44,12 +44,12 @@ under `cortex_xdr_ioc_lookup` in the server's module configuration file.
 
 | MISP type | XDR type | Normalization |
 | --- | --- | --- |
-| `md5`, `sha1`, `sha256` | `hash` | Check hexadecimal length and lowercase. |
+| `md5`, `sha256` | `hash` | Check hexadecimal length and lowercase. |
 | `domain`, `hostname` | `domain_name` | Non-transitional IDNA2008/UTS-46 processing; remove the DNS root dot. `faß.de` stays distinct from `fass.de`. |
 | `ip-src`, `ip-dst` | `ip` | Validate/canonicalize IPv4 or IPv6. |
 
 An attribute UUID is required. CIDRs, scoped IPv6, port-qualified composites,
-URLs, filenames and other composites are unsupported. Restrictions are not
+URLs, filenames, SHA-1 hashes and other composites are unsupported. Restrictions are not
 dropped to broaden a lookup. The original attribute is returned unchanged.
 
 ## Authentication and response handling
@@ -114,3 +114,5 @@ was available for authenticated validation.
 - [Authentication](https://cortex-docs.paloaltonetworks.com/xdr-api/make-your-first-api-call)
 - [IOCs and permission requirements](https://cortex-docs.paloaltonetworks.com/xdr-api/cortex-platform/iocs)
 - [Copy the API origin](https://cortex-docs.paloaltonetworks.com/xdr-api/get-your-fqdn)
+
+- [Native IOC types and Pro license](https://cortex-docs.paloaltonetworks.com/cortex-xdr/detect-investigate-and-respond-to-threats/threat-management/detection-rules/whats-an-ioc/create-an-ioc-rule)
