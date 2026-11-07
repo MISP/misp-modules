@@ -219,6 +219,7 @@ For further Information see the [license file](https://misp.github.io/misp-modul
 * [ThreadFox Lookup](https://misp.github.io/misp-modules/expansion/#threadfox-lookup) - Module to search for an IOC on ThreatFox by abuse.ch.
 * [ThreatMiner Lookup](https://misp.github.io/misp-modules/expansion/#threatminer-lookup) - Module to get information from ThreatMiner.
 * [Tines Record Lookup](https://misp.github.io/misp-modules/expansion/#tines-record-lookup) - Find a MISP observable in a selected Tines record type and field using Records v2 search.
+* [Torq Observable Lookup](https://misp.github.io/misp-modules/expansion/#torq-observable-lookup) - Look up a MISP observable in Torq and return verified matches with reputation and threat intelligence.
 * [Triage Submit](https://misp.github.io/misp-modules/expansion/#triage-submit) - Module to submit samples to tria.ge
 * [TruSTAR Enrich](https://misp.github.io/misp-modules/expansion/#trustar-enrich) - Module to get enrich indicators with TruSTAR.
 * [TweetFeed Lookup](https://misp.github.io/misp-modules/expansion/#tweetfeed-lookup) - Look up an IOC in TweetFeed, the CC0 feed of IOCs shared by the infosec community on X/Twitter: reporters, source tweets, hashtags, AI context and campaign membership.
