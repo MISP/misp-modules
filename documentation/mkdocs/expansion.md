@@ -3555,6 +3555,41 @@ Module to get information from ThreatMiner.
 
 -----
 
+#### [Tines Record Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/tines_record_lookup.py)
+
+Find a MISP observable in a selected Tines record type and field using Records v2 search.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/tines_record_lookup.py)]
+
+- **features**:
+>Uses a literal EQUAL filter against an explicit numeric field ID. Queries the read-only Records v2 search API, preserves source attributes and returns a referenced annotation with records and completeness. Artifact handles and pagination links are not fetched. See https://github.com/MISP/misp-modules/blob/main/documentation/expansion/tines_record_lookup.md.
+
+- **config**:
+> - url
+> - api_key
+> - record_type_id
+> - field_id
+> - limit
+> - test_mode
+> - timeout
+
+- **data-source**:
+>external
+
+- **input**:
+>A supported observable or text attribute with a UUID and a non-empty string value.
+
+- **output**:
+>Original attribute and a non-IDS annotation of Tines record matches and pagination completeness.
+
+- **references**:
+> - https://www.tines.com/stories/docs/api/authentication/
+> - https://www.tines.com/stories/docs/api/records/search/
+
+- **requirements**:
+>Tines API access to the selected record type and its search field.
+
+-----
+
 #### [Triage Submit](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/triage_submit.py)
 
 Module to submit samples to tria.ge
