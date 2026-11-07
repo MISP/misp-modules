@@ -106,6 +106,7 @@ For further Information see the [license file](https://misp.github.io/misp-modul
 * [Censys Enrich](https://misp.github.io/misp-modules/expansion/#censys-enrich) - An expansion module to enrich attributes in MISP by quering the censys.io API
 * [CIRCL Passive DNS](https://misp.github.io/misp-modules/expansion/#circl-passive-dns) - Module to access CIRCL Passive DNS.
 * [CIRCL Passive SSL](https://misp.github.io/misp-modules/expansion/#circl-passive-ssl) - Modules to access CIRCL Passive SSL.
+* [Cisco Umbrella Investigate](https://misp.github.io/misp-modules/expansion/#cisco-umbrella-investigate) - Enrich a domain with Cisco Umbrella Investigate categorization and risk scores.
 * [ClaamAV](https://misp.github.io/misp-modules/expansion/#claamav) - Submit file to ClamAV
 * [Cluster25 Expand](https://misp.github.io/misp-modules/expansion/#cluster25-expand) - Module to query Cluster25 CTI.
 * [Markdown to PDF converter](https://misp.github.io/misp-modules/expansion/#markdown-to-pdf-converter) - Render the markdown (under GFM) into PDF. Requires pandoc (https://pandoc.org/), wkhtmltopdf (https://wkhtmltopdf.org/) and mermaid dependencies.
