@@ -88,6 +88,7 @@ For more information: [Extending MISP with Python modules](https://www.misp-proj
 * [GeoIP Enrichment](https://misp.github.io/misp-modules/expansion/#geoip-enrichment) - A hover and expansion module to enrich an ip with geolocation and ASN information from an mmdb server instance, such as CIRCL's ip.circl.lu.
 * [MWDB Submit](https://misp.github.io/misp-modules/expansion/#mwdb-submit) - Module to push malware samples to a MWDB instance
 * [MWDB Query](https://misp.github.io/misp-modules/expansion/#mwdb-query) - Query an MWDB instance for an existing file by hash.
+* [n8n Data Table Lookup](https://misp.github.io/misp-modules/expansion/#n8n-data-table-lookup) - Find an observable in a selected n8n Data Table string column using the public REST API.
 * [NeutrinoAPI IP Blocklist](https://misp.github.io/misp-modules/expansion/#neutrinoapi-ip-blocklist) - Enrich public IP addresses with NeutrinoAPI blocklist categories, detection flags, timestamps and sensor context.
 * [OCR Enrich](https://misp.github.io/misp-modules/expansion/#ocr-enrich) - Module to process some optical character recognition on pictures.
 * [ODS Enrich](https://misp.github.io/misp-modules/expansion/#ods-enrich) - Module to extract freetext from a .ods document.
