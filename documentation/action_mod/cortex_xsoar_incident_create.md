@@ -103,6 +103,15 @@ The current XSOAR 8 OpenAPI contract distinguishes:
 | **200** | The request was processed **without creating an incident**, for example because of a preprocessing rule. Return an error with `success: false`, status `not_created`, and no incident ID. Empty/non-JSON bodies are permitted for this documented outcome. |
 | Other status, timeout or malformed/unconfirmed 201 | Return an error and status `uncertain`; inspect XSOAR before retrying. |
 
+These status meanings come from the [XSOAR 8 incident endpoint's current
+OpenAPI responses](https://cortex-docs.paloaltonetworks.com/xsoar-8-api/cortex-xsoar-8.x-apis/incidents).
+The older Demisto `POST /incident` specification describes HTTP 200 with an
+`IncidentWrapper` as creation. That is a different API contract: this module
+targets XSOAR 8's `/xsoar/public/v1/incident` and does not support the legacy
+endpoint. Treating 200 as creation here would incorrectly report a suppressed
+incident as created. Existing client and action tests cover both a flat 201
+creation response and a 200 outcome with empty, non-JSON or ID-bearing bodies.
+
 Despite its schema name `IncidentWrapper`, the 201 response is a **flat** object,
 rather than `{"incident": {...}}`. Created results include the actual returned
 name, incident type and severity. Tenant mappings can change these fields; when
