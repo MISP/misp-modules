@@ -22,6 +22,11 @@ or `0`/`1` strings. Missing, null and empty settings mean false. Other values
 return an error before calling VT. Collaborator identifiers are trimmed and
 deduplicated, and empty CSV entries are ignored.
 
+One-level expansion considers only the native VT nodes present before expansion
+that have available relationships. Custom nodes and native nodes without
+relationships are preserved without expansion. Newly discovered nodes are added
+to the graph and are not expanded again in that same invocation.
+
 Export creates or updates a remote graph; it is not a dry run. A new graph is
 public unless `private` is explicitly true. For an existing graph, its loaded
 visibility and collaborators are preserved rather than replaced by the new-graph

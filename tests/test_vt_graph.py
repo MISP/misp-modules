@@ -91,6 +91,12 @@ class NativeAPI:
             elif request.method == "POST" and path == "urls":
                 assert parse_qs(request.body)["url"] == ["https://example.org/path"]
                 reply = (200, {"data": {"type": "analysis", "id": "u-" + URL_ID + "-1700000000"}})
+            elif (
+                request.method == "GET"
+                and path.startswith(("domains/", "ip_addresses/", "urls/"))
+                and len(path.split("/")) == 3
+            ):
+                reply = (200, {"data": [], "meta": {}, "links": {}})
             elif request.method == "GET" and path.startswith(("domains/", "ip_addresses/", "urls/")):
                 reply = (200, {"data": {"attributes": {}}})
             else:
@@ -149,11 +155,67 @@ def test_boolean_values_reach_native_private_field(api, value):
 
 
 def test_expansion_is_explicit_and_string_false_does_not_expand(api):
-    with patch.object(vt_graph_api.VTGraph, "expand_n_level") as expand:
-        assert "error" not in module.handler(query(expand_one_level="false"))
-        expand.assert_not_called()
-        assert "error" not in module.handler(query(expand_one_level="true"))
-        expand.assert_called_once_with(1)
+    assert "error" not in module.handler(query(expand_one_level="false"))
+    assert len(api.calls) == 1 and api.calls[0].method == "POST"
+    api.calls.clear()
+    assert "error" not in module.handler(query(expand_one_level="true"))
+    expansions = {urlsplit(r.url).path.rsplit("/", 1)[1] for r in api.calls if r.method == "GET"}
+    assert expansions == set(vt_graph_api.Node.NODE_EXPANSIONS["domain"])
+    assert len(api.saved()) == 1
+
+
+@pytest.mark.parametrize(
+    "kind,value", [("filename", "report.exe"), ("target-user", "analyst"), ("target-email", "a@example.org")]
+)
+def test_expansion_saves_custom_only_graph_without_relationship_requests(api, kind, value):
+    result = module.handler(query(data=[{"Attribute": [attribute(kind, value)]}], expand_one_level="true"))
+    assert "error" not in result and len(api.calls) == 1
+    node = api.saved()[0]["data"]["attributes"]["nodes"][0]
+    assert node["entity_id"] == value and node["type"] == "custom"
+
+
+def test_mixed_graph_expands_native_nodes_once_and_preserves_custom_nodes(api):
+    api.overrides[("GET", "domains/example.org/resolutions")] = (
+        200,
+        {"data": [{"id": "192.0.2.99example.org", "type": "resolution", "attributes": {}}]},
+    )
+    attrs = [
+        attribute("filename", "report.exe"),
+        attribute("target-user", "analyst"),
+        attribute("target-email", "a@example.org"),
+        attribute(),
+    ]
+    result = module.handler(query(data=[{"Attribute": attrs}], expand_one_level="true"))
+    assert "error" not in result and len(api.saved()) == 1
+    nodes = {node["entity_id"]: node for node in api.saved()[0]["data"]["attributes"]["nodes"]}
+    assert all(nodes[value]["type"] == "custom" for value in ("report.exe", "analyst", "a@example.org"))
+    assert nodes["192.0.2.99"]["type"] == "ip_address"
+    # Newly discovered nodes are retained, but not expanded at this same level.
+    gets = [r for r in api.calls if r.method == "GET"]
+    assert len(gets) == len(vt_graph_api.Node.NODE_EXPANSIONS["domain"])
+    assert all("/domains/example.org/" in r.url for r in gets)
+
+
+def test_expansion_skips_loaded_custom_and_native_nodes_without_relationships(api):
+    api.loaded["data"]["attributes"]["nodes"].extend(
+        [
+            {
+                "type": "custom",
+                "entity_id": "existing.txt",
+                "entity_attributes": {"custom_type": "filename"},
+                "index": 1,
+                "x": 0,
+                "y": 0,
+            },
+            {"type": "ssl_cert", "entity_id": SHA256, "index": 2, "x": 0, "y": 0},
+        ]
+    )
+    attrs = [attribute("link", "https://www.virustotal.com/graph/" + GRAPH_ID), attribute()]
+    result = module.handler(query(data=[{"Attribute": attrs}], expand_one_level="true"))
+    assert "error" not in result and len(api.saved()) == 1
+    nodes = {node["entity_id"] for node in api.saved()[0]["data"]["attributes"]["nodes"]}
+    assert {"existing.txt", SHA256, "existing.example", "example.org"} <= nodes
+    assert all("/ssl_certs/" not in r.url and "existing.txt" not in r.url for r in api.calls)
 
 
 def test_information_lookup_is_explicit(api):

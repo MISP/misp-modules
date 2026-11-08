@@ -4,6 +4,8 @@ This modules provides a graph importer method for MISP event by using the
 response payload giving by MISP API directly.
 """
 
+from vt_graph_api import Node
+
 from misp_modules.lib.vt_graph_parser.errors import GraphImportError
 from misp_modules.lib.vt_graph_parser.helpers.parsers import parse_pymisp_response
 from misp_modules.lib.vt_graph_parser.importers.base import import_misp_graph
@@ -96,6 +98,10 @@ def from_pymisp_response(
             max_search_depth,
         )
         if expand_node_one_level:
-            graph.expand_n_level(1)
+            # SDK 2.2.0 expands custom/relationship-free nodes with a zero-worker
+            # pool. Keep those nodes, and expand only this level's native nodes.
+            for node in list(graph.nodes.values()):
+                if node.node_type in Node.SUPPORTED_NODE_TYPES and node.expansions_available:
+                    graph.expand_one_level(node.node_id)
         graphs.append(graph)
     return graphs
