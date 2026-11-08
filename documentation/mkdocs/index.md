@@ -35,6 +35,7 @@ For more information: [Extending MISP with Python modules](https://www.misp-proj
 * [Cluster25 Expand](https://misp.github.io/misp-modules/expansion/#cluster25-expand) - Module to query Cluster25 CTI.
 * [Markdown to PDF converter](https://misp.github.io/misp-modules/expansion/#markdown-to-pdf-converter) - Render the markdown (under GFM) into PDF. Requires pandoc (https://pandoc.org/), wkhtmltopdf (https://wkhtmltopdf.org/) and mermaid dependencies.
 * [Cortex XDR IOC Lookup](https://misp.github.io/misp-modules/expansion/#cortex-xdr-ioc-lookup) - Look up exact hash, domain and IP IOC rules in a Cortex XDR tenant.
+* [Cortex XSOAR Indicator Lookup](https://misp.github.io/misp-modules/expansion/#cortex-xsoar-indicator-lookup) - Look up a MISP observable in Cortex XSOAR 8's indicator store with reputation and expiration metadata.
 * [Country Code](https://misp.github.io/misp-modules/expansion/#country-code) - Module to expand country codes.
 * [CPE Lookup](https://misp.github.io/misp-modules/expansion/#cpe-lookup) - An expansion module to query the CVE search API with a cpe code to get its related vulnerabilities.
 * [CrowdSec CTI](https://misp.github.io/misp-modules/expansion/#crowdsec-cti) - Module to access CrowdSec CTI API.
