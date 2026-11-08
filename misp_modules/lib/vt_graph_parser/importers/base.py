@@ -4,7 +4,8 @@ This module provides a common method to import graph from misp attributes.
 """
 
 import vt_graph_api
-from vt_graph_parser.helpers.rules import MispEventInitialRule
+
+from misp_modules.lib.vt_graph_parser.helpers.rules import MispEventInitialRule
 
 
 def import_misp_graph(
@@ -81,7 +82,7 @@ def import_misp_graph(
     else:
         graph = vt_graph_api.VTGraph.load_graph(graph_id, vt_api_key)
 
-    attributes_to_add = [attr for attr in misp_attributes if not graph.has_node(attr.value)]
+    attributes_to_add = misp_attributes
 
     total_expandable_attrs = max(
         sum(1 for attr in attributes_to_add if attr.type in vt_graph_api.Node.SUPPORTED_NODE_TYPES),
@@ -90,23 +91,38 @@ def import_misp_graph(
 
     max_quotas_per_search = max(int(max_api_quotas / total_expandable_attrs), 1)
 
-    previous_node_id = ""
+    previous_node = None
     for attr in attributes_to_add:
+        # Check during insertion: duplicate attributes and MD5/SHA-1 aliases may
+        # resolve to a node added earlier in this same event.
+        native = attr.type in vt_graph_api.Node.SUPPORTED_NODE_TYPES
+        already_added = graph.has_node(attr.value) if native else attr.value in graph.nodes
+        if already_added:
+            continue
         # Add the current attr as node to the graph.
-        added_node = graph.add_node(attr.value, attr.type, fetch_information, fetch_vt_enterprise, attr.label)
+        added_node = graph.add_node(
+            attr.value,
+            attr.type,
+            fetch_information=fetch_information,
+            fetch_vt_enterprise=fetch_vt_enterprise,
+            label=attr.label,
+        )
         # If use_vt_to_connect_the_grap is True the nodes will be connected using
         # VT API.
         if use_vt_to_connect_the_graph:
-            if attr.type not in vt_graph_api.Node.SUPPORTED_NODE_TYPES and previous_node_id:
-                graph.add_link(previous_node_id, attr.value, "manual")
-            else:
+            if previous_node is not None and (
+                not native or previous_node.node_type not in vt_graph_api.Node.SUPPORTED_NODE_TYPES
+            ):
+                graph.add_link(previous_node.node_id, added_node.node_id, "manual")
+            if native:
                 graph.connect_with_graph(
-                    attr.value,
-                    max_quotas_per_search,
-                    max_search_depth,
+                    added_node.node_id,
+                    max_api_quotas=max_quotas_per_search,
+                    max_depth=max_search_depth,
                     fetch_info_collected_nodes=fetch_information,
                 )
         else:
             rule = rule.resolve_relation(graph, added_node, attr.category)
+        previous_node = added_node
 
     return graph
