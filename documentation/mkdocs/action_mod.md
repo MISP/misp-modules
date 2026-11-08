@@ -26,6 +26,33 @@ Upload missing Cortex XDR IOC rules from IDS-marked MISP event and object attrib
 
 -----
 
+#### [Cortex XSOAR Incident Create](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/action_mod/cortex_xsoar_incident_create.py)
+
+Create a Cortex XSOAR 8 incident with a MISP event reference and selected-data counts.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/action_mod/cortex_xsoar_incident_create.py)]
+
+- **features**:
+>Creates a new incident through /xsoar/public/v1/incident, with dry run enabled by default. Distinguishes HTTP 201 creation from HTTP 200 processing without creation. Supports Standard/Advanced keys and an explicit investigation opt-in. Sends source UUID/counts rather than event contents. See https://github.com/MISP/misp-modules/blob/main/documentation/action_mod/cortex_xsoar_incident_create.md.
+
+- **config**:
+>{'params': {'incident_type': {'type': 'string', 'description': 'Existing XSOAR incident type', 'value': 'Unclassified'}, 'name_prefix': {'type': 'string', 'description': '1–64 ASCII letters, digits, spaces, ._-', 'value': 'MISP event'}, 'severity': {'type': 'string', 'description': 'Numeric XSOAR severity from 0 to 4', 'value': '2'}, 'create_investigation': {'type': 'string', 'description': "true starts the incident type's investigation/playbook", 'value': 'false'}, 'dry_run': {'type': 'string', 'description': 'true previews; false requests a new incident', 'value': 'true'}}, 'blocking': True, 'support_filters': False, 'expect_misp_core_format': True}
+
+- **input**:
+>Exactly one selected, non-deleted MISP event with a valid UUID in workflow data.
+
+- **output**:
+>Preview or created/not-created/uncertain incident outcome, source UUID and selected-data counts.
+
+- **references**:
+> - https://cortex-docs.paloaltonetworks.com/cortex-xsoar-8-saas/troubleshoot-and-reference/reference/cortex-xsoar-api
+> - https://cortex-docs.paloaltonetworks.com/xsoar-8-api/make-your-first-api-call
+> - https://cortex-docs.paloaltonetworks.com/xsoar-8-api/cortex-xsoar-8.x-apis/incidents
+
+- **requirements**:
+>Cortex XSOAR 8 API credentials with incident creation permissions.
+
+-----
+
 #### [CrowdStrike IOC Publish](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/action_mod/crowdstrike_ioc_publish.py)
 
 <img src=../logos/crowdstrike.png height=60>
