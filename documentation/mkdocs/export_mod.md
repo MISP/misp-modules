@@ -716,9 +716,9 @@ This module is used to create a VirusTotal Graph from a MISP event.
 [[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/vt_graph.py)]
 
 - **features**:
->The module takes the MISP event as input and queries the VirusTotal Graph API to create a new graph out of the event.
+>The module takes the MISP event as input and queries the VirusTotal Graph API to create a new graph out of the event, or update an existing graph linked in the event. Supports flat and wrapped events, object attributes and filename/hash composites. Boolean configuration accepts true/false strings.
 >
->Once the graph is ready, we get the url of it, which is returned so we can view it on VirusTotal.
+>Returns graph links as a text file. See https://github.com/MISP/misp-modules/blob/main/documentation/export_mod/vt_graph.md for API v3 behavior, visibility and quota details.
 
 - **config**:
 > - vt_api_key
@@ -738,10 +738,13 @@ This module is used to create a VirusTotal Graph from a MISP event.
 >Link of the VirusTotal Graph created for the event.
 
 - **references**:
->https://www.virustotal.com/gui/graph-overview
+> - https://docs.virustotal.com/reference/create-graphs
+> - https://docs.virustotal.com/reference/graphs-update
+> - https://docs.virustotal.com/reference/graph-object
+> - https://github.com/VirusTotal/vt-graph-api
 
 - **requirements**:
->vt_graph_api, the python library to query the VirusTotal graph API
+>vt-graph-api, the official VirusTotal Graph SDK (tested with 2.2.0)
 
 -----
 

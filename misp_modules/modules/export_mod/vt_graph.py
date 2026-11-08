@@ -3,39 +3,38 @@
 import base64
 import json
 
-from vt_graph_parser.importers.pymisp_response import from_pymisp_response
+import requests
+from vt_graph_api import errors as vt_errors
 
-misperrors = {"error": "Error"}
+from misp_modules.lib.vt_graph_parser.errors import GraphImportError
+from misp_modules.lib.vt_graph_parser.helpers.parsers import GRAPH_ID_PATTERN, MISP_INPUT_ATTR, boolean
+from misp_modules.lib.vt_graph_parser.importers.pymisp_response import from_pymisp_response
+
 moduleinfo = {
-    "version": "0.1",
+    "version": "0.2",
     "author": "VirusTotal",
     "description": "This module is used to create a VirusTotal Graph from a MISP event.",
     "module-type": ["export"],
     "name": "VirusTotal Graph Export",
     "logo": "virustotal.png",
-    "requirements": ["vt_graph_api, the python library to query the VirusTotal graph API"],
+    "requirements": ["vt-graph-api, the official VirusTotal Graph SDK (tested with 2.2.0)"],
     "features": (
         "The module takes the MISP event as input and queries the VirusTotal Graph API to create a new graph out of the"
-        " event.\n\nOnce the graph is ready, we get the url of it, which is returned so we can view it on VirusTotal."
+        " event, or update an existing graph linked in the event. Supports flat and wrapped events, object attributes"
+        " and filename/hash composites. Boolean configuration accepts true/false strings.\n\nReturns graph links as a"
+        " text file. See https://github.com/MISP/misp-modules/blob/main/documentation/export_mod/vt_graph.md for API v3"
+        " behavior, visibility and quota details."
     ),
-    "references": ["https://www.virustotal.com/gui/graph-overview"],
+    "references": [
+        "https://docs.virustotal.com/reference/create-graphs",
+        "https://docs.virustotal.com/reference/graphs-update",
+        "https://docs.virustotal.com/reference/graph-object",
+        "https://github.com/VirusTotal/vt-graph-api",
+    ],
     "input": "A MISP event.",
     "output": "Link of the VirusTotal Graph created for the event.",
 }
-mispattributes = {
-    "input": [
-        "hostname",
-        "domain",
-        "ip-src",
-        "ip-dst",
-        "md5",
-        "sha1",
-        "sha256",
-        "url",
-        "filename|md5",
-        "filename",
-    ]
-}
+mispattributes = {"input": MISP_INPUT_ATTR}
 moduleconfig = [
     "vt_api_key",
     "fetch_information",
@@ -49,64 +48,93 @@ moduleconfig = [
 ]
 
 
+def _collaborators(value, name):
+    if value is None or value == "":
+        return None
+    if not isinstance(value, str):
+        raise GraphImportError(f"{name} must be a comma-separated string.")
+    return list(dict.fromkeys(item.strip() for item in value.split(",") if item.strip()))
+
+
 def handler(q=False):
-    """Expansion handler.
-
-    Args:
-      q (bool, optional): module data. Defaults to False.
-
-    Returns:
-      [str]: VirusTotal graph links
-    """
+    """Export the selected MISP events using the official API v3 Graph SDK."""
     if not q:
         return False
-    request = json.loads(q)
+    try:
+        request = json.loads(q)
+    except (TypeError, ValueError):
+        return {"error": "The export request must be valid JSON."}
+    if not isinstance(request, dict):
+        return {"error": "The export request must be an object."}
+    config = request.get("config")
+    if (
+        not isinstance(config, dict)
+        or not isinstance(config.get("vt_api_key"), str)
+        or not config["vt_api_key"].strip()
+    ):
+        return {"error": "A VirusTotal API key is required for this module."}
 
-    if not request.get("config") or not request["config"].get("vt_api_key"):
-        misperrors["error"] = "A VirusTotal api key is required for this module."
-        return misperrors
+    try:
+        options = {
+            name: boolean(config.get(name), name)
+            for name in (
+                "fetch_information",
+                "private",
+                "fetch_vt_enterprise",
+                "expand_one_level",
+            )
+        }
+        collaborators = {
+            name: _collaborators(config.get(name), name)
+            for name in (
+                "user_editors",
+                "user_viewers",
+                "group_editors",
+                "group_viewers",
+            )
+        }
+        graphs = from_pymisp_response(
+            request,
+            config["vt_api_key"],
+            fetch_information=options["fetch_information"],
+            private=options["private"],
+            fetch_vt_enterprise=options["fetch_vt_enterprise"],
+            expand_node_one_level=options["expand_one_level"],
+            **collaborators,
+        )
+        links = []
+        for graph in graphs:
+            graph.save_graph()
+            if not isinstance(graph.graph_id, str) or not GRAPH_ID_PATTERN.fullmatch(graph.graph_id):
+                raise vt_errors.SaveGraphError()
+            links.append(graph.get_ui_link())
+    except GraphImportError as error:
+        return {"error": str(error)}
+    except (
+        requests.RequestException,
+        vt_errors.SaveGraphError,
+        vt_errors.LoadError,
+        vt_errors.InvalidJSONError,
+        vt_errors.CollaboratorNotFoundError,
+        vt_errors.NodeNotFoundError,
+        vt_errors.NodeNotSupportedTypeError,
+        vt_errors.NodeNotSupportedExpansionError,
+        vt_errors.SameNodeError,
+        vt_errors.MaximumConnectionRetriesError,
+        ValueError,
+        KeyError,
+        TypeError,
+    ):
+        # The SDK may include raw response bodies or request details in errors.
+        # A save or collaborator update can fail after a graph has been created.
+        return {
+            "error": (
+                "VirusTotal Graph export failed. Check your API access, quota and existing graphs before retrying;"
+                " one or more graphs may already have been saved."
+            )
+        }
 
-    config = request["config"]
-
-    api_key = config.get("vt_api_key")
-    fetch_information = config.get("fetch_information") or False
-    private = config.get("private") or False
-    fetch_vt_enterprise = config.get("fetch_vt_enterprise") or False
-    expand_one_level = config.get("expand_one_level") or False
-
-    user_editors = config.get("user_editors")
-    if user_editors:
-        user_editors = user_editors.split(",")
-    user_viewers = config.get("user_viewers")
-    if user_viewers:
-        user_viewers = user_viewers.split(",")
-    group_editors = config.get("group_editors")
-    if group_editors:
-        group_editors = group_editors.split(",")
-    group_viewers = config.get("group_viewers")
-    if group_viewers:
-        group_viewers = group_viewers.split(",")
-
-    graphs = from_pymisp_response(
-        request,
-        api_key,
-        fetch_information=fetch_information,
-        private=private,
-        fetch_vt_enterprise=fetch_vt_enterprise,
-        user_editors=user_editors,
-        user_viewers=user_viewers,
-        group_editors=group_editors,
-        group_viewers=group_viewers,
-        expand_node_one_level=expand_one_level,
-    )
-    links = []
-
-    for graph in graphs:
-        graph.save_graph()
-        links.append(graph.get_ui_link())
-
-    # This file will contains one VirusTotal graph link for each exported event
-    file_data = str(base64.b64encode(bytes("\n".join(links), "utf-8")), "utf-8")
+    file_data = base64.b64encode("\n".join(links).encode("utf-8")).decode("ascii")
     return {"response": [], "data": file_data}
 
 

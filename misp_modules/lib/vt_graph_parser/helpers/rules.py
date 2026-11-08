@@ -83,6 +83,8 @@ class MispEventRule(object):
         Returns:
           MispEventRule: the transited rule.
         """
+        if self.node is None:
+            return MispEventCustomRule(self, node)
         graph.add_link(self.node.node_id, node.node_id, "manual")
         return self
 
@@ -141,6 +143,16 @@ class MispEventRule(object):
           MispEventRule: the transited rule.
         """
         pass
+
+
+class MispEventCustomRule(MispEventRule):
+    """Keep an initial custom node so the next node can be connected."""
+
+    def resolve_relation(self, graph, node, misp_category):
+        graph.add_link(self.node.node_id, node.node_id, "manual")
+        if node.node_type in self.relation_event:
+            return MispEventInitialRule().resolve_relation(graph, node, misp_category)
+        return MispEventCustomRule(self, node)
 
 
 class MispEventURLRule(MispEventRule):
