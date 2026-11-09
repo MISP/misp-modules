@@ -4517,6 +4517,43 @@ Export IDS-marked network attributes as RouterOS IPv4/IPv6 firewall filter comma
 
 -----
 
+#### [MISP Feed Export](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/misp_feed.py)
+
+Generate a MISP feed ZIP from the selected events, with a manifest and hash index.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/misp_feed.py)]
+
+- **features**:
+>Uses PyMISP to_feed to create manifest.json, hashes.csv and UUID-named event files. Accepts multiple events and returns a downloadable ZIP without fetching other events or publishing files. Defaults to published events with distribution All and inheriting data. See the usage guide at https://github.com/MISP/misp-modules/blob/main/documentation/export_mod/misp_feed.md.
+
+- **config**:
+> - valid_distributions
+> - include_unpublished
+> - with_distribution
+> - with_local_tags
+> - exclude_attribute_types
+> - max_events
+> - max_size_mb
+
+- **fetch_options**:
+>{'includeAttachments': True}
+
+- **input**:
+>A selected collection of complete MISP events, in standard, flat or legacy export format.
+
+- **output**:
+>Base64-encoded ZIP containing a standard MISP feed directory.
+
+- **references**:
+>https://github.com/MISP/PyMISP/tree/main/examples/feed-generator
+
+- **require_standard_format**:
+>True
+
+- **requirements**:
+>PyMISP
+
+-----
+
 #### [Nexthink NXQL Export](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/nexthinkexport.py)
 
 <img src=logos/nexthink.svg height=60>
