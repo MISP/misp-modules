@@ -1,0 +1,402 @@
+{
+  "$comment": "Projection of OCSF 1.9.0 JSON Schema from https://schema.ocsf.io/schema/1.9.0/classes/osint_inventory_info?profiles=none. Upstream OCSF schema is Apache-2.0 (https://github.com/ocsf/ocsf-schema/blob/1.9.0/LICENSE). Only properties used by ocsf_export and their referenced definitions are retained; upstream required fields, constraints, types and enums are unchanged. No optional profiles are enabled.",
+  "$defs": {
+    "file": {
+      "additionalProperties": false,
+      "properties": {
+        "hashes": {
+          "items": {
+            "$ref": "#/$defs/fingerprint"
+          },
+          "title": "Hashes",
+          "type": "array"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "type_id": {
+          "enum": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            99
+          ],
+          "title": "Type ID",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "name",
+        "type_id"
+      ],
+      "title": "File",
+      "type": "object"
+    },
+    "fingerprint": {
+      "additionalProperties": false,
+      "properties": {
+        "algorithm_id": {
+          "enum": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20,
+            99
+          ],
+          "title": "Algorithm ID",
+          "type": "integer"
+        },
+        "value": {
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "algorithm_id",
+        "value"
+      ],
+      "title": "Fingerprint",
+      "type": "object"
+    },
+    "metadata": {
+      "additionalProperties": false,
+      "properties": {
+        "original_event_uid": {
+          "title": "Original Event ID",
+          "type": "string"
+        },
+        "processed_time": {
+          "title": "Processed Time",
+          "type": "integer"
+        },
+        "product": {
+          "$ref": "#/$defs/product",
+          "title": "Product"
+        },
+        "uid": {
+          "title": "Event UID",
+          "type": "string"
+        },
+        "version": {
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "product",
+        "version"
+      ],
+      "title": "Metadata",
+      "type": "object"
+    },
+    "object": {
+      "additionalProperties": true,
+      "properties": {},
+      "title": "Object",
+      "type": "object"
+    },
+    "observable": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "type_id": {
+          "enum": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20,
+            21,
+            22,
+            23,
+            24,
+            25,
+            26,
+            27,
+            28,
+            29,
+            30,
+            31,
+            32,
+            33,
+            34,
+            35,
+            36,
+            37,
+            38,
+            39,
+            40,
+            41,
+            42,
+            43,
+            44,
+            45,
+            46,
+            47,
+            48,
+            49,
+            50,
+            99
+          ],
+          "title": "Type ID",
+          "type": "integer"
+        },
+        "value": {
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type_id"
+      ],
+      "title": "Observable",
+      "type": "object"
+    },
+    "osint": {
+      "additionalProperties": false,
+      "properties": {
+        "comment": {
+          "title": "Analyst Comments",
+          "type": "string"
+        },
+        "confidence_id": {
+          "enum": [
+            0,
+            1,
+            2,
+            3,
+            99
+          ],
+          "title": "Confidence ID",
+          "type": "integer"
+        },
+        "external_uid": {
+          "title": "External ID",
+          "type": "string"
+        },
+        "file": {
+          "$ref": "#/$defs/file",
+          "title": "Related File"
+        },
+        "labels": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Labels",
+          "type": "array"
+        },
+        "modified_time": {
+          "title": "Modified Time",
+          "type": "integer"
+        },
+        "src_url": {
+          "title": "Source URL",
+          "type": "string"
+        },
+        "tlp": {
+          "enum": [
+            "AMBER",
+            "AMBER STRICT",
+            "CLEAR",
+            "GREEN",
+            "RED",
+            "WHITE"
+          ],
+          "title": "Traffic Light Protocol",
+          "type": "string"
+        },
+        "type_id": {
+          "enum": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            99
+          ],
+          "title": "Indicator Type ID",
+          "type": "integer"
+        },
+        "uid": {
+          "title": "Unique ID",
+          "type": "string"
+        },
+        "value": {
+          "title": "Indicator",
+          "type": "string"
+        },
+        "vendor_name": {
+          "title": "Vendor Name",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type_id",
+        "value"
+      ],
+      "title": "OSINT",
+      "type": "object"
+    },
+    "product": {
+      "additionalProperties": false,
+      "anyOf": [
+        {
+          "required": [
+            "name"
+          ]
+        },
+        {
+          "required": [
+            "uid"
+          ]
+        }
+      ],
+      "properties": {
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "vendor_name": {
+          "title": "Vendor Name",
+          "type": "string"
+        }
+      },
+      "title": "Product",
+      "type": "object"
+    }
+  },
+  "$id": "https://schema.ocsf.io/schema/classes/osint_inventory_info",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "additionalProperties": false,
+  "properties": {
+    "activity_id": {
+      "enum": [
+        0,
+        1,
+        2,
+        99
+      ],
+      "title": "Activity ID",
+      "type": "integer"
+    },
+    "category_uid": {
+      "const": 5,
+      "title": "Category ID",
+      "type": "integer"
+    },
+    "class_uid": {
+      "const": 5021,
+      "title": "Class ID",
+      "type": "integer"
+    },
+    "metadata": {
+      "$ref": "#/$defs/metadata",
+      "title": "Metadata"
+    },
+    "observables": {
+      "items": {
+        "$ref": "#/$defs/observable"
+      },
+      "title": "Observables",
+      "type": "array"
+    },
+    "osint": {
+      "items": {
+        "$ref": "#/$defs/osint"
+      },
+      "title": "OSINT",
+      "type": "array"
+    },
+    "severity_id": {
+      "enum": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        99
+      ],
+      "title": "Severity ID",
+      "type": "integer"
+    },
+    "time": {
+      "title": "Event Time",
+      "type": "integer"
+    },
+    "type_uid": {
+      "title": "Type ID",
+      "type": "integer"
+    },
+    "unmapped": {
+      "$ref": "#/$defs/object",
+      "title": "Unmapped Data"
+    }
+  },
+  "required": [
+    "activity_id",
+    "category_uid",
+    "class_uid",
+    "metadata",
+    "osint",
+    "severity_id",
+    "time",
+    "type_uid"
+  ],
+  "title": "OSINT Inventory Info",
+  "type": "object"
+}

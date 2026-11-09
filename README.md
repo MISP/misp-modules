@@ -268,6 +268,7 @@ For further Information see the [license file](https://misp.github.io/misp-modul
 * [MikroTik RouterOS ACL Export](https://misp.github.io/misp-modules/export_mod/#mikrotik-routeros-acl-export) - Export IDS-marked network attributes as RouterOS IPv4/IPv6 firewall filter commands.
 * [Netfilter nftables Export](https://misp.github.io/misp-modules/export_mod/#netfilter-nftables-export) - Export IDS-marked event and object network attributes as nftables block or logging rules.
 * [Nexthink NXQL Export](https://misp.github.io/misp-modules/export_mod/#nexthink-nxql-export) - Nexthink NXQL query export module
+* [OCSF Export](https://misp.github.io/misp-modules/export_mod/#ocsf-export) - Export event and object indicators as OCSF OSINT Inventory Info NDJSON.
 * [OSQuery Export](https://misp.github.io/misp-modules/export_mod/#osquery-export) - Export MISP event and object indicators as an osquery query pack.
 * [Palo Alto PAN-OS ACL Export](https://misp.github.io/misp-modules/export_mod/#palo-alto-pan-os-acl-export) - Export IDS-marked network attributes as PAN-OS local security policy set commands.
 * [Event to PDF Export](https://misp.github.io/misp-modules/export_mod/#event-to-pdf-export) - Simple export of a MISP event to PDF.

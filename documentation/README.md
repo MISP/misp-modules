@@ -4541,6 +4541,30 @@ Nexthink NXQL query export module
 
 -----
 
+#### [OCSF Export](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/ocsf_export.py)
+
+Export event and object indicators as OCSF OSINT Inventory Info NDJSON.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/ocsf_export.py)]
+
+- **features**:
+>Exports supported attributes from all supplied events as OCSF 1.9.0 OSINT Inventory Info events (5021). Includes typed observables, stable source-based IDs, object context, tags, TLP and modification times. Only to_ids attributes are included by default; include_non_ids enables contextual attributes. Deleted data is excluded. No additional dependency or remote connection is required. See the [usage guide](https://github.com/MISP/misp-modules/blob/main/documentation/export_mod/ocsf_export.md).
+
+- **config**:
+> - include_non_ids
+> - misp_url
+
+- **input**:
+>MISP events and object attributes in standard, bare or legacy export format.
+
+- **output**:
+>Base64-encoded UTF-8 OCSF NDJSON; skipped counts and warnings in the API response.
+
+- **references**:
+> - https://schema.ocsf.io/1.9.0/classes/osint_inventory_info
+> - https://github.com/ocsf/ocsf-schema/tree/1.9.0
+
+-----
+
 #### [OSQuery Export](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/osqueryexport.py)
 
 <img src=logos/osquery.png height=60>
