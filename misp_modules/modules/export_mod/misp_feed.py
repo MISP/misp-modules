@@ -13,18 +13,30 @@ from datetime import date
 from pymisp import MISPEvent, PyMISPError, pymisp_json_default
 
 moduleinfo = {
-    "version": "1.0",
+    "version": "1.1",
     "author": "MISP Project",
     "name": "MISP Feed Export",
     "logo": "",
     "description": "Generate a MISP feed ZIP from the selected events, with a manifest and hash index.",
     "module-type": ["export"],
-    "require_standard_format": True,
-    "fetch_options": {"includeAttachments": True},
+    # The legacy envelope retains EventTag/AttributeTag association-local flags
+    # that older JSON converters discard when flattening nested Tag records.
+    "require_standard_format": False,
+    "fetch_options": {
+        "includeAttachments": True,
+        "includeEventCorrelations": False,
+        "noSightings": True,
+        "noShadowAttributes": True,
+        "excludeGalaxy": True,
+        "fetchFullClusters": False,
+    },
+    "collection_export": "misp-feed-v1",
+    "timeout": 120,
     "requirements": ["PyMISP"],
     "features": (
         "Uses PyMISP to_feed to create manifest.json, hashes.csv and UUID-named event files. Accepts multiple"
-        " events and returns a downloadable ZIP without fetching other events or publishing files. Defaults to"
+        " events and supports bounded one-event parts for MISP background collection generation. Returns a ZIP without"
+        " fetching other events or publishing files. Defaults to"
         " published events with distribution All and inheriting data. See the usage guide at"
         " https://github.com/MISP/misp-modules/blob/main/documentation/export_mod/misp_feed.md."
     ),
@@ -40,6 +52,7 @@ moduleconfig = [
     "exclude_attribute_types",
     "max_events",
     "max_size_mb",
+    "max_event_size_mb",
 ]
 
 
@@ -75,11 +88,11 @@ def _identifier(value, name):
     return str(parsed)
 
 
-def _integer(value, name, default, maximum):
+def _integer(value, name, default, maximum, minimum=1):
     if value is None or value == "":
         return default
-    if isinstance(value, bool) or not re.fullmatch(r"[0-9]{1,9}", str(value)) or not 1 <= int(value) <= maximum:
-        raise FeedError(f"{name} must be between 1 and {maximum}.")
+    if isinstance(value, bool) or not re.fullmatch(r"[0-9]{1,9}", str(value)) or not minimum <= int(value) <= maximum:
+        raise FeedError(f"{name} must be between {minimum} and {maximum}.")
     return int(value)
 
 
@@ -90,16 +103,31 @@ def _distribution(value):
 
 
 def _tags(container, local):
-    source = container.pop("Tag", [])
-    for key in ("EventTag", "AttributeTag"):
-        source += [item.get("Tag", item) for item in _list(container.pop(key, []), key)]
-    tags = []
+    source = []
+    for key in ("Tag", "EventTag", "AttributeTag"):
+        for wrapper in _list(container.pop(key, []), key):
+            tag = wrapper.get("Tag", wrapper)
+            if not isinstance(tag, dict):
+                raise FeedError("Tags must be objects.")
+            tag = dict(tag)
+            tag["local"] = _boolean(wrapper.get("local"), "Tag.local") or _boolean(tag.get("local"), "Tag.local")
+            tag["exportable"] = _boolean(wrapper.get("exportable"), "Tag.exportable", True) and _boolean(
+                tag.get("exportable"), "Tag.exportable", True
+            )
+            source.append(tag)
+    tags = {}
     for tag in _list(source, "Tag"):
         tag["exportable"] = _boolean(tag.get("exportable"), "Tag.exportable", True)
         tag["local"] = _boolean(tag.get("local"), "Tag.local")
-        if tag["exportable"] and (local or not tag["local"]):
-            tags.append(tag)
-    container["Tag"] = tags
+        name = tag.get("name")
+        if not isinstance(name, str) or not name:
+            raise FeedError("Tags must include a name.")
+        if name in tags:
+            tags[name]["local"] |= tag["local"]
+            tags[name]["exportable"] &= tag["exportable"]
+        else:
+            tags[name] = tag
+    container["Tag"] = [tag for tag in tags.values() if tag["exportable"] and (local or not tag["local"])]
 
 
 def _prepare_child(child, allowed, excluded, local, timestamp, kind):
@@ -123,7 +151,7 @@ def _event(envelope, allowed, excluded, local):
         raise FeedError("Event must be an object.")
     event = copy.deepcopy(source)
     # Core legacy exports put selected collections next to Event metadata.
-    for key in ("Attribute", "Object", "Tag", "EventTag", "EventReport", "Orgc", "CryptographicKey"):
+    for key in ("Attribute", "Object", "Tag", "EventTag", "EventReport", "Orgc", "CryptographicKey", "SharingGroup"):
         if key in envelope:
             event[key] = copy.deepcopy(envelope[key])
     if _boolean(event.get("deleted"), "Event.deleted"):
@@ -213,6 +241,7 @@ def handler(q=False):
         if not isinstance(request, dict) or not isinstance(request.get("config", {}), dict):
             raise FeedError("Request and config must be objects.")
         config = request.get("config", {})
+        chunk = _boolean(request.get("feed_chunk"), "feed_chunk")
         flags = {
             key: _boolean(config.get(key), key)
             for key in ("include_unpublished", "with_distribution", "with_local_tags")
@@ -229,13 +258,20 @@ def handler(q=False):
         if not isinstance(exclusions, str):
             raise FeedError("exclude_attribute_types must be comma-separated.")
         excluded = {value.strip() for value in exclusions.split(",") if value.strip()}
-        maximum = _integer(config.get("max_events"), "max_events", 1000, 100000)
-        budget = _integer(config.get("max_size_mb"), "max_size_mb", 128, 2048) * 1024 * 1024
+        maximum = _integer(config.get("max_events"), "max_events", 0, 10000000, minimum=0)
+        aggregate_mb = _integer(config.get("max_size_mb"), "max_size_mb", 10240, 1048576, minimum=0)
+        event_mb = _integer(config.get("max_event_size_mb"), "max_event_size_mb", 128, 2048)
+        budget_mb = event_mb if chunk else min(aggregate_mb or 128, 128)
+        budget = budget_mb * 1024 * 1024
         data = request.get("data")
         if isinstance(data, dict):
             data = data.get("response", [data])
         events = _list(data, "data")
-        if not events or len(events) > maximum:
+        if chunk and len(events) != 1:
+            raise FeedError("feed_chunk requires exactly one event.")
+        if not chunk and len(events) > 1000:
+            raise FeedError("Use the background MISP collection export for more than 1000 events.")
+        if not events or (maximum and len(events) > maximum):
             raise FeedError("Select at least one event and stay within max_events; the feed is never truncated.")
         manifest, hashes, seen, skipped = {}, set(), set(), {}
         output = io.BytesIO()
@@ -246,7 +282,7 @@ def handler(q=False):
                 nonlocal total
                 total += len(content)
                 if total > budget:
-                    raise FeedError("Feed exceeds max_size_mb; narrow the selection or raise the configured limit.")
+                    raise FeedError("Feed exceeds the per-request size limit (max_size_mb/max_event_size_mb).")
                 entry = zipfile.ZipInfo(name, date_time=(1980, 1, 1, 0, 0, 0))
                 entry.compress_type = zipfile.ZIP_DEFLATED
                 archive.writestr(entry, content)
@@ -281,7 +317,7 @@ def handler(q=False):
                 hashes.update((digest, event["uuid"]) for digest in body.pop("_hashes"))
                 manifest.update(body.pop("_manifest"))
                 write(event["uuid"] + ".json", _json(feed))
-            if not manifest:
+            if not manifest and not chunk:
                 raise FeedError("No events pass the published/distribution filters.")
             write("manifest.json", _json(manifest))
             text = io.StringIO(newline="")
@@ -291,6 +327,7 @@ def handler(q=False):
             "response": [],
             "data": base64.b64encode(output.getvalue()).decode("ascii"),
             "summary": {"events": len(manifest), "skipped": skipped, "uncompressed_bytes": total},
+            "feed_limits": {"max_events": maximum, "max_size_mb": aggregate_mb},
         }
     except FeedError as error:
         return {"error": "MISP feed export: " + str(error)}

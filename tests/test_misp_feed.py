@@ -276,7 +276,7 @@ def test_invalid_metadata_or_protected_event_fails_whole_export(change):
         {"valid_distributions": "6"},
         {"include_unpublished": "maybe"},
         {"exclude_attribute_types": []},
-        {"max_events": 0},
+        {"max_events": -1},
         {"max_size_mb": True},
     ],
 )
@@ -295,7 +295,7 @@ def test_duplicate_events_event_and_size_limits_do_not_truncate():
 
 def test_discovery_contract():
     assert module.handler(False) is False
-    assert module.version()["require_standard_format"]
+    assert module.version()["require_standard_format"] is False
     assert module.introspection()["inputSource"] == ["event", "event-collection"]
     assert module.introspection()["responseType"] == "application/zip"
 
@@ -322,3 +322,76 @@ class TestFeedHTTP(AsyncHTTPTestCase):
         result = json.loads(response.body)
         assert result["summary"]["events"] == 2 and "data" in result
         assert json.loads(self.fetch("/modules").body)[0]["mispattributes"]["outputFileExtension"] == "zip"
+
+    def test_each_chunk_has_its_own_http_deadline(self):
+        import time
+
+        prepare = module._event
+
+        def delayed(*args, **kwargs):
+            time.sleep(0.12)
+            return prepare(*args, **kwargs)
+
+        start = time.monotonic()
+        with patch.object(module, "_event", side_effect=delayed):
+            for index in range(12):
+                response = self.fetch(
+                    "/query",
+                    method="POST",
+                    body=json.dumps(
+                        {"module": "misp_feed", "timeout": 1, "feed_chunk": True, "data": [event(index + 1)]}
+                    ),
+                )
+                assert response.code == 200 and "data" in json.loads(response.body)
+        assert time.monotonic() - start > 1
+
+
+def test_incremental_chunk_is_single_event_and_carries_aggregate_limits():
+    result = module.handler(json.dumps({"data": [event()], "feed_chunk": True}))
+    assert "error" not in result and result["summary"]["events"] == 1
+    assert result["feed_limits"] == {"max_events": 0, "max_size_mb": 10240}
+    assert module.version()["collection_export"] == "misp-feed-v1"
+    assert "error" in module.handler(json.dumps({"data": [event(1), event(2)], "feed_chunk": True}))
+
+
+def test_filtered_chunk_is_valid_empty_part_for_background_assembly():
+    source = event()
+    source["published"] = False
+    result = module.handler(json.dumps({"data": [source], "feed_chunk": True}))
+    assert "error" not in result and result["summary"]["events"] == 0
+    part = zipfile.ZipFile(io.BytesIO(base64.b64decode(result["data"])))
+    assert json.loads(part.read("manifest.json")) == {} and part.read("hashes.csv") == b""
+
+
+def test_large_inline_request_is_rejected_in_favour_of_background_flow():
+    result = module.handler(json.dumps({"data": [event()] * 1001}))
+    assert "error" in result and "background" in result["error"] and "data" not in result
+
+
+@pytest.mark.parametrize("association_local", [True, "true", "1", 1])
+def test_wrapper_local_flags_survive_before_tag_filtering(association_local):
+    source = event()
+    source.pop("Tag")
+    source["EventTag"] = [{"local": association_local, "Tag": {"name": "association-private-event", "local": False}}]
+    source["Attribute"][0].pop("Tag")
+    source["Attribute"][0]["AttributeTag"] = [
+        {"local": association_local, "Tag": {"name": "association-private-attribute", "local": "false"}}
+    ]
+    _, feed = archive([source])
+    assert b"association-private" not in feed.read("manifest.json")
+    assert b"association-private" not in feed.read(identifier(1) + ".json")
+    _, feed = archive([source], with_local_tags=True)
+    body = json.loads(feed.read(identifier(1) + ".json"))["Event"]
+    assert body["Tag"][0]["name"] == "association-private-event"
+    assert body["Attribute"][0]["Tag"][0]["name"] == "association-private-attribute"
+
+
+def test_duplicate_flat_and_wrapped_tag_records_keep_restrictive_local_state():
+    source = event()
+    source["Tag"] = [{"name": "mixed-local-tag", "local": False}]
+    source["EventTag"] = [{"Tag": {"name": "mixed-local-tag"}, "local": True}]
+    _, feed = archive([source])
+    assert b"mixed-local-tag" not in feed.read(identifier(1) + ".json")
+    _, feed = archive([source], with_local_tags=True)
+    tags = json.loads(feed.read(identifier(1) + ".json"))["Event"]["Tag"]
+    assert len(tags) == 1 and tags[0]["local"] is True

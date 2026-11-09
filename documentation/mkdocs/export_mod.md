@@ -382,7 +382,10 @@ Generate a MISP feed ZIP from the selected events, with a manifest and hash inde
 [[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/misp_feed.py)]
 
 - **features**:
->Uses PyMISP to_feed to create manifest.json, hashes.csv and UUID-named event files. Accepts multiple events and returns a downloadable ZIP without fetching other events or publishing files. Defaults to published events with distribution All and inheriting data. See the usage guide at https://github.com/MISP/misp-modules/blob/main/documentation/export_mod/misp_feed.md.
+>Uses PyMISP to_feed to create manifest.json, hashes.csv and UUID-named event files. Accepts multiple events and supports bounded one-event parts for MISP background collection generation. Returns a ZIP without fetching other events or publishing files. Defaults to published events with distribution All and inheriting data. See the usage guide at https://github.com/MISP/misp-modules/blob/main/documentation/export_mod/misp_feed.md.
+
+- **collection_export**:
+>misp-feed-v1
 
 - **config**:
 > - valid_distributions
@@ -392,9 +395,10 @@ Generate a MISP feed ZIP from the selected events, with a manifest and hash inde
 > - exclude_attribute_types
 > - max_events
 > - max_size_mb
+> - max_event_size_mb
 
 - **fetch_options**:
->{'includeAttachments': True}
+>{'includeAttachments': True, 'includeEventCorrelations': False, 'noSightings': True, 'noShadowAttributes': True, 'excludeGalaxy': True, 'fetchFullClusters': False}
 
 - **input**:
 >A selected collection of complete MISP events, in standard, flat or legacy export format.
@@ -405,11 +409,11 @@ Generate a MISP feed ZIP from the selected events, with a manifest and hash inde
 - **references**:
 >https://github.com/MISP/PyMISP/tree/main/examples/feed-generator
 
-- **require_standard_format**:
->True
-
 - **requirements**:
 >PyMISP
+
+- **timeout**:
+>120
 
 -----
 
