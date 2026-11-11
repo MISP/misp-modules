@@ -89,6 +89,7 @@ nav:
       - Export Modules: export_mod.md
       - Import Modules: import_mod.md
     - Install Guides: install.md
+    - TLS and Post-Quantum Readiness: tls-pqc.md
     - Local Module Configuration: module-config.md
     - PAP RED Restrictions: pap-red.md
     - Result Caching: caching.md
