@@ -1,5 +1,6 @@
-from flask import Blueprint, redirect, render_template, request
+from flask import Blueprint, redirect, render_template, request, url_for
 from flask import session as sess
+from flask_login import current_user
 
 from app.utils import admin_user_active
 
@@ -9,6 +10,23 @@ from .form import ExternalToolForm
 external_tools_blueprint = Blueprint(
     "external_tools", __name__, template_folder="templates", static_folder="static"
 )
+
+
+@external_tools_blueprint.before_request
+def authorize_tool_management():
+    """Apply the same optional-admin policy as module configuration."""
+    sess["admin_user"] = admin_user_active()
+    if request.endpoint not in {
+        "external_tools.add_external_tool",
+        "external_tools.delete_tool",
+        "external_tools.change_status",
+        "external_tools.change_config",
+    }:
+        return None
+    if sess["admin_user"] and not current_user.is_authenticated:
+        if request.endpoint == "external_tools.add_external_tool":
+            return redirect(url_for("account.login", next=request.path))
+        return {"message": "Permission denied", "toast_class": "danger-subtle"}, 403
 
 
 @external_tools_blueprint.route("/external_tools", methods=["GET"])

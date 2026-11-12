@@ -149,6 +149,12 @@ If `ADMIN_PASSWORD` is set in `.env`, the admin user is active. Access the login
 - **Development**: If `ADMIN_PASSWORD` is unset, a password is generated and printed to the console.
 - **Production**: `ADMIN_PASSWORD` must be set in `.env`, or the application will fail to start with an error.
 
+### External tool management
+
+When `ADMIN_PASSWORD` is configured, adding, deleting, enabling, or editing an
+external tool requires an administrator login. As with module configuration,
+installations without `ADMIN_PASSWORD` allow management without a login.
+
 ## Database Management
 
 Manage the database with the following commands:
