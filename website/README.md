@@ -155,6 +155,10 @@ When `ADMIN_PASSWORD` is configured, adding, deleting, enabling, or editing an
 external tool requires an administrator login. As with module configuration,
 installations without `ADMIN_PASSWORD` allow management without a login.
 
+External tool API keys are never included in `/external_tools/list`. Leave the
+API key field blank when editing a tool to keep its saved key, or enter a new
+key to replace it. Keys remain available on the server for tool submissions.
+
 ## Database Management
 
 Manage the database with the following commands:

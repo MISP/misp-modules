@@ -85,42 +85,27 @@ def change_status():
 )
 def change_config():
     """Change configuration for a tool"""
-    if (
-        "tool_id" in request.json["result_dict"]
-        and request.json["result_dict"]["tool_id"]
-    ):
-        if (
-            "tool_name" in request.json["result_dict"]
-            and request.json["result_dict"]["tool_name"]
-        ):
-            if (
-                "tool_url" in request.json["result_dict"]
-                and request.json["result_dict"]["tool_url"]
-            ):
-                if (
-                    "tool_api_key" in request.json["result_dict"]
-                    and request.json["result_dict"]["tool_api_key"]
-                ):
-                    res = ToolModel.change_config_core(request.json["result_dict"])
-                    if res:
-                        return {
-                            "message": "Config changed",
-                            "toast_class": "success-subtle",
-                        }, 200
-                    return {
-                        "message": "Something went wrong",
-                        "toast_class": "danger-subtle",
-                    }, 400
-                return {
-                    "message": 'Need to pass "tool_api_key"',
-                    "toast_class": "warning-subtle",
-                }, 400
-            return {
-                "message": 'Need to pass "tool_url"',
-                "toast_class": "warning-subtle",
-            }, 400
+    payload = request.get_json(silent=True)
+    values = payload.get("result_dict") if isinstance(payload, dict) else None
+    if not isinstance(values, dict):
         return {
-            "message": 'Need to pass "tool_name"',
+            "message": 'Need to pass "result_dict"',
             "toast_class": "warning-subtle",
         }, 400
-    return {"message": 'Need to pass "tool_id"', "toast_class": "warning-subtle"}, 400
+    for field in ("tool_id", "tool_name", "tool_url"):
+        if not values.get(field):
+            return {
+                "message": f'Need to pass "{field}"',
+                "toast_class": "warning-subtle",
+            }, 400
+    # Credentials are write-only. Missing or empty means keep the saved key.
+    if "tool_api_key" in values and (
+        not isinstance(values["tool_api_key"], str) or len(values["tool_api_key"]) > 60
+    ):
+        return {
+            "message": "API key must be a string of at most 60 characters",
+            "toast_class": "warning-subtle",
+        }, 400
+    if ToolModel.change_config_core(values):
+        return {"message": "Config changed", "toast_class": "success-subtle"}, 200
+    return {"message": "Something went wrong", "toast_class": "danger-subtle"}, 400

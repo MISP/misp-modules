@@ -169,3 +169,63 @@ class ExternalToolTests(unittest.TestCase):
                 self.assertEqual(
                     response.status_code, 302 if url == "/add_external_tool" else 200
                 )
+
+    def test_list_never_exposes_credentials(self):
+        for authenticated in (False, True):
+            with self.subTest(authenticated=authenticated):
+                if authenticated:
+                    self.login()
+                response = self.client.get("/external_tools/list")
+                self.assertEqual(response.status_code, 200)
+                self.assertNotIn(b"saved-secret", response.data)
+                self.assertNotIn("api_key", response.json[0])
+                self.assertEqual(response.json[0]["id"], self.tool_id)
+
+    def test_missing_or_blank_key_preserves_saved_key(self):
+        self.login()
+        for extra in ({}, {"tool_api_key": ""}):
+            with self.subTest(extra=extra):
+                response = self.client.post(
+                    "/external_tools/change_config",
+                    json={"result_dict": {**self.config, **extra}},
+                    headers={"X-CSRFToken": self.token},
+                )
+                self.assertEqual(response.status_code, 200)
+                self.assertEqual(
+                    self.snapshot()[0][1:4],
+                    ("Updated tool", "https://example.org/updated", "saved-secret"),
+                )
+
+    def test_invalid_config_returns_bad_request_without_changes(self):
+        self.login()
+        before = self.snapshot()
+        for body in (
+            None,
+            [],
+            {},
+            {"result_dict": None},
+            {"result_dict": []},
+            {"result_dict": {}},
+            {"result_dict": {**self.config, "tool_api_key": ["invalid"]}},
+            {"result_dict": {**self.config, "tool_api_key": "x" * 61}},
+        ):
+            with self.subTest(body=body):
+                response = self.client.post(
+                    "/external_tools/change_config",
+                    json=body,
+                    headers={"X-CSRFToken": self.token},
+                )
+                self.assertEqual(response.status_code, 400)
+                self.assertEqual(self.snapshot(), before)
+
+    def test_stored_key_remains_available_for_server_side_submission(self):
+        from app import home_core
+        from app.models import ExternalTools
+
+        with self.app.app_context(), patch("app.home_core.requests.post") as post:
+            post.return_value.status_code = 200
+            tool = ExternalTools.query.get(self.tool_id)
+            self.assertTrue(home_core.submit_external_tool({"example": "result"}, tool))
+            self.assertEqual(
+                post.call_args.kwargs["headers"]["X-API-KEY"], "saved-secret"
+            )
