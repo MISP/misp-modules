@@ -6,7 +6,7 @@
   "requirements": ["SPARQLWrapper", "pymisp"],
   "features": [
     "Accept a text attribute with type, value and UUID. Preserve the source attribute, including its existing metadata, and reference its UUID from each result with related-to.",
-    "Query exact labels and aliases in the configured language. Return up to max_results distinct candidate entities with labels and descriptions, falling back to English for display when needed. This is an exact match lookup, not a fuzzy search; multiple matches may be ambiguous and require analyst review.",
+    "Query exact labels and aliases in the configured language. Return up to max_results distinct candidate Q items with labels and descriptions, falling back to English for display when needed. Properties and lexemes are excluded before applying the result limit. This is an exact match lookup, not a fuzzy search; multiple matches may be ambiguous and require analyst review.",
     "Return results.Attribute and results.Object in misp_standard format. Each annotation has a ref link to https://www.wikidata.org/wiki/Q... and text containing the entity label, Q identifier and optional description. All generated attributes have to_ids=false; descriptive text has correlation disabled.",
     "No matches returns an empty Object list and preserves the source attribute. Invalid requests, malformed responses, timeouts and upstream failures return an error dictionary without exposing upstream exception details.",
     "Use the public HTTPS Wikidata Query Service with a MISP user agent and a bounded request timeout. No API key is needed. Attribute values are sent to Wikidata; linked pages are not downloaded.",

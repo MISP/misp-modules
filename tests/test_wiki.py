@@ -6,6 +6,8 @@ from urllib.error import HTTPError, URLError
 import pytest
 from pymisp import MISPObject
 from pyparsing import ParseResults
+from rdflib import RDFS, SKOS, Graph, Literal, URIRef
+from rdflib.plugins.sparql.algebra import translateQuery
 from rdflib.plugins.sparql.parser import Query, parseQuery
 from rdflib.plugins.sparql.parserutils import CompValue
 from SPARQLWrapper import JSON, POST
@@ -96,6 +98,7 @@ def test_untrusted_text_stays_inside_sparql_literals(client, text, legacy):
     assert [(str(node["string"]), node["lang"] if "lang" in node else "") for node in literals] == [
         (text, "en"),
         (text, "en"),
+        ("^https?://www[.]wikidata[.]org/entity/Q[1-9][0-9]*$", ""),
         ("en,en", ""),
     ]
     assert sum(node.name == "ServiceGraphPattern" for node in parsed) == 1
@@ -124,6 +127,25 @@ def test_defaults_and_modern_endpoint(client):
     assert 'rdfs:label "Google"@en' in sparql
     assert 'skos:altLabel "Google"@en' in sparql
     assert "LIMIT 5" in sparql
+
+
+@pytest.mark.parametrize("predicate", [RDFS.label, SKOS.altLabel])
+@pytest.mark.parametrize("has_item", [True, False])
+def test_non_items_do_not_consume_the_query_limit(client, predicate, has_item):
+    assert "results" in wiki.handler(query(config={"max_results": 1}))
+    parsed = parseQuery(client[1].setQuery.call_args.args[0])
+    subquery = next(node for node in nodes(parsed) if node.name == "SubSelect")
+    # Evaluate the actual inner SELECT locally, including its ORDER BY/LIMIT,
+    # without calling the outer Wikidata label service.
+    parsed[1] = CompValue("SelectQuery", **subquery)
+    graph = Graph()
+    entities = ["P1", "L1", "L1-F1", "L1-S1"]
+    if has_item:
+        entities.extend(["Q1", "Q9"])
+    for entity in entities:
+        graph.add((URIRef(f"http://www.wikidata.org/entity/{entity}"), predicate, Literal("Google", lang="en")))
+    results = [str(row.item) for row in graph.query(translateQuery(parsed))]
+    assert results == (["http://www.wikidata.org/entity/Q1"] if has_item else [])
 
 
 @pytest.mark.parametrize("config", [{}, {"language": "", "timeout": None, "max_results": "  "}])

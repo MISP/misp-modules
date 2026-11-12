@@ -68,6 +68,7 @@ SELECT ?item ?itemLabel ?itemDescription WHERE {{
       {{ ?item rdfs:label {literal}@{language} . }}
       UNION
       {{ ?item skos:altLabel {literal}@{language} . }}
+      FILTER(REGEX(STR(?item), "^https?://www[.]wikidata[.]org/entity/Q[1-9][0-9]*$"))
     }} ORDER BY ?item LIMIT {max_results}
   }}
   SERVICE wikibase:label {{ bd:serviceParam wikibase:language "{language},en" . }}
