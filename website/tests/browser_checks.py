@@ -697,11 +697,29 @@ class InterfaceTests(unittest.TestCase):
             expect(self.page.get_by_role("button", name="Rejected destination", exact=False)).to_have_count(0)
             self.page.unroute("**/external_tools/change_config")
 
+            with self.page.expect_response("**/external_tools/change_status?*") as toggled:
+                self.page.get_by_role("checkbox", name="Enable Renamed destination", exact=True).uncheck()
+            self.assertEqual(toggled.value.status, 200)
+            self.assertEqual(toggled.value.request.method, "POST")
+            self.assertEqual(toggled.value.request.headers["x-csrftoken"], self.page.locator("#csrf_token").input_value())
+            with self.app.app_context():
+                self.assertFalse(db.session.get(ExternalTools, tool_id).is_active)
+
             with self.page.expect_response("**/external_tools/list") as listed:
                 self.page.reload()
             self.assertNotIn("replacement-browser-secret", listed.value.text())
             self.page.get_by_role("button", name="Renamed destination", exact=False).click()
             expect(self.page.get_by_label("API key", exact=True)).to_be_empty()
+            with self.page.expect_response(f"**/external_tools/{tool_id}/delete_tool") as deleted:
+                self.page.get_by_role("button", name="Delete tool", exact=True).click()
+            self.assertEqual(deleted.value.status, 200)
+            self.assertEqual(deleted.value.request.method, "POST")
+            self.assertEqual(deleted.value.request.headers["x-csrftoken"], self.page.locator("#csrf_token").input_value())
+            expect(self.page.get_by_role("button", name="Renamed destination", exact=False)).to_have_count(0)
+            self.page.reload()
+            expect(self.page.get_by_role("button", name="Renamed destination", exact=False)).to_have_count(0)
+            with self.app.app_context():
+                self.assertIsNone(db.session.get(ExternalTools, tool_id))
             self.page.get_by_role("link", name="Log out", exact=True).click()
             expect(self.page.get_by_role("link", name="Admin login", exact=True)).to_be_visible()
 

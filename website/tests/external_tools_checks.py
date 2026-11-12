@@ -229,3 +229,19 @@ class ExternalToolTests(unittest.TestCase):
             self.assertEqual(
                 post.call_args.kwargs["headers"]["X-API-KEY"], "saved-secret"
             )
+
+    def test_get_cannot_mutate_even_for_an_admin(self):
+        self.login()
+        before = self.snapshot()
+        for url, _ in self.requests()[1:]:
+            with self.subTest(url=url):
+                self.assertEqual(self.client.get(url).status_code, 405)
+                self.assertEqual(self.snapshot(), before)
+
+    def test_all_mutations_require_csrf_even_for_an_admin(self):
+        self.login()
+        before = self.snapshot()
+        for url, options in self.requests():
+            with self.subTest(url=url):
+                self.assertEqual(self.client.post(url, **options).status_code, 400)
+                self.assertEqual(self.snapshot(), before)

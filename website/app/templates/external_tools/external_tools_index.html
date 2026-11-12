@@ -169,7 +169,10 @@
                 }
 
                 async function change_status(tool, event){
-                    let res = await fetch("/external_tools/change_status?tool_id="+tool.id)
+                    let res = await fetch("/external_tools/change_status?tool_id="+tool.id, {
+                        method: "POST",
+                        headers: { "X-CSRFToken": $("#csrf_token").val() }
+                    })
                     if(res.ok){
                         tool.is_active = tool.is_active === false
                     }else{
@@ -191,7 +194,10 @@
 
                 async function delete_tool(){
                     let loc_id = current_config.value["tool_id"]
-                    let res = await fetch("/external_tools/"+loc_id+"/delete_tool")
+                    let res = await fetch("/external_tools/"+loc_id+"/delete_tool", {
+                        method: "POST",
+                        headers: { "X-CSRFToken": $("#csrf_token").val() }
+                    })
                     if(res.ok){
                         current_config.value = {}
                         let index 

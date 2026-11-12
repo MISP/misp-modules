@@ -52,9 +52,7 @@ def add_external_tool():
     return render_template("external_tools/add_external_tool.html", form=form)
 
 
-@external_tools_blueprint.route(
-    "/external_tools/<tid>/delete_tool", methods=["GET", "POST"]
-)
+@external_tools_blueprint.route("/external_tools/<tid>/delete_tool", methods=["POST"])
 def delete_tool(tid):
     """Delete a tool"""
     if ToolModel.get_tool(tid):
@@ -64,9 +62,7 @@ def delete_tool(tid):
     return {"message": "Tool not found", "toast_class": "danger-subtle"}, 404
 
 
-@external_tools_blueprint.route(
-    "/external_tools/change_status", methods=["GET", "POST"]
-)
+@external_tools_blueprint.route("/external_tools/change_status", methods=["POST"])
 def change_status():
     """Active or disabled a tool"""
     if "tool_id" in request.args:
@@ -80,9 +76,7 @@ def change_status():
     return {"message": 'Need to pass "tool_id"', "toast_class": "warning-subtle"}, 400
 
 
-@external_tools_blueprint.route(
-    "/external_tools/change_config", methods=["GET", "POST"]
-)
+@external_tools_blueprint.route("/external_tools/change_config", methods=["POST"])
 def change_config():
     """Change configuration for a tool"""
     payload = request.get_json(silent=True)
