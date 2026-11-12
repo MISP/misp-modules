@@ -245,3 +245,13 @@ class ExternalToolTests(unittest.TestCase):
             with self.subTest(url=url):
                 self.assertEqual(self.client.post(url, **options).status_code, 400)
                 self.assertEqual(self.snapshot(), before)
+
+    def test_delete_is_committed_without_an_http_session(self):
+        from app import db
+        from app.external_tools import external_tools_core
+        from app.models import ExternalTools
+
+        with self.app.app_context():
+            self.assertTrue(external_tools_core.delete_tool(self.tool_id))
+            db.session.remove()
+            self.assertIsNone(db.session.get(ExternalTools, self.tool_id))

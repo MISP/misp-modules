@@ -51,6 +51,7 @@ def delete_tool(tool_id):
     tool = get_tool(tool_id)
     if tool:
         db.session.delete(tool)
+        db.session.commit()
         return True
     return False
 
