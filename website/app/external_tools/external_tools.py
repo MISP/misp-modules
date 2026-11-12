@@ -1,5 +1,6 @@
-from flask import Blueprint, redirect, render_template, request
+from flask import Blueprint, redirect, render_template, request, url_for
 from flask import session as sess
+from flask_login import current_user
 
 from app.utils import admin_user_active
 
@@ -9,6 +10,23 @@ from .form import ExternalToolForm
 external_tools_blueprint = Blueprint(
     "external_tools", __name__, template_folder="templates", static_folder="static"
 )
+
+
+@external_tools_blueprint.before_request
+def authorize_tool_management():
+    """Apply the same optional-admin policy as module configuration."""
+    sess["admin_user"] = admin_user_active()
+    if request.endpoint not in {
+        "external_tools.add_external_tool",
+        "external_tools.delete_tool",
+        "external_tools.change_status",
+        "external_tools.change_config",
+    }:
+        return None
+    if sess["admin_user"] and not current_user.is_authenticated:
+        if request.endpoint == "external_tools.add_external_tool":
+            return redirect(url_for("account.login", next=request.path))
+        return {"message": "Permission denied", "toast_class": "danger-subtle"}, 403
 
 
 @external_tools_blueprint.route("/external_tools", methods=["GET"])
@@ -34,9 +52,7 @@ def add_external_tool():
     return render_template("external_tools/add_external_tool.html", form=form)
 
 
-@external_tools_blueprint.route(
-    "/external_tools/<tid>/delete_tool", methods=["GET", "POST"]
-)
+@external_tools_blueprint.route("/external_tools/<tid>/delete_tool", methods=["POST"])
 def delete_tool(tid):
     """Delete a tool"""
     if ToolModel.get_tool(tid):
@@ -46,9 +62,7 @@ def delete_tool(tid):
     return {"message": "Tool not found", "toast_class": "danger-subtle"}, 404
 
 
-@external_tools_blueprint.route(
-    "/external_tools/change_status", methods=["GET", "POST"]
-)
+@external_tools_blueprint.route("/external_tools/change_status", methods=["POST"])
 def change_status():
     """Active or disabled a tool"""
     if "tool_id" in request.args:
@@ -62,47 +76,30 @@ def change_status():
     return {"message": 'Need to pass "tool_id"', "toast_class": "warning-subtle"}, 400
 
 
-@external_tools_blueprint.route(
-    "/external_tools/change_config", methods=["GET", "POST"]
-)
+@external_tools_blueprint.route("/external_tools/change_config", methods=["POST"])
 def change_config():
     """Change configuration for a tool"""
-    if (
-        "tool_id" in request.json["result_dict"]
-        and request.json["result_dict"]["tool_id"]
-    ):
-        if (
-            "tool_name" in request.json["result_dict"]
-            and request.json["result_dict"]["tool_name"]
-        ):
-            if (
-                "tool_url" in request.json["result_dict"]
-                and request.json["result_dict"]["tool_url"]
-            ):
-                if (
-                    "tool_api_key" in request.json["result_dict"]
-                    and request.json["result_dict"]["tool_api_key"]
-                ):
-                    res = ToolModel.change_config_core(request.json["result_dict"])
-                    if res:
-                        return {
-                            "message": "Config changed",
-                            "toast_class": "success-subtle",
-                        }, 200
-                    return {
-                        "message": "Something went wrong",
-                        "toast_class": "danger-subtle",
-                    }, 400
-                return {
-                    "message": 'Need to pass "tool_api_key"',
-                    "toast_class": "warning-subtle",
-                }, 400
-            return {
-                "message": 'Need to pass "tool_url"',
-                "toast_class": "warning-subtle",
-            }, 400
+    payload = request.get_json(silent=True)
+    values = payload.get("result_dict") if isinstance(payload, dict) else None
+    if not isinstance(values, dict):
         return {
-            "message": 'Need to pass "tool_name"',
+            "message": 'Need to pass "result_dict"',
             "toast_class": "warning-subtle",
         }, 400
-    return {"message": 'Need to pass "tool_id"', "toast_class": "warning-subtle"}, 400
+    for field in ("tool_id", "tool_name", "tool_url"):
+        if not values.get(field):
+            return {
+                "message": f'Need to pass "{field}"',
+                "toast_class": "warning-subtle",
+            }, 400
+    # Credentials are write-only. Missing or empty means keep the saved key.
+    if "tool_api_key" in values and (
+        not isinstance(values["tool_api_key"], str) or len(values["tool_api_key"]) > 60
+    ):
+        return {
+            "message": "API key must be a string of at most 60 characters",
+            "toast_class": "warning-subtle",
+        }, 400
+    if ToolModel.change_config_core(values):
+        return {"message": "Config changed", "toast_class": "success-subtle"}, 200
+    return {"message": "Something went wrong", "toast_class": "danger-subtle"}, 400

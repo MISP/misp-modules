@@ -74,7 +74,9 @@
        autocomplete="off"
        class="form-control"
        :id="'form-api-key-'+current_config.tool_id"
-       :value="current_config.tool_api_key">
+       :value="current_config.tool_api_key"
+       placeholder="Leave blank to keep the saved key">
+                        <p class="form-text">Leave blank to keep the saved key.</p>
                         <span class="field-error" :id="'error-api-key-'+current_config.tool_id"></span>
                     </div>
                     <button type="submit" class="btn btn-primary">Save settings</button><button type="button"
@@ -115,7 +117,7 @@
                     current_config.value["tool_name"] = tool.name
                     current_config.value["tool_url"] = tool.url
                     current_config.value["tool_id"] = tool.id
-                    current_config.value["tool_api_key"] = tool.api_key
+                    current_config.value["tool_api_key"] = ""
                 }
 
                 function close_panel(){
@@ -125,7 +127,7 @@
                 async function change_config(){
                     $("#error-name-"+current_config.value["tool_id"]).text("")
                     $("#error-url-"+current_config.value["tool_id"]).text("")
-                    $("#error-url-"+current_config.value["tool_api_key"]).text("")
+                    $("#error-api-key-"+current_config.value["tool_id"]).text("")
                     let result_dict = {}
                     result_dict["tool_id"] = current_config.value["tool_id"]
 
@@ -140,29 +142,9 @@
                         return
                     }
                     let loc_api_key = $("#form-api-key-"+current_config.value["tool_id"]).val()
-                    if(!loc_api_key){
-                        $("#error-api-key-"+current_config.value["tool_id"]).text('Cannot be empty')
-                        return
-                    }
-
-                    // Update result_dict and current_config
                     result_dict["tool_name"] = loc_name
-                    current_config.value["tool_name"] = loc_name
-
                     result_dict["tool_url"] = loc_url
-                    current_config.value["tool_url"] = loc_url
-
                     result_dict["tool_api_key"] = loc_api_key
-                    current_config.value["tool_api_key"] = loc_api_key
-                    
-                    // Update list of tools with new value for current tool
-                    for(let i in tools_config.value){
-                        if(tools_config.value[i].id == current_config.value["tool_id"] ){
-                            tools_config.value[i].name = loc_name
-                            tools_config.value[i].url = loc_url
-                            tools_config.value[i].api_key = loc_api_key
-                        }
-                    }
 
                     const res = await fetch('/external_tools/change_config',{
                                         headers: { "X-CSRFToken": $("#csrf_token").val(), "Content-Type": "application/json" },
@@ -171,11 +153,26 @@
                                             result_dict
                                         })
                                     })
+                    if(res.ok){
+                        current_config.value["tool_name"] = loc_name
+                        current_config.value["tool_url"] = loc_url
+                        current_config.value["tool_api_key"] = ""
+                        $("#form-api-key-"+current_config.value["tool_id"]).val("")
+                        for(let tool of loc_tools){
+                            if(tool.id == current_config.value["tool_id"]){
+                                tool.name = loc_name
+                                tool.url = loc_url
+                            }
+                        }
+                    }
                     display_toast(res)
                 }
 
                 async function change_status(tool, event){
-                    let res = await fetch("/external_tools/change_status?tool_id="+tool.id)
+                    let res = await fetch("/external_tools/change_status?tool_id="+tool.id, {
+                        method: "POST",
+                        headers: { "X-CSRFToken": $("#csrf_token").val() }
+                    })
                     if(res.ok){
                         tool.is_active = tool.is_active === false
                     }else{
@@ -197,7 +194,10 @@
 
                 async function delete_tool(){
                     let loc_id = current_config.value["tool_id"]
-                    let res = await fetch("/external_tools/"+loc_id+"/delete_tool")
+                    let res = await fetch("/external_tools/"+loc_id+"/delete_tool", {
+                        method: "POST",
+                        headers: { "X-CSRFToken": $("#csrf_token").val() }
+                    })
                     if(res.ok){
                         current_config.value = {}
                         let index 

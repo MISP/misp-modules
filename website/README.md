@@ -149,6 +149,17 @@ If `ADMIN_PASSWORD` is set in `.env`, the admin user is active. Access the login
 - **Development**: If `ADMIN_PASSWORD` is unset, a password is generated and printed to the console.
 - **Production**: `ADMIN_PASSWORD` must be set in `.env`, or the application will fail to start with an error.
 
+### External tool management
+
+When `ADMIN_PASSWORD` is configured, adding, deleting, enabling, or editing an
+external tool requires an administrator login. As with module configuration,
+installations without `ADMIN_PASSWORD` allow management without a login.
+
+External tool API keys are never included in `/external_tools/list`. Leave the
+API key field blank when editing a tool to keep its saved key, or enter a new
+key to replace it. Keys remain available on the server for tool submissions.
+Management API calls that change a tool use `POST` and require a CSRF token.
+
 ## Database Management
 
 Manage the database with the following commands:

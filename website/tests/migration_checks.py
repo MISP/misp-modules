@@ -65,12 +65,13 @@ class DatabaseMigrationChecks(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.get_json(), [{
             "id": 1, "name": "saved tool", "url": "https://example.org",
-            "api_key": expected_key, "is_active": True,
+            "is_active": True,
         }])
         self.assertIn("ix_external_tools_api_key", {
             index["name"] for index in inspect(db.engine).get_indexes("external_tools")
         })
         with db.engine.connect() as connection:
+            self.assertEqual(connection.scalar(text("SELECT api_key FROM external_tools")), expected_key)
             self.assertEqual(connection.scalar(text("SELECT session_id FROM history")), 42)
             self.assertEqual(connection.scalar(text("SELECT result FROM session_db WHERE uuid = 'saved-query'")), "{}")
             self.assertEqual(connection.scalar(text("SELECT version_num FROM alembic_version")), REPAIR_HEAD)

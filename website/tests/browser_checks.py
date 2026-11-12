@@ -11,6 +11,7 @@ import threading
 import unittest
 from pathlib import Path
 from tempfile import TemporaryDirectory
+from unittest.mock import patch
 from urllib.parse import parse_qs, urlparse
 
 from playwright.sync_api import expect, sync_playwright
@@ -642,6 +643,85 @@ class InterfaceTests(unittest.TestCase):
         self.page.reload()
         self.page.get_by_role("button", name="whois", exact=False).click()
         expect(self.page.get_by_label("server", exact=True)).not_to_have_value("unsaved.example.org")
+
+    def test_external_tool_settings_keep_keys_write_only(self):
+        from app import db
+        from app.models import ExternalTools
+        from app.utils import utils
+
+        with self.app.app_context():
+            tool = ExternalTools(name="Review destination", url="https://example.org/ingest",
+                                 api_key="saved-browser-secret", is_active=True)
+            db.session.add(tool)
+            db.session.commit()
+            tool_id = tool.id
+
+        with patch.object(utils, "ADMIN_PASSWORD", "external-tool-browser-admin"):
+            self.page.goto(self.base + "/add_external_tool")
+            self.page.wait_for_url("**/login?next=**")
+            self.page.get_by_label("Password", exact=True).fill("external-tool-browser-admin")
+            self.page.get_by_role("button", name="Log in", exact=True).click()
+            self.page.wait_for_url("**/add_external_tool")
+
+            with self.page.expect_response("**/external_tools/list") as listed:
+                self.page.goto(self.base + "/external_tools")
+            self.assertNotIn("saved-browser-secret", listed.value.text())
+            self.assertTrue(all("api_key" not in row for row in listed.value.json()))
+            self.page.get_by_role("button", name="Review destination", exact=False).click()
+            key_field = self.page.get_by_label("API key", exact=True)
+            expect(key_field).to_be_empty()
+            expect(self.page.get_by_text("Leave blank to keep the saved key.", exact=True)).to_be_visible()
+            self.page.get_by_label("Name", exact=True).fill("Renamed destination")
+            with self.page.expect_response("**/external_tools/change_config") as saved:
+                self.page.get_by_role("button", name="Save settings", exact=True).click()
+            self.assertEqual(saved.value.status, 200)
+            self.assertEqual(saved.value.request.method, "POST")
+            expect(self.page.get_by_role("button", name="Renamed destination", exact=False)).to_be_visible()
+            with self.app.app_context():
+                self.assertEqual(db.session.get(ExternalTools, tool_id).api_key, "saved-browser-secret")
+
+            key_field.fill("replacement-browser-secret")
+            with self.page.expect_response("**/external_tools/change_config") as saved:
+                self.page.get_by_role("button", name="Save settings", exact=True).click()
+            self.assertEqual(saved.value.status, 200)
+            expect(key_field).to_be_empty()
+            with self.app.app_context():
+                self.assertEqual(db.session.get(ExternalTools, tool_id).api_key, "replacement-browser-secret")
+
+            self.page.route("**/external_tools/change_config", lambda route: route.fulfill(
+                status=403, json={"message": "Permission denied", "toast_class": "danger-subtle"}))
+            self.page.get_by_label("Name", exact=True).fill("Rejected destination")
+            with self.page.expect_response("**/external_tools/change_config"):
+                self.page.get_by_role("button", name="Save settings", exact=True).click()
+            expect(self.page.get_by_role("button", name="Renamed destination", exact=False)).to_be_visible()
+            expect(self.page.get_by_role("button", name="Rejected destination", exact=False)).to_have_count(0)
+            self.page.unroute("**/external_tools/change_config")
+
+            with self.page.expect_response("**/external_tools/change_status?*") as toggled:
+                self.page.get_by_role("checkbox", name="Enable Renamed destination", exact=True).uncheck()
+            self.assertEqual(toggled.value.status, 200)
+            self.assertEqual(toggled.value.request.method, "POST")
+            self.assertEqual(toggled.value.request.headers["x-csrftoken"], self.page.locator("#csrf_token").input_value())
+            with self.app.app_context():
+                self.assertFalse(db.session.get(ExternalTools, tool_id).is_active)
+
+            with self.page.expect_response("**/external_tools/list") as listed:
+                self.page.reload()
+            self.assertNotIn("replacement-browser-secret", listed.value.text())
+            self.page.get_by_role("button", name="Renamed destination", exact=False).click()
+            expect(self.page.get_by_label("API key", exact=True)).to_be_empty()
+            with self.page.expect_response(f"**/external_tools/{tool_id}/delete_tool") as deleted:
+                self.page.get_by_role("button", name="Delete tool", exact=True).click()
+            self.assertEqual(deleted.value.status, 200)
+            self.assertEqual(deleted.value.request.method, "POST")
+            self.assertEqual(deleted.value.request.headers["x-csrftoken"], self.page.locator("#csrf_token").input_value())
+            expect(self.page.get_by_role("button", name="Renamed destination", exact=False)).to_have_count(0)
+            self.page.reload()
+            expect(self.page.get_by_role("button", name="Renamed destination", exact=False)).to_have_count(0)
+            with self.app.app_context():
+                self.assertIsNone(db.session.get(ExternalTools, tool_id))
+            self.page.get_by_role("link", name="Log out", exact=True).click()
+            expect(self.page.get_by_role("link", name="Admin login", exact=True)).to_be_visible()
 
     def test_parent_query_relationship_is_preserved(self):
         self.page.goto(self.base + "/home/test-query?query=example.org")
