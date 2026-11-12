@@ -4335,23 +4335,30 @@ An expansion module for https://whoisfreaks.com/ that enriches a domain or an IP
 
 <img src=../logos/wikidata.png height=60>
 
-An expansion hover module to extract information from Wikidata to have additional information about particular term for analysis.
+Look up Wikidata labels and aliases and return related annotation objects.
 [[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/wiki.py)]
 
 - **features**:
->This module takes a text attribute as input and queries the Wikidata API. If the text attribute is clear enough to define a specific term, the API returns a wikidata link in response.
+>Looks up exact labels and aliases in Wikidata without an API key. Returns bounded candidate matches with labels, descriptions and Wikidata links as annotation objects related to the source text attribute. Generated attributes have to_ids=false. language defaults to en; max_results defaults to 5 (1-25); timeout defaults to 15 seconds (1-60). Blank settings use defaults. Labels and descriptions fall back to English when unavailable in the requested language. No matches returns an empty Object list. Legacy top-level text requests are accepted, but all responses use misp_standard.
+
+- **config**:
+> - language
+> - max_results
+> - timeout
 
 - **input**:
->Text attribute.
+>A text attribute containing type, value and UUID; legacy top-level text is also accepted.
 
 - **output**:
->Text attribute.
+>Annotation objects with Wikidata links, labels and descriptions, in MISP standard format.
 
 - **references**:
->https://www.wikidata.org
+> - https://www.wikidata.org
+> - https://www.wikidata.org/wiki/Wikidata:SPARQL_query_service
 
 - **requirements**:
->SPARQLWrapper python library
+> - SPARQLWrapper
+> - pymisp
 
 -----
 

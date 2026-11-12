@@ -3,7 +3,6 @@
 
 import json
 import os
-import time
 import unittest
 from base64 import b64encode
 from urllib.parse import urljoin
@@ -934,44 +933,23 @@ class TestExpansions(unittest.TestCase):
             self.assertEqual(self.get_errors(response), "A Vulners api key is required for this module.")
 
     def test_wikidata(self):
-        query = {"module": "wiki", "text": "Google"}
-        retryable_errors = {"Something went wrong, look in the server logs for details"}
-        max_attempts = 4
-        wait_seconds = 2
-
-        last_response = None
-        last_exception = None
-        for attempt in range(1, max_attempts + 1):
-            try:
-                last_response = self.misp_modules_post(query)
-            except requests.exceptions.RequestException as request_exception:
-                last_exception = request_exception
-                if attempt < max_attempts:
-                    time.sleep(wait_seconds)
-                    continue
-                self.fail(f"Wikidata request failed after {max_attempts} attempts: {request_exception}")
-
-            try:
-                self.assertEqual(self.get_values(last_response), "http://www.wikidata.org/entity/Q95")
-                return
-            except Exception:
-                try:
-                    error_message = self.get_errors(last_response)
-                except Exception:
-                    error_message = None
-
-                if error_message not in retryable_errors or attempt == max_attempts:
-                    break
-
-                time.sleep(wait_seconds)
-
-        if last_response is None and last_exception is not None:
-            self.fail(f"Wikidata request failed after {max_attempts} attempts: {last_exception}")
-
-        try:
-            self.assertEqual(self.get_values(last_response), "No additional data found on Wikidata")
-        except Exception:
-            self.assertEqual(self.get_errors(last_response), "Something went wrong, look in the server logs for details")
+        source_uuid = "32876e4a-916d-4935-9e51-7b69a76718f8"
+        query = {
+            "module": "wiki",
+            "attribute": {"type": "text", "value": "Google", "uuid": source_uuid},
+        }
+        response = self.misp_modules_post(query)
+        error = response.json().get("error")
+        if error in (
+            "Wikidata query timed out. Try again later.",
+            "Wikidata query failed. The service may be unavailable or rate-limited.",
+        ):
+            self.skipTest(error)
+        self.assertIn("https://www.wikidata.org/wiki/Q95", self.get_object_attribute_values(response, "ref"))
+        self.assertEqual(self.get_object_types(response), ["annotation"] * len(response.json()["results"]["Object"]))
+        self.assertEqual(response.json()["results"]["Attribute"][0]["uuid"], source_uuid)
+        for obj in response.json()["results"]["Object"]:
+            self.assertEqual(obj["ObjectReference"][0]["referenced_uuid"], source_uuid)
 
     def test_xforceexchange(self):
         module_name = "xforceexchange"

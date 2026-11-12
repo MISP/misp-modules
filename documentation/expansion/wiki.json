@@ -1,0 +1,37 @@
+{
+  "name": "Wikidata Lookup",
+  "module": "wiki",
+  "module-type": ["expansion", "hover"],
+  "description": "Look up exact Wikidata labels and aliases and return related MISP annotation objects.",
+  "requirements": ["SPARQLWrapper", "pymisp"],
+  "features": [
+    "Accept a text attribute with type, value and UUID. Preserve the source attribute, including its existing metadata, and reference its UUID from each result with related-to.",
+    "Query exact labels and aliases in the configured language. Return up to max_results distinct candidate Q items with labels and descriptions, falling back to English for display when needed. Properties and lexemes are excluded before applying the result limit. This is an exact match lookup, not a fuzzy search; multiple matches may be ambiguous and require analyst review.",
+    "Return results.Attribute and results.Object in misp_standard format. Each annotation has a ref link to https://www.wikidata.org/wiki/Q... and text containing the entity label, Q identifier and optional description. All generated attributes have to_ids=false; descriptive text has correlation disabled.",
+    "No matches returns an empty Object list and preserves the source attribute. Invalid requests, malformed responses, timeouts and upstream failures return an error dictionary without exposing upstream exception details.",
+    "Use the public HTTPS Wikidata Query Service with a MISP user agent and a bounded request timeout. No API key is needed. Attribute values are sent to Wikidata; linked pages are not downloaded.",
+    "Escape user text as a SPARQL string literal, including backslashes, quotes and control characters (PR #869). Validate the language tag and numeric configuration before constructing the query.",
+    "Legacy requests containing a top-level text value are still accepted, but now also return misp_standard output. They return annotations without a source attribute or source references. Consumers of the previous results list must migrate to results.Object."
+  ],
+  "config": {
+    "language": "Language tag for exact labels and aliases, for example en, fr or zh-hans. Default: en. Labels and descriptions use this language with English fallback.",
+    "max_results": "Integer from 1 to 25. Default: 5. Bounds both the query and the number of generated annotations; duplicate entity identifiers are removed.",
+    "timeout": "Request timeout in seconds, integer from 1 to 60. Default: 15. Blank configuration values use defaults."
+  },
+  "references": [
+    "https://www.wikidata.org/wiki/Wikidata:SPARQL_query_service",
+    "https://github.com/MISP/misp-modules/pull/869",
+    "https://github.com/MISP/misp-objects/blob/main/objects/annotation/definition.json"
+  ],
+  "examples": [
+    {
+      "module": "wiki",
+      "attribute": {
+        "type": "text",
+        "value": "Google",
+        "uuid": "32876e4a-916d-4935-9e51-7b69a76718f8"
+      },
+      "config": {"language": "en", "max_results": "5", "timeout": "15"}
+    }
+  ]
+}
