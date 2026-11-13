@@ -1,6 +1,8 @@
 import base64
 import copy
 import json
+from io import BytesIO
+from pathlib import Path
 from xml.etree import ElementTree
 
 import pytest
@@ -56,6 +58,74 @@ def export(objects=None, data=None):
     assert result["response"] == []
     payload = base64.b64decode(result["data"], validate=True)
     return payload, ElementTree.fromstring(payload), result
+
+
+@pytest.fixture
+def morning_walk():
+    """Build MISP inputs independently of the companion importer PR."""
+    data = (Path(__file__).parent / "fixtures" / "gpx" / "Morning_Walk.gpx").read_bytes()
+    source = ElementTree.fromstring(data)
+    points = source.findall("g:trk/g:trkseg/g:trkpt", NS)
+    assert len(points) == 606
+    stored = dataset(data)
+    stored["Attribute"][0]["value"] = "Morning_Walk.gpx"
+    locations = []
+    for index, point in enumerate(points, 1):
+        obj = location(
+            latitude=point.get("lat"),
+            longitude=point.get("lon"),
+            altitude=point.findtext("g:ele", namespaces=NS),
+            **{"first-seen": point.findtext("g:time", namespaces=NS)},
+        )
+        obj["uuid"] = f"00000000-0000-4000-8000-{index:012d}"
+        locations.append(obj)
+        stored["ObjectReference"].append({"relationship_type": "contains", "referenced_uuid": obj["uuid"]})
+    return data, source, stored, locations
+
+
+def test_morning_walk_attachment_round_trip(morning_walk):
+    data, source, stored, locations = morning_walk
+    payload, root, _ = export([stored, *locations])
+    assert payload == data
+    assert root.find("g:trk/g:name", NS).text == source.find("g:trk/g:name", NS).text
+    assert len(root.findall("g:trk/g:trkseg/g:trkpt", NS)) == 606
+    assert root.findall("g:wpt", NS) == []
+
+
+def test_morning_walk_combined_export_preserves_garmin_extensions(morning_walk):
+    _, source, stored, locations = morning_walk
+    _, root, _ = export([stored, *locations, location()])
+    assert len(root.findall("g:wpt", NS)) == 1
+    assert len(root.findall("g:trk", NS)) == len(root.findall("g:trk/g:trkseg", NS)) == 1
+    assert root.findtext("g:trk/g:name", namespaces=NS) == source.findtext("g:trk/g:name", namespaces=NS)
+    originals = source.findall("g:trk/g:trkseg/g:trkpt", NS)
+    exported = root.findall("g:trk/g:trkseg/g:trkpt", NS)
+    assert len(exported) == len(originals) == 606
+    for before, after in zip(originals, exported):
+        assert after.attrib == before.attrib
+        for field in ("ele", "time"):
+            assert after.findtext(f"g:{field}", namespaces=NS) == before.findtext(f"g:{field}", namespaces=NS)
+        # Compare namespace-qualified elements and all sensor values, ignoring XML prefix choices.
+        original_extensions = [
+            (el.tag, el.attrib, (el.text or "").strip()) for el in before.find("g:extensions", NS).iter()
+        ]
+        exported_extensions = [
+            (el.tag, el.attrib, (el.text or "").strip()) for el in after.find("g:extensions", NS).iter()
+        ]
+        assert exported_extensions == original_extensions
+
+
+def test_morning_walk_geolocations_become_waypoints(morning_walk):
+    _, source, _, locations = morning_walk
+    _, root, _ = export(locations)
+    originals = source.findall("g:trk/g:trkseg/g:trkpt", NS)
+    exported = root.findall("g:wpt", NS)
+    assert len(exported) == len(originals) == 606
+    assert root.findall("g:trk", NS) == []
+    for before, after in zip(originals, exported):
+        assert after.attrib == before.attrib
+        for field in ("ele", "time"):
+            assert after.findtext(f"g:{field}", namespaces=NS) == before.findtext(f"g:{field}", namespaces=NS)
 
 
 @pytest.mark.parametrize(
@@ -118,6 +188,65 @@ def test_real_pymisp_objects():
     assert root.find("g:wpt", NS).attrib == {"lat": "49", "lon": "6"}
 
 
+@pytest.mark.parametrize("offset", ["+00:60", "-00:60", "+01:99", "+14:01", "-14:01", "+15:00", "-15:00", "+23:59"])
+@pytest.mark.parametrize("context", ["first-seen", "last-seen", "attachment"])
+def test_invalid_timezone_offsets_reject_entire_export(offset, context):
+    timestamp = f"2026-01-02T12:00:00{offset}"
+    if context == "attachment":
+        obj = dataset(
+            f'<gpx version="1.1" creator="test"><wpt lat="0" lon="0"><time>{timestamp}</time></wpt></gpx>'.encode()
+        )
+    else:
+        obj = location(**{context: timestamp})
+    result = module.handler(json.dumps({"data": {"Object": [location(), obj]}}))
+    assert "observation time" in result["error"]
+    assert "data" not in result
+
+
+@pytest.mark.parametrize(
+    "offset,expected",
+    [
+        ("+00:00", "2026-01-02T12:00:00Z"),
+        ("-00:00", "2026-01-02T12:00:00Z"),
+        ("+13:59", "2026-01-01T22:01:00Z"),
+        ("-13:59", "2026-01-03T01:59:00Z"),
+        ("+14:00", "2026-01-01T22:00:00Z"),
+        ("-14:00", "2026-01-03T02:00:00Z"),
+    ],
+)
+def test_valid_timezone_offset_boundaries(offset, expected):
+    _, root, _ = export([location(**{"first-seen": f"2026-01-02T12:00:00{offset}"})])
+    assert root.findtext("g:wpt/g:time", namespaces=NS) == expected
+
+
+@pytest.mark.parametrize("context", ["geolocation", "attachment"])
+@pytest.mark.parametrize(
+    "timestamp,expected",
+    [
+        ("2026-01-01T24:00:00Z", "2026-01-02T00:00:00Z"),
+        ("2026-01-31T24:00:00+02:00", "2026-01-31T22:00:00Z"),
+        ("2024-12-31T24:00:00.000-01:00", "2025-01-01T01:00:00Z"),
+        ("2026-01-01T24:00:00", "2026-01-02T00:00:00Z"),
+        ("2026-01-01T24:00:01Z", None),
+        ("2026-01-01T24:01:00Z", None),
+        ("2026-01-01T24:00:00.001Z", None),
+    ],
+)
+def test_end_of_day_timestamps(context, timestamp, expected):
+    source = f'<gpx version="1.1" creator="test"><wpt lat="0" lon="0"><time>{timestamp}</time></wpt></gpx>'.encode()
+    obj = dataset(source) if context == "attachment" else location(**{"first-seen": timestamp})
+    result = module.handler(json.dumps({"data": {"Object": [obj]}}))
+    if expected is None:
+        assert "observation time" in result["error"] and "data" not in result
+    else:
+        assert "error" not in result, result
+        payload = base64.b64decode(result["data"])
+        if context == "attachment":
+            assert payload == source
+        else:
+            assert ElementTree.fromstring(payload).findtext("g:wpt/g:time", namespaces=NS) == expected
+
+
 def test_combined_sources_keep_geometry_extensions_and_source_metadata():
     _, root, _ = export([dataset(), dataset(GPX10), location()])
     assert len(root.findall("g:wpt", NS)) == 3
@@ -156,6 +285,69 @@ def test_namespace_less_source_and_extension_namespace_preservation():
     )
     _, root, _ = export([dataset(source), location()])
     assert root.findtext("g:wpt/g:extensions/custom", namespaces=NS) == "v"
+
+
+def test_combining_sources_preserves_qname_namespace_scopes():
+    def source(label):
+        return f"""<gpx xmlns="http://www.topografix.com/GPX/1/1" xmlns:v="urn:vendor:{label}"
+          xmlns:misp0="urn:types:{label}" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.1" creator="test">
+          <metadata><extensions><v:item id="meta-{label}" xsi:type="misp0:Meta"/></extensions></metadata>
+          <wpt lat="0" lon="0"><extensions>
+            <v:item id="point-{label}" xsi:type="misp0:Kind">misp0:Payload</v:item>
+            <v:item xmlns:misp0="urn:inner:{label}" id="inner-{label}" xsi:type="misp0:Inner"/>
+            <v:item xmlns:v="urn:shadow:{label}" id="shadow-{label}" xsi:type="v:Shadow"/>
+          </extensions></wpt>
+          <extensions><v:item id="root-{label}" xsi:type="misp0:Root"/></extensions>
+        </gpx>""".encode()
+
+    payload, _, _ = export([dataset(source("one")), dataset(source("two")), location()])
+    scopes, pending, seen = [{}], {}, set()
+    for event, value in ElementTree.iterparse(BytesIO(payload), events=("start-ns", "start", "end")):
+        if event == "start-ns":
+            prefix, uri = value
+            pending[prefix or ""] = uri
+        elif event == "start":
+            scopes.append(dict(scopes[-1], **pending))
+            pending.clear()
+        else:
+            qname = value.get("{http://www.w3.org/2001/XMLSchema-instance}type")
+            if qname:
+                prefix, local = qname.split(":")
+                identifier = value.get("id")
+                kind, label = identifier.split("-")
+                expected_uri = (
+                    f'urn:{"inner" if kind == "inner" else "shadow" if kind == "shadow" else "types"}:{label}'
+                )
+                assert scopes[-1][prefix] == expected_uri
+                assert (
+                    local == {"meta": "Meta", "point": "Kind", "inner": "Inner", "shadow": "Shadow", "root": "Root"}[
+                        kind
+                    ]
+                )
+                if kind == "point":
+                    text_prefix, text_local = value.text.split(":")
+                    assert scopes[-1][text_prefix] == f"urn:types:{label}" and text_local == "Payload"
+                seen.add(identifier)
+            scopes.pop()
+    assert seen == {
+        f"{kind}-{label}" for kind in ("meta", "point", "inner", "shadow", "root") for label in ("one", "two")
+    }
+
+
+@pytest.mark.parametrize("namespace", ["", ' xmlns="http://www.topografix.com/GPX/1/1"'])
+@pytest.mark.parametrize("local_name", ["wpt", "rtept", "trkpt"])
+def test_extension_point_names_do_not_count_as_observations(monkeypatch, namespace, local_name):
+    monkeypatch.setattr(module, "MAX_POINTS", 2)
+    payload = f'<v:payload>{f"<v:{local_name}/>" * 3}<{local_name}/></v:payload>'
+    data = (
+        f'<gpx version="1.1" creator="test"{namespace} xmlns:v="urn:vendor"><wpt lat="0"'
+        f' lon="0"/><extensions>{payload}</extensions></gpx>'.encode()
+    )
+    stored, _, _ = export([dataset(data)])
+    assert stored == data
+    _, root, _ = export([dataset(data), location()])
+    assert len(root.findall("g:wpt", NS)) == 2
+    assert len(root.findall(f".//{{urn:vendor}}{local_name}")) == 3
 
 
 def test_deleted_records_and_place_only_locations():

@@ -67,6 +67,8 @@ Vendor extensions on geometry remain attached to their points/routes/tracks.
 GPX 1.0 URLs become links; its metadata is converted to 1.1, and fields such as
 track point speed/course move into extensions in the GPX 1.0 namespace.
 Combining datasets changes XML formatting and namespace prefixes.
+Extension values keep their source namespace bindings, including prefixes used
+only in text or `xsi:type`, and prefixes reused differently by separate files.
 
 ## Geolocation mapping
 

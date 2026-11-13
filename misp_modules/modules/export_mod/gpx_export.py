@@ -5,7 +5,7 @@ import binascii
 import copy
 import json
 import re
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from decimal import Decimal, InvalidOperation
 from xml.etree import ElementTree
 
@@ -55,20 +55,36 @@ CHILDREN = {
 class _GPXTreeBuilder(ElementTree.TreeBuilder):
     def __init__(self):
         super().__init__()
-        self.depth = self.points = 0
+        self.path = []
+        self.points = 0
+        self.point_paths = set()
+        self.pending_namespaces = {}
+
+    def start_ns(self, prefix, uri):
+        # Retain bindings even when a prefix occurs only in text or an xsi:type value.
+        self.pending_namespaces["xmlns" + (":" + prefix if prefix else "")] = uri
 
     def start(self, tag, attrs):
-        self.depth += 1
-        if self.depth > 32:
+        if not self.path:
+            ns = tag[:-3]
+            self.point_paths = {
+                (tag, ns + "wpt"),
+                (tag, ns + "rte", ns + "rtept"),
+                (tag, ns + "trk", ns + "trkseg", ns + "trkpt"),
+            }
+        self.path.append(tag)
+        if len(self.path) > 32:
             raise ValueError("XML nesting exceeds the 32-level limit.")
-        if tag.rsplit("}", 1)[-1] in ("wpt", "rtept", "trkpt"):
+        if tuple(self.path) in self.point_paths:
             self.points += 1
             if self.points > MAX_POINTS:
                 raise ValueError("GPX exceeds the 10,000-point limit.")
+        attrs = dict(attrs, **self.pending_namespaces)
+        self.pending_namespaces.clear()
         return super().start(tag, attrs)
 
     def end(self, tag):
-        self.depth -= 1
+        self.path.pop()
         return super().end(tag)
 
     def doctype(self, name, pubid, system):
@@ -138,10 +154,20 @@ def _number(value, field, minimum=None, maximum=None):
 
 def _time(value):
     if not isinstance(value, str) or not re.fullmatch(
-        r"[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\.[0-9]+)?(?:Z|[+-][0-9]{2}:[0-9]{2})?", value
+        r"[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\.[0-9]+)?"
+        r"(?:Z|[+-](?:(?:0[0-9]|1[0-3]):[0-5][0-9]|14:00))?",
+        value,
     ):
         raise ValueError("Invalid geographic observation time.")
+    end_of_day = value[11:13] == "24"
+    if end_of_day:
+        fraction = re.match(r"\.([0-9]+)", value[19:])
+        if value[14:19] != "00:00" or fraction and fraction[1].strip("0"):
+            raise ValueError("Invalid geographic observation time.")
+        value = value[:11] + "00" + value[13:]
     result = datetime.fromisoformat(value.replace("Z", "+00:00"))
+    if end_of_day:
+        result += timedelta(days=1)
     result = result.replace(tzinfo=timezone.utc) if result.tzinfo is None else result.astimezone(timezone.utc)
     return result.isoformat().replace("+00:00", "Z")
 
@@ -280,9 +306,55 @@ def _metadata(root, ns):
     return metadata
 
 
+def _inherit_namespaces(node, source):
+    for key, uri in source.attrib.items():
+        if key == "xmlns" or key.startswith("xmlns:"):
+            node.attrib.setdefault(key, uri)
+    return node
+
+
+def _serialize(root):
+    """Use private prefixes for element names while retaining all source QName bindings."""
+    reserved = {"xml", "xmlns"}
+    namespaces = {}
+    for node in root.iter():
+        reserved.update(key[6:] for key in node.attrib if key.startswith("xmlns:"))
+        for name in (node.tag, *node.attrib):
+            if name.startswith("{"):
+                namespaces.setdefault(name[1:].split("}", 1)[0], None)
+    index = 0
+    for uri in namespaces:
+        if uri == "http://www.w3.org/XML/1998/namespace":
+            namespaces[uri] = "xml"
+            continue
+        while f"misp{index}" in reserved:
+            index += 1
+        namespaces[uri] = f"misp{index}"
+        index += 1
+
+    def qualified(name):
+        if not name.startswith("{"):
+            return name
+        uri, local = name[1:].split("}", 1)
+        return f"{namespaces[uri]}:{local}"
+
+    # Do not change ElementTree's process-wide prefix registry: requests may run concurrently.
+    for node in root.iter():
+        node.tag = qualified(node.tag)
+        attrs = {qualified(key): value for key, value in node.attrib.items()}
+        node.attrib.clear()
+        node.attrib.update(attrs)
+    for uri, prefix in namespaces.items():
+        if prefix != "xml":
+            root.set("xmlns:" + prefix, uri)
+    return ElementTree.tostring(root, encoding="utf-8", xml_declaration=True)
+
+
 def _combine(documents, waypoints):
     root = ElementTree.Element(GPX_NS + "gpx", version="1.1", creator="MISP misp-modules")
     metadata = _metadata(documents[0][1], documents[0][2]) if documents else ElementTree.Element(GPX_NS + "metadata")
+    if documents:
+        _inherit_namespaces(metadata, documents[0][1])
     # Any stored bounds may be stale once several datasets or locations are combined.
     for bounds in list(metadata.findall(GPX_NS + "bounds")):
         metadata.remove(bounds)
@@ -296,13 +368,12 @@ def _combine(documents, waypoints):
                 context.append(copy.deepcopy(child))
     for kind in ("wpt", "rte", "trk"):
         for _, source, ns, _ in documents:
-            root.extend(_convert(node, ns) for node in source.findall(ns + kind))
+            root.extend(_inherit_namespaces(_convert(node, ns), source) for node in source.findall(ns + kind))
         if kind == "wpt":
             root.extend(waypoints)
     if len(extensions):
         root.append(extensions)
-    # Explicit prefixed namespaces avoid changing extension elements that originally had no namespace.
-    return ElementTree.tostring(root, encoding="utf-8", xml_declaration=True)
+    return _serialize(root)
 
 
 def handler(q=False):
