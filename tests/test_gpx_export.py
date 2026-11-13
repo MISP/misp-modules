@@ -1,6 +1,7 @@
 import base64
 import copy
 import json
+from pathlib import Path
 from xml.etree import ElementTree
 
 import pytest
@@ -56,6 +57,74 @@ def export(objects=None, data=None):
     assert result["response"] == []
     payload = base64.b64decode(result["data"], validate=True)
     return payload, ElementTree.fromstring(payload), result
+
+
+@pytest.fixture
+def morning_walk():
+    """Build MISP inputs independently of the companion importer PR."""
+    data = (Path(__file__).parent / "fixtures" / "gpx" / "Morning_Walk.gpx").read_bytes()
+    source = ElementTree.fromstring(data)
+    points = source.findall("g:trk/g:trkseg/g:trkpt", NS)
+    assert len(points) == 606
+    stored = dataset(data)
+    stored["Attribute"][0]["value"] = "Morning_Walk.gpx"
+    locations = []
+    for index, point in enumerate(points, 1):
+        obj = location(
+            latitude=point.get("lat"),
+            longitude=point.get("lon"),
+            altitude=point.findtext("g:ele", namespaces=NS),
+            **{"first-seen": point.findtext("g:time", namespaces=NS)},
+        )
+        obj["uuid"] = f"00000000-0000-4000-8000-{index:012d}"
+        locations.append(obj)
+        stored["ObjectReference"].append({"relationship_type": "contains", "referenced_uuid": obj["uuid"]})
+    return data, source, stored, locations
+
+
+def test_morning_walk_attachment_round_trip(morning_walk):
+    data, source, stored, locations = morning_walk
+    payload, root, _ = export([stored, *locations])
+    assert payload == data
+    assert root.find("g:trk/g:name", NS).text == source.find("g:trk/g:name", NS).text
+    assert len(root.findall("g:trk/g:trkseg/g:trkpt", NS)) == 606
+    assert root.findall("g:wpt", NS) == []
+
+
+def test_morning_walk_combined_export_preserves_garmin_extensions(morning_walk):
+    _, source, stored, locations = morning_walk
+    _, root, _ = export([stored, *locations, location()])
+    assert len(root.findall("g:wpt", NS)) == 1
+    assert len(root.findall("g:trk", NS)) == len(root.findall("g:trk/g:trkseg", NS)) == 1
+    assert root.findtext("g:trk/g:name", namespaces=NS) == source.findtext("g:trk/g:name", namespaces=NS)
+    originals = source.findall("g:trk/g:trkseg/g:trkpt", NS)
+    exported = root.findall("g:trk/g:trkseg/g:trkpt", NS)
+    assert len(exported) == len(originals) == 606
+    for before, after in zip(originals, exported):
+        assert after.attrib == before.attrib
+        for field in ("ele", "time"):
+            assert after.findtext(f"g:{field}", namespaces=NS) == before.findtext(f"g:{field}", namespaces=NS)
+        # Compare namespace-qualified elements and all sensor values, ignoring XML prefix choices.
+        original_extensions = [
+            (el.tag, el.attrib, (el.text or "").strip()) for el in before.find("g:extensions", NS).iter()
+        ]
+        exported_extensions = [
+            (el.tag, el.attrib, (el.text or "").strip()) for el in after.find("g:extensions", NS).iter()
+        ]
+        assert exported_extensions == original_extensions
+
+
+def test_morning_walk_geolocations_become_waypoints(morning_walk):
+    _, source, _, locations = morning_walk
+    _, root, _ = export(locations)
+    originals = source.findall("g:trk/g:trkseg/g:trkpt", NS)
+    exported = root.findall("g:wpt", NS)
+    assert len(exported) == len(originals) == 606
+    assert root.findall("g:trk", NS) == []
+    for before, after in zip(originals, exported):
+        assert after.attrib == before.attrib
+        for field in ("ele", "time"):
+            assert after.findtext(f"g:{field}", namespaces=NS) == before.findtext(f"g:{field}", namespaces=NS)
 
 
 @pytest.mark.parametrize(
