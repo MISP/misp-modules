@@ -149,6 +149,11 @@ If `ADMIN_PASSWORD` is set in `.env`, the admin user is active. Access the login
 - **Development**: If `ADMIN_PASSWORD` is unset, a password is generated and printed to the console.
 - **Production**: `ADMIN_PASSWORD` must be set in `.env`, or the application will fail to start with an error.
 
+After login, the optional `next` destination must be a local path or an HTTP(S)
+URL with the same host and port as the request. Accepted URLs are converted to
+local paths, preserving query strings and fragments. External or malformed
+destinations fall back to `/`.
+
 ### External tool management
 
 When `ADMIN_PASSWORD` is configured, adding, deleting, enabling, or editing an
