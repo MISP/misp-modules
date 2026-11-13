@@ -1,6 +1,10 @@
 import base64
 import hashlib
 import json
+from datetime import datetime
+from decimal import Decimal
+from pathlib import Path
+from xml.etree import ElementTree
 
 import pytest
 from pymisp import MISPEvent
@@ -85,6 +89,53 @@ def test_dataset_and_geolocation_mapping():
     event = MISPEvent()
     event.load(dict(result["results"], info="Imported GPX"))
     assert len(event.objects) == 6
+
+
+def test_morning_walk_strava_file():
+    """Exercise the complete uploaded Strava/Garmin track, including every observation."""
+    data = (Path(__file__).parent / "fixtures" / "gpx" / "Morning_Walk.gpx").read_bytes()
+    digest = "77e36202f8bb56cbc31c5bf5cc1ab104841a368c0c9e206853a9110f1b6170a8"
+    assert hashlib.sha256(data).hexdigest() == digest
+    ns = {"g": "http://www.topografix.com/GPX/1/1"}
+    source = ElementTree.fromstring(data)
+    points = source.findall("g:trk/g:trkseg/g:trkpt", ns)
+    assert len(points) == 606
+
+    result = module.handler(request(data, filename="Morning_Walk.gpx"))
+    assert "error" not in result, result
+    objects = result["results"]["Object"]
+    (dataset,) = (obj for obj in objects if obj["name"] == "gpx")
+    locations = [obj for obj in objects if obj["name"] == "geolocation"]
+    assert len(objects) == 607 and len(locations) == 606
+    fields = relations(dataset)
+    assert fields["filename"] == ["Morning_Walk.gpx"]
+    assert fields["creator"] == ["StravaGPX"]
+    assert fields["sha256"] == [digest]
+    assert fields["point-count"] == ["606"]
+    assert fields["track-count"] == fields["track-segment-count"] == ["1"]
+    assert fields["waypoint-count"] == fields["route-count"] == ["0"]
+    assert fields["start-time"] == ["2026-11-13T05:52:57+00:00"]
+    assert fields["end-time"] == ["2026-11-13T06:52:26+00:00"]
+    for coordinate in ("latitude", "longitude"):
+        values = [Decimal(point.get("lat" if coordinate == "latitude" else "lon")) for point in points]
+        assert Decimal(fields[f"min-{coordinate}"][0]) == min(values)
+        assert Decimal(fields[f"max-{coordinate}"][0]) == max(values)
+    references = dataset["ObjectReference"]
+    assert len(references) == 606
+    assert {ref["referenced_uuid"] for ref in references} == {obj["uuid"] for obj in locations}
+    assert all(ref["relationship_type"] == "contains" for ref in references)
+    for index, (point, location) in enumerate(zip(points, locations), 1):
+        observed = relations(location)
+        assert observed["latitude"] == [point.get("lat")]
+        assert observed["longitude"] == [point.get("lon")]
+        assert observed["altitude"] == [point.findtext("g:ele", namespaces=ns)]
+        timestamp = datetime.fromisoformat(point.findtext("g:time", namespaces=ns).replace("Z", "+00:00")).isoformat()
+        assert observed["first-seen"] == observed["last-seen"] == [timestamp]
+        assert location["comment"] == f"GPX track 1 segment 1 point {index}"
+    assert all(attribute["to_ids"] is False for obj in objects for attribute in obj["Attribute"])
+    (attachment,) = (a for a in dataset["Attribute"] if a["object_relation"] == "attachment")
+    # This also preserves the Garmin heart-rate/cadence/temperature extensions on every point.
+    assert base64.b64decode(attachment["data"], validate=True) == data
 
 
 @pytest.mark.parametrize("version", ["1.0", "1.1"])
