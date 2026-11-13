@@ -5,7 +5,7 @@ import binascii
 import copy
 import json
 import re
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from decimal import Decimal, InvalidOperation
 from xml.etree import ElementTree
 
@@ -159,7 +159,15 @@ def _time(value):
         value,
     ):
         raise ValueError("Invalid geographic observation time.")
+    end_of_day = value[11:13] == "24"
+    if end_of_day:
+        fraction = re.match(r"\.([0-9]+)", value[19:])
+        if value[14:19] != "00:00" or fraction and fraction[1].strip("0"):
+            raise ValueError("Invalid geographic observation time.")
+        value = value[:11] + "00" + value[13:]
     result = datetime.fromisoformat(value.replace("Z", "+00:00"))
+    if end_of_day:
+        result += timedelta(days=1)
     result = result.replace(tzinfo=timezone.utc) if result.tzinfo is None else result.astimezone(timezone.utc)
     return result.isoformat().replace("+00:00", "Z")
 

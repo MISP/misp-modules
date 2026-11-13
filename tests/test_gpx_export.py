@@ -219,6 +219,34 @@ def test_valid_timezone_offset_boundaries(offset, expected):
     assert root.findtext("g:wpt/g:time", namespaces=NS) == expected
 
 
+@pytest.mark.parametrize("context", ["geolocation", "attachment"])
+@pytest.mark.parametrize(
+    "timestamp,expected",
+    [
+        ("2026-01-01T24:00:00Z", "2026-01-02T00:00:00Z"),
+        ("2026-01-31T24:00:00+02:00", "2026-01-31T22:00:00Z"),
+        ("2024-12-31T24:00:00.000-01:00", "2025-01-01T01:00:00Z"),
+        ("2026-01-01T24:00:00", "2026-01-02T00:00:00Z"),
+        ("2026-01-01T24:00:01Z", None),
+        ("2026-01-01T24:01:00Z", None),
+        ("2026-01-01T24:00:00.001Z", None),
+    ],
+)
+def test_end_of_day_timestamps(context, timestamp, expected):
+    source = f'<gpx version="1.1" creator="test"><wpt lat="0" lon="0"><time>{timestamp}</time></wpt></gpx>'.encode()
+    obj = dataset(source) if context == "attachment" else location(**{"first-seen": timestamp})
+    result = module.handler(json.dumps({"data": {"Object": [obj]}}))
+    if expected is None:
+        assert "observation time" in result["error"] and "data" not in result
+    else:
+        assert "error" not in result, result
+        payload = base64.b64decode(result["data"])
+        if context == "attachment":
+            assert payload == source
+        else:
+            assert ElementTree.fromstring(payload).findtext("g:wpt/g:time", namespaces=NS) == expected
+
+
 def test_combined_sources_keep_geometry_extensions_and_source_metadata():
     _, root, _ = export([dataset(), dataset(GPX10), location()])
     assert len(root.findall("g:wpt", NS)) == 3
