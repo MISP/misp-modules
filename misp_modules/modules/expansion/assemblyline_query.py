@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # Contributions: Adam McHugh <adam@mchughcyber.com.au>
 import json
+import logging
 from collections import defaultdict
 from urllib.parse import urlparse
 
@@ -27,17 +28,26 @@ moduleinfo = {
         " for this instance. Credentials include the used-ID and an API key or the password associated to the"
         " user-ID.\n\nThe submission ID extracted from the submission link is then used to query AssemblyLine and get"
         " the full submission report. This report is parsed to extract file objects and the associated IPs, domains or"
-        " URLs the files are connecting to.\n\nSome more data may be parsed in the future."
+        " URLs the files are connecting to.\n\nSome more data may be parsed in the future.\n\nThe optional debug flag"
+        " logs the full parsed MISP event, including indicators and classification tags, to the service logger. It is"
+        " disabled by default. See"
+        " https://github.com/MISP/misp-modules/blob/main/documentation/expansion/assemblyline_query.md."
     ),
     "references": ["https://www.cyber.gc.ca/en/assemblyline"],
     "input": "Link of an AssemblyLine submission report.",
     "output": "MISP attributes & objects parsed from the AssemblyLine submission.",
 }
-moduleconfig = ["apiurl", "user_id", "apikey", "password", "verifyssl"]
+moduleconfig = ["apiurl", "user_id", "apikey", "password", "verifyssl", "debug"]
+
+# Use the service's handlers. Each parser instance gates its own debug records,
+# so the module flag works without changing logging levels for other requests.
+LOGGER = logging.getLogger("misp-modules.assemblyline_query")
+LOGGER.setLevel(logging.DEBUG)
 
 
 class AssemblyLineParser:
-    def __init__(self):
+    def __init__(self, debug=False):
+        self.debug = _coerce_bool_flag(debug, default=False)
         self.misp_event = MISPEvent()
         self.results = {}
         self.attribute = {"to_ids": True}
@@ -69,8 +79,7 @@ class AssemblyLineParser:
             is_completed = client.get_json(f"/api/v4/submission/is_completed/{sid}/")
         except AssemblyLineError as e:
             self.results["error"] = (
-                "Something went wrong while trying to check if the submission in AssemblyLine is completed:"
-                f" {e}"
+                f"Something went wrong while trying to check if the submission in AssemblyLine is completed: {e}"
             )
             return
         if isinstance(is_completed, dict):
@@ -91,11 +100,8 @@ class AssemblyLineParser:
         if "error" in self.results:
             return self.results
         event = json.loads(self.misp_event.to_json())
-        try:
-            with open("/tmp/assemblyline_query_debug.json", "w", encoding="utf-8") as debug_file:
-                json.dump(event, debug_file, indent=2)
-        except Exception:
-            pass
+        if self.debug:
+            LOGGER.debug("Parsed AssemblyLine event: %s", json.dumps(event))
         results = {key: event[key] for key in ("Attribute", "Object", "Tag") if (key in event and event[key])}
         if not results:
             return {
@@ -188,7 +194,7 @@ class AssemblyLineParser:
 
 
 def parse_config(apiurl, user_id, config):
-    verify = _coerce_verify_flag(config.get("verifyssl"), default=True)
+    verify = _coerce_bool_flag(config.get("verifyssl"), default=True)
     api_key = config.get("apikey")
     password = config.get("password")
     errors = []
@@ -230,7 +236,7 @@ def handler(q=False):
     client = parse_config(apiurl, user_id, request["config"])
     if isinstance(client, dict):
         return client
-    assemblyline_parser = AssemblyLineParser()
+    assemblyline_parser = AssemblyLineParser(debug=request["config"].get("debug", False))
     assemblyline_parser.get_submission(request["attribute"], client)
     return assemblyline_parser.finalize_results()
 
@@ -264,7 +270,7 @@ def _extract_submission_id(value):
     return None
 
 
-def _coerce_verify_flag(value, default=True):
+def _coerce_bool_flag(value, default=True):
     if value is None:
         return default
     if isinstance(value, bool):
