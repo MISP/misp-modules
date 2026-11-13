@@ -159,6 +159,41 @@ def test_gpx_10_metadata_and_naive_observation_time():
     assert relations(result["results"]["Object"][0])["first-seen"] == ["2026-01-01T12:00:00+00:00"]
 
 
+@pytest.mark.parametrize("offset", ["+00:60", "-00:60", "+01:99", "+14:01", "-14:01", "+15:00", "-15:00", "+23:59"])
+@pytest.mark.parametrize("context", ["point", "metadata"])
+def test_invalid_timezone_offsets_reject_entire_import(offset, context):
+    timestamp = f"<time>2026-01-02T12:00:00{offset}</time>"
+    if context == "point":
+        content = f'<wpt lat="0" lon="0"/><wpt lat="1" lon="2">{timestamp}</wpt>'
+    else:
+        content = f'<metadata>{timestamp}</metadata><wpt lat="0" lon="0"/>'
+    result = module.handler(request(f'<gpx version="1.1" creator="test">{content}</gpx>'.encode()))
+    assert "observation time" in result["error"]
+    assert "results" not in result
+
+
+@pytest.mark.parametrize(
+    "offset,expected",
+    [
+        ("+00:00", "2026-01-02T12:00:00+00:00"),
+        ("-00:00", "2026-01-02T12:00:00+00:00"),
+        ("+13:59", "2026-01-01T22:01:00+00:00"),
+        ("-13:59", "2026-01-03T01:59:00+00:00"),
+        ("+14:00", "2026-01-01T22:00:00+00:00"),
+        ("-14:00", "2026-01-03T02:00:00+00:00"),
+    ],
+)
+def test_valid_timezone_offset_boundaries(offset, expected):
+    data = (
+        f'<gpx version="1.1" creator="test"><wpt lat="0" lon="0"><time>2026-01-02T12:00:00{offset}</time></wpt></gpx>'
+        .encode()
+    )
+    result = module.handler(request(data))
+    assert "error" not in result, result
+    (location,) = (obj for obj in result["results"]["Object"] if obj["name"] == "geolocation")
+    assert relations(location)["first-seen"] == [expected]
+
+
 @pytest.mark.parametrize(
     "point",
     [
