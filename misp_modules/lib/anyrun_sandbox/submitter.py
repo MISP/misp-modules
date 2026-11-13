@@ -55,7 +55,7 @@ class AnyRunSubmitter:
         self._config.pop("proxy_username", "")
         self._config.pop("proxy_password", "")
 
-        if not any((self._token, self._os_type)):
+        if not all((self._token, self._os_type)):
             raise RunTimeException(f"ANYRUN Sandbox API-KEY and OS type must be specified.")
 
         if "url" in self._request:
