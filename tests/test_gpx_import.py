@@ -248,6 +248,26 @@ def test_limits(monkeypatch):
     assert "size limit" in module.handler(request(GPX))["error"]
 
 
+@pytest.mark.parametrize("namespace", ["", ' xmlns="http://www.topografix.com/GPX/1/1"'])
+@pytest.mark.parametrize("local_name", ["wpt", "rtept", "trkpt"])
+def test_extension_point_names_do_not_count_as_observations(monkeypatch, namespace, local_name):
+    monkeypatch.setattr(module, "MAX_POINTS", 1)
+    vendor_points = f"<v:{local_name}/>" * 3
+    # Even same-namespace names nested inside a vendor payload are outside GPX's geometry paths.
+    payload = f"<v:payload>{vendor_points}<{local_name}/></v:payload>"
+    data = (
+        f'<gpx version="1.1" creator="test"{namespace} xmlns:v="urn:vendor"><wpt lat="0"'
+        f' lon="0"/><extensions>{payload}</extensions></gpx>'.encode()
+    )
+    result = module.handler(request(data))
+    assert "error" not in result, result
+    (dataset,) = (obj for obj in result["results"]["Object"] if obj["name"] == "gpx")
+    assert relations(dataset)["point-count"] == ["1"]
+    # Actual structural points must still hit the parser limit before object construction.
+    data = data.replace(b'<wpt lat="0" lon="0"/>', b'<wpt lat="0" lon="0"/>' * 2)
+    assert "point limit" in module.handler(request(data))["error"]
+
+
 class TestGPXImportHTTP(AsyncHTTPTestCase):
     def get_app(self):
         self.previous, self.cache = service.MODULES_HANDLERS.copy(), service.ListModules.CACHE

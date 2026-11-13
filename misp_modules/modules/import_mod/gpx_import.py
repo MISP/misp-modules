@@ -45,20 +45,29 @@ MAX_POINTS = 10_000
 class _GPXTreeBuilder(ElementTree.TreeBuilder):
     def __init__(self):
         super().__init__()
-        self.depth = self.points = 0
+        self.path = []
+        self.points = 0
+        self.point_paths = set()
 
     def start(self, tag, attrs):
-        self.depth += 1
-        if self.depth > 32:
+        if not self.path:
+            ns = tag[:-3]
+            self.point_paths = {
+                (tag, ns + "wpt"),
+                (tag, ns + "rte", ns + "rtept"),
+                (tag, ns + "trk", ns + "trkseg", ns + "trkpt"),
+            }
+        self.path.append(tag)
+        if len(self.path) > 32:
             raise ValueError("XML nesting exceeds the 32-level limit.")
-        if tag.rsplit("}", 1)[-1] in ("wpt", "rtept", "trkpt"):
+        if tuple(self.path) in self.point_paths:
             self.points += 1
             if self.points > MAX_POINTS:
                 raise ValueError("GPX exceeds the 10,000-point limit.")
         return super().start(tag, attrs)
 
     def end(self, tag):
-        self.depth -= 1
+        self.path.pop()
         return super().end(tag)
 
     def doctype(self, name, pubid, system):
