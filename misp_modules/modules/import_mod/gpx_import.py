@@ -145,7 +145,7 @@ def _parse(data, filename):
     add("size-in-bytes", len(data))
     add("gpx-version", version)
     for algorithm in ("md5", "sha1", "sha256"):
-        add(algorithm, hashlib.new(algorithm, data).hexdigest())
+        add(algorithm, hashlib.new(algorithm, data, usedforsecurity=False).hexdigest())
     if root.get("creator"):
         add("creator", root.get("creator"))
     for relation, path in (

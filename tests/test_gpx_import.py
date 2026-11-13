@@ -59,7 +59,7 @@ def test_dataset_and_geolocation_mapping():
     assert fields["size-in-bytes"] == [str(len(GPX))]
     assert fields["gpx-version"] == ["1.1"]
     for name in ("md5", "sha1", "sha256"):
-        assert fields[name] == [hashlib.new(name, GPX).hexdigest()]
+        assert fields[name] == [hashlib.new(name, GPX, usedforsecurity=False).hexdigest()]
     for name, count in (
         ("point-count", 5),
         ("waypoint-count", 1),
@@ -136,6 +136,23 @@ def test_morning_walk_strava_file():
     (attachment,) = (a for a in dataset["Attribute"] if a["object_relation"] == "attachment")
     # This also preserves the Garmin heart-rate/cadence/temperature extensions on every point.
     assert base64.b64decode(attachment["data"], validate=True) == data
+
+
+def test_artifact_hashes_work_with_fips_restrictions(monkeypatch):
+    new_hash = hashlib.new
+
+    def fips_hash(algorithm, data=b"", **kwargs):
+        if algorithm in ("md5", "sha1") and kwargs.get("usedforsecurity", True):
+            raise ValueError("Hash disabled for security use by FIPS policy")
+        return new_hash(algorithm, data, **kwargs)
+
+    monkeypatch.setattr(module.hashlib, "new", fips_hash)
+    result = module.handler(request())
+    assert "error" not in result, result
+    (dataset,) = (obj for obj in result["results"]["Object"] if obj["name"] == "gpx")
+    fields = relations(dataset)
+    for algorithm in ("md5", "sha1", "sha256"):
+        assert fields[algorithm] == [new_hash(algorithm, GPX, usedforsecurity=False).hexdigest()]
 
 
 @pytest.mark.parametrize("version", ["1.0", "1.1"])
