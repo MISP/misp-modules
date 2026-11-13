@@ -5,7 +5,7 @@ import binascii
 import hashlib
 import json
 import re
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 from io import BytesIO
 from xml.etree import ElementTree
@@ -92,7 +92,16 @@ def _time(value):
         value,
     ):
         raise ValueError("Invalid GPX observation time.")
+    end_of_day = value[11:13] == "24"
+    if end_of_day:
+        fraction = re.match(r"\.([0-9]+)", value[19:])
+        if value[14:19] != "00:00" or fraction and fraction[1].strip("0"):
+            raise ValueError("Invalid GPX observation time.")
+        # XML Schema permits midnight as 24:00:00; older Python runtimes do not.
+        value = value[:11] + "00" + value[13:]
     result = datetime.fromisoformat(value.replace("Z", "+00:00"))
+    if end_of_day:
+        result += timedelta(days=1)
     return result.replace(tzinfo=timezone.utc) if result.tzinfo is None else result.astimezone(timezone.utc)
 
 

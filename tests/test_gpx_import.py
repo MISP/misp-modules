@@ -194,6 +194,38 @@ def test_valid_timezone_offset_boundaries(offset, expected):
     assert relations(location)["first-seen"] == [expected]
 
 
+@pytest.mark.parametrize("context", ["point", "metadata"])
+@pytest.mark.parametrize(
+    "timestamp,expected",
+    [
+        ("2026-01-01T24:00:00Z", "2026-01-02T00:00:00+00:00"),
+        ("2026-01-31T24:00:00+02:00", "2026-01-31T22:00:00+00:00"),
+        ("2024-12-31T24:00:00.000-01:00", "2025-01-01T01:00:00+00:00"),
+        ("2026-01-01T24:00:00", "2026-01-02T00:00:00+00:00"),
+        ("2026-01-01T24:00:01Z", None),
+        ("2026-01-01T24:01:00Z", None),
+        ("2026-01-01T24:00:00.001Z", None),
+    ],
+)
+def test_end_of_day_timestamps(context, timestamp, expected):
+    content = (
+        f'<wpt lat="0" lon="0"><time>{timestamp}</time></wpt>'
+        if context == "point"
+        else f"<metadata><time>{timestamp}</time></metadata>"
+    )
+    result = module.handler(request(f'<gpx version="1.1" creator="test">{content}</gpx>'.encode()))
+    if expected is None:
+        assert "observation time" in result["error"] and "results" not in result
+    else:
+        assert "error" not in result, result
+        (obj,) = (
+            obj
+            for obj in result["results"]["Object"]
+            if obj["name"] == ("geolocation" if context == "point" else "gpx")
+        )
+        assert relations(obj)["first-seen" if context == "point" else "time"] == [expected]
+
+
 @pytest.mark.parametrize(
     "point",
     [
