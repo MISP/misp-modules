@@ -163,7 +163,7 @@ def parse_response(censys_output, attribute):
     for serv in censys_output.get("services", []):
         if not isinstance(serv, dict):
             continue
-        if serv.get("service_name").lower() == "http" and serv.get("certificate", None):
+        if (serv.get("service_name") or "").lower() == "http" and serv.get("certificate", None):
             try:
                 cert = serv.get("certificate", None)
                 if cert:
@@ -174,7 +174,7 @@ def parse_response(censys_output, attribute):
                     misp_event.add_object(**cert_obj)
             except KeyError:
                 print("Error !")
-        if serv.get("ssh") and serv.get("service_name").lower() == "ssh":
+        if serv.get("ssh") and (serv.get("service_name") or "").lower() == "ssh":
             try:
                 cert = serv.get("ssh").get("server_host_key").get("fingerprint_sha256")
                 # TODO enable once the type is merged
