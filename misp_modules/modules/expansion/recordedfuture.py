@@ -406,7 +406,6 @@ class RFEnricher:
                                 self.add_attribute(indicator, related_type)
                     elif related_type in self.galaxy_tag_types:
                         # Related entities added as galaxy-tags to the enriched attribute
-                        galaxy_tags = []
                         for related in related_entity["entities"]:
                             # filter those entities that have count bigger than 4, to reduce noise
                             # because there can be a huge list of related entities
