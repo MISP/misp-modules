@@ -269,9 +269,9 @@ class QueryModule(tornado.web.RequestHandler):
 
         def execute():
             with module_context(module_name):
-                try:
+                if hasattr(MODULES_HANDLERS[module_name], "dict_handler"):
                     response = MODULES_HANDLERS[module_name].dict_handler(request=dict_payload)
-                except AttributeError:
+                else:
                     response = MODULES_HANDLERS[module_name].handler(q=json_payload)
             outcome = (
                 "module_errors"
