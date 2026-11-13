@@ -138,7 +138,9 @@ def _number(value, field, minimum=None, maximum=None):
 
 def _time(value):
     if not isinstance(value, str) or not re.fullmatch(
-        r"[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\.[0-9]+)?(?:Z|[+-][0-9]{2}:[0-9]{2})?", value
+        r"[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\.[0-9]+)?"
+        r"(?:Z|[+-](?:(?:0[0-9]|1[0-3]):[0-5][0-9]|14:00))?",
+        value,
     ):
         raise ValueError("Invalid geographic observation time.")
     result = datetime.fromisoformat(value.replace("Z", "+00:00"))

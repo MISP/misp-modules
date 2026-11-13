@@ -187,6 +187,37 @@ def test_real_pymisp_objects():
     assert root.find("g:wpt", NS).attrib == {"lat": "49", "lon": "6"}
 
 
+@pytest.mark.parametrize("offset", ["+00:60", "-00:60", "+01:99", "+14:01", "-14:01", "+15:00", "-15:00", "+23:59"])
+@pytest.mark.parametrize("context", ["first-seen", "last-seen", "attachment"])
+def test_invalid_timezone_offsets_reject_entire_export(offset, context):
+    timestamp = f"2026-01-02T12:00:00{offset}"
+    if context == "attachment":
+        obj = dataset(
+            f'<gpx version="1.1" creator="test"><wpt lat="0" lon="0"><time>{timestamp}</time></wpt></gpx>'.encode()
+        )
+    else:
+        obj = location(**{context: timestamp})
+    result = module.handler(json.dumps({"data": {"Object": [location(), obj]}}))
+    assert "observation time" in result["error"]
+    assert "data" not in result
+
+
+@pytest.mark.parametrize(
+    "offset,expected",
+    [
+        ("+00:00", "2026-01-02T12:00:00Z"),
+        ("-00:00", "2026-01-02T12:00:00Z"),
+        ("+13:59", "2026-01-01T22:01:00Z"),
+        ("-13:59", "2026-01-03T01:59:00Z"),
+        ("+14:00", "2026-01-01T22:00:00Z"),
+        ("-14:00", "2026-01-03T02:00:00Z"),
+    ],
+)
+def test_valid_timezone_offset_boundaries(offset, expected):
+    _, root, _ = export([location(**{"first-seen": f"2026-01-02T12:00:00{offset}"})])
+    assert root.findtext("g:wpt/g:time", namespaces=NS) == expected
+
+
 def test_combined_sources_keep_geometry_extensions_and_source_metadata():
     _, root, _ = export([dataset(), dataset(GPX10), location()])
     assert len(root.findall("g:wpt", NS)) == 3
