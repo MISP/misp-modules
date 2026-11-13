@@ -222,6 +222,7 @@ For more information: [Extending MISP with Python modules](https://www.misp-proj
 * [Cortex XDR IOC Publish](https://misp.github.io/misp-modules/action_mod/#cortex-xdr-ioc-publish) - Upload missing Cortex XDR IOC rules from IDS-marked MISP event and object attributes.
 * [Cortex XSOAR Incident Create](https://misp.github.io/misp-modules/action_mod/#cortex-xsoar-incident-create) - Create a Cortex XSOAR 8 incident with a MISP event reference and selected-data counts.
 * [CrowdStrike IOC Publish](https://misp.github.io/misp-modules/action_mod/#crowdstrike-ioc-publish) - Create and renew module-owned Falcon custom IOCs from MISP event and object attributes.
+* [Export to Sentinel or Defender](https://misp.github.io/misp-modules/action_mod/#export-to-sentinel-or-defender) - Export to Sentinel or Defender using the existing script wrapper, or directly to Sentinel's STIX API.
 * [IRC](https://misp.github.io/misp-modules/action_mod/#irc) - Send a message to an IRC channel.
 * [Matrix](https://misp.github.io/misp-modules/action_mod/#matrix) - Send a message to an unencrypted Matrix room.
 * [Mattermost](https://misp.github.io/misp-modules/action_mod/#mattermost) - Simplistic module to send message to a Mattermost channel.
@@ -229,6 +230,7 @@ For more information: [Extending MISP with Python modules](https://www.misp-proj
 * [Nextcloud talk](https://misp.github.io/misp-modules/action_mod/#nextcloud-talk) - Simplistic module to send a message to a Nextcloud talk conversation.
 * [OSQuery Pack Publish](https://misp.github.io/misp-modules/action_mod/#osquery-pack-publish) - Publish a MISP query pack to a configured local osquery pack directory.
 * [QRadar Reference Set Publish](https://misp.github.io/misp-modules/action_mod/#qradar-reference-set-publish) - Publish typed MISP indicators to an existing QRadar reference set and explicit domain.
+* [Microsoft Sentinel Publish](https://misp.github.io/misp-modules/action_mod/#microsoft-sentinel-publish) - Publish MISP indicators directly to Microsoft Sentinel's STIX upload API with per-object results.
 * [SentinelOne IOC Publish](https://misp.github.io/misp-modules/action_mod/#sentinelone-ioc-publish) - Publish MISP event and object indicators to SentinelOne Threat Intelligence with explicit scope.
 * [Shuffle Workflow Execute](https://misp.github.io/misp-modules/action_mod/#shuffle-workflow-execute) - Start a Shuffle workflow with selected MISP event and object attributes as its JSON execution argument.
 * [Signal](https://misp.github.io/misp-modules/action_mod/#signal) - Send a message to Signal recipients or a group through signal-cli-rest-api.
