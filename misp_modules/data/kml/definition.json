@@ -1,0 +1,174 @@
+{
+  "attributes": {
+    "archive-member-count": {
+      "description": "Number of file members in the KMZ archive, excluding directory entries.",
+      "disable_correlation": true,
+      "misp-attribute": "counter",
+      "to_ids": false,
+      "ui-priority": 60
+    },
+    "attachment": {
+      "description": "Original KML XML or complete KMZ archive, including packaged assets.",
+      "misp-attribute": "attachment",
+      "to_ids": false,
+      "ui-priority": 95
+    },
+    "coordinate-count": {
+      "description": "Number of parsed geometry positions, including line and polygon vertices and nonempty gx:Track samples.",
+      "disable_correlation": true,
+      "misp-attribute": "counter",
+      "to_ids": false,
+      "ui-priority": 70
+    },
+    "description-text": {
+      "description": "Description of the entry document or root feature.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 70
+    },
+    "end-time": {
+      "description": "Latest complete timezone-qualified timestamp among extracted observations.",
+      "disable_correlation": true,
+      "misp-attribute": "datetime",
+      "to_ids": false,
+      "ui-priority": 70
+    },
+    "entry-document": {
+      "description": "Path of the main KML document inside the KMZ archive.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 80
+    },
+    "filename": {
+      "description": "Original dataset filename.",
+      "misp-attribute": "filename",
+      "to_ids": false,
+      "ui-priority": 100
+    },
+    "geometry-type": {
+      "description": "Geometry types parsed in Placemarks, including gx:Track and gx:MultiTrack.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 75
+    },
+    "max-latitude": {
+      "description": "Maximum WGS84 latitude among parsed geometry positions.",
+      "disable_correlation": true,
+      "misp-attribute": "float",
+      "to_ids": false,
+      "ui-priority": 60
+    },
+    "max-longitude": {
+      "description": "Maximum WGS84 longitude among parsed geometry positions.",
+      "disable_correlation": true,
+      "misp-attribute": "float",
+      "to_ids": false,
+      "ui-priority": 60
+    },
+    "md5": {
+      "description": "MD5 hash of the original attachment.",
+      "misp-attribute": "md5",
+      "to_ids": false,
+      "ui-priority": 70
+    },
+    "mime-type": {
+      "description": "application/vnd.google-earth.kml+xml for KML or application/vnd.google-earth.kmz for KMZ.",
+      "disable_correlation": true,
+      "misp-attribute": "mime-type",
+      "to_ids": false,
+      "ui-priority": 90
+    },
+    "min-latitude": {
+      "description": "Minimum WGS84 latitude among parsed geometry positions.",
+      "disable_correlation": true,
+      "misp-attribute": "float",
+      "to_ids": false,
+      "ui-priority": 60
+    },
+    "min-longitude": {
+      "description": "Minimum WGS84 longitude among parsed geometry positions.",
+      "disable_correlation": true,
+      "misp-attribute": "float",
+      "to_ids": false,
+      "ui-priority": 60
+    },
+    "name": {
+      "description": "Name of the entry document or root feature.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 85
+    },
+    "observation-count": {
+      "description": "Number of extracted Point and nonempty gx:Track observations; repeated positions remain distinct.",
+      "disable_correlation": true,
+      "misp-attribute": "counter",
+      "to_ids": false,
+      "ui-priority": 80
+    },
+    "placemark-count": {
+      "description": "Number of Placemarks parsed in the entry document and locally linked KML members; each document is parsed once.",
+      "disable_correlation": true,
+      "misp-attribute": "counter",
+      "to_ids": false,
+      "ui-priority": 75
+    },
+    "sha1": {
+      "description": "SHA1 hash of the original attachment.",
+      "misp-attribute": "sha1",
+      "to_ids": false,
+      "ui-priority": 70
+    },
+    "sha256": {
+      "description": "SHA256 hash of the original attachment.",
+      "misp-attribute": "sha256",
+      "to_ids": false,
+      "ui-priority": 70
+    },
+    "size-in-bytes": {
+      "description": "Size of the original KML file or compressed KMZ archive in bytes.",
+      "disable_correlation": true,
+      "misp-attribute": "size-in-bytes",
+      "to_ids": false,
+      "ui-priority": 80
+    },
+    "source-format": {
+      "description": "Container format of the attached dataset.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 90,
+      "values_list": [
+        "kml",
+        "kmz"
+      ]
+    },
+    "start-time": {
+      "description": "Earliest complete timezone-qualified timestamp among extracted observations.",
+      "disable_correlation": true,
+      "misp-attribute": "datetime",
+      "to_ids": false,
+      "ui-priority": 70
+    },
+    "text": {
+      "description": "Analyst note about the dataset; altitude modes and source feature metadata remain in linked observation context and the attachment.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 20
+    }
+  },
+  "description": "A KML geographic dataset or KMZ package, preserving its original document and assets, file provenance, geometry counts and derived bounds. Link extracted Point and gx:Track observations using contains.",
+  "meta-category": "file",
+  "name": "kml",
+  "required": [
+    "attachment"
+  ],
+  "uuid": "bb8f51a6-f1d5-45ff-b893-2bf58e0e0276",
+  "version": 1
+}

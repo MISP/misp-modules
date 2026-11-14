@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2" xmlns:gx="http://www.google.com/kml/ext/2.2" xmlns:v="urn:example:vendor">
+ <Document id="dataset"><name>Field map</name><description>Sites &amp; tracks</description>
+  <Style id="shared"><IconStyle><Icon><href>icons/pin.png</href></Icon></IconStyle></Style>
+  <Folder><name>Sites</name>
+   <Placemark id="camp"><name>Café &amp; camp</name><description><![CDATA[<b>Start</b> & finish]]></description>
+    <styleUrl>#shared</styleUrl><TimeStamp><when>2026-01-01T11:00:00+01:00</when></TimeStamp>
+    <ExtendedData><Data name="note"><value>field source</value></Data>
+     <v:payload><Point><coordinates>not geometry</coordinates></Point></v:payload>
+    </ExtendedData>
+    <Point><altitudeMode>absolute</altitudeMode><coordinates>6.123456789012345678901,49.1,120.5</coordinates></Point>
+   </Placemark>
+   <Placemark id="area"><name>Area</name><TimeSpan><begin>2026-11</begin><end>2026-12-01T00:00:00Z</end></TimeSpan>
+    <MultiGeometry>
+     <Point><coordinates>6,49,0</coordinates></Point>
+     <Point><gx:altitudeMode>relativeToSeaFloor</gx:altitudeMode><coordinates>7,50,-3</coordinates></Point>
+     <LineString><coordinates>-180,-90,0 180,90,1</coordinates></LineString>
+     <Polygon><outerBoundaryIs><LinearRing><coordinates>6,49 8,49 8,51 6,49</coordinates></LinearRing></outerBoundaryIs>
+      <innerBoundaryIs><LinearRing><coordinates>6.5,49.5 7,49.5 7,50 6.5,49.5</coordinates></LinearRing></innerBoundaryIs>
+     </Polygon>
+    </MultiGeometry>
+   </Placemark>
+  </Folder>
+  <Placemark><name>Track</name><gx:Track><altitudeMode>relativeToGround</altitudeMode>
+   <when>2026-01-02T00:00:00Z</when><when>2026-01-02T00:00:01Z</when><when>2026-01-02T00:00:02Z</when>
+   <gx:coord>7 50 0</gx:coord><gx:coord/><gx:coord>8 51 5</gx:coord>
+   <gx:angles>0 0 0</gx:angles><gx:angles/><gx:angles>1 2 3</gx:angles>
+  </gx:Track></Placemark>
+  <Placemark><name>Multiple tracks</name><gx:MultiTrack><altitudeMode>absolute</altitudeMode>
+   <gx:Track><when>2026-01-03T00:00:00Z</when><gx:coord>9 52 7</gx:coord></gx:Track>
+  </gx:MultiTrack></Placemark>
+  <Placemark><Model><Location><longitude>170</longitude><latitude>80</latitude><altitude>2</altitude></Location></Model></Placemark>
+  <GroundOverlay><Icon><href>images/overlay.png</href></Icon><LatLonBox><north>89</north><south>-89</south></LatLonBox></GroundOverlay>
+  <NetworkLink><Link><href>https://example.invalid/remote.kml</href></Link></NetworkLink>
+ </Document>
+</kml>
