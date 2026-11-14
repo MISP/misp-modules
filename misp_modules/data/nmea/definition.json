@@ -1,0 +1,150 @@
+{
+  "attributes": {
+    "attachment": {
+      "description": "Original NMEA 0183 log bytes, including all sentences and line endings.",
+      "misp-attribute": "attachment",
+      "to_ids": false,
+      "ui-priority": 95
+    },
+    "end-time": {
+      "description": "Latest UTC timestamp among extracted positions with a date supplied by the log.",
+      "disable_correlation": true,
+      "misp-attribute": "datetime",
+      "to_ids": false,
+      "ui-priority": 70
+    },
+    "filename": {
+      "description": "Filename of the NMEA 0183 log.",
+      "misp-attribute": "filename",
+      "to_ids": false,
+      "ui-priority": 100
+    },
+    "invalid-fix-count": {
+      "description": "Number of position sentences reporting no valid fix and omitted from extracted observations.",
+      "disable_correlation": true,
+      "misp-attribute": "counter",
+      "to_ids": false,
+      "ui-priority": 60
+    },
+    "max-latitude": {
+      "description": "Maximum WGS84 latitude among extracted position observations.",
+      "disable_correlation": true,
+      "misp-attribute": "float",
+      "to_ids": false,
+      "ui-priority": 60
+    },
+    "max-longitude": {
+      "description": "Maximum WGS84 longitude among extracted position observations.",
+      "disable_correlation": true,
+      "misp-attribute": "float",
+      "to_ids": false,
+      "ui-priority": 60
+    },
+    "md5": {
+      "description": "MD5 hash of the original log.",
+      "misp-attribute": "md5",
+      "to_ids": false,
+      "ui-priority": 70
+    },
+    "mime-type": {
+      "description": "MIME type of the log, typically text/plain.",
+      "disable_correlation": true,
+      "misp-attribute": "mime-type",
+      "to_ids": false,
+      "ui-priority": 90
+    },
+    "min-latitude": {
+      "description": "Minimum WGS84 latitude among extracted position observations.",
+      "disable_correlation": true,
+      "misp-attribute": "float",
+      "to_ids": false,
+      "ui-priority": 60
+    },
+    "min-longitude": {
+      "description": "Minimum WGS84 longitude among extracted position observations.",
+      "disable_correlation": true,
+      "misp-attribute": "float",
+      "to_ids": false,
+      "ui-priority": 60
+    },
+    "position-count": {
+      "description": "Number of extracted position observations; repeated sentences remain distinct observations.",
+      "disable_correlation": true,
+      "misp-attribute": "counter",
+      "to_ids": false,
+      "ui-priority": 80
+    },
+    "sentence-count": {
+      "description": "Number of nonblank NMEA sentences in the log.",
+      "disable_correlation": true,
+      "misp-attribute": "counter",
+      "to_ids": false,
+      "ui-priority": 80
+    },
+    "sentence-type": {
+      "description": "Sentence type, such as GGA, RMC or ZDA; proprietary sentences use their complete identifier.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 70
+    },
+    "sha1": {
+      "description": "SHA1 hash of the original log.",
+      "misp-attribute": "sha1",
+      "to_ids": false,
+      "ui-priority": 70
+    },
+    "sha256": {
+      "description": "SHA256 hash of the original log.",
+      "misp-attribute": "sha256",
+      "to_ids": false,
+      "ui-priority": 70
+    },
+    "size-in-bytes": {
+      "description": "Size of the original log in bytes.",
+      "disable_correlation": true,
+      "misp-attribute": "size-in-bytes",
+      "to_ids": false,
+      "ui-priority": 80
+    },
+    "start-time": {
+      "description": "Earliest UTC timestamp among extracted positions with a date supplied by the log.",
+      "disable_correlation": true,
+      "misp-attribute": "datetime",
+      "to_ids": false,
+      "ui-priority": 70
+    },
+    "talker-id": {
+      "description": "Two-character talker identifier from a standard NMEA sentence, such as GP or GN.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 70
+    },
+    "text": {
+      "description": "Analyst note about the log. Fix quality and sentence-specific context belong to linked geolocation observations.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 20
+    },
+    "unhandled-sentence-count": {
+      "description": "Number of sentences retained in the attachment without decoding their payload.",
+      "disable_correlation": true,
+      "misp-attribute": "counter",
+      "to_ids": false,
+      "ui-priority": 60
+    }
+  },
+  "description": "An NMEA 0183 receiver log, preserving the original sentences, file provenance, sentence and position counts, talker identifiers and derived spatial and temporal bounds. Link extracted geolocation observations using contains.",
+  "meta-category": "file",
+  "name": "nmea",
+  "required": [
+    "attachment"
+  ],
+  "uuid": "4e177821-a927-4f11-a8ff-1232e8faf968",
+  "version": 1
+}
