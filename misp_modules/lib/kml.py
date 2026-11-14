@@ -223,6 +223,9 @@ class Dataset:
                     link_base = urljoin(base, child.get("{http://www.w3.org/XML/1998/namespace}base", ""))
                     link_base = urljoin(link_base, link.get("{http://www.w3.org/XML/1998/namespace}base", ""))
                     try:
+                        href = link.find(self.ns + "href")
+                        if href is not None:
+                            link_base = urljoin(link_base, href.get("{http://www.w3.org/XML/1998/namespace}base", ""))
                         self.links.append(urljoin(link_base, self._text(link, "href")))
                     except ValueError:
                         self.unresolved_links += 1

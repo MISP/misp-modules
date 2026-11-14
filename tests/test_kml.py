@@ -223,6 +223,43 @@ def test_local_networklinks_are_bounded_cycle_safe_and_honor_xml_base():
     assert json.loads(fields(locations(result)[0])["text"][0])["document"] == "point.kml"
 
 
+@pytest.mark.parametrize("link_tag", ["Link", "Url"])
+@pytest.mark.parametrize("inherited", [False, True])
+def test_networklink_href_xml_base_resolves_local_layer_and_round_trips(link_tag, inherited):
+    xml = linked("child.kml").replace(b"<href>", b'<href xml:base="layers/">')
+    target = "layers/child.kml"
+    if inherited:
+        xml = xml.replace(b"<Document>", b'<Document xml:base="docs/"><Folder xml:base="folders/">')
+        xml = xml.replace(b"</Document>", b"</Folder></Document>")
+        xml = xml.replace(b"<NetworkLink>", b'<NetworkLink xml:base="network/">')
+        xml = xml.replace(b"<Link>", b'<Link xml:base="links/">')
+        xml = xml.replace(b'xml:base="layers/"', b'xml:base="../layers/"')
+        target = "docs/folders/network/layers/child.kml"
+    xml = xml.replace(b"<Link", ("<" + link_tag).encode()).replace(b"</Link>", ("</" + link_tag + ">").encode())
+    raw = package({"doc.kml": xml, target: SIMPLE})
+    result = imported(raw)
+    assert "warnings" not in result
+    assert len(locations(result)) == 1
+    assert json.loads(fields(locations(result)[0])["text"][0])["document"] == target
+    assert export(data=result["results"], module=kmz_export)[0] == raw
+    combined, _ = export([*result["results"]["Object"], location()], module=kmz_export)
+    assert len(locations(imported(combined))) == 2
+
+
+@pytest.mark.parametrize("base", ["https://example.invalid/layers/", "file:///tmp/", "/outside/", "%2e%2e/"])
+def test_networklink_href_xml_base_does_not_resolve_remote_or_escaping_paths(monkeypatch, base):
+    def forbidden(*args, **kwargs):
+        raise AssertionError("Network access is forbidden")
+
+    monkeypatch.setattr(socket, "create_connection", forbidden)
+    xml = linked("child.kml").replace(b"<href>", f'<href xml:base="{base}">'.encode())
+    # A same-named member must not be used when href's own base points elsewhere.
+    raw = package({"doc.kml": xml, "child.kml": SIMPLE})
+    result = imported(raw)
+    assert locations(result) == [] and result["warnings"]
+    assert export(data=result["results"], module=kmz_export)[0] == raw
+
+
 @pytest.mark.parametrize(
     "href",
     [
