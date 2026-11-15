@@ -396,7 +396,7 @@ Import a PCAP or PCAPNG capture, including reassembled files, emails and network
 [[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/pcap_import.py)]
 
 - **features**:
->Parses captures offline with TShark, without capture privileges or network lookups. Extracts IPv4/IPv6 endpoints, DNS names and answers, HTTP URLs, hosts and user agents, and TLS SNI hostnames. Reassembles HTTP files and SMTP messages; reuses email_import for email objects, attachments and body URLs. Requires complete, unencrypted application traffic for payload extraction; HTTPS yields visible TLS metadata only. Other file-transfer protocols and TLS decryption are not supported. Observed network attributes have to_ids disabled for analyst review. Captures are limited to 50 MiB, exported data and JSON metadata to 100 MiB each. timeout is a positive number of seconds, at most 300 (default 60). Output sizes, including diagnostics, are checked every 50 ms while TShark runs; exceeding a limit kills the process. Bursts can overshoot between checks; these checks are not filesystem quotas.
+>Parses captures offline with TShark, without capture privileges or network lookups. Extracts IPv4/IPv6 endpoints, DNS names and answers, HTTP URLs, hosts and user agents, and TLS SNI hostnames. Reassembles HTTP files and SMTP messages; reuses email_import for email objects, attachments and body URLs. Requires complete, unencrypted application traffic for payload extraction; HTTPS yields visible TLS metadata only. Other file-transfer protocols and TLS decryption are not supported. Observed network attributes have to_ids disabled for analyst review. Captures are limited to 50 MiB, exported data and JSON metadata to 100 MiB each. timeout is a positive number of seconds, at most 300 (default 60). Output sizes, including diagnostics, are checked every 50 ms while TShark runs; exceeding a limit kills the process. Bursts can overshoot between checks; these checks are not filesystem quotas. Adds capture hashes and pcap-metadata, capture-scoped TCP/UDP network-connection objects, packet timestamps and observation intervals. Reconstructed content links to streams by exact payload hashes; identical content retains all observed sources. SMTP provenance uses a targeted second pass within the same timeout and combined metadata limit. See the [usage guide](https://github.com/MISP/misp-modules/blob/main/documentation/import_mod/pcap_import.md).
 
 - **config**:
 >timeout
@@ -405,7 +405,7 @@ Import a PCAP or PCAPNG capture, including reassembled files, emails and network
 >Base64-encoded PCAP or PCAPNG file
 
 - **output**:
->MISP network attributes, file and email objects, including attachments and hashes
+>MISP network attributes, pcap-metadata, network-connection, file and email objects with capture/stream provenance
 
 - **references**:
 > - https://github.com/MISP/misp-modules/issues/397

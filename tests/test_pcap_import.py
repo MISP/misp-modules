@@ -60,8 +60,9 @@ def _pcapng(frames):
 
 
 class _TCP:
-    def __init__(self, port):
+    def __init__(self, port, source_port=49152):
         self.port = port
+        self.source_port = source_port
         self.sequences = [1000, 5000]
         self.frames = []
         self.send(b"", flags=2)
@@ -71,7 +72,7 @@ class _TCP:
     def send(self, data, server=False, flags=24):
         side = int(server)
         source, destination = ("198.51.100.20", "192.0.2.10") if server else ("192.0.2.10", "198.51.100.20")
-        ports = (self.port, 49152) if server else (49152, self.port)
+        ports = (self.port, self.source_port) if server else (self.source_port, self.port)
         header = struct.pack(
             "!HHIIBBHHH", *ports, self.sequences[side], self.sequences[1 - side], 0x50, flags, 65535, 0, 0
         )
@@ -159,7 +160,8 @@ def test_compressed_http_export_limit(tshark, monkeypatch):
     assert len(capture) < 4096
     monkeypatch.setattr(pcap_import, "MAX_OUTPUT_SIZE", 64 * 1024)
     result = pcap_import.handler(_request(capture))
-    assert "exported files exceed" in result["error"]
+    # Payload provenance also emits decoded bytes as bounded JSON metadata.
+    assert any(reason in result["error"] for reason in ("exported files exceed", "JSON metadata exceeds"))
 
 
 def test_smtp_email_and_attachment_reassembly(tshark):
@@ -196,6 +198,12 @@ def test_smtp_email_and_attachment_reassembly(tshark):
     urls = _objects(result, "url")
     # URLObject normalises percent-encoded characters while retaining the path, query and fragment.
     assert _relation(urls[0], "url")[0]["value"] == "https://example.test/path?download=1&name=evidence file#sample"
+    flow = _objects(result, "network-connection")[0]
+    for obj in (emails[0], files[0], urls[0]):
+        reference = next(ref for ref in obj["ObjectReference"] if ref["referenced_uuid"] == flow["uuid"])
+        assert "completion_frames" in json.loads(reference["comment"])
+        assert all("first_seen" in attribute and "last_seen" in attribute for attribute in obj["Attribute"])
+    assert not result.get("warnings")
 
 
 def test_tls_sni_without_payload_decryption(tshark):
