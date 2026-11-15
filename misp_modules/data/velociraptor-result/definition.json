@@ -1,0 +1,99 @@
+{
+  "attributes": {
+    "artifact": {
+      "description": "Velociraptor artifact and optional source name, e.g. Windows.Network.NetstatEnriched/Netstat.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 100
+    },
+    "client-id": {
+      "description": "Velociraptor client identifier, scoped to the originating server.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 90
+    },
+    "collected-at": {
+      "description": "Explicit collection time with a timezone. This is not the occurrence time of the observed activity.",
+      "disable_correlation": true,
+      "misp-attribute": "datetime",
+      "to_ids": false,
+      "ui-priority": 75
+    },
+    "flow-id": {
+      "description": "Velociraptor flow or collection identifier, scoped to the originating server/client.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 90
+    },
+    "hostname": {
+      "description": "Reported endpoint hostname or FQDN, retained as context rather than a network indicator.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 80
+    },
+    "hunt-id": {
+      "description": "Velociraptor hunt identifier, scoped to the originating server.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 80
+    },
+    "parser-version": {
+      "description": "Name/version of the importer that produced the normalized observation.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "row": {
+      "description": "JSON representation of the result row, including unmapped fields. Keep the original export for exact bytes and numeric precision.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 85
+    },
+    "row-number": {
+      "description": "One-based ordinal of the record in the source export; CSV headers and blank JSONL lines are excluded.",
+      "disable_correlation": true,
+      "misp-attribute": "counter",
+      "to_ids": false,
+      "ui-priority": 70
+    },
+    "server-id": {
+      "description": "Identifier of the originating Velociraptor server or deployment, supplied by the analyst or export metadata.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 70
+    },
+    "source-format": {
+      "description": "Encoding of the source export: json, jsonl or csv.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 60
+    },
+    "source-sha256": {
+      "description": "SHA-256 of the original export bytes. The source file object points to this result row using derived-from.",
+      "disable_correlation": true,
+      "misp-attribute": "sha256",
+      "to_ids": false,
+      "ui-priority": 70
+    }
+  },
+  "description": "A Velociraptor artifact result row with collection provenance and original row context. Link to the source export and to derived process, file, network-socket or service objects. An observation does not by itself establish malicious activity.",
+  "meta-category": "misc",
+  "name": "velociraptor-result",
+  "required": [
+    "artifact",
+    "row",
+    "row-number",
+    "source-sha256"
+  ],
+  "uuid": "58a338aa-9fb7-4bb3-babe-ea0001b0871a",
+  "version": 2
+}

@@ -378,6 +378,29 @@ Simple URL import tool with Faup
 
 -----
 
+#### [Velociraptor Results Import](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/velociraptor_import.py)
+
+Import Velociraptor JSON, JSONL or CSV results with linked forensic observations and provenance.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/velociraptor_import.py)]
+
+- **features**:
+>Preserves the original export and every result row, including unmapped fields. Maps Windows.System.Pslist, Windows.System.Services, Windows.Network.NetstatEnriched/Netstat and Windows.Search.FileFinder into process, file, network-socket and windows-service objects. Other artifacts are retained as provenance rows with warnings. All attributes have to_ids disabled. No credentials, network access, VQL execution or additional dependencies are required. Includes the velociraptor-result template for older PyMISP. See the [usage guide](https://github.com/MISP/misp-modules/blob/main/documentation/import_mod/velociraptor_import.md).
+
+- **input**:
+>Base64-encoded UTF-8 JSON, JSONL or CSV in data; artifact/context in config or row metadata.
+
+- **output**:
+>MISP source file, velociraptor-result and derived observation objects in misp_standard format.
+
+- **references**:
+> - https://docs.velociraptor.app/
+> - https://github.com/Velocidex/velociraptor/tree/master/artifacts/definitions
+
+- **requirements**:
+>PyMISP
+
+-----
+
 #### [VMRay API Import](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/vmray_import.py)
 
 <img src=../logos/vmray.png height=60>
