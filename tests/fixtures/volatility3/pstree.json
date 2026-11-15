@@ -1,0 +1,36 @@
+
+[
+  {
+    "Audit": "C:\\Windows\\System32\\cmd.exe",
+    "Cmd": "cmd.exe /c echo example",
+    "CreateTime": "2026-10-10T12:00:00.123456+00:00",
+    "ExitTime": null,
+    "Handles": null,
+    "ImageFileName": "System",
+    "Offset(V)": 18446603336221200384,
+    "PID": 4,
+    "PPID": 0,
+    "Path": "C:\\Windows\\System32\\cmd.exe",
+    "SessionId": 1,
+    "Threads": 3,
+    "Wow64": false,
+    "__children": [
+      {
+        "Audit": "C:\\Windows\\System32\\cmd.exe",
+        "Cmd": "cmd.exe /c echo example",
+        "CreateTime": "2026-10-10T12:00:01.123456+00:00",
+        "ExitTime": null,
+        "Handles": null,
+        "ImageFileName": "cmd.exe",
+        "Offset(V)": 18446603336221204480,
+        "PID": 100,
+        "PPID": 4,
+        "Path": "C:\\Windows\\System32\\cmd.exe",
+        "SessionId": 1,
+        "Threads": 3,
+        "Wow64": false,
+        "__children": []
+      }
+    ]
+  }
+]

@@ -1,0 +1,3 @@
+
+{"CreateTime": "2026-10-10T12:00:00.123456+00:00", "ExitTime": null, "File output": "Disabled", "Handles": null, "ImageFileName": "System", "Offset(V)": 18446603336221200384, "PID": 4, "PPID": 0, "SessionId": 1, "Threads": 3, "Wow64": false, "__children": []}
+{"CreateTime": "2026-10-10T12:00:01.123456+00:00", "ExitTime": null, "File output": "Disabled", "Handles": null, "ImageFileName": "cmd.exe", "Offset(V)": 18446603336221204480, "PID": 100, "PPID": 4, "SessionId": 1, "Threads": 3, "Wow64": false, "__children": []}

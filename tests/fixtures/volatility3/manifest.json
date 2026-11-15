@@ -1,0 +1,128 @@
+{
+  "cmdline.json": {
+    "image_name": "synthetic.raw",
+    "image_sha256": "f4a1e9b60855ad31d11c02e03c7599ec1fedfa323f993a250041b4f65afe4fa6",
+    "plugin": "windows.cmdline.CmdLine",
+    "plugin_version": "1.0.0",
+    "volatility_version": "2.28.2"
+  },
+  "cmdline.jsonl": {
+    "image_name": "synthetic.raw",
+    "image_sha256": "f4a1e9b60855ad31d11c02e03c7599ec1fedfa323f993a250041b4f65afe4fa6",
+    "plugin": "windows.cmdline.CmdLine",
+    "plugin_version": "1.0.0",
+    "volatility_version": "2.28.2"
+  },
+  "malfind.json": {
+    "image_name": "synthetic.raw",
+    "image_sha256": "f4a1e9b60855ad31d11c02e03c7599ec1fedfa323f993a250041b4f65afe4fa6",
+    "plugin": "windows.malware.malfind.Malfind",
+    "plugin_version": "1.1.0",
+    "volatility_version": "2.28.2"
+  },
+  "malfind.jsonl": {
+    "image_name": "synthetic.raw",
+    "image_sha256": "f4a1e9b60855ad31d11c02e03c7599ec1fedfa323f993a250041b4f65afe4fa6",
+    "plugin": "windows.malware.malfind.Malfind",
+    "plugin_version": "1.1.0",
+    "volatility_version": "2.28.2"
+  },
+  "netscan.json": {
+    "image_name": "synthetic.raw",
+    "image_sha256": "f4a1e9b60855ad31d11c02e03c7599ec1fedfa323f993a250041b4f65afe4fa6",
+    "plugin": "windows.netscan.NetScan",
+    "plugin_version": "2.0.0",
+    "volatility_version": "2.28.2"
+  },
+  "netscan.jsonl": {
+    "image_name": "synthetic.raw",
+    "image_sha256": "f4a1e9b60855ad31d11c02e03c7599ec1fedfa323f993a250041b4f65afe4fa6",
+    "plugin": "windows.netscan.NetScan",
+    "plugin_version": "2.0.0",
+    "volatility_version": "2.28.2"
+  },
+  "netstat.json": {
+    "image_name": "synthetic.raw",
+    "image_sha256": "f4a1e9b60855ad31d11c02e03c7599ec1fedfa323f993a250041b4f65afe4fa6",
+    "plugin": "windows.netstat.NetStat",
+    "plugin_version": "2.0.0",
+    "volatility_version": "2.28.2"
+  },
+  "netstat.jsonl": {
+    "image_name": "synthetic.raw",
+    "image_sha256": "f4a1e9b60855ad31d11c02e03c7599ec1fedfa323f993a250041b4f65afe4fa6",
+    "plugin": "windows.netstat.NetStat",
+    "plugin_version": "2.0.0",
+    "volatility_version": "2.28.2"
+  },
+  "pslist.json": {
+    "image_name": "synthetic.raw",
+    "image_sha256": "f4a1e9b60855ad31d11c02e03c7599ec1fedfa323f993a250041b4f65afe4fa6",
+    "plugin": "windows.pslist.PsList",
+    "plugin_version": "3.0.1",
+    "volatility_version": "2.28.2"
+  },
+  "pslist.jsonl": {
+    "image_name": "synthetic.raw",
+    "image_sha256": "f4a1e9b60855ad31d11c02e03c7599ec1fedfa323f993a250041b4f65afe4fa6",
+    "plugin": "windows.pslist.PsList",
+    "plugin_version": "3.0.1",
+    "volatility_version": "2.28.2"
+  },
+  "psscan.json": {
+    "image_name": "synthetic.raw",
+    "image_sha256": "f4a1e9b60855ad31d11c02e03c7599ec1fedfa323f993a250041b4f65afe4fa6",
+    "plugin": "windows.psscan.PsScan",
+    "plugin_version": "2.0.0",
+    "volatility_version": "2.28.2"
+  },
+  "psscan.jsonl": {
+    "image_name": "synthetic.raw",
+    "image_sha256": "f4a1e9b60855ad31d11c02e03c7599ec1fedfa323f993a250041b4f65afe4fa6",
+    "plugin": "windows.psscan.PsScan",
+    "plugin_version": "2.0.0",
+    "volatility_version": "2.28.2"
+  },
+  "pstree.json": {
+    "image_name": "synthetic.raw",
+    "image_sha256": "f4a1e9b60855ad31d11c02e03c7599ec1fedfa323f993a250041b4f65afe4fa6",
+    "plugin": "windows.pstree.PsTree",
+    "volatility_version": "2.28.2"
+  },
+  "pstree.jsonl": {
+    "image_name": "synthetic.raw",
+    "image_sha256": "f4a1e9b60855ad31d11c02e03c7599ec1fedfa323f993a250041b4f65afe4fa6",
+    "plugin": "windows.pstree.PsTree",
+    "volatility_version": "2.28.2"
+  },
+  "vadyarascan.json": {
+    "image_name": "synthetic.raw",
+    "image_sha256": "f4a1e9b60855ad31d11c02e03c7599ec1fedfa323f993a250041b4f65afe4fa6",
+    "plugin": "windows.vadyarascan.VadYaraScan",
+    "plugin_version": "1.1.4",
+    "volatility_version": "2.28.2"
+  },
+  "vadyarascan.jsonl": {
+    "image_name": "synthetic.raw",
+    "image_sha256": "f4a1e9b60855ad31d11c02e03c7599ec1fedfa323f993a250041b4f65afe4fa6",
+    "plugin": "windows.vadyarascan.VadYaraScan",
+    "plugin_version": "1.1.4",
+    "volatility_version": "2.28.2"
+  },
+  "yarascan.json": {
+    "image_name": "synthetic.raw",
+    "image_sha256": "f4a1e9b60855ad31d11c02e03c7599ec1fedfa323f993a250041b4f65afe4fa6",
+    "layer_name": "synthetic",
+    "plugin": "yarascan.YaraScan",
+    "plugin_version": "2.1.1",
+    "volatility_version": "2.28.2"
+  },
+  "yarascan.jsonl": {
+    "image_name": "synthetic.raw",
+    "image_sha256": "f4a1e9b60855ad31d11c02e03c7599ec1fedfa323f993a250041b4f65afe4fa6",
+    "layer_name": "synthetic",
+    "plugin": "yarascan.YaraScan",
+    "plugin_version": "2.1.1",
+    "volatility_version": "2.28.2"
+  }
+}

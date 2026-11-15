@@ -1,0 +1,15 @@
+
+[
+  {
+    "Args": "\"C:\\Windows\\System32\\cmd.exe\" /c echo example",
+    "PID": 4,
+    "Process": "System",
+    "__children": []
+  },
+  {
+    "Args": "\"C:\\Windows\\System32\\cmd.exe\" /c echo example",
+    "PID": 100,
+    "Process": "cmd.exe",
+    "__children": []
+  }
+]
