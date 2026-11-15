@@ -806,18 +806,20 @@ Export MISP event and object indicators as a typed Wazuh CDB source list.
 
 <img src=../logos/yara.png height=60>
 
-This module is used to export MISP events to YARA.
+Export stored YARA collections and optionally generate literal IOC content searches.
 [[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/yara_export.py)]
 
 - **features**:
->The module will dynamically generate YARA rules for attributes that are marked as to IDS. Basic metadata about the event is added to the rule.
->Attributes that are already YARA rules are also exported, with a rewritten rule name.
+>Produces a ZIP of unchanged stored YARA collections in separate namespaces, with a provenance and exclusion manifest. The default rules mode exports yara attributes regardless of to_ids. Select indicators or both to generate literal, case-sensitive UTF-8 byte searches from supported IDS-marked attributes. A filename or domain matches bytes in scanned content, not a file's name or DNS activity. Deleted data is excluded. Collections and the complete output are compiled with filesystem includes disabled. See the [usage guide](https://github.com/MISP/misp-modules/blob/main/documentation/export_mod/yara_export.md).
+
+- **config**:
+>mode
 
 - **input**:
->Attributes and Objects.
+>MISP events and object attributes in standard, bare or legacy export format.
 
 - **output**:
->A YARA file that can be used with the YARA scanning tool.
+>Base64-encoded ZIP containing rules/*.yara and manifest.json; load using the manifest namespaces.
 
 - **references**:
 >https://virustotal.github.io/yara/

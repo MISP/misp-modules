@@ -194,7 +194,7 @@ For more information: [Extending MISP with Python modules](https://www.misp-proj
 * [VirusTotal Collections Export](https://misp.github.io/misp-modules/export_mod/#virustotal-collections-export) - Creates a VT Collection from an event iocs.
 * [VirusTotal Graph Export](https://misp.github.io/misp-modules/export_mod/#virustotal-graph-export) - This module is used to create a VirusTotal Graph from a MISP event.
 * [Wazuh CDB Export](https://misp.github.io/misp-modules/export_mod/#wazuh-cdb-export) - Export MISP event and object indicators as a typed Wazuh CDB source list.
-* [YARA Rule Export](https://misp.github.io/misp-modules/export_mod/#yara-rule-export) - This module is used to export MISP events to YARA.
+* [YARA Rule Export](https://misp.github.io/misp-modules/export_mod/#yara-rule-export) - Export stored YARA collections and optionally generate literal IOC content searches.
 * [Zeek Intel Export](https://misp.github.io/misp-modules/export_mod/#zeek-intel-export) - Export validated MISP event and object indicators as a Zeek Intel Framework feed.
 
 ### Import Modules
