@@ -1,8 +1,10 @@
 import base64
 import copy
+import csv
 import hashlib
 import json
 import socket
+from io import StringIO
 from pathlib import Path
 
 import pytest
@@ -70,6 +72,68 @@ def exported(data, config=None):
     assert "error" not in result, result
     rows = [json.loads(line) for line in base64.b64decode(result["data"]).decode().split("\n") if line]
     return result, rows
+
+
+def annotation_csv(value):
+    stream = StringIO(newline="")
+    writer = csv.DictWriter(stream, fieldnames=[*row(), "tag"])
+    writer.writeheader()
+    writer.writerow(row(tag="['valid']"))
+    writer.writerow(row(tag=value))
+    return stream.getvalue().encode()
+
+
+def test_explore_metadata_is_preserved_without_redundant_configuration():
+    response = json.loads((FIXTURES / "timesketch-api.json").read_text())
+    response["meta"].update(
+        timeline_id=12, source_url="https://timesketch.example/sketch/7", unrelated="excluded context"
+    )
+    result = imported(raw=json.dumps(response).encode(), selection="annotated")
+    value = fields(objects(result)[0])
+    assert value["sketch-id"] == "7" and value["timeline-id"] == "12"
+    assert value["source-url"] == "https://timesketch.example/sketch/7"
+    assert "attachment" not in fields(objects(result, "file")[0])
+    assert "excluded context" not in json.dumps(result)
+    assert json.loads(value["raw-event"]) == response["objects"][0]
+
+
+def test_entry_then_response_metadata_then_config_provenance_precedence():
+    response = json.loads((FIXTURES / "timesketch-api.json").read_text())
+    response["meta"]["timeline_id"] = "response-timeline"
+    response["objects"][0]["_source"]["sketch_id"] = "entry-sketch"
+    response["objects"].append({"_source": row()})
+    result = imported(
+        raw=json.dumps(response).encode(),
+        sketch_id="config-sketch",
+        timeline_id="config-timeline",
+        source_url="https://misp.example/reference",
+    )
+    values = [fields(obj) for obj in objects(result)]
+    assert values[0]["sketch-id"] == "entry-sketch"
+    assert values[1]["sketch-id"] == values[2]["sketch-id"] == "7"
+    assert values[0]["timeline-id"] == "12" and values[2]["timeline-id"] == "response-timeline"
+    assert all(value["source-url"] == "https://misp.example/reference" for value in values)
+
+
+@pytest.mark.parametrize("meta", [None, [], "invalid", {"sketch_id": []}, {"timeline_id": True}, {"source_url": {}}])
+def test_invalid_explore_metadata_returns_an_atomic_error(meta):
+    result = importer.handler(request(json.dumps({"meta": meta, "objects": [row()]}).encode()))
+    assert "error" in result and "results" not in result
+
+
+@pytest.mark.parametrize(
+    "value", ["{1: 2}", "{True: 'label'}", "{None: 'label'}", "{(1, 2): 'label'}", "{'nested': [{1: 'label'}]}"]
+)
+def test_csv_annotation_non_string_keys_return_an_atomic_error(value):
+    result = importer.handler(request(annotation_csv(value)))
+    assert "dictionary keys must be strings" in result["error"]
+    assert "results" not in result
+
+
+def test_parsed_annotation_depth_errors_cannot_fall_back_to_unvalidated_text():
+    annotation = "{'nested': " + "[" * 33 + "'label'" + "]" * 33 + "}"
+    result = importer.handler(request(annotation_csv(annotation)))
+    assert "nesting exceeds" in result["error"] and "results" not in result
 
 
 @pytest.mark.parametrize(
@@ -397,7 +461,20 @@ class TestTimesketchHTTP(AsyncHTTPTestCase):
         )
         assert response.code == 200
         imported_data = json.loads(response.body)["results"]
+        assert all(
+            fields(obj)["sketch-id"] == "7" for obj in imported_data["Object"] if obj["name"] == "timesketch-timeline"
+        )
         response = self.fetch(
             "/query", method="POST", body=json.dumps({"module": "timesketch_export", "data": imported_data})
         )
         assert response.code == 200 and json.loads(response.body)["summary"]["observations"] == 2
+
+    def test_invalid_csv_annotations_return_module_errors_instead_of_http_500(self):
+        for value in ("{1: 2}", "{'nested': [{False: 'label'}]}"):
+            response = self.fetch(
+                "/query", method="POST", body=request(annotation_csv(value), module="timesketch_import")
+            )
+            assert response.code == 200
+            result = json.loads(response.body)
+            assert "dictionary keys must be strings" in result["error"]
+            assert "results" not in result

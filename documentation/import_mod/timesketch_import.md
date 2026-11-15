@@ -27,7 +27,7 @@ the base64-encoded export, and an optional `filename`. Configuration:
 | `format` | `auto` (default), `json`, `jsonl` or `csv`. Explicit formats are enforced. |
 | `selection` | `all` (default), `selected` or `annotated`. |
 | `datetime_unit` | Explicit unit for numeric `datetime`: `s`, `ms`, `us` or `ns`. Empty for ISO dates. |
-| `sketch_id`, `timeline_id` | Optional source defaults when IDs are absent; row values take precedence. |
+| `sketch_id`, `timeline_id` | Optional source defaults when IDs are absent; row values, then applicable response `meta`, take precedence. |
 | `source_url` | Optional source selection/event reference when absent from a row. Never fetched. |
 
 `all` treats the supplied file as the analyst's prefiltered selection. Timesketch
@@ -37,7 +37,14 @@ does not imply an explicit selection. `selected` requires a true selection flag.
 a selection flag. A Plaso EventTag container with an empty labels list is not an
 annotation. Comments are available only if requested in the source export.
 CSV annotation cells may contain JSON or pandas' Python list/dict representation;
-the latter is parsed with `ast.literal_eval`, never executed.
+the latter is parsed with `ast.literal_eval`, never executed. Parsed dictionaries
+must have string keys, including nested dictionaries; malformed structures return
+an atomic import error.
+
+Explore response `meta.sketch_id`, singular `meta.timeline_id` and `meta.source_url`
+are retained as source defaults even when no configuration repeats those values.
+Per-entry references take precedence. Unrelated response metadata is not copied
+into entries, so it cannot disclose excluded rows when selection is applied.
 
 The importer reuses `timesketch-timeline`, with compatible version 4 additions
 bundled for installations whose PyMISP templates are older. It preserves source

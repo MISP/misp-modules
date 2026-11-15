@@ -195,6 +195,8 @@ def _bounded(row):
             raise ValueError("Timeline entry nesting exceeds 32 levels.")
         if isinstance(value, dict):
             for key in value:
+                if not isinstance(key, str):
+                    raise ValueError("Timeline entry dictionary keys must be strings.")
                 key.encode("utf-8")
             stack.extend((child, depth + 1) for child in value.values())
         elif isinstance(value, list):
@@ -206,11 +208,18 @@ def _bounded(row):
 
 
 def _unwrap(data):
+    context = {}
     if isinstance(data, dict) and "objects" in data:
+        meta = data.get("meta", {})
+        if not isinstance(meta, dict):
+            raise ValueError("Timesketch response meta must be an object.")
+        context = {
+            key: meta[key] for key in ("sketch_id", "timeline_id", "source_url") if meta.get(key) not in (None, "")
+        }
         data = data["objects"]  # Timesketch Explore response.
     elif isinstance(data, dict) and isinstance(data.get("hits"), dict):
         data = data["hits"].get("hits")
-    return data if isinstance(data, list) else [data]
+    return (data if isinstance(data, list) else [data]), context
 
 
 def read_rows(text, format_):
@@ -219,7 +228,8 @@ def read_rows(text, format_):
         format_ = "json" if text.lstrip().startswith(("{", "[")) else "csv"
     if format_ == "json":
         try:
-            return _unwrap(loads(text)), "json"
+            rows, context = _unwrap(loads(text))
+            return rows, "json", context
         except json.JSONDecodeError:
             if not automatic or text.lstrip().startswith("["):
                 raise
@@ -232,7 +242,7 @@ def read_rows(text, format_):
             if len(rows) >= MAX_ROWS:
                 raise ValueError("Export exceeds 1000 entries.")
             rows.append(loads(line))
-        return rows, "jsonl"
+        return rows, "jsonl", {}
     reader = csv.DictReader(StringIO(text, newline=""), strict=True)
     header = reader.fieldnames
     if not header or any(not key for key in header) or len(set(header)) != len(header):
@@ -243,7 +253,7 @@ def read_rows(text, format_):
         if None in row or any(value is None for value in row.values()):
             raise ValueError("CSV row does not match the header column count.")
         rows.append(row)
-    return rows, "csv"
+    return rows, "csv", {}
 
 
 def _structured(value):
@@ -252,11 +262,11 @@ def _structured(value):
         for parser in (loads, ast.literal_eval):
             try:
                 parsed = parser(value)
-                if isinstance(parsed, (dict, list)):
-                    _bounded({"value": parsed})
-                    return parsed
             except (ValueError, SyntaxError, RecursionError):
-                pass
+                continue
+            if isinstance(parsed, (dict, list)):
+                _bounded({"value": parsed})
+                return parsed
     return value
 
 
@@ -320,7 +330,9 @@ def import_findings(request):
     raw = base64.b64decode(encoded, validate=True)
     if not raw or len(raw) > MAX_INPUT:
         raise ValueError("Export must be non-empty and at most 20 MiB.")
-    rows, format_ = read_rows(raw.decode("utf-8-sig"), format_)
+    rows, format_, response_context = read_rows(raw.decode("utf-8-sig"), format_)
+    for key, value in response_context.items():
+        defaults[key] = _text(value, "meta." + key)
     if not rows or len(rows) > MAX_ROWS:
         raise ValueError("Export must contain 1–1000 entries.")
     chosen = []
