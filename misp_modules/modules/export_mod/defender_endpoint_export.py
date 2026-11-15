@@ -77,7 +77,8 @@ def _literal(value):
 
 
 def _domain(value):
-    return idna.encode(value.removesuffix("."), uts46=True, std3_rules=True).decode("ascii").lower()
+    # Validate empty labels before stripping the optional root dot, including UTS #46 dot mappings.
+    return idna.encode(value, uts46=True, std3_rules=True).decode("ascii").lower().removesuffix(".")
 
 
 def _indicator(kind, value):

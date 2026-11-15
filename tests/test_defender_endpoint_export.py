@@ -73,6 +73,35 @@ def test_domain_and_url_dispatch_have_distinct_host_and_literal_semantics():
     assert "MISP_Host" not in url and " in~ " not in url
 
 
+@pytest.mark.parametrize("mode", ["exact", "subdomains"])
+@pytest.mark.parametrize("suffix", ["", ".", "\u3002", "\uff0e", "\uff61"])
+def test_domain_root_dot_is_normalized_after_idna_and_deduplicated(mode, suffix):
+    config = {"domain_mode": mode, "tables": "DeviceNetworkEvents"}
+    canonical, _ = export([attribute(value="example.org")], config)
+    queries, summary = export([attribute(value="Example.ORG" + suffix), attribute(value="example.org")], config)
+    assert queries == canonical
+    assert summary == {"indicators": 1, "queries": 1, "skipped": {}}
+
+
+@pytest.mark.parametrize("mode", ["exact", "subdomains"])
+@pytest.mark.parametrize(
+    "value",
+    [
+        "example.org..",
+        "example.org...",
+        "example.org\u3002.",
+        "example.org.\u3002",
+        "example.org\u3002\u3002",
+        "example.org\uff0e.",
+        "example.org\uff61.",
+    ],
+)
+def test_repeated_domain_root_dots_are_rejected(mode, value):
+    queries, summary = export([attribute(value=value)], {"domain_mode": mode})
+    assert queries == []
+    assert summary == {"indicators": 0, "queries": 0, "skipped": {"invalid indicators": 1}}
+
+
 def test_subdomains_pattern_uses_an_escaped_label_boundary_and_the_extracted_host():
     (query,), _ = export([attribute()], {"domain_mode": "subdomains", "tables": "DeviceNetworkEvents"})
     literal = re.search(r"let MISP_DomainPattern = '([^']*)';", query)[1]
@@ -160,6 +189,8 @@ def test_event_layouts_deduplication_order_and_no_input_mutation():
         ("ip-src", "not-an-ip"),
         ("url", "example.org/path"),
         ("url", "https://example.org:99999/a"),
+        ("url", "https://example.org../path"),
+        ("url", "https://example.org\u3002./path"),
         ("url", "https://example.org/a\n| union DeviceEvents"),
         ("url", "https://example.org/\u2028x"),
         ("url", "https://example.org/\ud800"),
