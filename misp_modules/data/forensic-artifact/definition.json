@@ -1,0 +1,157 @@
+{
+  "attributes": {
+    "application-id": {
+      "description": "Reported application/package/bundle identifier; distinct from a display name.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "artifact-id": {
+      "description": "Producer artifact identifier, scoped to its case and data source; not a globally unique identity.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 90
+    },
+    "artifact-type": {
+      "description": "Explicit TSK artifact type or unsupported producer artifact type; never inferred from a URL or filename.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 90
+    },
+    "case-id": {
+      "description": "Explicit case identifier supplied by the export or analyst.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "data-source": {
+      "description": "Reported data source label/name, kept distinct from a database identifier.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "data-source-id": {
+      "description": "Explicit evidence data source identifier within the case.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "device-id": {
+      "description": "Explicit device identifier; not inferred from a participant address or application.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "event-time": {
+      "description": "Normalized artifact time only when its units and timezone are explicit; meaning depends on artifact type.",
+      "disable_correlation": true,
+      "misp-attribute": "datetime",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "evidence-id": {
+      "description": "Explicit evidence or extraction identifier supplied by the export or analyst.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "producer": {
+      "description": "Source tool/parser name. For normalized interchange, this is caller-provided attribution, not authenticated native format detection.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 90
+    },
+    "producer-version": {
+      "description": "Explicit source tool/parser version, if provided.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "raw-record": {
+      "description": "Exact selected JSON row text, or normalized JSON of all original CSV cell strings, including unmapped fields. Source-format identifies the representation; the report is authoritative for full-export bytes.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "record-number": {
+      "description": "One-based original data-row ordinal; CSV header is excluded, and selection never renumbers retained rows.",
+      "disable_correlation": true,
+      "misp-attribute": "counter",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "report-id": {
+      "description": "Explicit producer report identifier.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "review-status": {
+      "description": "Unreviewed forensic observation; importing a result does not establish malicious activity.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "source-context": {
+      "description": "Effective producer/case/selection context applied to this row, kept separately from the raw row.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "source-file": {
+      "description": "Reported source path or forensic container member; never opened on the importer host.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "source-format": {
+      "description": "Parsed input contract: autopsy-csv or selected-json.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "source-object-id": {
+      "description": "Explicit source content/object identifier in the forensic case.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "source-sha256": {
+      "description": "SHA-256 of exact input report bytes, including rows excluded by explicit selection; not a hash of the underlying device/image.",
+      "disable_correlation": true,
+      "misp-attribute": "sha256",
+      "to_ids": false,
+      "ui-priority": 50
+    }
+  },
+  "description": "A selected Autopsy or normalized mobile-forensic artifact with producer, case/device, source-record and evidence provenance. Link to its report and derived tsk-* or software objects; source paths are references, not files to fetch.",
+  "meta-category": "misc",
+  "name": "forensic-artifact",
+  "required": [
+    "artifact-type",
+    "producer",
+    "raw-record",
+    "record-number",
+    "source-format",
+    "source-sha256"
+  ],
+  "uuid": "8b854b82-dcbd-496e-b7d6-2ddf61defa3e",
+  "version": 1
+}
