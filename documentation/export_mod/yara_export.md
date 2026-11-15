@@ -52,6 +52,11 @@ deleted data, mode selection, non-IDS attributes, unsupported types, invalid
 indicators and invalid stored collections; compiler diagnostics are retained.
 API warnings summarize exclusions and describe IOC matching semantics.
 
+Locations follow the original input shape: for example,
+data[0].Event.Attribute[0] for a wrapped event in a list, or
+data.Attribute[0] for a single bare event. Attribute and object collection
+locations are tracked independently when they sit at different envelope levels.
+
 ## IOC matching semantics
 
 IOC generation is opt-in. Each event contributes one generated rule in its own
@@ -59,6 +64,12 @@ namespace; its condition is **any of the selected strings**. Strings are literal
 UTF-8 byte sequences matched case-sensitively anywhere in the scanned content.
 Quotes, backslashes, controls and non-ASCII bytes are escaped using YARA syntax,
 including in generated metadata. Generated identifiers are fixed ASCII names.
+
+An IOC string may contain at most 8190 UTF-8 bytes, the text-literal limit of
+the pinned YARA compiler. Longer values are excluded as invalid indicators with
+a source-specific diagnostic, while valid stored collections and other IOC
+searches remain exportable. If any retained component of a composite exceeds
+the limit, the entire attribute is excluded.
 
 For example, a filename indicator evil.exe matches bytes inside a file containing
 not-evil.exe.backup. It does not inspect the scanned file's actual name or path.

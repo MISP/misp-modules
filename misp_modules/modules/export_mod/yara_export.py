@@ -93,6 +93,8 @@ MATCH_SEMANTICS = (
     " names or enforce hostname boundaries. There is no wide/nocase matching, normalization, hash verification"
     " or network activity detection. Composites contribute independent alternatives; hashes and ports are omitted."
 )
+# Maximum decoded text-literal length accepted by the pinned yara-python 4.5.4 compiler.
+MAX_IOC_STRING_BYTES = 8190
 
 
 def _literal(value):
@@ -116,6 +118,7 @@ def _records(container, key):
 
 
 def _attributes(data):
+    is_collection = isinstance(data, list)
     if isinstance(data, dict):
         data = [data]
     if not isinstance(data, list) or any(not isinstance(item, dict) for item in data):
@@ -126,10 +129,14 @@ def _attributes(data):
             raise ValueError("Event must be an object.")
         deleted = boolean(event.get("deleted"), "deleted") or boolean(envelope.get("deleted"), "deleted")
         collections = dict(event, **envelope)
-        containers = [(collections, f"data[{index}]", deleted)]
+        location = f"data[{index}]" if is_collection else "data"
+        event_location = f"{location}.Event" if "Event" in envelope else location
+        attribute_location = location if "Attribute" in envelope else event_location
+        object_location = location if "Object" in envelope else event_location
+        containers = [(collections, attribute_location, deleted)]
         for obj_index, obj in enumerate(_records(collections, "Object")):
             containers.append(
-                (obj, f"data[{index}].Object[{obj_index}]", deleted or boolean(obj.get("deleted"), "deleted"))
+                (obj, f"{object_location}.Object[{obj_index}]", deleted or boolean(obj.get("deleted"), "deleted"))
             )
         for container, location, container_deleted in containers:
             for attr_index, attribute in enumerate(_records(container, "Attribute")):
@@ -242,7 +249,9 @@ def _build(data, mode):
         try:
             values, omitted = _strings(kind, attribute.get("value"))
             for value in values:
-                _literal(value)  # Reject unencodable Unicode with a source-specific diagnostic.
+                # Check decoded bytes before grouping, so one invalid IOC cannot block valid output.
+                if len(value.encode("utf-8")) > MAX_IOC_STRING_BYTES:
+                    raise ValueError(f"IOC string exceeds YARA's {MAX_IOC_STRING_BYTES}-byte UTF-8 literal limit.")
         except (ValueError, UnicodeError) as exc:
             exclude(ref, "invalid indicator", exc)
             continue

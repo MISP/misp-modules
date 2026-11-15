@@ -1,6 +1,7 @@
 import base64
 import io
 import json
+import re
 import zipfile
 
 import pytest
@@ -215,6 +216,104 @@ def test_event_shapes_and_object_attributes(shape):
     assert len(sources) == 2
     refs = [entry["sources"][0] for entry in manifest["collections"].values()]
     assert any(".Object[0].Attribute[0]" in ref["location"] for ref in refs)
+
+
+@pytest.mark.parametrize("as_list", [False, True])
+@pytest.mark.parametrize(
+    "attribute_level,object_level",
+    [
+        ("inner", "inner"),
+        ("outer", "outer"),
+        ("inner", "outer"),
+        ("outer", "inner"),
+        ("bare", "bare"),
+    ],
+)
+def test_source_locations_resolve_to_original_input(as_list, attribute_level, object_level):
+    included = _stored("rule included { condition: true }", uuid="included")
+    excluded = _stored("rule excluded { condition: missing }", uuid="excluded")
+    object_attribute = _stored("rule object_rule { condition: true }", uuid="object-attribute")
+    inner = {"id": "1", "Attribute": [included, excluded], "Object": [{"Attribute": [object_attribute]}]}
+    if attribute_level == "bare":
+        event = inner
+    else:
+        event = {"Event": inner}
+        for key, level in [("Attribute", attribute_level), ("Object", object_level)]:
+            if level == "outer":
+                event[key] = inner.pop(key)
+                # A shadowed collection must not supply either records or their locations.
+                inner[key] = [{"type": "yara", "value": "invalid shadowed collection"}]
+    data = [event] if as_list else event
+    _, manifest, _ = _unpack(_request(data))
+    prefix = "data[0]" if as_list else "data"
+    attribute_prefix = prefix + (".Event" if attribute_level == "inner" else "")
+    object_prefix = prefix + (".Event" if object_level == "inner" else "")
+    refs = [ref for entry in manifest["collections"].values() for ref in entry["sources"]]
+    refs.extend(entry["source"] for entry in manifest["exclusions"])
+    locations = {ref["attribute"]: ref["location"] for ref in refs}
+    assert locations == {
+        "included": attribute_prefix + ".Attribute[0]",
+        "excluded": attribute_prefix + ".Attribute[1]",
+        "object-attribute": object_prefix + ".Object[0].Attribute[0]",
+    }
+    for ref in refs:
+        record = {"data": data}
+        for key, index in re.findall(r"([A-Za-z]+)(?:\[(\d+)\])?", ref["location"]):
+            record = record[key]
+            if index:
+                record = record[int(index)]
+        assert record["uuid"] == ref["attribute"]
+
+
+@pytest.mark.parametrize("mode", ["indicators", "both"])
+@pytest.mark.parametrize("value", ["a" * 8191, "é" * 4096, "\x00" * 8192], ids=["ascii", "utf8", "escaped"])
+def test_oversized_ioc_is_excluded_without_losing_valid_collections(mode, value):
+    result = _request(
+        [
+            _event(
+                [
+                    _stored("rule stored { condition: true }"),
+                    _attribute("filename", "valid.bin"),
+                    _attribute("email-header", value, uuid="oversized"),
+                ]
+            )
+        ],
+        mode,
+    )
+    _, manifest, rules = _unpack(result)
+    assert {match.rule for match in rules.match(data=b"valid.bin")} == (
+        {"MISP_ioc", "stored"} if mode == "both" else {"MISP_ioc"}
+    )
+    exclusion = next(entry for entry in result["exclusions"] if entry["source"]["attribute"] == "oversized")
+    assert exclusion["reason"] == "invalid indicator"
+    assert "8190" in exclusion["diagnostic"]
+    assert result["summary"]["skipped"]["invalid indicator"] == 1
+    assert manifest["exclusions"] == result["exclusions"]
+
+
+@pytest.mark.parametrize("char", ["a", "é", "\x00"], ids=["ascii", "utf8", "escaped"])
+def test_ioc_at_literal_byte_limit_remains_exportable(char):
+    value = char * (8190 // len(char.encode("utf-8")))
+    _, _, rules = _unpack(_request([_event([_attribute("pattern-in-file", value)])], "indicators"))
+    assert rules.match(data=value.encode("utf-8"))
+
+
+def test_oversized_composite_is_excluded_as_a_whole():
+    result = _request(
+        [
+            _event(
+                [
+                    _attribute("filename", "valid.bin"),
+                    _attribute("domain|ip", "example.org|" + "a" * 8192),
+                ]
+            )
+        ],
+        "indicators",
+    )
+    _, _, rules = _unpack(result)
+    assert rules.match(data=b"valid.bin")
+    assert not rules.match(data=b"example.org")
+    assert result["summary"]["skipped"] == {"invalid indicator": 1}
 
 
 def test_deleted_events_objects_and_attributes_are_reported():
