@@ -140,25 +140,31 @@ Export event and object attributes of any type as CSV.
 
 #### [Microsoft Defender for Endpoint KQL Export](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/defender_endpoint_export.py)
 
-<img src=../logos/defender_endpoint.png height=60>
+<img src=../logos/defender_endpoing.png height=60>
 
-Defender for Endpoint KQL hunting query export module
+Validated, table-specific Defender hunting queries with bounded indicator batches
 [[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/defender_endpoint_export.py)]
 
 - **features**:
->This module export an event as Defender for Endpoint KQL queries that can then be used in your own python3 or Powershell tool. If you are using Microsoft Sentinel, you can directly connect your MISP instance to Sentinel and then create queries using the `ThreatIntelligenceIndicator` table to match events against imported IOC.
+>Exports active event and object indicators as independently executable KQL batches. Validates and escapes literals, applies a time range to every table, and distinguishes exact URL matches from domain host matches. Defaults: 7d, exact domains, Endpoint and AlertEvidence tables, 100 indicators per batch. See the module guide for table selection, subdomains and absolute time ranges.
 
 - **config**:
->Period
+> - Period
+> - start_time
+> - end_time
+> - domain_mode
+> - tables
+> - batch_size
 
 - **input**:
->MISP Event attributes
+>MISP event and object attributes
 
 - **output**:
->Defender for Endpoint KQL queries
+>One independently executable KQL query per line in a .kql file
 
 - **references**:
->https://docs.microsoft.com/en-us/windows/security/threat-protection/microsoft-defender-atp/advanced-hunting-schema-reference
+> - https://learn.microsoft.com/en-us/defender-xdr/advanced-hunting-schema-tables
+> - https://github.com/MISP/misp-modules/blob/main/documentation/export_mod/defender_endpoint_export.md
 
 -----
 
