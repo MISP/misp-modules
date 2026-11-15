@@ -73,3 +73,11 @@ Native osquery's [remote interface](https://github.com/osquery/osquery/blob/5.24
 has clients pull configuration or distributed queries. A generic HTTP POST to an
 osquery agent would not publish a pack. This local action deliberately uses the
 documented [filesystem pack contract](https://github.com/osquery/osquery/blob/5.24.0/docs/wiki/deployment/configuration.md#query-packs).
+
+## Importing collected results
+
+Use [OSQuery Results Import](../import_mod/osquery_import.md) for the return path
+from deployed packs. Retain this action response's `data.sources` map and supply
+it with the native result logs; publishing a pack does not execute its queries or
+collect their results. Added/removed rows remain observations and do not modify
+the original source indicators.

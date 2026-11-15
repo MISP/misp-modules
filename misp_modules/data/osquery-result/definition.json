@@ -1,0 +1,193 @@
+{
+  "attributes": {
+    "calendar-time": {
+      "description": "Original human-readable osquery calendarTime value.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "counter": {
+      "description": "Schedule execution counter, including zero for an initial full differential result.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "decorations": {
+      "description": "JSON representation of native logger decorations, without treating arbitrary keys as hostnames or MISP tags.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "epoch": {
+      "description": "Original schedule epoch marker, not a timestamp or process identity.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "execution-time": {
+      "description": "Query execution/log time normalized from native unixTime seconds or an explicit collector timestamp; not entity creation/deletion time.",
+      "disable_correlation": true,
+      "misp-attribute": "datetime",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "execution-time-raw": {
+      "description": "Original collector execution timestamp when provided outside native logger metadata.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "host-identifier": {
+      "description": "Host identifier from osquery or explicit collector context. It may be a UUID/custom value and is not assumed to be a hostname.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 80
+    },
+    "numerics": {
+      "description": "Explicit native numerics flag; raw column values retain their original JSON types.",
+      "disable_correlation": true,
+      "misp-attribute": "boolean",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "osquery-version": {
+      "description": "Producer-supplied osquery version; never inferred from the importer environment.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "pack-name": {
+      "description": "Pack identity supplied by the producer or unambiguously recovered from a MISP-generated scheduled name.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "query-name": {
+      "description": "Query identity, stripped of a pack prefix only with explicit pack context or an unambiguous MISP-generated query suffix.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 80
+    },
+    "record-context": {
+      "description": "Normalized source log metadata excluding columns/snapshot/diffResults payloads. Original attached bytes remain authoritative.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "record-index": {
+      "description": "One-based source log-record ordinal, excluding blank JSONL lines.",
+      "disable_correlation": true,
+      "misp-attribute": "counter",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "record-type": {
+      "description": "row for a real returned row, or empty-result for an explicitly empty snapshot/batch. Empty-result is not a matched finding.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 80
+    },
+    "result-kind": {
+      "description": "snapshot or differential; does not establish maliciousness or remediation.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "review-status": {
+      "description": "Imported observations start as unreviewed. A query result alone does not confirm malicious activity.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "row": {
+      "description": "Normalized JSON of the exact returned columns, retaining unknown fields and numeric/string types.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "row-action": {
+      "description": "Native row action: snapshot, added or removed. A removed row does not delete MISP data or prove remediation.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 80
+    },
+    "row-count": {
+      "description": "Number of returned rows carried by this source log record, including zero for an explicit empty result; an event-format record does not report the total query row count.",
+      "disable_correlation": true,
+      "misp-attribute": "counter",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "row-index": {
+      "description": "One-based row ordinal within the expansion of that source record; omitted for empty results.",
+      "disable_correlation": true,
+      "misp-attribute": "counter",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "scheduled-name": {
+      "description": "Exact native scheduled-query name, including the full pack prefix when supplied.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "source-format": {
+      "description": "Input encoding: json or jsonl.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "source-indicators": {
+      "description": "JSON array of original event/object/attribute references from the hunting exporter sources map. These are contextual references, not imported IDS attributes or verification of a match.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "source-sha256": {
+      "description": "SHA-256 of the exact imported result export bytes.",
+      "disable_correlation": true,
+      "misp-attribute": "sha256",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "unix-time": {
+      "description": "Original osquery unixTime value, defined as Unix seconds. Never infer units from magnitude.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    }
+  },
+  "description": "An osquery snapshot or differential result with host, query/pack, execution and source-indicator provenance. Empty results and removed rows retain their distinct meanings and do not imply a malicious verdict.",
+  "meta-category": "misc",
+  "name": "osquery-result",
+  "required": [
+    "host-identifier",
+    "query-name",
+    "scheduled-name",
+    "result-kind",
+    "record-type",
+    "record-index",
+    "source-sha256"
+  ],
+  "uuid": "93aec195-967c-4828-8b17-86ed197fbeb9",
+  "version": 1
+}
