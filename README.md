@@ -279,6 +279,7 @@ For further Information see the [license file](https://misp.github.io/misp-modul
 * [Test Export](https://misp.github.io/misp-modules/export_mod/#test-export) - Skeleton export module.
 * [ThreatStream Export](https://misp.github.io/misp-modules/export_mod/#threatstream-export) - Module to export a structured CSV file for uploading to threatStream.
 * [ThreadConnect Export](https://misp.github.io/misp-modules/export_mod/#threadconnect-export) - Module to export a structured CSV file for uploading to ThreatConnect.
+* [Timesketch Observations Export](https://misp.github.io/misp-modules/export_mod/#timesketch-observations-export) - Export supported timestamped observations as Timesketch JSONL with MISP and source references.
 * [VirusTotal Collections Export](https://misp.github.io/misp-modules/export_mod/#virustotal-collections-export) - Creates a VT Collection from an event iocs.
 * [VirusTotal Graph Export](https://misp.github.io/misp-modules/export_mod/#virustotal-graph-export) - This module is used to create a VirusTotal Graph from a MISP event.
 * [Wazuh CDB Export](https://misp.github.io/misp-modules/export_mod/#wazuh-cdb-export) - Export MISP event and object indicators as a typed Wazuh CDB source list.
@@ -305,6 +306,7 @@ For further Information see the [license file](https://misp.github.io/misp-modul
 * [TAXII 2.1 Import](https://misp.github.io/misp-modules/import_mod/#taxii-2.1-import) - Import content from a TAXII 2.1 server
 * [CSV Test Import](https://misp.github.io/misp-modules/import_mod/#csv-test-import) - Simple CSV import tool with mapable columns
 * [ThreadAnalyzer Sandbox Import](https://misp.github.io/misp-modules/import_mod/#threadanalyzer-sandbox-import) - Module to import ThreatAnalyzer archive.zip / analysis.json files.
+* [Timesketch and Plaso Findings Import](https://misp.github.io/misp-modules/import_mod/#timesketch-and-plaso-findings-import) - Import selected or annotated Timesketch/Plaso entries with source references and annotation context.
 * [URL Import](https://misp.github.io/misp-modules/import_mod/#url-import) - Simple URL import tool with Faup
 * [Velociraptor Results Import](https://misp.github.io/misp-modules/import_mod/#velociraptor-results-import) - Import Velociraptor JSON, JSONL or CSV results with linked forensic observations and provenance.
 

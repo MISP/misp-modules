@@ -4801,6 +4801,31 @@ Module to export a structured CSV file for uploading to ThreatConnect.
 
 -----
 
+#### [Timesketch Observations Export](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/timesketch_export.py)
+
+Export supported timestamped observations as Timesketch JSONL with MISP and source references.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/timesketch_export.py)]
+
+- **features**:
+>Exports existing timesketch-timeline and timesketch_message objects, supported forensic object times and attribute first_seen/last_seen observations. Emits exact microsecond timestamps and the mandatory Timesketch fields. MISP modification times are excluded; source identifiers/annotations are namespaced snapshots. Does not export attachments or contact Timesketch. Complements existing playbooks. See the [usage guide](https://github.com/MISP/misp-modules/blob/main/documentation/export_mod/timesketch_export.md).
+
+- **config**:
+>misp_url
+
+- **input**:
+>MISP events in standard, bare or legacy export format, restricted to the intended selection.
+
+- **output**:
+>Base64-encoded UTF-8 Timesketch JSONL with mandatory fields, source references and API warnings.
+
+- **references**:
+>https://timesketch.org/guides/user/importing-data/
+
+- **requirements**:
+>PyMISP
+
+-----
+
 #### [VirusTotal Collections Export](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/virustotal_collections.py)
 
 <img src=logos/virustotal.png height=60>
@@ -5336,6 +5361,29 @@ Module to import ThreatAnalyzer archive.zip / analysis.json files.
 
 - **references**:
 >https://www.threattrack.com/malware-analysis.aspx
+
+-----
+
+#### [Timesketch and Plaso Findings Import](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/timesketch_import.py)
+
+Import selected or annotated Timesketch/Plaso entries with source references and annotation context.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/timesketch_import.py)]
+
+- **features**:
+>Accepts Timesketch search JSON, JSONL and CSV exports and Plaso psort json_line output. Reuses the timesketch-timeline object, preserving event/sketch/timeline identifiers, annotations, raw entries and microsecond timestamps. Selection can include all supplied entries, explicit selections or annotations. Source annotations remain context, not malicious verdicts. Includes a compatible template and requires no API credentials or tool execution. Complements existing Timesketch playbooks. See the [usage guide](https://github.com/MISP/misp-modules/blob/main/documentation/import_mod/timesketch_import.md).
+
+- **input**:
+>Base64-encoded UTF-8 JSON, JSONL or CSV in data; optional filename and selection/source settings.
+
+- **output**:
+>Source file and timesketch-timeline objects, with unnormalized times retained and reported.
+
+- **references**:
+> - https://timesketch.org/
+> - https://plaso.readthedocs.io/
+
+- **requirements**:
+>PyMISP
 
 -----
 

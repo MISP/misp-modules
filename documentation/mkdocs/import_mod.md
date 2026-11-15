@@ -391,6 +391,29 @@ Module to import ThreatAnalyzer archive.zip / analysis.json files.
 
 -----
 
+#### [Timesketch and Plaso Findings Import](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/timesketch_import.py)
+
+Import selected or annotated Timesketch/Plaso entries with source references and annotation context.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/timesketch_import.py)]
+
+- **features**:
+>Accepts Timesketch search JSON, JSONL and CSV exports and Plaso psort json_line output. Reuses the timesketch-timeline object, preserving event/sketch/timeline identifiers, annotations, raw entries and microsecond timestamps. Selection can include all supplied entries, explicit selections or annotations. Source annotations remain context, not malicious verdicts. Includes a compatible template and requires no API credentials or tool execution. Complements existing Timesketch playbooks. See the [usage guide](https://github.com/MISP/misp-modules/blob/main/documentation/import_mod/timesketch_import.md).
+
+- **input**:
+>Base64-encoded UTF-8 JSON, JSONL or CSV in data; optional filename and selection/source settings.
+
+- **output**:
+>Source file and timesketch-timeline objects, with unnormalized times retained and reported.
+
+- **references**:
+> - https://timesketch.org/
+> - https://plaso.readthedocs.io/
+
+- **requirements**:
+>PyMISP
+
+-----
+
 #### [URL Import](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/url_import.py)
 
 Simple URL import tool with Faup

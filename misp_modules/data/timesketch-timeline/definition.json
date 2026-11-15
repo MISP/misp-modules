@@ -1,0 +1,173 @@
+{
+  "attributes": {
+    "data-type": {
+      "description": "Source event data_type.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "datetime": {
+      "description": "When the log entry was seen",
+      "misp-attribute": "datetime",
+      "ui-priority": 0
+    },
+    "datetime-raw": {
+      "description": "Original datetime value from the source export; retain timezone and precision context before normalization.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "datetime-unit": {
+      "description": "Explicit unit for a numeric datetime field: s, ms, us or ns. Never inferred from its magnitude.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "display-name": {
+      "description": "Source display_name or artifact reference.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "event-id": {
+      "description": "Source Timesketch/OpenSearch document ID, scoped by sketch/timeline/index context.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 70
+    },
+    "message": {
+      "description": "Informative message of the event",
+      "misp-attribute": "text",
+      "ui-priority": 0
+    },
+    "parser": {
+      "description": "Source parser or parser chain, when supplied by Plaso/Timesketch.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "pathspec": {
+      "description": "JSON representation of the source dfVFS path specification, including parent evidence references.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "raw-event": {
+      "description": "Normalized JSON for the complete source record, including API wrapper metadata. Original export bytes remain authoritative.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "row-number": {
+      "description": "One-based source record ordinal, excluding CSV headers and blank JSONL lines.",
+      "disable_correlation": true,
+      "misp-attribute": "counter",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "selected": {
+      "description": "Explicit source selection flag. A search hit alone does not imply this flag is true.",
+      "disable_correlation": true,
+      "misp-attribute": "boolean",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "sketch-id": {
+      "description": "Source sketch identifier, when supplied. Not an identifier for a newly imported sketch.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "source-comments": {
+      "description": "JSON representation of source annotations/comments, including author/time metadata where supplied. Missing comment times are not invented.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 70
+    },
+    "source-format": {
+      "description": "Encoding of the selected source export: json, jsonl or csv.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "source-index": {
+      "description": "Source OpenSearch index identifier; preserved as provenance rather than an ingestion target.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "source-labels": {
+      "description": "JSON representation of source Timesketch labels, retaining sketch scope when supplied. Not automatically active labels in another sketch.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "source-sha256": {
+      "description": "SHA-256 of the exact imported export bytes, not the underlying forensic evidence.",
+      "disable_correlation": true,
+      "misp-attribute": "sha256",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "source-tags": {
+      "description": "JSON representation of source tags or Plaso EventTag labels. These are not automatically MISP tags or verdicts.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "source-url": {
+      "description": "Explicit URL reference to the source selection, event or investigation. The importer does not fetch it.",
+      "disable_correlation": true,
+      "misp-attribute": "link",
+      "to_ids": false,
+      "ui-priority": 70
+    },
+    "timeline-id": {
+      "description": "Source timeline identifier, when supplied. Do not reuse it as an ingestion target.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "timeline-name": {
+      "description": "Source timeline name reported by a Timesketch export.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "timestamp": {
+      "description": "When the log entry was seen in microseconds since Unix epoch",
+      "misp-attribute": "text",
+      "ui-priority": 0
+    },
+    "timestamp_desc": {
+      "description": "Text explaining what type of timestamp is it",
+      "misp-attribute": "text",
+      "ui-priority": 0
+    }
+  },
+  "description": "A timesketch timeline object based on mandatory field in timesketch to describe a log entry.",
+  "meta-category": "misc",
+  "name": "timesketch-timeline",
+  "requiredOneOf": [
+    "message",
+    "datetime"
+  ],
+  "uuid": "06db0221-cbc0-4ffc-ad98-7f34549310f1",
+  "version": 4
+}
