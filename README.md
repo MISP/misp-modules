@@ -304,6 +304,8 @@ For further Information see the [license file](https://misp.github.io/misp-modul
 * [CSV Test Import](https://misp.github.io/misp-modules/import_mod/#csv-test-import) - Simple CSV import tool with mapable columns
 * [ThreadAnalyzer Sandbox Import](https://misp.github.io/misp-modules/import_mod/#threadanalyzer-sandbox-import) - Module to import ThreatAnalyzer archive.zip / analysis.json files.
 * [URL Import](https://misp.github.io/misp-modules/import_mod/#url-import) - Simple URL import tool with Faup
+* [Velociraptor Results Import](https://misp.github.io/misp-modules/import_mod/#velociraptor-results-import) - Import Velociraptor JSON, JSONL or CSV results with linked forensic observations and provenance.
+
 * [VMRay API Import](https://misp.github.io/misp-modules/import_mod/#vmray-api-import) - Module to import VMRay (VTI) results.
 * [VMRay Summary JSON Import](https://misp.github.io/misp-modules/import_mod/#vmray-summary-json-import) - Import a VMRay Summary JSON report.
 
