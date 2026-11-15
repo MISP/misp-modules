@@ -5292,6 +5292,30 @@ Simple CSV import tool with mapable columns
 
 -----
 
+#### [OSQuery Results Import](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/osquery_import.py)
+
+<img src=logos/osquery.png height=60>
+
+Import osquery snapshots and differential results with host, query/pack and source-indicator provenance.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/osquery_import.py)]
+
+- **features**:
+>Completes the return path from OSQuery Export and OSQuery Pack Publish. Accepts JSON/JSONL event, batch and snapshot logs, plus explicitly identified ad-hoc snapshots. Preserves host/query/pack identity, execution time, schedule epoch/counter, row action, decorations, raw rows and hunting source references. Empty results remain separate from matches, and removed rows do not delete MISP data. Includes an osquery-result template. No SQL execution, endpoint access or new dependencies. See the [usage guide](https://github.com/MISP/misp-modules/blob/main/documentation/import_mod/osquery_import.md).
+
+- **input**:
+>Base64-encoded UTF-8 JSON/JSONL result export; optional collector context and exporter sources map.
+
+- **output**:
+>Exact source file and unreviewed osquery-result objects, including explicit empty-result records.
+
+- **references**:
+>https://osquery.readthedocs.io/en/stable/deployment/logging/
+
+- **requirements**:
+>PyMISP
+
+-----
+
 #### [PCAP Import](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/pcap_import.py)
 
 Import a PCAP or PCAPNG capture, including reassembled files, emails and network indicators.

@@ -1,0 +1,16 @@
+{
+  "version": "5.24.1",
+  "pack_name": "misp_fixture_pack_with_underscores",
+  "query_name": "misp_d49b2e7e02e476684933625587340d396164542adb74a602beaf1018c4836a75",
+  "event": {
+    "uuid": "8aeea4c1-ce72-4ecb-8115-4c1b30f99ef6",
+    "Attribute": [
+      {
+        "uuid": "3f6d4ee0-f1f6-439d-adb3-26b9b257f50e",
+        "type": "filename",
+        "value": "/workspace/work/osquery-native/synthetic-indicator.txt",
+        "to_ids": true
+      }
+    ]
+  }
+}

@@ -301,6 +301,7 @@ For further Information see the [license file](https://misp.github.io/misp-modul
 * [MISP JSON Import](https://misp.github.io/misp-modules/import_mod/#misp-json-import) - Module to import MISP JSON format for merging MISP events.
 * [OCR Import](https://misp.github.io/misp-modules/import_mod/#ocr-import) - Optical Character Recognition (OCR) module for MISP.
 * [OpenIOC Import](https://misp.github.io/misp-modules/import_mod/#openioc-import) - Import legacy OpenIOC 1.0 and 1.1 files into MISP.
+* [OSQuery Results Import](https://misp.github.io/misp-modules/import_mod/#osquery-results-import) - Import osquery snapshots and differential results with host, query/pack and source-indicator provenance.
 * [PCAP Import](https://misp.github.io/misp-modules/import_mod/#pcap-import) - Import a PCAP or PCAPNG capture, including reassembled files, emails and network indicators.
 * [TAXII 2.1 Import](https://misp.github.io/misp-modules/import_mod/#taxii-2.1-import) - Import content from a TAXII 2.1 server
 * [CSV Test Import](https://misp.github.io/misp-modules/import_mod/#csv-test-import) - Simple CSV import tool with mapable columns

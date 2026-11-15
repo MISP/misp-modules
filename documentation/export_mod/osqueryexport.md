@@ -104,3 +104,12 @@ Windows API behavior requires verification on a Windows endpoint.
 See upstream [configuration](https://github.com/osquery/osquery/blob/5.24.0/docs/wiki/deployment/configuration.md)
 and [YARA](https://github.com/osquery/osquery/blob/5.24.0/docs/wiki/deployment/yara.md)
 documentation for the pack and scan contracts.
+
+## Importing collected results
+
+The [OSQuery Results Import module](../import_mod/osquery_import.md) accepts native
+snapshot and differential JSON/JSONL logs. Retain this export response's `sources`
+map and supply it with the collected results to preserve event/object/attribute
+origins. The map stays outside the deployed pack. The importer recognizes the
+stable MISP query keys in standard scheduled pack names and preserves row actions
+without changing the originating indicators.
