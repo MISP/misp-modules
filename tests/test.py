@@ -153,6 +153,49 @@ class TestModules(unittest.TestCase):
             assert "mrxcls.sys" in values
             assert "mdmcpq3.PNF" in values
 
+    def test_email_boolean_config_and_original_evidence(self):
+        archive_data = io.BytesIO()
+        with zipfile.ZipFile(archive_data, "w") as archive:
+            archive.writestr("child.txt", b"child contents")
+        message = get_base_email()
+        message.replace_header("Subject", "Fwd: Example Message")
+        message.attach(MIMEText("Review https://example.org/path", "plain"))
+        attachment = MIMEApplication(archive_data.getvalue(), "zip")
+        attachment.add_header("Content-Disposition", "attachment", filename="archive.zip")
+        message.attach(attachment)
+        raw = message.as_bytes() + b"\r\n \t"
+        for setting in ("false", False, True):
+            with self.subTest(setting=setting):
+                query = {
+                    "module": "email_import",
+                    "data": base64.b64encode(raw).decode("ascii"),
+                    "config": {
+                        "unzip_attachments": setting,
+                        "guess_zip_attachment_passwords": False,
+                        "extract_urls": setting,
+                        "remove_subject_markers": setting,
+                    },
+                }
+                with requests.post(self.url + "query", json=query, timeout=30) as response:
+                    response.raise_for_status()
+                    result = response.json()
+                objects = result["results"]["Object"]
+                carrier = objects[0]
+                source = next(a for a in carrier["Attribute"] if a["object_relation"] == "eml")
+                self.assertEqual(base64.b64decode(source["data"]), raw)
+                self.assertFalse(source["to_ids"])
+                filenames = [
+                    a["value"]
+                    for obj in objects
+                    if obj["name"] == "file"
+                    for a in obj["Attribute"]
+                    if a["object_relation"] == "filename"
+                ]
+                self.assertEqual(filenames, ["archive.zip", "child.txt"] if setting is True else ["archive.zip"])
+                self.assertEqual(sum(obj["name"] == "url" for obj in objects), int(setting is True))
+                subject = next(a["value"] for a in carrier["Attribute"] if a["object_relation"] == "subject")
+                self.assertEqual(subject, "Example Message" if setting is True else "Fwd: Example Message")
+
     @unittest.skip("Need Rewrite")
     def test_email_headers(self):
         query = {"module": "email_import"}

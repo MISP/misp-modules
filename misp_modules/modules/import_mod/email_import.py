@@ -3,6 +3,8 @@ import base64
 import json
 import re
 import zipfile
+import zlib
+from dataclasses import dataclass
 from html.parser import HTMLParser
 from io import BytesIO
 from pathlib import Path
@@ -21,7 +23,7 @@ mispattributes = {
 }
 
 moduleinfo = {
-    "version": "0.2",
+    "version": "0.3",
     "author": "Seamus Tuohy, Raphaël Vinot",
     "description": "Email import module for MISP",
     "module-type": ["import"],
@@ -29,17 +31,20 @@ moduleinfo = {
     "requirements": [],
     "features": (
         "This module can be used to import e-mail text as well as attachments and urls.\nConfiguration parameters are"
-        " used to unzip attachments, guess zip attachment passwords, extract urls, remove common subject markers,"
-        " and extract partial inline forwarded emails (extract_forwarded_emails, disabled by default):"
-        " set each one of them to True or False to process or not the respective corresponding actions."
-        "\nForward extraction supports English From/To/Cc/Bcc/Reply-To/Sent/Date/Subject header blocks in plain text"
-        " and HTML, including Outlook. Folded header values are supported. Each block needs a sender address,"
-        " a subject, and a recipient or date."
-        " At most 20 partial email objects are linked to the carrier with includes references. Plain text is preferred;"
-        " HTML is used if no forwards are found in plain text. Reconstructed attributes have to_ids disabled;"
-        " the original email is retained as evidence. Local or unparseable timestamps are preserved as text in the"
-        " reconstructed headers. Existing extract_urls and remove_subject_markers settings also apply to forwards."
-        " URL objects are shared between the carrier and forwards that contain the same URL."
+        " used to unzip attachments, guess zip attachment passwords, extract urls, remove common subject markers, and"
+        " extract partial inline forwarded emails (extract_forwarded_emails, disabled by default): All switches default"
+        " to False and accept JSON booleans, 0/1, and case-insensitive yes/no strings. ZIP extraction is limited per"
+        " request to 100 members, 50 MiB expanded bytes, and 100 password candidates; each member is limited to 20 MiB."
+        " Originals are retained and skipped archives are reported.\nForward extraction supports English"
+        " From/To/Cc/Bcc/Reply-To/Sent/Date/Subject header blocks in plain text and HTML, including Outlook. Folded"
+        " header values are supported. Each block needs a sender address, a subject, and a recipient or date. At most"
+        " 20 partial email objects are linked to the carrier with includes references. Plain text is preferred; HTML is"
+        " used if no forwards are found in plain text. Reconstructed attributes have to_ids disabled; the original"
+        " email is retained as evidence. Local or unparseable timestamps are preserved as text in the reconstructed"
+        " headers. Existing extract_urls and remove_subject_markers settings also apply to forwards. URL objects are"
+        " shared between the carrier and forwards that contain the same URL. Submitted EML/MSG bytes are preserved"
+        " separately from converted EML and heuristic forwards. See the [usage"
+        " guide](https://github.com/MISP/misp-modules/blob/main/documentation/import_mod/email_import.md)."
     ),
     "references": ["https://github.com/MISP/mail_to_misp"],
     "input": "E-mail file",
@@ -48,7 +53,7 @@ moduleinfo = {
 }
 
 # unzip_attachments : Unzip all zip files that are not password protected
-# guess_zip_attachment_passwords : This attempts to unzip all password protected zip files using all the strings found in the email body and subject
+# guess_zip_attachment_passwords : Try bounded password candidates from common values, subject and body.
 # extract_urls : This attempts to extract all URL's from text/html parts of the email
 moduleconfig = [
     "unzip_attachments",
@@ -58,128 +63,158 @@ moduleconfig = [
     "extract_forwarded_emails",
 ]
 
+MAX_ZIP_MEMBERS = 100
+MAX_ZIP_MEMBER_BYTES = 20 * 1024 * 1024
+MAX_ZIP_EXPANDED_BYTES = 50 * 1024 * 1024
+MAX_ZIP_PASSWORD_ATTEMPTS = 100
+MAX_PASSWORD_BYTES = 256
+MAX_PASSWORD_TEXT_CHARS = 64 * 1024
+ZIP_READ_CHUNK = 64 * 1024
+
+
+class ZipLimitError(ValueError):
+    """An archive exceeded a request-wide extraction budget."""
+
+
+@dataclass
+class ZipBudget:
+    members: int = 0
+    expanded_bytes: int = 0
+    password_attempts: int = 0
+
+
+def _boolean(value, name):
+    if value is None or value == "":
+        return False
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, int) and value in (0, 1):
+        return bool(value)
+    if isinstance(value, str):
+        normalized = value.strip().lower()
+        if normalized in ("1", "true", "t", "yes", "y"):
+            return True
+        if normalized in ("", "0", "false", "f", "no", "n"):
+            return False
+    raise ValueError(f"{name} must be a boolean, 0/1, or a yes/no string.")
+
+
+def _add_binary(filename, data, parent, file_objects, comment):
+    data.seek(0)
+    file_object, main_object, sections = make_binary_objects(pseudofile=data, filename=filename, standalone=False)
+    file_object.comment = comment
+    file_objects.extend(obj for obj in (file_object, main_object, *sections) if obj)
+    parent.add_reference(file_object.uuid, "includes", "Email attachment")
+    return file_object
+
+
+def _attach_original(email_object, data):
+    """Never depend on PyMISP's normalized/converted source buffers for evidence."""
+    relation = "msg" if email_object.eml_from_msg else "eml"
+    email_object.add_attribute(
+        relation,
+        value=f"Original email.{relation}",
+        data=BytesIO(data),
+        to_ids=False,
+        comment="Original submitted message bytes, unchanged.",
+    )
+    if email_object.eml_from_msg:
+        email_object.add_attribute(
+            "eml",
+            value="Converted email.eml",
+            data=BytesIO(email_object.email.as_bytes()),
+            to_ids=False,
+            comment="Reconstructed EML converted from MSG; not the original message.",
+        )
+
 
 def dict_handler(request: dict):
     # request data is always base 64 byte encoded
     data = base64.b64decode(request["data"])
 
-    email_object = EMailObject(pseudofile=BytesIO(data), attach_original_email=True, standalone=False)
+    try:
+        config = request.get("config")
+        if config is None:
+            config = {}
+        if not isinstance(config, dict):
+            raise ValueError("config must be an object.")
+        options = {name: _boolean(config.get(name), name) for name in moduleconfig}
+    except ValueError as exc:
+        return {"error": f"Email import configuration: {exc}"}
+    unzip = options["unzip_attachments"]
+    extract_urls = options["extract_urls"]
+    remove_subject_markers = options["remove_subject_markers"]
 
-    # Check if we were given a configuration
-    config = request.get("config", {})
-    # Don't be picky about how the user chooses to say yes to these
-    acceptable_config_yes = ["y", "yes", "true", "t"]
-
-    # Do we unzip attachments we find?
-    unzip = config.get("unzip_attachments", None)
-    if unzip is not None and unzip.lower() in acceptable_config_yes:
-        unzip = True
-
-    # Do we try to find passwords for protected zip files?
-    zip_pass_crack = config.get("guess_zip_attachment_passwords", None)
-    if zip_pass_crack is not None and zip_pass_crack.lower() in acceptable_config_yes:
-        zip_pass_crack = True
-        password_list = get_zip_passwords(email_object.email)
-
-    # Do we extract URL's from the email.
-    extract_urls = config.get("extract_urls", None)
-    if extract_urls is not None and extract_urls.lower() in acceptable_config_yes:
-        extract_urls = True
-
-    # Do we strip common forwarding/reply markers from the e-mail subject.
-    remove_subject_markers = config.get("remove_subject_markers", None)
-    if remove_subject_markers is not None and remove_subject_markers.lower() in acceptable_config_yes:
+    # None suppresses PyMISP's source attachment, including on versions where False does not.
+    email_object = EMailObject(pseudofile=BytesIO(data), attach_original_email=None, standalone=False)
+    _attach_original(email_object, data)
+    password_list = get_zip_passwords(email_object.email) if unzip and options["guess_zip_attachment_passwords"] else []
+    if remove_subject_markers:
         strip_subject_markers(email_object)
 
-    file_objects = []  # All possible file objects
-    # Get Attachments
-    # Get file names of attachments
+    file_objects = []
+    warnings = []
+    budget = ZipBudget()
+    office_extensions = {
+        "doc",
+        "docx",
+        "dot",
+        "dotx",
+        "xls",
+        "xlsx",
+        "xlm",
+        "xla",
+        "xlc",
+        "xlt",
+        "xltx",
+        "xlw",
+        "ppt",
+        "pptx",
+        "pps",
+        "ppsx",
+        "pot",
+        "potx",
+        "sldx",
+        "odt",
+        "ods",
+        "odp",
+        "odg",
+        "odf",
+        "fodt",
+        "fods",
+        "fodp",
+        "fodg",
+        "ott",
+        "uot",
+    }
     for attachment_name, attachment in email_object.attachments:
-        # Create file objects for the attachments
-        if not attachment_name:
-            attachment_name = "NameMissing.txt"
-
-        temp_filename = Path(attachment_name)
-        zipped_files = [
-            "doc",
-            "docx",
-            "dot",
-            "dotx",
-            "xls",
-            "xlsx",
-            "xlm",
-            "xla",
-            "xlc",
-            "xlt",
-            "xltx",
-            "xlw",
-            "ppt",
-            "pptx",
-            "pps",
-            "ppsx",
-            "pot",
-            "potx",
-            "potx",
-            "sldx",
-            "odt",
-            "ods",
-            "odp",
-            "odg",
-            "odf",
-            "fodt",
-            "fods",
-            "fodp",
-            "fodg",
-            "ott",
-            "uot",
-        ]
-        # Attempt to unzip the attachment and return its files
-        if unzip and temp_filename.suffix[1:] not in zipped_files:
-            try:
-                unzip_attachment(attachment_name, attachment, email_object, file_objects)
-            except RuntimeError:  # File is encrypted with a password
-                if zip_pass_crack is True:
-                    password = test_zip_passwords(attachment, password_list)
-                    if password:
-                        unzip_attachment(
-                            attachment_name,
-                            attachment,
-                            email_object,
-                            file_objects,
-                            password,
-                        )
-                    else:  # Inform the analyst that we could not crack password
-                        f_object, main_object, sections = make_binary_objects(
-                            pseudofile=attachment,
-                            filename=attachment_name,
-                            standalone=False,
-                        )
-                        f_object.comment = "Encrypted Zip: Password could not be cracked from message"
-                        file_objects.append(f_object)
-                        file_objects.append(main_object)
-                        file_objects += sections
-                        email_object.add_reference(f_object.uuid, "includes", "Email attachment")
-            except zipfile.BadZipFile:  # Attachment is not a zipfile
-                # Just straight add the file
-                f_object, main_object, sections = make_binary_objects(
-                    pseudofile=attachment, filename=attachment_name, standalone=False
-                )
-                file_objects.append(f_object)
-                file_objects.append(main_object)
-                file_objects += sections
-                email_object.add_reference(f_object.uuid, "includes", "Email attachment")
-        else:
-            # Just straight add the file
-            f_object, main_object, sections = make_binary_objects(
-                pseudofile=attachment, filename=attachment_name, standalone=False
+        attachment_name = attachment_name or "NameMissing.txt"
+        original = _add_binary(
+            attachment_name, attachment, email_object, file_objects, "Original email attachment, unchanged."
+        )
+        if not unzip or Path(attachment_name).suffix[1:].lower() in office_extensions:
+            continue
+        if not zipfile.is_zipfile(attachment):
+            continue
+        try:
+            unzip_attachment(
+                attachment_name, attachment, email_object, file_objects, passwords=password_list, budget=budget
             )
-            file_objects.append(f_object)
-            file_objects.append(main_object)
-            file_objects += sections
-            email_object.add_reference(f_object.uuid, "includes", "Email attachment")
+        except (
+            ZipLimitError,
+            RuntimeError,
+            zipfile.BadZipFile,
+            NotImplementedError,
+            OSError,
+            EOFError,
+            zlib.error,
+        ) as exc:
+            warning = f"ZIP attachment {attachment_name!r} was not extracted: {exc}"
+            original.comment += " " + warning
+            warnings.append(warning)
 
     url_objects = {}  # Shared by the carrier and all its reconstructed forwards.
-    if str(config.get("extract_forwarded_emails", "")).lower() in acceptable_config_yes:
+    if options["extract_forwarded_emails"]:
         for message in inline_forwarded_messages(email_object.email):
             forwarded = EMailObject(
                 pseudofile=BytesIO(message.as_bytes()), attach_original_email=False, standalone=False
@@ -200,7 +235,7 @@ def dict_handler(request: dict):
                 attribute.to_ids = False
             forwarded.comment = "Heuristically reconstructed from an inline forward; headers are unverified claims."
             email_object.add_reference(forwarded.uuid, "includes", "Inline forwarded email (heuristic extraction)")
-            if remove_subject_markers is not None and remove_subject_markers.lower() in acceptable_config_yes:
+            if remove_subject_markers:
                 strip_subject_markers(forwarded)
             file_objects.append(forwarded)
             if extract_urls:
@@ -213,6 +248,8 @@ def dict_handler(request: dict):
     if file_objects:
         objects += [o.to_dict() for o in file_objects if o]
     r = {"results": {"Object": objects}}
+    if warnings:
+        r["warnings"] = warnings
     return r
 
 
@@ -278,60 +315,77 @@ def strip_subject_markers(email_object):
             attribute.value = stripped_subject
 
 
-def unzip_attachment(filename, data, email_object, file_objects, password=None):
-    """Extract the contents of a zipfile.
+def _zip_members(archive, budget):
+    members = archive.infolist()
+    if len(members) > MAX_ZIP_MEMBERS - budget.members:
+        raise ZipLimitError(f"ZIP member count exceeds the {MAX_ZIP_MEMBERS}-member request limit.")
+    budget.members += len(members)
+    if any(info.compress_type not in (zipfile.ZIP_STORED, zipfile.ZIP_DEFLATED) for info in members):
+        # ZipExtFile does not bound each decompressor call for BZIP2/LZMA, even with read(size).
+        raise NotImplementedError("ZIP extraction supports stored and deflated members only.")
+    if any(info.file_size > MAX_ZIP_MEMBER_BYTES for info in members):
+        raise ZipLimitError(f"ZIP member exceeds the {MAX_ZIP_MEMBER_BYTES}-byte per-member limit.")
+    if sum(info.file_size for info in members) > MAX_ZIP_EXPANDED_BYTES - budget.expanded_bytes:
+        raise ZipLimitError(f"Expanded ZIP data exceeds the {MAX_ZIP_EXPANDED_BYTES}-byte request limit.")
+    return [info for info in members if not info.is_dir()]
 
-    Args:
-        filename (str): A string containing the name of the zip file.
-        data (decoded attachment data): Data object decoded from an e-mail part.
 
-    Returns:
-        Returns an array containing a dict for each file
-        Example Dict {"values":"name_of_file.txt",
-                      "data":<Base64 Encoded BytesIO>,
-                      "comment":"string here"}
+def _read_zip_member(stream, budget):
+    output = BytesIO()
+    while True:
+        remaining = min(MAX_ZIP_MEMBER_BYTES - output.tell(), MAX_ZIP_EXPANDED_BYTES - budget.expanded_bytes)
+        if remaining < 0:
+            raise ZipLimitError("Expanded ZIP data limit exhausted.")
+        size = min(ZIP_READ_CHUNK, remaining + 1)
+        # Charge before reading: a failed CRC/decryption read may still have expanded data.
+        budget.expanded_bytes += size
+        chunk = stream.read(size)
+        budget.expanded_bytes -= size - len(chunk)
+        if not chunk:
+            return output
+        if len(chunk) > remaining:
+            raise ZipLimitError("Expanded ZIP data exceeds the member or request byte limit.")
+        output.write(chunk)
 
+
+def unzip_attachment(filename, data, email_object, file_objects, password=None, *, passwords=(), budget=None):
+    """Extract one ZIP atomically using a budget shared by all attachments and retries.
+
+    Never write archive paths to disk. Directory entries count toward the member
+    limit; duplicate names are opened by ZipInfo so each entry is read exactly.
     """
-    with zipfile.ZipFile(data, "r") as zf:
-        if password is not None:
-            comment = f'Extracted from {filename} with password "{password}"'
-            password = str.encode(password)  # Byte encoded password required
-        else:
-            comment = f"Extracted from {filename}"
-        for zip_file_name in zf.namelist():  # Get all files in the zip file
-            with zf.open(zip_file_name, mode="r", pwd=password) as fp:
-                file_data = BytesIO(fp.read())
-            f_object, main_object, sections = make_binary_objects(
-                pseudofile=file_data, filename=zip_file_name, standalone=False
-            )
-            f_object.comment = comment
-            file_objects.append(f_object)
-            file_objects.append(main_object)
-            file_objects += sections
-            email_object.add_reference(f_object.uuid, "includes", "Email attachment")
-
-
-def test_zip_passwords(data, test_passwords):
-    """Test passwords until one is found to be correct.
-
-    Args:
-        data (decoded attachment data): Data object decoded from an e-mail part.
-        test_passwords (array): List of strings to test as passwords
-
-    Returns:
-        Returns a byte string containing a found password and None if password is not found.
-
-    """
-    with zipfile.ZipFile(data, "r") as zf:
-        firstfile = zf.namelist()[0]
-        for pw_test in test_passwords:
-            byte_pwd = str.encode(pw_test)
+    if budget is None:
+        budget = ZipBudget()
+    data.seek(0)
+    with zipfile.ZipFile(data, "r") as archive:
+        members = _zip_members(archive, budget)
+        encrypted = any(info.flag_bits & 1 for info in members)
+        if encrypted and password is None and not passwords:
+            raise RuntimeError("Encrypted ZIP; password guessing is disabled.")
+        candidates = [password] if password is not None else passwords if encrypted else [None]
+        for candidate in candidates:
+            if encrypted:
+                if budget.password_attempts >= MAX_ZIP_PASSWORD_ATTEMPTS:
+                    raise ZipLimitError(
+                        f"ZIP password attempts exceed the {MAX_ZIP_PASSWORD_ATTEMPTS}-attempt request limit."
+                    )
+                budget.password_attempts += 1
+            pwd = candidate.encode("utf-8") if isinstance(candidate, str) else candidate
+            extracted = []
             try:
-                zf.open(firstfile, pwd=byte_pwd)
-                return pw_test
-            except RuntimeError:  # Incorrect Password
+                for info in members:
+                    with archive.open(info, mode="r", pwd=pwd) as stream:
+                        extracted.append((info.filename, _read_zip_member(stream, budget)))
+            except (RuntimeError, zipfile.BadZipFile, zlib.error):
+                if not encrypted:
+                    raise
+                # Failed attempts consume the byte budget and never commit partial objects.
                 continue
-    return None
+            comment = f"Extracted from {filename}" + (" (password-protected ZIP)" if encrypted else "")
+            for member_name, member_data in extracted:
+                _add_binary(member_name, member_data, email_object, file_objects, comment)
+            return
+    raise RuntimeError("Encrypted ZIP: no candidate password succeeded.")
 
 
 def get_zip_passwords(message):
@@ -376,26 +430,29 @@ def get_zip_passwords(message):
 
     # Not checking for multi-part message because by having an
     # encrypted zip file it must be multi-part.
-    body = []
+    body = [str(message.get("Subject", ""))[:MAX_PASSWORD_TEXT_CHARS]]
+    remaining = MAX_PASSWORD_TEXT_CHARS - len(body[0])
     for part in message.walk():
+        if remaining <= 0:
+            break
         charset = part.get_content_charset()
         if not charset:
             charset = "utf-8"
+        if part.get_content_type() not in ("text/plain", "text/html"):
+            continue
+        payload = part.get_payload(decode=True) or b""
+        try:
+            text = payload[: remaining * 4].decode(charset, errors="ignore")[:remaining]
+        except LookupError:
+            text = payload[: remaining * 4].decode("utf-8", errors="ignore")[:remaining]
+        remaining -= len(text)
         if part.get_content_type() == "text/plain":
-            body.append(part.get_payload(decode=True).decode(charset, errors="ignore"))
-        elif part.get_content_type() == "text/html":
+            body.append(text)
+        else:
             html_parser = HTMLTextParser()
-            payload = part.get_payload(decode=True)
-            if payload:
-                html_parser.feed(payload.decode(charset, errors="ignore"))
-                for text in html_parser.text_data:
-                    body.append(text)
-    raw_text = "\n".join(body).strip()
-
-    # Add subject to text corpus to parse
-    if "Subject" in message:
-        subject = " " + message.get("Subject")
-        raw_text += subject
+            html_parser.feed(text)
+            body.extend(html_parser.text_data)
+    raw_text = "\n".join(body)[:MAX_PASSWORD_TEXT_CHARS].strip()
 
     # Grab any strings that are marked off by special chars
     marking_chars = [["'", "'"], ['"', '"'], ["[", "]"], ["(", ")"]]
@@ -409,10 +466,20 @@ def get_zip_passwords(message):
     # Also get words with basic punctuation stripped out
     # just in case someone places a password in a proper sentence
     stripped_words = [i.strip(".,;:?!") for i in individual_words]
-    unique_words = list(set(individual_words + stripped_words))
-    possible_passwords += unique_words
-
-    return possible_passwords
+    possible_passwords += individual_words + stripped_words
+    # Stable order, bounded candidates and key lengths; do not depend on hash randomization.
+    passwords = []
+    seen = set()
+    for candidate in possible_passwords:
+        if not candidate or len(candidate) > MAX_PASSWORD_BYTES:
+            continue
+        if candidate in seen or len(candidate.encode("utf-8")) > MAX_PASSWORD_BYTES:
+            continue
+        seen.add(candidate)
+        passwords.append(candidate)
+        if len(passwords) >= MAX_ZIP_PASSWORD_ATTEMPTS:
+            break
+    return passwords
 
 
 class HTMLTextParser(HTMLParser):
