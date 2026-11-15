@@ -311,14 +311,12 @@ class _Builder:
                 continue
             self.add(result, relation, hex(address))
 
-    def process(self, result, row, created):
-        pid = self.number(row.get("PID"), "PID", 2**32 - 1)
+    def process(self, result, row, created, pid, ppid):
         if pid is None:
             self.warnings["No valid PID; process observation not constructed"] += 1
             return None, None
         obj = self.object("process", [str(result.uuid), "process"])
         self.add(obj, "pid", str(pid))
-        ppid = self.number(row.get("PPID"), "PPID", 2**32 - 1)
         if ppid is not None:
             self.add(obj, "parent-pid", str(ppid))
         name_column = "ImageFileName" if "ImageFileName" in row else "Process" if "Process" in row else "Owner"
@@ -386,12 +384,15 @@ class _Builder:
             self.add(result, relation, value)
         for field, value in self.context.items():
             self.add(result, field.replace("_", "-"), value)
+        pid = self.number(row.get("PID"), "PID", 2**32 - 1)
+        ppid = self.number(row.get("PPID"), "PPID", 2**32 - 1)
+        for relation, value in (("process-id", pid), ("parent-process-id", ppid)):
+            if value is not None:
+                self.add(result, relation, str(value))
         self.fields(
             result,
             row,
             {
-                "PID": "process-id",
-                "PPID": "parent-process-id",
                 "Protection": "memory-protection",
                 "Tag": "vad-tag",
                 "Rule": "rule-name",
@@ -408,7 +409,7 @@ class _Builder:
         self.link(self.source, result, "derived-from")
         process, identity = (None, None)
         if self.kind != "yara-match" or self.context["plugin"].startswith("windows."):
-            process, identity = self.process(result, row, created)
+            process, identity = self.process(result, row, created, pid, ppid)
         if self.kind == "network":
             self.network(result, row)
         return result, process, identity

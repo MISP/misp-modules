@@ -105,6 +105,9 @@ semantics and higher precision remain raw with a warning; no rounding or epoch
 guessing occurs. Network `Created` is retained as network-object creation time,
 never relabeled as a first-packet observation. Wildcard endpoints and unavailable
 values do not become fake IPs; corrupt PIDs/ports/addresses remain raw with warnings.
+PID/PPID values must be integers in the range 0–4294967295 before appearing on
+either result or process objects. Zero is retained; invalid identifiers are not
+promoted from raw context and cannot establish process-parent links.
 
 `malfind` suspicion and YARA matches always start as `unreviewed`. A rule name is
 not a rule body, and none of these rows independently confirms malicious activity.

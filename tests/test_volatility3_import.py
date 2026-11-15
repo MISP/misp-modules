@@ -145,8 +145,42 @@ def test_corrupt_network_fields_keep_raw_context_without_false_process_or_endpoi
     data[0].update(PID=-1, Proto="unknown", LocalAddr="garbage", ForeignAddr="*", LocalPort=999999, ForeignPort=-1)
     result = imported("netscan.json", raw=json.dumps(data).encode())
     assert not objects(result, "process") and not objects(result, "network-socket")
+    assert "process-id" not in fields(objects(result)[0])
     assert json.loads(fields(objects(result)[0])["raw-result"])["PID"] == -1
     assert result["warnings"]
+
+
+@pytest.mark.parametrize("column,relation", [("PID", "process-id"), ("PPID", "parent-process-id")])
+@pytest.mark.parametrize("value", [-1, "-1", 2**32, str(2**32), True, 1.5])
+def test_corrupt_process_identifiers_are_raw_only_and_cannot_create_parent_links(column, relation, value):
+    data = rows("pstree.json")
+    data[0]["__children"][0][column] = value
+    result = imported("pstree.json", raw=json.dumps(data).encode())
+    child = fields(objects(result)[1])
+    assert relation not in child
+    assert json.loads(child["raw-result"])[column] == value
+    assert not any(refs(p, "parent-of") for p in objects(result, "process"))
+    assert refs(objects(result)[0], "contains") == [objects(result)[1]["uuid"]]
+    assert f"Invalid {column}; retained in raw-result: 1" in result["warnings"]
+    if column == "PID":
+        assert len(objects(result, "process")) == 1
+    else:
+        assert len(objects(result, "process")) == 2
+        assert "parent-pid" not in fields(objects(result, "process")[1])
+
+
+@pytest.mark.parametrize(
+    "column,relation,process_relation", [("PID", "process-id", "pid"), ("PPID", "parent-process-id", "parent-pid")]
+)
+@pytest.mark.parametrize("value", [0, 2**32 - 1, "0004"])
+def test_valid_identifier_boundaries_are_shared_by_result_and_process(column, relation, process_relation, value):
+    data = rows()[:1]
+    data[0][column] = value
+    result = imported(raw=json.dumps(data).encode())
+    assert fields(objects(result)[0])[relation] == str(int(value))
+    assert fields(objects(result, "process")[0])[process_relation] == str(int(value))
+    assert json.loads(fields(objects(result)[0])["raw-result"])[column] == value
+    assert not any(w.startswith(f"Invalid {column};") for w in result["warnings"])
 
 
 @pytest.mark.parametrize("filename", ["malfind.json", "vadyarascan.json", "yarascan.json"])
@@ -378,3 +412,19 @@ class TestVolatility3HTTP(AsyncHTTPTestCase):
         assert response.code == 200 and len(objects(json.loads(response.body))) == 2
         response = self.fetch("/query", method="POST", body=json.dumps({"module": "volatility3_import", "data": "%%%"}))
         assert response.code == 200 and "error" in json.loads(response.body)
+
+    def test_corrupt_identifiers_remain_raw_in_http_results(self):
+        data = rows()[:1]
+        data[0].update(PID=-1, PPID=2**32)
+        response = self.fetch(
+            "/query",
+            method="POST",
+            body=request(json.dumps(data).encode(), MANIFEST["pslist.json"], module="volatility3_import"),
+        )
+        assert response.code == 200
+        result = json.loads(response.body)
+        assert not objects(result, "process")
+        value = fields(objects(result)[0])
+        assert not {"process-id", "parent-process-id"}.intersection(value)
+        assert json.loads(value["raw-result"])["PID"] == -1
+        assert json.loads(value["raw-result"])["PPID"] == 2**32
