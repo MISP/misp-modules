@@ -5100,6 +5100,29 @@ Email import module for MISP
 
 -----
 
+#### [Hayabusa and Chainsaw Findings Import](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/evtx_findings_import.py)
+
+Import Hayabusa timelines and Chainsaw hunt results as unreviewed detections with linked Windows event context.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/evtx_findings_import.py)]
+
+- **features**:
+>Accepts Hayabusa JSON, JSONL and CSV timelines and Chainsaw hunt JSON/JSONL, including aggregate and cached results. Preserves the original export, rule identity/severity, host, channel, provider, Windows Event ID, record ID, EVTX references and unmapped data. Aggregate event contexts remain separate linked objects. A rule match is unreviewed, not an analyst-confirmed malicious finding. All attributes are non-IDS and non-correlating. Includes compatible object templates; no tool execution, network access or new dependencies. See the [usage guide](https://github.com/MISP/misp-modules/blob/main/documentation/import_mod/evtx_findings_import.md).
+
+- **input**:
+>Base64-encoded UTF-8 detection export in data; optional filename and tool/format settings.
+
+- **output**:
+>Source file, windows-event-log-detection and windows-event-log-record objects.
+
+- **references**:
+> - https://github.com/Yamato-Security/hayabusa/blob/main/config/profiles.yaml
+> - https://github.com/WithSecureOpenSource/chainsaw/blob/master/src/cli.rs
+
+- **requirements**:
+>PyMISP
+
+-----
+
 #### [GoAML Import](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/goamlimport.py)
 
 <img src=logos/goAML.jpg height=60>

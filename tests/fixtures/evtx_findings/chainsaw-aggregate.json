@@ -1,0 +1,149 @@
+[
+  {
+    "group": "Lateral Movement",
+    "kind": "aggregate",
+    "name": "Synthetic multi-host aggregation",
+    "timestamp": "2022-10-11T19:26:52.154080+00:00",
+    "authors": [
+      "5661c6f72"
+    ],
+    "level": "high",
+    "source": "sigma",
+    "status": "stable",
+    "id": "88bd7406-f575-458e-949b-d92e40b5a1b5",
+    "documents": [
+      {
+        "kind": "evtx",
+        "path": "host-a/Security.evtx",
+        "data": {
+          "Event": {
+            "EventData": {
+              "AuthenticationPackageName": "Negotiate",
+              "LogonProcessName": "Advapi  ",
+              "TargetOutboundDomainName": "-",
+              "TargetLinkedLogonId": "0x0",
+              "LmPackageName": "-",
+              "TargetDomainName": "NT AUTHORITY",
+              "SubjectUserName": "DESKTOP-JK4Q86I$",
+              "TargetUserSid": "S-1-5-18",
+              "IpAddress": "-",
+              "KeyLength": 0,
+              "SubjectLogonId": "0x3e7",
+              "TargetLogonId": "0x3e7",
+              "ElevatedToken": "%%1842",
+              "LogonGuid": "00000000-0000-0000-0000-000000000000",
+              "RestrictedAdminMode": "-",
+              "SubjectDomainName": "WORKGROUP",
+              "LogonType": 5,
+              "VirtualAccount": "%%1843",
+              "TargetOutboundUserName": "-",
+              "WorkstationName": "-",
+              "IpPort": "-",
+              "ImpersonationLevel": "%%1833",
+              "SubjectUserSid": "S-1-5-18",
+              "TransmittedServices": "-",
+              "ProcessId": "0x29c",
+              "TargetUserName": "SYSTEM",
+              "ProcessName": "C:\\Windows\\System32\\services.exe"
+            },
+            "System": {
+              "EventID": 4624,
+              "Level": 0,
+              "Provider_attributes": {
+                "Name": "Microsoft-Windows-Security-Auditing",
+                "Guid": "54849625-5478-4994-A5BA-3E3B0328C30D"
+              },
+              "Version": 2,
+              "Task": 12544,
+              "Opcode": 0,
+              "TimeCreated_attributes": {
+                "SystemTime": "2022-10-11T19:26:52.154080Z"
+              },
+              "Execution_attributes": {
+                "ProcessID": 688,
+                "ThreadID": 736
+              },
+              "Keywords": "0x8020000000000000",
+              "Correlation_attributes": {
+                "ActivityID": "5965E1C0-DDA7-0003-D8E1-6559A7DDD801"
+              },
+              "EventRecordID": 7,
+              "Channel": "Security",
+              "Computer": "host-a",
+              "Security": null
+            }
+          },
+          "Event_attributes": {
+            "xmlns": "http://schemas.microsoft.com/win/2004/08/events/event"
+          }
+        }
+      },
+      {
+        "kind": "evtx",
+        "path": "host-b/System.evtx",
+        "data": {
+          "Event": {
+            "EventData": {
+              "AuthenticationPackageName": "Negotiate",
+              "LogonProcessName": "Advapi  ",
+              "TargetOutboundDomainName": "-",
+              "TargetLinkedLogonId": "0x0",
+              "LmPackageName": "-",
+              "TargetDomainName": "NT AUTHORITY",
+              "SubjectUserName": "DESKTOP-JK4Q86I$",
+              "TargetUserSid": "S-1-5-18",
+              "IpAddress": "-",
+              "KeyLength": 0,
+              "SubjectLogonId": "0x3e7",
+              "TargetLogonId": "0x3e7",
+              "ElevatedToken": "%%1842",
+              "LogonGuid": "00000000-0000-0000-0000-000000000000",
+              "RestrictedAdminMode": "-",
+              "SubjectDomainName": "WORKGROUP",
+              "LogonType": 5,
+              "VirtualAccount": "%%1843",
+              "TargetOutboundUserName": "-",
+              "WorkstationName": "-",
+              "IpPort": "-",
+              "ImpersonationLevel": "%%1833",
+              "SubjectUserSid": "S-1-5-18",
+              "TransmittedServices": "-",
+              "ProcessId": "0x29c",
+              "TargetUserName": "SYSTEM",
+              "ProcessName": "C:\\Windows\\System32\\services.exe"
+            },
+            "System": {
+              "EventID": 4624,
+              "Level": 0,
+              "Provider_attributes": {
+                "Name": "Microsoft-Windows-Security-Auditing",
+                "Guid": "54849625-5478-4994-A5BA-3E3B0328C30D"
+              },
+              "Version": 2,
+              "Task": 12544,
+              "Opcode": 0,
+              "TimeCreated_attributes": {
+                "SystemTime": "2022-10-11T19:26:52.154080Z"
+              },
+              "Execution_attributes": {
+                "ProcessID": 688,
+                "ThreadID": 736
+              },
+              "Keywords": "0x8020000000000000",
+              "Correlation_attributes": {
+                "ActivityID": "5965E1C0-DDA7-0003-D8E1-6559A7DDD801"
+              },
+              "EventRecordID": 7,
+              "Channel": "System",
+              "Computer": "host-b",
+              "Security": null
+            }
+          },
+          "Event_attributes": {
+            "xmlns": "http://schemas.microsoft.com/win/2004/08/events/event"
+          }
+        }
+      }
+    ]
+  }
+]

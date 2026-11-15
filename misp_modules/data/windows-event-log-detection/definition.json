@@ -1,0 +1,126 @@
+{
+  "attributes": {
+    "detection-kind": {
+      "description": "Result shape reported by the tool, e.g. timeline, individual, cached or aggregate.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "detection-time": {
+      "description": "Parsed detection/timeline time only when the source specifies a timezone and representable precision; not import time.",
+      "disable_correlation": true,
+      "misp-attribute": "datetime",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "raw-result": {
+      "description": "Normalized JSON representation of the complete reported detection, retaining unmapped fields. Original bytes remain authoritative in the export attachment.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "result-index": {
+      "description": "One-based result ordinal in the original export, excluding CSV headers and blank JSONL lines.",
+      "disable_correlation": true,
+      "misp-attribute": "counter",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "review-status": {
+      "description": "Review state of the imported match. An importer sets unreviewed and must not infer malicious activity.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "rule-file": {
+      "description": "Source rule filename/path as reported; not read by the importer.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "rule-id": {
+      "description": "Rule identifier provided by the detecting tool. This is not an event record identifier.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "rule-source": {
+      "description": "Reported rule format or source, e.g. sigma or chainsaw.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "rule-status": {
+      "description": "Rule maturity/status as reported, not an analyst verdict on the detection.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "rule-title": {
+      "description": "Name or title of the matching rule.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 80
+    },
+    "severity": {
+      "description": "Reported rule severity, retaining the original label or abbreviation; not Windows event Level.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 80
+    },
+    "source-format": {
+      "description": "Source export encoding: json, jsonl, csv or hayabusa-json for the native pretty-printed object stream.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "source-sha256": {
+      "description": "SHA-256 of the exact source export bytes; not a hash of the EVTX file.",
+      "disable_correlation": true,
+      "misp-attribute": "sha256",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "timestamp-raw": {
+      "description": "Original detection/timeline timestamp string without precision or timezone changes.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "tool": {
+      "description": "Tool that emitted the detection, e.g. hayabusa or chainsaw.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 80
+    },
+    "tool-version": {
+      "description": "Tool version explicitly supplied with the import; not inferred from a rule status.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    }
+  },
+  "description": "An unreviewed rule match reported by a Windows event-log analysis tool. Keep matched event records and any analyst-confirmed conclusion as separate linked objects.",
+  "meta-category": "misc",
+  "name": "windows-event-log-detection",
+  "required": [
+    "tool",
+    "rule-title",
+    "raw-result"
+  ],
+  "uuid": "fccbd010-d855-41a4-b43d-6ea876d19b49",
+  "version": 1
+}

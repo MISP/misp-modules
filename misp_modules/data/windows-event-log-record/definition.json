@@ -1,0 +1,90 @@
+{
+  "attributes": {
+    "channel": {
+      "description": "Reported Windows event channel, retaining any tool abbreviation.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 80
+    },
+    "computer": {
+      "description": "Computer or host value as reported; not asserted to be a malicious hostname.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 80
+    },
+    "event-id": {
+      "description": "Windows Event ID defining the event type; not the record identifier.",
+      "disable_correlation": true,
+      "misp-attribute": "counter",
+      "to_ids": false,
+      "ui-priority": 80
+    },
+    "event-index": {
+      "description": "One-based document ordinal within the parent detection export result; aggregate members remain distinct.",
+      "disable_correlation": true,
+      "misp-attribute": "counter",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "event-level": {
+      "description": "Windows System.Level as reported; not the detecting rule severity.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "event-time": {
+      "description": "Parsed event time only when the timestamp has an explicit timezone and representable precision.",
+      "disable_correlation": true,
+      "misp-attribute": "datetime",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "provider": {
+      "description": "Reported Windows event provider name.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "raw-event": {
+      "description": "Normalized JSON event context from the export, including unmapped fields. This is not the original EVTX binary record.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "record-id": {
+      "description": "EventRecordID within a log; requires source/host context for identity.",
+      "disable_correlation": true,
+      "misp-attribute": "counter",
+      "to_ids": false,
+      "ui-priority": 80
+    },
+    "source-evtx": {
+      "description": "Reported source EVTX path/reference. This does not imply that EVTX bytes were acquired or hashed.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "timestamp-raw": {
+      "description": "Original event timestamp string, including its precision and timezone when present.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    }
+  },
+  "description": "Windows event context as reported in a forensic detection export. Record identifiers are scoped to their source log and host; do not merge records by EventRecordID alone.",
+  "meta-category": "misc",
+  "name": "windows-event-log-record",
+  "required": [
+    "raw-event",
+    "event-index"
+  ],
+  "uuid": "b5929cee-f5fe-4caa-b913-20923010ea48",
+  "version": 1
+}
