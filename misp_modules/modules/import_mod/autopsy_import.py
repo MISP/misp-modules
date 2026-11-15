@@ -254,7 +254,7 @@ def _time(value, canonical, offset):
         raise ValueError("Unknown timezone offset.")
     if zone in ("Z", " UTC", " GMT"):
         tz = timezone.utc
-    elif zone and zone.startswith(" GMT"):
+    elif zone and zone.startswith((" UTC", " GMT")):
         tz = _offset(zone[4:])
     elif zone and zone[0] in "+-":
         tz = _offset(zone if ":" in zone else zone[:3] + ":" + zone[3:])

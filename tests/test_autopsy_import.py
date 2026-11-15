@@ -177,6 +177,30 @@ def test_incomplete_profiles_remain_raw_instead_of_invalid_tsk_objects(profile):
     assert result["summary"]["unmapped_records"] == 1
 
 
+@pytest.mark.parametrize("format_", ["selected-json", "autopsy-csv"])
+@pytest.mark.parametrize("report_timezone", [None, "-06:00"])
+@pytest.mark.parametrize(
+    "offset,expected",
+    [
+        ("+01:00", "2026-11-15T09:00:00+00:00"),
+        ("-05:30", "2026-11-15T15:30:00+00:00"),
+    ],
+)
+def test_explicit_utc_offset_overrides_report_timezone(format_, report_timezone, offset, expected):
+    value = "2026-11-15 10:00:00 UTC" + offset
+    config = {} if report_timezone is None else {"timezone": report_timezone}
+    if format_ == "autopsy-csv":
+        raw = f"URL,Date Accessed\nhttps://example.org/,{value}\n".encode()
+        result = imported(raw=raw, artifact_type="TSK_WEB_HISTORY", **config)
+    else:
+        doc = document()
+        doc["artifacts"] = [doc["artifacts"][0]]
+        doc["artifacts"][0]["attributes"]["TSK_DATETIME_ACCESSED"] = value
+        result = imported(doc, **config)
+    assert fields(objects(result, "tsk-web-history")[0])["datetime-accessed"] == expected
+    assert not result["warnings"]
+
+
 def test_conflicting_aliases_are_not_silently_selected():
     doc = document()
     doc["artifacts"] = [doc["artifacts"][0]]

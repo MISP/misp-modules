@@ -133,7 +133,9 @@ ISO timestamps with explicit offsets, or Autopsy-style date/time display values.
 Numeric zero follows Sleuth Kit's unknown-time sentinel and remains raw; an
 intentional Unix epoch instant can be supplied as an explicit ISO timestamp.
 
-UTC, GMT and numeric offsets can be normalized directly. Local timestamps and
+UTC, GMT and numeric offsets can be normalized directly. Explicit prefixed
+offsets such as UTC+01:00 and GMT-05:30 take precedence over config.timezone.
+Local timestamps and
 ambiguous abbreviations such as CST require config.timezone, set to UTC or a
 known numeric offset such as -06:00 that matches the report's display settings.
 IANA zones and DST transitions are not inferred. A -00:00 offset and precision
