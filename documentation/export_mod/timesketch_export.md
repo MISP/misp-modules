@@ -26,6 +26,12 @@ their attributes' explicit first/last observations. Ambiguous repeated timeline
 relations or invalid/unknown/local/sub-microsecond times are skipped and reported.
 If nothing supported remains, the response is an error with a skip summary.
 
+Explicit timezone offsets may use either `+HH:MM` / `-HH:MM` or the compact
+`+HHMM` / `-HHMM` form returned by MISP for saved datetime attributes. Both are
+normalized to UTC without changing the source event or losing microseconds.
+Unknown offsets (`-00:00` and `-0000`), local times and precision beyond six
+fractional digits remain unresolved and are skipped with a summary reason.
+
 Each row contains mandatory `message`, UTC `datetime` and `timestamp_desc`, plus
 an exact integer microsecond `timestamp`. Integer epoch arithmetic avoids float
 rounding. The JSONL can be downloaded from MISP or decoded from the normal

@@ -147,10 +147,10 @@ def instant(value):
         not isinstance(value, str)
         or not re.fullmatch(
             r"[0-9]{4}-[0-9]{2}-[0-9]{2}[T"
-            r" ][0-9]{2}:[0-9]{2}:[0-9]{2}(?:\.[0-9]{1,6})?(?:Z|[+-](?:[01][0-9]|2[0-3]):[0-5][0-9])",
+            r" ][0-9]{2}:[0-9]{2}:[0-9]{2}(?:\.[0-9]{1,6})?(?:Z|[+-](?:[01][0-9]|2[0-3]):?[0-5][0-9])",
             value,
         )
-        or value.endswith("-00:00")
+        or value.endswith(("-00:00", "-0000"))
     ):
         raise ValueError("Datetime needs a known offset and at most microsecond precision.")
     try:

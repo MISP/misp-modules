@@ -72,7 +72,8 @@ agree, allowing the declared numeric date's quantization (for example, within
 the same millisecond) while retaining the exact microsecond timestamp.
 
 ISO dates require an explicit known offset and at most six fractional digits.
-Local times, unknown `-00:00` offsets, conflicting timestamps, floats and
+Both colon-separated (`+02:00`) and compact (`+0200`) offsets are accepted.
+Local times, unknown `-00:00` / `-0000` offsets, conflicting timestamps, floats and
 sub-microsecond dates remain raw with a warning and no normalized `datetime`.
 They are not silently rounded or repaired; the exporter skips unresolved times.
 Zero and negative epochs are supported. The input and normalized record limits

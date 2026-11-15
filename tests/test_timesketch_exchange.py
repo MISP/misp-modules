@@ -203,6 +203,9 @@ def test_plaso_empty_eventtag_metadata_is_not_an_annotation():
         ("1970-01-01T00:00:00Z", 0, None, "1970-01-01T00:00:00+00:00"),
         ("1969-12-31T23:59:59.999999Z", -1, None, "1969-12-31T23:59:59.999999+00:00"),
         ("2026-10-10T14:00:00.123456+02:00", STAMP, None, "2026-10-10T12:00:00.123456+00:00"),
+        ("2026-10-10T12:00:00.123456+0000", STAMP, None, "2026-10-10T12:00:00.123456+00:00"),
+        ("2026-10-10T17:30:00.123456+0530", STAMP, None, "2026-10-10T12:00:00.123456+00:00"),
+        ("2026-10-10T08:30:00.123456-0330", STAMP, None, "2026-10-10T12:00:00.123456+00:00"),
         (1791633600123, STAMP, "ms", "2026-10-10T12:00:00.123456+00:00"),
         (str(STAMP * 1000), STAMP, "ns", "2026-10-10T12:00:00.123456+00:00"),
     ],
@@ -219,6 +222,12 @@ def test_known_timestamps_are_exact(date, timestamp, unit, expected):
         (DATE, STAMP + 1, None),
         ("2026-10-10T12:00:00", STAMP, None),
         ("2026-10-10T12:00:00-00:00", STAMP, None),
+        ("2026-10-10T12:00:00-0000", STAMP, None),
+        ("2026-10-10T12:00:00+2400", STAMP, None),
+        ("2026-10-10T12:00:00+0060", STAMP, None),
+        ("2026-10-10T12:00:00+00:60", STAMP, None),
+        ("2026-10-10T12:00:00+000", STAMP, None),
+        ("2026-10-10T12:00:00.1234567+0000", STAMP, None),
         ("2026-10-10T12:00:00.1234567Z", STAMP, None),
         (str(STAMP * 1000 + 1), STAMP, "ns"),
         (1.5, STAMP, "s"),
@@ -302,6 +311,37 @@ def test_supported_forensic_object_timestamps_use_observation_relations(name, re
     _, rows = exported(event([obj]))
     assert rows[0]["timestamp_desc"] == rows[0]["misp_object_relation"] == relation
     assert rows[0]["misp_attribute_uuid"] == "attribute-1"
+
+
+@pytest.mark.parametrize(
+    "value",
+    [
+        "2026-10-10T12:00:00.123456+0000",
+        "2026-10-10T17:30:00.123456+0530",
+        "2026-10-10T08:30:00.123456-0330",
+    ],
+)
+def test_saved_misp_compact_offsets_export_exact_observation_times(value):
+    obj = {
+        "name": "windows-event-log-record",
+        "uuid": "record-uuid",
+        "Attribute": [{"object_relation": "event-time", "type": "datetime", "value": value}],
+    }
+    original = copy.deepcopy(obj)
+    result, rows = exported({"Event": event([obj])})
+    assert len(rows) == 1 and rows[0]["datetime"] == DATE
+    assert rows[0]["timestamp"] == STAMP
+    assert rows[0]["misp_object_uuid"] == "record-uuid"
+    assert rows[0]["timestamp_desc"] == "event-time"
+    assert result["summary"]["skipped"] == {}
+    assert obj == original
+
+
+@pytest.mark.parametrize("offset", ["-0000", "-00:00", "+2400", "+0060", "+00:60", "+000", ""])
+def test_export_does_not_guess_unknown_missing_or_invalid_offsets(offset):
+    result = exporter.handler(json.dumps({"data": event([timeline(datetime="2026-10-10T12:00:00" + offset)])}))
+    assert result["error"] == "No supported timestamped observations selected."
+    assert sum(result["summary"]["skipped"].values()) == 1
 
 
 def test_first_last_seen_are_observations_even_without_to_ids_and_event_metadata_is_ignored():
