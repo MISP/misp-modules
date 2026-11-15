@@ -304,6 +304,7 @@ For further Information see the [license file](https://misp.github.io/misp-modul
 * [OpenIOC Import](https://misp.github.io/misp-modules/import_mod/#openioc-import) - Import legacy OpenIOC 1.0 and 1.1 files into MISP.
 * [OSQuery Results Import](https://misp.github.io/misp-modules/import_mod/#osquery-results-import) - Import osquery snapshots and differential results with host, query/pack and source-indicator provenance.
 * [PCAP Import](https://misp.github.io/misp-modules/import_mod/#pcap-import) - Import a PCAP or PCAPNG capture, including reassembled files, emails and network indicators.
+* [Suricata EVE Observations Import](https://misp.github.io/misp-modules/import_mod/#suricata-eve-observations-import) - Import selected Suricata EVE findings with timestamps, flow/Community IDs, signatures and capture references.
 * [TAXII 2.1 Import](https://misp.github.io/misp-modules/import_mod/#taxii-2.1-import) - Import content from a TAXII 2.1 server
 * [CSV Test Import](https://misp.github.io/misp-modules/import_mod/#csv-test-import) - Simple CSV import tool with mapable columns
 * [ThreadAnalyzer Sandbox Import](https://misp.github.io/misp-modules/import_mod/#threadanalyzer-sandbox-import) - Module to import ThreatAnalyzer archive.zip / analysis.json files.
@@ -315,6 +316,8 @@ For further Information see the [license file](https://misp.github.io/misp-modul
 * [VMRay Summary JSON Import](https://misp.github.io/misp-modules/import_mod/#vmray-summary-json-import) - Import a VMRay Summary JSON report.
 
 * [Volatility 3 Results Import](https://misp.github.io/misp-modules/import_mod/#volatility-3-results-import) - Import Volatility 3 process, network, suspicious-memory and YARA results with memory-image provenance.
+
+* [Zeek Observations Import](https://misp.github.io/misp-modules/import_mod/#zeek-observations-import) - Import selected Zeek records with timestamps, connection/Community IDs and capture provenance.
 
 ### Action Modules
 * [Cortex XDR IOC Publish](https://misp.github.io/misp-modules/action_mod/#cortex-xdr-ioc-publish) - Upload missing Cortex XDR IOC rules from IDS-marked MISP event and object attributes.

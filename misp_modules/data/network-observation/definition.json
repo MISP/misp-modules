@@ -1,0 +1,247 @@
+{
+  "attributes": {
+    "action": {
+      "description": "Source sensor action, such as allowed/blocked. Does not prove maliciousness or remediation.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "capture-file": {
+      "description": "Explicit native or collector-supplied packet capture reference; never opened.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "capture-sha256": {
+      "description": "Producer-supplied SHA-256 of the referenced capture, not the imported log/export.",
+      "disable_correlation": true,
+      "misp-attribute": "sha256",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "capture-url": {
+      "description": "Explicit source capture/investigation reference; never fetched.",
+      "disable_correlation": true,
+      "misp-attribute": "link",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "category": {
+      "description": "Source detection category.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "community-id": {
+      "description": "Source-provided Community ID. Seed/version and capture context must agree before treating two records as the same flow.",
+      "disable_correlation": true,
+      "misp-attribute": "community-id",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "community-id-raw": {
+      "description": "Original Community ID value, including unsupported or malformed values retained without normalization.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "event-time": {
+      "description": "Normalized source observation time, with a known offset and no sub-microsecond rounding.",
+      "disable_correlation": true,
+      "misp-attribute": "datetime",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "flow-end": {
+      "description": "Explicit source flow end time. Never invented from log write time or a rounded duration.",
+      "disable_correlation": true,
+      "misp-attribute": "datetime",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "flow-id": {
+      "description": "Reported Suricata unsigned 64-bit flow_id; scoped to its sensor/capture/run.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 80
+    },
+    "flow-start": {
+      "description": "Explicit connection/flow start time when the source defines it.",
+      "disable_correlation": true,
+      "misp-attribute": "datetime",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "generator-id": {
+      "description": "Reported Suricata alert generator ID, validated as an unsigned integer.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "interface": {
+      "description": "Reported capture interface, such as native EVE in_iface.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "log-type": {
+      "description": "Zeek stream/path name or Suricata EVE event_type.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 80
+    },
+    "message": {
+      "description": "Zeek notice/signature message or other explicit source message.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "notice-type": {
+      "description": "Zeek notice enum/type, distinct from a Suricata SID.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "packet-number": {
+      "description": "Native Suricata pcap_cnt, the packet number within the capture; not a log row count.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "raw-record": {
+      "description": "Complete normalized source JSON; for Zeek TSV, original line/escaped columns, type/marker headers and decoded values. Original bytes remain authoritative when attached.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "record-index": {
+      "description": "One-based source record ordinal excluding Zeek headers and blank JSONL lines.",
+      "disable_correlation": true,
+      "misp-attribute": "counter",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "review-status": {
+      "description": "Imported observations and sensor matches start as unreviewed, not confirmed malicious.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "sensor": {
+      "description": "Explicit producer/collector sensor identity; not inferred from an endpoint IP.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "severity": {
+      "description": "Source severity value; not a MISP confidence or analyst verdict.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "signature": {
+      "description": "Reported Suricata signature/message text; not an analyst-confirmed verdict.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 80
+    },
+    "signature-id": {
+      "description": "Reported Suricata numeric SID or symbolic Zeek signature identifier; not rule text.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "signature-revision": {
+      "description": "Reported Suricata alert revision, validated as an unsigned integer.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "source-context": {
+      "description": "JSON of explicit collector defaults; separate context is not authenticated by the raw export hash.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "source-format": {
+      "description": "Actual parsed encoding: json, jsonl or zeek-tsv.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "source-sha256": {
+      "description": "SHA-256 of exact input log/export bytes, including records excluded by selection.",
+      "disable_correlation": true,
+      "misp-attribute": "sha256",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "timestamp-raw": {
+      "description": "Original timestamp value as text, preserving decimal value/precision or ISO offset before normalization. Exact lexical bytes remain in the source export.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "tool": {
+      "description": "Producer: zeek or suricata.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 80
+    },
+    "tool-version": {
+      "description": "Producer-supplied tool version; never inferred from the importer.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "transaction-id": {
+      "description": "Native Suricata tx_id within its flow/capture scope.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "zeek-uid": {
+      "description": "Reported Zeek connection UID; scoped to the sensor/capture/run, never a globally unique flow identity.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 80
+    }
+  },
+  "description": "A sensor-reported network observation or detection with Zeek/Suricata flow identifiers, timestamps, signature and capture provenance. Keep sensor matches distinct from analyst-confirmed malicious findings.",
+  "meta-category": "network",
+  "name": "network-observation",
+  "required": [
+    "tool",
+    "log-type",
+    "record-index",
+    "raw-record",
+    "source-sha256"
+  ],
+  "uuid": "23242131-7220-476d-acc0-2ccc1af037c3",
+  "version": 1
+}

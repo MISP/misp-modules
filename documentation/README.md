@@ -5290,6 +5290,28 @@ Import legacy OpenIOC 1.0 and 1.1 files into MISP.
 
 -----
 
+#### [Suricata EVE Observations Import](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/suricata_import.py)
+
+Import selected Suricata EVE findings with timestamps, flow/Community IDs, signatures and capture references.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/suricata_import.py)]
+
+- **features**:
+>Accepts native EVE JSON/JSONL, preserving flow/packet/transaction IDs, alert SID/GID/revision/message, severity, action, sensor/capture context and raw protocol records. Reuses network-connection and pcap-metadata with a bundled network-observation template. Event-type/flow-ID selection omits the full attachment when records are excluded. Sensor alerts remain unreviewed observations, not confirmed malicious findings. All attributes are non-IDS and non-correlating. No Suricata execution, capture access or network calls. See the [usage guide](https://github.com/MISP/misp-modules/blob/main/documentation/import_mod/suricata_import.md).
+
+- **input**:
+>Base64-encoded UTF-8 EVE JSON/JSONL, optionally selected by event type or flow ID.
+
+- **output**:
+>Source file, network-observation, network-connection and optional pcap-metadata objects.
+
+- **references**:
+>https://docs.suricata.io/en/latest/output/eve/eve-json-format.html
+
+- **requirements**:
+>PyMISP
+
+-----
+
 #### [TAXII 2.1 Import](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/taxii21.py)
 
 Import content from a TAXII 2.1 server
@@ -5506,6 +5528,28 @@ Import Volatility 3 process, network, suspicious-memory and YARA results with me
 - **references**:
 > - https://github.com/volatilityfoundation/volatility3
 > - https://volatility3.readthedocs.io/
+
+- **requirements**:
+>PyMISP
+
+-----
+
+#### [Zeek Observations Import](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/zeek_import.py)
+
+Import selected Zeek records with timestamps, connection/Community IDs and capture provenance.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/zeek_import.py)]
+
+- **features**:
+>Accepts native JSON/JSONL and typed Zeek ASCII logs, including escaped/unset fields. Preserves raw records, stream/sensor context, exact timestamps, UIDs, Community IDs, notices/signatures and capture references. Reuses network-connection and pcap-metadata with a bundled network-observation template. UID selection omits the full source attachment when records are excluded. All observations remain unreviewed and non-IDS. No Zeek execution, capture access or network calls. See the [usage guide](https://github.com/MISP/misp-modules/blob/main/documentation/import_mod/zeek_import.md).
+
+- **input**:
+>Base64-encoded UTF-8 Zeek JSON/JSONL or ASCII log; JSON requires explicit stream context.
+
+- **output**:
+>Source file, network-observation, network-connection and optional pcap-metadata objects.
+
+- **references**:
+>https://docs.zeek.org/en/stable/logs/index.html
 
 - **requirements**:
 >PyMISP
