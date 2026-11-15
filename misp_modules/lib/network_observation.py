@@ -22,6 +22,10 @@ MAX_DEPTH = 32
 NAMESPACE = UUID("c81c553e-3dfa-453c-ae42-2c123e6a0f61")
 EPOCH = datetime(1970, 1, 1, tzinfo=timezone.utc)
 CONTEXT = ("sensor", "tool_version", "capture_file", "capture_sha256", "capture_url", "log_type", "timestamp_unit")
+ISO_TIMESTAMP = re.compile(
+    r"[0-9]{4}-[0-9]{2}-[0-9]{2}[T"
+    r" ][0-9]{2}:[0-9]{2}:[0-9]{2}(?:\.[0-9]{1,6})?(?:Z|[+-](?:[01][0-9]|2[0-3]):?[0-5][0-9])"
+)
 
 
 def dumps(value):
@@ -94,15 +98,7 @@ def _integer(value, maximum):
 
 
 def _instant(value):
-    if (
-        not isinstance(value, str)
-        or not re.fullmatch(
-            r"[0-9]{4}-[0-9]{2}-[0-9]{2}[T"
-            r" ][0-9]{2}:[0-9]{2}:[0-9]{2}(?:\.[0-9]{1,6})?(?:Z|[+-](?:[01][0-9]|2[0-3]):?[0-5][0-9])",
-            value,
-        )
-        or value.endswith(("-00:00", "-0000"))
-    ):
+    if not isinstance(value, str) or not ISO_TIMESTAMP.fullmatch(value) or value.endswith(("-00:00", "-0000")):
         raise ValueError("Timestamp needs a known offset and at most microsecond precision.")
     return datetime.fromisoformat(value.replace("Z", "+00:00")).astimezone(timezone.utc)
 
@@ -299,7 +295,7 @@ class _Builder:
             if self.tool == "zeek" and relation == "event-time":
                 parsed = (
                     _instant(value)
-                    if isinstance(value, str) and "T" in value
+                    if isinstance(value, str) and ISO_TIMESTAMP.fullmatch(value)
                     else _epoch(value, self.context.get("timestamp_unit", "s"))
                 )
             else:

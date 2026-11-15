@@ -65,7 +65,8 @@ an assumed seed.
 Timestamp numbers are parsed as exact decimals, not binary floats. Units are
 explicit, never guessed from magnitude; use the matching JSON timestamp mode if
 Zeek was configured to emit milliseconds. Known-offset ISO dates, including Zeek's
-ISO JSON mode, are also accepted. Local/unknown offsets, unsupported precision and
+ISO JSON mode, are also accepted with either `T` or a space between date and time.
+Local/unknown offsets, unsupported precision and
 sub-microsecond values remain raw with warnings, without rounding. Decimal JSON
 values retain their mathematical value in canonical raw records; original lexical
 bytes remain in the source export.
@@ -81,7 +82,8 @@ Capture references use existing `pcap-metadata`; its name/hash describe only sup
 provenance, not a capture the importer inspected. Capture metadata points to the
 source export and observations, and the export points to observations using the
 catalogue's source-to-derived `derived-from` direction. Observations point to their
-derived connections and also `describe` them. The compatible observation template
+derived connections using `derived-from` and may also reference them using
+`describes`. The compatible observation template
 is bundled for older PyMISP inventories.
 
 All attributes are non-IDS and non-correlating. Imported notices, protocol records

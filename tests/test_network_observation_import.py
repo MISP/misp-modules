@@ -257,6 +257,40 @@ def test_zeek_decimal_epochs_use_declared_units_without_float_rounding(stamp, un
     assert fields(objects(result)[0])["event-time"] == expected
 
 
+@pytest.mark.parametrize(
+    "stamp,expected",
+    [
+        ("2026-10-10 12:00:00+00:00", "2026-10-10T12:00:00+00:00"),
+        ("2026-10-10 14:00:00.123456+02:00", "2026-10-10T12:00:00.123456+00:00"),
+        ("2026-10-10 12:00:00.123456+0000", "2026-10-10T12:00:00.123456+00:00"),
+        ("2026-10-10T12:00:00.123456Z", "2026-10-10T12:00:00.123456+00:00"),
+    ],
+)
+def test_zeek_iso_separators_preserve_event_and_connection_start_times(stamp, expected):
+    result = imported("zeek-conn.jsonl", raw=shared.dumps(conn(ts=stamp)).encode(), config={"log_type": "conn"})
+    value = fields(objects(result)[0])
+    assert value["event-time"] == value["flow-start"] == expected
+    assert fields(objects(result, "network-connection")[0])["first-packet-seen"] == expected
+    assert value["timestamp-raw"] == stamp and json.loads(value["raw-record"])["ts"] == stamp
+    assert not result["warnings"]
+
+
+@pytest.mark.parametrize(
+    "stamp",
+    [
+        "2026-10-10 12:00:00",
+        "2026-10-10 12:00:00-0000",
+        "2026-10-10 12:00:00.1234567+00:00",
+    ],
+)
+def test_zeek_space_separated_invalid_or_unknown_times_are_still_raw_only(stamp):
+    result = imported("zeek-conn.jsonl", raw=shared.dumps(conn(ts=stamp)).encode(), config={"log_type": "conn"})
+    value = fields(objects(result)[0])
+    assert not {"event-time", "flow-start"}.intersection(value)
+    assert "first-packet-seen" not in fields(objects(result, "network-connection")[0])
+    assert value["timestamp-raw"] == stamp and result["warnings"]
+
+
 @pytest.mark.parametrize("stamp", [Decimal("1791633600.1234567"), Decimal("1e999999"), Decimal("1e-999999"), True])
 def test_zeek_submicrosecond_and_extreme_epochs_are_raw_only(stamp):
     raw = shared.dumps(conn(ts=stamp)).encode()
