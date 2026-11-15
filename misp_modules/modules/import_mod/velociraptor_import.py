@@ -95,13 +95,14 @@ def _loads(value):
 
 
 def _rows(text, format_):
-    if format_ == "auto":
+    auto_detect = format_ == "auto"
+    if auto_detect:
         format_ = "json" if text.lstrip().startswith(("{", "[")) else "csv"
     if format_ == "json":
         try:
             data = _loads(text)
         except json.JSONDecodeError:
-            if text.lstrip().startswith("["):
+            if not auto_detect or text.lstrip().startswith("["):
                 raise
             format_ = "jsonl"
         else:
@@ -259,7 +260,7 @@ class _Builder:
 
     def derived(self, record, name, role):
         obj = self.object(name, str(record.uuid) + ":" + role)
-        self.link(obj, record, "derived-from")
+        self.link(record, obj, "derived-from")
         self.link(record, obj, "describes")
         return obj
 
@@ -369,7 +370,7 @@ class _Builder:
             "parser-version": "velociraptor_import/1.0",
         }.items():
             self.add(record, key, value)
-        self.link(record, self.source, "derived-from")
+        self.link(self.source, record, "derived-from")
         profile = PROFILES.get(context["artifact"])
         before = len(self.event.objects)
         if profile == "process":

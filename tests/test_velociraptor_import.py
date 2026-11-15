@@ -61,7 +61,8 @@ def test_mixed_artifacts_original_bytes_and_relationships():
         assert values["source-sha256"] == hashlib.sha256(raw).hexdigest()
         assert values["server-id"] == "dfir.example"
         assert values["collected-at"] == "2026-11-15T10:00:00+00:00"
-        assert references(record, "derived-from") == [source["uuid"]]
+        assert source["uuid"] not in references(record, "derived-from")
+    assert references(source, "derived-from") == [record["uuid"] for record in records]
     assert fields(records[0])["client-id"] == "C.alpha"
     assert fields(records[0])["flow-id"] == "F.alpha"
     assert fields(records[1])["hunt-id"] == "H.test"
@@ -95,6 +96,23 @@ def test_mixed_artifacts_original_bytes_and_relationships():
         assert all(a["to_ids"] is False for a in obj["Attribute"])
         if obj["name"] == "velociraptor-result":
             assert all(a["disable_correlation"] is True for a in obj["Attribute"])
+
+
+def test_provenance_edges_follow_catalogue_source_to_derived_target():
+    raw = FIXTURE.read_bytes() + b'{"_Source":"Custom.Unknown","Pid":100}\n'
+    result = imported(raw=raw, artifact="")
+    source = result["results"]["Object"][0]
+    records = objects(result, "velociraptor-result")
+    expected = {(source["uuid"], record["uuid"]) for record in records}
+    for record in records:
+        expected.update((record["uuid"], target) for target in references(record, "describes"))
+    actual = {
+        (obj["uuid"], target) for obj in result["results"]["Object"] for target in references(obj, "derived-from")
+    }
+    assert actual == expected
+    assert not any((target, original) in actual for original, target in actual)
+    assert len(records) == 6
+    assert references(records[-1], "describes") == []
 
 
 def test_pymisp_roundtrip_and_bundled_template():
@@ -136,6 +154,29 @@ def test_input_formats_nested_hash_cells_and_multiline_csv(format_):
     assert fields(objects(result, "process")[0])["command-line"] == row["CommandLine"]
     assert fields(objects(result, "file")[1])["md5"] == "a" * 32
     assert fields(objects(result, "velociraptor-result")[0])["source-format"] == format_
+
+
+def test_explicit_json_does_not_fall_back_to_jsonl():
+    raw = b'{"Pid":1}\n{"Pid":2}\n'
+    result = module.handler(request(raw, {"artifact": "Windows.System.Pslist", "format": "json"}))
+    assert "error" in result
+    assert "results" not in result
+
+
+@pytest.mark.parametrize("format_", ["auto", "jsonl"])
+def test_jsonl_accepted_when_auto_detected_or_explicit(format_):
+    result = imported(raw=b'{"Pid":1}\n{"Pid":2}\n', format=format_)
+    records = objects(result, "velociraptor-result")
+    assert len(records) == 2
+    assert all(fields(record)["source-format"] == "jsonl" for record in records)
+
+
+@pytest.mark.parametrize("rows", [{"Pid": 1}, [{"Pid": 1}, {"Pid": 2}]])
+def test_explicit_json_accepts_complete_pretty_printed_documents(rows):
+    result = imported(raw=json.dumps(rows, indent=2).encode(), format="json")
+    records = objects(result, "velociraptor-result")
+    assert len(records) == (len(rows) if isinstance(rows, list) else 1)
+    assert all(fields(record)["source-format"] == "json" for record in records)
 
 
 def test_filefinder_times_hashes_and_zero_size():

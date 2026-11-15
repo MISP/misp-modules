@@ -78,6 +78,10 @@ aliases in a row reject the import. Missing context is not fabricated. A standar
 single-artifact export commonly needs `config.artifact`; an annotated mixed export
 can identify each artifact using `_Source`. No custom envelope is required.
 
+An explicit `format=json` requires one complete JSON document and never falls
+back to JSONL. To import newline-delimited records, select `jsonl` or leave format
+selection at `auto`.
+
 ## Mappings
 
 Mappings follow these upstream artifact definitions:
@@ -113,9 +117,11 @@ artifact/context, source hash, format, importer version, one-based record ordina
 and normalized row JSON. This JSON is a parsed representation: the attachment is
 authoritative for original bytes, CSV quoting and JSON numeric precision.
 
-The provenance row references its source file with `derived-from` and each mapped
-observation with `describes`; mapped observations reference the row with
-`derived-from`. Process executable files use `executes`; process/socket context
+The source file references each provenance row with `derived-from`, and each row
+references its mapped observations with `derived-from` and `describes`. This follows
+MISP's relationship catalogue: the target's information is based on the source's
+information, so provenance runs from source export to row to mapped observation.
+Process executable files use `executes`; process/socket context
 reported in the same row uses `related-to`. PIDs never join independent rows or
 collections, so PID reuse cannot manufacture a process tree. Ppid remains a
 `parent-pid` attribute. Repeated rows are distinct occurrences.

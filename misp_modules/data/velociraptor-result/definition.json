@@ -78,7 +78,7 @@
       "ui-priority": 60
     },
     "source-sha256": {
-      "description": "SHA-256 of the original export bytes. Link to the source file object using derived-from.",
+      "description": "SHA-256 of the original export bytes. The source file object points to this result row using derived-from.",
       "disable_correlation": true,
       "misp-attribute": "sha256",
       "to_ids": false,
@@ -95,5 +95,5 @@
     "source-sha256"
   ],
   "uuid": "58a338aa-9fb7-4bb3-babe-ea0001b0871a",
-  "version": 1
+  "version": 2
 }
