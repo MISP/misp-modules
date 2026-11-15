@@ -153,6 +153,9 @@ def instant(value):
         or value.endswith(("-00:00", "-0000"))
     ):
         raise ValueError("Datetime needs a known offset and at most microsecond precision.")
+    # Python 3.10's fromisoformat accepts only colon-separated UTC offsets.
+    if re.search(r"[+-][0-9]{4}$", value):
+        value = value[:-2] + ":" + value[-2:]
     try:
         return datetime.fromisoformat(value.replace("Z", "+00:00")).astimezone(timezone.utc)
     except OverflowError:
