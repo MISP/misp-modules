@@ -1,0 +1,4 @@
+datetime,timestamp,timestamp_desc,message,label,tag,comment,parser,data_type,display_name,_id,_index,_source
+2026-10-10 12:00:00.123456+00:00,1791633600123456,Content Modification Time,"Example file changed
+second line",['__ts_star'],['reviewed'],"[{'comment': 'Investigate this entry', 'user': 'analyst', 'created_at': '2026-10-11T09:00:00Z'}]",filestat,fs:stat,OS:/evidence/example.txt,event-1,source-index,Evidence timeline
+2026-10-10 12:00:01.000000+00:00,1791633601000000,Creation Time,Selected example,[],[],[],filestat,fs:stat,OS:/evidence/second.txt,event-2,source-index,Evidence timeline
