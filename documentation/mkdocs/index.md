@@ -203,6 +203,8 @@ For more information: [Extending MISP with Python modules](https://www.misp-proj
 * [Cuckoo Sandbox Import](https://misp.github.io/misp-modules/import_mod/#cuckoo-sandbox-import) - Module to import Cuckoo JSON.
 * [DMARC Import](https://misp.github.io/misp-modules/import_mod/#dmarc-import) - Import DMARC aggregate XML reports, including gzip and ZIP files.
 * [Email Import](https://misp.github.io/misp-modules/import_mod/#email-import) - Email import module for MISP
+* [Hayabusa and Chainsaw Findings Import](https://misp.github.io/misp-modules/import_mod/#hayabusa-and-chainsaw-findings-import) - Import Hayabusa timelines and Chainsaw hunt results as unreviewed detections with linked Windows event context.
+
 * [GoAML Import](https://misp.github.io/misp-modules/import_mod/#goaml-import) - Module to import MISP objects about financial transactions from GoAML files.
 * [Import Blueprint](https://misp.github.io/misp-modules/import_mod/#import-blueprint) - Generic blueprint to be copy-pasted to quickly boostrap creation of import module.
 * [Joe Sandbox Import](https://misp.github.io/misp-modules/import_mod/#joe-sandbox-import) - A module to import data from a Joe Sandbox analysis json report.

@@ -1,0 +1,14 @@
+title: Test Logon Observation
+id: 6b71bdb7-0874-4b5e-b51e-e8fa032c7871
+status: test
+description: Benign rule for validating the MISP import mapping.
+author: MISP Project
+date: 2026/11/15
+logsource:
+  product: windows
+  service: security
+detection:
+  selection:
+    EventID: 4624
+  condition: selection
+level: informational
