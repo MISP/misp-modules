@@ -1,0 +1,115 @@
+# YARA Rule Export
+
+The exporter now returns a base64-encoded **ZIP**, with MIME type
+application/zip, containing rules/*.yara and manifest.json. This replaces
+the previous flat .yara download: YARA namespaces belong to compiler inputs,
+and cannot be represented by concatenating source files.
+
+## Modes
+
+| config.mode | Behavior |
+| --- | --- |
+| rules (default) | Export stored yara attributes, including object attributes, regardless of to_ids. |
+| indicators | Generate literal content searches from supported to_ids attributes; omit stored rules. |
+| both | Export stored collections and generated IOC searches in separate namespaces. |
+
+Set the mode in the module configuration, for example:
+
+    {"module": "yara_export", "config": {"mode": "both"}, "data": [...]}
+
+Deleted events, objects and attributes are excluded in every mode. Inputs may
+be standard event envelopes, bare events, or the legacy split envelope with
+Event metadata and sibling Attribute/Object collections.
+
+## Stored collections and validation
+
+Each stored attribute is one complete collection in a separate namespace named
+stored_&lt;SHA-256-of-UTF-8-source&gt;. Its source is preserved exactly, including
+names, private/global modifiers, imports, comments, metadata and references.
+Identical source collections share a namespace, retaining all source references.
+Different collections can use the same rule names. A global rule constrains only
+its collection's namespace.
+
+Keep dependent rules together in the same attribute. Dependencies split across
+attributes are not resolved across namespaces. An invalid collection is excluded
+as a whole, with the compiler diagnostic and the source event/attribute reference.
+No regex renaming, typographical substitutions, or partial rule salvage occurs.
+Filesystem includes are disabled; a collection needing external variables,
+unavailable modules or an include is excluded when it cannot compile locally.
+Raw NUL characters in stored source are rejected.
+
+After validating stored collections, the exporter compiles the **complete**
+namespace-to-source mapping, including generated rules. A failure at that stage
+returns an error without download data. Selection of no valid collections also
+returns an error with the exclusion report.
+
+The manifest maps each namespace to a relative archive path, its kind
+(stored/generated), and its sources. Source references include event and
+attribute UUIDs/IDs when available, the MISP type and the input location
+(including object/attribute indexes). Both the manifest and API response contain
+summary counts, exclusions and composite reductions. Exclusions distinguish
+deleted data, mode selection, non-IDS attributes, unsupported types, invalid
+indicators and invalid stored collections; compiler diagnostics are retained.
+API warnings summarize exclusions and describe IOC matching semantics.
+
+## IOC matching semantics
+
+IOC generation is opt-in. Each event contributes one generated rule in its own
+namespace; its condition is **any of the selected strings**. Strings are literal
+UTF-8 byte sequences matched case-sensitively anywhere in the scanned content.
+Quotes, backslashes, controls and non-ASCII bytes are escaped using YARA syntax,
+including in generated metadata. Generated identifiers are fixed ASCII names.
+
+For example, a filename indicator evil.exe matches bytes inside a file containing
+not-evil.exe.backup. It does not inspect the scanned file's actual name or path.
+A domain example.org matches bytes inside notexample.org.invalid; it does not
+enforce DNS label boundaries, parse DNS packets or resolve names. Uppercase
+EXAMPLE.ORG and UTF-16 text do not match that UTF-8 string. There is no
+normalization, nocase/wide matching, hash verification or network detection.
+Review these content searches before using them for detection.
+
+Supported single-value types are hostname, domain, ip, ip-src, ip-dst, url,
+filename, email, email-src, email-dst, email-subject, email-attachment,
+email-header, email-reply-to, email-x-mailer, email-mime-boundary,
+email-thread-index, email-message-id, pattern-in-file, pattern-in-traffic and
+pattern-in-memory. Pattern attributes are also literals, not regular expressions
+or YARA expressions.
+
+The following composites retain the previous content-search behavior, with
+explicit reductions recorded in the manifest and response:
+
+| Type | Generated strings |
+| --- | --- |
+| domain\|ip | Domain and address as independent alternatives, not a conjunction. |
+| hostname\|port, ip-src\|port, ip-dst\|port | Host/address only; port omitted. |
+| filename\|hash, malware-sample | Filename only; hash omitted. No file hash computation. |
+
+Supported filename hash suffixes are md5, sha1, sha256, authentihash, vhash,
+ssdeep, imphash, impfuzzy, pehash, sha224, sha384, sha512, sha512/224, sha512/256,
+sha3-224, sha3-256, sha3-384, sha3-512 and tlsh. Both composite components must be
+nonempty. Standalone hashes, ports and other types are excluded and reported.
+Duplicate generated byte strings within an event are combined, retaining input
+provenance. Generated event metadata includes title, organization, date, ID,
+UUID and the matching-semantics description.
+
+## Loading an export
+
+Save the decoded API data as export.zip. Read the source files through the
+manifest's namespace mapping, rather than concatenating them:
+
+    import json
+    import zipfile
+    import yara
+
+    with zipfile.ZipFile("export.zip") as archive:
+        manifest = json.loads(archive.read("manifest.json"))
+        sources = {
+            namespace: archive.read(entry["path"]).decode("utf-8")
+            for namespace, entry in manifest["collections"].items()
+        }
+    rules = yara.compile(sources=sources, includes=False)
+    for match in rules.match(filepath="sample.bin"):
+        print(match.namespace, match.rule)
+
+Retain namespaces when compiling with other YARA clients as well. The archive
+contains portable source, not platform-dependent compiled rules.

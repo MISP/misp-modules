@@ -1,305 +1,342 @@
+"""Export unchanged YARA collections and opt-in literal IOC content searches."""
+
 import base64
+import hashlib
+import io
 import json
-import re
+import zipfile
+from collections import Counter
 
 import yara
 
-misperrors = {"error": "Error"}
+from misp_modules.lib.indicator_list import boolean
 
-
-userConfig = {}
-
-moduleconfig = []
-
-# fixed for now, options in the future:
-# event, attribute, event-collection, attribute-collection
-inputSource = ["event"]
-
-outputFileExtension = "yara"
-responseType = "text/plain"
-
-
+moduleconfig = ["mode"]
 moduleinfo = {
-    "version": "0.1",
+    "version": "1.0",
     "author": "Christophe Vandeplas",
-    "description": "This module is used to export MISP events to YARA.",
+    "description": "Export stored YARA collections and optionally generate literal IOC content searches.",
     "module-type": ["export"],
     "name": "YARA Rule Export",
     "logo": "yara.png",
     "requirements": ["yara-python python library"],
     "features": (
-        "The module will dynamically generate YARA rules for attributes that are marked as to IDS. Basic metadata about"
-        " the event is added to the rule.\nAttributes that are already YARA rules are also exported, with a rewritten"
-        " rule name."
+        "Produces a ZIP of unchanged stored YARA collections in separate namespaces, with a provenance and exclusion"
+        " manifest. The default rules mode exports yara attributes regardless of to_ids. Select indicators or both"
+        " to generate literal, case-sensitive UTF-8 byte searches from supported IDS-marked attributes. A filename"
+        " or domain matches bytes in scanned content, not a file's name or DNS activity. Deleted data is excluded."
+        " Collections and the complete output are compiled with filesystem includes disabled. See the [usage"
+        " guide](https://github.com/MISP/misp-modules/blob/main/documentation/export_mod/yara_export.md)."
     ),
     "references": ["https://virustotal.github.io/yara/"],
-    "input": "Attributes and Objects.",
-    "output": "A YARA file that can be used with the YARA scanning tool.",
+    "input": "MISP events and object attributes in standard, bare or legacy export format.",
+    "output": "Base64-encoded ZIP containing rules/*.yara and manifest.json; load using the manifest namespaces.",
 }
 
-
-class YaraRule:
-    def __init__(self, name):
-        self.name = name
-        self.strings = {}
-        self.conditions = []
-        self.meta = {}
-
-    def add_string(self, type_: str, s: str):
-        type_clean = "".join(c if c.isalnum() or c == "_" else "_" for c in type_)
-        if type_clean not in self.strings:
-            self.strings[type_clean] = []
-        self.strings[type_clean].append(s)
-
-    def add_condition(self, condition: str):
-        self.conditions.append(condition)
-
-    def add_meta(self, key: str, value: str):
-        if key not in self.meta:
-            self.meta[key] = []
-        self.meta[key].append(value)
-
-    def __str__(self):
-        if len(self.strings) == 0 and len(self.conditions) == 0:
-            return "\n"  # no strings, so no rule
-
-        result = []
-        result.append(f"rule {self.name} {{")
-
-        result.append("    meta:")
-        for key, values in self.meta.items():
-            i = 0
-            if len(values) == 1:
-                result.append(f'        {key} = "{values[0]}"')
-                continue
-            for value in values:
-                result.append(f'        {key}_{i} = "{value}"')
-                i += 1
-
-        result.append("    strings:")
-        for key, values in self.strings.items():
-            i = 0
-            for value in values:
-                result.append(f'        ${key}_{i} = "{value}"')
-                i += 1
-
-        result.append("    condition:")
-        if len(self.conditions) == 0:
-            result.append("        any of them")
-        for condition in self.conditions:
-            result.append(f"        {condition}")
-
-        result.append("}")
-        result.append("")
-        return "\n".join(result)
-
-
-def handle_string(yara_rules: list, yr: YaraRule, attribute: dict):
-    if not attribute["to_ids"]:  # skip non IDS attributes
-        return
-    yr.add_string(attribute["type"], attribute["value"])
-    return
+STRING_TYPES = {
+    "hostname",
+    "domain",
+    "ip",
+    "ip-src",
+    "ip-dst",
+    "url",
+    "email",
+    "email-src",
+    "email-dst",
+    "email-subject",
+    "email-attachment",
+    "email-header",
+    "email-reply-to",
+    "email-x-mailer",
+    "email-mime-boundary",
+    "email-thread-index",
+    "email-message-id",
+    "filename",
+    "pattern-in-file",
+    "pattern-in-traffic",
+    "pattern-in-memory",
+}
+COMPOSITE_TYPES = {
+    "hostname|port",
+    "domain|ip",
+    "ip-src|port",
+    "ip-dst|port",
+    *(
+        f"filename|{kind}"
+        for kind in (
+            "md5",
+            "sha1",
+            "sha256",
+            "authentihash",
+            "vhash",
+            "ssdeep",
+            "imphash",
+            "impfuzzy",
+            "pehash",
+            "sha224",
+            "sha384",
+            "sha512",
+            "sha512/224",
+            "sha512/256",
+            "sha3-224",
+            "sha3-256",
+            "sha3-384",
+            "sha3-512",
+            "tlsh",
+        )
+    ),
+    "malware-sample",
+}
+MATCH_SEMANTICS = (
+    "Generated rules match any selected literal UTF-8 byte sequence, case-sensitively, anywhere in scanned content."
+    " Filename matches do not inspect the scanned file's name or path; domain matches do not parse DNS, resolve"
+    " names or enforce hostname boundaries. There is no wide/nocase matching, normalization, hash verification"
+    " or network activity detection. Composites contribute independent alternatives; hashes and ports are omitted."
+)
 
 
-def handle_combined(yara_rules: list, yr: YaraRule, attribute: dict):
-    if not attribute["to_ids"]:  # skip non IDS attributes
-        return
-    type_1, type_2 = attribute["type"].split("|")
-    value_1, value_2 = attribute["value"].split("|")
-    try:
-        handlers[type_1](yara_rules, yr, dict(attribute, type=type_1, value=value_1))
-    except KeyError:
-        # ignore unsupported types
-        pass
-    try:
-        handlers[type_2](yara_rules, yr, dict(attribute, type=type_2, value=value_2))
-    except KeyError:
-        # ignore unsupported types
-        pass
+def _literal(value):
+    """Quote UTF-8 bytes using only escapes understood by YARA, including controls."""
+    escaped = []
+    for byte in str(value).encode("utf-8"):
+        if byte in (ord('"'), ord("\\")):
+            escaped.append("\\" + chr(byte))
+        elif 32 <= byte < 127:
+            escaped.append(chr(byte))
+        else:
+            escaped.append(f"\\x{byte:02x}")
+    return '"' + "".join(escaped) + '"'
 
 
-def handle_yara(yara_rules: list, yr: YaraRule, attribute: dict):
-    # do not check for to_ids, as we want to always export the Yara rule
-    # split out as a separate rule, and rewrite the rule name
-    value = re.sub(
-        "^[ \t]*rule ",
-        "rule MISP_e{}_".format(attribute["event_id"]),
-        attribute["value"],
-        flags=re.MULTILINE,
-    )
-    # cleanup dirty stuff from people
-    substitutions = (
-        ("”", '"'),
-        ("“", '"'),
-        ("″", '"'),
-        ("`", "'"),
-        ("\r", ""),
-        ("Rule ", "rule "),  # some people write this with the wrong case
-        # ('$ ', '$'),    # this breaks rules
-        # ('\t\t', '\n'), # this breaks rules
-    )
-    for substitution in substitutions:
-        if substitution[0] in value:
-            value = value.replace(substitution[0], substitution[1])
+def _records(container, key):
+    records = container.get(key, [])
+    if not isinstance(records, list) or any(not isinstance(item, dict) for item in records):
+        raise ValueError(f"{key} must be a list of objects.")
+    return records
 
-    # we may ignore any global rules as they might disable everything
-    # on the other hand we're only processing one event...
-    # if 'global rule' in value:
-    #     return
 
-    # private rules need some more rewriting
-    if "private rule" in value:
-        priv_rules = re.findall(r"private rule (\w+)", value, flags=re.MULTILINE)
-        for priv_rule in priv_rules:
-            value = re.sub(
-                priv_rule,
-                "MISP_e{}_{}".format(attribute["event_id"], priv_rule),
-                value,
-                flags=re.MULTILINE,
+def _attributes(data):
+    if isinstance(data, dict):
+        data = [data]
+    if not isinstance(data, list) or any(not isinstance(item, dict) for item in data):
+        raise ValueError("data must contain an event or a list of events.")
+    for index, envelope in enumerate(data):
+        event = envelope.get("Event", envelope)
+        if not isinstance(event, dict):
+            raise ValueError("Event must be an object.")
+        deleted = boolean(event.get("deleted"), "deleted") or boolean(envelope.get("deleted"), "deleted")
+        collections = dict(event, **envelope)
+        containers = [(collections, f"data[{index}]", deleted)]
+        for obj_index, obj in enumerate(_records(collections, "Object")):
+            containers.append(
+                (obj, f"data[{index}].Object[{obj_index}]", deleted or boolean(obj.get("deleted"), "deleted"))
             )
-
-    # compile the yara rule to confirm it's validity
-    try:
-        yara.compile(source=value)
-    except Exception:
-        # skip rules that do not compile
-        return
-
-    # all checks done, add the rule
-    yara_rules.append(value)
-    return
+        for container, location, container_deleted in containers:
+            for attr_index, attribute in enumerate(_records(container, "Attribute")):
+                ref = {
+                    "event": str(event.get("uuid") or event.get("id") or index),
+                    "attribute": str(attribute.get("uuid") or attribute.get("id") or "unknown"),
+                    "type": attribute.get("type"),
+                    "location": f"{location}.Attribute[{attr_index}]",
+                }
+                yield index, dict(collections, **event), attribute, ref, container_deleted
 
 
-def handle_malware_sample(yara_rules: list, yr: YaraRule, attribute: dict):
-    if not attribute["to_ids"]:  # skip non IDS attributes
-        return
-    handle_combined(yara_rules, yr, dict(attribute, type="filename|md5"))
+def _strings(kind, value):
+    if not isinstance(value, str) or not value:
+        raise ValueError("Empty or non-string indicator.")
+    if kind in STRING_TYPES:
+        return [value], []
+    left, separator, right = value.rpartition("|")
+    if not separator or not left or not right:
+        raise ValueError("Composite requires two nonempty components separated by '|'.")
+    if kind == "domain|ip":
+        return [left, right], []
+    omitted = "md5" if kind == "malware-sample" else kind.split("|", 1)[1]
+    return [left], [omitted]
 
 
-def handle_meta(yara_rules: list, yr: YaraRule, attribute: dict):
-    yr.add_meta(attribute["type"], attribute["value"])
-    return
+def _generated_rule(event, strings):
+    org = event.get("Orgc") or {}
+    if not isinstance(org, dict):
+        raise ValueError("Orgc must be an object.")
+    metadata = {
+        "description": event.get("info", ""),
+        "author": "MISP - " + str(org.get("name", "")),
+        "misp_event_date": event.get("date", ""),
+        "misp_event_id": event.get("id", ""),
+        "misp_event_uuid": event.get("uuid", ""),
+        "match_semantics": MATCH_SEMANTICS,
+    }
+    # Each generated collection has its own namespace, so a fixed ASCII name is sufficient.
+    lines = ["rule MISP_ioc {", "    meta:"]
+    lines.extend(f"        {key} = {_literal(value)}" for key, value in metadata.items())
+    lines.append("    strings:")
+    lines.extend(f"        $ioc_{index} = {_literal(value)}" for index, value in enumerate(strings))
+    lines.extend(["    condition:", "        any of them", "}", ""])
+    return "\n".join(lines)
 
 
-handlers = {
-    "yara": handle_yara,
-    "hostname": handle_string,
-    "hostname|port": handle_combined,
-    "domain": handle_string,
-    "domain|ip": handle_combined,
-    "ip": handle_string,
-    "ip-src": handle_string,
-    "ip-dst": handle_string,
-    "ip-dst|port": (
-        handle_combined
-    ),  # we could also handle_string, which would be more specific. Less false positives, but less true positives too...
-    "ip-src|port": handle_combined,
-    "url": handle_string,
-    "email": handle_string,
-    "email-src": handle_string,
-    "email-dst": handle_string,
-    "email-subject": handle_string,
-    "email-attachment": handle_string,
-    "email-header": handle_string,
-    "email-reply-to": handle_string,
-    "email-x-mailer": handle_string,
-    "email-mime-boundary": handle_string,
-    "email-thread-index": handle_string,
-    "email-message-id": handle_string,
-    "filename": handle_string,
-    "filename|md5": handle_combined,
-    "filename|sha1": handle_combined,
-    "filename|sha256": handle_combined,
-    "filename|authentihash": handle_combined,
-    "filename|vhash": handle_combined,
-    "filename|ssdeep": handle_combined,
-    "filename|imphash": handle_combined,
-    "filename|impfuzzy": handle_combined,
-    "filename|pehash": handle_combined,
-    "filename|sha224": handle_combined,
-    "filename|sha384": handle_combined,
-    "filename|sha512": handle_combined,
-    "filename|sha512/224": handle_combined,
-    "filename|sha512/256": handle_combined,
-    "filename|sha3-224": handle_combined,
-    "filename|sha3-256": handle_combined,
-    "filename|sha3-384": handle_combined,
-    "filename|sha3-512": handle_combined,
-    "filename|tlsh": handle_combined,
-    "malware-sample": handle_malware_sample,
-    "pattern-in-file": handle_string,
-    "pattern-in-traffic": handle_string,
-    "pattern-in-memory": handle_string,
-    "link": handle_meta,
-}
+def _add_collection(sources, manifest, kind, source, refs):
+    namespace = kind + "_" + hashlib.sha256(source.encode("utf-8")).hexdigest()
+    sources[namespace] = source
+    entry = manifest["collections"].setdefault(
+        namespace, {"path": f"rules/{namespace}.yara", "kind": kind, "sources": []}
+    )
+    entry["sources"].extend(refs)
+    return namespace
 
-# auto-generate the list of types to use
-types_to_use = handlers.keys()
+
+def _build(data, mode):
+    sources, generated, exclusions, reductions = {}, {}, [], []
+    manifest = {
+        "format_version": 1,
+        "module": "yara_export",
+        "mode": mode,
+        "collections": {},
+        "exclusions": exclusions,
+        "reductions": reductions,
+        "match_semantics": MATCH_SEMANTICS,
+        "includes": False,
+    }
+
+    def exclude(ref, reason, diagnostic=None):
+        entry = {"source": ref, "reason": reason}
+        if diagnostic is not None:
+            entry["diagnostic"] = str(diagnostic)
+        exclusions.append(entry)
+
+    for index, event, attribute, ref, deleted in _attributes(data):
+        if deleted or boolean(attribute.get("deleted"), "deleted"):
+            exclude(ref, "deleted")
+            continue
+        kind = attribute.get("type")
+        if kind == "yara":
+            if mode == "indicators":
+                exclude(ref, "excluded by mode")
+                continue
+            source = attribute.get("value")
+            if not isinstance(source, str) or not source.strip():
+                exclude(ref, "invalid stored collection", "Expected nonempty YARA source.")
+                continue
+            try:
+                if "\x00" in source:
+                    raise ValueError("NUL bytes in stored source are unsupported.")
+                # Validate the entire attribute, including private/global rules and their references.
+                compiled = yara.compile(source=source, includes=False)
+                if not list(compiled):
+                    raise ValueError("Collection contains no rules.")
+                _add_collection(sources, manifest, "stored", source, [ref])
+            except (yara.Error, ValueError, UnicodeError) as exc:
+                exclude(ref, "invalid stored collection", exc)
+            continue
+        if mode == "rules":
+            exclude(ref, "excluded by mode")
+            continue
+        if not isinstance(kind, str) or kind not in STRING_TYPES | COMPOSITE_TYPES:
+            exclude(ref, "unsupported type")
+            continue
+        if not boolean(attribute.get("to_ids"), "to_ids"):
+            exclude(ref, "non-IDS")
+            continue
+        try:
+            values, omitted = _strings(kind, attribute.get("value"))
+            for value in values:
+                _literal(value)  # Reject unencodable Unicode with a source-specific diagnostic.
+        except (ValueError, UnicodeError) as exc:
+            exclude(ref, "invalid indicator", exc)
+            continue
+        group = generated.setdefault(index, {"event": event, "strings": [], "refs": []})
+        group["strings"].extend(values)
+        group["refs"].append(ref)
+        if omitted:
+            reductions.append({"source": ref, "omitted_components": omitted})
+
+    for group in generated.values():
+        source = _generated_rule(group["event"], sorted(set(group["strings"])))
+        _add_collection(sources, manifest, "generated", source, group["refs"])
+    skipped = Counter(entry["reason"] for entry in exclusions)
+    manifest["summary"] = {
+        "stored_collections": sum(entry["kind"] == "stored" for entry in manifest["collections"].values()),
+        "generated_rules": sum(entry["kind"] == "generated" for entry in manifest["collections"].values()),
+        "excluded_attributes": len(exclusions),
+        "skipped": dict(sorted(skipped.items())),
+    }
+    return sources, manifest
+
+
+def _archive(sources, manifest):
+    files = {
+        manifest["collections"][namespace]["path"]: source.encode("utf-8") for namespace, source in sources.items()
+    }
+    files["manifest.json"] = (json.dumps(manifest, ensure_ascii=True, indent=2, sort_keys=True) + "\n").encode()
+    output = io.BytesIO()
+    with zipfile.ZipFile(output, "w", compression=zipfile.ZIP_DEFLATED) as archive:
+        for name, content in sorted(files.items()):
+            entry = zipfile.ZipInfo(name, date_time=(1980, 1, 1, 0, 0, 0))
+            entry.compress_type = zipfile.ZIP_DEFLATED
+            entry.external_attr = 0o100644 << 16
+            archive.writestr(entry, content)
+    return output.getvalue()
 
 
 def handler(q=False):
     if q is False:
         return False
-    request = json.loads(q)
-
-    yara_rules = []
-    for event in request["data"]:
-        event_info_clean = "".join(c if c.isalnum() or c == "_" else "_" for c in event["Event"]["info"])
-        yr = YaraRule(f"MISP_e{event['Event']['id']}_{event_info_clean}")
-
-        yr.add_meta("description", event["Event"]["info"])
-        yr.add_meta("author", f"MISP - {event['Orgc']['name']}")
-        yr.add_meta("misp_event_date", event["Event"]["date"])
-        yr.add_meta("misp_event_id", event["Event"]["id"])
-        yr.add_meta("misp_event_uuid", event["Event"]["uuid"])
-
-        for attribute in event.get("Attribute", []):
-            try:
-                handlers[attribute["type"]](yara_rules, yr, attribute)
-            except KeyError:
-                # ignore unsupported types
-                pass
-        for obj in event.get("Object", []):
-            for attribute in obj["Attribute"]:
-                try:
-                    handlers[attribute["type"]](yara_rules, yr, attribute)
-                except KeyError:
-                    # ignore unsupported types
-                    pass
-        yara_rules.append(str(yr))
-    r = {
-        "response": [],
-        "data": str(base64.b64encode(bytes("\n".join(yara_rules), "utf-8")), "utf-8"),
-    }
-
-    return r
+    try:
+        request = json.loads(q)
+        if not isinstance(request, dict):
+            raise ValueError("Request must be an object.")
+        config = request.get("config")
+        if config is None:
+            config = {}
+        if not isinstance(config, dict):
+            raise ValueError("config must be an object.")
+        mode = config.get("mode")
+        if mode is None or mode == "":
+            mode = "rules"
+        if mode not in ("rules", "indicators", "both"):
+            raise ValueError("mode must be rules, indicators or both.")
+        sources, manifest = _build(request.get("data"), mode)
+        report = {
+            "summary": manifest["summary"],
+            "exclusions": manifest["exclusions"],
+            "reductions": manifest["reductions"],
+            "warnings": [
+                f"Skipped {count}: {reason}; see exclusions for source references and diagnostics."
+                for reason, count in manifest["summary"]["skipped"].items()
+            ],
+        }
+        if manifest["summary"]["generated_rules"]:
+            report["warnings"].append(MATCH_SEMANTICS)
+        if not sources:
+            return {
+                "error": "No valid YARA collections selected; use indicators or both mode to generate IOC searches.",
+                **report,
+            }
+        try:
+            # Validate precisely the namespace-to-source mapping delivered in the archive.
+            yara.compile(sources=sources, includes=False)
+        except yara.Error as exc:
+            return {"error": f"Complete YARA output failed to compile: {exc}", **report}
+        return {"response": [], "data": base64.b64encode(_archive(sources, manifest)).decode("ascii"), **report}
+    except (TypeError, ValueError, UnicodeError) as exc:
+        return {"error": f"YARA export: {exc}"}
 
 
 def introspection():
-    modulesetup = {}
-    try:
-        responseType
-        modulesetup["responseType"] = responseType
-    except NameError:
-        pass
-    try:
-        userConfig
-        modulesetup["userConfig"] = userConfig
-    except NameError:
-        pass
-    try:
-        outputFileExtension
-        modulesetup["outputFileExtension"] = outputFileExtension
-    except NameError:
-        pass
-    try:
-        inputSource
-        modulesetup["inputSource"] = inputSource
-    except NameError:
-        pass
-    return modulesetup
+    return {
+        "inputSource": ["event", "event-collection"],
+        "outputFileExtension": "zip",
+        "responseType": "application/zip",
+        "userConfig": {
+            "mode": {
+                "type": "String",
+                "message": "rules (default), indicators or both; IOC searches match bytes in content",
+            },
+        },
+    }
 
 
 def version():
-    moduleinfo["config"] = moduleconfig
-    return moduleinfo
+    return dict(moduleinfo, config=moduleconfig)

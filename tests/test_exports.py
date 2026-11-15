@@ -4,6 +4,7 @@ import io
 import json
 import os
 import unittest
+import zipfile
 from urllib.parse import urljoin
 
 import requests
@@ -80,14 +81,19 @@ class TestExports(unittest.TestCase):
             "data": [self.event],
         }
         response = self.misp_modules_post(query)
-        expected_result = (
-            'rule MISP_e625_MetadataExample\n{\n    meta:\n        my_identifier_1 = "Some string data"\n       '
-            ' my_identifier_2 = 24\n        my_identifier_3 = true\n\n    strings:\n        $my_text_string = "text'
-            ' here"\n        $my_hex_string = { E2 34 A1 C8 23 FB }\n\n    condition:\n        $my_text_string or'
-            " $my_hex_string\n}\n\n"
-        )
-        result = self.get_values(response)
-        self.assertEqual(result, expected_result)
+        try:
+            result = response.json()
+            with zipfile.ZipFile(io.BytesIO(base64.b64decode(result["data"]))) as archive:
+                manifest = json.loads(archive.read("manifest.json"))
+                entries = list(manifest["collections"].values())
+                self.assertEqual(len(entries), 1)
+                self.assertEqual(entries[0]["kind"], "stored")
+                expected = next(
+                    attribute["value"] for attribute in self.event["Attribute"] if attribute["type"] == "yara"
+                )
+                self.assertEqual(archive.read(entries[0]["path"]).decode("utf-8"), expected)
+        finally:
+            response.connection.close()
 
 
 if __name__ == "__main__":
