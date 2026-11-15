@@ -5417,6 +5417,29 @@ Import a VMRay Summary JSON report.
 
 -----
 
+#### [Volatility 3 Results Import](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/volatility3_import.py)
+
+Import Volatility 3 process, network, suspicious-memory and YARA results with memory-image provenance.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/volatility3_import.py)]
+
+- **features**:
+>Accepts native JSON/JSONL from Windows pslist, psscan, pstree, cmdline, netscan, netstat, malfind and vadyarascan, plus layer-wide yarascan. Preserves exact exports, image hashes, plugin/framework versions, offsets, process creation times, renderer hierarchy and unmapped fields. Reuses process and network-socket objects and includes a volatility3-result template. Suspicious memory and YARA matches remain unreviewed. No image access, Volatility execution, network calls or new dependencies. See the [usage guide](https://github.com/MISP/misp-modules/blob/main/documentation/import_mod/volatility3_import.md).
+
+- **input**:
+>Base64-encoded native JSON/JSONL in data, with plugin and optional image/version context in config or metadata.
+
+- **output**:
+>Source export, optional memory-image file, volatility3-result, process and network-socket objects.
+
+- **references**:
+> - https://github.com/volatilityfoundation/volatility3
+> - https://volatility3.readthedocs.io/
+
+- **requirements**:
+>PyMISP
+
+-----
+
 ## Action Modules
 
 #### [Cortex XDR IOC Publish](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/action_mod/cortex_xdr_ioc_publish.py)

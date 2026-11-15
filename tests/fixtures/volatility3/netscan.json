@@ -1,0 +1,29 @@
+
+[
+  {
+    "Created": "2026-10-10T12:00:00.123456+00:00",
+    "ForeignAddr": "203.0.113.5",
+    "ForeignPort": 443,
+    "LocalAddr": "10.0.0.5",
+    "LocalPort": 49152,
+    "Offset": 4660,
+    "Owner": "System",
+    "PID": 4,
+    "Proto": "TCPv4",
+    "State": "ESTABLISHED",
+    "__children": []
+  },
+  {
+    "Created": "2026-10-10T12:00:00.123456+00:00",
+    "ForeignAddr": "*",
+    "ForeignPort": 0,
+    "LocalAddr": "::",
+    "LocalPort": 53,
+    "Offset": 4661,
+    "Owner": "cmd.exe",
+    "PID": 100,
+    "Proto": "UDPv6",
+    "State": null,
+    "__children": []
+  }
+]

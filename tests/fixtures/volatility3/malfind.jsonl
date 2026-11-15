@@ -1,0 +1,3 @@
+
+{"CommitCharge": 1, "Disasm": "", "End VPN": 8191, "File output": "Disabled", "Hexdump": "4d 5a 90 00 73 79 6e 74 68 65 74 69 63 20 6d 61 74 63 68", "Notes": "Synthetic suspicious region", "PID": 4, "PrivateMemory": 1, "Process": "System", "Protection": "PAGE_EXECUTE_READWRITE", "Start VPN": 4096, "Tag": "VadS", "__children": []}
+{"CommitCharge": 1, "Disasm": "", "End VPN": 8191, "File output": "Disabled", "Hexdump": "4d 5a 90 00 73 79 6e 74 68 65 74 69 63 20 6d 61 74 63 68", "Notes": "Synthetic suspicious region", "PID": 100, "PrivateMemory": 1, "Process": "cmd.exe", "Protection": "PAGE_EXECUTE_READWRITE", "Start VPN": 4096, "Tag": "VadS", "__children": []}

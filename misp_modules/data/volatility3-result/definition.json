@@ -1,0 +1,241 @@
+{
+  "attributes": {
+    "image-name": {
+      "description": "Producer-supplied memory image name/reference. It is not a path to fetch.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "image-sha256": {
+      "description": "Memory image SHA-256 supplied by the producer. Never computed from the results export or verified by opening the image.",
+      "disable_correlation": true,
+      "misp-attribute": "sha256",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "layer-name": {
+      "description": "Producer-supplied memory layer name; particularly useful for global YARA scans.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "match-data": {
+      "description": "Reported YARA matched bytes as emitted by the JSON renderer; retain the raw row for exact source representation.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "memory-end": {
+      "description": "Reported suspicious region End VPN address, as hexadecimal.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "memory-protection": {
+      "description": "Reported memory protection string for a suspicious region.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "memory-start": {
+      "description": "Reported suspicious region Start VPN address, as hexadecimal; does not assert maliciousness.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "network-created": {
+      "description": "Reported network object creation time; this is not a first-packet observation.",
+      "disable_correlation": true,
+      "misp-attribute": "datetime",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "network-created-raw": {
+      "description": "Original network Created value before normalization.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "offset": {
+      "description": "Reported Offset column, rendered losslessly as hexadecimal. Its address space is plugin/layer-specific and is not inferred.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "offset-physical": {
+      "description": "Reported Offset(P) physical address, rendered losslessly as hexadecimal.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "offset-virtual": {
+      "description": "Reported Offset(V) virtual address, rendered losslessly as hexadecimal.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "parent-process-id": {
+      "description": "Reported PPID. A matching number alone does not establish a parent relationship.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "plugin": {
+      "description": "Fully qualified Volatility 3 plugin used to produce this result.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 80
+    },
+    "plugin-version": {
+      "description": "Plugin class version, supplied by the producer; distinct from the Volatility framework version.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "process-created": {
+      "description": "Normalized process creation time with a known timezone and without precision loss.",
+      "disable_correlation": true,
+      "misp-attribute": "datetime",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "process-created-raw": {
+      "description": "Original CreateTime value, including unavailable or unsupported time context where supplied.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "process-exited": {
+      "description": "Reported process exit time normalized only when its offset and precision are known.",
+      "disable_correlation": true,
+      "misp-attribute": "datetime",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "process-exited-raw": {
+      "description": "Original ExitTime value before normalization.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "process-id": {
+      "description": "Reported PID, scoped to the source image/run and row, not a globally unique process identity.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "process-name": {
+      "description": "Process name reported by the plugin.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 80
+    },
+    "raw-result": {
+      "description": "Normalized JSON of the original row columns. Renderer __children hierarchy is represented by row-path and object references; exact export bytes remain authoritative.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "result-index": {
+      "description": "One-based result index in depth-first traversal, including nested rows.",
+      "disable_correlation": true,
+      "misp-attribute": "counter",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "result-kind": {
+      "description": "Mapping category: process, process-tree, command-line, network, suspicious-memory or yara-match.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 80
+    },
+    "review-status": {
+      "description": "Analyst review state. Imported plugin observations and matches start as unreviewed, not confirmed malicious.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "row-path": {
+      "description": "One-based renderer row path, such as 1.2 for the second child of the first root. This is not a process identifier.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "rule-name": {
+      "description": "Name of the matched YARA rule, not the rule body or a confirmed malicious verdict.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 80
+    },
+    "source-format": {
+      "description": "Input encoding: json or jsonl.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "source-sha256": {
+      "description": "SHA-256 of the exact JSON/JSONL export bytes, not the memory image.",
+      "disable_correlation": true,
+      "misp-attribute": "sha256",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "vad-tag": {
+      "description": "Reported virtual address descriptor tag.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "volatility-version": {
+      "description": "Volatility 3 version supplied by the producer; not inferred from output columns.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "yara-component": {
+      "description": "Reported YARA string/component identifier.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    }
+  },
+  "description": "A Volatility 3 result row with memory-image provenance, plugin/version context, offsets and unreviewed memory or YARA observations. Link to source exports and derived process or network-socket objects.",
+  "meta-category": "misc",
+  "name": "volatility3-result",
+  "required": [
+    "plugin",
+    "result-kind",
+    "raw-result",
+    "source-sha256",
+    "result-index",
+    "row-path"
+  ],
+  "uuid": "c2c487ad-9b4a-45db-b90d-33a3a13e9cca",
+  "version": 1
+}

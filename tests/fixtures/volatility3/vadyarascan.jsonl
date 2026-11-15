@@ -1,0 +1,3 @@
+
+{"Component": "$example", "CreateTime": "2026-10-10T12:00:00.123456+00:00", "ImageFileName": "System", "Offset": 4660, "PID": 4, "PPID": 0, "Rule": "ExampleRule", "SessionId": 1, "Threads": 3, "Value": "4d 5a 90 00 73 79 6e 74 68 65 74 69 63 20 6d 61 74 63 68", "__children": []}
+{"Component": "$example", "CreateTime": "2026-10-10T12:00:01.123456+00:00", "ImageFileName": "cmd.exe", "Offset": 4661, "PID": 100, "PPID": 4, "Rule": "ExampleRule", "SessionId": 1, "Threads": 3, "Value": "4d 5a 90 00 73 79 6e 74 68 65 74 69 63 20 6d 61 74 63 68", "__children": []}
