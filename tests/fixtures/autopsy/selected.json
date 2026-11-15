@@ -1,0 +1,120 @@
+{
+  "format": "misp-forensic-selected",
+  "version": 1,
+  "producer": {
+    "name": "Example mobile parser",
+    "version": "1.0"
+  },
+  "context": {
+    "case_id": "case-a",
+    "device_id": "phone-a",
+    "data_source_id": "ds-1",
+    "evidence_id": "extract-1",
+    "report_id": "report-1"
+  },
+  "artifacts": [
+    {
+      "artifact_type": "TSK_WEB_HISTORY",
+      "artifact_id": "100",
+      "source_file": "/users/alice/History",
+      "source_object_id": 450,
+      "attributes": {
+        "TSK_URL": "https://example.org/a?x=1&y=two%20words",
+        "TSK_DATETIME_ACCESSED": 1700000000,
+        "TSK_TITLE": "Example page",
+        "TSK_PROG_NAME": "Chrome",
+        "TSK_REFERRER": "https://example.org/",
+        "TSK_DOMAIN": "example.org"
+      },
+      "native_record": {
+        "unmapped": {
+          "note": "kept verbatim as row data"
+        }
+      }
+    },
+    {
+      "artifact_type": "TSK_WEB_BOOKMARK",
+      "artifact_id": "101",
+      "attributes": {
+        "TSK_URL": "https://example.org/bookmark",
+        "TSK_NAME": "Work",
+        "TSK_DATETIME_CREATED": "2026-11-15T10:00:00+01:00"
+      }
+    },
+    {
+      "artifact_type": "TSK_WEB_COOKIE",
+      "artifact_id": "102",
+      "attributes": {
+        "TSK_URL": "https://example.org/",
+        "TSK_NAME": "session",
+        "TSK_VALUE": "test-only-cookie",
+        "TSK_DATETIME_CREATED": 1700000010
+      }
+    },
+    {
+      "artifact_type": "TSK_WEB_SEARCH_QUERY",
+      "artifact_id": "103",
+      "attributes": {
+        "TSK_DOMAIN": "example.org",
+        "TSK_TEXT": "test query",
+        "TSK_DATETIME_ACCESSED": 1700000020,
+        "TSK_USER_NAME": "alice"
+      }
+    },
+    {
+      "artifact_type": "TSK_WEB_DOWNLOAD",
+      "artifact_id": "104",
+      "attributes": {
+        "TSK_URL": "https://example.org/evidence.bin",
+        "TSK_PATH": "C:\\Downloads\\evidence.bin",
+        "TSK_PATH_ID": 999,
+        "TSK_DATETIME_ACCESSED": 1700000030
+      }
+    },
+    {
+      "artifact_type": "TSK_MESSAGE",
+      "artifact_id": "105",
+      "context": {
+        "device_id": "phone-b"
+      },
+      "attributes": {
+        "TSK_TEXT": "Review the selected message.\nSecond line.",
+        "TSK_MESSAGE_TYPE": "SMS",
+        "TSK_PHONE_NUMBER_FROM": "+12025550101",
+        "TSK_PHONE_NUMBER_TO": "+12025550102",
+        "TSK_PROG_NAME": "Messages",
+        "TSK_DATETIME": 1700000040,
+        "TSK_DATETIME_SENT": 1700000040
+      }
+    },
+    {
+      "artifact_type": "TSK_EMAIL_MSG",
+      "artifact_id": "106",
+      "attributes": {
+        "TSK_EMAIL_CONTENT_PLAIN": "Selected plain-text email.",
+        "TSK_EMAIL_FROM": "sender@example.org",
+        "TSK_EMAIL_TO": "analyst@example.org",
+        "TSK_SUBJECT": "Selected finding",
+        "TSK_DATETIME_RCVD": "2026-11-15T10:00:00Z"
+      }
+    },
+    {
+      "artifact_type": "TSK_INSTALLED_PROG",
+      "artifact_id": "107",
+      "application_id": "org.example.app",
+      "attributes": {
+        "TSK_PROG_NAME": "Example App",
+        "TSK_VERSION": "1.2.3",
+        "TSK_ORGANIZATION": "Example",
+        "TSK_DATETIME": 1700000050
+      }
+    },
+    {
+      "artifact_type": "CUSTOM_UNMAPPED",
+      "artifact_id": "108",
+      "attributes": {
+        "custom": "Preserve unknown artifacts too."
+      }
+    }
+  ]
+}

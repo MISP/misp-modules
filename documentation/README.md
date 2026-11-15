@@ -5009,6 +5009,41 @@ A module designed to retrieve an analysis report from the ANY.RUN Sandbox by its
 
 -----
 
+#### [Autopsy and Mobile Forensic Selected Results Import](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/autopsy_import.py)
+
+Import selected browser, download, communication and application artifacts with forensic provenance.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/autopsy_import.py)]
+
+- **features**:
+>Accepts Autopsy Export Selected Rows to CSV and a versioned selected-results JSON interchange for mobile parsers. Reuses tsk-web-history/bookmark/cookie/search-query/downloads, tsk-chats and software objects. Preserves selected raw rows, report hashes and case/device/source identifiers in forensic-artifact objects. Explicit row selection omits the full source attachment when rows are excluded. All attributes are unreviewed, non-IDS and non-correlating. Local timestamps need an explicit report offset; paths and URLs are never opened. Commercial native reports require sample fixtures and a named maintainer before an adapter is added. See the [usage guide](https://github.com/MISP/misp-modules/blob/main/documentation/import_mod/autopsy_import.md).
+
+- **config**:
+> - format
+> - artifact_type
+> - rows
+> - case_id
+> - data_source_id
+> - device_id
+> - evidence_id
+> - report_id
+> - tool_version
+> - timezone
+
+- **input**:
+>Base64 UTF-8 Autopsy selected-row CSV or misp-forensic-selected version 1 JSON.
+
+- **output**:
+>Source report, forensic-artifact provenance and linked tsk-* or software observations.
+
+- **references**:
+> - https://www.autopsy.com/
+> - https://github.com/sleuthkit/autopsy/blob/develop/Core/src/org/sleuthkit/autopsy/directorytree/ExportCSVAction.java
+
+- **requirements**:
+>PyMISP
+
+-----
+
 #### [PDNS COF Importer](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/cof2misp.py)
 
 Passive DNS Common Output Format (COF) MISP importer

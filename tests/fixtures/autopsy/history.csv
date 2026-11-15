@@ -1,0 +1,3 @@
+﻿URL,Date Accessed,Program Name,Title,Domain,Referrer URL,Source File,Data Source,Artifact ID,Unmapped
+https://example.org/?q=one%20two,2026-11-15 10:30:00 UTC,Chrome,"A title, with ""quotes""",example.org,https://example.org/,/evidence/History,disk-image.E01,42,"Preserved, not discarded"
+https://example.org/second,2026-11-15 11:30:00 UTC,Firefox,Second,example.org,,/evidence/places.sqlite,disk-image.E01,43,Second row

@@ -199,6 +199,7 @@ For more information: [Extending MISP with Python modules](https://www.misp-proj
 
 ### Import Modules
 * [ANYRUN Sandbox Import](https://misp.github.io/misp-modules/import_mod/#anyrun-sandbox-import) - A module designed to retrieve an analysis report from the ANY.RUN Sandbox by its unique ID and extract results (such as verdict, malware tags, and IOCs), converting them into MISP attributes within your event.
+* [Autopsy and Mobile Forensic Selected Results Import](https://misp.github.io/misp-modules/import_mod/#autopsy-and-mobile-forensic-selected-results-import) - Import selected browser, download, communication and application artifacts with forensic provenance.
 * [PDNS COF Importer](https://misp.github.io/misp-modules/import_mod/#pdns-cof-importer) - Passive DNS Common Output Format (COF) MISP importer
 * [CSV Import](https://misp.github.io/misp-modules/import_mod/#csv-import) - Import MISP attributes from base64-encoded UTF-8 CSV contents.
 * [Cuckoo Sandbox Import](https://misp.github.io/misp-modules/import_mod/#cuckoo-sandbox-import) - Module to import Cuckoo JSON.
