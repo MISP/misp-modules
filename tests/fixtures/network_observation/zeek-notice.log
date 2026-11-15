@@ -1,0 +1,10 @@
+#separator \x09
+#set_separator	,
+#empty_field	(empty)
+#unset_field	-
+#path	notice
+#open	2026-11-15-17-31-53
+#fields	ts	uid	id.orig_h	id.orig_p	id.resp_h	id.resp_p	fuid	file_mime_type	file_desc	proto	note	msg	sub	src	dst	p	n	peer_descr	actions	email_dest	suppress_for	remote_location.country_code	remote_location.region	remote_location.city	remote_location.latitude	remote_location.longitude
+#types	time	string	addr	port	addr	port	string	string	string	enum	enum	string	string	addr	addr	port	count	string	set[enum]	set[string]	interval	string	string	string	double	double
+1791633600.153456	CwjQme4ZVpjweinRl7	192.0.2.1	12345	198.51.100.2	80	-	-	-	tcp	Fixture::HTTP_Observed	Synthetic HTTP observation	-	192.0.2.1	198.51.100.2	80	-	-	Notice::ACTION_LOG	(empty)	3600.000000	-	-	-	-	-
+#close	2026-11-15-17-31-53

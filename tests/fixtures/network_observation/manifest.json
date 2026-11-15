@@ -1,0 +1,10 @@
+{
+  "capture_file": "/work/synthetic.pcap",
+  "capture_sha256": "9139bb14a0306bcaf825523544ca7ebc597ee1c203cbae7396948a2d6821e9cc",
+  "images": {
+    "suricata": "jasonish/suricata@sha256:d5a3a1785299ab40918d465e54fedf8e3afeeedba76bb64b0cc74dbc20bda2c3",
+    "zeek": "zeek/zeek@sha256:524cb0ce29f26a6a954fb9c357a8f92b95812476d8240f0ece26617ace249dd0"
+  },
+  "suricata_version": "8.0.8",
+  "zeek_version": "9.0.1"
+}

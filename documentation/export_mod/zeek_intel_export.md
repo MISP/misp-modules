@@ -198,3 +198,11 @@ References: [Intel Framework](https://docs.zeek.org/en/current/frameworks/intel.
 [native Intel types](https://docs.zeek.org/en/current/scripts/base/frameworks/intel/main.zeek.html),
 [ASCII reader](https://docs.zeek.org/en/current/scripts/base/frameworks/input/readers/ascii.zeek.html),
 and [Intel file loading and atomic updates](https://docs.zeek.org/en/current/scripts/base/frameworks/intel/input.zeek.html).
+
+## Importing sensor evidence
+
+Use [Zeek Observations Import](../import_mod/zeek_import.md) or
+[Suricata EVE Observations Import](../import_mod/suricata_import.md) for inbound
+selected records. They retain timestamps, flow/Community IDs, source signatures
+and capture context as unreviewed evidence. Outbound intelligence export does not
+collect or map those sensor observations.

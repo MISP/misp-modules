@@ -1,0 +1,1 @@
+{"ts":1791633600.153456,"uid":"CemmKNXnzWaeF8dbi","id.orig_h":"192.0.2.1","id.orig_p":12345,"id.resp_h":"198.51.100.2","id.resp_p":80,"proto":"tcp","note":"Fixture::HTTP_Observed","msg":"Synthetic HTTP observation","src":"192.0.2.1","dst":"198.51.100.2","p":80,"actions":["Notice::ACTION_LOG"],"email_dest":[],"suppress_for":3600.0}
