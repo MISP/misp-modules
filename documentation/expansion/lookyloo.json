@@ -15,12 +15,13 @@
     "https://lookyloo.circl.lu/doc/"
   ],
   "features": [
-    "Pivot on existing captures using ip_info, hostname_info, url_info, hash_info and favicon_info. Optionally enrich matching captures. UUID attributes retrieve the specific capture directly, including its details, regardless of enrich_captures. All new attributes use to_ids=false.",
+    "Pivot on existing captures using ip_info, hostname_info, url_info, hash_info and favicon_info. Optionally enrich matching captures, including native MISP export content. UUID attributes retrieve the specific capture directly, including its details, regardless of enrich_captures. All new attributes use to_ids=false.",
     "All new object attributes and contact/cookie attributes use to_ids=false. Input UUID, tags, comment and detection flag are preserved.",
     "Capture objects link to the queried attribute. A capture contains its observed URLs, files and cookies. Files reference the URLs that returned their bytes. IP and hostname lists do not imply a DNS mapping.",
-    "Responses are limited to 5 MiB per endpoint. Optional endpoint errors, missing data and resource limits are recorded on the capture while retaining successful enrichment. Failure of the primary lookup or capture info returns an error.",
+    "Responses are limited to 5 MiB per endpoint, except native MISP exports (32 MiB including embedded attachments). Optional endpoint errors, missing data and resource limits are recorded on the capture while retaining successful enrichment. Failure of the primary lookup or capture info returns an error.",
     "These modules use existing captures only. They do not submit URLs, upload captures, trigger third-party modules, push events, send reports, or call administrative endpoints.",
-    "The lookyloo-capture template is bundled in misp_modules/data/lookyloo-capture. Install the matching template on the MISP server to render and edit its fields."
+    "The lookyloo-capture template is bundled in misp_modules/data/lookyloo-capture. Install the matching template on the MISP server to render and edit its fields.",
+    "With include_misp_export=true, import native event attributes and objects, including embedded attachments and object relationships. Attribute tags and observation times are retained. Imported attributes use to_ids=false; UUIDs and references are remapped into the result. max_items applies to events, attributes, objects and reference collections. Unresolved references are skipped with a note; malformed export events do not remove core enrichment."
   ],
   "input": {
     "format": "misp_standard",
@@ -63,7 +64,7 @@
     },
     "include_raw": {
       "default": true,
-      "description": "Preserve fetched JSON as named raw-data attachments. Stats, module responses, comparables and extended/export data are available in these attachments. Disable to omit raw responses, including those fields."
+      "description": "Preserve fetched JSON as named raw-data attachments. Stats, module responses, comparables and extended data are available in these attachments. Native MISP content is imported independently when include_misp_export=true."
     },
     "include_cookies": {
       "default": false,
@@ -79,7 +80,7 @@
     },
     "include_misp_export": {
       "default": false,
-      "description": "Preserve the native misp_export event list as an attachment, without importing remote detection flags or merging event context. Requires include_raw=true."
+      "description": "Import attributes, objects, attachments and relationships from the native MISP export. New attributes use to_ids=false; fresh UUIDs and remapped references prevent collisions. Event metadata, event tags, remote IDs, distribution and sharing groups are not imported. Works with include_raw=false; include_raw=true also preserves the original JSON."
     },
     "include_contacts": {
       "default": false,
@@ -153,6 +154,10 @@
         "type": "uuid",
         "value": "51de3086-4339-43fa-b290-f6d42d593619",
         "uuid": "82383d84-3016-4d1c-902f-3de0533bfcec"
+      },
+      "config": {
+        "include_misp_export": true,
+        "include_raw": false
       }
     }
   ],
