@@ -13,9 +13,11 @@ from uuid import UUID
 
 import requests
 from pymisp import MISPAttribute, MISPEvent, MISPObject
+from pymisp.exceptions import PyMISPError
 
 DEFAULT_URL = "https://lookyloo.circl.lu"
 MAX_RESPONSE_BYTES = 5 * 1024 * 1024
+MAX_MISP_EXPORT_BYTES = 32 * 1024 * 1024
 CONFIG = ["url", "apikey", "timeout", "max_items", "include_raw"]
 CAPTURE_CONFIG = ["include_cookies", "include_favicons", "include_extended", "include_misp_export", "include_contacts"]
 CORE_ENDPOINTS = ("status", "redirects", "ips", "hostnames", "urls", "hashes", "stats", "modules", "comparables")
@@ -137,6 +139,7 @@ class Client:
 
     def request(self, path, payload=None, params=None, allow_capture_error=False):
         method = "POST" if payload is not None else "GET"
+        max_bytes = MAX_MISP_EXPORT_BYTES if path.endswith("/misp_export") else MAX_RESPONSE_BYTES
         try:
             with self.session.request(
                 method,
@@ -152,8 +155,8 @@ class Client:
                 content = bytearray()
                 for chunk in response.iter_content(65536):
                     content.extend(chunk)
-                    if len(content) > MAX_RESPONSE_BYTES:
-                        raise LookylooError(f"{path}: response exceeds 5 MiB.")
+                    if len(content) > max_bytes:
+                        raise LookylooError(f"{path}: response exceeds {max_bytes / (1024 * 1024):g} MiB.")
                 data = json.loads(content)
         except requests.RequestException as error:
             # Transport exceptions can contain credentials and private query URLs.
@@ -314,7 +317,7 @@ class Parser:
                 )
                 self.raw(obj, endpoint, data)
                 self.parse_endpoint(obj, endpoint, data)
-            except (LookylooError, TypeError, KeyError, ValueError) as error:
+            except (LookylooError, PyMISPError, TypeError, KeyError, ValueError) as error:
                 self.add(obj, "error", str(error), comment=endpoint)
         if self.client.options["include_contacts"]:
             try:
@@ -389,6 +392,8 @@ class Parser:
                     self.add(cookie, "text", json.dumps(context, sort_keys=True))
                 self.event.add_object(cookie)
                 obj.add_reference(cookie.uuid, "contains")
+        elif endpoint == "misp_export":
+            self.misp_export(obj, body)
         elif endpoint == "favicons":
             for digest in self.bounded(obj, body["favicons"], "favicons"):
                 content = base64.b64decode(body["favicons"][digest], validate=True)
@@ -397,6 +402,103 @@ class Parser:
                 file_obj = self.file(obj, digest)
                 if file_obj:
                     self.add(file_obj, "attachment", f"{digest}.ico", data=BytesIO(content))
+
+    @staticmethod
+    def export_attribute(item):
+        """Keep observable content, without importing remote event ownership or detection flags."""
+        if not isinstance(item, dict) or not isinstance(item.get("type"), str):
+            raise LookylooError("Invalid MISP export attribute.")
+        if not isinstance(item.get("value"), (str, int, float)) or isinstance(item["value"], bool):
+            raise LookylooError("Invalid MISP export attribute value.")
+        fields = ("type", "value", "category", "comment", "first_seen", "last_seen", "disable_correlation")
+        attribute = {key: item[key] for key in fields if key in item}
+        attribute["to_ids"] = False
+        if "data" in item:
+            if not isinstance(item["data"], str):
+                raise LookylooError("Invalid MISP export attachment data.")
+            attribute["data"] = BytesIO(base64.b64decode(item["data"], validate=True))
+        if "Tag" in item:
+            if not isinstance(item["Tag"], list):
+                raise LookylooError("Invalid MISP export attribute tags.")
+            attribute["Tag"] = [{"name": tag["name"]} for tag in item["Tag"]]
+        return attribute
+
+    def misp_export(self, capture, data):
+        """Import event content with fresh UUIDs and references scoped to each exported event."""
+        events = data if isinstance(data, list) else [data]
+        for record in self.bounded(capture, events, "MISP export events"):
+            if not isinstance(record, dict) or not isinstance(record.get("Event", record), dict):
+                raise LookylooError("Unexpected MISP export event format.")
+            record = record.get("Event", record)
+            event, identifiers, pending = MISPEvent(), {}, []
+
+            def collection(item, key):
+                values = item.get(key, [])
+                if not isinstance(values, list):
+                    raise LookylooError(f"Unexpected MISP export {key} format.")
+                return self.bounded(capture, values, "MISP export " + key)
+
+            def remember(item, imported):
+                if "uuid" in item:
+                    if not isinstance(item["uuid"], str):
+                        raise LookylooError("Invalid UUID in MISP export event.")
+                    identifier = str(UUID(item["uuid"]))
+                    if identifier in identifiers:
+                        raise LookylooError("Duplicate UUID in MISP export event.")
+                    identifiers[identifier] = str(imported.uuid)
+
+            for item in collection(record, "Attribute"):
+                imported = event.add_attribute(**self.export_attribute(item))
+                remember(item, imported)
+            for item in collection(record, "Object"):
+                if not isinstance(item, dict) or not isinstance(item.get("name"), str) or not item["name"]:
+                    raise LookylooError("Invalid MISP export object.")
+                imported = MISPObject(item["name"], strict=False, standalone=False)
+                fields = (
+                    "meta-category",
+                    "description",
+                    "template_uuid",
+                    "template_version",
+                    "comment",
+                    "first_seen",
+                    "last_seen",
+                )
+                imported.from_dict(**{key: item[key] for key in fields if key in item})
+                for attribute in collection(item, "Attribute"):
+                    values = self.export_attribute(attribute)
+                    relation = attribute.get("object_relation")
+                    if not isinstance(relation, str) or not relation:
+                        raise LookylooError("MISP export object attribute is missing its relation.")
+                    child = imported.add_attribute(relation, **values)
+                    if child is None:
+                        raise LookylooError("Empty MISP export object attribute.")
+                    remember(attribute, child)
+                remember(item, imported)
+                event.add_object(imported)
+                pending.append((imported, collection(item, "ObjectReference")))
+            for imported, references in pending:
+                for reference in references:
+                    if not isinstance(reference, dict):
+                        raise LookylooError("Invalid MISP export object reference.")
+                    if not isinstance(reference.get("referenced_uuid"), str):
+                        raise LookylooError("Invalid MISP export reference UUID.")
+                    target = identifiers.get(str(UUID(reference["referenced_uuid"])))
+                    if not target or target == str(imported.uuid):
+                        self.note(
+                            capture, "MISP export reference skipped: target was not imported or is the object itself."
+                        )
+                        continue
+                    relationship = reference.get("relationship_type")
+                    if not isinstance(relationship, str) or not relationship:
+                        raise LookylooError("Invalid MISP export relationship type.")
+                    imported.add_reference(target, relationship, comment=reference.get("comment"))
+            # Commit an event only once its content and references have been parsed successfully.
+            for attribute in event.attributes:
+                self.event.add_attribute(**attribute)
+                capture.add_reference(attribute.uuid, "contains")
+            for imported in event.objects:
+                self.event.add_object(imported)
+                capture.add_reference(imported.uuid, "contains")
 
     def results(self):
         result = json.loads(self.event.to_json())

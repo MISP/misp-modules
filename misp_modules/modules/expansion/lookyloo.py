@@ -31,8 +31,8 @@ moduleinfo = {
     "references": ["https://lookyloo.circl.lu/doc/"],
     "features": (
         "Pivot on existing captures using ip_info, hostname_info, url_info, hash_info and favicon_info. Optionally"
-        " enrich matching captures. UUID attributes retrieve the specific capture directly. All new attributes use"
-        " to_ids=false."
+        " enrich matching captures, including native MISP export content. UUID attributes retrieve the specific capture"
+        " directly. All new attributes use to_ids=false."
     ),
     "input": "IPv4/IPv6, domain, hostname, URL, SHA-512 or capture UUID attribute.",
     "output": "Related lookyloo-capture objects and observed URL/file objects, with optional capture enrichment.",

@@ -14,11 +14,13 @@ moduleinfo = {
     "references": ["https://lookyloo.circl.lu/doc/"],
     "features": (
         "Retrieve capture metadata, status, redirects, IPs, hostnames, URLs, SHA-512 hashes, statistics, cached module"
-        " results and comparables. Optional cookies, favicons, extended JSON, MISP export and contact lookup. Links to"
-        " screenshot and binary exports are returned."
+        " results and comparables. Optional cookies, favicons, extended JSON, native MISP attributes, objects and"
+        " attachments, and contact lookup. Links to screenshot and binary exports are returned."
     ),
     "input": "Lookyloo /tree/<uuid> link or a text or uuid attribute containing a capture UUID.",
-    "output": "lookyloo-capture, url, file, image and optional cookie objects and contact attributes.",
+    "output": (
+        "lookyloo-capture, url, file, image and optional cookie objects, contact attributes and native MISP content."
+    ),
 }
 
 
