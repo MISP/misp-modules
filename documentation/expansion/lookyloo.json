@@ -2,7 +2,7 @@
   "version": "1.0",
   "author": "MISP Project",
   "name": "Lookyloo lookup",
-  "description": "Find Lookyloo captures containing an IP, hostname, URL, resource hash or favicon hash.",
+  "description": "Find Lookyloo captures by UUID or containing an IP, hostname, URL, resource hash or favicon hash.",
   "module-type": [
     "expansion"
   ],
@@ -15,7 +15,7 @@
     "https://lookyloo.circl.lu/doc/"
   ],
   "features": [
-    "Pivot on existing captures using ip_info, hostname_info, url_info, hash_info and favicon_info. Optionally enrich matching captures. All new attributes use to_ids=false.",
+    "Pivot on existing captures using ip_info, hostname_info, url_info, hash_info and favicon_info. Optionally enrich matching captures. UUID attributes retrieve the specific capture directly, including its details, regardless of enrich_captures. All new attributes use to_ids=false.",
     "All new object attributes and contact/cookie attributes use to_ids=false. Input UUID, tags, comment and detection flag are preserved.",
     "Capture objects link to the queried attribute. A capture contains its observed URLs, files and cookies. Files reference the URLs that returned their bytes. IP and hostname lists do not imply a DNS mapping.",
     "Responses are limited to 5 MiB per endpoint. Optional endpoint errors, missing data and resource limits are recorded on the capture while retaining successful enrichment. Failure of the primary lookup or capture info returns an error.",
@@ -32,7 +32,8 @@
       "hostname",
       "url",
       "sha512",
-      "filename|sha512"
+      "filename|sha512",
+      "uuid"
     ],
     "required_attribute_fields": [
       "type",
@@ -144,6 +145,14 @@
       },
       "config": {
         "hash_lookup": "both"
+      }
+    },
+    {
+      "module": "lookyloo",
+      "attribute": {
+        "type": "uuid",
+        "value": "51de3086-4339-43fa-b290-f6d42d593619",
+        "uuid": "82383d84-3016-4d1c-902f-3de0533bfcec"
       }
     }
   ],

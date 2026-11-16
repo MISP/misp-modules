@@ -2,7 +2,7 @@
 
 from ._lookyloo import CAPTURE_CONFIG, CONFIG, Client, LookylooError, Parser, capture_uuid, parse_request
 
-mispattributes = {"input": ["link", "url", "text"], "format": "misp_standard"}
+mispattributes = {"input": ["link", "url", "text", "uuid"], "format": "misp_standard"}
 moduleconfig = CONFIG + CAPTURE_CONFIG
 moduleinfo = {
     "version": "1.0",
@@ -17,7 +17,7 @@ moduleinfo = {
         " results and comparables. Optional cookies, favicons, extended JSON, MISP export and contact lookup. Links to"
         " screenshot and binary exports are returned."
     ),
-    "input": "Lookyloo /tree/<uuid> link or a text attribute containing a capture UUID.",
+    "input": "Lookyloo /tree/<uuid> link or a text or uuid attribute containing a capture UUID.",
     "output": "lookyloo-capture, url, file, image and optional cookie objects and contact attributes.",
 }
 
