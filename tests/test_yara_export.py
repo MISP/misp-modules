@@ -115,8 +115,35 @@ def test_same_collection_is_deduplicated_with_all_provenance():
     assert {ref["event"] for ref in refs} == {"uuid", "event2"}
 
 
-def test_indicators_require_explicit_opt_in():
-    result = _request([_event([_attribute("filename", "evil.exe")])])
+@pytest.mark.parametrize(
+    "settings",
+    [{}, {"config": None}, {"config": {}}, {"config": {"mode": None}}, {"config": {"mode": ""}}],
+    ids=["no-config", "null-config", "empty-config", "null-mode", "empty-mode"],
+)
+@pytest.mark.parametrize("contents", ["stored", "indicators", "mixed"])
+def test_unset_mode_exports_stored_rules_and_indicators(settings, contents):
+    attributes = []
+    if contents != "indicators":
+        attributes.append(_stored("rule existing { condition: true }", to_ids=False))
+    if contents != "stored":
+        attributes.append(_attribute("filename", "evil.exe"))
+    query = {"data": [_event(attributes)], **settings}
+    result = yara_export.handler(json.dumps(query))
+    assert result == _request(query["data"], "both")
+    _, manifest, rules = _unpack(result)
+    assert manifest["mode"] == "both"
+    assert manifest["summary"]["stored_collections"] == int(contents != "indicators")
+    assert manifest["summary"]["generated_rules"] == int(contents != "stored")
+    expected = set()
+    if contents != "indicators":
+        expected.add("existing")
+    if contents != "stored":
+        expected.add("MISP_ioc")
+    assert {match.rule for match in rules.match(data=b"evil.exe")} == expected
+
+
+def test_explicit_rules_mode_excludes_indicators():
+    result = _request([_event([_attribute("filename", "evil.exe")])], "rules")
     assert "data" not in result
     assert result["summary"]["generated_rules"] == 0
     assert result["summary"]["skipped"] == {"excluded by mode": 1}

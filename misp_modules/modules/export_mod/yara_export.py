@@ -1,4 +1,4 @@
-"""Export unchanged YARA collections and opt-in literal IOC content searches."""
+"""Export unchanged YARA collections and literal IOC content searches."""
 
 import base64
 import hashlib
@@ -22,8 +22,9 @@ moduleinfo = {
     "requirements": ["yara-python python library"],
     "features": (
         "Produces a ZIP of unchanged stored YARA collections in separate namespaces, with a provenance and exclusion"
-        " manifest. The default rules mode exports yara attributes regardless of to_ids. Select indicators or both"
-        " to generate literal, case-sensitive UTF-8 byte searches from supported IDS-marked attributes. A filename"
+        " manifest. The default both mode exports yara attributes regardless of to_ids and generates literal,"
+        " case-sensitive UTF-8 byte searches from supported IDS-marked attributes. Select rules or indicators to"
+        " export only stored collections or generated IOC searches, respectively. A filename"
         " or domain matches bytes in scanned content, not a file's name or DNS activity. Deleted data is excluded."
         " Collections and the complete output are compiled with filesystem includes disabled. See the [usage"
         " guide](https://github.com/MISP/misp-modules/blob/main/documentation/export_mod/yara_export.md)."
@@ -303,7 +304,7 @@ def handler(q=False):
             raise ValueError("config must be an object.")
         mode = config.get("mode")
         if mode is None or mode == "":
-            mode = "rules"
+            mode = "both"
         if mode not in ("rules", "indicators", "both"):
             raise ValueError("mode must be rules, indicators or both.")
         sources, manifest = _build(request.get("data"), mode)
@@ -341,7 +342,7 @@ def introspection():
         "userConfig": {
             "mode": {
                 "type": "String",
-                "message": "rules (default), indicators or both; IOC searches match bytes in content",
+                "message": "both (default), rules or indicators; IOC searches match bytes in content",
             },
         },
     }

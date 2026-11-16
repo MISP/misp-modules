@@ -4935,7 +4935,7 @@ Export stored YARA collections and optionally generate literal IOC content searc
 [[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/yara_export.py)]
 
 - **features**:
->Produces a ZIP of unchanged stored YARA collections in separate namespaces, with a provenance and exclusion manifest. The default rules mode exports yara attributes regardless of to_ids. Select indicators or both to generate literal, case-sensitive UTF-8 byte searches from supported IDS-marked attributes. A filename or domain matches bytes in scanned content, not a file's name or DNS activity. Deleted data is excluded. Collections and the complete output are compiled with filesystem includes disabled. See the [usage guide](https://github.com/MISP/misp-modules/blob/main/documentation/export_mod/yara_export.md).
+>Produces a ZIP of unchanged stored YARA collections in separate namespaces, with a provenance and exclusion manifest. The default both mode exports yara attributes regardless of to_ids and generates literal, case-sensitive UTF-8 byte searches from supported IDS-marked attributes. Select rules or indicators to export only stored collections or generated IOC searches, respectively. A filename or domain matches bytes in scanned content, not a file's name or DNS activity. Deleted data is excluded. Collections and the complete output are compiled with filesystem includes disabled. See the [usage guide](https://github.com/MISP/misp-modules/blob/main/documentation/export_mod/yara_export.md).
 
 - **config**:
 >mode

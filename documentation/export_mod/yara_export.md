@@ -9,9 +9,14 @@ and cannot be represented by concatenating source files.
 
 | config.mode | Behavior |
 | --- | --- |
-| rules (default) | Export stored yara attributes, including object attributes, regardless of to_ids. |
+| rules | Export stored yara attributes, including object attributes, regardless of to_ids. |
 | indicators | Generate literal content searches from supported to_ids attributes; omit stored rules. |
-| both | Export stored collections and generated IOC searches in separate namespaces. |
+| both (default) | Export stored collections and generated IOC searches in separate namespaces. |
+
+Omitting config or config.mode, or setting either to null, selects both. An empty
+config object or an empty mode string also selects both. This keeps events that
+contain only supported IDS-marked indicators exportable without configuration.
+Set mode to rules to export only stored YARA collections.
 
 Set the mode in the module configuration, for example:
 
@@ -59,8 +64,9 @@ locations are tracked independently when they sit at different envelope levels.
 
 ## IOC matching semantics
 
-IOC generation is opt-in. Each event contributes one generated rule in its own
-namespace; its condition is **any of the selected strings**. Strings are literal
+IOC generation is enabled in both (the default) and indicators modes. Each event
+contributes one generated rule in its own namespace; its condition is **any of
+the selected strings**. Strings are literal
 UTF-8 byte sequences matched case-sensitively anywhere in the scanned content.
 Quotes, backslashes, controls and non-ASCII bytes are escaped using YARA syntax,
 including in generated metadata. Generated identifiers are fixed ASCII names.
