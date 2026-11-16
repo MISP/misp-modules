@@ -460,7 +460,7 @@ def handler(q=False):
             reference = json.loads(reference)
         if reference not in (None, ""):
             ref, ref_raw = read_attribute(reference)
-            if ref["uuid"] == source["uuid"]:
+            if UUID(ref["uuid"]) == UUID(source["uuid"]):
                 raise ValueError("Reference must have a different attribute UUID.")
             ref_report, ref_shingles = profile(ref, ref_raw, config, deadline)
             comparison = compare(report, ref_report, shingles, ref_shingles)

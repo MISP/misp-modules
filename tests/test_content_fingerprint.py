@@ -338,6 +338,29 @@ def test_limits_and_reference_identity():
     assert "error" in run(attribute(b"\xff\xfe", "text.txt"))
 
 
+@pytest.mark.parametrize(
+    "reference_uuid",
+    [SOURCE_UUID.upper(), "{" + SOURCE_UUID + "}", SOURCE_UUID.replace("-", ""), "urn:uuid:" + SOURCE_UUID],
+)
+@pytest.mark.parametrize("via_config", [False, True])
+@pytest.mark.parametrize("reference_text", [ARTICLE, ARTICLE + " Additional observations."])
+def test_reference_rejects_equivalent_uuid_representations(reference_uuid, via_config, reference_text):
+    reference = attribute(reference_text, uuid=reference_uuid)
+    result = run(**{"reference": json.dumps(reference)}) if via_config else run(reference=reference)
+    assert result == {"error": "Reference must have a different attribute UUID."}
+
+
+def test_distinct_noncanonical_reference_uuid_preserves_input_metadata():
+    reference = {**attribute(uuid=REFERENCE_UUID.upper()), "comment": "Keep this spelling", "to_ids": True}
+    result = run(reference=reference)
+    assert comparison(result)["exact_match"]
+    assert result["results"]["Attribute"][1] == reference
+    fingerprints = objects(result)
+    assert len({obj["uuid"] for obj in fingerprints}) == 2
+    annotation = objects(result, "annotation")[0]
+    assert len({ref["referenced_uuid"] for ref in annotation["ObjectReference"]}) == 2
+
+
 def test_tool_timeout_and_output_limit(tmp_path):
     import sys
 
