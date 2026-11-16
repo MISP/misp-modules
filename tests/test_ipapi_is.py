@@ -184,7 +184,7 @@ def test_key_is_sent_in_the_body(type_, value):
 
     (url,), kwargs = post.call_args
     assert url == "https://api.ipapi.is/"
-    assert kwargs["json"] == {"q": value.lower(), "key": "secret-key"}
+    assert kwargs["json"] == {"q": value.lower(), "key": "secret-key", "v": 1}
     assert "params" not in kwargs
     assert kwargs["timeout"] == 10
     sent = requests.Request("POST", url, json=kwargs["json"], headers=kwargs["headers"]).prepare()

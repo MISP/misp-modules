@@ -142,6 +142,8 @@ def lookup(ip, api_key):
     body = {"q": ip}
     if api_key:
         body["key"] = api_key  # never in the URL, where it would end up in logs
+        # The response format read here. Without it the API answers in the format the key's account is set to.
+        body["v"] = 1
     try:
         response = requests.post(API_URL, json=body, headers={"User-Agent": USER_AGENT}, timeout=TIMEOUT)
     except requests.RequestException as e:
