@@ -192,6 +192,29 @@ def test_har_urls_post_data_and_embedded_base64_bodies():
     assert set(objects(run(capture))) == set(found)  # HAR detection without a filename
 
 
+@pytest.mark.parametrize("scheme", ["http", "https", "HTTP", "HTTPS", "hTtP", "hTtPs"])
+def test_har_resource_url_preserves_case_insensitive_http_schemes(scheme):
+    url = f"{scheme}://cdn.example/Script.js?key=MixedCase"
+    capture = har(
+        {
+            "request": {"url": url},
+            "response": {"content": {"mimeType": "application/javascript", "text": "gtag('config', 'G-ABC1234567');"}},
+        }
+    )
+    obj = objects(run(capture, "capture.har"))["google-analytics-4:G-ABC1234567"]
+    assert value(obj, "url") == url
+    assert evidence(obj)["sources"][0]["url"] == url
+
+
+@pytest.mark.parametrize("scheme", ["ftp", "file", "javascript"])
+def test_har_resource_url_attribute_excludes_other_schemes(scheme):
+    url = f"{scheme}://cdn.example/script.js"
+    capture = har({"request": {"url": url}, "response": {"content": {"text": "G-ABC1234567"}}})
+    obj = objects(run(capture, "capture.har"))["google-analytics-4:G-ABC1234567"]
+    assert not any(a["object_relation"] == "url" for a in obj["Attribute"])
+    assert evidence(obj)["sources"][0]["url"] == url
+
+
 def test_post_body_does_not_claim_an_id_only_present_in_the_url():
     capture = har({"request": {"url": "https://www.facebook.com/tr/?id=12345678", "postData": {"text": "ev=PageView"}}})
     obj = objects(run(capture))["meta-pixel:12345678"]

@@ -304,7 +304,7 @@ def extract(attribute, text, filename):
             "description", value=json.dumps(evidence, ensure_ascii=True), to_ids=False, disable_correlation=True
         )
         for url in sorted({source["url"] for source in evidence["sources"] if "url" in source}):
-            if url.startswith(("http://", "https://")):
+            if url.lower().startswith(("http://", "https://")):
                 obj.add_attribute("url", value=url, to_ids=False, disable_correlation=True)
         obj.add_reference(attribute["uuid"], "extracted-from")
         objects.append(json.loads(obj.to_json()))
