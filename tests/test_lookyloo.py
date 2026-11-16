@@ -73,7 +73,7 @@ def assert_valid(result):
         loaded = MISPObject(
             obj["name"],
             strict=True,
-            **({"misp_objects_template_custom": template} if obj["name"] == "lookyloo-capture" else {})
+            **({"misp_objects_template_custom": template} if obj["name"] == "lookyloo-capture" else {}),
         )
         loaded.from_dict(**obj)
         loaded.to_json(strict=True)
@@ -170,7 +170,7 @@ def capture_responses(extra=None):
     return {**result, **(extra or {})}
 
 
-def run_capture(config=None, extra=None, value=CAPTURE, type_="text"):
+def run_capture(config=None, extra=None, value=CAPTURE, type_="text", module=lookyloo_capture):
     replies = capture_responses(extra)
 
     def request(method, path, **kwargs):
@@ -181,8 +181,41 @@ def run_capture(config=None, extra=None, value=CAPTURE, type_="text"):
         return data if isinstance(data, MagicMock) else response(data)
 
     with patch.object(requests.Session, "request", side_effect=request) as mocked:
-        result = lookyloo_capture.handler(query(value, type_, config))
+        result = module.handler(query(value, type_, config))
     return result, mocked
+
+
+@pytest.mark.parametrize("module", [lookyloo, lookyloo_capture])
+@pytest.mark.parametrize("value", [CAPTURE, "  " + CAPTURE.upper() + "  "])
+def test_uuid_attribute_retrieves_specific_capture(module, value):
+    result, request = run_capture(value=value, type_="uuid", module=module)
+    assert_valid(result)
+    captures = objects(result, "lookyloo-capture")
+    assert len(captures) == 1
+    assert values(captures[0], "capture-id") == [CAPTURE]
+    assert result["results"]["Attribute"][0]["type"] == "uuid"
+    assert result["results"]["Attribute"][0]["value"] == value.strip()
+    assert {call.args for call in request.call_args_list} == {
+        ("GET", shared.DEFAULT_URL + "/json/" + CAPTURE + "/" + endpoint)
+        for endpoint in ("info", *shared.CORE_ENDPOINTS)
+    }
+
+
+@pytest.mark.parametrize("module", [lookyloo, lookyloo_capture])
+@pytest.mark.parametrize("value", ["not-a-uuid", SOURCE + "/info", " "])
+def test_invalid_uuid_attribute_never_requests(module, value):
+    with patch.object(requests.Session, "request") as request:
+        assert "error" in module.handler(query(value, "uuid"))
+    request.assert_not_called()
+
+
+@pytest.mark.parametrize("module", [lookyloo, lookyloo_capture])
+def test_missing_uuid_capture_returns_error(module):
+    with patch.object(requests.Session, "request", return_value=response({}, 404)) as request:
+        result = module.handler(query(CAPTURE, "uuid"))
+    assert "HTTP 404" in result["error"]
+    assert request.call_count == 1
+    assert request.call_args.args == ("GET", shared.DEFAULT_URL + "/json/" + CAPTURE + "/info")
 
 
 def test_capture_core_endpoints_and_resources():
@@ -298,8 +331,9 @@ def test_invalid_lookup_responses(body):
 
 
 def test_response_size_limit():
-    with patch.object(shared, "MAX_RESPONSE_BYTES", 10), patch.object(
-        requests.Session, "request", return_value=response(records())
+    with (
+        patch.object(shared, "MAX_RESPONSE_BYTES", 10),
+        patch.object(requests.Session, "request", return_value=response(records())),
     ):
         assert "exceeds" in lookyloo.handler(query())["error"]
 
@@ -371,6 +405,7 @@ def test_metadata_and_no_query():
     for module in (lookyloo, lookyloo_capture):
         assert module.handler() is False
         assert module.introspection()["format"] == "misp_standard"
+        assert "uuid" in module.introspection()["input"]
         assert "url" in module.version()["config"]
 
 

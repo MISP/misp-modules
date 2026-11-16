@@ -27,7 +27,8 @@
     "types": [
       "link",
       "url",
-      "text"
+      "text",
+      "uuid"
     ],
     "required_attribute_fields": [
       "type",
@@ -122,10 +123,18 @@
         "include_cookies": true,
         "include_favicons": true
       }
+    },
+    {
+      "module": "lookyloo_capture",
+      "attribute": {
+        "type": "uuid",
+        "value": "51de3086-4339-43fa-b290-f6d42d593619",
+        "uuid": "82383d84-3016-4d1c-902f-3de0533bfcec"
+      }
     }
   ],
   "limitations": [
-    "Links must use the configured instance and /tree/<uuid> path. UUID text inputs are also accepted. Private capture seed URLs are not supported; configure an API key with access.",
+    "Links must use the configured instance and /tree/<uuid> path. UUID values in text or uuid attributes are also accepted. Private capture seed URLs are not supported; configure an API key with access.",
     "Binary artifact links are provided without downloading their contents or guaranteeing their availability. JSON MISP exports and cached module results remain attachments.",
     "Global discovery/configuration APIs (recent_captures, categories, tlds, stats, devices, remote_lacuses, get_user_config, get_token), multi-capture comparison and advanced search are outside single-attribute enrichment."
   ]

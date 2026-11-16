@@ -9,6 +9,7 @@ from ._lookyloo import (
     LookylooError,
     Parser,
     boolean,
+    capture_uuid,
     integer,
     parse_request,
     sha512,
@@ -16,7 +17,7 @@ from ._lookyloo import (
 )
 
 mispattributes = {
-    "input": ["ip-src", "ip-dst", "domain|ip", "domain", "hostname", "url", "sha512", "filename|sha512"],
+    "input": ["ip-src", "ip-dst", "domain|ip", "domain", "hostname", "url", "sha512", "filename|sha512", "uuid"],
     "format": "misp_standard",
 }
 moduleconfig = CONFIG + CAPTURE_CONFIG + ["limit", "offset", "hash_lookup", "enrich_captures", "max_captures"]
@@ -24,15 +25,16 @@ moduleinfo = {
     "version": "1.0",
     "author": "MISP Project",
     "name": "Lookyloo lookup",
-    "description": "Find Lookyloo captures containing an IP, hostname, URL, resource hash or favicon hash.",
+    "description": "Find Lookyloo captures by UUID or containing an IP, hostname, URL, resource hash or favicon hash.",
     "module-type": ["expansion"],
     "requirements": ["requests", "A Lookyloo instance; API key optional", "lookyloo-capture object template (bundled)"],
     "references": ["https://lookyloo.circl.lu/doc/"],
     "features": (
         "Pivot on existing captures using ip_info, hostname_info, url_info, hash_info and favicon_info. Optionally"
-        " enrich matching captures. All new attributes use to_ids=false."
+        " enrich matching captures. UUID attributes retrieve the specific capture directly. All new attributes use"
+        " to_ids=false."
     ),
-    "input": "IPv4/IPv6, domain, hostname, URL or SHA-512 attribute.",
+    "input": "IPv4/IPv6, domain, hostname, URL, SHA-512 or capture UUID attribute.",
     "output": "Related lookyloo-capture objects and observed URL/file objects, with optional capture enrichment.",
 }
 
@@ -43,6 +45,12 @@ def handler(q=False):
     try:
         attribute, config = parse_request(q, mispattributes["input"])
         value, type_ = attribute["value"].strip(), attribute["type"]
+        if type_ == "uuid":
+            with Client(config) as client:
+                identifier = capture_uuid(value, client.base_url)
+                parser = Parser(attribute, client)
+                parser.enrich(identifier)
+                return parser.results()
         if type_ in ("ip-src", "ip-dst", "domain|ip"):
             value = str(ipaddress.ip_address(value.rsplit("|", 1)[-1]))
             searches = [("ip_info", "ip")]
