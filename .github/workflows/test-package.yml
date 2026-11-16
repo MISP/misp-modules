@@ -68,8 +68,8 @@ jobs:
       - name: Install dependencies
         run: poetry install --with test -E all
 
-      - name: Install packet capture tools for integration tests
-        run: sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y tshark tcpdump
+      - name: Install packet capture and media tools for integration tests
+        run: sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y tshark tcpdump ffmpeg
 
       - name: Build package
         run: poetry build
