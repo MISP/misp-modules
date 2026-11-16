@@ -287,6 +287,7 @@ For further Information see the [license file](https://misp.github.io/misp-modul
 * [Zeek Intel Export](https://misp.github.io/misp-modules/export_mod/#zeek-intel-export) - Export validated MISP event and object indicators as a Zeek Intel Framework feed.
 
 ### Import Modules
+* [ADTimeline Import](https://misp.github.io/misp-modules/import_mod/#adtimeline-import) - Import ADTimeline CSV replication metadata with linked-value times, server-scoped counters and source provenance.
 * [ANYRUN Sandbox Import](https://misp.github.io/misp-modules/import_mod/#anyrun-sandbox-import) - A module designed to retrieve an analysis report from the ANY.RUN Sandbox by its unique ID and extract results (such as verdict, malware tags, and IOCs), converting them into MISP attributes within your event.
 * [PDNS COF Importer](https://misp.github.io/misp-modules/import_mod/#pdns-cof-importer) - Passive DNS Common Output Format (COF) MISP importer
 * [CSV Import](https://misp.github.io/misp-modules/import_mod/#csv-import) - Import MISP attributes from base64-encoded UTF-8 CSV contents.

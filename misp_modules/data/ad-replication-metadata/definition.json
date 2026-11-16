@@ -1,0 +1,212 @@
+{
+  "attributes": {
+    "account-name": {
+      "description": "Collected SamAccountName, not proof of the modifying account.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "attribute-name": {
+      "description": "Replicated attribute name, pszAttributeName.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 80
+    },
+    "change-time": {
+      "description": "Normalized UTC ftimeLastOriginatingChange, only when supported and non-sentinel.",
+      "disable_correlation": true,
+      "misp-attribute": "datetime",
+      "to_ids": false,
+      "ui-priority": 80
+    },
+    "change-time-raw": {
+      "description": "Original ftimeLastOriginatingChange value; retains unavailable and sentinel times.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "collection-server": {
+      "description": "Optional collector-provided LDAP server context; scopes local USNs.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "domain-scope": {
+      "description": "Optional collector-provided domain context, not inferred from a DN.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "link-created": {
+      "description": "Normalized UTC ftimeCreated, only when supported and non-sentinel.",
+      "disable_correlation": true,
+      "misp-attribute": "datetime",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "link-created-raw": {
+      "description": "Original ftimeCreated value; retains unavailable and sentinel times.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "link-deleted": {
+      "description": "Normalized UTC ftimeDeleted, only when supported and non-sentinel.",
+      "disable_correlation": true,
+      "misp-attribute": "datetime",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "link-deleted-raw": {
+      "description": "Original ftimeDeleted value; retains unavailable and sentinel times.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "linked-value-dn": {
+      "description": "Member column: linked DN for member or altRecipient metadata; not necessarily group membership.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "local-usn": {
+      "description": "usnLocalChange, scoped to collection server.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "object-category": {
+      "description": "Collected AD ObjectCategory distinguished name.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "object-class": {
+      "description": "Collected AD ObjectClass.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "object-created": {
+      "description": "Normalized UTC WhenCreated, only when supported and non-sentinel.",
+      "disable_correlation": true,
+      "misp-attribute": "datetime",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "object-created-raw": {
+      "description": "Original WhenCreated value; retains unavailable and sentinel times.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "object-dn": {
+      "description": "Distinguished name of the affected AD object; not the actor.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 80
+    },
+    "object-name": {
+      "description": "Collected object Name; not a historical name or actor attribution.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "originating-dsa-dn": {
+      "description": "Originating directory server DN, not an authenticated actor.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "originating-invocation-id": {
+      "description": "uuidLastOriginatingDsaInvocationID as reported.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "originating-usn": {
+      "description": "usnOriginatingChange, scoped to originating server/invocation.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "raw-record": {
+      "description": "JSON representation of all original CSV columns and values; exact bytes remain attached.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "record-index": {
+      "description": "One-based CSV data-record index, not physical line number.",
+      "disable_correlation": true,
+      "misp-attribute": "counter",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "review-status": {
+      "description": "Analyst review state; source metadata does not confirm malicious activity.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "sane_default": [
+        "unreviewed",
+        "confirmed-benign",
+        "confirmed-malicious",
+        "inconclusive"
+      ],
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "sid": {
+      "description": "Collected object SID.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "source-sha256": {
+      "description": "SHA-256 of exact attached source export.",
+      "disable_correlation": true,
+      "misp-attribute": "sha256",
+      "to_ids": false,
+      "ui-priority": 50
+    },
+    "version": {
+      "description": "dwVersion counter as reported, retaining exact decimal text.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 50
+    }
+  },
+  "description": "An Active Directory replication metadata observation, including attribute or linked-value changes, server-scoped counters and source provenance. Replication metadata is partial last-change evidence, not a complete audit trail or actor attribution.",
+  "meta-category": "misc",
+  "name": "ad-replication-metadata",
+  "required": [
+    "object-dn",
+    "attribute-name",
+    "change-time-raw",
+    "source-sha256",
+    "record-index",
+    "raw-record"
+  ],
+  "uuid": "43a01b2b-7cd3-4bc8-865f-3b9d9ccbffbf",
+  "version": 1
+}
