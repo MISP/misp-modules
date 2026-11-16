@@ -1,4 +1,27 @@
 
+#### [ADTimeline Import](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/adtimeline_import.py)
+
+Import ADTimeline CSV replication metadata with linked-value times, server-scoped counters and source provenance.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/adtimeline_import.py)]
+
+- **features**:
+>Imports native semicolon-delimited timeline CSV as unreviewed ad-replication-metadata objects with an exact source attachment. Preserves all columns and raw timestamps. Replication metadata is partial last-change evidence, not actor attribution or confirmed malicious activity. No LDAP access or code execution. Includes its object template. See the usage guide for supported inputs and limits.
+
+- **input**:
+>Base64-encoded native timeline_*.csv (UTF-8, or BOM-marked UTF-16).
+
+- **output**:
+>Source file and unreviewed AD replication metadata objects.
+
+- **references**:
+> - https://github.com/ANSSI-FR/ADTimeline
+> - https://github.com/MISP/misp-modules/blob/main/documentation/import_mod/adtimeline_import.md
+
+- **requirements**:
+>PyMISP
+
+-----
+
 #### [ANYRUN Sandbox Import](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/anyrun_sandbox_import.py)
 
 <img src=../logos/anyrun.png height=60>
