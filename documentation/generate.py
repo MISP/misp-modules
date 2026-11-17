@@ -21,6 +21,7 @@ MODULE_TYPE_TITLE = {
     misp_modules.ModuleType.EXPORT_MOD.value: "Export Modules",
     misp_modules.ModuleType.IMPORT_MOD.value: "Import Modules",
     misp_modules.ModuleType.ACTION_MOD.value: "Action Modules",
+    misp_modules.ModuleType.GATHERING.value: "Gathering Modules",
 }
 MODULE_INFO_TO_IGNORE = ["module-type", "author", "version"]
 
