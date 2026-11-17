@@ -15,6 +15,7 @@ from tornado.web import Application
 
 from misp_modules import __main__ as server
 from misp_modules.module_config import ModuleConfig, ModuleConfigError
+from misp_modules.modules.expansion import dns_query
 
 
 def write_config(path, modules):
@@ -181,6 +182,20 @@ class TestModuleConfigEndpoint(AsyncHTTPTestCase):
                 (r"/statistics", server.Statistics),
             ]
         )
+
+    def test_discovery_preserves_descriptions_and_legacy_config(self):
+        with (
+            patch.dict(self.handlers, {"dns_query": dns_query, "type:dns_query": "expansion"}),
+            patch.object(server.ListModules, "CACHE", None),
+        ):
+            response = self.fetch("/modules")
+        assert response.code == 200
+        modules = {module["name"]: module for module in orjson.loads(response.body)}
+        config = modules["dns_query"]["meta"]["config"]
+        assert set(config) == {"nameserver", "record_types", "query_timeout", "max_time", "max_pivots", "mail_policy"}
+        assert all(isinstance(description, str) and description.strip() for description in config.values())
+        assert "seconds" in config["query_timeout"] and "seconds" in config["max_time"]
+        assert modules["legacy"]["meta"]["config"] == ["apikey", "url"]
 
     def test_both_handler_styles_and_api_overrides(self):
         for name in ("modern", "legacy"):

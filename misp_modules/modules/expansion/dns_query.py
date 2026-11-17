@@ -60,7 +60,30 @@ moduleinfo = {
     "input": "A supported MISP attribute containing type, value and UUID.",
     "output": "Linked dns-resource-record objects; newly generated attributes have to_ids=false.",
 }
-moduleconfig = ["nameserver", "record_types", "query_timeout", "max_time", "max_pivots", "mail_policy"]
+moduleconfig = {
+    "nameserver": "Recursive DNS server IP address (IPv4 or IPv6). Leave empty to use the system resolver.",
+    "record_types": (
+        "Record types to query: all (default), or up to 128 comma-separated types, e.g. A,AAAA,SOA,TXT. "
+        "Reserved, meta, transfer and authentication types are excluded. "
+        "Address follow-ups and mail-policy TXT queries are controlled separately."
+    ),
+    "query_timeout": (
+        "Per-query lifetime in seconds, including retries: 0.1 to 10 (default: 2), "
+        "capped by the remaining total DNS time budget."
+    ),
+    "max_time": (
+        "Total DNS time budget in seconds for initial queries and address follow-ups: 1 to 120 (default: 30). "
+        "Result serialization adds processing time."
+    ),
+    "max_pivots": (
+        "Maximum discovered domain names to resolve in one A/AAAA follow-up stage: 0 to 64 (default: 16). "
+        "Set 0 to disable address follow-ups."
+    ),
+    "mail_policy": (
+        "Query _dmarc, _mta-sts and _smtp._tls TXT names for non-IP input: true/false or 1/0 (default: true). "
+        "Uses the exact input domain, without guessing an organizational domain."
+    ),
+}
 
 # These are reserved values, query/meta types, authentication or EDNS machinery,
 # rather than ordinary resource data to enumerate. ANY is deliberately excluded.
