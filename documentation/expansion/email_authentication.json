@@ -1,0 +1,81 @@
+{
+  "name": "Email Authentication",
+  "module": "email_authentication",
+  "module-type": ["expansion"],
+  "description": "Collect published SPF, DKIM and DMARC TXT records for a hostname or domain into email-authentication MISP objects.",
+  "requirements": ["dnspython", "PyMISP", "DNS access to a recursive resolver"],
+  "input": ["hostname", "domain"],
+  "output": "misp_standard: the original attribute and one email-authentication object per matching TXT resource record, linked to the original attribute by derived-from.",
+  "features": [
+    "Query SPF at the exact input name and DMARC at _dmarc.<input>. Query DKIM at <selector>._domainkey.<input> for each configured selector.",
+    "Normalize names to lowercase IDNA, use absolute DNS queries, and disable resolver search paths. DNS CNAME resolution is handled by dnspython.",
+    "Concatenate character-string chunks within each TXT resource record without inserting spaces. Separate TXT resource records remain separate objects, including multiple published SPF or DMARC records.",
+    "Keep the original queried domain, query name, returned TXT owner, TTL and raw concatenated policy/key text. Record first_seen and last_seen as the UTC observation time of this lookup.",
+    "Use a request-local resolver, four workers, a per-query timeout and a shared elapsed-time budget. Keep successful records when another query fails and describe failures in the first object's comment.",
+    "Treat NXDOMAIN and NoAnswer as no records returned. Report timeouts, resolver failures, invalid UTF-8 TXT records, truncation and exhausted time budgets separately. If nothing matches, return an explanatory error, including any failures.",
+    "All new attributes have to_ids=false. Preserve the original attribute UUID and metadata. The module never populates message evaluation fields such as spf, dkim, dmarc or dkim-signature."
+  ],
+  "config": {
+    "nameserver": {
+      "default": "System resolver",
+      "description": "Optional IPv4 or IPv6 address of a recursive DNS resolver. A fresh resolver is created for every request."
+    },
+    "dkim_selectors": {
+      "default": "default,google,selector1,selector2,k1,dkim,s1,s2",
+      "description": "Comma-separated selectors replacing the default list, with duplicates removed. At most 32 selectors, including dotted selectors, are supported. Empty or unset uses the default list."
+    },
+    "query_timeout": {
+      "default": 2,
+      "description": "Seconds per DNS lookup, between 0.1 and 10. Each lookup is also limited to the remaining shared time budget."
+    },
+    "max_time": {
+      "default": 20,
+      "description": "Shared DNS time budget in seconds, between 1 and 25. Queued queries are skipped after the deadline. DNS retry scheduling and object serialization can add a small amount of overhead."
+    }
+  },
+  "object_template": {
+    "name": "email-authentication",
+    "uuid": "7ab39b08-20d6-4be6-9ddd-d1bc37fe4b0a",
+    "version": 2,
+    "source": "https://github.com/MISP/misp-objects/pull/579",
+    "bundled_definition": "misp_modules/data/email-authentication/definition.json",
+    "description": "Proposed version-2 extension of the merged version-1 template. Retains every original relation and its meaning. Adds domain, dns-name, dns-owner, dns-ttl, dkim-selector, spf-record, dkim-record and dmarc-record. Adds the three record relations to requiredOneOf so both message observations and published DNS record observations validate. This extension is bundled locally; it has not been submitted to misp-objects.",
+    "installation": "The module loads its bundled definition, so an older PyMISP object catalog works. Before importing results into MISP, install this definition as objects/email-authentication/definition.json in the MISP server's misp-objects checkout (usually app/files/misp-objects), then update object templates through MISP administration. Keep the same UUID and version 2. Coordinate this local change with future misp-objects updates."
+  },
+  "limitations": [
+    "Published policies and keys do not prove SPF, DKIM or DMARC success or failure for a message. No message, sending IP, envelope sender, signature, or alignment evaluation is performed.",
+    "DNS cannot enumerate all DKIM selectors. Supply selectors from message headers or provider documentation when known. Missing records for the tested selectors do not establish that DKIM is disabled. Empty p= keys are retained as published revoked keys.",
+    "Lookups use exactly the input domain or hostname. They do not replace a hostname with its registered domain or perform organizational-domain DMARC fallback. A missing _dmarc record at a subdomain does not establish that no inherited DMARC policy applies.",
+    "SPF include/redirect mechanisms are retained without recursive evaluation. TXT detection identifies candidate records; it does not validate policy syntax, cryptographic keys, DNSSEC or policy effectiveness. Multiple policy records are preserved without selecting one.",
+    "Only SPF, DKIM and DMARC TXT records are collected. MTA-STS, TLS-RPT, BIMI, SMTP probes and HTTP policy fetching are outside this module's scope.",
+    "Return at most 20 matching TXT records per query. Non-UTF-8 TXT records are skipped with a warning. Resolver caching may affect observed TTLs."
+  ],
+  "installation": [
+    "Install misp-modules with its minimal or all dependency extra; dnspython is already declared there. No new dependency or API key is needed.",
+    "Install the bundled version-2 template on the MISP server as described above, restart misp-modules, and enable email_authentication in MISP Enrichment settings.",
+    "Expand a hostname or domain attribute. Configure known DKIM selectors when available."
+  ],
+  "example_request": {
+    "module": "email_authentication",
+    "attribute": {
+      "type": "domain",
+      "value": "example.org",
+      "uuid": "5b582d80-7a7e-4b6a-9f22-77656e72bb3b"
+    },
+    "config": {
+      "dkim_selectors": "selector1,selector2",
+      "query_timeout": "2",
+      "max_time": "20"
+    }
+  },
+  "validation": {
+    "command": "python -m pytest -q -o log_cli=false tests/test_email_authentication.py tests/test_dns_query.py tests/test_dns.py tests/test_url_dns.py",
+    "coverage": "Mocked DNS failure and edge cases, strict PyMISP validation, original message-result compatibility, and real dnspython parsing over a local UDP DNS server with a CNAME and split TXT response."
+  },
+  "references": [
+    "https://github.com/MISP/misp-objects/pull/579",
+    "https://www.rfc-editor.org/rfc/rfc7208",
+    "https://www.rfc-editor.org/rfc/rfc6376",
+    "https://www.rfc-editor.org/rfc/rfc7489"
+  ]
+}
