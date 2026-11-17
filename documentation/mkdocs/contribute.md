@@ -184,46 +184,62 @@ PAP:RED are blocked for either source when the policy is enabled.
 
 ### Additional Configuration Values
 
-If your module requires additional configuration (to be exposed via the MISP user-interface), you can define those in the moduleconfig value returned by the version function.
+If your module requires additional configuration from the site administrator, return it in `moduleinfo["config"]` from `version()`. For enrichment, import and export modules, prefer a dictionary mapping each setting name to a description:
 
 ~~~python
-# config fields that your code expects from the site admin
-moduleconfig = ["apikey", "event_limit"]
+moduleconfig = {
+    "apikey": "API key issued by the service provider. Required.",
+    "event_limit": "Maximum events to fetch per query: an integer from 1 to 100 (default: 10).",
+}
 
 def version():
-    moduleinfo['config'] = moduleconfig
-    return moduleinfo
+    return dict(moduleinfo, config=moduleconfig)
 ~~~
 
+The `/modules` endpoint exposes these descriptions in the module's metadata:
 
-When you do this a config array is added to the meta-data output containing all the potential configuration values:
-
+~~~json
+{
+    "name": "example",
+    "type": "expansion",
+    "mispattributes": {"input": ["domain"], "output": ["text"]},
+    "meta": {
+        "description": "Example expansion service",
+        "config": {
+            "apikey": "API key issued by the service provider. Required.",
+            "event_limit": "Maximum events to fetch per query: an integer from 1 to 100 (default: 10)."
+        },
+        "module-type": ["expansion"]
+    }
+}
 ~~~
-"meta": {
-      "description": "PassiveTotal expansion service to expand values with multiple Passive DNS sources",
-      "config": [
-        "username",
-        "password"
-      ],
-      "module-type": [
-        "expansion",
-        "hover"
-      ],
 
-...
+MISP versions supporting configuration descriptions use the dictionary keys as setting names and display the values as help text in plugin settings. The legacy list of names, such as `moduleconfig = ["apikey", "event_limit"]`, remains supported, but provides no field descriptions. Action modules use a separate `params` schema; keep that format for action parameters.
+
+Describe the expected format, whether a value is required, accepted values or ranges, units and the default (including what an empty value means). For credentials, explain where to obtain them; never include real keys or other secrets in metadata. See `misp_modules/modules/expansion/dns_query.py` for an example.
+
+Descriptions are metadata, not validation or automatic defaults. The handler must still validate incoming values and apply its defaults. When converting a list to a dictionary, preserve the setting names so existing saved configuration continues to work, and check any code that treats `moduleconfig` as a list. Use a MISP version that supports dictionary configuration metadata before migrating a deployment.
+
+The administrator's actual values arrive separately in the request's `config` object. For example, an API request may contain:
+
+~~~json
+{
+    "module": "example",
+    "domain": "example.org",
+    "config": {"apikey": "example-placeholder", "event_limit": "25"}
+}
 ~~~
 
+Read those values from the parsed request, not from the metadata descriptions:
 
-If you want to use the configuration values set in the web interface they are stored in the key `config` in the JSON object passed to the handler.
-
-~~~
+~~~python
 def handler(q=False):
-
-    # Check if we were given a configuration
-    config = q.get("config", {})
-
-    # Find out if there is a username field
-    username = config.get("username", None)
+    if q is False:
+        return False
+    request = json.loads(q)
+    config = request.get("config", {})
+    api_key = config.get("apikey")
+    # Validate the values and apply defaults before calling the service.
 ~~~
 
 
