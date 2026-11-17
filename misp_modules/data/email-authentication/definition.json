@@ -1,0 +1,122 @@
+{
+  "attributes": {
+    "dkim": {
+      "description": "DKIM verification result reported for the message.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "dkim-domain": {
+      "description": "Domain that signed the message with DKIM.",
+      "disable_correlation": false,
+      "misp-attribute": "domain",
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "dkim-record": {
+      "description": "Published DKIM key TXT record, including an empty p= for revoked keys; not a message signature.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "dkim-selector": {
+      "description": "DKIM selector queried beneath _domainkey at domain.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "dkim-signature": {
+      "description": "DKIM signature as recorded by the source.",
+      "disable_correlation": true,
+      "misp-attribute": "dkim-signature",
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "dmarc": {
+      "description": "DMARC evaluation result reported for the message.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "dmarc-override": {
+      "description": "Source-reported override action for the DMARC result.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "dmarc-policy": {
+      "description": "DMARC policy status or disposition supplied by the source.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "dmarc-record": {
+      "description": "Published DMARC TXT record; not a message evaluation result.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "dns-name": {
+      "description": "DNS name queried for this TXT record.",
+      "disable_correlation": false,
+      "misp-attribute": "domain",
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "dns-owner": {
+      "description": "Owner of the returned TXT record, which may differ from dns-name when an alias is followed.",
+      "disable_correlation": false,
+      "misp-attribute": "domain",
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "dns-ttl": {
+      "description": "Time to live in seconds of the returned TXT record.",
+      "disable_correlation": true,
+      "misp-attribute": "counter",
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "domain": {
+      "description": "Domain whose published email-authentication configuration was queried.",
+      "disable_correlation": false,
+      "misp-attribute": "domain",
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "spf": {
+      "description": "SPF evaluation result reported for the message.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "spf-record": {
+      "description": "Published SPF TXT record, with DNS character-string chunks concatenated.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 1
+    }
+  },
+  "description": "SPF, DKIM and DMARC results for one email observation, or one published email-authentication DNS record. DNS records describe configuration, not message verification results. Based on OCSF 1.9.0: https://schema.ocsf.io/1.9.0/objects/email_auth.",
+  "meta-category": "network",
+  "name": "email-authentication",
+  "requiredOneOf": [
+    "spf",
+    "dkim",
+    "dmarc",
+    "spf-record",
+    "dkim-record",
+    "dmarc-record"
+  ],
+  "uuid": "7ab39b08-20d6-4be6-9ddd-d1bc37fe4b0a",
+  "version": 2
+}

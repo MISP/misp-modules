@@ -130,6 +130,7 @@ For further Information see the [license file](https://misp.github.io/misp-modul
 * [DuckDuckGo Search](https://misp.github.io/misp-modules/expansion/#duckduckgo-search) - Search DuckDuckGo for web references to an attribute without an API key.
 * [EQL Query Generator](https://misp.github.io/misp-modules/expansion/#eql-query-generator) - EQL query generation for a MISP attribute.
 * [EUPI Lookup](https://misp.github.io/misp-modules/expansion/#eupi-lookup) - A module to query the Phishing Initiative service (https://phishing-initiative.lu).
+* [Email Authentication](https://misp.github.io/misp-modules/expansion/#email-authentication) - Gather SPF, DKIM and DMARC DNS records into email-authentication objects. [Configuration and template installation](documentation/expansion/email_authentication.json).
 * [URL Components Extractor](https://misp.github.io/misp-modules/expansion/#url-components-extractor) - Extract URL components
 * [Farsight DNSDB Lookup](https://misp.github.io/misp-modules/expansion/#farsight-dnsdb-lookup) - Module to access Farsight DNSDB Passive DNS.
 * [GCVE CPE](https://misp.github.io/misp-modules/expansion/#gcve-cpe) - Expand CPE attributes with GCVE CPE catalog metadata, package mappings and vulnerability references.
