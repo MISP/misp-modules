@@ -4120,6 +4120,36 @@ Module to enrich a file or URL with VMware NSX Defender.
 
 -----
 
+#### [VPNDetection Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/vpndetection.py)
+
+<img src=../logos/vpndetection.png height=60>
+
+An expansion and hover module to check an IP address for VPN, privacy relay, Tor, hosting, CDN and proxy use with VPNDetection, with its country and ASN. No API key is needed.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/vpndetection.py)]
+
+- **features**:
+>The module takes an IP address attribute as input and looks it up with the [VPNDetection API](https://vpndetection.io/api). It returns a geolocation object, an asn object, and a vpndetection-ip object with the detection flags that are set, each with its provider where one is known, its confidence and the date the address was last seen as such.
+>
+>The `api_key` is optional. Without one the API answers whether the address is a VPN, a privacy relay or a Tor exit, the relay's provider, the country and the ASN. With a key it also answers the hosting, CDN and residential, datacenter, mobile and public proxy flags, the VPN and hosting providers, the anycast, mobile carrier and satellite flags, whether the address runs an SSH, SMTP or web server, an open DNS resolver or BitTorrent, its region, city, postal code and coordinates, its reverse DNS hostname, the organization it is registered to and its abuse contact. The key is sent in the Authorization header. Private and reserved addresses are not looked up. Terms: https://vpndetection.io/terms, privacy: https://vpndetection.io/privacy.
+
+- **config**:
+>api_key
+
+- **input**:
+>An IP address attribute (ip-src or ip-dst).
+
+- **output**:
+>A geolocation object with the country (with a key, down to the city), an asn object, and a vpndetection-ip object with the flags that are set and the provider, confidence and last-seen date behind each detection, and with a key the hostname, organization and abuse contact.
+
+- **references**:
+> - https://vpndetection.io/api
+> - https://docs.vpndetection.io
+
+- **requirements**:
+>A VPNDetection API key (optional: without one the API answers the VPN, relay and Tor flags, the country and the ASN)
+
+-----
+
 #### [VulnDB Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/vulndb.py)
 
 <img src=../logos/vulndb.png height=60>
