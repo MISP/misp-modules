@@ -112,6 +112,15 @@ and advance its timestamp through the shared revision index. A changed rule has
 a new object UUID; no deletion tombstones are emitted, so normal MISP merge
 semantics can retain previous rule versions after a historical correction.
 
+## BeaconBeagle
+
+The `beaconbeagle_gathering` producer gathers decoded Cobalt Strike configurations, beacon
+hosts and C2 infrastructure from the public BeaconBeagle API. Select `dataset`
+(`all`, `configs`, `beacons` or `c2`), optional last-observation UTC dates,
+`page_size` and an optional `max_events` budget. See the
+[BeaconBeagle usage guide](https://github.com/MISP/misp-modules/blob/main/documentation/gathering/beaconbeagle.md)
+for requests, conversion details and source limitations.
+
 ## Durable revisions and additional producers
 
 Preserve the SQLite revision index in `MISP_MODULES_GATHERING_STATE_DIR` across
