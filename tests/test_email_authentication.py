@@ -135,6 +135,14 @@ def test_selectors_alias_owners_and_multiple_records(resolver):
         ("v=DMARC1; p=reject", "dmarc-record", True),
         ("v=DMARC10; p=reject", "dmarc-record", False),
         ("v=DKIM1 ; k=rsa; p=ABC", "dkim-record", True),
+        (" \tv=DKIM1; p=ABC", "dkim-record", True),
+        ("\r\n\tv=DKIM1; p=ABC", "dkim-record", True),
+        ("v = DKIM1; p=ABC", "dkim-record", True),
+        ("\tv\t=\tDKIM1 \r\n\t; p=ABC", "dkim-record", True),
+        ("k=rsa; v=DKIM1; p=ABC", "dkim-record", False),
+        ("k=rsa; \tv = DKIM1; p=ABC", "dkim-record", False),
+        ("v = DKIM2; p=ABC", "dkim-record", False),
+        ("v = dkim1; p=ABC", "dkim-record", False),
         ("p=", "dkim-record", True),
         ("k=rsa; p=ABC", "dkim-record", True),
         ("k=rsa", "dkim-record", False),
@@ -145,6 +153,16 @@ def test_selectors_alias_owners_and_multiple_records(resolver):
 )
 def test_record_detection(record, relation, expected):
     assert module._matches(record, relation) is expected
+
+
+def test_dkim_version_whitespace_survives_lookup(resolver):
+    record = " \tv = DKIM1; k=rsa; p=ABC"
+    _answers(resolver, {"s1._domainkey.example.org.": (r'" \009v = DKIM1; " "k=rsa; p=ABC"',)})
+    obj = _objects(_run(config={"dkim_selectors": "s1"}), "dkim-record")[0]
+    # PyMISP strips leading/trailing whitespace from text attribute values.
+    assert _values(obj, "dkim-record") == [record.strip()]
+    assert _values(obj, "dkim-selector") == ["s1"]
+    assert _values(obj, "dns-name") == ["s1._domainkey.example.org"]
 
 
 def test_partial_errors_preserve_success_and_are_distinct_from_absence(resolver):

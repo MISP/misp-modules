@@ -126,7 +126,9 @@ def _matches(record, relation):
         if not separator or not re.fullmatch(r"[a-zA-Z][a-zA-Z0-9_]*", key) or key in tags:
             return False
         tags[key] = value.strip()
-    return "p" in tags and ("v" not in tags or (re.match(r"^v=DKIM1\s*;", record) is not None and tags["v"] == "DKIM1"))
+    # Parsing above removes tag whitespace while preserving insertion order.
+    # If present, v= must be the first tag and its value is case-sensitive.
+    return "p" in tags and ("v" not in tags or (next(iter(tags)) == "v" and tags["v"] == "DKIM1"))
 
 
 def _lookup(resolver, query, deadline, timeout):
