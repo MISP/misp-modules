@@ -10,6 +10,7 @@ from uuid import UUID
 
 import requests
 from pymisp import MISPObject
+from urllib3.util import Timeout
 
 mispattributes = {"input": ["url", "link"], "format": "misp_standard"}
 moduleconfig = ["access_key", "secret_key", "timeout", "poll_attempts"]
@@ -69,15 +70,25 @@ def target_url(value):
     return parsed._replace(fragment="").geturl()
 
 
-def request_json(session, method, path, timeout, data=None):
+def request_json(session, method, path, deadline, data=None):
+    remaining = deadline - time.monotonic()
+    if remaining <= 0:
+        raise ValueError("Save Page Now time budget exhausted.")
     try:
         with session.request(
-            method, BASE + path, data=data, timeout=timeout, allow_redirects=False, stream=True
+            method,
+            BASE + path,
+            data=data,
+            timeout=Timeout(total=remaining, connect=min(10, remaining)),
+            allow_redirects=False,
+            stream=True,
         ) as response:
             if response.status_code not in (200, 202):
                 raise ValueError(f"Save Page Now returned HTTP {response.status_code}.")
             content = bytearray()
             for chunk in response.iter_content(65536):
+                if time.monotonic() >= deadline:
+                    raise ValueError("Save Page Now time budget exhausted.")
                 content.extend(chunk)
                 if len(content) > MAX_RESPONSE:
                     raise ValueError("Save Page Now response exceeds 1 MiB.")
@@ -123,6 +134,8 @@ def handler(q=False):
         if not isinstance(config, dict):
             raise ValueError("config must be an object.")
         timeout = integer(config, "timeout", 30, 1, 120)
+        caller_timeout = integer(request, "timeout", 300, 1, 86400)
+        deadline = time.monotonic() + min(timeout, max(0, caller_timeout - 1))
         attempts = integer(config, "poll_attempts", 0, 0, 6)
         keys = [config.get(name) for name in ("access_key", "secret_key")]
         if not all(isinstance(key, str) and re.fullmatch(r"[A-Za-z0-9_./+=-]{1,256}", key) for key in keys):
@@ -142,7 +155,7 @@ def handler(q=False):
                 }
             )
             try:
-                payload = request_json(session, "POST", "/save", timeout, {"url": url})
+                payload = request_json(session, "POST", "/save", deadline, {"url": url})
             except ValueError as error:
                 return {"error": f"{error} Submission outcome is unconfirmed; do not automatically resubmit."}
             identifier = payload.get("job_id")
@@ -156,10 +169,12 @@ def handler(q=False):
             path = f"/save/status/{identifier}"
             receipt.update(job_id=identifier, status="submitted", status_url=BASE + path)
             for index in range(attempts):
-                if index:
-                    time.sleep(2)
                 try:
-                    status = request_json(session, "GET", path, timeout)
+                    if index:
+                        if deadline - time.monotonic() <= 2:
+                            raise ValueError("Save Page Now time budget exhausted before the next poll.")
+                        time.sleep(2)
+                    status = request_json(session, "GET", path, deadline)
                     if status.get("job_id", identifier) != identifier:
                         raise ValueError("Status response has a different job ID.")
                     state = status.get("status")

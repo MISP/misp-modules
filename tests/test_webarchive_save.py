@@ -55,9 +55,13 @@ def test_submit_is_one_post_with_receipt_and_preserved_context(session):
     assert result["results"]["Object"][0]["ObjectReference"][0]["referenced_uuid"] == UUID
     session.headers.update.assert_called_once()
     assert session.headers.update.call_args.args[0]["Authorization"] == "LOW test-access:test-secret"
-    session.request.assert_called_once_with(
-        "POST", module.BASE + "/save", data={"url": URL}, timeout=30, allow_redirects=False, stream=True
-    )
+    session.request.assert_called_once()
+    args, kwargs = session.request.call_args
+    assert args == ("POST", module.BASE + "/save")
+    assert kwargs["data"] == {"url": URL}
+    assert kwargs["allow_redirects"] is False and kwargs["stream"] is True
+    assert 29 <= kwargs["timeout"].total <= 30
+    assert kwargs["timeout"].connect_timeout == 10
     assert "test-secret" not in json.dumps(result)
 
 
@@ -173,6 +177,97 @@ def test_response_size_limit_and_fragment(session):
     assert module.handler() is False
     assert module.introspection()["input"] == ["url", "link"]
     assert module.version()["module-type"] == ["expansion"]
+
+
+@pytest.mark.parametrize("caller_timeout,budget", [(None, 120), (20, 19)])
+def test_slow_requests_share_budget_and_keep_accepted_receipt(session, caller_timeout, budget):
+    clock = [0.0]
+    timeouts = []
+
+    def slow_request(method, url, **kwargs):
+        remaining = kwargs["timeout"].total
+        timeouts.append(remaining)
+        duration = 100 if method == "POST" else 110
+        clock[0] += min(duration, remaining)
+        if duration >= remaining:
+            raise requests.Timeout("slow response")
+        return response({"job_id": "accepted"} if method == "POST" else {"status": "pending"})
+
+    # Use a faster submission for the explicitly shorter caller timeout.
+    def short_request(method, url, **kwargs):
+        remaining = kwargs["timeout"].total
+        timeouts.append(remaining)
+        if method == "POST":
+            clock[0] += 5
+            return response({"job_id": "accepted"})
+        clock[0] += remaining
+        raise requests.Timeout("slow status response")
+
+    session.request.side_effect = slow_request if caller_timeout is None else short_request
+    query = {
+        "attribute": {"type": "url", "value": URL, "uuid": UUID},
+        "config": {**CONFIG, "timeout": 120, "poll_attempts": 6},
+    }
+    if caller_timeout is not None:
+        query["timeout"] = caller_timeout
+    with patch.object(module.time, "monotonic", side_effect=lambda: clock[0]):
+        result = module.handler(json.dumps(query))
+    assert clock[0] == budget
+    assert timeouts == ([120, 20] if caller_timeout is None else [19, 14])
+    job = receipt(result)
+    assert job["job_id"] == "accepted" and job["status"] == "submitted"
+    assert "poll_error" in job
+    assert session.request.call_count == 2
+
+
+def test_budget_exhaustion_before_polling_delay_returns_pending_receipt(session):
+    clock = [0.0]
+
+    def slow_request(method, url, **kwargs):
+        clock[0] += 10 if method == "POST" else 19
+        return response({"job_id": "accepted"} if method == "POST" else {"status": "pending"})
+
+    session.request.side_effect = slow_request
+    with (
+        patch.object(module.time, "monotonic", side_effect=lambda: clock[0]),
+        patch.object(module.time, "sleep") as sleep,
+    ):
+        result = module.handler(
+            json.dumps(
+                {"attribute": {"type": "url", "value": URL, "uuid": UUID}, "config": {**CONFIG, "poll_attempts": 6}}
+            )
+        )
+    job = receipt(result)
+    assert job["status"] == "pending" and job["job_id"] == "accepted"
+    assert "time budget" in job["poll_error"]
+    sleep.assert_not_called()
+    assert session.request.call_count == 2
+
+
+def test_expired_request_deadline_never_starts_network_call(session):
+    with patch.object(module.time, "monotonic", return_value=30), pytest.raises(ValueError, match="time budget"):
+        module.request_json(session, "GET", "/save/status/job", 30)
+    session.request.assert_not_called()
+
+
+def test_streaming_deadline_retains_accepted_receipt(session):
+    clock = [0.0]
+    status = response({})
+
+    def chunks(size):
+        clock[0] = 31
+        yield b'{"status":"pending"}'
+
+    status.iter_content.side_effect = chunks
+    session.request.side_effect = [response({"job_id": "accepted"}), status]
+    with patch.object(module.time, "monotonic", side_effect=lambda: clock[0]):
+        result = module.handler(
+            json.dumps(
+                {"attribute": {"type": "url", "value": URL, "uuid": UUID}, "config": {**CONFIG, "poll_attempts": 1}}
+            )
+        )
+    assert receipt(result)["job_id"] == "accepted"
+    assert "time budget" in receipt(result)["poll_error"]
 
 
 class TestWebarchiveSaveHTTP(AsyncHTTPTestCase):

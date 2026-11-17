@@ -37,7 +37,7 @@ disclosure. It does not run as a hover module.
 | Configuration | Default | Meaning |
 | --- | --- | --- |
 | `access_key`, `secret_key` | required | Internet Archive S3 API credentials. |
-| `timeout` | 30 | Integer 1–120 seconds per API request. |
+| `timeout` | 30 | Integer 1–120 seconds shared by submission, polling and polling delays. Requests use the remaining budget, with connection time capped at 10 seconds. |
 | `poll_attempts` | 0 | Integer 0–6. Zero returns the accepted job immediately; otherwise query only this submitted job, with two seconds between polls. |
 
 The response uses `misp_standard` and preserves the original attribute. An
@@ -66,8 +66,14 @@ module reports an unconfirmed outcome rather than claiming rejection. Repeated
 invocations submit new jobs and may create duplicates. HTTP errors, including
 rate limits and authentication failures, are reported without following
 redirects or forwarding credentials. Responses are limited to 1 MiB per call.
-Polling is bounded by `poll_attempts` and the per-request timeout; no background
-worker continues polling after the response.
+Polling is bounded by `poll_attempts` and a shared monotonic deadline. The
+budget is also capped at one second below the query's top-level `timeout`
+(300 seconds by default), leaving time to return the receipt. If there is not
+enough time for another polling delay, the module stops and returns the accepted
+job with `poll_error`. Transport timeouts use the remaining budget; the deadline
+is also checked between streamed response chunks. As with requests' normal
+timeouts, a socket read already in progress cannot be interrupted by the
+between-chunk check. No further polls are scheduled after budget exhaustion.
 
 This initial provider is Internet Archive. It does not submit to archive.today
 or bypass another provider's interactive controls. The submission/authentication
