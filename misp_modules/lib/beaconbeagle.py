@@ -265,9 +265,7 @@ def convert(kind, key, data):
             ],
         )
         for location in data["locations"]:
-            infrastructure(
-                str(ip_address(location["beacon_ip"])), location.get("beacon_port"), location.get("protocol"), location
-            )
+            infrastructure(location["beacon_ip"], location.get("beacon_port"), location.get("protocol"), location)
         settings = config.get("settings", {})
         if not isinstance(settings, dict):
             raise ValueError("Invalid BeaconBeagle settings")
@@ -289,18 +287,24 @@ def convert(kind, key, data):
                 for version in entry.get("versions", []):
                     infrastructure(key, port, version.get("protocol"), version)
     else:
-        for address in sorted(set(data.get("IPs", []) + ([data["Host"]] if data.get("Host") else []))):
+        addresses = sorted(set(data.get("IPs", []) + [data.get("Host") or key]))
+        for address in addresses:
             infrastructure(address, observation=data)
         for endpoint in data.get("Endpoints", {}).values():
-            for address in data.get("IPs", []) or [data.get("Host", key)]:
+            for address in addresses:
                 infrastructure(address, endpoint.get("port"), endpoint.get("protocol"), endpoint)
         for url in data.get("URLs", []):
             if not isinstance(url, str) or urlsplit(url).scheme not in ("http", "https") or not urlsplit(url).hostname:
                 raise ValueError("Invalid BeaconBeagle C2 URL")
             attribute("url", url)
-    for item in observations:
-        if item.get("asn"):
-            attribute("AS", "AS" + str(item["asn"]).removeprefix("AS"), "BeaconBeagle network ASN")
+    asns = [item.get("asn") for item in observations]
+    if kind == "c2":
+        asns.extend(
+            (enrichment.get("ASN") or {}).get("number") for enrichment in data.get("ip_enrichment", {}).values()
+        )
+    for asn in asns:
+        if asn:
+            attribute("AS", "AS" + str(asn).removeprefix("AS"), "BeaconBeagle network ASN")
     # Duplicate versions/architectures can describe the same observed endpoint.
     event["Object"] = list(object_index.values())
     event["Object"].sort(key=lambda item: item["uuid"])

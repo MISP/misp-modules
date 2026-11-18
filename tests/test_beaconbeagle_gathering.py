@@ -88,6 +88,31 @@ def test_all_datasets(config_record, beacon_record, c2_record):
         assert builder.add.call_count == 3
 
 
+def test_c2_feed_archive_includes_enriched_asns(tmp_path, c2_record):
+    c2_record["ip_enrichment"] = {
+        ADDRESS: {"ASN": {"number": 64500, "org": "Example network"}},
+        "192.0.2.2": {"ASN": {"number": 64500}},
+        "192.0.2.3": {"ASN": {"number": 64501}},
+        "192.0.2.4": {"GEO": {"country": "FR"}},
+    }
+    assert "asn" not in c2_record
+    with patch.object(module, "Client") as factory:
+        client = factory.return_value.__enter__.return_value
+        client.pages.return_value = [{"key": "c2.example"}]
+        client.get.return_value = c2_record
+        builder = FeedBuilder(tmp_path / "feed", revisions=RevisionStore(tmp_path / "state"))
+        module.gather({"dataset": "c2"}, builder)
+        builder.archive(tmp_path / "feed.zip")
+    with zipfile.ZipFile(tmp_path / "feed.zip") as archive:
+        manifest = json.loads(archive.read("manifest.json"))
+        assert len(manifest) == 1
+        event = json.loads(archive.read(next(iter(manifest)) + ".json"))["Event"]
+    asns = [a for a in event["Attribute"] if a["type"] == "AS"]
+    assert sorted(a["value"] for a in asns) == ["AS64500", "AS64501"]
+    assert all(a["to_ids"] is False for a in asns)
+    assert event["timestamp"] == str(LAST)
+
+
 def test_failed_generation_publishes_no_zip(tmp_path):
     manager = GatheringJobs(tmp_path, workers=1)
     with patch.object(module, "Client", side_effect=ValueError("offline")):
