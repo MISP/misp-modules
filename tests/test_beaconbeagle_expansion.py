@@ -123,6 +123,43 @@ def test_config_hash_lookup(config_record):
         client.get.assert_called_once_with("configs/" + CONFIG_HASH, missing=True)
 
 
+def test_config_hash_lookup_with_hostname_location(config_record):
+    config_record["locations"][0]["beacon_ip"] = "beacon.example"
+    with patch.object(module, "Client") as factory:
+        client = factory.return_value.__enter__.return_value
+        client.get.return_value = config_record
+        result = module.handler(query("sha256", CONFIG_HASH))
+    assert_source(result)
+    assert coverage(result)["configurations_returned"] == 1
+    assert any(
+        a["object_relation"] == "domain" and a["value"] == "beacon.example"
+        for obj in result["results"]["Object"]
+        for a in obj["Attribute"]
+    )
+
+
+def test_domain_lookup_keeps_c2_endpoint_and_enriched_asn(c2_record):
+    c2_record["URLs"] = []
+    c2_record["ip_enrichment"] = {ADDRESS: {"ASN": {"number": 64500}}}
+    with patch.object(module, "Client") as factory:
+        client = factory.return_value.__enter__.return_value
+        client.get.side_effect = [c2_record, {"hashes": []}, {"items": [], "total": 0}]
+        result = module.handler(query("domain", "c2.example"))
+    assert_source(result)
+    assert any(a["type"] == "AS" and a["value"] == "AS64500" for a in result["results"]["Attribute"])
+    endpoint = next(
+        obj
+        for obj in result["results"]["Object"]
+        if any(a["object_relation"] == "domain" and a["value"] == "c2.example" for a in obj["Attribute"])
+        and any(a["object_relation"] == "dst-port" for a in obj["Attribute"])
+    )
+    assert {a["object_relation"]: a["value"] for a in endpoint["Attribute"]} == {
+        "domain": "c2.example",
+        "dst-port": "443",
+        "protocol": "https",
+    }
+
+
 def test_arbitrary_field_pivot_reports_limits(config_record):
     with patch.object(module, "Client") as factory:
         client = factory.return_value.__enter__.return_value

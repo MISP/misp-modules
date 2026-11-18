@@ -143,6 +143,73 @@ def test_observation_ranges_merge_across_architectures(config_record):
     assert all(a["last_seen"] == api.timestamp(LAST + 3600).isoformat() for a in ip["Attribute"])
 
 
+@pytest.mark.parametrize(
+    "address,relation,expected",
+    [
+        ("Beacon.Example.", "domain", "beacon.example"),
+        (ADDRESS, "ip-dst", ADDRESS),
+        ("2001:0db8::1", "ip-dst", "2001:db8::1"),
+    ],
+)
+def test_configuration_location_accepts_hostnames_and_ip_addresses(config_record, address, relation, expected):
+    config_record["locations"][0]["beacon_ip"] = address
+    event, observed = api.convert("configs", CONFIG_HASH, config_record)
+    endpoint = next(
+        obj
+        for obj in event["Object"]
+        if any(a["object_relation"] == relation and a["value"] == expected for a in obj["Attribute"])
+    )
+    values = {a["object_relation"]: a["value"] for a in endpoint["Attribute"]}
+    assert values == {relation: expected, "dst-port": "443", "protocol": "https"}
+    assert all(a["first_seen"] == api.timestamp(FIRST).isoformat() for a in endpoint["Attribute"])
+    assert all(a["last_seen"] == api.timestamp(LAST).isoformat() for a in endpoint["Attribute"])
+    assert observed == LAST
+
+
+@pytest.mark.parametrize(
+    "addresses,hostname,expected",
+    [
+        ([ADDRESS], "c2.example", {ADDRESS, "c2.example"}),
+        ([], "c2.example", {"c2.example"}),
+        ([ADDRESS, ADDRESS], ADDRESS, {ADDRESS}),
+        ([], None, {"c2.example"}),
+    ],
+)
+def test_c2_endpoint_keeps_hostname_and_resolved_ips(c2_record, addresses, hostname, expected):
+    c2_record["IPs"] = addresses
+    if hostname is None:
+        del c2_record["Host"]
+    else:
+        c2_record["Host"] = hostname
+    c2_record["URLs"] = []
+    c2_record["Endpoints"] = {"dns:53": {"port": "53", "protocol": "dns", "Firsttime": FIRST, "lasttime": LAST}}
+    event, _ = api.convert("c2", "c2.example", c2_record)
+    endpoints = [obj for obj in event["Object"] if any(a["object_relation"] == "dst-port" for a in obj["Attribute"])]
+    assert len(endpoints) == len(expected)
+    assert {
+        a["value"] for obj in endpoints for a in obj["Attribute"] if a["object_relation"] in ("domain", "ip-dst")
+    } == expected
+    for obj in endpoints:
+        values = {a["object_relation"]: a["value"] for a in obj["Attribute"]}
+        assert values["dst-port"] == "53"
+        assert values["protocol"] == "dns"
+        assert all(a["first_seen"] == api.timestamp(FIRST).isoformat() for a in obj["Attribute"])
+
+
+def test_c2_asns_include_per_ip_enrichment_and_deduplicate(c2_record):
+    c2_record["asn"] = "64500"
+    c2_record["ip_enrichment"] = {
+        ADDRESS: {"ASN": {"number": 64500, "org": "Example"}},
+        "192.0.2.2": {"ASN": {"number": 64501}},
+        "192.0.2.3": {"ASN": {}},
+        "192.0.2.4": {"GEO": {"country": "FR"}},
+    }
+    event, _ = api.convert("c2", "c2.example", c2_record)
+    asns = [a for a in event["Attribute"] if a["type"] == "AS"]
+    assert sorted(a["value"] for a in asns) == ["AS64500", "AS64501"]
+    assert all(a["to_ids"] is False for a in asns)
+
+
 @pytest.mark.parametrize("data", [None, [], {}, {"hash": "b" * 64}])
 def test_invalid_config(data):
     with pytest.raises((ValueError, TypeError)):

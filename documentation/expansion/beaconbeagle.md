@@ -55,7 +55,10 @@ that the exact URL was observed.
 Output preserves the input attribute and its metadata. Each decoded configuration
 becomes a `malware-config` object; observed endpoints become `ip-port` objects.
 Associated IPs, domains, URLs, HTTP user agents and ASN information are mapped where
-available. Every source detail response is preserved as a canonical JSON attachment
+available. Configuration locations accept hostnames as well as IP addresses.
+C2 endpoint objects retain the hostname and each resolved IP with the endpoint's
+port and protocol. ASN attributes include per-IP enrichment and are deduplicated.
+Every source detail response is preserved as a canonical JSON attachment
 with its API link, retaining timestamps, country/organisation enrichment, configuration
 settings and fields without dedicated MISP relations. Objects reference the input
 attribute. Generated attributes use `to_ids=false`; configuration hashes are not
