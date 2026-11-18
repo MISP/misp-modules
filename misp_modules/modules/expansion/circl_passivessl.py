@@ -83,12 +83,20 @@ class PassiveSSLParser:
     def _handle_certificate(self, certificate, ip_uuid):
         x509 = MISPObject("x509")
         x509.add_attribute(self.cert_hash, type=self.cert_hash, value=certificate)
-        cert_details = self.pssl.fetch_cert(certificate)
-        info = cert_details["info"]
+        # A certificate listed for an IP is not always fetchable: the API answers
+        # "Not existing certificate" or a bare 500. Keep the fingerprint and move on
+        # instead of failing the whole expansion.
+        try:
+            info = self.pssl.fetch_cert(certificate).get("info") or {}
+        except Exception:
+            info = {}
         for feature, mapping in self.mapping.items():
+            if info.get(feature) is None:
+                continue
             attribute_type, object_relation = mapping
             x509.add_attribute(object_relation, type=attribute_type, value=info[feature])
-        x509.add_attribute(self.cert_type, type="text", value=self.cert_type)
+        if info:
+            x509.add_attribute(self.cert_type, type="text", value=self.cert_type)
         x509.add_reference(ip_uuid, "seen-by")
         self.misp_event.add_object(**x509)
 
