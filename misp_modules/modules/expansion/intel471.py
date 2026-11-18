@@ -1,6 +1,8 @@
 import json
+from urllib.parse import quote
 
 from pyintel471 import PyIntel471
+from requests.exceptions import RequestException
 
 misperrors = {"error": "Error"}
 mispattributes = {
@@ -22,7 +24,7 @@ mispattributes = {
     "output": ["freetext"],
 }
 moduleinfo = {
-    "version": "0.1",
+    "version": "0.2",
     "author": "Raphaël Vinot",
     "description": "Module to access Intel 471",
     "module-type": ["hover", "expansion"],
@@ -30,8 +32,9 @@ moduleinfo = {
     "logo": "intel471.png",
     "requirements": ["The intel471 python library"],
     "features": (
-        "The module uses the Intel471 python library to query the Intel471 API with the value of the input attribute."
-        " The result of the query is then returned as freetext so the Freetext import parses it."
+        "The module uses the Intel471 python library to query /v1/search with the value of the input attribute"
+        " as global search text. This includes results from reports, malware intelligence, sources and news"
+        " available to the account. Results are returned as freetext so the Freetext import parses them."
     ),
     "references": ["https://public.intel471.com/"],
     "input": (
@@ -49,18 +52,13 @@ moduleconfig = ["email", "authkey"]
 
 
 def cleanup(response):
-    """The entries have uids that will be recognised as hashes when they shouldn't"""
-    j = response.json()
-    if j["iocTotalCount"] == 0:
+    """Remove internal UIDs from every collection so they are not imported as hashes."""
+    j = response.json(object_hook=lambda obj: {key: value for key, value in obj.items() if key != "uid"})
+    if not isinstance(j, dict):
+        raise ValueError("Invalid Intel 471 search response")
+    # Global search can return indicators, reports, news, etc. even when iocTotalCount is zero.
+    if not any(isinstance(value, list) and value for value in j.values()):
         return "Nothing has been found."
-    for ioc in j["iocs"]:
-        ioc.pop("uid")
-        if ioc["links"]["actorTotalCount"] > 0:
-            for actor in ioc["links"]["actors"]:
-                actor.pop("uid")
-        if ioc["links"]["reportTotalCount"] > 0:
-            for report in ioc["links"]["reports"]:
-                report.pop("uid")
     return json.dumps(j, indent=2)
 
 
@@ -76,15 +74,21 @@ def handler(q=False):
         misperrors["error"] = "Unsupported attributes type"
         return misperrors
 
-    if request.get("config"):
-        if (request["config"].get("email") is None) or (request["config"].get("authkey") is None):
-            misperrors["error"] = "Intel 471 authentication is missing"
-            return misperrors
+    config = request.get("config") or {}
+    if not config.get("email") or not config.get("authkey"):
+        return {"error": "Intel 471 authentication is missing"}
 
-    intel471 = PyIntel471(email=request["config"].get("email"), authkey=request["config"].get("authkey"))
-    ioc_filters = intel471.iocs_filters(ioc=to_query)
-    res = intel471.iocs(filters=ioc_filters)
-    to_return = cleanup(res)
+    intel471 = PyIntel471(email=config["email"], authkey=config["authkey"])
+    # PyIntel471 interpolates filter values without URL encoding.
+    search_filters = intel471.search_filters(text=quote(to_query, safe=""))
+    try:
+        res = intel471.search(filters=search_filters)
+        res.raise_for_status()
+        to_return = cleanup(res)
+    except RequestException:
+        return {"error": "Intel 471 API request failed"}
+    except ValueError:
+        return {"error": "Invalid Intel 471 search response"}
 
     r = {"results": [{"types": mispattributes["output"], "values": to_return}]}
     return r
