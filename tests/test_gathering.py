@@ -117,6 +117,12 @@ def test_standard_feed_round_trip_and_template(config, tmp_path):
     assert all(obj._validate() for obj in parsed.objects)
     manifest = json.loads((tmp_path / "feed/manifest.json").read_text())
     assert manifest[event_uuid]["timestamp"] == event["timestamp"]
+    expected_tags = [
+        {"name": 'misp-gathering:module="withaname"', "local": True},
+        {"name": 'misp-gathering:source="witha.name"', "local": True},
+    ]
+    assert event["Tag"] == manifest[event_uuid]["Tag"] == expected_tags
+    assert [(tag.name, tag.local) for tag in parsed.tags] == [(tag["name"], True) for tag in expected_tags]
     assert len(event["Object"]) == 2
     assert event["Object"][0]["template_uuid"] == "e56d7f93-258e-4ba5-bd8a-463acd6d98c4"
     assert event["Object"][0]["template_version"] == "3"
@@ -152,6 +158,31 @@ def test_correction_keeps_event_identity_and_advances_revision(config):
     assert list(second["events"]) == [uuid]
     assert int(second["manifest"][uuid]["timestamp"]) > int(first["manifest"][uuid]["timestamp"])
     assert bundle(config) == second
+
+
+def test_origin_tags_update_existing_events_without_changing_identity(config, tmp_path):
+    event, observed = withaname.convert(config, FILENAME)
+    old_event = copy.deepcopy(event)
+    del old_event["Tag"]
+    revisions = gathering.RevisionStore(tmp_path / "revisions")
+
+    def archive_event(value, directory):
+        builder = gathering.FeedBuilder(directory / "feed", revisions=revisions)
+        builder.add(value, observed)
+        builder.archive(directory / "feed.zip")
+        return read_feed(builder.directory), (directory / "feed.zip").read_bytes()
+
+    before, _ = archive_event(old_event, tmp_path / "before")
+    after, first_zip = archive_event(event, tmp_path / "after")
+    repeated, repeated_zip = archive_event(event, tmp_path / "repeated")
+    event_uuid = event["uuid"]
+    assert set(before["events"]) == set(after["events"]) == {event_uuid}
+    assert int(after["manifest"][event_uuid]["timestamp"]) > int(before["manifest"][event_uuid]["timestamp"])
+    assert after == repeated
+    assert first_zip == repeated_zip
+    assert event["Tag"] == after["manifest"][event_uuid]["Tag"]
+    assert old_event["Object"] == event["Object"]
+    assert old_event["Attribute"] == event["Attribute"]
 
 
 def test_entry_deduplication_preserves_distinct_rules_and_scopes_observations(config):

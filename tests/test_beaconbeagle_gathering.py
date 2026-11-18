@@ -4,6 +4,7 @@ import zipfile
 from unittest.mock import Mock, patch
 
 import pytest
+from pymisp import MISPEvent
 
 from misp_modules.lib.gathering import FeedBuilder, GatheringJobs, RevisionStore
 from misp_modules.modules.gathering import beaconbeagle_gathering as module
@@ -53,6 +54,17 @@ def test_paginated_collection_archive_and_revisions(tmp_path, config_record):
         event = json.loads(archive.read(event_uuid + ".json"))["Event"]
         assert event["timestamp"] == str(LAST)
         assert manifest[event_uuid]["timestamp"] == event["timestamp"]
+        assert (
+            manifest[event_uuid]["Tag"]
+            == event["Tag"]
+            == [
+                {"name": 'misp-gathering:module="beaconbeagle_gathering"', "local": True},
+                {"name": 'misp-gathering:source="beaconbeagle.com"', "local": True},
+            ]
+        )
+        parsed = MISPEvent()
+        parsed.load(json.dumps({"Event": event}), validate=True)
+        assert all(tag.local is True for tag in parsed.tags)
     changed = copy.deepcopy(config_record)
     changed["config"]["watermark"] = 456
     event2, timestamp2 = module.convert("configs", CONFIG_HASH, changed)
@@ -86,6 +98,25 @@ def test_all_datasets(config_record, beacon_record, c2_record):
         builder = Mock()
         module.gather({}, builder)
         assert builder.add.call_count == 3
+        for call in builder.add.call_args_list:
+            assert call.args[0]["Tag"] == [
+                {"name": 'misp-gathering:module="beaconbeagle_gathering"', "local": True},
+                {"name": 'misp-gathering:source="beaconbeagle.com"', "local": True},
+            ]
+
+
+def test_origin_tags_preserve_converter_tags_and_do_not_modify_shared_conversion(config_record):
+    event, observed = module.convert("configs", CONFIG_HASH, config_record)
+    assert "Tag" not in event  # This converter is also used by expansion.
+    event["Tag"] = [{"name": "existing-source-tag", "local": False}]
+    with patch.object(module, "Client") as factory, patch.object(module, "convert", return_value=(event, observed)):
+        client = factory.return_value.__enter__.return_value
+        client.pages.return_value = [{"hash": CONFIG_HASH}]
+        builder = Mock()
+        module.gather({"dataset": "configs"}, builder)
+    generated = builder.add.call_args.args[0]
+    assert generated["Tag"][0] == {"name": "existing-source-tag", "local": False}
+    assert len(generated["Tag"]) == 3
 
 
 def test_c2_feed_archive_includes_enriched_asns(tmp_path, c2_record):
