@@ -13,7 +13,7 @@ from urllib.parse import urljoin, urlsplit
 import requests
 from pymisp import MISPObject
 
-from misp_modules.lib.gathering import NAMESPACE, canonical_json, get_jobs, stable_uuid
+from misp_modules.lib.gathering import NAMESPACE, canonical_json, get_jobs, origin_tags, stable_uuid
 
 SOURCE = "https://witha.name/data/"
 SOURCE_NAMESPACE = stable_uuid(NAMESPACE, "witha.name/data")
@@ -21,7 +21,7 @@ FILENAME = re.compile(r"^(\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2})_DDoSia-target-lis
 MAX_SOURCE_BYTES = 8 * 1024 * 1024
 
 moduleinfo = {
-    "version": "0.2",
+    "version": "0.3",
     "author": "MISP Project",
     "description": "Gather witha.name DDoSia configurations as a deterministic MISP feed.",
     "module-type": ["gathering"],
@@ -111,6 +111,7 @@ def convert(config, filename, deduplicate=True):
         "distribution": "0",
         "published": True,
         "Orgc": {"name": "WithAName", "uuid": stable_uuid(SOURCE_NAMESPACE, "organisation")},
+        "Tag": origin_tags("withaname", "witha.name"),
         "Attribute": [],
         "Object": [],
     }

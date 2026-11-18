@@ -4,10 +4,10 @@ import datetime as dt
 import json
 
 from misp_modules.lib.beaconbeagle import Client, convert, integer, path_key
-from misp_modules.lib.gathering import get_jobs
+from misp_modules.lib.gathering import get_jobs, origin_tags
 
 moduleinfo = {
-    "version": "1",
+    "version": "1.1",
     "author": "MISP Project",
     "name": "BeaconBeagle Gathering",
     "description": "Gather Cobalt Strike configurations, beacon hosts and C2 infrastructure into a MISP feed ZIP.",
@@ -79,6 +79,7 @@ def gather(params, builder, config=None):
                 count += 1
                 if limit and count > limit:
                     raise ValueError("BeaconBeagle max_events exceeded; narrow the dataset or date range")
+                event.setdefault("Tag", []).extend(origin_tags("beaconbeagle_gathering", "beaconbeagle.com"))
                 builder.add(event, observed)
 
 

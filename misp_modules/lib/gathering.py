@@ -37,6 +37,18 @@ def stable_uuid(parent, *parts):
     return str(uuid5(UUID(str(parent)), canonical_json(parts)))
 
 
+def origin_tags(module, source):
+    """Event-local provenance using the misp-gathering taxonomy.
+
+    Use the module identifier and upstream provider's domain, not a retrieval URL
+    or time. MISP imports Tag.local as the locality of the event/tag association.
+    """
+    return [
+        {"name": f'misp-gathering:module="{module}"', "local": True},
+        {"name": f'misp-gathering:source="{source}"', "local": True},
+    ]
+
+
 class RevisionStore:
     """Keep monotonically increasing event revisions across workers and restarts.
 

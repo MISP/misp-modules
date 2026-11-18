@@ -50,6 +50,41 @@ This replaces the unmerged version 1 in-memory bundle proposal. The former
 daily aggregation and protected-event signatures remain outside this first
 producer's scope.
 
+## Local origin tags
+
+Every event created by a gathering producer includes two default event-level
+tags from the `misp-gathering` taxonomy:
+
+| Producer | Module tag | Source tag |
+| --- | --- | --- |
+| WithAName | `misp-gathering:module="withaname"` | `misp-gathering:source="witha.name"` |
+| BeaconBeagle (all datasets) | `misp-gathering:module="beaconbeagle_gathering"` | `misp-gathering:source="beaconbeagle.com"` |
+
+`module` identifies the collector by its `/modules` identifier; `source`
+identifies the upstream provider by its canonical domain. Add values to the
+taxonomy when introducing a producer. These tags describe collection provenance,
+not confidence, review status or ownership of the observed infrastructure.
+
+Tags are included in both the event JSON and `manifest.json`, using the standard
+MISP representation, for example:
+
+```json
+{"name":"misp-gathering:module=\"withaname\"","local":true}
+```
+
+MISP's event importer preserves `local` on the event/tag association. Local tags
+remain visible and filterable on that instance and are excluded from ordinary
+outgoing synchronisation; internal sync can include them. The taxonomy defines
+the vocabulary; locality is set explicitly in each generated tag. Enable the
+taxonomy to make its descriptions available in the tag picker. Creating an
+unknown tag on import remains subject to the importing user's MISP permissions.
+
+The tags are deterministic and do not alter event, object or attribute UUIDs.
+Adding them to previously generated events advances their revision through the
+existing revision store; repeated collection then keeps that revision. Preserve
+the revision store when upgrading so previously imported events can receive the
+tags on their next update.
+
 ## Memory and disk use
 
 `FeedBuilder(directory)` writes each complete event to its own JSON file as it
@@ -140,7 +175,10 @@ To add another source:
 3. Implement `producer(parameters, builder, config)`, calling
    `builder.add(event, source_timestamp)` once per complete event and checking
    cancellation during slow work. The framework builds the manifest and ZIP.
-4. Use stable UUIDs throughout and include meaningful content in revisions.
+4. Add `origin_tags(module_identifier, source_domain)` from
+   `misp_modules.lib.gathering` to the event's `Tag` list before `builder.add()`.
+   Keep this in the gathering producer when sharing a converter with expansion.
+5. Use stable UUIDs throughout and include meaningful content in revisions.
    Exclude volatile retrieval timestamps and scope content-filtered views.
-5. Test reordered data, retries, corrections, limits and job lifecycle. The MISP
+6. Test reordered data, retries, corrections, limits and job lifecycle. The MISP
    integration discovers producers without a source-specific allowlist.

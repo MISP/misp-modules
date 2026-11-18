@@ -24,6 +24,13 @@ Poll `GET /gathering/jobs/<job_id>`, download
 `<event-uuid>.json` files. See the [gathering guide](../mkdocs/gathering-guide.md)
 for storage, cancellation, revisions and retention settings.
 
+Every generated event carries the local origin tags
+`misp-gathering:module="beaconbeagle_gathering"` and
+`misp-gathering:source="beaconbeagle.com"`, also present in the manifest. These
+apply to configurations, beacons and C2 records. See
+[local origin tags](../mkdocs/gathering-guide.md#local-origin-tags) for import and
+synchronisation behavior.
+
 | Parameter | Default | Meaning |
 | --- | --- | --- |
 | `dataset` | `all` | `configs`, `beacons`, `c2`, or all three |
