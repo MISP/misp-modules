@@ -150,9 +150,9 @@ def handler(q=False):
 
     # event_limit = request["config"].get("event_limit")
     attribute = request["attribute"]
-    proxy_settings = get_proxy_settings(request.get("config"))
 
     try:
+        proxy_settings = get_proxy_settings(request.get("config"))
         vysion, MISPProcessor = _load_vysion_dependencies()
 
         client = vysion.Client(
