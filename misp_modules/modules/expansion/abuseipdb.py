@@ -69,7 +69,10 @@ def handler(q=False):
         or request["attribute"]["type"] == "domain"
         or request["attribute"]["type"] == "domain|ip"
     ):
-        ip = get_ip(request)[0]
+        ip = get_ip(request)
+        if isinstance(ip, dict):
+            return ip
+        ip = ip[0]
 
     else:
         ip = request["attribute"]["value"]
