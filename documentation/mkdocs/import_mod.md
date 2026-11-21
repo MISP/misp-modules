@@ -262,7 +262,7 @@ Import metadata from an uploaded file without an external service.
 [[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/file_metadata_import.py)]
 
 - **features**:
->Reads documents, images, audio and video with ExifTool. Preserves grouped raw parser values and unverified timestamp and location claims. Optional embedded stream scanning and original file attachment. See the [usage guide](https://github.com/MISP/misp-modules/blob/main/documentation/expansion/file_metadata.md).
+>Reads documents, images, audio and video with ExifTool. Preserves grouped raw parser values and unverified timestamp and location claims. Correlates selected names, identifiers and software across files. Optional embedded stream scanning and original file attachment. See the [usage guide](https://github.com/MISP/misp-modules/blob/main/documentation/expansion/file_metadata.md).
 
 - **data-source**:
 >internal

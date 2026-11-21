@@ -6,6 +6,7 @@ import json
 import re
 import shutil
 import subprocess
+import unicodedata
 from concurrent.futures import ThreadPoolExecutor
 from datetime import date, time
 from functools import lru_cache
@@ -32,6 +33,8 @@ TIMEOUT_SECONDS = 30
 MAX_TAGS = 4096
 MAX_TAG_BYTES = 32 * 1024
 MAX_METADATA_BYTES = 4 * 1024 * 1024
+MAX_CORRELATION_VALUES = 256
+MAX_CORRELATION_LENGTH = 191
 
 DATE_VALUE = re.compile(r"(?P<year>[0-9]{4})(?:[:-](?P<month>[0-9]{2})(?:[:-](?P<day>[0-9]{2}))?)?")
 TIME_VALUE = re.compile(r"(?P<hour>[0-9]{2}):(?P<minute>[0-9]{2})(?::(?P<second>[0-9]{2})(?P<fraction>\.[0-9]+)?)?")
@@ -50,6 +53,78 @@ LOCATION_PREFIXES = (
 )
 CONTROL_FILE_TAGS = {"File:Main:FileType", "File:Main:MIMEType"}
 BINARY_PLACEHOLDER = re.compile(r"\(Binary data [0-9]+ bytes?(?:, use -b option to extract)?\)\Z")
+
+# Match a tag in its metadata family or XMP namespace. For example, PDF
+# Creator identifies software, while Dublin Core Creator identifies an author.
+CORRELATION_TAGS = {
+    "EXIF": {
+        "Artist": "author",
+        "XPAuthor": "author",
+        "OwnerName": "device-owner",
+        "SerialNumber": "serial-number",
+        "CameraSerialNumber": "serial-number",
+        "LensSerialNumber": "lens-serial-number",
+        "Software": "software",
+        "ProcessingSoftware": "software",
+    },
+    "MakerNotes": {
+        "OwnerName": "device-owner",
+        "SerialNumber": "serial-number",
+        "CameraSerialNumber": "serial-number",
+        "LensSerialNumber": "lens-serial-number",
+    },
+    "APP12": {"SerialNumber": "serial-number"},
+    "IPTC": {"By-line": "author", "UniqueDocumentID": "document-id"},
+    "PDF": {"Author": "author", "Creator": "software", "Producer": "software"},
+    "FlashPix": {
+        "Author": "author",
+        "LastModifiedBy": "last-modified-by",
+        "Software": "software",
+        "CreatingApplication": "software",
+    },
+    "XML": {"LastModifiedBy": "last-modified-by", "Application": "software"},
+    "XMP-dc": {"Creator": "author"},
+    "XMP-pdf": {"Author": "author", "Creator": "software", "Producer": "software"},
+    "XMP-tiff": {"Artist": "author", "Software": "software"},
+    "XMP-xmp": {"CreatorTool": "software"},
+    "XMP-xmpMM": {"DocumentID": "document-id", "OriginalDocumentID": "document-id"},
+    "XMP-exifEX": {
+        "OwnerName": "device-owner",
+        "SerialNumber": "serial-number",
+        "LensSerialNumber": "lens-serial-number",
+    },
+    "XMP-aux": {"OwnerName": "device-owner", "SerialNumber": "serial-number", "LensSerialNumber": "lens-serial-number"},
+    "QuickTime": {
+        "Author": "author",
+        "Artist": "author",
+        "SerialNumber": "serial-number",
+        "Software": "software",
+        "Encoder": "software",
+    },
+    "Matroska": {"Artist": "author", "Encoder": "software", "WritingApp": "software"},
+    "PNG": {"Author": "author", "Artist": "author", "Software": "software"},
+    "RIFF": {"Artist": "author", "Software": "software"},
+    "ASF": {"Author": "author", "Artist": "author"},
+    "ID3": {"Author": "author", "Artist": "author"},
+    "Vorbis": {"Artist": "author", "Encoder": "software"},
+    "APE": {"Artist": "author"},
+}
+CORRELATION_IDENTIFIERS = {"document-id", "serial-number", "lens-serial-number"}
+CORRELATION_PLACEHOLDERS = {
+    "anonymous",
+    "default",
+    "microsoft office user",
+    "n/a",
+    "none",
+    "not applicable",
+    "not available",
+    "not set",
+    "null",
+    "undefined",
+    "unknown",
+    "unspecified",
+}
+ZERO_IDENTIFIER = re.compile(r"(?:urn:uuid:|uuid:)?[0{}-]+", re.IGNORECASE)
 
 
 def _json(value):
@@ -259,6 +334,32 @@ def _tag_record(tag, value):
     return "metadata-tag", record
 
 
+def _correlation_values(tag, value):
+    parts = tag.split(":")
+    namespace = parts[1] if parts[0] == "XMP" else parts[0]
+    relation = CORRELATION_TAGS.get(namespace, {}).get(parts[-1])
+    if not relation:
+        return
+    for item in value if isinstance(value, list) else (value,):
+        if not isinstance(item, str):
+            continue
+        if relation in CORRELATION_IDENTIFIERS:
+            candidate = item.strip()
+            if ZERO_IDENTIFIER.fullmatch(candidate):
+                continue
+        else:
+            candidate = unicodedata.normalize("NFC", " ".join(item.split()))
+        if (
+            len(candidate) > MAX_CORRELATION_LENGTH
+            or not candidate.isprintable()
+            or not any(char.isalnum() for char in candidate)
+            or candidate.casefold() in CORRELATION_PLACEHOLDERS
+            or BINARY_PLACEHOLDER.fullmatch(candidate)
+        ):
+            continue
+        yield relation, candidate
+
+
 @lru_cache(maxsize=1)
 def _template():
     return json.loads(
@@ -266,8 +367,8 @@ def _template():
     )
 
 
-def _add(obj, relation, value, *, key=None, **kwargs):
-    attribute = obj.add_attribute(relation, value=value, to_ids=False, disable_correlation=True, **kwargs)
+def _add(obj, relation, value, *, key=None, correlate=False, **kwargs):
+    attribute = obj.add_attribute(relation, value=value, to_ids=False, disable_correlation=not correlate, **kwargs)
     attribute.uuid = _uuid(UUID(obj.uuid), relation, key)
 
 
@@ -285,7 +386,7 @@ def _result(data, filename, attachment_uuid, scan_embedded, include_original):
     source = MISPObject("file", strict=True, standalone=False)
     source.uuid = _uuid(NAMESPACE, "file", digest, filename, attachment_uuid)
     _add(source, "filename", filename)
-    _add(source, "sha256", digest)
+    _add(source, "sha256", digest, correlate=True)
     _add(source, "size-in-bytes", len(data))
     if mime_type:
         _add(source, "mimetype", mime_type)
@@ -305,6 +406,8 @@ def _result(data, filename, attachment_uuid, scan_embedded, include_original):
         _reference(source, attachment_uuid)
 
     counts = {"metadata-tag": 0, "timestamp-claim": 0, "location-claim": 0}
+    correlation_tags = {}
+    correlation_limited = False
     total_bytes = included = omitted = binary_tags = 0
     for tag, value in tags.items():
         family, _, name = tag.partition(":")
@@ -326,6 +429,19 @@ def _result(data, filename, attachment_uuid, scan_embedded, include_original):
         counts[relation] += 1
         total_bytes += len(serialized)
         included += 1
+        for key in _correlation_values(tag, value):
+            if key in correlation_tags or len(correlation_tags) < MAX_CORRELATION_VALUES:
+                correlation_tags.setdefault(key, set()).add(tag)
+            else:
+                correlation_limited = True
+    for (relation, value), origins in sorted(correlation_tags.items()):
+        origin_names = sorted(origins)
+        comment = "Unverified embedded metadata from " + ", ".join(origin_names[:5])
+        if len(origin_names) > 5:
+            comment += f" (+{len(origin_names) - 5} source tags retained in raw metadata)"
+        _add(metadata, relation, value, key=value, correlate=True, comment=comment)
+    if correlation_limited:
+        warnings.append(f"Only the first {MAX_CORRELATION_VALUES} distinct metadata correlation values were emitted.")
     if omitted:
         _add(metadata, "omitted-tag-count", omitted)
         warnings.append(f"{omitted} metadata tags exceeded the result limits and were omitted.")
@@ -344,6 +460,7 @@ def _result(data, filename, attachment_uuid, scan_embedded, include_original):
             "parser_version": version,
             "extraction_profile": profile,
             "metadata_tags": included,
+            "correlation_values": len(correlation_tags),
             "timestamp_claims": counts["timestamp-claim"],
             "location_claims": counts["location-claim"],
             "omitted_tags": omitted,

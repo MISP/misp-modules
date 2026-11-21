@@ -11,10 +11,10 @@ moduleinfo = {
     "data-source": "internal",
     "requirements": file_metadata.REQUIREMENTS,
     "features": (
-        "Reads documents, images, audio and video with ExifTool. Preserves grouped raw parser values and "
-        "unverified timestamp and location claims. Optional embedded stream scanning and original file "
-        "attachment. See the "
-        "[usage guide](https://github.com/MISP/misp-modules/blob/main/documentation/expansion/file_metadata.md)."
+        "Reads documents, images, audio and video with ExifTool. Preserves grouped raw parser values and unverified"
+        " timestamp and location claims. Correlates selected names, identifiers and software across files. Optional"
+        " embedded stream scanning and original file attachment. See the [usage"
+        " guide](https://github.com/MISP/misp-modules/blob/main/documentation/expansion/file_metadata.md)."
     ),
     "references": file_metadata.REFERENCES,
     "input": "An uploaded file or base64 file data.",

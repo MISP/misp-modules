@@ -2,6 +2,7 @@ import base64
 import hashlib
 import json
 import shutil
+import subprocess
 import sys
 from pathlib import Path
 
@@ -39,7 +40,9 @@ XMP = b"""<x:xmpmeta xmlns:x="adobe:ns:meta/">
 <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
 <rdf:Description rdf:about=""
  xmlns:exif="http://ns.adobe.com/exif/1.0/"
+ xmlns:dc="http://purl.org/dc/elements/1.1/"
  xmlns:Iptc4xmpExt="http://iptc.org/std/Iptc4xmpExt/2008-02-29/Iptc4xmpExt/">
+ <dc:creator><rdf:Seq><rdf:li>Jos&#xE9;  Vidal</rdf:li></rdf:Seq></dc:creator>
  <exif:DateTimeOriginal>2024-03-30T01:02:03.1200</exif:DateTimeOriginal>
  <Iptc4xmpExt:LocationShown><rdf:Bag><rdf:li rdf:parseType="Resource">
  <Iptc4xmpExt:City>Paris</Iptc4xmpExt:City>
@@ -63,12 +66,20 @@ def file_and_metadata(result):
         misp_obj = MISPObject(obj["name"], strict=True, standalone=False, **opts)
         misp_obj.from_dict(**obj)
         assert json.loads(misp_obj.to_json(strict=True))["uuid"] == obj["uuid"]
-        assert all(a["to_ids"] is False and a["disable_correlation"] is True for a in obj["Attribute"])
+        assert all(a["to_ids"] is False for a in obj["Attribute"])
     return file, metadata
 
 
 def attribute(obj, relation):
     return next(attr for attr in obj["Attribute"] if attr["object_relation"] == relation)
+
+
+def correlation_attributes(obj):
+    return {
+        (attr["object_relation"], attr["value"]): attr
+        for attr in obj["Attribute"]
+        if attr["disable_correlation"] is False
+    }
 
 
 def claims(obj, relation):
@@ -93,6 +104,8 @@ def test_import_preserves_provenance_values_and_unverified_claims(tags):
     assert attribute(file, "mimetype")["value"] == "image/jpeg"
     assert attribute(metadata, "parser-version")["value"] == "13.64"
     assert attribute(metadata, "extraction-profile")["value"] == "standard"
+    assert set(correlation_attributes(file)) == {("sha256", digest)}
+    assert set(correlation_attributes(metadata)) == {("serial-number", "000123")}
 
     raw = claims(metadata, "metadata-tag")
     timestamps = claims(metadata, "timestamp-claim")
@@ -117,6 +130,65 @@ def test_import_preserves_provenance_values_and_unverified_claims(tags):
     assert all(claim["verification"] == "unverified" for claim in (timestamps | locations).values())
     assert all(not tag.startswith(("System:", "Composite:")) for tag in raw | timestamps | locations)
     assert result["summary"]["binary_tags_skipped"] == 1
+
+
+def test_correlation_uses_namespace_aware_plain_values_and_keeps_evidence(tags):
+    tags.update(
+        {
+            "EXIF:IFD0:Main:Artist": " Jose\u0301   Vidal ",
+            "XMP:XMP-dc:Doc2:Creator": ["José Vidal", "Analyst, Alice", "Unknown", {"Name": "ambiguous"}],
+            "IPTC:Main:By-line": "José Vidal",
+            "PDF:Main:Author": "José Vidal",
+            "PDF:Main:Creator": "Imaging Studio 6.2",
+            "XMP:XMP-xmp:Main:CreatorTool": "Imaging   Studio 6.2",
+            "XMP:XMP-xmpMM:Main:DocumentID": " uuid:9488bd22-0341-4844-a95a-2d5c7e951fb1 ",
+            "XMP:XMP-xmpMM:Main:OriginalDocumentID": "urn:uuid:00000000-0000-0000-0000-000000000000",
+            "XMP:XMP-aux:Main:SerialNumber": "000123",
+            "XMP:XMP-exifEX:Main:LensSerialNumber": "000042",
+            "EXIF:ExifIFD:Main:OwnerName": "J. Vidal",
+            "XML:Doc8:LastModifiedBy": "Alice",
+            "QuickTime:Keys:Main:Artist": "   ",
+            "XMP:XMP-tmp0:Main:Creator": "Unmapped namespace",
+            "XMP:XMP-pdf:Main:Author": "x" * 192,
+        }
+    )
+    result = query(importer, data=DATA, filename="report.pdf")
+    _, metadata = file_and_metadata(result)
+    by_value = correlation_attributes(metadata)
+    assert set(by_value) == {
+        ("author", "José Vidal"),
+        ("author", "Analyst, Alice"),
+        ("device-owner", "J. Vidal"),
+        ("serial-number", "000123"),
+        ("lens-serial-number", "000042"),
+        ("document-id", "uuid:9488bd22-0341-4844-a95a-2d5c7e951fb1"),
+        ("software", "Imaging Studio 6.2"),
+        ("last-modified-by", "Alice"),
+    }
+    assert result["summary"]["correlation_values"] == len(by_value)
+    assert all(attr["type"] == "text" for attr in by_value.values())
+    note = by_value["author", "José Vidal"]["comment"]
+    assert "Unverified embedded metadata" in note
+    assert all(tag in note for tag in ("EXIF:IFD0:Main:Artist", "PDF:Main:Author", "XMP:XMP-dc:Doc2:Creator"))
+    for tag, entry in claims(metadata, "metadata-tag").items():
+        assert entry["value"] == tags[tag]
+    assert "XMP:XMP-pdf:Main:Author" in claims(metadata, "metadata-tag")
+    assert not any(
+        a["object_relation"] in {"metadata-tag", "timestamp-claim", "location-claim"} for a in by_value.values()
+    )
+
+
+def test_correlation_value_limit_keeps_all_raw_values(tags, monkeypatch):
+    parsed = ["Alice", "Bob", "Carol"]
+    tags["XMP:XMP-dc:Main:Creator"] = parsed
+    tags["PDF:Main:Author"] = "Alice"
+    monkeypatch.setattr(file_metadata, "MAX_CORRELATION_VALUES", 2)
+    result = query(importer, data=DATA)
+    _, metadata = file_and_metadata(result)
+    assert result["summary"]["correlation_values"] == 2
+    assert any("distinct metadata correlation values" in warning for warning in result["warnings"])
+    assert claims(metadata, "metadata-tag")["XMP:XMP-dc:Main:Creator"]["value"] == parsed
+    assert "PDF:Main:Author" in correlation_attributes(metadata)["author", "Alice"]["comment"]
 
 
 def test_attachment_expansion_links_existing_evidence(tags):
@@ -197,7 +269,7 @@ def test_subprocess_time_and_pipe_limits(tmp_path, monkeypatch):
 
 
 @pytest.mark.skipif(shutil.which("exiftool") is None, reason="ExifTool is required for integration tests")
-def test_real_xmp_and_pdf():
+def test_real_xmp_and_pdf_share_an_author_correlation_value(tmp_path):
     result = query(importer, data=base64.b64encode(XMP).decode("ascii"), filename="claims.xmp")
     _, xmp = file_and_metadata(result)
     assert result["summary"]["format"] == "XMP"
@@ -208,8 +280,20 @@ def test_real_xmp_and_pdf():
     show_location = next(value for tag, value in locations.items() if tag.endswith(":LocationShown"))
     assert show_location["value"] == [{"City": "Paris"}]
 
-    data = Path(__file__).with_name("test_files").joinpath("test.pdf").read_bytes()
-    result = query(importer, data=base64.b64encode(data).decode("ascii"), filename="test.pdf")
+    pdf_file = tmp_path / "test.pdf"
+    shutil.copyfile(Path(__file__).with_name("test_files").joinpath("test.pdf"), pdf_file)
+    subprocess.run(
+        ["exiftool", "-config", "", "-overwrite_original", "-Author=José Vidal", str(pdf_file)],
+        check=True,
+        capture_output=True,
+    )
+    data = base64.b64encode(pdf_file.read_bytes()).decode("ascii")
+    result = query(importer, data=data, filename=pdf_file.name)
     _, pdf = file_and_metadata(result)
     assert result["summary"]["format"] == "PDF"
     assert claims(pdf, "timestamp-claim")["PDF:Main:CreateDate"]["offset"] == "+02:00"
+    same_author = ("author", "José Vidal")
+    assert "XMP:XMP-dc:Main:Creator" in correlation_attributes(xmp)[same_author]["comment"]
+    pdf_author = next(tag for tag in claims(pdf, "metadata-tag") if tag.startswith("PDF:") and tag.endswith(":Author"))
+    assert pdf_author in correlation_attributes(pdf)[same_author]["comment"]
+    assert ("software", "Writer") in correlation_attributes(pdf)

@@ -44,15 +44,37 @@ configuration or in the import form.
   or date is promoted to a confirmed event fact.
 - Generated composite tags, temporary-file system metadata and binary payload
   extraction are excluded. Results report when limits omit tags or when
-  ExifTool emits a diagnostic. All generated attributes have IDS and
-  correlation disabled. Metadata may contain sensitive personal details
-  such as coordinates, author names and device identifiers.
+  ExifTool emits a diagnostic. All generated attributes have IDS disabled.
+  Metadata may contain sensitive personal details such as coordinates,
+  author names and device identifiers.
 
 Each request accepts up to 64 MiB of decoded input and allows up to 30 seconds
 for ExifTool. The module emits at most 4,096 textual or structured tags, with
 limits of 32 KiB per serialized tag and 4 MiB of serialized tag values in
 total. Set MISP and proxy upload limits to accommodate the base64 request
 when working with larger files.
+
+## Correlation
+
+MISP can match the `file` object's SHA-256 against copies of the same file and
+match selected metadata across files. The `file-metadata` object exposes
+repeatable plain-text fields for authors and artists, last editors, device
+owners, device and lens serial numbers, document identifiers, and software.
+For example, PDF `Author`, Dublin Core `Creator` and EXIF `Artist` use the
+same `author` field. PDF `Creator` identifies software.
+
+The module emits one value per member of a parsed list and preserves
+punctuation and case. It normalizes Unicode and whitespace in labels and
+trims outer whitespace from identifiers, preserving any leading zeros.
+It skips common placeholders and values longer than 191 characters and
+reports when it reaches the limit of 256 distinct correlation values per
+file. Each value cites its source tags in the attribute comment. Raw
+records and embedded time and location claims stay available with
+correlation disabled.
+
+Treat a metadata match as a lead and check the original fields before
+attributing a file to someone or linking it to a device. MISP's normal
+correlation settings and exclusions apply.
 
 ## Module API
 

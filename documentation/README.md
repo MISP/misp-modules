@@ -1199,7 +1199,7 @@ Extract selected file, document and media metadata locally with ExifTool.
 [[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/file_metadata.py)]
 
 - **features**:
->Preserves grouped EXIF, XMP, PDF, Office and media-container tags and raw parser values. Records the ExifTool version and SHA-256, flags embedded time and location claims for corroboration and links the results to the original attachment. Optional embedded stream scanning. See the [usage guide](https://github.com/MISP/misp-modules/blob/main/documentation/expansion/file_metadata.md).
+>Preserves grouped EXIF, XMP, PDF, Office and media-container tags and raw parser values. Records the ExifTool version and SHA-256, flags embedded time and location claims for corroboration and links the results to the original attachment. Correlates selected names, identifiers and software across files. Optional embedded stream scanning. See the [usage guide](https://github.com/MISP/misp-modules/blob/main/documentation/expansion/file_metadata.md).
 
 - **config**:
 >scan_embedded
@@ -5304,7 +5304,7 @@ Import metadata from an uploaded file without an external service.
 [[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/file_metadata_import.py)]
 
 - **features**:
->Reads documents, images, audio and video with ExifTool. Preserves grouped raw parser values and unverified timestamp and location claims. Optional embedded stream scanning and original file attachment. See the [usage guide](https://github.com/MISP/misp-modules/blob/main/documentation/expansion/file_metadata.md).
+>Reads documents, images, audio and video with ExifTool. Preserves grouped raw parser values and unverified timestamp and location claims. Correlates selected names, identifiers and software across files. Optional embedded stream scanning and original file attachment. See the [usage guide](https://github.com/MISP/misp-modules/blob/main/documentation/expansion/file_metadata.md).
 
 - **data-source**:
 >internal
