@@ -42,7 +42,7 @@ MAX_RECORDS = 1000
 MAX_TARGETS = 1000
 NAMESPACE = UUID("5408461f-8355-4a73-813f-800de4f023b5")
 TIMESTAMP = re.compile(
-    r"[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\.[0-9]{1,7})?(Z|[+-][0-9]{2}:[0-9]{2})?"
+    r"([0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2})(?:\.([0-9]{1,7}))?(Z|[+-][0-9]{2}:[0-9]{2})?"
 )
 KINDS = {
     "createdDateTime": "entra-sign-in",
@@ -186,14 +186,13 @@ def _tenant(record, supplied, field):
 def _time(value, name, implicit_utc=False):
     raw = _text(value, name)
     match = TIMESTAMP.fullmatch(raw)
-    if not match or raw.endswith("-00:00") or (not match[1] and not implicit_utc):
+    if not match or match[3] == "-00:00" or (not match[3] and not implicit_utc):
         raise ValueError(f"{name} requires ISO 8601 seconds and a known timezone.")
-    zone = match[1]
-    if zone and zone != "Z" and (int(zone[1:3]) > 23 or int(zone[4:]) > 59):
+    zone = match[3] if match[3] not in (None, "Z") else "+00:00"
+    if int(zone[1:3]) > 23 or int(zone[4:]) > 59:
         raise ValueError(f"{name} has an invalid UTC offset.")
-    if not zone:
-        raw += "+00:00"
-    return datetime.fromisoformat(raw.replace("Z", "+00:00")).astimezone(timezone.utc)
+    fraction = (match[2] or "").ljust(6, "0")[:6]
+    return datetime.fromisoformat(f"{match[1]}.{fraction}{zone}").astimezone(timezone.utc)
 
 
 def _normalize_ip(address):

@@ -160,9 +160,9 @@ def test_entra_graph_page_maps_time_actor_and_tenants_with_source_metadata():
 
 
 def test_time_generated_alone_does_not_supply_ingestion_time():
-    (event,) = objects(result_for(sign_in(TimeGenerated="2026-11-01T10:00:37Z")))
+    (event,) = objects(result_for(sign_in(TimeGenerated="2026-11-01T10:00:37.1Z")))
     fields = values(event)
-    assert fields["time-generated"] == "2026-11-01T10:00:37+00:00"
+    assert fields["time-generated"] == "2026-11-01T10:00:37.100000+00:00"
     assert "ingestion-time" not in fields and "ingestion-time-raw" not in fields
 
 
