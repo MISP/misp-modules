@@ -1,0 +1,216 @@
+{
+  "attributes": {
+    "aws-region": {
+      "description": "AWS Region reported for the event.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 8
+    },
+    "error-code": {
+      "description": "Error code reported by the AWS service.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 8
+    },
+    "event-category": {
+      "description": "CloudTrail event category such as Management, Data or NetworkActivity.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 8
+    },
+    "event-id": {
+      "description": "CloudTrail eventID identifying this event record.",
+      "disable_correlation": true,
+      "misp-attribute": "uuid",
+      "to_ids": false,
+      "ui-priority": 10
+    },
+    "event-name": {
+      "description": "API operation or other event name recorded by CloudTrail.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 10
+    },
+    "event-source": {
+      "description": "AWS service endpoint that reported the event.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 10
+    },
+    "event-time": {
+      "description": "The eventTime normalized to UTC.",
+      "disable_correlation": true,
+      "misp-attribute": "datetime",
+      "to_ids": false,
+      "ui-priority": 10
+    },
+    "event-time-raw": {
+      "description": "Original CloudTrail eventTime string.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 4
+    },
+    "event-type": {
+      "description": "CloudTrail event type such as AwsApiCall, AwsConsoleSignIn or AwsServiceEvent.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 8
+    },
+    "event-version": {
+      "description": "CloudTrail record schema version.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 4
+    },
+    "on-behalf-of-identity-store-arn": {
+      "description": "Identity store ARN reported in userIdentity.onBehalfOf.identityStoreArn. Together with the user ID, it identifies the user.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 8
+    },
+    "on-behalf-of-user-id": {
+      "description": "IAM Identity Center or AWS Builder ID user ID reported in userIdentity.onBehalfOf.userId.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 8
+    },
+    "original-event-id": {
+      "description": "Original CloudTrail event identifier recorded in an addendum.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 6
+    },
+    "outcome": {
+      "description": "Outcome reported by the service or unknown when the record is inconclusive.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 8,
+      "values_list": [
+        "success",
+        "failure",
+        "unknown"
+      ]
+    },
+    "principal-account-id": {
+      "description": "AWS account identifier reported for the actor.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 8
+    },
+    "principal-arn": {
+      "description": "Amazon Resource Name of the calling principal or session.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 8
+    },
+    "principal-id": {
+      "description": "Unique principal identifier as recorded by CloudTrail.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 8
+    },
+    "principal-name": {
+      "description": "User name reported in userIdentity.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "principal-type": {
+      "description": "CloudTrail userIdentity type.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 8
+    },
+    "read-only": {
+      "description": "Whether CloudTrail identifies the action as read-only.",
+      "disable_correlation": true,
+      "misp-attribute": "boolean",
+      "to_ids": false,
+      "ui-priority": 6
+    },
+    "recipient-account-id": {
+      "description": "Account to which this CloudTrail event record was delivered.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 8
+    },
+    "request-id": {
+      "description": "Identifier assigned to the request by the AWS service.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 6
+    },
+    "review-status": {
+      "description": "Analyst review status of the imported observation.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "session-issuer-arn": {
+      "description": "ARN of the session issuer reported by CloudTrail.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 6
+    },
+    "shared-event-id": {
+      "description": "Identifier shared by separate CloudTrail records of one action delivered to multiple accounts.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 6
+    },
+    "source-address": {
+      "description": "Original sourceIPAddress value, which may be an IP, service name or AWS placeholder.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 8
+    },
+    "source-ip": {
+      "description": "Validated IP address from CloudTrail sourceIPAddress.",
+      "disable_correlation": true,
+      "misp-attribute": "ip-src",
+      "to_ids": false,
+      "ui-priority": 8
+    },
+    "user-agent": {
+      "description": "User agent recorded for the action.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    }
+  },
+  "description": "One AWS CloudTrail audit event with its operation, event time, observed principal, and reported outcome. Link source logs and related cloud entities with object references.",
+  "meta-category": "misc",
+  "name": "aws-cloudtrail-event",
+  "required": [
+    "event-id",
+    "event-name",
+    "event-source",
+    "event-time"
+  ],
+  "uuid": "604a3060-15ce-493e-a344-3ebc1a50b735",
+  "version": 2
+}

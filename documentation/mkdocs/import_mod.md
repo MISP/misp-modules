@@ -50,6 +50,29 @@ A module designed to retrieve an analysis report from the ANY.RUN Sandbox by its
 
 -----
 
+#### [AWS CloudTrail Audit Logs Import](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/aws_cloudtrail_import.py)
+
+Import AWS CloudTrail JSON or JSON.gz audit records with source provenance.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/aws_cloudtrail_import.py)]
+
+- **features**:
+>Imports native Records envelopes and individual CloudTrail event JSON offline. Maps identity, action, resource, outcome and time to unreviewed MISP objects. Links each record to a SHA-256 source file descriptor. Can attach the exact upload on request. Includes compatible object templates.
+
+- **input**:
+>Base64-encoded UTF-8 CloudTrail JSON or gzip-compressed JSON.
+
+- **output**:
+>AWS CloudTrail audit event, source file, and linked cloud account, resource and IAM role objects.
+
+- **references**:
+> - https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-event-reference-record-contents.html
+> - https://github.com/MISP/misp-modules/blob/main/documentation/import_mod/aws_cloudtrail_import.md
+
+- **requirements**:
+>PyMISP
+
+-----
+
 #### [Autopsy and Mobile Forensic Selected Results Import](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/autopsy_import.py)
 
 Import selected browser, download, communication and application artifacts with forensic provenance.
