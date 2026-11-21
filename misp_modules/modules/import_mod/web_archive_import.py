@@ -149,15 +149,10 @@ def _import(request):
         record = _object("warc-record", identity, values)
         for index, (name, value) in enumerate(headers):
             _add(record, "http-response-header", _json({"name": name, "value": value}), index=index)
-        capture = _object(
-            "page-capture",
-            identity,
-            {
-                "url": values["target-uri"],
-                "capture-date": values["capture-date"],
-                "archive-record-id": values["record-id"],
-            },
-        )
+        capture_values = {"url": values["target-uri"], "archive-record-id": values["record-id"]}
+        if "capture-date" in values:
+            capture_values["capture-date"] = values["capture-date"]
+        capture = _object("page-capture", identity, capture_values)
         _source_reference(record, source)
         _source_reference(capture, record)
         objects.extend((record, capture))

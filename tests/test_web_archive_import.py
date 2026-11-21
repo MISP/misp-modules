@@ -15,6 +15,9 @@ from misp_modules.modules.import_mod import web_archive_import as module
 URI = "https://Example.test/web?x=%2b"
 WARC_ID = "urn:uuid:10b97942-d6e1-4db1-89e8-edaf01c25c57"
 REVISIT_ID = "urn:uuid:10b97942-d6e1-4db1-89e8-edaf01c25c58"
+VISIT_DATE = "2026-11-21T12:00:00.1234567Z"
+IDENTICAL_PROFILE = "http://netpreserve.org/warc/1.1/revisit/identical-payload-digest"
+NOT_MODIFIED_PROFILE = "http://netpreserve.org/warc/1.1/revisit/server-not-modified"
 RESPONSE = (
     b"HTTP/1.1 302 Found\r\n"
     b"Location: /next\r\n"
@@ -35,6 +38,7 @@ def warc(
     kind="response",
     uri=URI,
     id_=WARC_ID,
+    date=VISIT_DATE,
     version="1.1",
     content_type="application/http; msgtype=response",
     extra=(),
@@ -42,7 +46,7 @@ def warc(
     fields = [
         ("WARC-Type", kind),
         ("WARC-Record-ID", f"<{id_}>"),
-        ("WARC-Date", "2026-11-21T12:00:00.1234567Z"),
+        ("WARC-Date", date),
         ("WARC-Target-URI", uri),
         ("Content-Type", content_type),
         ("Content-Length", str(len(block))),
@@ -164,7 +168,12 @@ def test_warc_links_original_capture_and_headers_without_materializing_content()
 
 def test_concatenated_gzip_revisit_and_exact_original_attachment():
     first = warc(version="1.0", uri=f"<{URI}>")
-    second = warc(b"", id_=REVISIT_ID, kind="revisit", extra=[("WARC-Refers-To", f"<{WARC_ID}>")])
+    second = warc(
+        b"",
+        id_=REVISIT_ID,
+        kind="revisit",
+        extra=[("WARC-Profile", IDENTICAL_PROFILE), ("WARC-Refers-To", f"<{WARC_ID}>")],
+    )
     non_web = warc(b"sample", uri="urn:example:payload", kind="resource", content_type="text/plain")
     raw = b"".join(gzip.compress(part, mtime=0) for part in (first, second, non_web))
     result = result_for(raw, config={"include_archive": "true"})
@@ -175,6 +184,7 @@ def test_concatenated_gzip_revisit_and_exact_original_attachment():
     revisit = values(records[1])
     assert revisit["record-offset"] == str(len(first))
     assert revisit["record-type"] == "revisit"
+    assert revisit["warc-profile"] == IDENTICAL_PROFILE
     assert revisit["refers-to"] == f"<{WARC_ID}>"
     assert "http-status" not in revisit
     attachment = next(a for a in source["Attribute"] if a["object_relation"] == "attachment")
@@ -185,9 +195,67 @@ def test_concatenated_gzip_revisit_and_exact_original_attachment():
 
 
 def test_short_fractional_capture_time():
-    raw = warc().replace(b"2026-11-21T12:00:00.1234567Z", b"2026-11-21T12:00:00.1Z")
+    raw = warc(date="2026-11-21T12:00:00.1Z")
     (record,) = objects(result_for(raw), "warc-record")
     assert values(record)["capture-date"] == "2026-11-21T12:00:00.100000+00:00"
+
+
+@pytest.mark.parametrize("profile", [IDENTICAL_PROFILE, NOT_MODIFIED_PROFILE])
+def test_revisit_keeps_profile_and_referenced_capture_date_without_a_record_id(profile):
+    referred = "2016-09-19T17:20:24.123456789+00:00"
+    raw = warc(
+        b"HTTP/1.1 304 Not Modified\r\nETag: prior\r\n\r\n",
+        kind="revisit",
+        extra=[
+            ("WARC-Profile", profile),
+            ("WARC-Refers-To-Target-URI", URI),
+            ("WARC-Refers-To-Date", referred),
+        ],
+    )
+    result = result_for(raw)
+    (record,) = objects(result, "warc-record")
+    fields = values(record)
+    assert fields["warc-profile"] == profile
+    assert fields["refers-to-target-uri"] == URI
+    assert fields["refers-to-date-raw"] == referred
+    assert fields["refers-to-date"] == "2016-09-19T17:20:24.123456+00:00"
+    assert fields["http-status"] == "304"
+    assert "refers-to" not in fields
+    check_misp_objects(result)
+
+
+def test_unknown_revisit_profile_preserves_metadata_without_interpreting_its_block():
+    profile = "urn:example:revisit:custom"
+    raw = warc(b"opaque custom block", kind="revisit", version="1.0", extra=[("WARC-Profile", f"<{profile}>")])
+    (record,) = objects(result_for(raw), "warc-record")
+    assert values(record)["warc-profile"] == profile
+    assert "http-status" not in values(record)
+
+
+@pytest.mark.parametrize("extra", [[], [("WARC-Profile", "relative/profile")]])
+def test_revisit_requires_an_absolute_profile_uri(extra):
+    result = result_for(warc(b"", kind="revisit", extra=extra))
+    assert set(result) == {"error"}
+    assert "WARC-Profile" in result["error"]
+
+
+@pytest.mark.parametrize("partial", ["2016", "2016-09", "2016-09-19", "2016-09-19T17:20Z"])
+def test_reduced_precision_dates_keep_raw_values_without_inventing_capture_times(partial):
+    raw = warc(
+        b"",
+        kind="revisit",
+        date=partial,
+        extra=[("WARC-Profile", NOT_MODIFIED_PROFILE), ("WARC-Refers-To-Date", partial)],
+    )
+    result = result_for(raw)
+    (record,) = objects(result, "warc-record")
+    (capture,) = objects(result, "page-capture")
+    assert values(record)["warc-date-raw"] == partial
+    assert values(record)["refers-to-date-raw"] == partial
+    assert "capture-date" not in values(record)
+    assert "refers-to-date" not in values(record)
+    assert "capture-date" not in values(capture)
+    check_misp_objects(result)
 
 
 def test_wacz_uses_raw_members_for_hashes_and_reports_signature_scope():

@@ -97,6 +97,20 @@
       "to_ids": false,
       "ui-priority": 7
     },
+    "refers-to-date": {
+      "description": "WARC-Refers-To-Date of the earlier capture, normalized to UTC when the source includes seconds.",
+      "disable_correlation": true,
+      "misp-attribute": "datetime",
+      "to_ids": false,
+      "ui-priority": 7
+    },
+    "refers-to-date-raw": {
+      "description": "Original WARC-Refers-To-Date of the earlier capture, with the source timestamp precision.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 6
+    },
     "refers-to-target-uri": {
       "description": "Target URI reported by WARC-Refers-To-Target-URI.",
       "disable_correlation": true,
@@ -125,6 +139,13 @@
       "to_ids": false,
       "ui-priority": 5
     },
+    "warc-profile": {
+      "description": "WARC-Profile URI declaring how a revisit's record block and payload are to be interpreted. Required for revisit records.",
+      "disable_correlation": true,
+      "misp-attribute": "uri",
+      "to_ids": false,
+      "ui-priority": 8
+    },
     "warc-version": {
       "description": "Version of the WARC record format.",
       "disable_correlation": true,
@@ -139,8 +160,11 @@
   "required": [
     "record-id",
     "record-type",
-    "target-uri",
-    "capture-date"
+    "target-uri"
+  ],
+  "requiredOneOf": [
+    "capture-date",
+    "warc-date-raw"
   ],
   "uuid": "8515eb6d-4948-4fd0-a7af-f15d86a58cdc",
   "version": 1

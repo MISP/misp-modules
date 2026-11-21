@@ -6,7 +6,7 @@ import json
 import re
 import stat
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import date, datetime
 from io import BufferedReader, BytesIO
 from urllib.parse import urlsplit
 from zipfile import ZIP_DEFLATED, ZIP_STORED, ZipFile
@@ -27,6 +27,11 @@ CHUNK = 64 * 1024
 MANIFEST = "datapackage.json"
 DIGEST = "datapackage-digest.json"
 CAPTURE_TYPES = {"response", "revisit", "resource"}
+REVISIT_PROFILES = {
+    f"http://netpreserve.org/warc/{version}/revisit/{profile}"
+    for version in ("1.0", "1.1")
+    for profile in ("identical-payload-digest", "server-not-modified")
+}
 RESPONSE_HEADERS = {
     "cache-control",
     "content-encoding",
@@ -50,7 +55,10 @@ WARC_FIELDS = {
 }
 FIELD_NAME = re.compile(rb"[!#$%&'*+.^_\x60|~0-9A-Za-z-]+")
 HTTP_STATUS = re.compile(rb"HTTP/([0-9]{1,2}(?:\.[0-9]{1,2})?) ([1-5][0-9]{2})(?:[ \t].*)?")
-ISO_UTC = re.compile(r"([0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2})(?:\.([0-9]{1,9}))?Z")
+WARC_DATE = re.compile(r"[0-9]{4}(?:-[0-9]{2}(?:-[0-9]{2})?)?")
+WARC_DATETIME = re.compile(
+    r"([0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2})(?::([0-9]{2})(?:\.([0-9]+))?)?(?:Z|\+00:00)"
+)
 
 
 @dataclass
@@ -115,7 +123,15 @@ def _headers(reader, encoding, end=None):
 
 def _warc_fields(reader):
     fields = {}
-    unique = WARC_FIELDS.keys() | {"content-length", "warc-date", "warc-record-id", "warc-target-uri", "warc-type"}
+    unique = WARC_FIELDS.keys() | {
+        "content-length",
+        "warc-date",
+        "warc-profile",
+        "warc-record-id",
+        "warc-refers-to-date",
+        "warc-target-uri",
+        "warc-type",
+    }
     for name, value in _headers(reader, "utf-8"):
         if name not in unique:
             continue
@@ -129,6 +145,13 @@ def _warc_fields(reader):
 
 def _uri(value):
     return value[1:-1] if value.startswith("<") and value.endswith(">") else value
+
+
+def _absolute_uri(value, field):
+    uri = _uri(value)
+    if any(char.isspace() for char in uri) or not urlsplit(uri).scheme:
+        raise ValueError(f"{field} requires an absolute URI.")
+    return uri
 
 
 def _target(value):
@@ -145,24 +168,45 @@ def _target(value):
     return raw
 
 
-def _metadata(fields, reader, end):
-    record_id = _uri(fields.get("warc-record-id", ""))
-    if not record_id or not urlsplit(record_id).scheme or any(char.isspace() for char in record_id):
-        raise ValueError("Capture record needs a WARC-Record-ID URI.")
-    date = fields.get("warc-date", "")
-    match = ISO_UTC.fullmatch(date)
+def _utc_timestamp(value, field):
+    # Validate reduced-precision dates without publishing an assumed month, day or second.
+    if WARC_DATE.fullmatch(value):
+        date.fromisoformat(value + "-01" * (2 - value.count("-")))
+        return None
+    match = WARC_DATETIME.fullmatch(value)
     if not match:
-        raise ValueError("Capture record needs a UTC WARC-Date.")
-    fraction = (match[2] or "").ljust(6, "0")[:6]
+        raise ValueError(f"{field} requires a valid UTC WARC date.")
+    if match[2] is None:
+        datetime.fromisoformat(match[1] + "+00:00")
+        return None
+    fraction = (match[3] or "").ljust(6, "0")[:6]
+    return datetime.fromisoformat(f"{match[1]}:{match[2]}.{fraction}+00:00").isoformat()
+
+
+def _metadata(fields, reader, end):
+    captured = fields.get("warc-date", "")
     values = {
-        "record-id": record_id,
-        "capture-date": datetime.fromisoformat(f"{match[1]}.{fraction}+00:00").isoformat(),
-        "warc-date-raw": date,
+        "record-id": _absolute_uri(fields.get("warc-record-id", ""), "WARC-Record-ID"),
+        "warc-date-raw": captured,
     }
+    if timestamp := _utc_timestamp(captured, "WARC-Date"):
+        values["capture-date"] = timestamp
     values.update({relation: fields[key] for key, relation in WARC_FIELDS.items() if fields.get(key)})
+    kind = fields["warc-type"]
+    can_read_http = kind == "response"
+    if kind == "revisit":
+        profile = _absolute_uri(fields.get("warc-profile", ""), "WARC-Profile")
+        values["warc-profile"] = profile
+        can_read_http = profile in REVISIT_PROFILES
+        if "warc-refers-to-date" in fields:
+            referred_date = fields["warc-refers-to-date"]
+            values["refers-to-date-raw"] = referred_date
+            if timestamp := _utc_timestamp(referred_date, "WARC-Refers-To-Date"):
+                values["refers-to-date"] = timestamp
+
     http_headers = []
     block_type = fields.get("content-type", "").partition(";")[0].strip().lower()
-    if fields["warc-type"] != "resource" and reader.offset < end and block_type in {"application/http", "message/http"}:
+    if can_read_http and reader.offset < end and block_type in {"application/http", "message/http"}:
         status = HTTP_STATUS.fullmatch(_line(reader, end))
         if not status:
             raise ValueError("Invalid archived HTTP response status line.")

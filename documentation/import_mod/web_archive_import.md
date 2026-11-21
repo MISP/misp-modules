@@ -10,13 +10,17 @@ It reads the uploaded bytes offline.
 
 The importer creates a `warc-record` and linked `page-capture` for each HTTP(S)
 response, revisit, or resource record. It preserves the recorded URL, record ID,
-UTC capture time and original date text, WARC block length, and uncompressed
-byte offset. WACZ records also carry the ZIP member path. Revisit references,
-truncation markers, and declared WARC digests are retained when present.
+original date text, WARC block length, and uncompressed byte offset. WACZ records
+also carry the ZIP member path. Revisit records preserve the required profile URI
+and any supplied reference ID, target URI, and date for the earlier capture.
+Dates that include seconds also get a normalized UTC value. The raw date retains
+the source precision. Truncation markers and declared WARC digests are retained
+when present.
 Request records and other WARC record types contribute to the scanned count.
 
-Where the WARC contains an archived HTTP response header block, the importer
-retains the status, HTTP version, and selected headers. These include content
+The importer retains status, HTTP version, and selected headers from archived
+response blocks and standard revisit profiles. Revisit records with other
+profiles retain their WARC metadata. Selected HTTP headers include content
 type, size and encoding, redirect location, date, last modification, ETag,
 language, transfer encoding, cache controls, and `Vary`. Each header is a
 separate `{name, value}` JSON attribute. Bodies, request headers, and cookies
