@@ -1,0 +1,132 @@
+{
+  "attributes": {
+    "account-id": {
+      "description": "Containing cloud account identifier, when known from the event context.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "alternate-id": {
+      "description": "Alternate identifier for this same resource.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "backed-up": {
+      "description": "Whether a backup is enabled, when explicitly reported.",
+      "disable_correlation": true,
+      "misp-attribute": "boolean",
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "created": {
+      "description": "Resource creation time as an ISO 8601 datetime; convert source epoch milliseconds when necessary.",
+      "disable_correlation": true,
+      "misp-attribute": "datetime",
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "criticality": {
+      "description": "Operational criticality reported for this resource.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "hostname": {
+      "description": "Fully qualified resource hostname.",
+      "disable_correlation": false,
+      "misp-attribute": "hostname",
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "ip-address": {
+      "description": "Address assigned to the resource; the attribute type does not assert traffic direction.",
+      "disable_correlation": false,
+      "misp-attribute": "ip-dst",
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "modified": {
+      "description": "Resource modification time as an ISO 8601 datetime.",
+      "disable_correlation": true,
+      "misp-attribute": "datetime",
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "name": {
+      "description": "Resource name as supplied by the source.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "namespace": {
+      "description": "Namespace that scopes the resource identifier or name.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "partition": {
+      "description": "Provider partition containing the resource.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "provider": {
+      "description": "Provider hosting this resource; use cloud.provider only when the source identifies the same provider.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "region": {
+      "description": "Region hosting the resource.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "resource-id": {
+      "description": "Provider-assigned resource identifier, for example an ARN or Azure resource ID.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "role": {
+      "description": "Resource role in the observed activity, such as Target, Actor, Affected, or Related.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "type": {
+      "description": "Provider-specific resource type.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "zone": {
+      "description": "Availability zone hosting the resource.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 1
+    }
+  },
+  "description": "An identified cloud resource involved in an investigation, including provider scope, lifecycle and its role in the observed activity. Based on OCSF 1.9.0: https://schema.ocsf.io/1.9.0/objects/resource_details, https://schema.ocsf.io/1.9.0/objects/cloud.",
+  "meta-category": "misc",
+  "name": "cloud-resource",
+  "requiredOneOf": [
+    "resource-id",
+    "name"
+  ],
+  "uuid": "8d4c07a5-f952-4da7-bb82-430ff6c73d92",
+  "version": 1
+}
