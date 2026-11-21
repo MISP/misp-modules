@@ -1,0 +1,49 @@
+{
+  "attributes": {
+    "account-id": {
+      "description": "Account in which the role is defined, including a cross-account role's account.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "alternate-id": {
+      "description": "Alternate role identifier, such as an LDAP distinguished name.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "name": {
+      "description": "Role display name.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "privilege": {
+      "description": "One privilege granted by this role per attribute.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "role-id": {
+      "description": "Role identifier, such as a role ARN or security identifier, scoped to its authority.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 1
+    }
+  },
+  "description": "An IAM role and its assigned privileges, distinct from the principal assuming it or a particular authenticated session. Based on OCSF 1.9.0: https://schema.ocsf.io/1.9.0/objects/iam_role.",
+  "meta-category": "misc",
+  "name": "iam-role",
+  "requiredOneOf": [
+    "role-id",
+    "name"
+  ],
+  "uuid": "fc4c162f-2cd8-4494-93df-77fda2ab0a2e",
+  "version": 1
+}
