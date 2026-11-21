@@ -256,6 +256,34 @@ Import Hayabusa timelines and Chainsaw hunt results as unreviewed detections wit
 
 -----
 
+#### [File and Media Metadata Import](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/file_metadata_import.py)
+
+Import metadata from an uploaded file without an external service.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/file_metadata_import.py)]
+
+- **features**:
+>Reads documents, images, audio and video with ExifTool. Preserves grouped raw parser values and unverified timestamp and location claims. Correlates selected names, identifiers and software across files. Optional embedded stream scanning and original file attachment. See the [usage guide](https://github.com/MISP/misp-modules/blob/main/documentation/expansion/file_metadata.md).
+
+- **data-source**:
+>internal
+
+- **input**:
+>An uploaded file or base64 file data.
+
+- **output**:
+>A source file object and linked file-metadata object.
+
+- **references**:
+> - https://exiftool.org/exiftool_pod.html
+> - https://exiftool.org/TagNames/
+
+- **requirements**:
+> - PyMISP
+> - ExifTool 13.00 or later on PATH
+> - Perl Archive::Zip for Office Open XML and OpenDocument metadata
+
+-----
+
 #### [GoAML Import](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/goamlimport.py)
 
 <img src=../logos/goAML.jpg height=60>

@@ -1193,6 +1193,37 @@ Module to access Farsight DNSDB Passive DNS.
 
 -----
 
+#### [File and Media Metadata](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/file_metadata.py)
+
+Extract selected file, document and media metadata locally with ExifTool.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/file_metadata.py)]
+
+- **features**:
+>Preserves grouped EXIF, XMP, PDF, Office and media-container tags and raw parser values. Records the ExifTool version and SHA-256, flags embedded time and location claims for corroboration and links the results to the original attachment. Correlates selected names, identifiers and software across files. Optional embedded stream scanning. See the [usage guide](https://github.com/MISP/misp-modules/blob/main/documentation/expansion/file_metadata.md).
+
+- **config**:
+>scan_embedded
+
+- **data-source**:
+>internal
+
+- **input**:
+>A MISP attachment with base64 data.
+
+- **output**:
+>Linked file and file-metadata objects.
+
+- **references**:
+> - https://exiftool.org/exiftool_pod.html
+> - https://exiftool.org/TagNames/
+
+- **requirements**:
+> - PyMISP
+> - ExifTool 13.00 or later on PATH
+> - Perl Archive::Zip for Office Open XML and OpenDocument metadata
+
+-----
+
 #### [GCVE CPE](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/gcve_cpe.py)
 
 Expand CPE attributes with GCVE CPE catalog metadata, package mappings and vulnerability references.
@@ -5264,6 +5295,34 @@ Import Hayabusa timelines and Chainsaw hunt results as unreviewed detections wit
 
 - **requirements**:
 >PyMISP
+
+-----
+
+#### [File and Media Metadata Import](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/file_metadata_import.py)
+
+Import metadata from an uploaded file without an external service.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/file_metadata_import.py)]
+
+- **features**:
+>Reads documents, images, audio and video with ExifTool. Preserves grouped raw parser values and unverified timestamp and location claims. Correlates selected names, identifiers and software across files. Optional embedded stream scanning and original file attachment. See the [usage guide](https://github.com/MISP/misp-modules/blob/main/documentation/expansion/file_metadata.md).
+
+- **data-source**:
+>internal
+
+- **input**:
+>An uploaded file or base64 file data.
+
+- **output**:
+>A source file object and linked file-metadata object.
+
+- **references**:
+> - https://exiftool.org/exiftool_pod.html
+> - https://exiftool.org/TagNames/
+
+- **requirements**:
+> - PyMISP
+> - ExifTool 13.00 or later on PATH
+> - Perl Archive::Zip for Office Open XML and OpenDocument metadata
 
 -----
 

@@ -1,0 +1,152 @@
+{
+  "attributes": {
+    "author": {
+      "description": "An unverified author, creator or artist name embedded in the source file.",
+      "disable_correlation": false,
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 9
+    },
+    "binary-tag-count": {
+      "description": "Number of binary metadata placeholders skipped by the extractor.",
+      "disable_correlation": true,
+      "misp-attribute": "counter",
+      "to_ids": false,
+      "ui-priority": 6
+    },
+    "detected-format": {
+      "description": "File format detected by the parser.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 8
+    },
+    "device-owner": {
+      "description": "An unverified device owner name embedded in the source file.",
+      "disable_correlation": false,
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 9
+    },
+    "document-id": {
+      "description": "An unverified document or original-document identifier embedded in the source file.",
+      "disable_correlation": false,
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 9
+    },
+    "extraction-profile": {
+      "description": "Parser option profile for the extraction.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 8
+    },
+    "last-modified-by": {
+      "description": "An unverified name recorded as the last editor in the source file.",
+      "disable_correlation": false,
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 9
+    },
+    "lens-serial-number": {
+      "description": "An unverified lens serial number embedded in the source file.",
+      "disable_correlation": false,
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 9
+    },
+    "location-claim": {
+      "description": "Unverified embedded location claim with the source tag name and raw value.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 9
+    },
+    "metadata-tag": {
+      "description": "JSON record containing the source tag name and its raw parser value.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 6
+    },
+    "omitted-tag-count": {
+      "description": "Number of extracted tags omitted due to result limits.",
+      "disable_correlation": true,
+      "misp-attribute": "counter",
+      "to_ids": false,
+      "ui-priority": 7
+    },
+    "parser": {
+      "description": "Name of the parser used to extract the metadata.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 9
+    },
+    "parser-version": {
+      "description": "Version of the metadata parser.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 9
+    },
+    "serial-number": {
+      "description": "An unverified camera or device serial number embedded in the source file.",
+      "disable_correlation": false,
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 9
+    },
+    "software": {
+      "description": "An embedded name or version of software reported to have created, processed or encoded the source file.",
+      "disable_correlation": false,
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 7
+    },
+    "source-sha256": {
+      "description": "SHA-256 of the exact source bytes processed by the parser.",
+      "disable_correlation": true,
+      "misp-attribute": "sha256",
+      "to_ids": false,
+      "ui-priority": 10
+    },
+    "timestamp-claim": {
+      "description": "Unverified embedded time or date claim with the source tag name, raw value, precision and timezone status.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 9
+    },
+    "warning": {
+      "description": "A parser diagnostic or extraction limitation.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 8
+    }
+  },
+  "description": "Metadata extracted from a source file with parser provenance, correlation fields and unverified embedded claims.",
+  "meta-category": "file",
+  "name": "file-metadata",
+  "required": [
+    "parser",
+    "parser-version",
+    "extraction-profile",
+    "source-sha256"
+  ],
+  "uuid": "ab3b8e6a-482f-4c77-9b24-a76060c44808",
+  "version": 1
+}

@@ -1190,6 +1190,37 @@ Module to access Farsight DNSDB Passive DNS.
 
 -----
 
+#### [File and Media Metadata](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/file_metadata.py)
+
+Extract selected file, document and media metadata locally with ExifTool.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/file_metadata.py)]
+
+- **features**:
+>Preserves grouped EXIF, XMP, PDF, Office and media-container tags and raw parser values. Records the ExifTool version and SHA-256, flags embedded time and location claims for corroboration and links the results to the original attachment. Correlates selected names, identifiers and software across files. Optional embedded stream scanning. See the [usage guide](https://github.com/MISP/misp-modules/blob/main/documentation/expansion/file_metadata.md).
+
+- **config**:
+>scan_embedded
+
+- **data-source**:
+>internal
+
+- **input**:
+>A MISP attachment with base64 data.
+
+- **output**:
+>Linked file and file-metadata objects.
+
+- **references**:
+> - https://exiftool.org/exiftool_pod.html
+> - https://exiftool.org/TagNames/
+
+- **requirements**:
+> - PyMISP
+> - ExifTool 13.00 or later on PATH
+> - Perl Archive::Zip for Office Open XML and OpenDocument metadata
+
+-----
+
 #### [GCVE CPE](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/gcve_cpe.py)
 
 Expand CPE attributes with GCVE CPE catalog metadata, package mappings and vulnerability references.
