@@ -54,6 +54,7 @@ For more information: [Extending MISP with Python modules](https://www.misp-proj
 * [EUPI Lookup](https://misp.github.io/misp-modules/expansion/#eupi-lookup) - A module to query the Phishing Initiative service (https://phishing-initiative.lu).
 * [URL Components Extractor](https://misp.github.io/misp-modules/expansion/#url-components-extractor) - Extract URL components
 * [Farsight DNSDB Lookup](https://misp.github.io/misp-modules/expansion/#farsight-dnsdb-lookup) - Module to access Farsight DNSDB Passive DNS.
+* [File and Media Metadata](https://misp.github.io/misp-modules/expansion/#file-and-media-metadata) - Extract selected file, document and media metadata locally with ExifTool.
 * [GCVE CPE](https://misp.github.io/misp-modules/expansion/#gcve-cpe) - Expand CPE attributes with GCVE CPE catalog metadata, package mappings and vulnerability references.
 * [GeoIP ASN Lookup](https://misp.github.io/misp-modules/expansion/#geoip-asn-lookup) - Query a local copy of the MaxMind GeoLite2 ASN database (MMDB format)
 * [GeoIP City Lookup](https://misp.github.io/misp-modules/expansion/#geoip-city-lookup) - An expansion module to query a local copy of MaxMind GeoIP2 or GeoLite2 database with an IP address, in order to get information about the city where it is located.
@@ -210,6 +211,7 @@ For more information: [Extending MISP with Python modules](https://www.misp-proj
 * [Email Import](https://misp.github.io/misp-modules/import_mod/#email-import) - Email import module for MISP
 * [Hayabusa and Chainsaw Findings Import](https://misp.github.io/misp-modules/import_mod/#hayabusa-and-chainsaw-findings-import) - Import Hayabusa timelines and Chainsaw hunt results as unreviewed detections with linked Windows event context.
 
+* [File and Media Metadata Import](https://misp.github.io/misp-modules/import_mod/#file-and-media-metadata-import) - Import metadata from an uploaded file without an external service.
 * [GoAML Import](https://misp.github.io/misp-modules/import_mod/#goaml-import) - Module to import MISP objects about financial transactions from GoAML files.
 * [Import Blueprint](https://misp.github.io/misp-modules/import_mod/#import-blueprint) - Generic blueprint to be copy-pasted to quickly boostrap creation of import module.
 * [Joe Sandbox Import](https://misp.github.io/misp-modules/import_mod/#joe-sandbox-import) - A module to import data from a Joe Sandbox analysis json report.
