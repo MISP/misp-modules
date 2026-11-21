@@ -121,7 +121,7 @@ def assert_valid(result):
 
 
 def test_entra_graph_page_maps_time_actor_and_tenants_with_source_metadata():
-    record = sign_in(TimeGenerated="2026-11-01T10:00:37.1234567Z")
+    record = sign_in(TimeGenerated="2026-11-01T10:00:37.1234567Z", IngestionTime="2026-11-01T10:04:09.8765432Z")
     raw = json.dumps({"value": [record], "@odata.nextLink": "https://example.test/PRIVATE"}).encode()
     result = result_for(raw, filename=r"C:\audit\sign-ins.json")
     (event,) = objects(result)
@@ -132,8 +132,10 @@ def test_entra_graph_page_maps_time_actor_and_tenants_with_source_metadata():
     assert fields["record-id"] == RECORD
     assert fields["operation"] == "Sign-in"
     assert fields["event-time"] == event["first_seen"] == event["last_seen"] == "2026-11-01T10:00:00+00:00"
-    assert fields["ingestion-time"] == "2026-11-01T10:00:37.123456+00:00"
-    assert fields["ingestion-time-raw"] == record["TimeGenerated"]
+    assert fields["time-generated"] == "2026-11-01T10:00:37.123456+00:00"
+    assert fields["time-generated-raw"] == record["TimeGenerated"]
+    assert fields["ingestion-time"] == "2026-11-01T10:04:09.876543+00:00"
+    assert fields["ingestion-time-raw"] == record["IngestionTime"]
     assert fields["tenant-id"] == fields["resource-tenant-id"] == TENANT
     assert fields["home-tenant-id"] == OTHER_TENANT
     assert fields["actor-id"] == record["userId"]
@@ -155,6 +157,13 @@ def test_entra_graph_page_maps_time_actor_and_tenants_with_source_metadata():
     assert result["warnings"]
     assert "PRIVATE" not in json.dumps(result)
     assert_valid(result)
+
+
+def test_time_generated_alone_does_not_supply_ingestion_time():
+    (event,) = objects(result_for(sign_in(TimeGenerated="2026-11-01T10:00:37Z")))
+    fields = values(event)
+    assert fields["time-generated"] == "2026-11-01T10:00:37+00:00"
+    assert "ingestion-time" not in fields and "ingestion-time-raw" not in fields
 
 
 def test_entra_directory_audit_keeps_target_groups_and_original_precision():

@@ -318,10 +318,11 @@ def _sign_in(record):
             raise ValueError("status.errorCode must be an integer.")
         values["result-code"] = str(code)
         values["outcome"] = "success" if code == 0 else "failure"
-    if record.get("TimeGenerated") not in (None, ""):
-        raw = _text(record["TimeGenerated"], "TimeGenerated")
-        values["ingestion-time-raw"] = raw
-        values["ingestion-time"] = _time(raw, "TimeGenerated").isoformat()
+    for field, relation in (("TimeGenerated", "time-generated"), ("IngestionTime", "ingestion-time")):
+        if record.get(field) not in (None, ""):
+            raw = _text(record[field], field)
+            values[relation + "-raw"] = raw
+            values[relation] = _time(raw, field).isoformat()
     if record.get("isInteractive") is not None:
         if not isinstance(record["isInteractive"], bool):
             raise ValueError("isInteractive must be a JSON boolean.")

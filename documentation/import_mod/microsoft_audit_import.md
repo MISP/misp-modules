@@ -31,8 +31,10 @@ Entra timestamps require an explicit timezone. A timezone-free Purview
 `CreationTime` uses UTC, as specified in the Microsoft schema. The normalized
 UTC time is used for the MISP timeline. Original timestamps retain all source
 precision, including the seventh fractional digit in Microsoft Graph dates.
-When a sign-in record explicitly includes Log Analytics `TimeGenerated`, the
-importer records it separately as ingestion time.
+An enriched sign-in record can include Log Analytics `TimeGenerated` as its
+reported record timestamp. For ingestion time, include `IngestionTime` from an
+explicit `ingestion_time()` query projection. Both fields retain their original
+values and are normalized independently. [Azure Monitor timestamp definitions](https://learn.microsoft.com/en-us/azure/azure-monitor/logs/data-ingestion-time)
 
 Purview `ResultStatus` is retained as reported. For Entra STS logon records, an
 explicit `LogonError` can establish a reported failure. HTTP success in

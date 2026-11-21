@@ -71,14 +71,14 @@
       "ui-priority": 6
     },
     "ingestion-time": {
-      "description": "Explicit Microsoft Log Analytics TimeGenerated for a sign-in, normalized to UTC.",
+      "description": "Explicit Azure Monitor ingestion_time() for a sign-in, normalized to UTC.",
       "disable_correlation": true,
       "misp-attribute": "datetime",
       "to_ids": false,
       "ui-priority": 7
     },
     "ingestion-time-raw": {
-      "description": "Original sign-in ingestion timestamp, including any precision beyond microseconds.",
+      "description": "Original ingestion_time() value supplied with the sign-in.",
       "disable_correlation": true,
       "misp-attribute": "text",
       "to_ids": false,
@@ -229,6 +229,20 @@
       "misp-attribute": "text",
       "to_ids": false,
       "ui-priority": 8
+    },
+    "time-generated": {
+      "description": "Azure Monitor TimeGenerated as reported for a sign-in, normalized to UTC.",
+      "disable_correlation": true,
+      "misp-attribute": "datetime",
+      "to_ids": false,
+      "ui-priority": 7
+    },
+    "time-generated-raw": {
+      "description": "Original TimeGenerated value supplied with the sign-in.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 4
     },
     "workload": {
       "description": "Microsoft workload or directory service reporting the audit record.",
