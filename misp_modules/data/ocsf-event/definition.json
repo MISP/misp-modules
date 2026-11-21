@@ -1,0 +1,467 @@
+{
+  "attributes": {
+    "activity-id": {
+      "description": "Source-declared activity ID within the OCSF event class.",
+      "disable_correlation": true,
+      "misp-attribute": "counter",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "activity-name": {
+      "description": "Source-declared activity name.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 7
+    },
+    "category-id": {
+      "description": "OCSF event category UID.",
+      "disable_correlation": true,
+      "misp-attribute": "counter",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "category-name": {
+      "description": "Source-declared OCSF event category name.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 7
+    },
+    "class-id": {
+      "description": "OCSF event class UID.",
+      "disable_correlation": true,
+      "misp-attribute": "counter",
+      "to_ids": false,
+      "ui-priority": 9
+    },
+    "class-name": {
+      "description": "Source-declared OCSF event class name.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 7
+    },
+    "cloud-account-id": {
+      "description": "Cloud account identifier reported in the OCSF event.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 7
+    },
+    "cloud-region": {
+      "description": "Cloud region reported in the OCSF event.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 7
+    },
+    "command-line": {
+      "description": "Process command line reported in the OCSF event.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 7
+    },
+    "destination-ip": {
+      "description": "IP address reported for a destination endpoint.",
+      "disable_correlation": false,
+      "misp-attribute": "ip-dst",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 7
+    },
+    "domain": {
+      "description": "Domain name reported in the OCSF event.",
+      "disable_correlation": false,
+      "misp-attribute": "domain",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 7
+    },
+    "email-address": {
+      "description": "Account or observable email address without a mail flow direction.",
+      "disable_correlation": true,
+      "misp-attribute": "email-dst",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 7
+    },
+    "end-time": {
+      "description": "Reported end of the activity or aggregation window normalized to UTC.",
+      "disable_correlation": true,
+      "misp-attribute": "datetime",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "event-code": {
+      "description": "Producer-assigned event code.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 7
+    },
+    "event-id": {
+      "description": "OCSF event identifier from metadata.uid.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 7
+    },
+    "event-sha256": {
+      "description": "SHA-256 of the original event's UTF-8 JSON text.",
+      "disable_correlation": true,
+      "misp-attribute": "sha256",
+      "to_ids": false,
+      "ui-priority": 7
+    },
+    "event-time": {
+      "description": "Primary event timestamp normalized to UTC.",
+      "disable_correlation": true,
+      "misp-attribute": "datetime",
+      "to_ids": false,
+      "ui-priority": 9
+    },
+    "file-name": {
+      "description": "File name reported in the OCSF event.",
+      "disable_correlation": true,
+      "misp-attribute": "filename",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 7
+    },
+    "file-path": {
+      "description": "File path reported in the OCSF event.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 7
+    },
+    "finding-id": {
+      "description": "Source finding identifier where the event includes finding information.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 7
+    },
+    "finding-title": {
+      "description": "Source finding title where the event includes finding information.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 7
+    },
+    "hostname": {
+      "description": "Host name reported in the OCSF event.",
+      "disable_correlation": false,
+      "misp-attribute": "hostname",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 7
+    },
+    "ip-address": {
+      "description": "IP address reported without a direction. The MISP type supports value correlation.",
+      "disable_correlation": false,
+      "misp-attribute": "ip-dst",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 7
+    },
+    "logged-time": {
+      "description": "Producer-reported logging time normalized to UTC.",
+      "disable_correlation": true,
+      "misp-attribute": "datetime",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "mac-address": {
+      "description": "MAC address reported in the OCSF event.",
+      "disable_correlation": false,
+      "misp-attribute": "mac-address",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 7
+    },
+    "md5": {
+      "description": "MD5 file fingerprint reported in the OCSF event.",
+      "disable_correlation": false,
+      "misp-attribute": "md5",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 7
+    },
+    "message": {
+      "description": "Event message reported by the producer.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 7
+    },
+    "original-event-id": {
+      "description": "Original producer event identifier from metadata.original_event_uid.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 7
+    },
+    "process-name": {
+      "description": "Process name reported in the OCSF event.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 7
+    },
+    "product-name": {
+      "description": "Name of the reporting product.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 7
+    },
+    "product-version": {
+      "description": "Version of the reporting product.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 7
+    },
+    "raw-event": {
+      "description": "Original JSON text of the event, from the opening brace through the closing brace.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "raw-event-part": {
+      "description": "Numbered JSON fragment of the original event. Concatenate the text fields in order by part.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "record-index": {
+      "description": "One-based position of the OCSF event within the imported source.",
+      "disable_correlation": true,
+      "misp-attribute": "counter",
+      "to_ids": false,
+      "ui-priority": 9
+    },
+    "resource-id": {
+      "description": "Resource identifier declared as an OCSF observable.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 7
+    },
+    "schema-version": {
+      "description": "OCSF schema version declared by the producer.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 7
+    },
+    "severity": {
+      "description": "Severity label reported by the producer.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 7
+    },
+    "severity-id": {
+      "description": "Severity ID reported by the producer.",
+      "disable_correlation": true,
+      "misp-attribute": "counter",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "sha1": {
+      "description": "SHA1 file fingerprint reported in the OCSF event.",
+      "disable_correlation": false,
+      "misp-attribute": "sha1",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 7
+    },
+    "sha224": {
+      "description": "SHA224 file fingerprint reported in the OCSF event.",
+      "disable_correlation": false,
+      "misp-attribute": "sha224",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 7
+    },
+    "sha256": {
+      "description": "SHA256 file fingerprint reported in the OCSF event.",
+      "disable_correlation": false,
+      "misp-attribute": "sha256",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 7
+    },
+    "sha3-224": {
+      "description": "SHA3-224 file fingerprint reported in the OCSF event.",
+      "disable_correlation": false,
+      "misp-attribute": "sha3-224",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 7
+    },
+    "sha3-256": {
+      "description": "SHA3-256 file fingerprint reported in the OCSF event.",
+      "disable_correlation": false,
+      "misp-attribute": "sha3-256",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 7
+    },
+    "sha3-384": {
+      "description": "SHA3-384 file fingerprint reported in the OCSF event.",
+      "disable_correlation": false,
+      "misp-attribute": "sha3-384",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 7
+    },
+    "sha3-512": {
+      "description": "SHA3-512 file fingerprint reported in the OCSF event.",
+      "disable_correlation": false,
+      "misp-attribute": "sha3-512",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 7
+    },
+    "sha384": {
+      "description": "SHA384 file fingerprint reported in the OCSF event.",
+      "disable_correlation": false,
+      "misp-attribute": "sha384",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 7
+    },
+    "sha512": {
+      "description": "SHA512 file fingerprint reported in the OCSF event.",
+      "disable_correlation": false,
+      "misp-attribute": "sha512",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 7
+    },
+    "sha512/224": {
+      "description": "SHA512/224 file fingerprint reported in the OCSF event.",
+      "disable_correlation": false,
+      "misp-attribute": "sha512/224",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 7
+    },
+    "sha512/256": {
+      "description": "SHA512/256 file fingerprint reported in the OCSF event.",
+      "disable_correlation": false,
+      "misp-attribute": "sha512/256",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 7
+    },
+    "source-ip": {
+      "description": "IP address reported for a source endpoint.",
+      "disable_correlation": false,
+      "misp-attribute": "ip-src",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 7
+    },
+    "source-sha256": {
+      "description": "SHA-256 of the exact imported file bytes.",
+      "disable_correlation": true,
+      "misp-attribute": "sha256",
+      "to_ids": false,
+      "ui-priority": 8
+    },
+    "start-time": {
+      "description": "Reported beginning of the activity or aggregation window normalized to UTC.",
+      "disable_correlation": true,
+      "misp-attribute": "datetime",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "status": {
+      "description": "Status label reported by the producer.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 7
+    },
+    "status-id": {
+      "description": "Status ID reported by the producer.",
+      "disable_correlation": true,
+      "misp-attribute": "counter",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "tenant-id": {
+      "description": "Tenant identifier reported by the producer.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 7
+    },
+    "type-id": {
+      "description": "OCSF event type UID.",
+      "disable_correlation": true,
+      "misp-attribute": "counter",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "url": {
+      "description": "HTTP or HTTPS URL reported in the OCSF event.",
+      "disable_correlation": false,
+      "misp-attribute": "url",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 7
+    },
+    "user-id": {
+      "description": "User identifier reported in the OCSF event.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 7
+    },
+    "user-name": {
+      "description": "User name reported in the OCSF event.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 7
+    },
+    "vendor-name": {
+      "description": "Name of the reporting product's vendor.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 7
+    }
+  },
+  "description": "A producer-reported Open Cybersecurity Schema Framework event with classification, provenance, original JSON evidence and selected observables.",
+  "meta-category": "misc",
+  "name": "ocsf-event",
+  "required": [
+    "class-id",
+    "record-index",
+    "source-sha256",
+    "event-sha256"
+  ],
+  "requiredOneOf": [
+    "raw-event",
+    "raw-event-part"
+  ],
+  "uuid": "8f926b2b-cc3f-446a-a036-6165480a49ce",
+  "version": 1
+}
