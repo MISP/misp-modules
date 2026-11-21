@@ -1,0 +1,266 @@
+{
+  "attributes": {
+    "actor-id": {
+      "description": "Source identifier of the user, principal or other identity associated with the activity.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 8
+    },
+    "actor-upn": {
+      "description": "User principal name supplied by the source.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 6
+    },
+    "application-id": {
+      "description": "Application registration ID reported by the source.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 8
+    },
+    "application-name": {
+      "description": "Application display name reported by the source.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 6
+    },
+    "category": {
+      "description": "Directory audit category supplied by Microsoft Entra.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 6
+    },
+    "conditional-access-status": {
+      "description": "Conditional Access status reported for the Entra sign-in.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 7
+    },
+    "correlation-id": {
+      "description": "Correlation identifier explicitly present in the audit record.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 8
+    },
+    "event-time": {
+      "description": "The source event timestamp normalized to UTC.",
+      "disable_correlation": true,
+      "misp-attribute": "datetime",
+      "to_ids": false,
+      "ui-priority": 10
+    },
+    "event-time-raw": {
+      "description": "Original event timestamp, including any precision beyond microseconds.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 4
+    },
+    "home-tenant-id": {
+      "description": "Home tenant reported for the Entra sign-in.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 6
+    },
+    "ingestion-time": {
+      "description": "Explicit Azure Monitor ingestion_time() for a sign-in, normalized to UTC.",
+      "disable_correlation": true,
+      "misp-attribute": "datetime",
+      "to_ids": false,
+      "ui-priority": 7
+    },
+    "ingestion-time-raw": {
+      "description": "Original ingestion_time() value supplied with the sign-in.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 4
+    },
+    "interactive": {
+      "description": "Whether Microsoft reports that the sign-in was interactive.",
+      "disable_correlation": true,
+      "misp-attribute": "boolean",
+      "to_ids": false,
+      "ui-priority": 6
+    },
+    "log-type": {
+      "description": "Microsoft log source represented by this observation.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 10,
+      "values_list": [
+        "entra-sign-in",
+        "entra-directory-audit",
+        "purview-unified-audit"
+      ]
+    },
+    "operation": {
+      "description": "Reported audit operation or Entra sign-in.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 10
+    },
+    "operation-type": {
+      "description": "Directory audit operation type supplied by Microsoft Entra.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 6
+    },
+    "outcome": {
+      "description": "Normalized result when the source provides enough context to interpret the reported activity outcome.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 8,
+      "values_list": [
+        "success",
+        "failure",
+        "timeout",
+        "partial-success",
+        "unknown"
+      ]
+    },
+    "record-id": {
+      "description": "Native audit record identifier in the named log and reporting tenant.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 10
+    },
+    "record-type": {
+      "description": "Native workload record type from the Unified Audit Log.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 6
+    },
+    "resource-id": {
+      "description": "Reported principal resource or workload ObjectId.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 8
+    },
+    "resource-name": {
+      "description": "Resource display name reported by the source.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 6
+    },
+    "resource-tenant-id": {
+      "description": "Resource tenant reported for the Entra sign-in.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 6
+    },
+    "result-code": {
+      "description": "Numeric status error code from an Entra sign-in, recorded as exact text.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 8
+    },
+    "result-status": {
+      "description": "Native result text. The source and workload determine its meaning.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 8
+    },
+    "review-status": {
+      "description": "Analyst review status of the imported observation.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 6
+    },
+    "service-principal-id": {
+      "description": "Service principal object ID, distinct from its application registration ID.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 8
+    },
+    "session-id": {
+      "description": "Session identifier explicitly present in the audit record.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 8
+    },
+    "source-address": {
+      "description": "Original client or source address, which may include a port or proxy address.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 7
+    },
+    "source-ip": {
+      "description": "Validated IP address from the reported source address.",
+      "disable_correlation": true,
+      "misp-attribute": "ip-src",
+      "to_ids": false,
+      "ui-priority": 8
+    },
+    "target-resource": {
+      "description": "One JSON object with selected ID, type, name and user principal name for a directory audit target.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 7
+    },
+    "tenant-id": {
+      "description": "Reporting or collecting Microsoft tenant identifier.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 8
+    },
+    "time-generated": {
+      "description": "Azure Monitor TimeGenerated as reported for a sign-in, normalized to UTC.",
+      "disable_correlation": true,
+      "misp-attribute": "datetime",
+      "to_ids": false,
+      "ui-priority": 7
+    },
+    "time-generated-raw": {
+      "description": "Original TimeGenerated value supplied with the sign-in.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 4
+    },
+    "workload": {
+      "description": "Microsoft workload or directory service reporting the audit record.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 7
+    }
+  },
+  "description": "One Microsoft Entra sign-in or directory audit record or Microsoft Purview Unified Audit Log record. Link the originating export and tenant context through object references.",
+  "meta-category": "misc",
+  "name": "microsoft-audit-event",
+  "required": [
+    "record-id",
+    "log-type",
+    "operation",
+    "event-time"
+  ],
+  "uuid": "7aeafc08-ccbd-47d7-b7a4-d566e13cf935",
+  "version": 1
+}

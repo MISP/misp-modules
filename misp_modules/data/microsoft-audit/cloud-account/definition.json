@@ -1,0 +1,105 @@
+{
+  "attributes": {
+    "account-id": {
+      "description": "Provider-assigned account, subscription, project, or tenant identifier; preserve its string form, including leading zeroes.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "account-type": {
+      "description": "Source account type, such as AWS Account, Azure Subscription, GCP Project, or M365 Tenant.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "disabled": {
+      "description": "Whether the account is disabled, when explicitly reported.",
+      "disable_correlation": true,
+      "misp-attribute": "boolean",
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "label": {
+      "description": "One source label per attribute.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "locked": {
+      "description": "Whether the account is locked, when explicitly reported.",
+      "disable_correlation": true,
+      "misp-attribute": "boolean",
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "name": {
+      "description": "Account or tenant display name.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "on-premises-sync-enabled": {
+      "description": "Whether an on-premises directory synchronizes this account.",
+      "disable_correlation": true,
+      "misp-attribute": "boolean",
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "organization-id": {
+      "description": "Identifier of the organization containing this account.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "partition": {
+      "description": "Provider partition or isolated cloud environment.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "project-id": {
+      "description": "Project identifier when recorded separately from the account identifier.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "provider": {
+      "description": "Cloud or SaaS provider that defines the account identifier's scope.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "region": {
+      "description": "Cloud region associated with the observation.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 1
+    },
+    "zone": {
+      "description": "Availability zone associated with the observation.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 1
+    }
+  },
+  "description": "A cloud or SaaS account, subscription, project, or tenant, with provider and organizational scope. Use user-account for individual security principals. Based on OCSF 1.9.0: https://schema.ocsf.io/1.9.0/objects/account, https://schema.ocsf.io/1.9.0/objects/cloud.",
+  "meta-category": "misc",
+  "name": "cloud-account",
+  "requiredOneOf": [
+    "account-id",
+    "name"
+  ],
+  "uuid": "03789478-6c41-4b8c-93f8-f0d3c4c88b8f",
+  "version": 1
+}

@@ -5302,6 +5302,31 @@ Module to import and parse reports from Lastline analysis links.
 
 -----
 
+#### [Microsoft Identity and Audit Logs Import](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/microsoft_audit_import.py)
+
+Import Entra sign-in and directory audit logs and Microsoft Purview Unified Audit Log exports.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/microsoft_audit_import.py)]
+
+- **features**:
+>Imports Entra sign-in and directory audit JSON and Purview Unified Audit Log JSON or AuditData CSV offline. Maps actions, actors, tenant and session context, results and times to unreviewed MISP objects. Links observations to a SHA-256 source file descriptor and supports attaching the exact upload by request.
+
+- **input**:
+>Base64-encoded UTF-8 Entra or Purview JSON, or a Purview CSV containing AuditData.
+
+- **output**:
+>Microsoft audit event, source file and optional linked cloud account objects.
+
+- **references**:
+> - https://learn.microsoft.com/en-us/graph/api/resources/signin?view=graph-rest-1.0
+> - https://learn.microsoft.com/en-us/graph/api/resources/directoryaudit?view=graph-rest-1.0
+> - https://learn.microsoft.com/en-us/purview/audit-log-export-records
+> - https://github.com/MISP/misp-modules/blob/main/documentation/import_mod/microsoft_audit_import.md
+
+- **requirements**:
+>PyMISP
+
+-----
+
 #### [MISP JSON Import](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/mispjson.py)
 
 Module to import MISP JSON format for merging MISP events.
