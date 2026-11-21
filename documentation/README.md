@@ -4441,6 +4441,36 @@ This module is used to export MISP events containing transaction objects into Go
 
 -----
 
+#### [Cited Intelligence Briefing Export](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/intelligence_briefing_export.py)
+
+Export an intelligence briefing with key judgments, evidence citations and analyst review checks.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/intelligence_briefing_export.py)]
+
+- **features**:
+>Builds a Markdown briefing from a selected Event Report, referenced intelligence judgments, Analyst Data, and INTREP source assessments. Flags missing or unresolved citations, confidence and alternatives. Checks an Analyst Opinion against the briefing's SHA-256 fingerprint before marking it reviewed.
+
+- **config**:
+> - report_uuid
+> - require_reviewed
+
+- **fetch_options**:
+>{'includeAnalystData': True, 'noEventReports': False, 'includeAttachments': False, 'includeEventCorrelations': False, 'includeGranularCorrelations': False}
+
+- **input**:
+>One MISP event with an Event Report, judgment objects, and the analyst data and evidence it cites.
+
+- **output**:
+>Base64-encoded Markdown with linked citations and release checks.
+
+- **references**:
+> - https://www.intelligence.gov/mission/our-values/objectivity
+> - https://github.com/MISP/misp-modules/blob/main/documentation/export_mod/intelligence_briefing_export.md
+
+- **require_standard_format**:
+>True
+
+-----
+
 #### [Juniper Junos ACL Export](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/export_mod/junos_export.py)
 
 Export IDS-marked network attributes as Junos inet/inet6 stateless firewall filter set commands.

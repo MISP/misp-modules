@@ -263,6 +263,7 @@ For further Information see the [license file](https://misp.github.io/misp-modul
 * [Elastic ECS Export](https://misp.github.io/misp-modules/export_mod/#elastic-ecs-export) - Export event and object indicators as ECS threat indicators in Elasticsearch Bulk NDJSON.
 * [Fortinet FortiOS ACL Export](https://misp.github.io/misp-modules/export_mod/#fortinet-fortios-acl-export) - Export IDS-marked network attributes as FortiOS 7.4+ address objects, services and firewall policies.
 * [GoAML Export](https://misp.github.io/misp-modules/export_mod/#goaml-export) - This module is used to export MISP events containing transaction objects into GoAML format.
+* [Cited Intelligence Briefing Export](https://misp.github.io/misp-modules/export_mod/#cited-intelligence-briefing-export) - Export an intelligence briefing with key judgments, evidence citations and analyst review checks.
 * [Juniper Junos ACL Export](https://misp.github.io/misp-modules/export_mod/#juniper-junos-acl-export) - Export IDS-marked network attributes as Junos inet/inet6 stateless firewall filter set commands.
 * [Lite Export](https://misp.github.io/misp-modules/export_mod/#lite-export) - Lite export of a MISP event.
 * [EQL Query Export](https://misp.github.io/misp-modules/export_mod/#eql-query-export) - Export MISP event in Event Query Language
