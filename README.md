@@ -320,6 +320,7 @@ For further Information see the [license file](https://misp.github.io/misp-modul
 
 * [Volatility 3 Results Import](https://misp.github.io/misp-modules/import_mod/#volatility-3-results-import) - Import Volatility 3 process, network, suspicious-memory and YARA results with memory-image provenance.
 
+* [Portable Web Archive Evidence Import](https://misp.github.io/misp-modules/import_mod/#portable-web-archive-evidence-import) - Import local WARC and WACZ captures with response metadata and package digest verification.
 * [Zeek Observations Import](https://misp.github.io/misp-modules/import_mod/#zeek-observations-import) - Import selected Zeek records with timestamps, connection/Community IDs and capture provenance.
 
 ### Action Modules

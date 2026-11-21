@@ -1,0 +1,171 @@
+{
+  "attributes": {
+    "block-content-type": {
+      "description": "Content-Type declared for the WARC record block.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 6
+    },
+    "block-length": {
+      "description": "WARC Content-Length of the record block in bytes, independent of the HTTP Content-Length.",
+      "disable_correlation": true,
+      "misp-attribute": "size-in-bytes",
+      "to_ids": false,
+      "ui-priority": 6
+    },
+    "capture-date": {
+      "description": "WARC-Date normalized to UTC.",
+      "disable_correlation": true,
+      "misp-attribute": "datetime",
+      "to_ids": false,
+      "ui-priority": 10
+    },
+    "declared-block-digest": {
+      "description": "Digest value declared by WARC-Block-Digest for the record block.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "declared-payload-digest": {
+      "description": "Digest value declared by WARC-Payload-Digest for the payload.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "http-response-header": {
+      "description": "One archived HTTP response header represented as JSON with a lowercase name and its value.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 7
+    },
+    "http-status": {
+      "description": "Status code in the archived HTTP response.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 9
+    },
+    "http-version": {
+      "description": "HTTP version in the archived response status line.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 7
+    },
+    "member-path": {
+      "description": "Relative ZIP path of the WARC member in the source WACZ.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 7
+    },
+    "record-id": {
+      "description": "WARC-Record-ID URI without its enclosing angle brackets.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 10
+    },
+    "record-offset": {
+      "description": "Zero-based byte offset of the record in the uncompressed WARC member or standalone WARC stream.",
+      "disable_correlation": true,
+      "misp-attribute": "counter",
+      "to_ids": false,
+      "ui-priority": 7
+    },
+    "record-type": {
+      "description": "WARC record type of the archived capture.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 9,
+      "values_list": [
+        "response",
+        "revisit",
+        "resource"
+      ]
+    },
+    "refers-to": {
+      "description": "Original WARC-Refers-To identifying a related record, such as a record revisited by this capture.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 7
+    },
+    "refers-to-date": {
+      "description": "WARC-Refers-To-Date of the earlier capture, normalized to UTC when the source includes seconds.",
+      "disable_correlation": true,
+      "misp-attribute": "datetime",
+      "to_ids": false,
+      "ui-priority": 7
+    },
+    "refers-to-date-raw": {
+      "description": "Original WARC-Refers-To-Date of the earlier capture, with the source timestamp precision.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 6
+    },
+    "refers-to-target-uri": {
+      "description": "Target URI reported by WARC-Refers-To-Target-URI.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 6
+    },
+    "target-uri": {
+      "description": "Original HTTP or HTTPS target URI in WARC-Target-URI.",
+      "disable_correlation": true,
+      "misp-attribute": "url",
+      "to_ids": false,
+      "ui-priority": 10
+    },
+    "truncated": {
+      "description": "Truncation reason declared in WARC-Truncated.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 7
+    },
+    "warc-date-raw": {
+      "description": "Original WARC-Date value, including source timestamp precision.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "warc-profile": {
+      "description": "WARC-Profile URI declaring how a revisit's record block and payload are to be interpreted. Required for revisit records.",
+      "disable_correlation": true,
+      "misp-attribute": "uri",
+      "to_ids": false,
+      "ui-priority": 8
+    },
+    "warc-version": {
+      "description": "Version of the WARC record format.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 4
+    }
+  },
+  "description": "Metadata for a captured HTTP or HTTPS resource in a WARC record. Link the record to its source WARC or WACZ file and the corresponding page capture.",
+  "meta-category": "network",
+  "name": "warc-record",
+  "required": [
+    "record-id",
+    "record-type",
+    "target-uri"
+  ],
+  "requiredOneOf": [
+    "capture-date",
+    "warc-date-raw"
+  ],
+  "uuid": "8515eb6d-4948-4fd0-a7af-f15d86a58cdc",
+  "version": 1
+}

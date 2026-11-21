@@ -6,6 +6,13 @@
       "multiple": true,
       "ui-priority": 1
     },
+    "archive-record-id": {
+      "description": "Record identifier for a capture stored in a linked archive, such as a WARC record in a WACZ package.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 1
+    },
     "attachment": {
       "description": "The captured page itself, stored as an attachment",
       "misp-attribute": "attachment",
@@ -44,7 +51,7 @@
       "ui-priority": 1
     }
   },
-  "description": "A copy of a page as it was when somebody fetched it: the stored bytes, the text extracted from them, or a link to an archived copy, with the date the capture was taken. Complements `image`, which holds a screenshot and no date, and `domain-crawled`, which holds the URLs a crawl found and not what they returned.",
+  "description": "A copy of a page as it was when somebody fetched it: the stored bytes, the text extracted from them, a link to an archived copy, or a record identifier in a linked archive, with the date the capture was taken. Complements `image`, which holds a screenshot and no date, and `domain-crawled`, which holds the URLs a crawl found and not what they returned.",
   "meta-category": "network",
   "name": "page-capture",
   "required": [
@@ -53,8 +60,9 @@
   "requiredOneOf": [
     "attachment",
     "archive",
-    "text"
+    "text",
+    "archive-record-id"
   ],
   "uuid": "555f0d10-5df6-4e04-bf8a-145156d37ab6",
-  "version": 1
+  "version": 2
 }
