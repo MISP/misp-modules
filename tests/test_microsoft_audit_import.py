@@ -243,6 +243,16 @@ def test_purview_sts_http_success_does_not_claim_a_successful_sign_in(kind):
     assert fields["outcome"] == "failure"
 
 
+@pytest.mark.parametrize(
+    "code,outcome", [("0", "success"), (0, "success"), ("53003", "failure"), ("AADSTS50074", "failure")]
+)
+def test_purview_sts_uses_explicit_error_code_without_a_logon_error(code, outcome):
+    record = purview(RecordType=15, Operation="UserLoggedIn", ResultStatus="Succeeded", ErrorCode=code)
+    fields = values(objects(result_for(record))[0])
+    assert fields["result-code"] == str(code)
+    assert fields["outcome"] == outcome
+
+
 def test_deduplication_is_scoped_to_tenant_and_source_type():
     sign_in_ = sign_in()
     purview_ = purview()

@@ -362,7 +362,14 @@ def _purview(record, operation):
     if sts:
         error = record.get("LogonError")
         fails = isinstance(error, str) and error.strip().casefold() not in {"", "0", "none"}
+        raw_code = record.get("ErrorCode")
         values["outcome"] = "failure" if fails else "unknown"
+        if raw_code not in (None, ""):
+            code = str(raw_code) if type(raw_code) is int else _text(raw_code, "ErrorCode")
+            match = re.fullmatch(r"(?:AADSTS)?([0-9]+)", code, re.IGNORECASE)
+            if match:
+                values["result-code"] = code
+                values["outcome"] = "failure" if fails or match[1].strip("0") else "success"
     else:
         values["outcome"] = OUTCOMES.get(values.get("result-status", "").casefold(), "unknown")
     return values

@@ -36,10 +36,11 @@ reported record timestamp. For ingestion time, include `IngestionTime` from an
 explicit `ingestion_time()` query projection. Both fields retain their original
 values and are normalized independently. [Azure Monitor timestamp definitions](https://learn.microsoft.com/en-us/azure/azure-monitor/logs/data-ingestion-time)
 
-Purview `ResultStatus` is retained as reported. For Entra STS logon records, an
-explicit `LogonError` can establish a reported failure. HTTP success in
-`ResultStatus` leaves the sign-in outcome unknown. Imported attributes have IDS
-matching and automatic correlation disabled.
+Purview `ResultStatus` is retained as reported. For Entra STS logon records,
+the importer uses the authentication `ErrorCode` and any explicit `LogonError`
+to determine the reported outcome. HTTP success in `ResultStatus` alone leaves
+the sign-in outcome unknown. Imported attributes have IDS matching and automatic
+correlation disabled.
 
 Supply `config.tenant_id` or the **Optional reporting tenant UUID** setting
 when an Entra export omits the reporting tenant. Purview provides it in
