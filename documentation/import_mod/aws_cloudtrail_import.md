@@ -20,10 +20,13 @@ source IP is added as `ip-src`. Provider placeholders and service names remain
 source text.
 
 Cloud account objects identify the reported principal and recipient accounts.
-An explicit IAM role ARN identifies the role. Entries in `resources` with an AWS ARN
-link to `cloud-resource` objects. The CloudTrail event region describes the event.
-Resource region comes from the resource ARN when present. Every event references a
-file object with the source basename, byte count, and SHA-256 of the exact
+An explicit IAM role ARN identifies the role. The event also retains the user ID and
+identity store ARN reported in `userIdentity.onBehalfOf`, separately from IAM
+principal and session-issuer identifiers. Entries in `resources` with an `ARN`
+value link to `cloud-resource` objects, including short provider IDs such as
+`d-1234567890`. Partition, region, and any inferred resource account come from
+the resource ARN. An explicit resource account is preserved for either ID form.
+Every event references a file object with the source basename, byte count, and SHA-256 of the exact
 upload, including its compressed form. The `extracted-from` reference comment gives the
 one-based record index in that file. No imported attribute is enabled for IDS
 matching or automatic correlation.

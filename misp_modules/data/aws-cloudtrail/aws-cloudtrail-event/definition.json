@@ -70,6 +70,20 @@
       "to_ids": false,
       "ui-priority": 4
     },
+    "on-behalf-of-identity-store-arn": {
+      "description": "Identity store ARN reported in userIdentity.onBehalfOf.identityStoreArn. Together with the user ID, it identifies the user.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 8
+    },
+    "on-behalf-of-user-id": {
+      "description": "IAM Identity Center or AWS Builder ID user ID reported in userIdentity.onBehalfOf.userId.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 8
+    },
     "original-event-id": {
       "description": "Original CloudTrail event identifier recorded in an addendum.",
       "disable_correlation": true,
@@ -198,5 +212,5 @@
     "event-time"
   ],
   "uuid": "604a3060-15ce-493e-a344-3ebc1a50b735",
-  "version": 1
+  "version": 2
 }

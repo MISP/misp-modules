@@ -249,6 +249,12 @@ def _event(record):
     }
     values.update(_fields(record, EVENT_FIELDS))
     values.update(_fields(identity, IDENTITY_FIELDS))
+    values.update(
+        _fields(
+            _mapping(identity, "onBehalfOf"),
+            {"userId": "on-behalf-of-user-id", "identityStoreArn": "on-behalf-of-identity-store-arn"},
+        )
+    )
     values.update(_fields(issuer, {"arn": "session-issuer-arn"}))
     values.update(_fields(_mapping(record, "addendum"), {"originalEventID": "original-event-id"}))
     read_only = record.get("readOnly")
@@ -269,9 +275,10 @@ def _event(record):
 
 
 def _link_entity(obj, entities, name, values, comment):
-    key = (name, *values.values())
+    identity = tuple(values.items())
+    key = (name, identity)
     if key not in entities:
-        entities[key] = _object(name, tuple(values.items()), values)
+        entities[key] = _object(name, identity, values)
     target = entities[key]
     if not any(ref.referenced_uuid == target.uuid for ref in obj.ObjectReference):
         _reference(obj, target, "related-to", comment)
@@ -311,18 +318,18 @@ def _link_resources(obj, entities, resources_):
     for resource in resources_:
         if not isinstance(resource, dict):
             raise ValueError("Every CloudTrail resources entry must be an object.")
-        arn_value = resource.get("ARN")
-        if arn_value in (None, ""):
+        identifier = resource.get("ARN")
+        if identifier in (None, ""):
             continue
-        arn_value = _text(arn_value, "resource ARN")
-        arn = _arn(arn_value)
-        if not arn:
-            continue
-        values = {"provider": "AWS", "resource-id": arn_value, "partition": arn[1]}
-        if arn[3]:
-            values["region"] = arn[3]
+        identifier = _text(identifier, "resource identifier")
+        arn = _arn(identifier)
+        values = {"provider": "AWS", "resource-id": identifier}
+        if arn:
+            values["partition"] = arn[1]
+            if arn[3]:
+                values["region"] = arn[3]
         values.update(_fields(resource, {"accountId": "account-id", "type": "type"}))
-        if "account-id" not in values and ACCOUNT_FORMAT.fullmatch(arn[4]):
+        if arn and "account-id" not in values and ACCOUNT_FORMAT.fullmatch(arn[4]):
             values["account-id"] = arn[4]
         _link_entity(obj, entities, "cloud-resource", values, "Resource reported in CloudTrail resources")
 

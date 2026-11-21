@@ -189,8 +189,68 @@ def test_accepts_other_native_categories_and_absent_identity():
     assert "principal-id" not in values_
 
 
-def test_reuses_account_when_actor_and_recipient_roles_change_and_skips_missing_arns():
-    one = record(resources=[{"type": "AWS::S3::Bucket"}, {"ARN": "redacted"}])
+@pytest.mark.parametrize("kind", ["IdentityCenterUser", "BuilderIdUser", "AssumedRole"])
+def test_preserves_on_behalf_of_identity_separately_from_principal(kind):
+    identity = record()["userIdentity"] if kind == "AssumedRole" else {"type": kind}
+    if kind == "IdentityCenterUser":
+        identity["accountId"] = CALLER
+    store = f"arn:aws:identitystore::{CALLER}:identitystore/d-1234567890"
+    if kind == "BuilderIdUser":
+        store = "arn:aws:identitystore::aws:identitystore/builderid"
+    user_id = "4fd5d19b-4854-4956-947a-c209cc5d81cd"
+    identity["onBehalfOf"] = {"userId": user_id, "identityStoreArn": store}
+    result = result_for(record(userIdentity=identity, resources=[]))
+    (event,) = objects(result, "aws-cloudtrail-event")
+    fields = values(event)
+    assert fields["principal-type"] == kind
+    assert fields["on-behalf-of-user-id"] == user_id
+    assert fields["on-behalf-of-identity-store-arn"] == store
+    if kind == "AssumedRole":
+        assert fields["principal-id"] == identity["principalId"]
+        assert fields["session-issuer-arn"] == identity["sessionContext"]["sessionIssuer"]["arn"]
+        assert len(objects(result, "iam-role")) == 1
+    else:
+        assert "principal-id" not in fields
+    if kind == "BuilderIdUser":
+        assert "principal-account-id" not in fields
+        assert {values(account)["account-id"] for account in objects(result, "cloud-account")} == {RECIPIENT}
+    assert_valid_objects(result)
+
+
+def test_links_non_arn_resource_ids_and_uses_only_reported_resource_scope():
+    gov_arn = f"arn:aws-us-gov:ec2:us-gov-west-1:{CALLER}:instance/i-test"
+    result = result_for(
+        record(
+            resources=[
+                {"ARN": "d-1234567890", "type": "AWS::IdentityStore::IdentityStore"},
+                {"ARN": "d-0987654321", "accountId": RECIPIENT},
+                {"ARN": gov_arn},
+            ]
+        )
+    )
+    (event,) = objects(result, "aws-cloudtrail-event")
+    entries = objects(result, "cloud-resource")
+    by_identifier = {values(obj)["resource-id"]: values(obj) for obj in entries}
+    assert by_identifier["d-1234567890"] == {
+        "resource-id": "d-1234567890",
+        "provider": "AWS",
+        "type": "AWS::IdentityStore::IdentityStore",
+    }
+    assert by_identifier["d-0987654321"] == {
+        "resource-id": "d-0987654321",
+        "provider": "AWS",
+        "account-id": RECIPIENT,
+    }
+    assert by_identifier[gov_arn]["partition"] == "aws-us-gov"
+    assert by_identifier[gov_arn]["region"] == "us-gov-west-1"
+    assert by_identifier[gov_arn]["account-id"] == CALLER
+    linked = {ref["referenced_uuid"] for ref in event["ObjectReference"] if ref["relationship_type"] == "related-to"}
+    assert all(entry["uuid"] in linked for entry in entries)
+    assert_valid_objects(result)
+
+
+def test_reuses_account_when_actor_and_recipient_roles_change_and_skips_missing_resource_ids():
+    one = record(resources=[{"type": "AWS::S3::Bucket"}, {"ARN": ""}])
     two = record(eventID=OTHER_EVENT, recipientAccountId=CALLER, userIdentity=None, resources=[])
     response = result_for({"Records": [one, two]})
     accounts = objects(response, "cloud-account")
@@ -220,6 +280,7 @@ def test_reuses_account_when_actor_and_recipient_roles_change_and_skips_missing_
         record(readOnly="false"),
         record(resources=[42]),
         record(userIdentity=[]),
+        record(userIdentity={"onBehalfOf": []}),
         b"\x1f\x8btruncated",
     ],
 )
