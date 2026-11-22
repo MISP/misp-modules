@@ -1,0 +1,273 @@
+{
+  "attributes": {
+    "admin-role-id": {
+      "description": "An administrator role ID reported in an admin event.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "admin-role-name": {
+      "description": "An administrator role name reported in an admin event.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "affected-group": {
+      "description": "The group email reported as the subject of the admin event.",
+      "disable_correlation": false,
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "affected-user": {
+      "description": "The user email reported as the subject of the admin event.",
+      "disable_correlation": false,
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "document-id": {
+      "description": "The Google Drive document ID reported with the event.",
+      "disable_correlation": false,
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 8
+    },
+    "document-owner": {
+      "description": "The reported document owner, which can be an email address or a shared drive name.",
+      "disable_correlation": false,
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "document-title": {
+      "description": "The document title reported by Google Drive.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "document-type": {
+      "description": "The document type reported by Google Drive.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "error-code": {
+      "description": "The error code in the reported event status.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "error-message": {
+      "description": "The error message in the reported event status.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "event-index": {
+      "description": "One-based ordinal of the event in the parent activity events array.",
+      "disable_correlation": true,
+      "misp-attribute": "counter",
+      "to_ids": false,
+      "ui-priority": 9
+    },
+    "event-name": {
+      "description": "The native event name reported in the activity.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 10
+    },
+    "event-status": {
+      "description": "The reported event outcome, when supplied.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "event-type": {
+      "description": "The native event type reported in the activity.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 9
+    },
+    "http-status-code": {
+      "description": "The HTTP status code in the reported event status.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "login-challenge-method": {
+      "description": "The challenge method reported for the sign-in.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "login-challenge-status": {
+      "description": "The challenge outcome reported for the sign-in.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "login-failure-type": {
+      "description": "The sign-in failure reason reported by the provider.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "login-type": {
+      "description": "The sign-in credential type as reported by the provider.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "new-visibility": {
+      "description": "The reported visibility of the Drive file after the event, when present.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "oauth-application-name": {
+      "description": "The application name reported in an OAuth token event.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "oauth-client-id": {
+      "description": "An OAuth client ID reported in a token event.",
+      "disable_correlation": false,
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 8
+    },
+    "oauth-client-type": {
+      "description": "The reported OAuth client type.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "oauth-scope": {
+      "description": "The scope value reported in the token event, preserving the original representation.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "old-visibility": {
+      "description": "The prior visibility of the Drive file as reported by Google.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "organizational-unit": {
+      "description": "The organizational unit named by the admin event.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "parameter": {
+      "description": "One native event parameters entry, serialized as JSON and indexed by its source position.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "resource-id": {
+      "description": "An identifier in the native event resourceIds array.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "sensitive-parameter": {
+      "description": "One native event sensitiveParameters entry, serialized as JSON and indexed by its source position.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "setting-name": {
+      "description": "The name of the setting reported in the admin event.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "shared-drive-id": {
+      "description": "A Google shared drive ID reported with the event.",
+      "disable_correlation": false,
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "sharing-target": {
+      "description": "The user, group or domain reported as the target of a sharing change.",
+      "disable_correlation": false,
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "suspicious-login": {
+      "description": "Whether Google flagged the sign-in as unusual.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 5,
+      "values_list": [
+        "true",
+        "false"
+      ]
+    }
+  },
+  "description": "One event in a Google Workspace Reports API activity with its source ordinal, parameters and investigation fields.",
+  "meta-category": "misc",
+  "name": "google-workspace-audit-event",
+  "required": [
+    "event-index"
+  ],
+  "uuid": "888ae6d3-1495-4c1a-a55f-4adb3bd3be76",
+  "version": 1
+}

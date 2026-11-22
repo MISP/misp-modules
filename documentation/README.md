@@ -5404,6 +5404,34 @@ Import native Google Cloud Audit Logs with authorization decisions and IAM bindi
 
 -----
 
+#### [Google Workspace Audit Logs Import](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/google_workspace_audit_import.py)
+
+Import saved Google Workspace login, admin, Drive and OAuth token activity.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/google_workspace_audit_import.py)]
+
+- **features**:
+>Reads Reports API activities.list JSON and keeps every nested event linked to its original activity ID. Preserves event parameters and exposes actor, Drive and OAuth identifiers for investigation. See the [usage guide](https://github.com/MISP/misp-modules/blob/main/documentation/import_mod/google_workspace_audit_import.md).
+
+- **data-source**:
+>internal
+
+- **input**:
+>A saved activities.list JSON response, Activity or array of Activity records, optionally gzipped.
+
+- **output**:
+>A source file and linked Google Workspace audit activity and event objects.
+
+- **references**:
+> - https://developers.google.com/workspace/admin/reports/reference/rest/v1/activities/list
+> - https://developers.google.com/workspace/admin/reports/v1/appendix/activity/login
+> - https://developers.google.com/workspace/admin/reports/v1/appendix/activity/drive
+> - https://developers.google.com/workspace/admin/reports/v1/appendix/activity/token
+
+- **requirements**:
+> PyMISP
+
+-----
+
 #### [Import Blueprint](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/import_blueprint.py)
 
 Generic blueprint to be copy-pasted to quickly boostrap creation of import module.
