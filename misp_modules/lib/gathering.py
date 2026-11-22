@@ -347,30 +347,33 @@ class GatheringJobs:
                 last_progress = time.monotonic()
 
         try:
-            check()
-            metadata["status"] = "running"
-            self._write(directory, metadata)
-            builder = FeedBuilder(directory / "feed", check_cancel=check)
-            with module_context(metadata["module"]):
-                producer(parameters, builder=builder, config=config)
-            check()
-            metadata.update(builder.archive(directory / "feed.zip.partial"))
-            (directory / "feed.zip.partial").replace(directory / "feed.zip")
+            try:
+                check()
+                metadata["status"] = "running"
+                self._write(directory, metadata)
+                builder = FeedBuilder(directory / "feed", check_cancel=check)
+                with module_context(metadata["module"]):
+                    producer(parameters, builder=builder, config=config)
+                check()
+                metadata.update(builder.archive(directory / "feed.zip.partial"))
+                (directory / "feed.zip.partial").replace(directory / "feed.zip")
+            finally:
+                shutil.rmtree(directory / "feed", ignore_errors=True)
+                (directory / "manifest.sqlite3").unlink(missing_ok=True)
+
             metadata.update(status="ready", expires_at=int(time.time()) + self.retention)
             self._write(directory, metadata)
         except Exception:
             logging.getLogger("misp-modules").exception("Gathering job %s failed", directory.name)
+            (directory / "feed.zip.partial").unlink(missing_ok=True)
+            (directory / "feed.zip").unlink(missing_ok=True)
             metadata.update(
                 status="failed",
                 error="Generation failed or was interrupted; see the module service logs.",
                 expires_at=int(time.time()) + self.retention,
             )
             self._write(directory, metadata)
-            (directory / "feed.zip.partial").unlink(missing_ok=True)
-            (directory / "feed.zip").unlink(missing_ok=True)
         finally:
-            shutil.rmtree(directory / "feed", ignore_errors=True)
-            (directory / "manifest.sqlite3").unlink(missing_ok=True)
             if (directory / "cancel").exists():
                 shutil.rmtree(directory, ignore_errors=True)
             self.slots.release()
