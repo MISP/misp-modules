@@ -73,6 +73,33 @@ Import AWS CloudTrail JSON or JSON.gz audit records with source provenance.
 
 -----
 
+#### [Atlassian Cloud Audit Logs Import](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/atlassian_cloud_audit_import.py)
+
+Import Atlassian Administration audit CSV and Organizations Events API JSON.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/atlassian_cloud_audit_import.py)]
+
+- **features**:
+>Imports saved organization and site activity with reported actor, authentication, action and scope. Preserves affected entities and event containers with their source positions. Links every event to the original export. See the [usage guide](https://github.com/MISP/misp-modules/blob/main/documentation/import_mod/atlassian_cloud_audit_import.md).
+
+- **data-source**:
+>internal
+
+- **input**:
+>Saved Atlassian Administration audit CSV or Organizations Events API JSON, optionally gzip-compressed.
+
+- **output**:
+>A source file and linked Atlassian Cloud audit event and entity objects.
+
+- **references**:
+> - https://support.atlassian.com/security-and-access-policies/docs/export-audit-logs/
+> - https://support.atlassian.com/security-and-access-policies/docs/view-audit-log-activities/
+> - https://developer.atlassian.com/cloud/admin/organization/rest/api-group-events/
+
+- **requirements**:
+> PyMISP
+
+-----
+
 #### [Autopsy and Mobile Forensic Selected Results Import](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/autopsy_import.py)
 
 Import selected browser, download, communication and application artifacts with forensic provenance.

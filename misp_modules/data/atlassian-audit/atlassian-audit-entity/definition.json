@@ -1,0 +1,73 @@
+{
+  "attributes": {
+    "entity-email": {
+      "description": "The email address reported for this entity.",
+      "disable_correlation": false,
+      "misp-attribute": "email-dst",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "entity-email-raw": {
+      "description": "The reported entity email field when it cannot be represented as an email.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "entity-id": {
+      "description": "The entity identifier reported in the Organizations Events API.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 9
+    },
+    "entity-key": {
+      "description": "A key reported in the entity attributes.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "entity-name": {
+      "description": "The reported entity name or display label.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 9
+    },
+    "entity-role": {
+      "description": "The API array containing this entity in its parent event.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "sane_default": [
+        "context",
+        "container"
+      ],
+      "to_ids": false,
+      "ui-priority": 10
+    },
+    "entity-type": {
+      "description": "The type reported for the entity.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 9
+    },
+    "source-link": {
+      "description": "The self link reported for the entity, including relative links.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    }
+  },
+  "description": "An affected entity or an event container recorded for an Atlassian Cloud audit event.",
+  "meta-category": "misc",
+  "name": "atlassian-audit-entity",
+  "required": [
+    "entity-id",
+    "entity-role"
+  ],
+  "uuid": "541607a9-38bf-4b66-bf6d-3d4fbace303e",
+  "version": 1
+}
