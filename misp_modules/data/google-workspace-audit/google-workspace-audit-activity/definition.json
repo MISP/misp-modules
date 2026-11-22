@@ -46,14 +46,14 @@
       "description": "The Google Workspace Reports API application from the native activity ID.",
       "disable_correlation": true,
       "misp-attribute": "text",
-      "to_ids": false,
-      "ui-priority": 10,
-      "values_list": [
+      "sane_default": [
         "login",
         "admin",
         "drive",
         "token"
-      ]
+      ],
+      "to_ids": false,
+      "ui-priority": 10
     },
     "caller-type": {
       "description": "The reported type of actor.",
