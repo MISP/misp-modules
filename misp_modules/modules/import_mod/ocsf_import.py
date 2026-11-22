@@ -54,9 +54,10 @@ NAMESPACE = UUID("98f8d4d2-0174-4cb0-972e-5114a49710b0")
 EPOCH = datetime(1970, 1, 1, tzinfo=timezone.utc)
 JSON_WHITESPACE = re.compile(r"[ \t\r\n]*")
 ISO_TIME = re.compile(
-    r"[0-9]{4}-[0-9]{2}-[0-9]{2}[T ][0-9]{2}:[0-9]{2}:[0-9]{2}(?:\.[0-9]{1,6})?"
-    r"(?:Z|[+-](?:[01][0-9]|2[0-3]):[0-5][0-9])"
+    r"(?P<date>[0-9]{4}-[0-9]{2}-[0-9]{2})[Tt ](?P<clock>[0-9]{2}:[0-9]{2}:[0-9]{2})"
+    r"(?:\.(?P<fraction>[0-9]+))?(?P<offset>[Zz]|[+-](?:[01][0-9]|2[0-3]):[0-5][0-9])"
 )
+MILLISECOND = timedelta(milliseconds=1)
 HOST_LABEL = re.compile(r"[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?")
 OBSERVABLE_NAME = re.compile(r"[a-zA-Z0-9_.\[\]-]{1,160}")
 
@@ -294,18 +295,26 @@ def _text(value, maximum=2048):
 
 
 def _date(value):
-    if isinstance(value, str) and ISO_TIME.fullmatch(value) and not value.endswith("-00:00"):
-        return datetime.fromisoformat(value.replace("Z", "+00:00")).astimezone(timezone.utc)
-    raise ValueError("Timestamp needs an explicit offset.")
+    match = ISO_TIME.fullmatch(value) if isinstance(value, str) else None
+    if match is None or match["offset"] == "-00:00":
+        raise ValueError("Timestamp needs an explicit offset.")
+    fraction = match["fraction"] or ""
+    offset = "+00:00" if match["offset"] in ("Z", "z") else match["offset"]
+    normalized = f"{match['date']}T{match['clock']}"
+    if fraction:
+        normalized += f".{fraction[:6]}"
+    instant = datetime.fromisoformat(normalized + offset).astimezone(timezone.utc)
+    return instant, bool(fraction[6:].strip("0"))
 
 
 def _timestamp(record, path, warnings):
     dt_value = _get(record, path + "_dt")
     ms_value = _get(record, path)
     explicit = epoch = None
+    truncated = False
     if dt_value is not None:
         try:
-            explicit = _date(dt_value)
+            explicit, truncated = _date(dt_value)
         except (ValueError, OverflowError):
             warnings[f"Invalid {path}_dt retained in source JSON"] += 1
     if ms_value is not None:
@@ -318,9 +327,15 @@ def _timestamp(record, path, warnings):
             warnings[f"Invalid {path} retained in source JSON"] += 1
     if explicit:
         comment = f"Reported in {path}_dt"
-        if epoch and abs(explicit - epoch) >= timedelta(milliseconds=1):
-            warnings[f"{path}_dt disagrees with {path} in epoch milliseconds; used {path}_dt"] += 1
-            comment += f"; {path} disagreed when interpreted as UTC epoch milliseconds"
+        if truncated:
+            warnings[f"Sub-microsecond precision in {path}_dt retained in source JSON"] += 1
+            comment += ". Truncated to microseconds"
+        if epoch:
+            delta = explicit - epoch
+            # A discarded fraction places the original instant after the normalized one.
+            if abs(delta) >= MILLISECOND and not (truncated and delta == -MILLISECOND):
+                warnings[f"{path}_dt disagrees with {path} in epoch milliseconds. Used {path}_dt"] += 1
+                comment += f". {path} disagreed when interpreted as UTC epoch milliseconds"
         return explicit.isoformat(), comment
     if epoch:
         return epoch.isoformat(), f"Reported in {path} as UTC epoch milliseconds"

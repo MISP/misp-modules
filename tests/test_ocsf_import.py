@@ -137,6 +137,42 @@ def test_gzip_json_lines_preserve_source_bytes_and_split_event_classes():
     assert not get_attrs(finding, "sha512") and not get_attrs(finding, "destination-ip")
 
 
+def test_actor_and_observable_email_use_direction_neutral_type():
+    event = {
+        "class_uid": 3002,
+        "actor": {"user": {"email_addr": "actor@example.test"}},
+        "observables": [{"type_id": 5, "name": "contact", "value": "contact@example.test"}],
+    }
+    _, (record,) = objects(result(json.dumps(event).encode()))
+    attributes = {attr["value"]: attr for attr in get_attrs(record, "email-address")}
+    assert set(attributes) == {"actor@example.test", "contact@example.test"}
+    assert all(attr["type"] == "email" for attr in attributes.values())
+    assert "actor.user.email_addr" in attributes["actor@example.test"]["comment"]
+    assert "observables[0].value" in attributes["contact@example.test"]["comment"]
+
+
+@pytest.mark.parametrize(
+    ("source_time", "epoch", "normalized", "truncated", "disagrees"),
+    [
+        ("2024-08-13t15:58:20.123456789z", None, "2024-08-13T15:58:20.123456+00:00", True, False),
+        ("2024-08-13t17:58:20.123456000+02:00", 0, "2024-08-13T15:58:20.123456+00:00", False, True),
+        ("1969-12-31t23:59:59.999000001z", 0, "1969-12-31T23:59:59.999000+00:00", True, False),
+    ],
+)
+def test_prefer_offset_datetime_with_lowercase_markers_and_long_fraction(
+    source_time, epoch, normalized, truncated, disagrees
+):
+    event = {"class_uid": 4001, "time": epoch, "time_dt": source_time}
+    imported = result(json.dumps(event).encode())
+    _, (record,) = objects(imported)
+    (attr,) = get_attrs(record, "event-time")
+    assert attr["value"] == normalized
+    assert ("Truncated to microseconds" in attr["comment"]) == truncated
+    assert any("Sub-microsecond precision" in warning for warning in imported["warnings"]) == truncated
+    assert any("time_dt disagrees" in warning for warning in imported["warnings"]) == disagrees
+    assert json.loads(value(record, "raw-event"))["time_dt"] == source_time
+
+
 def test_array_accepts_extension_and_repeated_ids_preserving_ordinals():
     text = '{  "class_uid": "85010001", "metadata": {"uid": "shared"}, "time": 0, "numeric": 1.1234567890001 }'
     payload = f"[ {text}, {text} ]".encode()

@@ -33,8 +33,9 @@ The importer records class, category, activity, severity, status, product
 and schema information when supplied. It selects an offset-aware `*_dt`
 timestamp when present, with UTC epoch milliseconds as the fallback. When
 both representations disagree by at least one millisecond, the projected
-attribute and the response report the disagreement. The raw record retains
-both source values.
+attribute and the response report the disagreement. The importer truncates
+sub-microsecond precision in the projected timestamp and retains the full
+source value in the raw record.
 
 The event also exposes selected fields from direct and finding evidence paths,
 including source and destination addresses, hostnames, HTTP(S) URLs, user

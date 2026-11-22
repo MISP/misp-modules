@@ -83,7 +83,7 @@
     "email-address": {
       "description": "Account or observable email address without a mail flow direction.",
       "disable_correlation": true,
-      "misp-attribute": "email-dst",
+      "misp-attribute": "email",
       "multiple": true,
       "to_ids": false,
       "ui-priority": 7
@@ -463,5 +463,5 @@
     "raw-event-part"
   ],
   "uuid": "8f926b2b-cc3f-446a-a036-6165480a49ce",
-  "version": 1
+  "version": 2
 }
