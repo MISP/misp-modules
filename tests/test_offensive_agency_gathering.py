@@ -8,7 +8,9 @@ import pytest
 import requests
 from pymisp import MISPEvent
 
+from misp_modules.lib import offensive_agency as provider
 from misp_modules.lib.gathering import FeedBuilder, RevisionStore
+from misp_modules.modules.expansion import offensive_agency_lookup as lookup
 from misp_modules.modules.gathering import offensive_agency as module
 
 IP = "192.0.2.1"
@@ -63,7 +65,7 @@ def api(monkeypatch):
 
     def send(session, request, **options):
         calls.append(request.url)
-        assert options["stream"] and all(options["timeout"])
+        assert options["stream"] and all(options["timeout"]) and not options["allow_redirects"]
         status, record = replies[request.url]
         response = requests.Response()
         response.status_code = status
@@ -139,12 +141,21 @@ def test_asset_observations_deduplicate_and_skip_missing(api, tmp_path):
     assert len(events) == 1 and calls == [present, missing]
     uuid, event = next(iter(events.items()))
     assert not event["Attribute"]
-    observation, = event["Object"]
+    observation = next(obj for obj in event["Object"] if obj["name"] == provider.OBSERVATION_NAME)
     assert observation["name"] == "offensive-agency-observation"
-    assert observation["template_uuid"] == module.OBSERVATION_TEMPLATE["uuid"]
+    assert observation["template_uuid"] == provider.OBSERVATION_TEMPLATE["uuid"]
     assert UUID(observation["uuid"]).version == 5
     attributes = {a["object_relation"]: a for a in observation["Attribute"]}
-    assert set(attributes) == {"ip", "source-url", "network-type", "country", "network-operator", "asn", "framework", "source-record"}
+    assert set(attributes) == {
+        "ip",
+        "source-url",
+        "network-type",
+        "country",
+        "network-operator",
+        "asn",
+        "framework",
+        "source-record",
+    }
     address = attributes["ip"]
     assert (address["value"], address["first_seen"], address["last_seen"]) == (
         IP,
@@ -167,7 +178,7 @@ def test_asset_observations_deduplicate_and_skip_missing(api, tmp_path):
     assert collect(tmp_path / "repeat", params, state) == events
     replies[present] = 200, dict(HOST, last_seen="2026-11-21", tools={"example": "confirmed"})
     changed = collect(tmp_path / "changed", params, state)[uuid]
-    updated, = changed["Object"]
+    updated = next(obj for obj in changed["Object"] if obj["name"] == provider.OBSERVATION_NAME)
     assert updated["uuid"] == observation["uuid"]
     assert {a["uuid"] for a in updated["Attribute"]} == {a["uuid"] for a in observation["Attribute"]}
     updated_attachment = next(a for a in updated["Attribute"] if a["object_relation"] == "source-record")
@@ -180,6 +191,9 @@ def test_asset_observations_deduplicate_and_skip_missing(api, tmp_path):
     "params",
     [
         {"url": "https://example.org/"},
+        {"all_hosts": "true"},
+        {"all_hosts": 1},
+        {"all_hosts": True, "asset_ips": [IP]},
         {"asset_ips": "192.0.2.1"},
         {"asset_ips": [123]},
         {"asset_ips": ["192.0.2.0/24"]},
@@ -215,7 +229,7 @@ def test_invalid_statistics_fail_generation(api, status, body):
 
 def test_budget_and_cancellation(api, monkeypatch):
     api[0][module.SOURCE + "api/stats.json"] = 200, STATS
-    monkeypatch.setattr(module, "MAX_RESPONSE_BYTES", 2)
+    monkeypatch.setattr(provider, "MAX_RESPONSE_BYTES", 2)
     with pytest.raises(ValueError, match="size budget"):
         module.gather({}, Mock())
     builder = Mock()
@@ -229,3 +243,118 @@ def test_invalid_host_observations():
     for changes in ({"ip": "192.0.2.2"}, {"first_seen": "2026-12-01"}, {"tools": []}, {"tools": {"x": "unknown"}}):
         with pytest.raises(ValueError):
             module.host_observation(IP, {**HOST, **changes})
+
+
+def test_full_export_is_one_request_and_preserves_every_row(api, tmp_path):
+    url = module.SOURCE + "api/hosts.json?scope=all"
+    row = {k: v for k, v in HOST.items() if k != "services"}
+    row["new_provider_field"] = {"source": "retained"}
+    older = dict(row, ip="2001:db8::1", last_seen="2026-10-01", first_seen="2026-09-01")
+    api[0][url] = 200, [row, older]
+    params = {"all_hosts": True}
+    state = tmp_path / "state"
+    events = collect(tmp_path / "all", params, state)
+    assert len(events) == 2 and api[1] == [url]
+    for expected in (row, older):
+        event = next(e for e in events.values() if e["info"].endswith(expected["ip"]))
+        assert event["date"] == expected["last_seen"]
+        observation = next(obj for obj in event["Object"] if obj["name"] == provider.OBSERVATION_NAME)
+        raw = next(a for a in observation["Attribute"] if a["object_relation"] == "source-record")
+        assert json.loads(base64.b64decode(raw["data"])) == expected
+        assert module.host_observation(expected["ip"], expected)[0]["uuid"] != event["uuid"]
+    api[0][url] = 200, [older, row, row]
+    assert collect(tmp_path / "repeat", params, state) == events
+
+
+@pytest.mark.parametrize("data", [{}, None, [42], [{}]])
+def test_invalid_export(api, data):
+    api[0][module.SOURCE + "api/hosts.json?scope=all"] = 200, data
+    with pytest.raises(ValueError):
+        module.gather({"all_hosts": True}, Mock())
+
+
+def test_empty_export(api, tmp_path):
+    api[0][module.SOURCE + "api/hosts.json?scope=all"] = 200, []
+    assert collect(tmp_path / "empty", {"all_hosts": True}, tmp_path / "state") == {}
+
+
+def test_export_budget_and_cancel_between_rows(api, monkeypatch):
+    api[0][module.SOURCE + "api/hosts.json?scope=all"] = 200, [HOST, dict(HOST, ip="192.0.2.2")]
+    builder = Mock()
+    builder.add.side_effect = lambda *_: setattr(builder.check_cancel, "side_effect", ValueError("cancelled"))
+    with pytest.raises(ValueError, match="cancelled"):
+        module.gather({"all_hosts": True}, builder)
+    assert builder.add.call_count == 1
+    monkeypatch.setattr(provider, "MAX_EXPORT_BYTES", 10)
+    with pytest.raises(ValueError, match="size budget"):
+        module.gather({"all_hosts": True}, Mock())
+
+
+SOURCE_ATTRIBUTE = {"type": "ip-src", "value": IP, "uuid": "7d40c53e-626d-4ddc-8522-c9907e3c25ad", "to_ids": True}
+
+
+def expand(attribute):
+    return lookup.handler(json.dumps({"attribute": attribute}))
+
+
+def test_lookup_templates_and_references(api):
+    url = module.SOURCE + "api/host/" + IP
+    api[0][url] = 200, dict(HOST, ports={"example": [443, 443], "another": [443]})
+    results = expand(SOURCE_ATTRIBUTE)["results"]
+    assert results["Attribute"] == [SOURCE_ATTRIBUTE]
+    observation, *network = results["Object"]
+    assert observation["name"] == provider.OBSERVATION_NAME
+    (ref,) = observation["ObjectReference"]
+    assert (ref["referenced_uuid"], ref["relationship_type"]) == (SOURCE_ATTRIBUTE["uuid"], "describes")
+    assert sorted(obj["name"] for obj in network) == ["domain-ip", "domain-ip", "ip-port"]
+    related = {}
+    for obj in network:
+        (ref,) = obj["ObjectReference"]
+        assert ref["object_uuid"] == obj["uuid"] and ref["referenced_uuid"] == observation["uuid"]
+        for attr in obj["Attribute"]:
+            assert attr["to_ids"] is False
+            if attr["object_relation"] == "ip":
+                assert attr["value"] == IP and attr["disable_correlation"] is True
+            else:
+                related[attr["object_relation"]] = attr
+    assert (related["domain"]["type"], related["domain"]["value"]) == ("domain", "agent.example")
+    assert related["domain"]["comment"] == "example: probable"
+    assert (related["hostname"]["type"], related["hostname"]["value"]) == ("hostname", "host.example")
+    assert (related["dst-port"]["type"], related["dst-port"]["value"]) == ("port", "443")
+    assert "another, example" in related["dst-port"]["comment"]
+    assert "Co-hosted C2 labels: example-cohosted-label" in observation["comment"]
+    assert "Fingerprint families: page" in next(
+        a["comment"] for a in observation["Attribute"] if a["object_relation"] == "framework"
+    )
+    assert expand(SOURCE_ATTRIBUTE)["results"] == results
+    other = expand(dict(SOURCE_ATTRIBUTE, uuid="08577147-9821-47ea-92bd-9422ebf0667e"))["results"]
+    assert {o["uuid"] for o in other["Object"]}.isdisjoint(o["uuid"] for o in results["Object"])
+    assert api[1] == [url] * 3
+
+
+def test_lookup_discovery_and_missing_ipv6(api):
+    assert lookup.handler(False) is False
+    assert lookup.introspection() == {"input": ["ip-src", "ip-dst"], "format": "misp_standard"}
+    assert lookup.version()["module-type"] == ["expansion"]
+    url = module.SOURCE + "api/host/2001:db8::1"
+    api[0][url] = 404, None
+    attribute = dict(SOURCE_ATTRIBUTE, type="ip-dst", value="2001:0db8::1")
+    assert expand(attribute) == {"results": {"Attribute": [attribute], "Object": []}}
+    assert api[1] == [url]
+
+
+@pytest.mark.parametrize(
+    "changes", [{"value": "fe80::1%eth0"}, {"value": "example.org"}, {"type": "domain"}, {"uuid": "bad"}]
+)
+def test_lookup_invalid_input_precedes_request(api, changes):
+    assert "error" in expand({**SOURCE_ATTRIBUTE, **changes})
+    assert not api[1]
+
+
+@pytest.mark.parametrize(
+    "status,record",
+    [(302, {}), (429, {}), (200, []), (200, dict(HOST, domains=[{"name": ""}])), (200, dict(HOST, ip="192.0.2.2"))],
+)
+def test_lookup_upstream_errors(api, status, record):
+    api[0][module.SOURCE + "api/host/" + IP] = status, record
+    assert "error" in expand(SOURCE_ATTRIBUTE)
