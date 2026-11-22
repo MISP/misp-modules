@@ -1,0 +1,340 @@
+{
+  "attributes": {
+    "access-type": {
+      "description": "The reported programmatic access type.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "action": {
+      "description": "The GitHub audit action, such as org.add_member, repository_ruleset.update or git.clone.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 10
+    },
+    "action-category": {
+      "description": "The category prefix in the reported audit action.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "actor": {
+      "description": "The GitHub account that performed the action, when reported as a username.",
+      "disable_correlation": false,
+      "misp-attribute": "github-username",
+      "to_ids": false,
+      "ui-priority": 10
+    },
+    "actor-id": {
+      "description": "The reported numeric or textual GitHub actor ID.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "actor-is-bot": {
+      "description": "GitHub's reported flag for whether the actor is a bot.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "actor-raw": {
+      "description": "The actor field as reported when it cannot be represented as a GitHub username.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "application-client-id": {
+      "description": "The reported application client ID.",
+      "disable_correlation": false,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "application-name": {
+      "description": "The reported name of the app in an integration, installation, or OAuth application event.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "created-at-raw": {
+      "description": "The original created_at field, including the source timestamp precision.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "default-workflow-permissions": {
+      "description": "The reported default permissions granted to GitHub Actions workflow tokens.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "document-id": {
+      "description": "The native audit record identifier from _document_id.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "enterprise": {
+      "description": "The reported enterprise slug or name, normally from the business field.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 8
+    },
+    "enterprise-id": {
+      "description": "The reported enterprise ID, normally from business_id.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "event-kind": {
+      "description": "Whether the action is a Git operation or another GitHub audit event.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "sane_default": [
+        "audit",
+        "git"
+      ],
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "event-time": {
+      "description": "The event time in UTC derived from created_at or, when absent, @timestamp.",
+      "disable_correlation": true,
+      "misp-attribute": "datetime",
+      "to_ids": false,
+      "ui-priority": 10
+    },
+    "git-external-id": {
+      "description": "The external identifier reported by GitHub for a Git operation.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "github-host": {
+      "description": "The GitHub hostname for this import or the analyst's reported export hostname.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 6
+    },
+    "integration": {
+      "description": "The integration identifier or name reported in the audit record.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "ip-src": {
+      "description": "The reported actor IP when it is a usable IPv4 or IPv6 address.",
+      "disable_correlation": false,
+      "misp-attribute": "ip-src",
+      "to_ids": false,
+      "ui-priority": 8
+    },
+    "oauth-application-id": {
+      "description": "The reported GitHub OAuth application ID.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "old-permission": {
+      "description": "The prior permission reported in the audit record.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "operation-type": {
+      "description": "The operation type reported by GitHub.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "organization": {
+      "description": "The reported GitHub organization, normally from the org field.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 8
+    },
+    "organization-id": {
+      "description": "The reported GitHub organization ID.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "permission": {
+      "description": "The GitHub permission reported for the action.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "previous-user": {
+      "description": "The prior GitHub username reported in old_user.",
+      "disable_correlation": false,
+      "misp-attribute": "github-username",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "previous-user-raw": {
+      "description": "The prior account field when it cannot be represented as a GitHub username.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "previous-visibility": {
+      "description": "The prior visibility reported for the repository.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "raw-record": {
+      "description": "The complete audit record as JSON. CSV column values are preserved as strings.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "raw-record-fragment": {
+      "description": "One JSON-encoded string fragment of a large raw audit record, ordered by the part number in the comment.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "repository": {
+      "description": "The repository name reported by GitHub, usually in owner/repository form.",
+      "disable_correlation": false,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 9
+    },
+    "repository-id": {
+      "description": "The reported GitHub repository ID from repo_id or repository_id.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "repository-selection": {
+      "description": "The repository selection mode reported for an application installation.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "request-id": {
+      "description": "The request ID reported by GitHub.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "ruleset-id": {
+      "description": "The ID of the reported repository ruleset.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "ruleset-name": {
+      "description": "The name of the reported repository ruleset.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "source-address": {
+      "description": "The original actor IP field, which may also contain a provider redaction.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "source-country-code": {
+      "description": "The country code from the reported actor location.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "target-user": {
+      "description": "The affected GitHub account reported in user or target_login.",
+      "disable_correlation": false,
+      "misp-attribute": "github-username",
+      "to_ids": false,
+      "ui-priority": 8
+    },
+    "target-user-id": {
+      "description": "The reported ID of the affected GitHub account.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "target-user-raw": {
+      "description": "The affected account field when it cannot be represented as a GitHub username.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "team": {
+      "description": "The team reported in the audit record.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "timestamp-raw": {
+      "description": "The original @timestamp field, including the source timestamp precision.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "transport": {
+      "description": "The name or code of the transport protocol reported for a Git event.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "visibility": {
+      "description": "The visibility reported for the repository.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    }
+  },
+  "description": "A GitHub organization or enterprise audit log event with its action, actor, scope and reported details.",
+  "meta-category": "misc",
+  "name": "github-audit-event",
+  "required": [
+    "action",
+    "event-time"
+  ],
+  "uuid": "ce57b745-9539-43a3-963e-fa0716581ab0",
+  "version": 1
+}
