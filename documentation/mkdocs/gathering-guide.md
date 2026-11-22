@@ -216,13 +216,14 @@ tracker has no record. Other HTTP errors fail the job.
 {"module":"offensive_agency","operation":"prepare","parameters":{"asset_ips":["192.0.2.1","2001:db8::1"]}}
 ```
 
-Asset events include the first and last observation dates, network context,
-agent names, and the provider's confirmed or probable classification.
-Each event also contains a JSON attachment with the complete response from the
-per-host API, including domains, reverse DNS, ports, fingerprint families,
-classes, cluster labels, co-hosting observations, and service details when
-provided. The attachment has a stable UUID and disabled correlation. Existing
-events receive it on import of a newer source revision.
+Each asset event contains an `offensive-agency-observation` object with the first
+and last observation dates, the IP address, network context, framework
+confidence, and a `source-record` attachment. The attachment holds the complete
+per-host API response, including domains, reverse DNS, ports, fingerprint
+families, classes, cluster labels, co-hosting observations, and service details
+when provided. The event, object, and its attributes have stable UUIDs.
+Previously imported asset events receive the object with the next newer source
+revision. MISP retains any previously imported standalone attributes.
 An observation describes software exposure. Operator intent is unknown.
 IP attributes use UTC day precision. Shared CDN addresses have correlation
 disabled. For cloud IPs, compare the observation dates with your log dates.

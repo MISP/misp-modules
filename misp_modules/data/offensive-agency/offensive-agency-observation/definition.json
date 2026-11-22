@@ -1,0 +1,69 @@
+{
+  "attributes": {
+    "asn": {
+      "description": "The autonomous system identifier reported for the address.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 7
+    },
+    "country": {
+      "description": "The country code reported for the address.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 7
+    },
+    "framework": {
+      "description": "A reported framework and the provider's confidence in the observation.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 8
+    },
+    "ip": {
+      "description": "The monitored IP address observed by the provider.",
+      "disable_correlation": true,
+      "misp-attribute": "ip-dst",
+      "to_ids": false,
+      "ui-priority": 10
+    },
+    "network-operator": {
+      "description": "The network operator reported for the address.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 7
+    },
+    "network-type": {
+      "description": "The network type reported by the provider, such as hosting, cloud, or CDN.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 8
+    },
+    "source-record": {
+      "description": "The complete per-host JSON observation returned by the provider.",
+      "disable_correlation": true,
+      "misp-attribute": "attachment",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "source-url": {
+      "description": "The Offensive Agency page for the observation.",
+      "disable_correlation": true,
+      "misp-attribute": "link",
+      "to_ids": false,
+      "ui-priority": 9
+    }
+  },
+  "description": "An Offensive Agency observation for a monitored IP address, with source context and the per-host JSON record.",
+  "meta-category": "network",
+  "name": "offensive-agency-observation",
+  "required": [
+    "ip"
+  ],
+  "uuid": "12fdf610-e071-4fe2-8da9-dec45f1db39a",
+  "version": 1
+}
