@@ -5471,6 +5471,33 @@ Optical Character Recognition (OCR) module for MISP.
 
 -----
 
+#### [OCSF Event Import](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/ocsf_import.py)
+
+Import OCSF events and selected observables from a local JSON or JSON Lines export.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/ocsf_import.py)]
+
+- **features**:
+>Preserves exact per-event JSON, schema and product provenance, and the source file SHA-256. Supports gzip, mixed event classes and extension fields, and extracts typed observables and selected endpoint, identity, process, file and finding fields. See the [usage guide](https://github.com/MISP/misp-modules/blob/main/documentation/import_mod/ocsf_import.md).
+
+- **data-source**:
+>internal
+
+- **input**:
+>A UTF-8 JSON object, JSON array or JSON Lines upload, optionally gzip-compressed.
+
+- **output**:
+>A source file and linked ocsf-event objects.
+
+- **references**:
+> - https://schema.ocsf.io/
+> - https://github.com/ocsf/examples
+> - https://docs.aws.amazon.com/security-lake/latest/userguide/open-cybersecurity-schema-framework.html
+
+- **requirements**:
+>PyMISP
+
+-----
+
 #### [OpenIOC Import](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/openiocimport.py)
 
 Import legacy OpenIOC 1.0 and 1.1 files into MISP.

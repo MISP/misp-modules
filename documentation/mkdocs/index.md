@@ -219,6 +219,7 @@ For more information: [Extending MISP with Python modules](https://www.misp-proj
 * [Microsoft Identity and Audit Logs Import](https://misp.github.io/misp-modules/import_mod/#microsoft-identity-and-audit-logs-import) - Import Entra sign-in and directory audit logs and Microsoft Purview Unified Audit Log exports.
 * [MISP JSON Import](https://misp.github.io/misp-modules/import_mod/#misp-json-import) - Module to import MISP JSON format for merging MISP events.
 * [OCR Import](https://misp.github.io/misp-modules/import_mod/#ocr-import) - Optical Character Recognition (OCR) module for MISP.
+* [OCSF Event Import](https://misp.github.io/misp-modules/import_mod/#ocsf-event-import) - Import OCSF events and selected observables from a local JSON or JSON Lines export.
 * [OpenIOC Import](https://misp.github.io/misp-modules/import_mod/#openioc-import) - Import legacy OpenIOC 1.0 and 1.1 files into MISP.
 * [OSQuery Results Import](https://misp.github.io/misp-modules/import_mod/#osquery-results-import) - Import osquery snapshots and differential results with host, query/pack and source-indicator provenance.
 * [PCAP Import](https://misp.github.io/misp-modules/import_mod/#pcap-import) - Import a PCAP or PCAPNG capture, including reassembled files, emails and network indicators.
