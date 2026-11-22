@@ -81,7 +81,6 @@ SCOPE_FIELDS = {
 }
 DETAIL_FIELDS = {
     "actor-id": ("actor_id",),
-    "actor-is-bot": ("actor_is_bot",),
     "target-user-id": ("user_id",),
     "team": ("team",),
     "operation-type": ("operation_type",),
@@ -102,8 +101,10 @@ DETAIL_FIELDS = {
     "git-external-id": ("external_id",),
     "source-address": ("actor_ip",),
     "source-country-code": ("actor_location.country_code",),
+    "user-agent": ("user_agent",),
 }
 ACCOUNT_FIELDS = {"actor": ("actor",), "target-user": ("user", "target_login"), "previous-user": ("old_user",)}
+BOOLEAN_VALUES = {"true": "1", "false": "0", "1": "1", "0": "0"}
 PLACEHOLDERS = {"none", "null", "unknown", "redacted", "n/a"}
 
 
@@ -287,6 +288,10 @@ def _event_fields(event, record, format_, host, action):
         value = _field(record, details, aliases)
         if value is not None:
             values[relation] = value
+
+    bot_flag = (_field(record, details, ("actor_is_bot",)) or "").strip().casefold()
+    if bot_flag in BOOLEAN_VALUES:
+        values["actor-is-bot"] = BOOLEAN_VALUES[bot_flag]
 
     if action.partition(".")[0] in ("integration", "integration_installation", "oauth_application"):
         name = _field(record, details, ("name",))

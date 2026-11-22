@@ -38,7 +38,7 @@
     "actor-is-bot": {
       "description": "GitHub's reported flag for whether the actor is a bot.",
       "disable_correlation": true,
-      "misp-attribute": "text",
+      "misp-attribute": "boolean",
       "to_ids": false,
       "ui-priority": 5
     },
@@ -317,6 +317,13 @@
       "description": "The name or code of the transport protocol reported for a Git event.",
       "disable_correlation": true,
       "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "user-agent": {
+      "description": "The user agent reported by GitHub for an audit or Git event.",
+      "disable_correlation": false,
+      "misp-attribute": "user-agent",
       "to_ids": false,
       "ui-priority": 5
     },

@@ -38,6 +38,7 @@ def git_records():
             "actor": "ci-app[bot]",
             "actor_is_bot": True,
             "actor_ip": "2001:0db8::8",
+            "user_agent": "git/2.49.0",
             "business": "sample-enterprise",
             "org": "sample-org",
             "repository": "sample-org/internal-repo",
@@ -72,7 +73,7 @@ def values(obj, relation):
 
 
 def test_audit_json_preserves_membership_policy_app_and_scope():
-    member = audit_event()
+    member = audit_event(actor_is_bot=False, user_agent="ExampleBrowser/1.0")
     policy = audit_event(
         _document_id="policy",
         action="business.update_default_repository_permission",
@@ -123,6 +124,14 @@ def test_audit_json_preserves_membership_policy_app_and_scope():
     assert values(first, "actor") == ["admin-user"]
     assert attr(first, "actor")[0]["type"] == "github-username"
     assert not attr(first, "actor")[0]["disable_correlation"]
+    (bot,) = attr(first, "actor-is-bot")
+    assert (bot["type"], bot["value"], bot["disable_correlation"]) == ("boolean", "0", True)
+    (user_agent,) = attr(first, "user-agent")
+    assert (user_agent["type"], user_agent["value"], user_agent["disable_correlation"]) == (
+        "user-agent",
+        "ExampleBrowser/1.0",
+        False,
+    )
     assert values(first, "target-user") == ["added-user"]
     assert values(second, "action-category") == ["business"]
     assert values(second, "old-permission") == ["write"]
@@ -148,6 +157,8 @@ def test_export_csv_keeps_dotted_headers_strings_and_multiline_cells():
         "data.permission",
         "data.old_user",
         "actor_location.country_code",
+        "actor_is_bot",
+        "data.user_agent",
         "data.events",
         "data.message",
     ]
@@ -160,6 +171,8 @@ def test_export_csv_keeps_dotted_headers_strings_and_multiline_cells():
         "write",
         "previous-user",
         "LU",
+        " False ",
+        "ExampleClient/3.1",
         '["push","issues"]',
         'note with "quotes", a comma\nand a newline',
     ]
@@ -172,6 +185,8 @@ def test_export_csv_keeps_dotted_headers_strings_and_multiline_cells():
     assert values(event, "permission") == ["write"]
     assert values(event, "previous-user") == ["previous-user"]
     assert values(event, "source-country-code") == ["LU"]
+    assert values(event, "actor-is-bot") == ["0"]
+    assert values(event, "user-agent") == ["ExampleClient/3.1"]
     assert json.loads(values(event, "raw-record")[0]) == dict(zip(header, row, strict=True))
     assert event["ObjectReference"][0]["comment"] == "CSV row ending at line 3"
 
@@ -200,11 +215,19 @@ def test_git_event_gzip_json_lines_source_and_transport():
     assert values(clone, "transport") == ["ssh"]
     assert values(push, "transport") == ["2"]
     assert values(clone, "ip-src") == ["2001:db8::8"]
-    assert values(clone, "actor-is-bot") == ["true"]
+    assert values(clone, "actor-is-bot") == ["1"]
+    assert values(clone, "user-agent") == ["git/2.49.0"]
     assert values(clone, "created-at-raw") == []
     assert values(clone, "event-time") == ["2020-12-02T17:24:34.512000+00:00"]
     assert clone["ObjectReference"][0]["comment"] == "JSON Lines line 1"
     assert push["ObjectReference"][0]["comment"] == "JSON Lines line 3"
+
+
+def test_unrecognized_bot_flag_stays_in_raw_record():
+    record = audit_event(actor_is_bot="unknown")
+    _, event = submit(record)["results"]["Object"]
+    assert not attr(event, "actor-is-bot")
+    assert json.loads(values(event, "raw-record")[0])["actor_is_bot"] == "unknown"
 
 
 def test_native_id_and_host_scope():
