@@ -4,14 +4,22 @@ import base64
 import datetime as dt
 import ipaddress
 import json
+from importlib import resources
 
 import requests
+from pymisp import MISPObject
 
 from misp_modules.lib.gathering import CONTRACT_VERSION, NAMESPACE, canonical_json, get_jobs, origin_tags, stable_uuid
 
 MODULE = "offensive_agency"
 SOURCE = "https://offensive.agency/"
 SOURCE_NAMESPACE = stable_uuid(NAMESPACE, "offensive.agency")
+OBSERVATION_NAME = "offensive-agency-observation"
+OBSERVATION_TEMPLATE = json.loads(
+    resources.files("misp_modules")
+    .joinpath("data", "offensive-agency", OBSERVATION_NAME, "definition.json")
+    .read_text(encoding="utf-8")
+)
 MAX_RESPONSE_BYTES = 8 * 1024 * 1024
 moduleinfo = {
     "name": "Offensive Agency",
@@ -52,9 +60,9 @@ def day(value):
     return dt.datetime.combine(dt.date.fromisoformat(value), dt.time.min, tzinfo=dt.timezone.utc)
 
 
-def event_for(kind, key, info, observed, path):
+def event_for(kind, key, info, observed):
     uuid = stable_uuid(SOURCE_NAMESPACE, kind, key)
-    event = {
+    return {
         "uuid": uuid,
         "info": info,
         "date": observed.date().isoformat(),
@@ -66,8 +74,6 @@ def event_for(kind, key, info, observed, path):
         "Tag": origin_tags(MODULE, "offensive.agency"),
         "Attribute": [],
     }
-    add_attribute(event, "source", "link", SOURCE + path)
-    return event
 
 
 def add_attribute(event, key, attribute_type, value, **fields):
@@ -103,7 +109,8 @@ def canonical_statistics(record):
 def statistics(record):
     observed = day(record["ref_day"])
     date = observed.date().isoformat()
-    event = event_for("statistics", date, f"Offensive Agency exposure statistics for {date}", observed, "stats")
+    event = event_for("statistics", date, f"Offensive Agency exposure statistics for {date}", observed)
+    add_attribute(event, "source", "link", SOURCE + "stats")
     for key, label in (
         ("total", "IPs in tracker history"),
         ("active", "Active IPs"),
@@ -132,41 +139,50 @@ def host_observation(ip, record):
     first, last = day(record["first_seen"]), day(record["last_seen"])
     if first > last:
         raise ValueError("Invalid Offensive Agency observation dates")
-    event = event_for("asset", ip, f"Offensive Agency observation for {ip}", last, "host/" + ip)
-    add_attribute(
-        event,
-        "asset-ip",
-        "ip-dst",
+    event = event_for("asset", ip, f"Offensive Agency observation for {ip}", last)
+    observation = MISPObject(
+        OBSERVATION_NAME, strict=True, standalone=False, misp_objects_template_custom=OBSERVATION_TEMPLATE
+    )
+    observation.uuid = stable_uuid(event["uuid"], "observation")
+    observation.first_seen = first
+    observation.last_seen = last
+
+    def add(relation, value, *, key=None, **fields):
+        observation.add_attribute(
+            relation, value=value, uuid=stable_uuid(observation.uuid, relation, key), to_ids=False, **fields
+        )
+
+    add("source-url", SOURCE + "host/" + ip)
+    add(
+        "ip",
         ip,
         disable_correlation=record.get("kind") not in ("hosting", "cloud"),
-        first_seen=first.isoformat(),
-        last_seen=last.isoformat(),
+        first_seen=first,
+        last_seen=last,
         comment="ONYPHE observation, day precision. Shared CDN addresses can serve unrelated domains.",
     )
-    for field, label in (("kind", "Network type"), ("country", "Country"), ("org", "Network operator"), ("asn", "ASN")):
+    for field, relation in (("kind", "network-type"), ("country", "country"), ("org", "network-operator"), ("asn", "asn")):
         if record.get(field):
-            add_attribute(event, field, "text", f"{label}: {record[field]}")
+            add(relation, record[field])
     tools = record["tools"]
     if not isinstance(tools, dict):
         raise ValueError("Invalid Offensive Agency agent observations")
     for name, level in sorted(tools.items()):
         if not isinstance(name, str) or level not in ("confirmed", "probable"):
             raise ValueError("Invalid Offensive Agency agent observation")
-        add_attribute(
-            event,
-            ["agent", name],
-            "text",
+        add(
+            "framework",
             f"{name}: {level}",
+            key=name,
             comment="Provider confidence in the software observation. Operator intent is unknown.",
         )
-    add_attribute(
-        event,
-        "host-json",
-        "attachment",
+    add(
+        "source-record",
         f"offensive-agency-host-{ip.replace(':', '_')}.json",
         data=base64.b64encode(canonical_json(record).encode()).decode(),
         comment="Complete per-host observation reported by Offensive Agency.",
     )
+    event["Object"] = [json.loads(observation.to_json(strict=True))]
     return event, int(last.timestamp())
 
 

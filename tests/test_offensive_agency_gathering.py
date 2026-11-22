@@ -97,7 +97,8 @@ def collect(root, params, state):
                 ]
             )
             assert event["timestamp"] == metadata["timestamp"] == metadata["publish_timestamp"]
-            assert all(UUID(a["uuid"]).version == 5 and not a["to_ids"] for a in event["Attribute"])
+            attributes = event["Attribute"] + [a for obj in event.get("Object", []) for a in obj["Attribute"]]
+            assert all(UUID(a["uuid"]).version == 5 and not a["to_ids"] for a in attributes)
             events[uuid] = event
     return events
 
@@ -137,23 +138,39 @@ def test_asset_observations_deduplicate_and_skip_missing(api, tmp_path):
     events = collect(tmp_path / "first", params, state)
     assert len(events) == 1 and calls == [present, missing]
     uuid, event = next(iter(events.items()))
-    address = next(a for a in event["Attribute"] if a["type"] == "ip-dst")
+    assert not event["Attribute"]
+    observation, = event["Object"]
+    assert observation["name"] == "offensive-agency-observation"
+    assert observation["template_uuid"] == module.OBSERVATION_TEMPLATE["uuid"]
+    assert UUID(observation["uuid"]).version == 5
+    attributes = {a["object_relation"]: a for a in observation["Attribute"]}
+    assert set(attributes) == {"ip", "source-url", "network-type", "country", "network-operator", "asn", "framework", "source-record"}
+    address = attributes["ip"]
     assert (address["value"], address["first_seen"], address["last_seen"]) == (
         IP,
         "2026-11-18T00:00:00+00:00",
         "2026-11-20T00:00:00+00:00",
     )
+    assert observation["first_seen"] == address["first_seen"]
+    assert observation["last_seen"] == address["last_seen"]
     assert address["disable_correlation"] is True
-    assert any(a["value"] == "example: probable" for a in event["Attribute"])
-    attachment = next(a for a in event["Attribute"] if a["type"] == "attachment")
+    cloud_event, _ = module.host_observation(IP, dict(HOST, kind="cloud"))
+    cloud_address = next(a for a in cloud_event["Object"][0]["Attribute"] if a["object_relation"] == "ip")
+    assert cloud_address["disable_correlation"] is False
+    assert (attributes["asn"]["type"], attributes["asn"]["value"]) == ("AS", HOST["asn"])
+    assert attributes["framework"]["value"] == "example: probable"
+    attachment = attributes["source-record"]
+    assert attachment["type"] == "attachment"
     assert attachment["value"] == f"offensive-agency-host-{IP}.json"
     assert attachment["disable_correlation"] is True
     assert json.loads(base64.b64decode(attachment["data"])) == HOST
     assert collect(tmp_path / "repeat", params, state) == events
     replies[present] = 200, dict(HOST, last_seen="2026-11-21", tools={"example": "confirmed"})
     changed = collect(tmp_path / "changed", params, state)[uuid]
-    assert {a["uuid"] for a in changed["Attribute"]} == {a["uuid"] for a in event["Attribute"]}
-    updated_attachment = next(a for a in changed["Attribute"] if a["type"] == "attachment")
+    updated, = changed["Object"]
+    assert updated["uuid"] == observation["uuid"]
+    assert {a["uuid"] for a in updated["Attribute"]} == {a["uuid"] for a in observation["Attribute"]}
+    updated_attachment = next(a for a in updated["Attribute"] if a["object_relation"] == "source-record")
     assert updated_attachment["uuid"] == attachment["uuid"]
     assert json.loads(base64.b64decode(updated_attachment["data"])) == replies[present][1]
     assert int(changed["timestamp"]) > int(event["timestamp"])
