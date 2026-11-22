@@ -7,7 +7,7 @@ from misp_modules.lib.beaconbeagle import Client, convert, integer, path_key
 from misp_modules.lib.gathering import get_jobs, origin_tags
 
 moduleinfo = {
-    "version": "1.1",
+    "version": "1.2",
     "author": "MISP Project",
     "name": "BeaconBeagle Gathering",
     "description": "Gather Cobalt Strike configurations, beacon hosts and C2 infrastructure into a MISP feed ZIP.",

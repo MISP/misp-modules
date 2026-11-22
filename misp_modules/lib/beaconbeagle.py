@@ -7,10 +7,13 @@ import math
 import re
 from ipaddress import ip_address
 from urllib.parse import quote, urlsplit
-from uuid import UUID, uuid5
+from uuid import UUID
 
 import requests
 from pymisp import MISPObject
+
+from misp_modules.lib.gathering import canonical_json as canonical
+from misp_modules.lib.gathering import stable_uuid
 
 API = "https://beaconbeagle.com/api/v1/"
 NAMESPACE = UUID("5b6e5d32-98a3-55ba-95ea-d4ae4bd695d4")
@@ -18,12 +21,8 @@ MAX_RESPONSE_BYTES = 16 * 1024 * 1024
 HASH = re.compile(r"^[a-fA-F0-9]{64}$")
 
 
-def canonical(value):
-    return json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=False, allow_nan=False)
-
-
 def identity(*parts):
-    return str(uuid5(NAMESPACE, canonical(parts)))
+    return stable_uuid(NAMESPACE, *parts)
 
 
 def integer(value, default, maximum):

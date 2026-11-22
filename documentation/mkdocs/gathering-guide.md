@@ -85,6 +85,46 @@ existing revision store; repeated collection then keeps that revision. Preserve
 the revision store when upgrading so previously imported events can receive the
 tags on their next update.
 
+## Repeat imports and corrections
+
+Every gathering producer supplies UUIDv5 identifiers for the event, its objects,
+its attributes and each object's attributes. Use `stable_uuid(namespace, *keys)`
+from `misp_modules.lib.gathering` with a fixed source namespace and a stable
+upstream record key. Scope each child to its parent. For example, a new producer
+could use the following keys for a source link:
+
+```python
+source_namespace = stable_uuid(NAMESPACE, "example.org/feed")
+event_uuid = stable_uuid(source_namespace, record["id"])
+link_uuid = stable_uuid(event_uuid, "link", record["url"])
+```
+
+Choose keys that represent the intended identity across corrections. Both
+existing producers identify their raw attachment independently of its bytes,
+so replacing the attachment content updates the same MISP attribute. Preserve
+published namespaces and key formats when updating a producer.
+
+`FeedBuilder.add()` verifies the UUID version at every level. It writes one
+copy of identical entries with the same UUID, including repeated events in a
+job. Conflicting content for one UUID within a single event or two versions of
+the same event within one feed fail generation. Objects and attributes are
+ordered by UUID. Tags are ordered by content. Producers still normalize their
+source-specific unordered collections, including those in JSON attachments.
+
+The first event revision uses the supplied source timestamp. Repeating a
+collection preserves the event and manifest timestamps and the timestamp on
+each object and attribute. A correction advances the event revision and assigns
+it to new or changed items and their containing objects. Unchanged siblings keep
+their timestamps. Source observation fields such as `first_seen` and `last_seen`
+participate in change detection. The builder supplies MISP revision timestamps.
+
+Keep the existing SQLite revision index when upgrading. For a previously
+gathered event whose content still matches the stored digest, the first run
+preserves its last emitted timestamp for every item. If the source has already
+changed, the first run assigns the new event revision to its children because
+the old index recorded only the whole-event digest. Subsequent runs track each
+child independently.
+
 ## Memory and disk use
 
 `FeedBuilder(directory)` writes each complete event to its own JSON file as it
@@ -178,7 +218,8 @@ To add another source:
 4. Add `origin_tags(module_identifier, source_domain)` from
    `misp_modules.lib.gathering` to the event's `Tag` list before `builder.add()`.
    Keep this in the gathering producer when sharing a converter with expansion.
-5. Use stable UUIDs throughout and include meaningful content in revisions.
-   Exclude volatile retrieval timestamps and scope content-filtered views.
+5. Follow the [repeat import rules](#repeat-imports-and-corrections) for UUID
+   keys and source timestamps. Scope content-filtered views and exclude volatile
+   retrieval metadata.
 6. Test reordered data, retries, corrections, limits and job lifecycle. The MISP
    integration discovers producers without a source-specific allowlist.

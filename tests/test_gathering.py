@@ -1,13 +1,16 @@
 import base64
 import copy
+import hashlib
 import json
 import os
+import sqlite3
 import tempfile
 import threading
 import time
 import tracemalloc
 import zipfile
 from concurrent.futures import ThreadPoolExecutor
+from contextlib import closing
 from pathlib import Path
 from unittest.mock import patch
 from uuid import UUID
@@ -157,7 +160,96 @@ def test_correction_keeps_event_identity_and_advances_revision(config):
     uuid = next(iter(first["events"]))
     assert list(second["events"]) == [uuid]
     assert int(second["manifest"][uuid]["timestamp"]) > int(first["manifest"][uuid]["timestamp"])
+    before, after = (feed["events"][uuid]["Event"] for feed in (first, second))
+    assert before["Object"] == after["Object"]
+    assert next(a for a in before["Attribute"] if a["type"] == "link") == next(
+        a for a in after["Attribute"] if a["type"] == "link"
+    )
+    old_raw, new_raw = (next(a for a in e["Attribute"] if a["type"] == "attachment") for e in (before, after))
+    assert old_raw["uuid"] == new_raw["uuid"]
+    assert new_raw["timestamp"] == after["timestamp"]
     assert bundle(config) == second
+
+
+def test_builder_collapses_identical_uuids_and_ignores_order_and_managed_timestamps(config, tmp_path):
+    event, observed = withaname.convert(config, FILENAME)
+    builder = gathering.FeedBuilder(tmp_path / "feed")
+    builder.add(event, observed)
+    path = builder.directory / (event["uuid"] + ".json")
+    first = path.read_bytes()
+    repeated = json.loads(first)["Event"]
+    repeated["publish_timestamp"] = repeated["timestamp"] = "999"
+    repeated["Tag"].reverse()
+    repeated["Attribute"].reverse()
+    repeated["Object"].reverse()
+    obj = repeated["Object"][0]
+    obj["Attribute"].reverse()
+    obj["Attribute"].append(dict(obj["Attribute"][0], timestamp="444"))
+    repeated["Object"].append(dict(obj, timestamp="555"))
+    repeated["Attribute"].append(dict(repeated["Attribute"][0], timestamp="666"))
+
+    builder.add(repeated, observed + 100)
+    assert builder.event_count == 1
+    assert builder.bytes_written == len(first)
+    retry = gathering.FeedBuilder(tmp_path / "retry" / "feed")
+    retry.add(repeated, observed + 200)
+    assert (retry.directory / path.name).read_bytes() == first
+    assert "timestamp" not in event
+
+
+@pytest.mark.parametrize("location", [(), ("Attribute", 0), ("Object", 0), ("Object", 0, "Attribute", 0)])
+@pytest.mark.parametrize("uuid", [None, "3c324b12-0099-410b-b33d-b32922178698"])
+def test_builder_requires_uuid5_at_every_level(config, tmp_path, location, uuid):
+    event, observed = withaname.convert(config, FILENAME)
+    item = event
+    for key in location:
+        item = item[key]
+    if uuid is None:
+        del item["uuid"]
+    else:
+        item["uuid"] = uuid
+    builder = gathering.FeedBuilder(tmp_path / "feed")
+    with pytest.raises(ValueError, match="requires a UUIDv5"):
+        builder.add(event, observed)
+    assert builder.event_count == 0
+
+
+def test_builder_rejects_conflicting_uuids(config, tmp_path):
+    event, observed = withaname.convert(config, FILENAME)
+    builder = gathering.FeedBuilder(tmp_path / "feed")
+    builder.add(event, observed)
+    with pytest.raises(ValueError, match="Conflicting gathering Event"):
+        builder.add(dict(event, info="conflict"), observed)
+    attr = event["Object"][0]["Attribute"][0]
+    event["Object"][0]["Attribute"].append(dict(attr, value="conflict"))
+    with pytest.raises(ValueError, match="Conflicting gathering Attribute"):
+        builder.add(event, observed)
+    assert builder.event_count == 1
+
+
+@pytest.mark.parametrize("changed", [False, True])
+def test_upgrade_from_event_only_revision_store(config, tmp_path, changed):
+    event, observed = withaname.convert(config, FILENAME)
+    old_revision = observed + 100
+    old_digest = hashlib.sha256(gathering.canonical_json(event).encode()).hexdigest()
+    revisions = gathering.RevisionStore()
+    with closing(sqlite3.connect(revisions.path)) as connection, connection:
+        connection.execute(
+            "CREATE TABLE revisions (uuid TEXT PRIMARY KEY, digest TEXT NOT NULL, timestamp INTEGER NOT NULL)"
+        )
+        connection.execute("INSERT INTO revisions VALUES (?, ?, ?)", (event["uuid"], old_digest, old_revision))
+    if changed:
+        event["info"] += " (corrected)"
+    builder = gathering.FeedBuilder(tmp_path / "feed", revisions)
+    builder.add(event, observed)
+    saved = json.loads((builder.directory / (event["uuid"] + ".json")).read_text())["Event"]
+    revision = int(saved["timestamp"])
+    if changed:
+        assert revision > old_revision
+    else:
+        assert revision == old_revision
+    children = saved["Attribute"] + saved["Object"] + [a for obj in saved["Object"] for a in obj["Attribute"]]
+    assert all(int(item["timestamp"]) == revision for item in children)
 
 
 def test_origin_tags_update_existing_events_without_changing_identity(config, tmp_path):

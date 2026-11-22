@@ -4,7 +4,6 @@ Jobs write ordinary manifest.json and <uuid>.json files and return a ZIP artifac
 No consumer-specific import state is kept by this service.
 """
 
-import copy
 import hashlib
 import json
 import logging
@@ -18,6 +17,7 @@ import time
 import zipfile
 from concurrent.futures import ThreadPoolExecutor
 from contextlib import closing
+from dataclasses import dataclass
 from pathlib import Path
 from uuid import UUID, uuid5
 
@@ -27,6 +27,7 @@ from misp_modules.http_debug import module_context
 
 CONTRACT_VERSION = 2
 NAMESPACE = UUID("60ad67e2-2475-5ae1-bc8d-6b706ff51e84")
+_CHILD_COLLECTIONS = {"Event": ("Attribute", "Object"), "Object": ("Attribute",), "Attribute": ()}
 
 
 def canonical_json(value):
@@ -34,6 +35,7 @@ def canonical_json(value):
 
 
 def stable_uuid(parent, *parts):
+    """Derive a UUIDv5 from a fixed namespace and ordered, JSON-serializable source keys."""
     return str(uuid5(UUID(str(parent)), canonical_json(parts)))
 
 
@@ -49,8 +51,56 @@ def origin_tags(module, source):
     ]
 
 
+def _digest(value):
+    return hashlib.sha256(canonical_json(value).encode()).hexdigest()
+
+
+@dataclass
+class _FeedItem:
+    data: dict
+    digest: str
+    parent: str | None
+
+
+def _prepare_item(kind, source, parent, items):
+    """Index the MISP hierarchy by UUID and hash only import-relevant content."""
+    try:
+        identifier = UUID(source["uuid"])
+        if identifier.version != 5:
+            raise ValueError
+    except (KeyError, AttributeError, TypeError, ValueError) as exc:
+        raise ValueError(f"Gathering {kind} requires a UUIDv5") from exc
+
+    uuid = str(identifier)
+    data = dict(source, uuid=uuid)
+    data.pop("timestamp", None)
+    if kind == "Event":
+        data.pop("publish_timestamp", None)
+    if "Tag" in data:
+        data["Tag"] = sorted(data["Tag"], key=canonical_json)
+    content = data.copy()
+    for collection in _CHILD_COLLECTIONS[kind]:
+        if collection not in data:
+            continue
+        children = {}
+        for child in data[collection]:
+            item = _prepare_item(collection, child, uuid, items)
+            children[item.data["uuid"]] = item
+        data[collection] = [children[key].data for key in sorted(children)]
+        content[collection] = {key: item.digest for key, item in children.items()}
+
+    digest = _digest([kind, content])
+    if uuid in items:
+        previous = items[uuid]
+        if previous.parent != parent or previous.digest != digest:
+            raise ValueError(f"Conflicting gathering {kind} UUID {uuid}")
+        return previous
+    items[uuid] = _FeedItem(data, digest, parent)
+    return items[uuid]
+
+
 class RevisionStore:
-    """Keep monotonically increasing event revisions across workers and restarts.
+    """Keep event, object and attribute revisions consistent across workers and restarts.
 
     Set MISP_MODULES_GATHERING_STATE_DIR to durable service-owned storage in
     production. SQLite serializes writers, including concurrent module requests.
@@ -64,23 +114,50 @@ class RevisionStore:
         self.directory.mkdir(mode=0o700, parents=True, exist_ok=True)
         self.path = self.directory / "revisions.sqlite3"
 
-    def revision(self, event_uuid, digest, source_timestamp):
+    def stamp(self, source, event, items, source_timestamp):
+        event_uuid = event.data["uuid"]
         with closing(sqlite3.connect(self.path, timeout=20)) as connection, connection:
+            connection.execute("BEGIN IMMEDIATE")
             connection.execute(
                 "CREATE TABLE IF NOT EXISTS revisions (uuid TEXT PRIMARY KEY, digest TEXT NOT NULL, timestamp INTEGER"
                 " NOT NULL)"
             )
-            connection.execute("BEGIN IMMEDIATE")
+            connection.execute(
+                "CREATE TABLE IF NOT EXISTS child_revisions (uuid TEXT PRIMARY KEY, parent TEXT NOT NULL,"
+                " digest TEXT NOT NULL, timestamp INTEGER NOT NULL)"
+            )
             previous = connection.execute(
                 "SELECT digest, timestamp FROM revisions WHERE uuid = ?", (event_uuid,)
             ).fetchone()
-            if previous and previous[0] == digest:
-                return previous[1]
+            digest = "v2:" + event.digest
             timestamp = int(source_timestamp)
             if previous:
-                timestamp = max(timestamp, previous[1] + 1, int(time.time()))
-            connection.execute("INSERT OR REPLACE INTO revisions VALUES (?, ?, ?)", (event_uuid, digest, timestamp))
-            return timestamp
+                old_digest, old_timestamp = previous
+                # Older installations hashed the raw event and stamped every child with its revision.
+                if old_digest == digest or (not old_digest.startswith("v2:") and old_digest == _digest(source)):
+                    timestamp = old_timestamp
+                else:
+                    timestamp = max(timestamp, old_timestamp + 1, int(time.time()))
+            if not previous or previous[0] != digest:
+                connection.execute("INSERT OR REPLACE INTO revisions VALUES (?, ?, ?)", (event_uuid, digest, timestamp))
+            event.data["timestamp"] = event.data["publish_timestamp"] = str(timestamp)
+
+            for uuid, item in items.items():
+                if item is event:
+                    continue
+                row = connection.execute(
+                    "SELECT parent, digest, timestamp FROM child_revisions WHERE uuid = ?", (uuid,)
+                ).fetchone()
+                if row and row[0] != item.parent:
+                    raise ValueError(f"Gathering UUID {uuid} belongs to another parent")
+                if row and row[1] == item.digest:
+                    item.data["timestamp"] = str(row[2])
+                else:
+                    connection.execute(
+                        "INSERT OR REPLACE INTO child_revisions VALUES (?, ?, ?, ?)",
+                        (uuid, item.parent, item.digest, timestamp),
+                    )
+                    item.data["timestamp"] = str(timestamp)
 
 
 class GenerationCancelled(ValueError):
@@ -101,27 +178,31 @@ class FeedBuilder:
         self.bytes_written = 0
         self.event_count = 0
         with closing(sqlite3.connect(self.index)) as connection:
-            connection.execute("CREATE TABLE manifest (uuid TEXT PRIMARY KEY, metadata TEXT NOT NULL)")
+            connection.execute(
+                "CREATE TABLE manifest (uuid TEXT PRIMARY KEY, metadata TEXT NOT NULL, digest TEXT NOT NULL)"
+            )
             connection.commit()
 
     def add(self, event, source_timestamp):
         self.check_cancel()
-        event = copy.deepcopy(event)
-        event_uuid = str(UUID(event["uuid"]))
-        digest = hashlib.sha256(canonical_json(event).encode()).hexdigest()
-        timestamp = str(self.revisions.revision(event_uuid, digest, source_timestamp))
-        event["timestamp"] = event["publish_timestamp"] = timestamp
-        for attribute in event.get("Attribute", []):
-            attribute["timestamp"] = timestamp
-        for obj in event.get("Object", []):
-            obj["timestamp"] = timestamp
-            for attribute in obj.get("Attribute", []):
-                attribute["timestamp"] = timestamp
-        metadata = {
-            key: event[key] for key in ("info", "date", "timestamp", "publish_timestamp", "Orgc", "Tag") if key in event
-        }
-        path = self.directory / f"{event_uuid}.json"
-        try:
+        items = {}
+        root = _prepare_item("Event", event, None, items)
+        event_uuid = root.data["uuid"]
+        with closing(sqlite3.connect(self.index)) as connection, connection:
+            existing = connection.execute("SELECT digest FROM manifest WHERE uuid = ?", (event_uuid,)).fetchone()
+            if existing:
+                if existing[0] == root.digest:
+                    return
+                raise ValueError(f"Conflicting gathering Event UUID {event_uuid}")
+
+            self.revisions.stamp(event, root, items, source_timestamp)
+            event = root.data
+            metadata = {
+                key: event[key]
+                for key in ("info", "date", "timestamp", "publish_timestamp", "Orgc", "Tag")
+                if key in event
+            }
+            path = self.directory / f"{event_uuid}.json"
             with path.open("x", encoding="utf-8") as output:
                 size = 0
                 for chunk in json.JSONEncoder(
@@ -131,10 +212,9 @@ class FeedBuilder:
                     if size > self.max_event_bytes or self.bytes_written + size > self.max_bytes:
                         raise ValueError("Gathering event or disk budget exceeded")
                     output.write(chunk)
-            with closing(sqlite3.connect(self.index)) as connection, connection:
-                connection.execute("INSERT INTO manifest VALUES (?, ?)", (event_uuid, canonical_json(metadata)))
-        except FileExistsError as exc:
-            raise ValueError("Duplicate event UUID in gathering result") from exc
+            connection.execute(
+                "INSERT INTO manifest VALUES (?, ?, ?)", (event_uuid, canonical_json(metadata), root.digest)
+            )
         self.bytes_written += size
         self.event_count += 1
 
