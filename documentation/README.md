@@ -5151,6 +5151,33 @@ Import selected browser, download, communication and application artifacts with 
 
 -----
 
+#### [Azure Activity Log Import](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/azure_activity_log_import.py)
+
+Import Azure Resource Manager Activity Log evidence from local JSON exports.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/azure_activity_log_import.py)]
+
+- **features**:
+>Reads Azure CLI, REST, Azure Monitor diagnostic and AzureActivity Log Analytics JSON. Keeps caller, resource, operation, result and correlation identifiers with the source file. Preserves actor authorization and explicit role-assignment targets. See the [usage guide](https://github.com/MISP/misp-modules/blob/main/documentation/import_mod/azure_activity_log_import.md).
+
+- **data-source**:
+>internal
+
+- **input**:
+>Saved Azure Activity Log JSON, optionally gzip-compressed.
+
+- **output**:
+>A source file object and linked azure-activity-log-event objects.
+
+- **references**:
+> - https://learn.microsoft.com/en-us/azure/azure-monitor/platform/activity-log-schema
+> - https://learn.microsoft.com/en-us/azure/azure-monitor/reference/tables/azureactivity
+> - https://learn.microsoft.com/en-us/azure/role-based-access-control/change-history-report
+
+- **requirements**:
+>PyMISP
+
+-----
+
 #### [PDNS COF Importer](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/cof2misp.py)
 
 Passive DNS Common Output Format (COF) MISP importer
