@@ -214,6 +214,7 @@ For more information: [Extending MISP with Python modules](https://www.misp-proj
 
 * [File and Media Metadata Import](https://misp.github.io/misp-modules/import_mod/#file-and-media-metadata-import) - Import metadata from an uploaded file without an external service.
 * [GoAML Import](https://misp.github.io/misp-modules/import_mod/#goaml-import) - Module to import MISP objects about financial transactions from GoAML files.
+* [GitHub Enterprise Audit Logs Import](https://misp.github.io/misp-modules/import_mod/#github-enterprise-audit-logs-import) - Import saved GitHub organization and enterprise audit logs and Git events.
 * [Google Cloud Audit Logs Import](https://misp.github.io/misp-modules/import_mod/#google-cloud-audit-logs-import) - Import native Google Cloud Audit Logs with authorization decisions and IAM binding changes.
 * [Google Workspace Audit Logs Import](https://misp.github.io/misp-modules/import_mod/#google-workspace-audit-logs-import) - Import saved Google Workspace login, admin, Drive and OAuth token activity.
 * [Import Blueprint](https://misp.github.io/misp-modules/import_mod/#import-blueprint) - Generic blueprint to be copy-pasted to quickly boostrap creation of import module.

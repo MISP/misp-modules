@@ -335,6 +335,32 @@ Module to import MISP objects about financial transactions from GoAML files.
 
 -----
 
+#### [GitHub Enterprise Audit Logs Import](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/github_enterprise_audit_import.py)
+
+Import saved GitHub organization and enterprise audit logs and Git events.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/github_enterprise_audit_import.py)]
+
+- **features**:
+>Reads audit log JSON and CSV, including GitHub's separate gzip-compressed Git-event JSON Lines export. Keeps reported enterprise, organization and repository scope and exposes actor, membership, policy and application fields. Links every event to the source file. See the [usage guide](https://github.com/MISP/misp-modules/blob/main/documentation/import_mod/github_enterprise_audit_import.md).
+
+- **data-source**:
+>internal
+
+- **input**:
+>Saved GitHub audit events as JSON, JSON Lines or CSV, optionally gzip-compressed.
+
+- **output**:
+>A source file and linked GitHub audit event objects.
+
+- **references**:
+> - https://docs.github.com/en/enterprise-cloud@latest/admin/monitoring-activity-in-your-enterprise/reviewing-audit-logs-for-your-enterprise/exporting-audit-log-activity-for-your-enterprise
+> - https://docs.github.com/en/enterprise-cloud@latest/admin/monitoring-activity-in-your-enterprise/reviewing-audit-logs-for-your-enterprise/audit-log-events-for-your-enterprise
+
+- **requirements**:
+> PyMISP
+
+-----
+
 #### [Google Cloud Audit Logs Import](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/google_cloud_audit_import.py)
 
 Import native Google Cloud Audit Logs with authorization decisions and IAM binding changes.
