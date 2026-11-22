@@ -18,6 +18,7 @@ import zipfile
 from concurrent.futures import ThreadPoolExecutor
 from contextlib import closing
 from dataclasses import dataclass
+from itertools import chain
 from pathlib import Path
 from uuid import UUID, uuid5
 
@@ -100,10 +101,10 @@ def _prepare_item(kind, source, parent, items):
 
 
 class RevisionStore:
-    """Keep event, object and attribute revisions consistent across workers and restarts.
+    """Opt-in revision history for callers that need to publish same-time corrections.
 
-    Set MISP_MODULES_GATHERING_STATE_DIR to durable service-owned storage in
-    production. SQLite serializes writers, including concurrent module requests.
+    Callers selecting this mode need a common database to agree on revisions.
+    SQLite serializes concurrent writers.
     """
 
     def __init__(self, directory=None):
@@ -170,7 +171,7 @@ class FeedBuilder:
     def __init__(self, directory, revisions=None, check_cancel=None):
         self.directory = Path(directory)
         self.directory.mkdir(mode=0o700, parents=True, exist_ok=False)
-        self.revisions = revisions or RevisionStore()
+        self.revisions = revisions
         self.check_cancel = check_cancel or (lambda: None)
         self.index = self.directory.parent / "manifest.sqlite3"
         self.max_event_bytes = int(os.environ.get("MISP_MODULES_GATHERING_MAX_EVENT_BYTES", 256 * 1024 * 1024))
@@ -181,21 +182,37 @@ class FeedBuilder:
             connection.execute(
                 "CREATE TABLE manifest (uuid TEXT PRIMARY KEY, metadata TEXT NOT NULL, digest TEXT NOT NULL)"
             )
+            connection.execute("CREATE TABLE item_uuids (uuid TEXT PRIMARY KEY) WITHOUT ROWID")
             connection.commit()
 
     def add(self, event, source_timestamp):
+        """Use the upstream revision time unless the caller explicitly supplies a RevisionStore."""
         self.check_cancel()
         items = {}
         root = _prepare_item("Event", event, None, items)
         event_uuid = root.data["uuid"]
+        source_timestamp = int(source_timestamp)
+        feed_digest = _digest([root.digest, source_timestamp])
         with closing(sqlite3.connect(self.index)) as connection, connection:
             existing = connection.execute("SELECT digest FROM manifest WHERE uuid = ?", (event_uuid,)).fetchone()
             if existing:
-                if existing[0] == root.digest:
+                if existing[0] == feed_digest:
                     return
                 raise ValueError(f"Conflicting gathering Event UUID {event_uuid}")
 
-            self.revisions.stamp(event, root, items, source_timestamp)
+            # A MISP UUID can belong to only one event. Check ownership within this job.
+            try:
+                connection.executemany("INSERT INTO item_uuids VALUES (?)", ((uuid,) for uuid in items))
+            except sqlite3.IntegrityError as exc:
+                raise ValueError("Gathering UUID reused across events in the same feed") from exc
+
+            if self.revisions is None:
+                timestamp = str(source_timestamp)
+                for item in items.values():
+                    item.data["timestamp"] = timestamp
+                root.data["publish_timestamp"] = timestamp
+            else:
+                self.revisions.stamp(event, root, items, source_timestamp)
             event = root.data
             metadata = {
                 key: event[key]
@@ -213,7 +230,7 @@ class FeedBuilder:
                         raise ValueError("Gathering event or disk budget exceeded")
                     output.write(chunk)
             connection.execute(
-                "INSERT INTO manifest VALUES (?, ?, ?)", (event_uuid, canonical_json(metadata), root.digest)
+                "INSERT INTO manifest VALUES (?, ?, ?)", (event_uuid, canonical_json(metadata), feed_digest)
             )
         self.bytes_written += size
         self.event_count += 1
@@ -230,13 +247,17 @@ class FeedBuilder:
                     separator = ","
             output.write("}")
         # ZIP central-directory records contain filenames/sizes, never event bodies.
-        with zipfile.ZipFile(destination, "w", compression=zipfile.ZIP_DEFLATED, allowZip64=True) as archive:
-            for entry in os.scandir(self.directory):
+        with (
+            zipfile.ZipFile(destination, "w", compression=zipfile.ZIP_DEFLATED, allowZip64=True) as archive,
+            closing(sqlite3.connect(self.index)) as connection,
+        ):
+            event_names = (uuid + ".json" for (uuid,) in connection.execute("SELECT uuid FROM manifest ORDER BY uuid"))
+            for name in chain(("manifest.json",), event_names):
                 self.check_cancel()
-                info = zipfile.ZipInfo(entry.name, date_time=(1980, 1, 1, 0, 0, 0))
+                info = zipfile.ZipInfo(name, date_time=(1980, 1, 1, 0, 0, 0))
                 info.compress_type = zipfile.ZIP_DEFLATED
                 info.external_attr = 0o600 << 16
-                with open(entry.path, "rb") as source, archive.open(info, "w", force_zip64=True) as output:
+                with (self.directory / name).open("rb") as source, archive.open(info, "w", force_zip64=True) as output:
                     while chunk := source.read(64 * 1024):
                         self.check_cancel()
                         output.write(chunk)

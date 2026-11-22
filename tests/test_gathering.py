@@ -1,6 +1,7 @@
 import base64
 import copy
 import hashlib
+import io
 import json
 import os
 import sqlite3
@@ -63,10 +64,10 @@ def state_directory(tmp_path, monkeypatch):
     manager.executor.shutdown(wait=True)
 
 
-def bundle(config, filename=FILENAME, deduplicate=True):
+def bundle(config, filename=FILENAME, deduplicate=True, revisions=None):
     event, timestamp = withaname.convert(config, filename, deduplicate)
     with tempfile.TemporaryDirectory() as root:
-        builder = gathering.FeedBuilder(Path(root) / "feed")
+        builder = gathering.FeedBuilder(Path(root) / "feed", revisions=revisions)
         builder.add(event, timestamp)
         builder.archive(Path(root) / "feed.zip")
         return read_feed(builder.directory)
@@ -149,14 +150,14 @@ def test_repeated_and_reordered_collection_is_identical(config):
     reordered = json.loads(json.dumps(config, sort_keys=True))
     reordered["targets"].reverse()
     assert bundle(reordered) == first
-    # A fresh store instance uses the same persisted revision.
     assert bundle(config) == first
 
 
-def test_correction_keeps_event_identity_and_advances_revision(config):
-    first = bundle(config)
+def test_explicit_revision_store_advances_same_time_corrections(config):
+    revisions = gathering.RevisionStore()
+    first = bundle(config, revisions=revisions)
     config["randoms"][0]["max"] = 8
-    second = bundle(config)
+    second = bundle(config, revisions=revisions)
     uuid = next(iter(first["events"]))
     assert list(second["events"]) == [uuid]
     assert int(second["manifest"][uuid]["timestamp"]) > int(first["manifest"][uuid]["timestamp"])
@@ -168,7 +169,7 @@ def test_correction_keeps_event_identity_and_advances_revision(config):
     old_raw, new_raw = (next(a for a in e["Attribute"] if a["type"] == "attachment") for e in (before, after))
     assert old_raw["uuid"] == new_raw["uuid"]
     assert new_raw["timestamp"] == after["timestamp"]
-    assert bundle(config) == second
+    assert bundle(config, revisions=revisions) == second
 
 
 def test_builder_collapses_identical_uuids_and_ignores_order_and_managed_timestamps(config, tmp_path):
@@ -188,11 +189,11 @@ def test_builder_collapses_identical_uuids_and_ignores_order_and_managed_timesta
     repeated["Object"].append(dict(obj, timestamp="555"))
     repeated["Attribute"].append(dict(repeated["Attribute"][0], timestamp="666"))
 
-    builder.add(repeated, observed + 100)
+    builder.add(repeated, observed)
     assert builder.event_count == 1
     assert builder.bytes_written == len(first)
     retry = gathering.FeedBuilder(tmp_path / "retry" / "feed")
-    retry.add(repeated, observed + 200)
+    retry.add(repeated, observed)
     assert (retry.directory / path.name).read_bytes() == first
     assert "timestamp" not in event
 
@@ -220,6 +221,10 @@ def test_builder_rejects_conflicting_uuids(config, tmp_path):
     builder.add(event, observed)
     with pytest.raises(ValueError, match="Conflicting gathering Event"):
         builder.add(dict(event, info="conflict"), observed)
+    with pytest.raises(ValueError, match="Conflicting gathering Event"):
+        builder.add(event, observed + 1)
+    with pytest.raises(ValueError, match="UUID reused across events"):
+        builder.add(dict(event, uuid=gathering.stable_uuid(gathering.NAMESPACE, "other event")), observed)
     attr = event["Object"][0]["Attribute"][0]
     event["Object"][0]["Attribute"].append(dict(attr, value="conflict"))
     with pytest.raises(ValueError, match="Conflicting gathering Attribute"):
@@ -252,7 +257,7 @@ def test_upgrade_from_event_only_revision_store(config, tmp_path, changed):
     assert all(int(item["timestamp"]) == revision for item in children)
 
 
-def test_origin_tags_update_existing_events_without_changing_identity(config, tmp_path):
+def test_explicit_revision_store_delivers_origin_tag_correction(config, tmp_path):
     event, observed = withaname.convert(config, FILENAME)
     old_event = copy.deepcopy(event)
     del old_event["Tag"]
@@ -288,9 +293,10 @@ def test_entry_deduplication_preserves_distinct_rules_and_scopes_observations(co
     assert {o["uuid"] for o in later["Object"]}.isdisjoint(o["uuid"] for o in collapsed["Object"])
 
 
-def test_revision_store_serializes_concurrent_requests(config):
+def test_explicit_revision_store_serializes_concurrent_requests(config):
+    revisions = gathering.RevisionStore()
     with ThreadPoolExecutor(max_workers=4) as executor:
-        results = list(executor.map(lambda _: bundle(config), range(12)))
+        results = list(executor.map(lambda _: bundle(config, revisions=revisions), range(12)))
     assert all(result == results[0] for result in results)
 
 
@@ -331,6 +337,54 @@ def transport(monkeypatch, config):
 
     monkeypatch.setattr(requests.Session, "send", send)
     return bodies, calls
+
+
+def test_background_jobs_are_independent_of_revision_history(config, transport, tmp_path, monkeypatch):
+    def generate(state, clock):
+        monkeypatch.setattr(gathering.time, "time", lambda: clock)
+        monkeypatch.setenv("MISP_MODULES_GATHERING_STATE_DIR", str(state))
+        manager = gathering.GatheringJobs(workers=1)
+        with manager.executor:
+            job = manager.submit("withaname", PARAMS, {}, withaname.gather)
+        return manager.archive_path(job["job_id"]).read_bytes()
+
+    warm, fresh = tmp_path / "warm", tmp_path / "fresh"
+    original = generate(warm, 1_800_000_000)
+    assert not (warm / "revisions.sqlite3").exists()
+    # A leftover index from an older service must have no influence on this replica.
+    legacy = warm / "revisions.sqlite3"
+    legacy.write_bytes(b"legacy index sentinel")
+    config["randoms"][0]["max"] += 1
+    bodies, _ = transport
+    bodies[withaname.SOURCE + FILENAME] = json.dumps(config).encode()
+    corrected = generate(warm, 1_800_000_100)
+    assert corrected != original
+    assert generate(fresh, 1_800_100_000) == corrected
+    assert legacy.read_bytes() == b"legacy index sentinel"
+    assert not (fresh / "revisions.sqlite3").exists()
+
+    with zipfile.ZipFile(io.BytesIO(original)) as before, zipfile.ZipFile(io.BytesIO(corrected)) as after:
+        # WithAName only supplies the date/time in the filename. The correction has the same MISP revision.
+        assert before.read("manifest.json") == after.read("manifest.json")
+        uuid, metadata = next(iter(json.loads(after.read("manifest.json")).items()))
+        event = json.loads(after.read(f"{uuid}.json"))["Event"]
+        _, observed = withaname.convert(config, FILENAME)
+        assert event["timestamp"] == event["publish_timestamp"] == metadata["timestamp"] == str(observed)
+        children = event["Attribute"] + event["Object"] + [a for obj in event["Object"] for a in obj["Attribute"]]
+        assert all(item["timestamp"] == str(observed) for item in children)
+
+
+def test_stateless_archives_are_independent_of_event_order(config, tmp_path):
+    first = withaname.convert(config, FILENAME)
+    second = withaname.convert(config, FILENAME.replace("12-00-00", "13-00-00"))
+
+    def archive(directory, events):
+        builder = gathering.FeedBuilder(directory / "feed")
+        for event, observed in events:
+            builder.add(event, observed)
+        return builder.archive(directory / "feed.zip")["sha256"]
+
+    assert archive(tmp_path / "a", (first, second)) == archive(tmp_path / "b", (second, first))
 
 
 def test_collection_filters_files_and_never_contacts_targets(transport):

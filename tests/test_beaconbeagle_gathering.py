@@ -7,7 +7,7 @@ from uuid import UUID
 import pytest
 from pymisp import MISPEvent
 
-from misp_modules.lib.gathering import FeedBuilder, GatheringJobs, RevisionStore
+from misp_modules.lib.gathering import FeedBuilder, GatheringJobs
 from misp_modules.modules.gathering import beaconbeagle_gathering as module
 from tests.test_beaconbeagle_common import ADDRESS, CONFIG_HASH, LAST, beacon_record, c2_record, config_record
 
@@ -44,7 +44,7 @@ def test_paginated_collection_archive_and_revisions(tmp_path, config_record):
         client = factory.return_value.__enter__.return_value
         client.pages.return_value = iter([{"hash": CONFIG_HASH}, {"hash": CONFIG_HASH}])
         client.get.return_value = config_record
-        builder = FeedBuilder(tmp_path / "feed", revisions=RevisionStore(tmp_path / "state"))
+        builder = FeedBuilder(tmp_path / "feed")
         module.gather({"dataset": "configs"}, builder)
         builder.archive(tmp_path / "feed.zip")
         assert builder.event_count == 1
@@ -68,12 +68,13 @@ def test_paginated_collection_archive_and_revisions(tmp_path, config_record):
         assert all(tag.local is True for tag in parsed.tags)
     changed = copy.deepcopy(config_record)
     changed["config"]["watermark"] = 456
+    changed["locations"][0]["lasttime"] = LAST + 60
     event2, timestamp2 = module.convert("configs", CONFIG_HASH, changed)
-    builder2 = FeedBuilder(tmp_path / "second" / "feed", revisions=RevisionStore(tmp_path / "state"))
+    builder2 = FeedBuilder(tmp_path / "second" / "feed")
     event2["Tag"] = event["Tag"]
     builder2.add(event2, timestamp2)
     updated = json.loads((builder2.directory / (event_uuid + ".json")).read_text())["Event"]
-    assert int(updated["timestamp"]) > LAST
+    assert int(updated["timestamp"]) == LAST + 60
     # Deployed configuration IDs must still address the existing MISP records.
     assert event_uuid == "48c26049-5ae8-5864-ab69-43feaa26c1a8"
     raw = next(a for a in updated["Attribute"] if a["type"] == "attachment")
@@ -82,12 +83,9 @@ def test_paginated_collection_archive_and_revisions(tmp_path, config_record):
     config = next(obj for obj in updated["Object"] if obj["name"] == "malware-config")
     assert config["uuid"] == "a46e029e-2458-55ca-97af-add6b9322baa"
     assert config["timestamp"] == updated["timestamp"]
-    for attribute in config["Attribute"]:
-        expected = updated["timestamp"] if attribute["object_relation"] == "config" else str(LAST)
-        assert attribute["timestamp"] == expected
-    assert [o for o in event["Object"] if o["name"] == "ip-port"] == [
-        o for o in updated["Object"] if o["name"] == "ip-port"
-    ]
+    children = updated["Attribute"] + updated["Object"] + [a for obj in updated["Object"] for a in obj["Attribute"]]
+    assert all(item["timestamp"] == str(LAST + 60) for item in children)
+    assert {obj["uuid"] for obj in updated["Object"]} == {obj["uuid"] for obj in event["Object"]}
 
 
 def test_date_filter_and_budget(tmp_path, config_record):
@@ -108,7 +106,7 @@ def test_date_filter_and_budget(tmp_path, config_record):
 
 def test_all_datasets_repeat_import(tmp_path, config_record, beacon_record, c2_record):
     def gather(directory):
-        builder = FeedBuilder(directory / "feed", revisions=RevisionStore(tmp_path / "state"))
+        builder = FeedBuilder(directory / "feed")
         with patch.object(module, "Client") as factory:
             client = factory.return_value.__enter__.return_value
             client.pages.side_effect = [[{"hash": CONFIG_HASH}], [{"ip": ADDRESS}], [{"key": "c2.example"}]]
@@ -162,7 +160,7 @@ def test_c2_feed_archive_includes_enriched_asns(tmp_path, c2_record):
         client = factory.return_value.__enter__.return_value
         client.pages.return_value = [{"key": "c2.example"}]
         client.get.return_value = c2_record
-        builder = FeedBuilder(tmp_path / "feed", revisions=RevisionStore(tmp_path / "state"))
+        builder = FeedBuilder(tmp_path / "feed")
         module.gather({"dataset": "c2"}, builder)
         builder.archive(tmp_path / "feed.zip")
     with zipfile.ZipFile(tmp_path / "feed.zip") as archive:

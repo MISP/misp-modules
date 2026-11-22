@@ -3,4 +3,4 @@
 Gather witha.name DDoSia configurations as a deterministic MISP feed.
 
 See the [gathering guide](gathering-guide.md) for the versioned contract, parameters,
-revision storage and instructions for adding another source.
+source timestamps and instructions for adding another source.
