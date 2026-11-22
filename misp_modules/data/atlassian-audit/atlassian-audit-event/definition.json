@@ -1,0 +1,275 @@
+{
+  "attributes": {
+    "action-id": {
+      "description": "The action identifier reported by the Organizations Events API or an export column.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 10
+    },
+    "activity": {
+      "description": "The activity label reported in an Atlassian Administration CSV export.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 10
+    },
+    "actor-email": {
+      "description": "The reported email address of the actor.",
+      "disable_correlation": false,
+      "misp-attribute": "email-src",
+      "to_ids": false,
+      "ui-priority": 8
+    },
+    "actor-email-raw": {
+      "description": "The actor's email field when Atlassian reports a label, redaction, or another value.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "actor-id": {
+      "description": "The reported Atlassian identifier of the actor.",
+      "disable_correlation": false,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 8
+    },
+    "actor-name": {
+      "description": "The reported name or label of the actor.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 9
+    },
+    "app-id": {
+      "description": "The reported identifier of the app that triggered the event.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "app-name": {
+      "description": "The reported app name or product label.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "app-type": {
+      "description": "The app type reported for the actor.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "auth-type": {
+      "description": "The reported authentication type used for the action.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "city": {
+      "description": "The city Atlassian reported for the source address.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "country": {
+      "description": "The country Atlassian reported for the source address.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "event-id": {
+      "description": "The audit event identifier reported by Atlassian.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 8
+    },
+    "event-time": {
+      "description": "The event timestamp normalized to UTC when a time and offset are available.",
+      "disable_correlation": true,
+      "misp-attribute": "datetime",
+      "to_ids": false,
+      "ui-priority": 10
+    },
+    "event-time-raw": {
+      "description": "The original event time, or the date and time joined from the CSV columns.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 8
+    },
+    "ip-src": {
+      "description": "The reported source address as a valid IPv4 or IPv6 address.",
+      "disable_correlation": false,
+      "misp-attribute": "ip-src",
+      "to_ids": false,
+      "ui-priority": 8
+    },
+    "location": {
+      "description": "The reported location label or legacy API geo value.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "message-format": {
+      "description": "The declared format of the encrypted audit message.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "on-behalf-of-email": {
+      "description": "The email address of the account on whose behalf the actor acted.",
+      "disable_correlation": false,
+      "misp-attribute": "email-src",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "on-behalf-of-email-raw": {
+      "description": "The reported delegated account's email field when it cannot be represented as an email.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "on-behalf-of-id": {
+      "description": "The Atlassian identifier of the account on whose behalf the actor acted.",
+      "disable_correlation": false,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "on-behalf-of-name": {
+      "description": "The reported name of the account on whose behalf the actor acted.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "organization": {
+      "description": "The organization name reported in the export.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "organization-id": {
+      "description": "The organization identifier from the export or supplied by the analyst.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 9
+    },
+    "processed-time-raw": {
+      "description": "The original API processedAt timestamp from an events stream response.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "raw-record": {
+      "description": "The complete audit record as JSON. CSV cell values remain strings.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "raw-record-fragment": {
+      "description": "One JSON-encoded string fragment of a large raw audit record, ordered by the part number in the comment.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "region": {
+      "description": "The region Atlassian reported for the source address.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "site": {
+      "description": "A reported or analyst-supplied site name or URL.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 8
+    },
+    "site-id": {
+      "description": "A reported Atlassian site or cloud ID.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 8
+    },
+    "source-address": {
+      "description": "The original source IP field, including any reported redaction.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "source-format": {
+      "description": "The format of the saved audit export.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "sane_default": [
+        "csv",
+        "json"
+      ],
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "token-id": {
+      "description": "The authentication token identifier reported by Atlassian.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "token-label": {
+      "description": "The reported label of the authentication token.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "unit": {
+      "description": "The unit name reported in the export.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "unit-id": {
+      "description": "The unit identifier reported in the export.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    }
+  },
+  "description": "An Atlassian Cloud organization or site audit event with the reported activity, actor, scope and source context.",
+  "meta-category": "misc",
+  "name": "atlassian-audit-event",
+  "required": [
+    "event-time-raw"
+  ],
+  "requiredOneOf": [
+    "action-id",
+    "activity"
+  ],
+  "uuid": "06a69130-f02b-4cc8-bec4-a5605e5b69ad",
+  "version": 1
+}
