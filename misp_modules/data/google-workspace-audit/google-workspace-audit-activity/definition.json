@@ -1,0 +1,119 @@
+{
+  "attributes": {
+    "activity-qualifier": {
+      "description": "The reported uniqueQualifier from the native activity ID, stored as text to retain all digits.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "activity-time": {
+      "description": "The activity timestamp in UTC with up to microsecond precision.",
+      "disable_correlation": true,
+      "misp-attribute": "datetime",
+      "to_ids": false,
+      "ui-priority": 10
+    },
+    "activity-time-raw": {
+      "description": "The exact time field from the native activity ID, including its original precision and offset.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "actor-email": {
+      "description": "The actor email reported by Google Workspace. The field can also contain a placeholder.",
+      "disable_correlation": false,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 10
+    },
+    "actor-key": {
+      "description": "The reported actor key, which may identify an OAuth requester or a robot account.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "actor-profile-id": {
+      "description": "The reported Google Workspace actor profile identifier. The field can also contain a placeholder.",
+      "disable_correlation": false,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "application-name": {
+      "description": "The Google Workspace Reports API application from the native activity ID.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 10,
+      "values_list": [
+        "login",
+        "admin",
+        "drive",
+        "token"
+      ]
+    },
+    "caller-type": {
+      "description": "The reported type of actor.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "customer-id": {
+      "description": "The Workspace customer identifier from the native activity ID.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 8
+    },
+    "ip-src": {
+      "description": "The reported source address when it is a valid IPv4 or IPv6 address.",
+      "disable_correlation": false,
+      "misp-attribute": "ip-src",
+      "to_ids": false,
+      "ui-priority": 8
+    },
+    "oauth-application-name": {
+      "description": "The name of the application used to perform the activity, when reported by Google.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "oauth-client-id": {
+      "description": "The OAuth client ID of the application used to perform the activity.",
+      "disable_correlation": false,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "owner-domain": {
+      "description": "The resource owner domain reported for this activity.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "source-address": {
+      "description": "The original ipAddress field from the activity, including any provider label or redaction.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    }
+  },
+  "description": "An activity from the Google Workspace Reports API with its native compound ID, actor and source context.",
+  "meta-category": "misc",
+  "name": "google-workspace-audit-activity",
+  "required": [
+    "activity-qualifier",
+    "activity-time-raw",
+    "application-name",
+    "customer-id"
+  ],
+  "uuid": "674a2223-4012-4bc0-8456-a64f29ce0199",
+  "version": 1
+}
