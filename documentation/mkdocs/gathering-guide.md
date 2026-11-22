@@ -216,19 +216,35 @@ tracker has no record. Other HTTP errors fail the job.
 {"module":"offensive_agency","operation":"prepare","parameters":{"asset_ips":["192.0.2.1","2001:db8::1"]}}
 ```
 
-Each asset event contains an `offensive-agency-observation` object with the first
-and last observation dates, the IP address, network context, framework
-confidence, and a `source-record` attachment. The attachment holds the complete
-per-host API response, including domains, reverse DNS, ports, fingerprint
-families, classes, cluster labels, co-hosting observations, and service details
-when provided. The event, object, and its attributes have stable UUIDs.
+To collect every host in the tracker's history, set `all_hosts` to `true`
+and leave `asset_ips` empty. This makes one request to
+`/api/hosts.json?scope=all`, including hosts outside the active window, and
+emits one event per IP. The job fails if the decoded response exceeds 64 MiB.
+
+```json
+{"module":"offensive_agency","operation":"prepare","parameters":{"all_hosts":true}}
+```
+
+Each host event contains an `offensive-agency-observation` object with the
+observation dates, IP address, network context and framework confidence.
+Linked `domain-ip` objects represent observed domains and reverse DNS names.
+Linked `ip-port` objects identify the frameworks observed on each port.
+The observation's `source-record` attachment preserves every field in the
+original row, including provider-specific labels. Inventory lookups also retain
+the service details supplied by the per-IP endpoint.
+
+The bulk and inventory feeds have distinct event UUIDs for the same IP so a
+bulk row cannot overwrite the richer per-IP record. Repeated collections in
+each mode retain their event, object and attribute UUIDs.
 Previously imported asset events receive the object with the next newer source
 revision. MISP retains any previously imported standalone attributes.
 An observation describes software exposure. Operator intent is unknown.
 IP attributes use UTC day precision. Shared CDN addresses have correlation
 disabled. For cloud IPs, compare the observation dates with your log dates.
 All attributes have IDS export disabled. The module requires no API key and
-makes requests only to the provider. [Source methodology and exports](https://offensive.agency/about)
+makes requests only to the provider. Analysts can also enrich a single IP
+attribute with [Offensive Agency Lookup](https://github.com/MISP/misp-modules/blob/main/documentation/expansion/offensive_agency_lookup.md).
+[Source methodology and exports](https://offensive.agency/about)
 
 ## Durable revisions and additional producers
 
