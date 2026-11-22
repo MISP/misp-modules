@@ -21,7 +21,7 @@ FILENAME = re.compile(r"^(\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2})_DDoSia-target-lis
 MAX_SOURCE_BYTES = 8 * 1024 * 1024
 
 moduleinfo = {
-    "version": "0.3",
+    "version": "0.4",
     "author": "MISP Project",
     "description": "Gather witha.name DDoSia configurations as a deterministic MISP feed.",
     "module-type": ["gathering"],

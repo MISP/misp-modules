@@ -79,18 +79,57 @@ the vocabulary; locality is set explicitly in each generated tag. Enable the
 taxonomy to make its descriptions available in the tag picker. Creating an
 unknown tag on import remains subject to the importing user's MISP permissions.
 
-The tags are deterministic and do not alter event, object or attribute UUIDs.
-Adding them to previously generated events advances their revision through the
-existing revision store; repeated collection then keeps that revision. Preserve
-the revision store when upgrading so previously imported events can receive the
-tags on their next update.
+The tags use stable values across collections. Existing MISP events receive
+updated tags when the feed supplies a newer event revision.
+
+## Repeat imports and corrections
+
+Every gathering producer supplies UUIDv5 identifiers for the event, its objects,
+its attributes and each object's attributes. Use `stable_uuid(namespace, *keys)`
+from `misp_modules.lib.gathering` with a fixed source namespace and a stable
+upstream record key. Scope each child to its parent. For example, a new producer
+could use the following keys for a source link:
+
+```python
+source_namespace = stable_uuid(NAMESPACE, "example.org/feed")
+event_uuid = stable_uuid(source_namespace, record["id"])
+link_uuid = stable_uuid(event_uuid, "link", record["url"])
+```
+
+Choose keys that represent the intended identity across corrections. Both
+existing producers identify their raw attachment independently of its bytes,
+so replacing the attachment content updates the same MISP attribute. Preserve
+published namespaces and key formats when updating a producer.
+
+`FeedBuilder.add()` verifies the UUID version at every level. It writes one
+copy of identical entries with the same UUID, including repeated events in a
+job. Conflicting content for one UUID within a single event or two versions of
+the same event within one feed fail generation. Objects and attributes are
+ordered by UUID. Tags are ordered by content. Producers still normalize their
+source-specific unordered collections, including those in JSON attachments.
+
+Standard gathering jobs use the producer's UTC source timestamp (Unix seconds)
+for the event, its publish timestamp, the manifest, and every object and
+attribute. Supply a time intrinsic to the source record, such as its upstream
+modification time or snapshot date. Replicas running the same converter on
+the same source data generate identical records and revisions, even with
+different local histories and clocks. The service ignores old
+`revisions.sqlite3` files.
+
+MISP looks up the event by UUID. It adds a new UUID and schedules an existing
+event for editing only when the incoming timestamp exceeds the stored one.
+An exact repeat is skipped. A source correction with the same timestamp is
+also skipped. After upgrading from a stateful producer, an already-imported
+event can have a locally generated revision ahead of its source time. The
+next source revision must exceed that stored timestamp for MISP to update it.
+[MISP feed import logic](https://github.com/MISP/MISP/blob/2d7de9643b9677231faf5660d8eca1cc9a090be2/app/Model/Feed.php#L260-L278)
 
 ## Memory and disk use
 
 `FeedBuilder(directory)` writes each complete event to its own JSON file as it
-arrives. A temporary SQLite manifest index is streamed into `manifest.json` at
-completion. ZIP creation reads those files in 64 KiB chunks; the full feed and
-archive are never assembled in memory. The temporary feed directory and index
+arrives. Each job keeps a temporary SQLite index to check UUID uniqueness and
+stream `manifest.json` at completion. ZIP creation reads the event files in
+64 KiB chunks. The temporary feed directory and index
 are deleted after the ZIP is ready. Peak event-content memory is proportional
 to the largest event, with additional source-listing and ZIP central-directory
 metadata proportional to the number of files. A single unusually large event
@@ -101,7 +140,7 @@ Operator budgets fail a generation explicitly; they never silently truncate it:
 
 | Environment variable | Default |
 | --- | --- |
-| `MISP_MODULES_GATHERING_STATE_DIR` | Service-UID directory under the system temporary directory; set a durable directory in production. |
+| `MISP_MODULES_GATHERING_STATE_DIR` | Service-UID directory under the system temporary directory. Stores job status and ZIP artifacts. Set a durable directory to retain them across restarts. |
 | `MISP_MODULES_GATHERING_WORKERS` | 2 background generation workers per service process. |
 | `MISP_MODULES_GATHERING_QUEUE` | 8 additional queued jobs per service process. |
 | `MISP_MODULES_GATHERING_TIMEOUT` | 86400 seconds; producers must check cooperative cancellation. |
@@ -142,10 +181,9 @@ and random definitions is normalized for reproducibility.
 Listed systems are victim targets: all generated attributes disable IDS export
 and correlation. UUIDv5 identifiers are stable and scoped to the source, event,
 rule and attribute. Switching entry deduplication selects a separate view identity;
-date windows only select complete events. Content changes keep the event UUID
-and advance its timestamp through the shared revision index. A changed rule has
-a new object UUID; no deletion tombstones are emitted, so normal MISP merge
-semantics can retain previous rule versions after a historical correction.
+date windows only select complete events. The snapshot filename fixes its event
+UUID and timestamp for a given view. Rewriting a file under the same name
+keeps the same event revision. MISP skips that revision on repeat import.
 
 ## BeaconBeagle
 
@@ -158,13 +196,13 @@ for requests, conversion details and source limitations.
 
 ## Durable revisions and additional producers
 
-Preserve the SQLite revision index in `MISP_MODULES_GATHERING_STATE_DIR` across
-upgrades. All workers/replicas serving the same feed need the same conversion
-version and shared storage suitable for SQLite locking, or one designated
-producer. Losing the index can prevent a historical correction from receiving a
-newer revision than an already imported copy. Credentials and request parameters
-are not written to job status files; normal module config/defaults are available
-to the background producer in memory.
+A custom caller can explicitly pass
+`FeedBuilder(directory, revisions=RevisionStore(path))` when it needs to
+publish corrections whose upstream timestamp stays fixed. This opts into
+history-dependent, per-item revisions. Such callers need a common revision
+store to agree across instances. Standard module handlers use the stateless
+builder. Each job still needs local space for its temporary manifest, status
+and feed ZIP. Credentials and request parameters stay in worker memory.
 
 To add another source:
 
@@ -178,7 +216,8 @@ To add another source:
 4. Add `origin_tags(module_identifier, source_domain)` from
    `misp_modules.lib.gathering` to the event's `Tag` list before `builder.add()`.
    Keep this in the gathering producer when sharing a converter with expansion.
-5. Use stable UUIDs throughout and include meaningful content in revisions.
-   Exclude volatile retrieval timestamps and scope content-filtered views.
+5. Follow the [repeat import rules](#repeat-imports-and-corrections) for UUID
+   keys and source timestamps. Scope content-filtered views and exclude volatile
+   retrieval metadata.
 6. Test reordered data, retries, corrections, limits and job lifecycle. The MISP
    integration discovers producers without a source-specific allowlist.

@@ -2,11 +2,12 @@ import copy
 import json
 import zipfile
 from unittest.mock import Mock, patch
+from uuid import UUID
 
 import pytest
 from pymisp import MISPEvent
 
-from misp_modules.lib.gathering import FeedBuilder, GatheringJobs, RevisionStore
+from misp_modules.lib.gathering import FeedBuilder, GatheringJobs
 from misp_modules.modules.gathering import beaconbeagle_gathering as module
 from tests.test_beaconbeagle_common import ADDRESS, CONFIG_HASH, LAST, beacon_record, c2_record, config_record
 
@@ -43,7 +44,7 @@ def test_paginated_collection_archive_and_revisions(tmp_path, config_record):
         client = factory.return_value.__enter__.return_value
         client.pages.return_value = iter([{"hash": CONFIG_HASH}, {"hash": CONFIG_HASH}])
         client.get.return_value = config_record
-        builder = FeedBuilder(tmp_path / "feed", revisions=RevisionStore(tmp_path / "state"))
+        builder = FeedBuilder(tmp_path / "feed")
         module.gather({"dataset": "configs"}, builder)
         builder.archive(tmp_path / "feed.zip")
         assert builder.event_count == 1
@@ -67,11 +68,24 @@ def test_paginated_collection_archive_and_revisions(tmp_path, config_record):
         assert all(tag.local is True for tag in parsed.tags)
     changed = copy.deepcopy(config_record)
     changed["config"]["watermark"] = 456
+    changed["locations"][0]["lasttime"] = LAST + 60
     event2, timestamp2 = module.convert("configs", CONFIG_HASH, changed)
-    builder2 = FeedBuilder(tmp_path / "second" / "feed", revisions=RevisionStore(tmp_path / "state"))
+    builder2 = FeedBuilder(tmp_path / "second" / "feed")
+    event2["Tag"] = event["Tag"]
     builder2.add(event2, timestamp2)
     updated = json.loads((builder2.directory / (event_uuid + ".json")).read_text())["Event"]
-    assert int(updated["timestamp"]) > LAST
+    assert int(updated["timestamp"]) == LAST + 60
+    # Deployed configuration IDs must still address the existing MISP records.
+    assert event_uuid == "48c26049-5ae8-5864-ab69-43feaa26c1a8"
+    raw = next(a for a in updated["Attribute"] if a["type"] == "attachment")
+    assert raw["uuid"] == "92bcdb00-d792-5613-aa56-8428945f4b13"
+    assert raw["timestamp"] == updated["timestamp"]
+    config = next(obj for obj in updated["Object"] if obj["name"] == "malware-config")
+    assert config["uuid"] == "a46e029e-2458-55ca-97af-add6b9322baa"
+    assert config["timestamp"] == updated["timestamp"]
+    children = updated["Attribute"] + updated["Object"] + [a for obj in updated["Object"] for a in obj["Attribute"]]
+    assert all(item["timestamp"] == str(LAST + 60) for item in children)
+    assert {obj["uuid"] for obj in updated["Object"]} == {obj["uuid"] for obj in event["Object"]}
 
 
 def test_date_filter_and_budget(tmp_path, config_record):
@@ -90,19 +104,34 @@ def test_date_filter_and_budget(tmp_path, config_record):
             module.gather({"dataset": "configs", "max_events": 1}, builder)
 
 
-def test_all_datasets(config_record, beacon_record, c2_record):
-    with patch.object(module, "Client") as factory:
-        client = factory.return_value.__enter__.return_value
-        client.pages.side_effect = [[{"hash": CONFIG_HASH}], [{"ip": ADDRESS}], [{"key": "c2.example"}]]
-        client.get.side_effect = [config_record, beacon_record, c2_record]
-        builder = Mock()
-        module.gather({}, builder)
-        assert builder.add.call_count == 3
-        for call in builder.add.call_args_list:
-            assert call.args[0]["Tag"] == [
+def test_all_datasets_repeat_import(tmp_path, config_record, beacon_record, c2_record):
+    def gather(directory):
+        builder = FeedBuilder(directory / "feed")
+        with patch.object(module, "Client") as factory:
+            client = factory.return_value.__enter__.return_value
+            client.pages.side_effect = [[{"hash": CONFIG_HASH}], [{"ip": ADDRESS}], [{"key": "c2.example"}]]
+            client.get.side_effect = [config_record, beacon_record, c2_record]
+            module.gather({}, builder)
+        builder.archive(directory / "feed.zip")
+        with zipfile.ZipFile(directory / "feed.zip") as archive:
+            return {name: archive.read(name) for name in archive.namelist()}
+
+    first = gather(tmp_path / "first")
+    assert gather(tmp_path / "repeat") == first
+    manifest = json.loads(first["manifest.json"])
+    assert len(manifest) == 3
+    for uuid, metadata in manifest.items():
+        event = json.loads(first[uuid + ".json"])["Event"]
+        assert (
+            event["Tag"]
+            == metadata["Tag"]
+            == [
                 {"name": 'misp-gathering:module="beaconbeagle_gathering"', "local": True},
                 {"name": 'misp-gathering:source="beaconbeagle.com"', "local": True},
             ]
+        )
+        items = [event, *event["Attribute"], *event["Object"], *(a for o in event["Object"] for a in o["Attribute"])]
+        assert all(UUID(item["uuid"]).version == 5 and item["timestamp"] == metadata["timestamp"] for item in items)
 
 
 def test_origin_tags_preserve_converter_tags_and_do_not_modify_shared_conversion(config_record):
@@ -131,7 +160,7 @@ def test_c2_feed_archive_includes_enriched_asns(tmp_path, c2_record):
         client = factory.return_value.__enter__.return_value
         client.pages.return_value = [{"key": "c2.example"}]
         client.get.return_value = c2_record
-        builder = FeedBuilder(tmp_path / "feed", revisions=RevisionStore(tmp_path / "state"))
+        builder = FeedBuilder(tmp_path / "feed")
         module.gather({"dataset": "c2"}, builder)
         builder.archive(tmp_path / "feed.zip")
     with zipfile.ZipFile(tmp_path / "feed.zip") as archive:

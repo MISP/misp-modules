@@ -62,9 +62,10 @@ seen times; configured C2 names have no invented observation time.
 
 All generated attributes have `to_ids=false` for analyst review. The source can
 include legitimate testing infrastructure. Distribution defaults to organisation
-only. Stable UUIDs and the gathering revision store support repeat imports and
-source corrections; ordinary MISP merging may retain older attributes. A record
-without observation times uses the Unix epoch rather than retrieval time.
+only. The feed uses stable UUIDs and the latest upstream observation time for its
+MISP revision. A repeat collection on another module instance generates the
+same records. MISP updates an existing event when that observation time
+advances. A record without observation times uses the Unix epoch.
 
 Requests use TLS verification, finite timeouts, no redirects, cancellation checks
 and a 16 MiB response budget. HTTP errors (including rate limits), invalid records
