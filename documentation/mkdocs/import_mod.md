@@ -308,6 +308,33 @@ Module to import MISP objects about financial transactions from GoAML files.
 
 -----
 
+#### [Google Cloud Audit Logs Import](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/google_cloud_audit_import.py)
+
+Import native Google Cloud Audit Logs with authorization decisions and IAM binding changes.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/google_cloud_audit_import.py)]
+
+- **features**:
+>Reads saved Cloud Logging LogEntry JSON, including gcloud arrays and Logging API pages. Maps principals, services, methods, resources, status codes, permission checks and IAM binding changes. Links each imported event to the source file and optionally attaches the exact upload. See the [usage guide](https://github.com/MISP/misp-modules/blob/main/documentation/import_mod/google_cloud_audit_import.md).
+
+- **data-source**:
+>internal
+
+- **input**:
+>A Google Cloud Logging LogEntry, JSON array or entries.list response, optionally gzip-compressed.
+
+- **output**:
+>A source file and linked Google Cloud audit events, permission checks and IAM binding changes.
+
+- **references**:
+> - https://docs.cloud.google.com/logging/docs/audit/understanding-audit-logs
+> - https://docs.cloud.google.com/logging/docs/reference/audit/auditlog/rest/Shared.Types/AuditLog
+> - https://docs.cloud.google.com/iam/docs/review-iam-policy-history
+
+- **requirements**:
+>PyMISP
+
+-----
+
 #### [Import Blueprint](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/import_blueprint.py)
 
 Generic blueprint to be copy-pasted to quickly boostrap creation of import module.

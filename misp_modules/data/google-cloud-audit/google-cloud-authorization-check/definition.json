@@ -1,0 +1,66 @@
+{
+  "attributes": {
+    "decision": {
+      "description": "Decision explicitly reported by this check. Unknown indicates that granted was absent.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 9,
+      "values_list": [
+        "granted",
+        "denied",
+        "unknown"
+      ]
+    },
+    "permission": {
+      "description": "IAM permission checked for this resource.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 9
+    },
+    "permission-type": {
+      "description": "Type of IAM permission reported for the check.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "resource-attribute-name": {
+      "description": "Resource name reported in attributes used for condition evaluation.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "resource-name": {
+      "description": "Resource accessed according to the authorization check.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 9
+    },
+    "resource-service": {
+      "description": "Resource service reported for condition evaluation.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "resource-type": {
+      "description": "Resource type reported for condition evaluation.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    }
+  },
+  "description": "One IAM authorization check reported within a Google Cloud audit log entry.",
+  "meta-category": "misc",
+  "name": "google-cloud-authorization-check",
+  "required": [
+    "decision"
+  ],
+  "uuid": "57badbc9-0343-4a24-a57a-24e781ada29d",
+  "version": 1
+}

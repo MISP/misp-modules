@@ -1,0 +1,42 @@
+{
+  "attributes": {
+    "action": {
+      "description": "Binding action reported in the IAM policy delta, such as ADD or REMOVE.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "condition": {
+      "description": "JSON with the reported IAM binding condition expression or identifying fields.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "member": {
+      "description": "IAM member or principal named in this binding change.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 9
+    },
+    "role": {
+      "description": "IAM role named in this binding change.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 9
+    }
+  },
+  "description": "One IAM allow-policy binding change reported in a Google Cloud audit log entry.",
+  "meta-category": "misc",
+  "name": "google-cloud-iam-binding-change",
+  "requiredOneOf": [
+    "action",
+    "role",
+    "member"
+  ],
+  "uuid": "aed13c6f-c5e7-4593-8c32-6c10abf5bc83",
+  "version": 1
+}

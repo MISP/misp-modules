@@ -213,6 +213,7 @@ For more information: [Extending MISP with Python modules](https://www.misp-proj
 
 * [File and Media Metadata Import](https://misp.github.io/misp-modules/import_mod/#file-and-media-metadata-import) - Import metadata from an uploaded file without an external service.
 * [GoAML Import](https://misp.github.io/misp-modules/import_mod/#goaml-import) - Module to import MISP objects about financial transactions from GoAML files.
+* [Google Cloud Audit Logs Import](https://misp.github.io/misp-modules/import_mod/#google-cloud-audit-logs-import) - Import native Google Cloud Audit Logs with authorization decisions and IAM binding changes.
 * [Import Blueprint](https://misp.github.io/misp-modules/import_mod/#import-blueprint) - Generic blueprint to be copy-pasted to quickly boostrap creation of import module.
 * [Joe Sandbox Import](https://misp.github.io/misp-modules/import_mod/#joe-sandbox-import) - A module to import data from a Joe Sandbox analysis json report.
 * [Lastline Import](https://misp.github.io/misp-modules/import_mod/#lastline-import) - Deprecation notice: this module will be deprecated by December 2021, please use vmware_nsx module.  Module to import and parse reports from Lastline analysis links.
