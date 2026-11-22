@@ -1,0 +1,244 @@
+{
+  "attributes": {
+    "actor-alternate-id": {
+      "description": "Alternate identifier reported for the actor.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "actor-display-name": {
+      "description": "Display name reported for the actor.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "actor-id": {
+      "description": "ID of the actor reported for this event.",
+      "disable_correlation": false,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 9
+    },
+    "actor-type": {
+      "description": "Type of the actor reported for this event.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "authentication-interface": {
+      "description": "Interface reported in authenticationContext.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "authentication-provider": {
+      "description": "Authentication provider reported in authenticationContext.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "authentication-step": {
+      "description": "Ordinal of the authentication step reported by Okta.",
+      "disable_correlation": true,
+      "misp-attribute": "counter",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "client-address": {
+      "description": "Original actor client address reported by Okta.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "client-device": {
+      "description": "Client device label reported by Okta.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "client-ip": {
+      "description": "Validated address from the reported client IP field.",
+      "disable_correlation": false,
+      "misp-attribute": "ip-src",
+      "to_ids": false,
+      "ui-priority": 9
+    },
+    "client-zone": {
+      "description": "Client network zone reported by Okta.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "credential-provider": {
+      "description": "Credential provider reported in authenticationContext.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "credential-type": {
+      "description": "Credential type reported in authenticationContext.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "event-id": {
+      "description": "Native event identifier reported in the Okta uuid field.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 9
+    },
+    "event-type": {
+      "description": "Event type reported by Okta.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 9
+    },
+    "external-session-id": {
+      "description": "Reported ID of the individual Okta session.",
+      "disable_correlation": false,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 9
+    },
+    "issuer-id": {
+      "description": "Issuer ID reported in authenticationContext.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "issuer-type": {
+      "description": "Issuer type reported in authenticationContext.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "legacy-event-type": {
+      "description": "Legacy equivalent of the Okta event type where reported.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "message": {
+      "description": "Display message reported for the event.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "outcome": {
+      "description": "Outcome result reported by Okta.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 9
+    },
+    "outcome-reason": {
+      "description": "Reason reported for the outcome.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "published": {
+      "description": "Reported publication time normalized to UTC.",
+      "disable_correlation": true,
+      "misp-attribute": "datetime",
+      "to_ids": false,
+      "ui-priority": 9
+    },
+    "published-raw": {
+      "description": "Original publication timestamp, including full source precision and offset.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "reported-factor": {
+      "description": "Factor label reported in Okta debug data.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "reported-factor-type": {
+      "description": "Factor type reported in Okta debug data.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "request-id": {
+      "description": "Request ID reported in Okta debug data.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "root-session-id": {
+      "description": "Reported root session ID shared by related Okta sessions.",
+      "disable_correlation": false,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 9
+    },
+    "schema-version": {
+      "description": "Version reported for the native System Log event.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "severity": {
+      "description": "Event severity reported by Okta.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "transaction-id": {
+      "description": "Transaction ID reported for the Okta operation.",
+      "disable_correlation": false,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 9
+    },
+    "transaction-type": {
+      "description": "Transaction type reported for the Okta operation.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "user-agent": {
+      "description": "Raw client user agent reported by Okta.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    }
+  },
+  "description": "An Okta System Log observation with actor, client, authentication context, outcome and source provenance.",
+  "meta-category": "misc",
+  "name": "okta-system-log-event",
+  "required": [
+    "event-id",
+    "event-type"
+  ],
+  "uuid": "3b542f21-ab2a-4e80-9410-81a352596039",
+  "version": 1
+}

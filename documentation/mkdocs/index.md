@@ -222,6 +222,7 @@ For more information: [Extending MISP with Python modules](https://www.misp-proj
 * [MISP JSON Import](https://misp.github.io/misp-modules/import_mod/#misp-json-import) - Module to import MISP JSON format for merging MISP events.
 * [OCR Import](https://misp.github.io/misp-modules/import_mod/#ocr-import) - Optical Character Recognition (OCR) module for MISP.
 * [OCSF Event Import](https://misp.github.io/misp-modules/import_mod/#ocsf-event-import) - Import OCSF events and selected observables from a local JSON or JSON Lines export.
+* [Okta System Log Import](https://misp.github.io/misp-modules/import_mod/#okta-system-log-import) - Import saved Okta System Log events with typed targets and investigation links.
 * [OpenIOC Import](https://misp.github.io/misp-modules/import_mod/#openioc-import) - Import legacy OpenIOC 1.0 and 1.1 files into MISP.
 * [OSQuery Results Import](https://misp.github.io/misp-modules/import_mod/#osquery-results-import) - Import osquery snapshots and differential results with host, query/pack and source-indicator provenance.
 * [PCAP Import](https://misp.github.io/misp-modules/import_mod/#pcap-import) - Import a PCAP or PCAPNG capture, including reassembled files, emails and network indicators.

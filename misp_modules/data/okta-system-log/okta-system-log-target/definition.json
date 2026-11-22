@@ -1,0 +1,47 @@
+{
+  "attributes": {
+    "target-alternate-id": {
+      "description": "Alternate identifier reported for the target.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "target-display-name": {
+      "description": "Display name reported for the target.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "target-id": {
+      "description": "ID of the target entity reported by Okta.",
+      "disable_correlation": false,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 9
+    },
+    "target-index": {
+      "description": "One-based position of this target in the event's native target array.",
+      "disable_correlation": true,
+      "misp-attribute": "counter",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "target-type": {
+      "description": "Type of the target entity reported by Okta.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 9
+    }
+  },
+  "description": "One reported target entry within a native Okta System Log event.",
+  "meta-category": "misc",
+  "name": "okta-system-log-target",
+  "required": [
+    "target-index"
+  ],
+  "uuid": "253445c7-391a-48ee-83e6-d9e21147bcd5",
+  "version": 1
+}

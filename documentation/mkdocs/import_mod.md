@@ -510,6 +510,32 @@ Import OCSF events and selected observables from a local JSON or JSON Lines expo
 
 -----
 
+#### [Okta System Log Import](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/okta_system_log_import.py)
+
+Import saved Okta System Log events with typed targets and investigation links.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/okta_system_log_import.py)]
+
+- **features**:
+>Reads native Okta System Log API JSON arrays or individual events. Captures actor, client IP, authentication context, outcome, targets, and distinct transaction, session and root session IDs. Connects events with shared reported identifiers and links them to the original upload. See the [usage guide](https://github.com/MISP/misp-modules/blob/main/documentation/import_mod/okta_system_log_import.md).
+
+- **data-source**:
+>internal
+
+- **input**:
+>Saved native Okta System Log API JSON, optionally gzip-compressed.
+
+- **output**:
+>A source file and linked Okta System Log event and target objects.
+
+- **references**:
+> - https://developer.okta.com/docs/reference/system-log-query/
+> - https://developer.okta.com/docs/api/openapi/okta-management/management/tags/systemlog
+
+- **requirements**:
+>PyMISP
+
+-----
+
 #### [OpenIOC Import](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/openiocimport.py)
 
 Import legacy OpenIOC 1.0 and 1.1 files into MISP.
