@@ -237,15 +237,22 @@ def _timestamp(value):
 def _targets(record):
     values = record.get("target")
     if values is None:
-        return []
+        return [], 0
     if not isinstance(values, list) or len(values) > MAX_TARGETS:
         raise ValueError("target must be an array of at most 2,000 entries.")
     result = []
-    for index, item in enumerate(values, 1):
+    for index, item in enumerate(values):
         if not isinstance(item, dict):
-            raise ValueError(f"target[{index - 1}] must be an object.")
-        result.append({"target-index": index, **_fields(item, TARGET_FIELDS)})
-    return result
+            raise ValueError(f"target[{index}] must be an object.")
+        fields = {}
+        for field, relation in TARGET_FIELDS.items():
+            value = item.get(field)
+            if value is None or (isinstance(value, str) and not value.strip()):
+                continue
+            fields[relation] = _text(value, f"target[{index}].{field}")
+        if fields:
+            result.append({"target-index": index + 1, **fields})
+    return result, len(values)
 
 
 def _event(record, identifier):
@@ -322,6 +329,7 @@ def _import(request):
     events, targets, fingerprints, anchors = [], [], {}, {}
     missing_timestamps = 0
     related_links = 0
+    source_target_count = 0
     for index, record in enumerate(records, 1):
         try:
             if not isinstance(record, dict):
@@ -334,8 +342,9 @@ def _import(request):
                 continue
             fingerprints[identifier] = fingerprint
             values, observed = _event(record, identifier)
-            event_targets = _targets(record)
-            if len(targets) + len(event_targets) > MAX_TARGETS:
+            event_targets, target_count = _targets(record)
+            source_target_count += target_count
+            if source_target_count > MAX_TARGETS:
                 raise ValueError("The upload exceeds 2,000 targets.")
             event = _object(EVENT, (identifier,), values)
             if observed is not None:
@@ -353,6 +362,9 @@ def _import(request):
             raise ValueError(f"Record {index}: {error}") from error
 
     warnings = []
+    skipped_targets = source_target_count - len(targets)
+    if skipped_targets:
+        warnings.append(f"Skipped target entries without reported identifying fields ({skipped_targets}).")
     if missing_timestamps:
         warnings.append(f"{missing_timestamps} records did not report a published timestamp.")
     return {
@@ -363,6 +375,7 @@ def _import(request):
             "events": len(events),
             "duplicate_records": len(records) - len(events),
             "targets": len(targets),
+            "skipped_empty_targets": skipped_targets,
             "related_event_links": related_links,
             "source_sha256": digest,
             "source_attached": attach,

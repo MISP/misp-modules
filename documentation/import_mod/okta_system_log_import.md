@@ -16,7 +16,9 @@ The importer runs locally on the supplied file. [Okta System Log API](https://de
   precision, with the original value kept in its own attribute.
 - Each `okta-system-log-target` keeps a reported target's ID, type, alternate
   ID and display name together. Its link and position identify the original
-  entry in the event's target array.
+  entry in the event's target array. When all four fields are empty or absent,
+  the importer skips that entry and reports the count. Other targets keep
+  their original array positions.
 - Transaction, external session and root session IDs have separate
   attributes. A transaction groups related activity within an operation.
   An external session groups activity within one session. A root session

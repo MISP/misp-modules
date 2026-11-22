@@ -6,6 +6,7 @@ import json
 
 import pytest
 from pymisp import MISPObject
+from pymisp.exceptions import InvalidMISPObject
 
 from misp_modules.modules.import_mod import okta_system_log_import as module
 
@@ -132,6 +133,37 @@ def test_native_event_preserves_actor_target_and_authentication_context():
     assert attrs(event)["actor-alternate-id"]["disable_correlation"] is True
     assert "not-projected" not in json.dumps(response)
     assert "attachment" not in fields(source)
+
+
+def test_native_target_template_requires_a_reported_field():
+    target = MISPObject(module.TARGET, strict=True, misp_objects_template_custom=module._template(module.TARGET))
+    target.add_attribute("target-index", value=1)
+    with pytest.raises(InvalidMISPObject):
+        target.to_json(strict=True)
+
+
+def test_empty_targets_are_reported_and_retained_target_indices_stay_native():
+    event = log_event()
+    app = event["target"][0]
+    event["target"] = [
+        {},
+        app,
+        {"type": "", "id": None, "alternateId": "  ", "displayName": "\t"},
+        {"type": "User"},
+        {"detailEntry": {"example": "unmapped"}},
+    ]
+    second = log_event(1)
+    second["target"] = [{}]
+    response = query([event, second])
+    result = grouped(response)
+    first_event, second_event = result[module.EVENT]
+    assert response["summary"]["events"] == 2 and response["summary"]["targets"] == 2
+    assert response["summary"]["skipped_empty_targets"] == 4
+    assert any("without reported identifying fields (4)" in message for message in response["warnings"])
+    assert [r["comment"] for r in links(first_event, "contains")] == ["target[1]", "target[3]"]
+    assert not links(second_event, "contains")
+    assert [fields(o)["target-index"] for o in result[module.TARGET]] == ["2", "4"]
+    assert fields(result[module.TARGET][1])["target-type"] == "User"
 
 
 def test_shared_context_links_session_mfa_application_and_admin():
@@ -264,5 +296,6 @@ def test_record_and_target_limits(monkeypatch):
     monkeypatch.setattr(module, "MAX_RECORDS", 2)
     monkeypatch.setattr(module, "MAX_TARGETS", 3)
     assert "exceeds 2,000 targets" in query([log_event(), log_event(1)])["error"]
+    assert "exceeds 2,000 targets" in query([dict(log_event(i), target=[{}, {}]) for i in range(2)])["error"]
     monkeypatch.setattr(module, "MAX_JSON", 3)
     assert "Decoded System Log" in query_bytes(gzip.compress(b'[{"uuid":"a"}]'))["error"]

@@ -42,6 +42,12 @@
   "required": [
     "target-index"
   ],
+  "requiredOneOf": [
+    "target-id",
+    "target-type",
+    "target-alternate-id",
+    "target-display-name"
+  ],
   "uuid": "253445c7-391a-48ee-83e6-d9e21147bcd5",
-  "version": 1
+  "version": 2
 }
