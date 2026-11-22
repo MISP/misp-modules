@@ -541,15 +541,24 @@ def test_delete_cancels_running_generation_and_removes_partial_files(state_direc
     assert not state_directory.path(job["job_id"]).exists()
 
 
-def test_failed_job_does_not_publish_an_archive(state_directory):
+def test_failed_job_does_not_publish_an_archive(state_directory, monkeypatch):
+    write = state_directory._write
+    files_at_failure = []
+
+    def record_failure(directory, metadata):
+        if metadata["status"] == "failed":
+            files_at_failure.extend(sorted(path.name for path in directory.iterdir()))
+        write(directory, metadata)
+
+    monkeypatch.setattr(state_directory, "_write", record_failure)
+
     def producer(*args, **kwargs):
         raise ValueError("provider-secret")
 
     job = state_directory.submit("fixture", {}, {}, producer)
     result = ready(state_directory, job["job_id"])
     assert result["status"] == "failed" and "provider-secret" not in json.dumps(result)
-    assert not (state_directory.path(job["job_id"]) / "feed").exists()
-    assert not (state_directory.path(job["job_id"]) / "feed.zip").exists()
+    assert files_at_failure == ["status.json"]
 
 
 class TestGatheringHTTP(AsyncHTTPTestCase):
