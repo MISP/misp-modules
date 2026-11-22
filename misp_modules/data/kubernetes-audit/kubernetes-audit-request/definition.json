@@ -1,0 +1,138 @@
+{
+  "attributes": {
+    "api-group": {
+      "description": "The API group reported in the Kubernetes object reference.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "audit-id": {
+      "description": "The native auditID shared by stages for this API request.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 10
+    },
+    "cluster-id": {
+      "description": "The cluster scope reported by the export or supplied by the analyst.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 9
+    },
+    "impersonated-user-uid": {
+      "description": "The reported UID of the impersonated Kubernetes principal.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "impersonated-username": {
+      "description": "The reported impersonated Kubernetes username.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 8
+    },
+    "last-stage-time": {
+      "description": "The latest reported audit stage timestamp in this request.",
+      "disable_correlation": true,
+      "misp-attribute": "datetime",
+      "to_ids": false,
+      "ui-priority": 8
+    },
+    "namespace": {
+      "description": "The namespace reported in the Kubernetes object reference.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 8
+    },
+    "object-api-version": {
+      "description": "The API version reported in the Kubernetes object reference.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "object-name": {
+      "description": "The name of the target object reported by Kubernetes.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 9
+    },
+    "object-uid": {
+      "description": "The reported UID of the target Kubernetes object.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "request-time": {
+      "description": "The time the Kubernetes API server received the request, normalized to UTC.",
+      "disable_correlation": true,
+      "misp-attribute": "datetime",
+      "to_ids": false,
+      "ui-priority": 8
+    },
+    "request-uri": {
+      "description": "The request URI as sent to the Kubernetes API server.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "resource": {
+      "description": "The resource type reported in the Kubernetes object reference.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 8
+    },
+    "service-account": {
+      "description": "The authenticated service account as namespace/name, derived from its Kubernetes username.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "subresource": {
+      "description": "The subresource reported in the Kubernetes object reference.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "user-uid": {
+      "description": "The reported UID of the authenticated Kubernetes principal.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "username": {
+      "description": "The authenticated username reported by the Kubernetes API server.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 9
+    },
+    "verb": {
+      "description": "The Kubernetes API verb, or the lowercased HTTP method for a non-resource request.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 10
+    }
+  },
+  "description": "A Kubernetes API request grouped by auditID within a source cluster, with links to its audit stage observations.",
+  "meta-category": "misc",
+  "name": "kubernetes-audit-request",
+  "required": [
+    "audit-id"
+  ],
+  "uuid": "836b4abe-93ac-4fee-8f7b-61ca96b4fe41",
+  "version": 1
+}

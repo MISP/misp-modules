@@ -1,0 +1,310 @@
+{
+  "attributes": {
+    "api-group": {
+      "description": "The API group reported in the Kubernetes object reference.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "audit-id": {
+      "description": "The native auditID shared by stages for this API request.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 10
+    },
+    "audit-level": {
+      "description": "The audit policy level reported for this stage.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "authorization-decision": {
+      "description": "The decision in the Kubernetes authorization.k8s.io/decision annotation.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "authorization-reason": {
+      "description": "The reason in the Kubernetes authorization.k8s.io/reason annotation.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "impersonated-user-group": {
+      "description": "A reported group of the impersonated Kubernetes principal.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "impersonated-user-uid": {
+      "description": "The reported UID of the impersonated Kubernetes principal.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "impersonated-username": {
+      "description": "The reported impersonated Kubernetes username.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 8
+    },
+    "ip-src": {
+      "description": "An IP from the reported sourceIPs chain. Client-controlled values may appear in this chain.",
+      "disable_correlation": true,
+      "misp-attribute": "ip-src",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "namespace": {
+      "description": "The namespace reported in the Kubernetes object reference.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 8
+    },
+    "object-api-version": {
+      "description": "The API version reported in the Kubernetes object reference.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "object-name": {
+      "description": "The name of the target object reported by Kubernetes.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 9
+    },
+    "object-uid": {
+      "description": "The reported UID of the target Kubernetes object.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "provider-account-id": {
+      "description": "The account ID reported by the CloudWatch Logs subscription.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "provider-category": {
+      "description": "The audit category in the Azure diagnostic export.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "provider-event-id": {
+      "description": "The provider's log event identifier, separate from the Kubernetes audit ID.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "provider-log-group": {
+      "description": "The log group reported by the CloudWatch Logs export.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "provider-log-stream": {
+      "description": "The log stream reported by the CloudWatch Logs export.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "provider-pod": {
+      "description": "The API server pod reported in the AKS Log Analytics row.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "provider-resource-id": {
+      "description": "The Azure resource ID reported for this log record.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "provider-table": {
+      "description": "The Azure Log Analytics table type reported for this row.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "request-time": {
+      "description": "The time the Kubernetes API server received the request, normalized to UTC.",
+      "disable_correlation": true,
+      "misp-attribute": "datetime",
+      "to_ids": false,
+      "ui-priority": 8
+    },
+    "request-time-raw": {
+      "description": "The request-received timestamp as reported in the audit record.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "request-uri": {
+      "description": "The request URI as sent to the Kubernetes API server.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "resource": {
+      "description": "The resource type reported in the Kubernetes object reference.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 8
+    },
+    "response-code": {
+      "description": "The numeric code from the Kubernetes responseStatus.",
+      "disable_correlation": true,
+      "misp-attribute": "counter",
+      "to_ids": false,
+      "ui-priority": 9
+    },
+    "response-message": {
+      "description": "The message from the Kubernetes responseStatus.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "response-reason": {
+      "description": "The reason from the Kubernetes responseStatus.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "response-status": {
+      "description": "The status from the Kubernetes responseStatus.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 8
+    },
+    "service-account": {
+      "description": "The authenticated service account as namespace/name, derived from its Kubernetes username.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "source-address": {
+      "description": "One original entry in the reported sourceIPs chain, in source order.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "source-format": {
+      "description": "The input export format in which this stage observation was found.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "stage": {
+      "description": "The request handling stage reported by Kubernetes.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "sane_default": [
+        "RequestReceived",
+        "ResponseStarted",
+        "ResponseComplete",
+        "Panic"
+      ],
+      "to_ids": false,
+      "ui-priority": 10
+    },
+    "stage-time": {
+      "description": "The stage timestamp normalized to UTC.",
+      "disable_correlation": true,
+      "misp-attribute": "datetime",
+      "to_ids": false,
+      "ui-priority": 9
+    },
+    "stage-time-raw": {
+      "description": "The original timestamp for this Kubernetes audit stage.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "subresource": {
+      "description": "The subresource reported in the Kubernetes object reference.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "user-agent": {
+      "description": "The user agent reported by the Kubernetes client.",
+      "disable_correlation": true,
+      "misp-attribute": "user-agent",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "user-group": {
+      "description": "A reported group of the authenticated Kubernetes principal.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "user-uid": {
+      "description": "The reported UID of the authenticated Kubernetes principal.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "username": {
+      "description": "The authenticated username reported by the Kubernetes API server.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 9
+    },
+    "verb": {
+      "description": "The Kubernetes API verb, or the lowercased HTTP method for a non-resource request.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 10
+    }
+  },
+  "description": "An observed stage of a Kubernetes API audit request, recording the reported identity, API target and response.",
+  "meta-category": "misc",
+  "name": "kubernetes-audit-stage",
+  "required": [
+    "audit-id",
+    "stage"
+  ],
+  "uuid": "eba4be8b-e957-449d-9774-6bf1c5db1a3f",
+  "version": 1
+}

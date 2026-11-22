@@ -220,6 +220,7 @@ For more information: [Extending MISP with Python modules](https://www.misp-proj
 * [Import Blueprint](https://misp.github.io/misp-modules/import_mod/#import-blueprint) - Generic blueprint to be copy-pasted to quickly boostrap creation of import module.
 * [Joe Sandbox Import](https://misp.github.io/misp-modules/import_mod/#joe-sandbox-import) - A module to import data from a Joe Sandbox analysis json report.
 * [Lastline Import](https://misp.github.io/misp-modules/import_mod/#lastline-import) - Deprecation notice: this module will be deprecated by December 2021, please use vmware_nsx module.  Module to import and parse reports from Lastline analysis links.
+* [Kubernetes API Audit Logs Import](https://misp.github.io/misp-modules/import_mod/#kubernetes-api-audit-logs-import) - Import Kubernetes API audit events and group stages by cluster and audit ID.
 * [Microsoft Identity and Audit Logs Import](https://misp.github.io/misp-modules/import_mod/#microsoft-identity-and-audit-logs-import) - Import Entra sign-in and directory audit logs and Microsoft Purview Unified Audit Log exports.
 * [MISP JSON Import](https://misp.github.io/misp-modules/import_mod/#misp-json-import) - Module to import MISP JSON format for merging MISP events.
 * [OCR Import](https://misp.github.io/misp-modules/import_mod/#ocr-import) - Optical Character Recognition (OCR) module for MISP.
