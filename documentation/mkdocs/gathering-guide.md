@@ -59,6 +59,7 @@ tags from the `misp-gathering` taxonomy:
 | --- | --- | --- |
 | WithAName | `misp-gathering:module="withaname"` | `misp-gathering:source="witha.name"` |
 | BeaconBeagle (all datasets) | `misp-gathering:module="beaconbeagle_gathering"` | `misp-gathering:source="beaconbeagle.com"` |
+| Offensive Agency | `misp-gathering:module="offensive_agency"` | `misp-gathering:source="offensive.agency"` |
 
 `module` identifies the collector by its `/modules` identifier; `source`
 identifies the upstream provider by its canonical domain. Add values to the
@@ -155,6 +156,35 @@ hosts and C2 infrastructure from the public BeaconBeagle API. Select `dataset`
 `page_size` and an optional `max_events` budget. See the
 [BeaconBeagle usage guide](https://github.com/MISP/misp-modules/blob/main/documentation/gathering/beaconbeagle.md)
 for requests, conversion details and source limitations.
+
+## Offensive Agency
+
+`offensive_agency` collects the tracker's public ONYPHE-based observations.
+With empty parameters it creates one event for the published report date,
+including headline counts and an aggregate JSON attachment with the per-agent
+breakdowns and time series. The source's reporting date supplies the event
+timestamp at midnight UTC. Corrections to the same report keep its UUID.
+
+```json
+{"module":"offensive_agency","operation":"prepare","parameters":{}}
+```
+
+To monitor your inventory, supply individual IPv4 or IPv6 addresses in
+`asset_ips`. The module sends each distinct address to Offensive Agency's
+per-host API and emits one event for each match. An HTTP 404 means the
+tracker has no record. Other HTTP errors fail the job.
+
+```json
+{"module":"offensive_agency","operation":"prepare","parameters":{"asset_ips":["192.0.2.1","2001:db8::1"]}}
+```
+
+Asset events include the first and last observation dates, network context,
+agent names, and the provider's confirmed or probable classification.
+An observation describes software exposure. Operator intent is unknown.
+IP attributes use UTC day precision. Shared CDN addresses have correlation
+disabled. For cloud IPs, compare the observation dates with your log dates.
+All attributes have IDS export disabled. The module requires no API key and
+makes requests only to the provider. [Source methodology and exports](https://offensive.agency/about)
 
 ## Durable revisions and additional producers
 
