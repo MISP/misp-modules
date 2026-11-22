@@ -355,6 +355,11 @@ def _records(document, position, warnings):
         key = "logEvents" if "logEvents" in record else "events"
         if record.get("nextToken"):
             warnings.add("The CloudWatch response has another page. Import the remaining saved pages separately.")
+        elif record.get("nextForwardToken") or record.get("nextBackwardToken"):
+            warnings.add(
+                "The CloudWatch GetLogEvents response has pagination tokens. "
+                "Verify that all pages for the requested time range were collected."
+            )
         for i, row in enumerate(_array(record.get(key), f"CloudWatch {key}")):
             path = f"{position}.{key}[{i}]"
             yield _at_position(path, lambda: _cloudwatch(row, record, path))
@@ -573,7 +578,8 @@ def _import(request):
         except (ValueError, OverflowError) as error:
             raise ValueError(f"{position}: {error}") from error
     if not groups:
-        raise ValueError("The export contains no Kubernetes audit events.")
+        message = "The export contains no Kubernetes audit events."
+        raise ValueError(" ".join([message, *sorted(warnings)]))
     parents, children = _request_objects(groups, source)
     if skipped:
         warnings.add(f"Skipped {skipped:,} records from non-audit categories or streams.")

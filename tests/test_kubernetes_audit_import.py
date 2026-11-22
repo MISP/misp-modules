@@ -175,6 +175,31 @@ def test_eks_cloudwatch_filter_response_with_unrelated_stream_and_continuation()
     assert links(second, "extracted-from")[0]["comment"] == "JSON document.events[2]"
 
 
+@pytest.mark.parametrize(
+    "tokens",
+    [
+        {"nextForwardToken": "private-forward-cursor"},
+        {"nextBackwardToken": "private-backward-cursor"},
+        {"nextForwardToken": "private-forward-cursor", "nextBackwardToken": "private-backward-cursor"},
+    ],
+)
+def test_eks_cloudwatch_get_log_events_warns_when_page_completeness_is_unknown(tokens):
+    result = submitted({"events": [{"message": json.dumps(event())}], **tokens})
+    assert result["summary"]["formats"] == {"eks-cloudwatch": 1}
+    assert result["warnings"] == [
+        "The CloudWatch GetLogEvents response has pagination tokens. "
+        "Verify that all pages for the requested time range were collected."
+    ]
+    assert all(token not in json.dumps(result) for token in tokens.values())
+
+
+def test_eks_cloudwatch_empty_get_log_events_page_surfaces_pagination_warning():
+    result = submitted({"events": [], "nextForwardToken": "private-forward-cursor"})
+    assert "contains no Kubernetes audit events" in result["error"]
+    assert "Verify that all pages" in result["error"]
+    assert "private-forward-cursor" not in result["error"]
+
+
 def test_eks_cloudwatch_subscription_is_scoped_by_account_and_group():
     def batch(account):
         return {
