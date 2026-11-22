@@ -1,0 +1,361 @@
+{
+  "attributes": {
+    "assigned-principal-id": {
+      "description": "Target principal identifier reported in a role assignment request or response.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 9
+    },
+    "assigned-principal-type": {
+      "description": "Target principal type reported in a role assignment request or response.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "assigned-role-assignment-id": {
+      "description": "Target role assignment identifier reported in a role assignment request or response.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "assigned-role-definition-id": {
+      "description": "Target role definition reported in a role assignment request or response.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "assignment-scope": {
+      "description": "Target scope reported in a role assignment request or response.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "assignment-source": {
+      "description": "Source body from which the target role assignment values were extracted.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "authorization-action": {
+      "description": "Action reported in the event's actor authorization context.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "authorization-principal-id": {
+      "description": "Principal identifier reported in the actor authorization evidence.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "authorization-principal-type": {
+      "description": "Principal type reported in the actor authorization evidence.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "authorization-role": {
+      "description": "Role reported in the actor authorization context.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "authorization-role-assignment-id": {
+      "description": "Role assignment identifier reported as actor authorization evidence.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "authorization-role-assignment-scope": {
+      "description": "Scope of the role assignment reported as actor authorization evidence.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "authorization-role-definition-id": {
+      "description": "Role definition identifier reported as actor authorization evidence.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "authorization-scope": {
+      "description": "Scope covered by the actor authorization context.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "caller": {
+      "description": "Reported caller or caller identifier selected from available identity claims.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 9
+    },
+    "caller-address": {
+      "description": "Original caller address reported for the operation.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "caller-application-id": {
+      "description": "Application identifier in the caller's identity claims.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "caller-object-id": {
+      "description": "Object identifier in the caller's identity claims.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "caller-source": {
+      "description": "Source field used for the caller value.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "caller-tenant-id": {
+      "description": "Directory tenant identifier in the caller's identity claims.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "category": {
+      "description": "Azure Activity Log event category.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "client-request-id": {
+      "description": "Client request ID as reported by the HTTP request context.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "correlation-id": {
+      "description": "Azure correlation ID for potentially related events.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 9
+    },
+    "diagnostic-category": {
+      "description": "Native Azure Monitor diagnostic category field.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "event-id": {
+      "description": "Native EventDataId of this Activity Log event, where supplied.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 9
+    },
+    "event-name": {
+      "description": "Source event name, such as BeginRequest or EndRequest.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "event-record-id": {
+      "description": "Resource Manager record identifier for this Activity Log event.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "event-time": {
+      "description": "Event time normalized to UTC at microsecond precision.",
+      "disable_correlation": true,
+      "misp-attribute": "datetime",
+      "to_ids": false,
+      "ui-priority": 9
+    },
+    "event-time-raw": {
+      "description": "Original event timestamp, including its full precision and offset.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "level": {
+      "description": "Source Activity Log level.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "location": {
+      "description": "Azure Monitor diagnostic location field.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "operation": {
+      "description": "Reported Azure operation name for this event.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 9
+    },
+    "operation-id": {
+      "description": "Reported operation ID, which may group several events.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "operation-source": {
+      "description": "Source of the operation when derived from the reported authorization action.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "resource-group": {
+      "description": "Azure resource group reported for this event.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "resource-id": {
+      "description": "Reported identifier of the Azure resource associated with this event.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 9
+    },
+    "resource-provider": {
+      "description": "Azure resource provider reported for this event.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "resource-type": {
+      "description": "Azure resource type reported for this event.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "result": {
+      "description": "Operation status or result reported by Azure.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 9
+    },
+    "result-detail": {
+      "description": "Operation substatus reported by Azure.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "result-signature": {
+      "description": "Azure Monitor diagnostic result signature.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "source-ip": {
+      "description": "Validated IP address from the caller address field.",
+      "disable_correlation": true,
+      "misp-attribute": "ip-src",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "source-schema": {
+      "description": "Azure Activity Log schema used by the source export.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5,
+      "values_list": [
+        "arm",
+        "azure-monitor",
+        "log-analytics"
+      ]
+    },
+    "status-code": {
+      "description": "Code or label reported in the operation's statusCode property.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "submission-time": {
+      "description": "Azure Activity Log submission timestamp normalized to UTC.",
+      "disable_correlation": true,
+      "misp-attribute": "datetime",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "submission-time-raw": {
+      "description": "Original Azure Activity Log submission timestamp.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "subscription-id": {
+      "description": "Reported subscription identifier or subscription in the resource ID.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "tenant-id": {
+      "description": "Directory tenant identifier reported on the event.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "workspace-id": {
+      "description": "Log Analytics workspace identifier from the AzureActivity TenantId column.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    }
+  },
+  "description": "A reported Azure Resource Manager Activity Log event with operation, actor, resource, result and source provenance.",
+  "meta-category": "misc",
+  "name": "azure-activity-log-event",
+  "required": [
+    "source-schema",
+    "operation"
+  ],
+  "uuid": "f386076b-de05-4af2-9824-df7e1128a070",
+  "version": 1
+}
