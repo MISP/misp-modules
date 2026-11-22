@@ -1,0 +1,211 @@
+{
+  "attributes": {
+    "caller-address": {
+      "description": "Reported caller IP field, which can be an address, redaction or provider label.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "caller-network": {
+      "description": "Network field reported in the audit request metadata.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "delegation-principal": {
+      "description": "Selected principal identifiers from one reported service account delegation entry.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "event-time": {
+      "description": "Google Cloud event time normalized to UTC at microsecond precision.",
+      "disable_correlation": true,
+      "misp-attribute": "datetime",
+      "to_ids": false,
+      "ui-priority": 9
+    },
+    "event-time-raw": {
+      "description": "Original Cloud Logging timestamp with the reported precision and offset.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "insert-id": {
+      "description": "Cloud Logging insertId for this entry, where supplied.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "location": {
+      "description": "Location reported in the monitored resource labels.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "log-category": {
+      "description": "Cloud Audit Logs category from the native log name.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5,
+      "values_list": [
+        "activity",
+        "data_access",
+        "system_event",
+        "policy"
+      ]
+    },
+    "log-name": {
+      "description": "Native Cloud Logging logName as supplied by the producer.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "method-name": {
+      "description": "Reported method from protoPayload.methodName.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 9
+    },
+    "monitored-project-id": {
+      "description": "Project ID reported in the monitored resource labels.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "monitored-resource-type": {
+      "description": "Type of the Cloud Logging monitored resource.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "operation-id": {
+      "description": "Identifier used by Cloud Logging to group entries belonging to an operation.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "operation-producer": {
+      "description": "Producer of the reported operation identifier.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "principal-email": {
+      "description": "Principal email field as reported, which may contain a redacted value.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "principal-subject": {
+      "description": "Authenticated principal subject as reported by Google Cloud.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "received-time": {
+      "description": "Cloud Logging reception time normalized to UTC.",
+      "disable_correlation": true,
+      "misp-attribute": "datetime",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "received-time-raw": {
+      "description": "Original Cloud Logging receiveTimestamp.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "resource-name": {
+      "description": "Resource name on which the operation was performed.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 9
+    },
+    "scope-id": {
+      "description": "Identifier of the environment named in logName.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "scope-type": {
+      "description": "Scope kind from logName, such as projects or organizations.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "service-name": {
+      "description": "Google Cloud API service name from protoPayload.serviceName.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 9
+    },
+    "severity": {
+      "description": "Cloud Logging severity label reported for the entry.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "source-ip": {
+      "description": "Validated IP address derived from the reported caller address.",
+      "disable_correlation": true,
+      "misp-attribute": "ip-src",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "status-code": {
+      "description": "Explicit google.rpc.Status code reported for the overall operation.",
+      "disable_correlation": true,
+      "misp-attribute": "counter",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "user-agent": {
+      "description": "Caller-supplied user agent reported in the audit request metadata.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "zone": {
+      "description": "Zone reported in the monitored resource labels.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 5
+    }
+  },
+  "description": "A Google Cloud Audit Logs LogEntry describing a reported operation, its identity and source context.",
+  "meta-category": "misc",
+  "name": "google-cloud-audit-event",
+  "required": [
+    "log-name",
+    "log-category",
+    "scope-type",
+    "scope-id"
+  ],
+  "uuid": "6d040cf8-7f13-49e2-9df7-196f357b8c8a",
+  "version": 1
+}
