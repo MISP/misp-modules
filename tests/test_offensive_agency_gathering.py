@@ -33,6 +33,27 @@ HOST = {
     "asn": "AS64500",
     "country": "FR",
     "tools": {"example": "probable"},
+    "domains": [{"name": "agent.example", "tools": {"example": "probable"}}],
+    "rdns": ["host.example"],
+    "ports": {"example": [443]},
+    "families": {"example": ["page"]},
+    "classes": ["Example device class"],
+    "clusters": ["example-cluster"],
+    "c2": ["example-cohosted-label"],
+    "sources": ["ctiscan", "ctiurl"],
+    "titles": ["Example console"],
+    "services": [
+        {
+            "port": 443,
+            "tls": True,
+            "last_seen": "2026-11-20",
+            "cert_cn": ["agent.example"],
+            "classes": ["Example device class"],
+            "products": ["Example product"],
+            "titles": ["Example console"],
+            "tools": ["example"],
+        }
+    ],
 }
 
 
@@ -124,10 +145,17 @@ def test_asset_observations_deduplicate_and_skip_missing(api, tmp_path):
     )
     assert address["disable_correlation"] is True
     assert any(a["value"] == "example: probable" for a in event["Attribute"])
+    attachment = next(a for a in event["Attribute"] if a["type"] == "attachment")
+    assert attachment["value"] == f"offensive-agency-host-{IP}.json"
+    assert attachment["disable_correlation"] is True
+    assert json.loads(base64.b64decode(attachment["data"])) == HOST
     assert collect(tmp_path / "repeat", params, state) == events
     replies[present] = 200, dict(HOST, last_seen="2026-11-21", tools={"example": "confirmed"})
     changed = collect(tmp_path / "changed", params, state)[uuid]
     assert {a["uuid"] for a in changed["Attribute"]} == {a["uuid"] for a in event["Attribute"]}
+    updated_attachment = next(a for a in changed["Attribute"] if a["type"] == "attachment")
+    assert updated_attachment["uuid"] == attachment["uuid"]
+    assert json.loads(base64.b64decode(updated_attachment["data"])) == replies[present][1]
     assert int(changed["timestamp"]) > int(event["timestamp"])
 
 

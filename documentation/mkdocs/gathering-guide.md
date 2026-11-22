@@ -218,6 +218,11 @@ tracker has no record. Other HTTP errors fail the job.
 
 Asset events include the first and last observation dates, network context,
 agent names, and the provider's confirmed or probable classification.
+Each event also contains a JSON attachment with the complete response from the
+per-host API, including domains, reverse DNS, ports, fingerprint families,
+classes, cluster labels, co-hosting observations, and service details when
+provided. The attachment has a stable UUID and disabled correlation. Existing
+events receive it on import of a newer source revision.
 An observation describes software exposure. Operator intent is unknown.
 IP attributes use UTC day precision. Shared CDN addresses have correlation
 disabled. For cloud IPs, compare the observation dates with your log dates.

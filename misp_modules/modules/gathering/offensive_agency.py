@@ -159,6 +159,14 @@ def host_observation(ip, record):
             f"{name}: {level}",
             comment="Provider confidence in the software observation. Operator intent is unknown.",
         )
+    add_attribute(
+        event,
+        "host-json",
+        "attachment",
+        f"offensive-agency-host-{ip.replace(':', '_')}.json",
+        data=base64.b64encode(canonical_json(record).encode()).decode(),
+        comment="Complete per-host observation reported by Offensive Agency.",
+    )
     return event, int(last.timestamp())
 
 
