@@ -5522,6 +5522,34 @@ Module to import and parse reports from Lastline analysis links.
 
 -----
 
+#### [Kubernetes API Audit Logs Import](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/kubernetes_audit_import.py)
+
+Import Kubernetes API audit events and group stages by cluster and audit ID.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/kubernetes_audit_import.py)]
+
+- **features**:
+>Reads native audit.k8s.io/v1 JSON Lines, EKS CloudWatch Logs and AKS diagnostic or Log Analytics JSON. Preserves each stage, the reported identity, API target and response, and links them to the request and original export. See the [usage guide](https://github.com/MISP/misp-modules/blob/main/documentation/import_mod/kubernetes_audit_import.md).
+
+- **data-source**:
+>internal
+
+- **input**:
+>Native Kubernetes audit v1 JSON Lines or JSON, EKS CloudWatch Logs JSON, or AKS diagnostic JSON.
+
+- **output**:
+>A source file and linked Kubernetes audit request and stage objects.
+
+- **references**:
+> - https://kubernetes.io/docs/tasks/debug/debug-cluster/audit/
+> - https://kubernetes.io/docs/reference/config-api/apiserver-audit.v1/
+> - https://docs.aws.amazon.com/eks/latest/userguide/control-plane-logs.html
+> - https://learn.microsoft.com/en-us/azure/aks/monitor-aks-reference
+
+- **requirements**:
+> PyMISP
+
+-----
+
 #### [Microsoft Identity and Audit Logs Import](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/microsoft_audit_import.py)
 
 Import Entra sign-in and directory audit logs and Microsoft Purview Unified Audit Log exports.
