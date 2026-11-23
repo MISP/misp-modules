@@ -1,0 +1,73 @@
+{
+  "attributes": {
+    "capture-date": {
+      "description": "Request start time normalized to UTC.",
+      "disable_correlation": true,
+      "misp-attribute": "datetime",
+      "to_ids": false,
+      "ui-priority": 10
+    },
+    "entry-index": {
+      "description": "Zero-based index of the exchange in the source HAR log.entries array.",
+      "disable_correlation": true,
+      "misp-attribute": "counter",
+      "to_ids": false,
+      "ui-priority": 9
+    },
+    "http-method": {
+      "description": "HTTP request method recorded in the HAR entry.",
+      "disable_correlation": true,
+      "misp-attribute": "http-method",
+      "to_ids": false,
+      "ui-priority": 9
+    },
+    "http-response-header": {
+      "description": "One archived HTTP response header represented as JSON with a lowercase name and its value.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "multiple": true,
+      "to_ids": false,
+      "ui-priority": 7
+    },
+    "http-status": {
+      "description": "Status code of the recorded HTTP response. A value of 0 indicates a missing response.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 9
+    },
+    "http-version": {
+      "description": "HTTP version reported by the HAR response.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 7
+    },
+    "started-date-time-raw": {
+      "description": "Original HAR startedDateTime value, including timezone and source precision.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 6
+    },
+    "target-uri": {
+      "description": "Original HTTP or HTTPS URL of the recorded request.",
+      "disable_correlation": true,
+      "misp-attribute": "url",
+      "to_ids": false,
+      "ui-priority": 10
+    }
+  },
+  "description": "Metadata for an HTTP or HTTPS exchange in a HAR log, linked to the source file and corresponding page capture.",
+  "meta-category": "network",
+  "name": "har-entry",
+  "required": [
+    "entry-index",
+    "target-uri",
+    "capture-date",
+    "http-method",
+    "http-status"
+  ],
+  "uuid": "6755e368-05fd-43e9-b7c3-de460d8f0ca6",
+  "version": 1
+}

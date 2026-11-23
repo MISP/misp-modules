@@ -1,4 +1,4 @@
-"""Read capture metadata from local WARC and WACZ bytes without replay."""
+"""Read capture metadata from local HAR, WARC and WACZ bytes without replay."""
 
 import gzip
 import hashlib
@@ -6,7 +6,7 @@ import json
 import re
 import stat
 from dataclasses import dataclass
-from datetime import date, datetime
+from datetime import UTC, date, datetime
 from io import BufferedReader, BytesIO
 from urllib.parse import urlsplit
 from zipfile import ZIP_DEFLATED, ZIP_STORED, ZipFile
@@ -58,6 +58,9 @@ HTTP_STATUS = re.compile(rb"HTTP/([0-9]{1,2}(?:\.[0-9]{1,2})?) ([1-5][0-9]{2})(?
 WARC_DATE = re.compile(r"[0-9]{4}(?:-[0-9]{2}(?:-[0-9]{2})?)?")
 WARC_DATETIME = re.compile(
     r"([0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2})(?::([0-9]{2})(?:\.([0-9]+))?)?(?:Z|\+00:00)"
+)
+HAR_DATETIME = re.compile(
+    r"[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\.[0-9]+)?(?:Z|[+-][0-9]{2}:[0-5][0-9])"
 )
 
 
@@ -229,6 +232,12 @@ def _skip_block(reader, end):
         raise ValueError("Expected a WARC record separator.")
 
 
+def _metadata_size(values, headers):
+    return sum(len(str(value).encode("utf-8")) for value in values.values()) + sum(
+        len(name) + len(value.encode("utf-8")) for name, value in headers
+    )
+
+
 def _collect(stream, path, captures, budget):
     reader = WarcReader(stream, budget)
     start_count = budget.records
@@ -263,8 +272,7 @@ def _collect(stream, path, captures, budget):
             )
             if path:
                 values["member-path"] = path
-            budget.metadata_bytes += sum(len(str(value).encode("utf-8")) for value in values.values())
-            budget.metadata_bytes += sum(len(name) + len(value.encode("utf-8")) for name, value in headers)
+            budget.metadata_bytes += _metadata_size(values, headers)
             if budget.metadata_bytes > MAX_METADATA_BYTES:
                 raise ValueError("Captured response metadata exceeds 8 MiB.")
             captures.append((values, headers))
@@ -322,7 +330,7 @@ def _zip_members(zipped):
 def _unique_json(pairs):
     obj = dict(pairs)
     if len(obj) != len(pairs):
-        raise ValueError("WACZ metadata contains a duplicate JSON key.")
+        raise ValueError("Web archive metadata contains a duplicate JSON key.")
     return obj
 
 
@@ -434,8 +442,123 @@ def _collect_wacz(raw, captures, budget):
     }
 
 
+def _har_target(value):
+    error = "HAR request.url requires an absolute URL."
+    if not isinstance(value, str):
+        raise ValueError(error)
+    try:
+        url = urlsplit(value)
+    except ValueError:
+        raise ValueError(error) from None
+    if not url.scheme:
+        raise ValueError(error)
+    if url.scheme not in {"http", "https"}:
+        return None
+    if (
+        not url.hostname
+        or not value.isprintable()
+        or any(char.isspace() for char in value)
+        or len(value.encode("utf-8")) > MAX_LINE
+    ):
+        raise ValueError("Invalid HTTP(S) HAR request.url.")
+    return value
+
+
+def _har_timestamp(value):
+    error = "HAR startedDateTime requires an ISO 8601 timestamp with a timezone."
+    if not isinstance(value, str) or len(value) > MAX_LINE or not HAR_DATETIME.fullmatch(value):
+        raise ValueError(error)
+    try:
+        return datetime.fromisoformat(value).astimezone(UTC).isoformat()
+    except (ValueError, OverflowError):
+        raise ValueError(error) from None
+
+
+def _har_headers(items):
+    if not isinstance(items, list):
+        raise ValueError("HAR response.headers must be an array.")
+    headers = []
+    for item in items:
+        if not isinstance(item, dict) or not isinstance(item.get("name"), str):
+            raise ValueError("HAR response headers require a name.")
+        name = item["name"].lower()
+        if name not in RESPONSE_HEADERS:
+            continue
+        value = item.get("value")
+        if (
+            not isinstance(value, str)
+            or len(value.encode("utf-8")) > MAX_LINE
+            or any((ord(char) < 32 and char != "\t") or ord(char) == 127 for char in value)
+        ):
+            raise ValueError("Invalid HAR HTTP response header value.")
+        if len(headers) >= MAX_CAPTURE_HEADERS:
+            raise ValueError("A capture exceeds 64 supported HTTP response headers.")
+        headers.append((name, value))
+    return headers
+
+
+def _har_metadata(entry, request, response, index, target):
+    method = request.get("method")
+    if not isinstance(method, str) or len(method) > MAX_LINE or not FIELD_NAME.fullmatch(method.encode("utf-8")):
+        raise ValueError("HAR request.method requires an HTTP method token.")
+    status = response.get("status")
+    if type(status) is not int or (status != 0 and not 100 <= status <= 599):
+        raise ValueError("HAR response.status requires an HTTP status code or 0 for a missing response.")
+    version = response.get("httpVersion", "")
+    if not isinstance(version, str) or len(version) > MAX_LINE or (version and not version.isprintable()):
+        raise ValueError("Invalid HAR response.httpVersion.")
+    captured = entry.get("startedDateTime")
+    values = {
+        "entry-index": index,
+        "target-uri": target,
+        "started-date-time-raw": captured,
+        "capture-date": _har_timestamp(captured),
+        "http-method": method,
+        "http-status": status,
+    }
+    if version:
+        values["http-version"] = version
+    return values, _har_headers(response.get("headers", []))
+
+
+def _read_har(raw):
+    document = json.loads(raw.decode("utf-8-sig"), object_pairs_hook=_unique_json)
+    log = document.get("log") if isinstance(document, dict) else None
+    if not isinstance(log, dict) or not isinstance(log.get("entries"), list):
+        raise ValueError("HAR requires an object with a log.entries array.")
+    if log.get("version") not in ("1.1", "1.2"):
+        raise ValueError("Expected HAR version 1.1 or 1.2.")
+    entries = log["entries"]
+    if len(entries) > MAX_RECORDS:
+        raise ValueError("Archive exceeds 10,000 HAR entries.")
+    captures = []
+    metadata_bytes = 0
+    for index, entry in enumerate(entries):
+        request = entry.get("request") if isinstance(entry, dict) else None
+        if not isinstance(request, dict):
+            raise ValueError("A HAR entry requires a request object.")
+        target = _har_target(request.get("url"))
+        if target is None:
+            continue
+        response = entry.get("response")
+        if not isinstance(response, dict):
+            raise ValueError("A HAR entry requires a response object.")
+        if len(captures) >= MAX_CAPTURES:
+            raise ValueError("Archive exceeds 1,000 HTTP(S) captures.")
+        values, headers = _har_metadata(entry, request, response, index, target)
+        metadata_bytes += _metadata_size(values, headers)
+        if metadata_bytes > MAX_METADATA_BYTES:
+            raise ValueError("Captured response metadata exceeds 8 MiB.")
+        captures.append((values, headers))
+    if not captures:
+        raise ValueError("Archive contains no HTTP(S) HAR entries.")
+    return captures, len(entries), None
+
+
 def read_archive(raw, format_):
     """Return capture records, scanned record count and optional WACZ digest results."""
+    if format_ == "har":
+        return _read_har(raw)
     captures, budget = [], WarcBudget()
     if format_ == "wacz":
         report = _collect_wacz(raw, captures, budget)

@@ -17,30 +17,36 @@ from pymisp.exceptions import PyMISPError
 from misp_modules.lib import web_archive
 
 moduleinfo = {
-    "version": "1.0",
+    "version": "1.1",
     "author": "MISP Project",
     "name": "Portable Web Archive Evidence Import",
-    "description": "Import local WARC and WACZ captures with response metadata and package digest verification.",
+    "description": "Import local HAR, WARC and WACZ captures with HTTP metadata and WACZ digest verification.",
     "module-type": ["import"],
     "requirements": ["PyMISP"],
     "features": (
-        "Reads WARC 1.0/1.1, gzip-compressed WARC and WACZ. Links HTTP(S) capture records and selected archived"
-        " response metadata to page-capture objects and the SHA-256 of the original upload. Verifies declared"
-        " WACZ manifest and resource digests. Original archive attachment is optional. No replay or network access."
+        "Reads HAR 1.1/1.2, WARC 1.0/1.1, gzip-compressed WARC and WACZ. Links HTTP(S) capture records and selected"
+        " response metadata to page-capture objects and the SHA-256 of the original upload. Verifies declared WACZ"
+        " manifest and resource digests. Original archive attachment is optional. All processing is offline."
     ),
     "references": [
+        "https://w3c.github.io/web-performance/specs/HAR/Overview.html",
         "https://specs.webrecorder.net/wacz/1.2.0/",
         "https://iipc.github.io/warc-specifications/specifications/warc-format/warc-1.1/",
         "https://github.com/MISP/misp-modules/blob/main/documentation/import_mod/web_archive_import.md",
     ],
-    "input": "Base64-encoded WARC, WARC.GZ or WACZ file.",
-    "output": "A source file, WARC record metadata and linked page-capture objects.",
+    "input": "Base64-encoded HAR, WARC, WARC.GZ or WACZ file.",
+    "output": "A source file, HAR entries or WARC record metadata, and linked page-capture objects.",
 }
 NAMESPACE = UUID("f2cf075f-d1be-4cc1-b0b7-f1162acd7723")
-FORMATS = {"wacz": "application/wacz+zip", "warc.gz": "application/gzip", "warc": "application/warc"}
+FORMATS = {
+    "har": "application/json",
+    "wacz": "application/wacz+zip",
+    "warc.gz": "application/gzip",
+    "warc": "application/warc",
+}
 
 
-@lru_cache(maxsize=2)
+@lru_cache(maxsize=3)
 def _template(name):
     path = resources.files("misp_modules").joinpath("data", name, "definition.json")
     return json.loads(path.read_text(encoding="utf-8"))
@@ -87,7 +93,9 @@ def _upload(request):
         return raw, "warc.gz"
     if raw.startswith((b"WARC/1.0", b"WARC/1.1")):
         return raw, "warc"
-    raise ValueError("Expected a WARC, gzip-compressed WARC or WACZ file.")
+    if raw.removeprefix(b"\xef\xbb\xbf").lstrip(b" \t\r\n").startswith(b"{"):
+        return raw, "har"
+    raise ValueError("Expected a HAR, WARC, gzip-compressed WARC or WACZ file.")
 
 
 def _filename(request, format_):
@@ -145,11 +153,18 @@ def _import(request):
 
     objects = [source]
     for values, headers in captures:
-        identity = (digest, values.get("member-path"), values["record-offset"])
-        record = _object("warc-record", identity, values)
+        if format_ == "har":
+            entry_index = values["entry-index"]
+            identity = (digest, entry_index)
+            record = _object("har-entry", identity, values)
+            record_id = f"/log/entries/{entry_index}"
+        else:
+            identity = (digest, values.get("member-path"), values["record-offset"])
+            record = _object("warc-record", identity, values)
+            record_id = values["record-id"]
         for index, (name, value) in enumerate(headers):
             _add(record, "http-response-header", _json({"name": name, "value": value}), index=index)
-        capture_values = {"url": values["target-uri"], "archive-record-id": values["record-id"]}
+        capture_values = {"url": values["target-uri"], "archive-record-id": record_id}
         if "capture-date" in values:
             capture_values["capture-date"] = values["capture-date"]
         capture = _object("page-capture", identity, capture_values)
@@ -188,7 +203,7 @@ def handler(q=False):
         zlib.error,
         RecursionError,
     ):
-        return {"error": "Unable to decode web archive. Supply a valid WARC, gzip-compressed WARC or WACZ file."}
+        return {"error": "Unable to decode web archive. Supply a valid HAR, WARC, gzip-compressed WARC or WACZ file."}
     except (TypeError, PyMISPError):
         return {"error": "Unable to import web archive. Check the request and object templates."}
     except ValueError as error:
