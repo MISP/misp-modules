@@ -452,6 +452,22 @@ def test_har_1_1_handles_missing_response_and_optional_original_attachment():
 
 
 @pytest.mark.parametrize(
+    "timestamp, normalized",
+    [
+        ("2026-11-21T12:00:00Z", "2026-11-21T12:00:00+00:00"),
+        ("2026-11-21T12:00:00.1Z", "2026-11-21T12:00:00.100000+00:00"),
+        ("2026-11-21T08:30:00.1234-03:30", "2026-11-21T12:00:00.123400+00:00"),
+    ],
+)
+def test_har_normalizes_iso_timestamps(timestamp, normalized):
+    result = result_for(har({**har_entry(), "startedDateTime": timestamp}))
+    (entry,) = objects(result, "har-entry")
+    (capture,) = objects(result, "page-capture")
+    assert values(entry)["started-date-time-raw"] == timestamp
+    assert values(entry)["capture-date"] == values(capture)["capture-date"] == normalized
+
+
+@pytest.mark.parametrize(
     "raw, message",
     [
         (b'{"log":', "Unable to decode"),

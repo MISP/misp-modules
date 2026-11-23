@@ -6,7 +6,7 @@ import json
 import re
 import stat
 from dataclasses import dataclass
-from datetime import UTC, date, datetime
+from datetime import date, datetime, timezone
 from io import BufferedReader, BytesIO
 from urllib.parse import urlsplit
 from zipfile import ZIP_DEFLATED, ZIP_STORED, ZipFile
@@ -60,7 +60,7 @@ WARC_DATETIME = re.compile(
     r"([0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2})(?::([0-9]{2})(?:\.([0-9]+))?)?(?:Z|\+00:00)"
 )
 HAR_DATETIME = re.compile(
-    r"[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\.[0-9]+)?(?:Z|[+-][0-9]{2}:[0-5][0-9])"
+    r"([0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2})(?:\.([0-9]+))?(Z|[+-][0-9]{2}:[0-5][0-9])"
 )
 
 
@@ -466,10 +466,16 @@ def _har_target(value):
 
 def _har_timestamp(value):
     error = "HAR startedDateTime requires an ISO 8601 timestamp with a timezone."
-    if not isinstance(value, str) or len(value) > MAX_LINE or not HAR_DATETIME.fullmatch(value):
+    if not isinstance(value, str) or len(value) > MAX_LINE or not (match := HAR_DATETIME.fullmatch(value)):
         raise ValueError(error)
+    timestamp, fraction, offset = match.groups()
+    # Python 3.10 requires an explicit offset and three or six fractional digits.
+    if fraction:
+        timestamp += "." + fraction[:6].ljust(6, "0")
+    if offset == "Z":
+        offset = "+00:00"
     try:
-        return datetime.fromisoformat(value).astimezone(UTC).isoformat()
+        return datetime.fromisoformat(timestamp + offset).astimezone(timezone.utc).isoformat()
     except (ValueError, OverflowError):
         raise ValueError(error) from None
 
