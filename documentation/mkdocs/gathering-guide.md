@@ -85,8 +85,9 @@ updated tags when the feed supplies a newer event revision.
 
 ## Repeat imports and corrections
 
-Every gathering producer supplies UUIDv5 identifiers for the event, its objects,
-its attributes and each object's attributes. Use `stable_uuid(namespace, *keys)`
+Built-in gathering producers put collected data, including source links and raw
+attachments, inside MISP objects. Every producer supplies UUIDv5 identifiers
+for the event, objects and their attributes. Use `stable_uuid(namespace, *keys)`
 from `misp_modules.lib.gathering` with a fixed source namespace and a stable
 upstream record key. Scope each child to its parent. For example, a new producer
 could use the following keys for a source link:
@@ -94,11 +95,12 @@ could use the following keys for a source link:
 ```python
 source_namespace = stable_uuid(NAMESPACE, "example.org/feed")
 event_uuid = stable_uuid(source_namespace, record["id"])
-link_uuid = stable_uuid(event_uuid, "link", record["url"])
+source_uuid = stable_uuid(event_uuid, "source-record")
+link_uuid = stable_uuid(source_uuid, "ref")
 ```
 
-Choose keys that represent the intended identity across corrections. Both
-existing producers identify their raw attachment independently of its bytes,
+Choose keys that represent the intended identity across corrections. Producers
+identify their raw attachments independently of their bytes,
 so replacing the attachment content updates the same MISP attribute. Preserve
 published namespaces and key formats when updating a producer.
 
@@ -124,6 +126,12 @@ also skipped. After upgrading from a stateful producer, an already-imported
 event can have a locally generated revision ahead of its source time. The
 next source revision must exceed that stored timestamp for MISP to update it.
 [MISP feed import logic](https://github.com/MISP/MISP/blob/2d7de9643b9677231faf5660d8eca1cc9a090be2/app/Model/Feed.php#L260-L278)
+
+The object layout applies to newly generated feeds. Already imported events keep
+their event UUIDs and receive the new objects when MISP accepts a newer source
+revision. MISP retains standalone attributes from previous imports. Refresh the
+MISP object templates to pick up `offensive-agency-statistics` and `malware-config`
+version 3 in the template editor.
 
 ## Memory and disk use
 
@@ -175,9 +183,11 @@ One snapshot becomes one event; each target rule becomes a `ddos-config` object.
 Filename timestamps are interpreted as UTC. Rules for the same hostname remain
 separate when their meaning differs. Source fields with underscores map to the
 corresponding hyphenated relations; bodies and headers use canonical JSON text.
-Random placeholders remain literal. A canonical JSON attachment preserves the
-configuration, including `randoms` and unmapped fields. Array ordering of targets
-and random definitions is normalized for reproducibility.
+Random placeholders remain literal. A source `annotation` object contains the
+snapshot link and a canonical JSON attachment with the full configuration,
+including `randoms` and unmapped fields. Snapshots with zero targets still
+contain this object. Array ordering of targets and random definitions is
+normalized for reproducibility.
 
 Listed systems are victim targets: all generated attributes disable IDS export
 and correlation. UUIDv5 identifiers are stable and scoped to the source, event,
@@ -198,10 +208,11 @@ for requests, conversion details and source limitations.
 ## Offensive Agency
 
 `offensive_agency` collects the tracker's public ONYPHE-based observations.
-With empty parameters it creates one event for the published report date,
-including headline counts and an aggregate JSON attachment with the per-agent
-breakdowns and time series. The source's reporting date supplies the event
-timestamp at midnight UTC. Corrections to the same report keep its UUID.
+With empty parameters it creates one event for the published report date.
+An `offensive-agency-statistics` object contains the report date, headline
+counters, source link and aggregate JSON attachment with the per-agent breakdowns
+and time series. The reporting date supplies the event timestamp at midnight UTC.
+Corrections to the same report keep its UUID.
 
 ```json
 {"module":"offensive_agency","operation":"prepare","parameters":{}}
@@ -236,8 +247,6 @@ the service details supplied by the per-IP endpoint.
 The bulk and inventory feeds have distinct event UUIDs for the same IP so a
 bulk row cannot overwrite the richer per-IP record. Repeated collections in
 each mode retain their event, object and attribute UUIDs.
-Previously imported asset events receive the object with the next newer source
-revision. MISP retains any previously imported standalone attributes.
 An observation describes software exposure. Operator intent is unknown.
 IP attributes use UTC day precision. Shared CDN addresses have correlation
 disabled. For cloud IPs, compare the observation dates with your log dates.
@@ -262,9 +271,10 @@ To add another source:
    introspection, advertising contract version 2 and its parameter schema.
 2. Validate parameters, then call `get_jobs().submit(name, parameters, config,
    producer)` from its handler. Return that small descriptor to `/query`.
-3. Implement `producer(parameters, builder, config)`, calling
-   `builder.add(event, source_timestamp)` once per complete event and checking
-   cancellation during slow work. The framework builds the manifest and ZIP.
+3. Implement `producer(parameters, builder, config)`. Use MISP object templates
+   for the collected data, then call `builder.add(event, source_timestamp)` once
+   per complete event. Check cancellation during slow work. The framework builds
+   the manifest and ZIP.
 4. Add `origin_tags(module_identifier, source_domain)` from
    `misp_modules.lib.gathering` to the event's `Tag` list before `builder.add()`.
    Keep this in the gathering producer when sharing a converter with expansion.

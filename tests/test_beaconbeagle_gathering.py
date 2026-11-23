@@ -1,3 +1,4 @@
+import base64
 import copy
 import json
 import zipfile
@@ -7,6 +8,7 @@ from uuid import UUID
 import pytest
 from pymisp import MISPEvent
 
+from misp_modules.lib.beaconbeagle import API, normalized
 from misp_modules.lib.gathering import FeedBuilder, GatheringJobs
 from misp_modules.modules.gathering import beaconbeagle_gathering as module
 from tests.test_beaconbeagle_common import ADDRESS, CONFIG_HASH, LAST, beacon_record, c2_record, config_record
@@ -39,6 +41,10 @@ def test_invalid_parameters_before_enqueue(params):
         jobs.assert_not_called()
 
 
+def object_attributes(event, name):
+    return [attribute for obj in event["Object"] if obj["name"] == name for attribute in obj["Attribute"]]
+
+
 def test_paginated_collection_archive_and_revisions(tmp_path, config_record):
     with patch.object(module, "Client") as factory:
         client = factory.return_value.__enter__.return_value
@@ -66,10 +72,11 @@ def test_paginated_collection_archive_and_revisions(tmp_path, config_record):
         parsed = MISPEvent()
         parsed.load(json.dumps({"Event": event}), validate=True)
         assert all(tag.local is True for tag in parsed.tags)
+        assert not parsed.attributes
     changed = copy.deepcopy(config_record)
     changed["config"]["watermark"] = 456
     changed["locations"][0]["lasttime"] = LAST + 60
-    event2, timestamp2 = module.convert("configs", CONFIG_HASH, changed)
+    event2, timestamp2 = module.convert("configs", CONFIG_HASH, changed, objects_only=True)
     builder2 = FeedBuilder(tmp_path / "second" / "feed")
     event2["Tag"] = event["Tag"]
     builder2.add(event2, timestamp2)
@@ -77,8 +84,10 @@ def test_paginated_collection_archive_and_revisions(tmp_path, config_record):
     assert int(updated["timestamp"]) == LAST + 60
     # Deployed configuration IDs must still address the existing MISP records.
     assert event_uuid == "48c26049-5ae8-5864-ab69-43feaa26c1a8"
-    raw = next(a for a in updated["Attribute"] if a["type"] == "attachment")
-    assert raw["uuid"] == "92bcdb00-d792-5613-aa56-8428945f4b13"
+    raw = next(a for a in object_attributes(updated, "annotation") if a["type"] == "attachment")
+    original = next(a for a in object_attributes(event, "annotation") if a["type"] == "attachment")
+    assert raw["uuid"] == original["uuid"]
+    assert raw["uuid"] != "92bcdb00-d792-5613-aa56-8428945f4b13"  # Legacy event-level attachment.
     assert raw["timestamp"] == updated["timestamp"]
     config = next(obj for obj in updated["Object"] if obj["name"] == "malware-config")
     assert config["uuid"] == "a46e029e-2458-55ca-97af-add6b9322baa"
@@ -120,8 +129,11 @@ def test_all_datasets_repeat_import(tmp_path, config_record, beacon_record, c2_r
     assert gather(tmp_path / "repeat") == first
     manifest = json.loads(first["manifest.json"])
     assert len(manifest) == 3
+    records = {"configs": config_record, "beacons": beacon_record, "c2": c2_record}
     for uuid, metadata in manifest.items():
         event = json.loads(first[uuid + ".json"])["Event"]
+        kind, key = event["info"].removeprefix("BeaconBeagle ").split(": ")
+        assert not event.get("Attribute")
         assert (
             event["Tag"]
             == metadata["Tag"]
@@ -130,12 +142,35 @@ def test_all_datasets_repeat_import(tmp_path, config_record, beacon_record, c2_r
                 {"name": 'misp-gathering:source="beaconbeagle.com"', "local": True},
             ]
         )
-        items = [event, *event["Attribute"], *event["Object"], *(a for o in event["Object"] for a in o["Attribute"])]
+        items = [event, *event["Object"], *(a for o in event["Object"] for a in o["Attribute"])]
         assert all(UUID(item["uuid"]).version == 5 and item["timestamp"] == metadata["timestamp"] for item in items)
+        assert all(not a["to_ids"] for o in event["Object"] for a in o["Attribute"])
+        source = {a["object_relation"]: a for a in object_attributes(event, "annotation")}
+        assert source["ref"]["value"] == f"{API}{kind}/{key}"
+        assert json.loads(base64.b64decode(source["attachment"]["data"])) == normalized(kind, records[kind])
+        network = {a["value"] for a in object_attributes(event, "ip-port") if a["type"] in ("ip-dst", "domain")}
+        assert ADDRESS in network
+        if kind == "configs":
+            assert "c2.example" in network
+            (config,) = [obj for obj in event["Object"] if obj["name"] == "malware-config"]
+            assert config["template_version"] == "3"
+            assert [a["value"] for a in config["Attribute"] if a["type"] == "user-agent"] == ["Example agent"]
+        if kind == "c2":
+            assert "c2.example" in network
+            assert [a["value"] for a in object_attributes(event, "url") if a["type"] == "url"] == c2_record["URLs"]
+
+
+def test_invalid_endpoint_port_preserves_host_in_an_object(config_record):
+    config_record["config"]["settings"]["SETTING_PORT"] = 0
+    event, _ = module.convert("configs", CONFIG_HASH, config_record, objects_only=True)
+    (endpoint,) = [obj for obj in event["Object"] if any(a["value"] == "c2.example" for a in obj["Attribute"])]
+    assert endpoint["name"] == "ip-port"
+    assert [a["object_relation"] for a in endpoint["Attribute"]] == ["domain"]
+    assert not event.get("Attribute")
 
 
 def test_origin_tags_preserve_converter_tags_and_do_not_modify_shared_conversion(config_record):
-    event, observed = module.convert("configs", CONFIG_HASH, config_record)
+    event, observed = module.convert("configs", CONFIG_HASH, config_record, objects_only=True)
     assert "Tag" not in event  # This converter is also used by expansion.
     event["Tag"] = [{"name": "existing-source-tag", "local": False}]
     with patch.object(module, "Client") as factory, patch.object(module, "convert", return_value=(event, observed)):
@@ -167,7 +202,8 @@ def test_c2_feed_archive_includes_enriched_asns(tmp_path, c2_record):
         manifest = json.loads(archive.read("manifest.json"))
         assert len(manifest) == 1
         event = json.loads(archive.read(next(iter(manifest)) + ".json"))["Event"]
-    asns = [a for a in event["Attribute"] if a["type"] == "AS"]
+    assert not event.get("Attribute")
+    asns = [a for a in object_attributes(event, "asn") if a["type"] == "AS"]
     assert sorted(a["value"] for a in asns) == ["AS64500", "AS64501"]
     assert all(a["to_ids"] is False for a in asns)
     assert event["timestamp"] == str(LAST)

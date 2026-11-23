@@ -2,17 +2,25 @@
 
 import base64
 import json
+from importlib import resources
 
 import requests
+from pymisp import MISPObject
 
 from misp_modules.lib.gathering import CONTRACT_VERSION, NAMESPACE, canonical_json, get_jobs, origin_tags, stable_uuid
-from misp_modules.lib.offensive_agency import SOURCE, day, fetch, host_ip, host_objects
+from misp_modules.lib.offensive_agency import SOURCE, add, day, fetch, host_ip, host_objects
 
 MODULE = "offensive_agency"
 SOURCE_NAMESPACE = stable_uuid(NAMESPACE, "offensive.agency")
+STATISTICS_NAME = "offensive-agency-statistics"
+STATISTICS_TEMPLATE = json.loads(
+    resources.files("misp_modules")
+    .joinpath("data", "offensive-agency", STATISTICS_NAME, "definition.json")
+    .read_text(encoding="utf-8")
+)
 moduleinfo = {
     "name": "Offensive Agency",
-    "version": "1.1",
+    "version": "1.2",
     "author": "MISP Project",
     "module-type": ["gathering"],
     "description": "Gather Offensive Agency exposure statistics, inventory matches or the full historical host export.",
@@ -72,19 +80,6 @@ def event_for(kind, key, info, observed):
     }
 
 
-def add_attribute(event, key, attribute_type, value, **fields):
-    event["Attribute"].append(
-        {
-            "uuid": stable_uuid(event["uuid"], key),
-            "type": attribute_type,
-            "value": value,
-            "to_ids": False,
-            "disable_correlation": True,
-            **fields,
-        }
-    )
-
-
 def canonical_statistics(record):
     # Ranked breakdowns can change tie order. The dates and corresponding time series are positional.
     def sort_breakdowns(row, fields):
@@ -106,26 +101,28 @@ def statistics(record):
     observed = day(record["ref_day"])
     date = observed.date().isoformat()
     event = event_for("statistics", date, f"Offensive Agency exposure statistics for {date}", observed)
-    add_attribute(event, "source", "link", SOURCE + "stats")
-    for key, label in (
-        ("total", "IPs in tracker history"),
-        ("active", "Active IPs"),
-        ("new", "New IPs in the active window"),
-        ("multi", "Active IPs with multiple agents"),
-        ("with_c2", "Active IPs with a co-hosted C2"),
+    obj = MISPObject(STATISTICS_NAME, strict=True, misp_objects_template_custom=STATISTICS_TEMPLATE)
+    obj.uuid = stable_uuid(event["uuid"], "statistics")
+    add(obj, "report-date", observed.isoformat())
+    add(obj, "source-url", SOURCE + "stats")
+    for key, relation in (
+        ("total", "tracked-ips"),
+        ("active", "active-ips"),
+        ("new", "new-ips"),
+        ("multi", "multi-agent-ips"),
+        ("with_c2", "cohosted-c2-ips"),
     ):
         count = record[key]
         if type(count) is not int or count < 0:
             raise ValueError(f"Invalid Offensive Agency count for {key}")
-        add_attribute(event, key, "text", f"{label}: {count}")
-    add_attribute(
-        event,
-        "statistics-json",
-        "attachment",
+        add(obj, relation, count)
+    add(
+        obj,
+        "source-record",
         f"offensive-agency-stats-{date}.json",
         data=base64.b64encode(canonical_statistics(record).encode()).decode(),
-        comment="Published aggregate statistics and daily time series, based on ONYPHE observations.",
     )
+    event["Object"] = [json.loads(obj.to_json())]
     return event, int(observed.timestamp())
 
 

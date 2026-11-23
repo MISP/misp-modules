@@ -99,7 +99,9 @@ def collect(root, params, state):
                 ]
             )
             assert event["timestamp"] == metadata["timestamp"] == metadata["publish_timestamp"]
-            attributes = event["Attribute"] + [a for obj in event.get("Object", []) for a in obj["Attribute"]]
+            assert not event.get("Attribute") and not parsed.attributes
+            assert parsed.objects
+            attributes = [a for obj in event["Object"] for a in obj["Attribute"]]
             assert all(UUID(a["uuid"]).version == 5 and not a["to_ids"] for a in attributes)
             events[uuid] = event
     return events
@@ -113,16 +115,33 @@ def test_daily_statistics_repeat_and_correction(api, tmp_path):
     first = collect(tmp_path / "first", {}, state)
     uuid, event = next(iter(first.items()))
     assert event["date"] == STATS["ref_day"]
-    attachment = next(a for a in event["Attribute"] if a["type"] == "attachment")
+    (stats,) = event["Object"]
+    assert stats["name"] == "offensive-agency-statistics"
+    assert stats["template_uuid"] == module.STATISTICS_TEMPLATE["uuid"]
+    attributes = {a["object_relation"]: a for a in stats["Attribute"]}
+    assert {r: int(a["value"]) for r, a in attributes.items() if a["type"] == "counter"} == {
+        "tracked-ips": STATS["total"],
+        "active-ips": STATS["active"],
+        "new-ips": STATS["new"],
+        "multi-agent-ips": STATS["multi"],
+        "cohosted-c2-ips": STATS["with_c2"],
+    }
+    assert attributes["report-date"]["value"] == STATS["ref_day"] + "T00:00:00+00:00"
+    assert attributes["source-url"]["value"] == module.SOURCE + "stats"
+    assert all(a["disable_correlation"] for a in attributes.values())
+    attachment = attributes["source-record"]
     assert json.loads(base64.b64decode(attachment["data"])) == STATS
     reordered = dict(reversed(list(STATS.items())))
     reordered["countries"] = list(reversed(STATS["countries"]))
     reordered["tools"] = {"example": {"ports": [[80, 1], [443, 8]]}}
     replies[url] = 200, reordered
     assert collect(tmp_path / "repeat", {}, state) == first
-    replies[url] = 200, dict(STATS, active=101)
+    replies[url] = 200, dict(STATS, active=101, new=0)
     changed = collect(tmp_path / "changed", {}, state)[uuid]
-    assert {a["uuid"] for a in changed["Attribute"]} == {a["uuid"] for a in event["Attribute"]}
+    (updated,) = changed["Object"]
+    assert updated["uuid"] == stats["uuid"]
+    assert {a["uuid"] for a in updated["Attribute"]} == {a["uuid"] for a in stats["Attribute"]}
+    assert next(a["value"] for a in updated["Attribute"] if a["object_relation"] == "new-ips") == "0"
     assert int(changed["timestamp"]) > int(event["timestamp"])
     replies[url] = 200, dict(STATS, ref_day="2026-11-21")
     assert uuid not in collect(tmp_path / "next", {}, state)
