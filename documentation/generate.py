@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import argparse
 import collections
 import copy
 import importlib
@@ -15,6 +16,7 @@ import misp_modules
 
 GH_LINK = "https://github.com/MISP/misp-modules/tree/main/misp_modules/modules"
 GH_DOC_LINK = "https://misp.github.io/misp-modules"
+MODULE_LIST_HEADING = "## Existing MISP modules"
 
 MODULE_TYPE_TITLE = {
     misp_modules.ModuleType.EXPANSION.value: "Expansion Modules",
@@ -92,13 +94,23 @@ def _generate_doc(module_type: str, logo_path: str = "logos") -> list[str]:
     return markdown
 
 
-def _generate_index_doc(module_type: str) -> list[str]:
+def _generate_index_doc(module_type: str, *, for_readme: bool = False) -> list[str]:
     markdown = []
     for module_name, module_info in _get_all_module_info()[module_type].items():
-        module_name_pretty = module_info.get("name", module_name)
-        anchor_ref = f"{GH_DOC_LINK}/{module_type}/#{module_name_pretty.replace(' ', '-').lower()}"
-        description_without_newlines = module_info.get("description").replace("\n", " ")
-        markdown.append(f"* [{module_name_pretty}]({anchor_ref}) - {description_without_newlines}\n")
+        module_name_pretty = module_info.get("name") or module_name
+        description = module_info["description"].replace("\n", " ").strip()
+        if for_readme:
+            doc_dir = pathlib.Path("documentation", module_type)
+            target = doc_dir / f"{module_name}.md"
+            if not (BASE / target).is_file():
+                target = pathlib.Path("misp_modules", misp_modules.MODULES_DIR, module_type, f"{module_name}.py")
+            link = target.as_posix()
+            json_doc = doc_dir / f"{module_name}.json"
+            if (BASE / json_doc).is_file():
+                description += f" [JSON documentation]({json_doc.as_posix()})."
+        else:
+            link = f"{GH_DOC_LINK}/{module_type}/#{module_name_pretty.replace(' ', '-').lower()}"
+        markdown.append(f"* [{module_name_pretty}]({link}) - {description}\n")
     return markdown
 
 
@@ -139,7 +151,7 @@ def update_docs_for_mkdocs_index():
             continue  # skip lines, as we're in the block that we're auto-generating
         skip = False
         new_doc.append(line)
-        if line.startswith("## Existing MISP modules"):
+        if line.startswith(MODULE_LIST_HEADING):
             skip = True
             for path, title in MODULE_TYPE_TITLE.items():
                 new_doc.append(f"\n### {title}\n")
@@ -149,27 +161,43 @@ def update_docs_for_mkdocs_index():
         w.write("".join(new_doc))
 
 
-def update_readme():
-    with open(BASE.joinpath("README.md"), "r") as r:
-        old_readme = r.readlines()
-    new_doc = []
-    skip = False
-    for line in old_readme:
-        if skip and not line.startswith("# List of MISP modules"):  # find next title
-            continue  # skip lines, as we're in the block that we're auto-generating
-        new_doc.append(line)
-        if line.startswith("# List of MISP modules"):
-            skip = True
-            for path, title in MODULE_TYPE_TITLE.items():
-                new_doc.append(f"\n## {title}\n")
-                new_doc.extend(_generate_index_doc(path))
-            new_doc.append("\n\n")
-    with open(BASE.joinpath("README.md"), "w") as w:
-        w.write("".join(new_doc))
+def update_readme() -> bool:
+    module_info = _get_all_module_info()
+    missing = sorted(
+        f"{module_type.name}/{module.name}"
+        for module_type, module in misp_modules.iterate_modules(SRC_ROOT / misp_modules.MODULES_DIR)
+        if module.stem not in module_info.get(module_type.name, {})
+    )
+    if missing:
+        logging.warning(
+            "Skipped README regeneration because these modules could not be imported: %s", ", ".join(missing)
+        )
+        return False
+
+    readme = BASE / "README.md"
+    lines = readme.read_text(encoding="utf-8").splitlines(keepends=True)
+    start = next((index + 1 for index, line in enumerate(lines) if line.rstrip() == MODULE_LIST_HEADING), None)
+    if start is None:
+        raise SystemExit(f"README.md is missing the {MODULE_LIST_HEADING!r} heading.")
+    end = next((index for index in range(start, len(lines)) if lines[index].startswith(("# ", "## "))), len(lines))
+
+    catalog = ["\n<!-- Regenerate with: poetry run python documentation/generate.py --readme-only -->\n"]
+    for path, title in MODULE_TYPE_TITLE.items():
+        catalog.append(f"\n### {title}\n")
+        catalog.extend(_generate_index_doc(path, for_readme=True))
+    if end < len(lines):
+        catalog.append("\n")
+    readme.write_text("".join([*lines[:start], *catalog, *lines[end:]]), encoding="utf-8")
+    return True
 
 
 def main():
     """Generate documentation."""
+    parser = argparse.ArgumentParser(description=main.__doc__)
+    parser.add_argument("--readme-only", action="store_true", help="Update the module list in the root README only.")
+    if parser.parse_args().readme_only:
+        return 0 if update_readme() else 1
+
     write_doc_for_readme()
     write_docs_for_mkdocs()
     update_docs_for_mkdocs_index()
