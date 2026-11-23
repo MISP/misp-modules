@@ -1,5 +1,5 @@
 import json
-from unittest.mock import patch
+from unittest.mock import call, patch
 
 from misp_modules.modules.expansion import dns as dns_module
 from misp_modules.modules.expansion import reversedns
@@ -43,12 +43,16 @@ def test_dns_emits_the_whole_rrset():
 
 
 def test_dns_also_queries_aaaa():
-    attribute = {"type": "domain", "value": "circl.lu", "uuid": UUID}
-    result, mock_resolver = _run(dns_module, attribute, {"A": ["149.13.33.14"], "AAAA": ["2001:db8::1"]})
+    hostname = "www.example.test"
+    attribute = {"type": "hostname", "value": hostname, "uuid": UUID}
+    result, mock_resolver = _run(
+        dns_module, attribute, {"A": ["192.0.2.2"], "AAAA": ["2001:db8::1"]}, config={"nameserver": "192.0.2.53"}
+    )
     values = _values(_object(result, "dns-record"))
-    assert ("a-record", "149.13.33.14") in values
+    assert ("a-record", "192.0.2.2") in values
     assert ("aaaa-record", "2001:db8::1") in values
-    assert [call.args[1] for call in mock_resolver.return_value.resolve.call_args_list] == ["A", "AAAA"]
+    assert mock_resolver.return_value.nameservers == ["192.0.2.53"]
+    assert mock_resolver.return_value.resolve.call_args_list == [call(hostname, "A"), call(hostname, "AAAA")]
 
 
 def test_dns_ipv6_only_name_is_not_an_error():
@@ -89,11 +93,12 @@ def test_dns_nxdomain_returns_error():
 
 
 def test_reversedns_emits_ptr_records():
-    attribute = {"type": "ip-src", "value": "8.8.8.8", "uuid": UUID}
-    result, _ = _run(reversedns, attribute, ["dns.google."])
+    attribute = {"type": "ip-src", "value": "192.0.2.2", "uuid": UUID}
+    result, mock_resolver = _run(reversedns, attribute, ["www.example.test."])
     values = _values(_object(result, "dns-record"))
-    assert ("queried-domain", "8.8.8.8.in-addr.arpa") in values
-    assert ("ptr-record", "dns.google") in values
+    assert ("queried-domain", "2.2.0.192.in-addr.arpa") in values
+    assert ("ptr-record", "www.example.test") in values
+    assert mock_resolver.return_value.nameservers == ["8.8.8.8"]
 
 
 def test_reversedns_rejects_a_non_ip():
