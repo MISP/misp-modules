@@ -55,10 +55,9 @@ moduleinfo = {
     "version": "1.0",
     "author": "Brandon Dixon",
     "description": (
-        "The PassiveTotal MISP expansion module brings the datasets derived from Internet scanning directly into your"
-        " MISP instance. This module supports passive DNS, historic SSL, WHOIS, and host attributes. In order to use"
-        " the module, you must have a valid PassiveTotal account username and API key. Registration is free and can be"
-        " done by visiting https://www.passivetotal.org/register"
+        "Query PassiveTotal for passive DNS, historic SSL, WHOIS and host attributes."
+        " Requires a PassiveTotal username and API key. See the [Microsoft Defender Threat Intelligence documentation]"
+        "(https://learn.microsoft.com/en-us/defender-xdr/defender-threat-intelligence)."
     ),
     "module-type": ["expansion", "hover"],
     "name": "PassiveTotal Lookup",
