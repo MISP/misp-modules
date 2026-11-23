@@ -913,19 +913,20 @@ Import Volatility 3 process, network, suspicious-memory and YARA results with me
 
 #### [Portable Web Archive Evidence Import](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/web_archive_import.py)
 
-Import local WARC and WACZ captures with response metadata and package digest verification.
+Import local HAR, WARC and WACZ captures with HTTP metadata and WACZ digest verification.
 [[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/import_mod/web_archive_import.py)]
 
 - **features**:
->Reads WARC 1.0/1.1, gzip-compressed WARC and WACZ. Links HTTP(S) capture records and selected archived response metadata to page-capture objects and the SHA-256 of the original upload. Verifies declared WACZ manifest and resource digests. Original archive attachment is optional. No replay or network access.
+>Reads HAR 1.1/1.2, WARC 1.0/1.1, gzip-compressed WARC and WACZ. Links HTTP(S) capture records and selected response metadata to page-capture objects and the SHA-256 of the original upload. Verifies declared WACZ manifest and resource digests. Original archive attachment is optional. All processing is offline.
 
 - **input**:
->Base64-encoded WARC, WARC.GZ or WACZ file.
+>Base64-encoded HAR, WARC, WARC.GZ or WACZ file.
 
 - **output**:
->A source file, WARC record metadata and linked page-capture objects.
+>A source file, HAR entries or WARC record metadata, and linked page-capture objects.
 
 - **references**:
+> - https://w3c.github.io/web-performance/specs/HAR/Overview.html
 > - https://specs.webrecorder.net/wacz/1.2.0/
 > - https://iipc.github.io/warc-specifications/specifications/warc-format/warc-1.1/
 > - https://github.com/MISP/misp-modules/blob/main/documentation/import_mod/web_archive_import.md

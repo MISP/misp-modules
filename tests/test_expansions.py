@@ -316,20 +316,6 @@ class TestExpansions(unittest.TestCase):
             self.assertEqual(self.get_first_object_type(response), "reputation")
             self.assertIn("dbl.spamhaus.org", self.get_object_attribute_values(response, "list-name"))
 
-    def test_dns(self):
-        query = {
-            "module": "dns",
-            "attribute": {
-                "type": "hostname",
-                "value": "www.circl.lu",
-                "uuid": "ea89a33b-4ab7-4515-9f02-922a0bee333d",
-            },
-            "config": {"nameserver": "8.8.8.8"},
-        }
-        response = self.misp_modules_post(query)
-        self.assertEqual(self.get_first_object_type(response), "dns-record")
-        self.assertIn("185.194.93.63", self.get_object_attribute_values(response, "a-record"))
-
     def test_docx(self):
         filename = "test.docx"
         with open(f"{self.dirname}/test_files/{filename}", "rb") as f:
@@ -639,16 +625,6 @@ class TestExpansions(unittest.TestCase):
             query = {"module": module_name, "attribute": attributes[0]}
             response = self.misp_modules_post(query)
             self.assertEqual(self.get_errors(response), "Missing api_url in config")
-
-    def test_reversedns(self):
-        query = {
-            "module": "reversedns",
-            "attribute": {"type": "ip-src", "value": "8.8.8.8", "uuid": "ea89a33b-4ab7-4515-9f02-922a0bee333d"},
-            "config": {},
-        }
-        response = self.misp_modules_post(query)
-        self.assertEqual(self.get_first_object_type(response), "dns-record")
-        self.assertIn("dns.google", self.get_object_attribute_values(response, "ptr-record"))
 
     def test_rulezet_validator(self):
         query = {

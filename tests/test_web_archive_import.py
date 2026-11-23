@@ -355,3 +355,150 @@ def test_limits_and_module_metadata(monkeypatch):
     assert "metadata exceeds" in result_for(warc())["error"]
     monkeypatch.setattr(web_archive, "MAX_WARC_BYTES", 40)
     assert "Inflated WARC" in result_for(gzip.compress(warc()))["error"]
+
+
+def har_entry(url=URI):
+    return {
+        "startedDateTime": "2026-11-21T17:30:00.1234567+05:30",
+        "request": {
+            "url": url,
+            "method": "POST",
+            "headers": [{"name": "Authorization", "value": "PRIVATE_REQUEST"}],
+            "postData": {"text": "PRIVATE_POST"},
+        },
+        "response": {
+            "status": 302,
+            "httpVersion": "h2",
+            "headers": [
+                {"name": "Location", "value": "/next"},
+                {"name": "ETag", "value": "one"},
+                {"name": "etag", "value": "two"},
+                {"name": "Set-Cookie", "value": "PRIVATE_COOKIE"},
+            ],
+            "content": {"text": "PRIVATE_BODY"},
+        },
+    }
+
+
+def har(*entries, version="1.2"):
+    return json.dumps(
+        {"log": {"version": version, "creator": {"name": "Test", "version": "1"}, "entries": entries}}
+    ).encode()
+
+
+def test_har_links_distinct_exchanges_to_original_file_and_preserves_selected_metadata():
+    raw = b"\xef\xbb\xbf \r\n" + har(har_entry(), har_entry("data:text/plain,PRIVATE_INLINE"), har_entry())
+    result = result_for(raw)
+    (source,) = objects(result, "file")
+    exchanges = objects(result, "har-entry")
+    captures = objects(result, "page-capture")
+    assert values(source) == {
+        "filename": "capture.har",
+        "sha256": sha(raw),
+        "size-in-bytes": str(len(raw)),
+        "mimetype": "application/json",
+    }
+    assert result["summary"] == {
+        "format": "har",
+        "records_scanned": 3,
+        "captures": 2,
+        "source_sha256": sha(raw),
+        "archive_attached": False,
+    }
+    for index, exchange, capture in zip((0, 2), exchanges, captures, strict=True):
+        fields = values(exchange)
+        assert fields["entry-index"] == str(index)
+        assert fields["target-uri"] == URI
+        assert fields["http-method"] == "POST"
+        assert fields["http-status"] == "302"
+        assert fields["http-version"] == "h2"
+        assert fields["started-date-time-raw"] == "2026-11-21T17:30:00.1234567+05:30"
+        assert fields["capture-date"] == "2026-11-21T12:00:00.123456+00:00"
+        assert [
+            json.loads(attr["value"])
+            for attr in exchange["Attribute"]
+            if attr["object_relation"] == "http-response-header"
+        ] == [
+            {"name": "location", "value": "/next"},
+            {"name": "etag", "value": "one"},
+            {"name": "etag", "value": "two"},
+        ]
+        assert values(capture) == {
+            "url": URI,
+            "archive-record-id": f"/log/entries/{index}",
+            "capture-date": fields["capture-date"],
+        }
+        assert exchange["ObjectReference"][0]["referenced_uuid"] == source["uuid"]
+        assert capture["ObjectReference"][0]["referenced_uuid"] == exchange["uuid"]
+    assert "PRIVATE_" not in json.dumps(result)
+    assert result == result_for(raw)
+    check_misp_objects(result)
+
+
+def test_har_1_1_handles_missing_response_and_optional_original_attachment():
+    entry = har_entry()
+    entry["response"] = {"status": 0, "httpVersion": "", "headers": []}
+    raw = har(entry, version="1.1")
+    result = result_for(raw, filename="evidence.json", config={"include_archive": True})
+    (exchange,) = objects(result, "har-entry")
+    (source,) = objects(result, "file")
+    assert values(exchange)["http-status"] == "0"
+    assert "http-version" not in values(exchange)
+    attachment = next(a for a in source["Attribute"] if a["object_relation"] == "attachment")
+    assert attachment["value"] == "evidence.json"
+    assert base64.b64decode(attachment["data"]) == raw
+    assert result["summary"]["archive_attached"] is True
+    check_misp_objects(result)
+
+
+@pytest.mark.parametrize(
+    "timestamp, normalized",
+    [
+        ("2026-11-21T12:00:00Z", "2026-11-21T12:00:00+00:00"),
+        ("2026-11-21T12:00:00.1Z", "2026-11-21T12:00:00.100000+00:00"),
+        ("2026-11-21T08:30:00.1234-03:30", "2026-11-21T12:00:00.123400+00:00"),
+    ],
+)
+def test_har_normalizes_iso_timestamps(timestamp, normalized):
+    result = result_for(har({**har_entry(), "startedDateTime": timestamp}))
+    (entry,) = objects(result, "har-entry")
+    (capture,) = objects(result, "page-capture")
+    assert values(entry)["started-date-time-raw"] == timestamp
+    assert values(entry)["capture-date"] == values(capture)["capture-date"] == normalized
+
+
+@pytest.mark.parametrize(
+    "raw, message",
+    [
+        (b'{"log":', "Unable to decode"),
+        (b'{"log":{"version":"1.2","entries":{}}}', "log.entries"),
+        (b'{"log":{"version":"1.2","entries":[],"entries":[]}}', "duplicate JSON key"),
+        (har(har_entry(), version="2.0"), "HAR version"),
+        (har(har_entry(), None), "request object"),
+        (har(har_entry("data:text/plain,only")), "no HTTP(S) HAR entries"),
+        (har(har_entry("https://")), "request.url"),
+        (har({**har_entry(), "startedDateTime": "2026-11-21T12:00:00"}), "startedDateTime"),
+        (har({**har_entry(), "response": {"status": True}}), "response.status"),
+        (har({**har_entry(), "response": {"status": 200, "headers": {}}}), "response.headers"),
+    ],
+)
+def test_invalid_har_returns_only_error(raw, message):
+    result = result_for(raw)
+    assert set(result) == {"error"}
+    assert message in result["error"]
+
+
+@pytest.mark.parametrize(
+    "limit, message",
+    [
+        ("MAX_RECORDS", "10,000 HAR entries"),
+        ("MAX_CAPTURES", "1,000 HTTP(S)"),
+        ("MAX_CAPTURE_HEADERS", "supported HTTP response headers"),
+        ("MAX_METADATA_BYTES", "metadata exceeds"),
+    ],
+)
+def test_har_uses_archive_limits(monkeypatch, limit, message):
+    monkeypatch.setattr(web_archive, limit, 1)
+    result = result_for(har(har_entry(), har_entry()))
+    assert set(result) == {"error"}
+    assert message in result["error"]
