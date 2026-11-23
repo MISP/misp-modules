@@ -47,12 +47,13 @@ They do not cut observations out of an event or mean "last modified".
 An unbounded initial run can require thousands of detail requests.
 
 Each configuration, beacon IP and C2 key has its own stable event identity.
-Events contain a source API link, complete canonical JSON attachment and mapped
-`malware-config` / `ip-port` objects, IP/domain/URL attributes and available ASN
-context. C2 ASN attributes include `ip_enrichment[IP].ASN.number`, deduplicating
-ASNs repeated across addresses or top-level metadata. Configuration locations
-accept both IPs and hostnames; C2 endpoint objects retain the hostname alongside
-resolved IPs with their port and protocol.
+An `annotation` object holds the source API link and complete canonical JSON
+attachment. `malware-config` objects include the configured HTTP user agent
+when available. `ip-port` objects represent beacon and C2 addresses, including
+hostnames, with available ports, protocols and observation times. `url` and
+`asn` objects hold C2 URLs and available ASN context. C2 ASN objects include
+`ip_enrichment[IP].ASN.number`, deduplicating ASNs repeated across addresses or
+top-level metadata.
 Configuration settings retain instruction order. Unknown fields,
 watermarks, architecture, current/historical status, country, enrichment and
 embedded configuration references remain in the source attachment.

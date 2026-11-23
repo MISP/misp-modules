@@ -7,7 +7,7 @@ from misp_modules.lib.beaconbeagle import Client, convert, integer, path_key
 from misp_modules.lib.gathering import get_jobs, origin_tags
 
 moduleinfo = {
-    "version": "1.2",
+    "version": "1.3",
     "author": "MISP Project",
     "name": "BeaconBeagle Gathering",
     "description": "Gather Cobalt Strike configurations, beacon hosts and C2 infrastructure into a MISP feed ZIP.",
@@ -73,7 +73,7 @@ def gather(params, builder, config=None):
                     continue
                 seen.add((kind, key))
                 data = client.get(kind + "/" + path_key(key))
-                event, observed = convert(kind, key, data)
+                event, observed = convert(kind, key, data, objects_only=True)
                 if not start <= dt.date.fromisoformat(event["date"]) < end:
                     continue
                 count += 1

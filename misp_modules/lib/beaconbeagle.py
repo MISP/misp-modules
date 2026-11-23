@@ -5,6 +5,7 @@ import datetime as dt
 import json
 import math
 import re
+from importlib import resources
 from ipaddress import ip_address
 from urllib.parse import quote, urlsplit
 from uuid import UUID
@@ -13,12 +14,17 @@ import requests
 from pymisp import MISPObject
 
 from misp_modules.lib.gathering import canonical_json as canonical
-from misp_modules.lib.gathering import stable_uuid
+from misp_modules.lib.gathering import source_record, stable_uuid
 
 API = "https://beaconbeagle.com/api/v1/"
 NAMESPACE = UUID("5b6e5d32-98a3-55ba-95ea-d4ae4bd695d4")
 MAX_RESPONSE_BYTES = 16 * 1024 * 1024
 HASH = re.compile(r"^[a-fA-F0-9]{64}$")
+MALWARE_CONFIG_TEMPLATE = json.loads(
+    resources.files("misp_modules")
+    .joinpath("data", "beaconbeagle", "malware-config", "definition.json")
+    .read_text(encoding="utf-8")
+)
 
 
 def identity(*parts):
@@ -158,7 +164,7 @@ def normalized(kind, data):
     return data
 
 
-def convert(kind, key, data):
+def convert(kind, key, data, *, objects_only=False):
     """Return a feed event and source timestamp; raw JSON preserves every API field."""
     if kind not in ("configs", "beacons", "c2") or not isinstance(data, dict):
         raise ValueError("Invalid BeaconBeagle record")
@@ -203,8 +209,8 @@ def convert(kind, key, data):
                 {"uuid": ident, "type": attr_type, "value": value, "to_ids": False, "comment": comment}
             )
 
-    def obj(name, discriminator, values, observation=None):
-        result = MISPObject(name, strict=True)
+    def obj(name, discriminator, values, observation=None, *, template=None):
+        result = MISPObject(name, strict=True, misp_objects_template_custom=template)
         result.uuid = identity(event_uuid, name, discriminator)
         result.comment = source_url
         for relation, value in sorted(set(values), key=canonical):
@@ -228,41 +234,47 @@ def convert(kind, key, data):
 
     def infrastructure(value, port=None, protocol=None, observation=None):
         attr_type, value = host(value)
-        attribute(attr_type, value)
+        if not objects_only:
+            attribute(attr_type, value)
         values = [(attr_type, value)]
         if port is not None:
             # The beacon API also exposes metadata keys such as GEO and ASN as ports.
-            if not re.fullmatch(r"[0-9]+", str(port)) or not 1 <= int(port) <= 65535:
+            if re.fullmatch(r"[0-9]+", str(port)) and 1 <= int(port) <= 65535:
+                values.append(("dst-port", str(int(port))))
+            elif objects_only:
+                port = protocol = None
+            else:
                 return
-            values.append(("dst-port", str(int(port))))
         if protocol:
             values.append(("protocol", str(protocol)))
         obj("ip-port", [value, str(port), protocol], values, observation)
 
-    attribute("link", source_url, "BeaconBeagle source API record")
-    raw = {
-        "uuid": identity(event_uuid, "raw"),
-        "type": "attachment",
-        "value": f"beaconbeagle-{kind}-{identity(key)}.json",
-        "data": base64.b64encode(canonical(data).encode()).decode(),
-        "to_ids": False,
-        "disable_correlation": True,
-        "comment": "Complete BeaconBeagle API record; configuration hashes are not sample hashes.",
-    }
-    event["Attribute"].append(raw)
+    filename = f"beaconbeagle-{kind}-{identity(key)}.json"
+    description = "Complete BeaconBeagle API record; configuration hashes are not sample hashes."
+    if objects_only:
+        event["Object"].append(source_record(event_uuid, source_url, filename, data, description))
+    else:
+        attribute("link", source_url, "BeaconBeagle source API record")
+        event["Attribute"].append(
+            {
+                "uuid": identity(event_uuid, "raw"),
+                "type": "attachment",
+                "value": filename,
+                "data": base64.b64encode(canonical(data).encode()).decode(),
+                "to_ids": False,
+                "disable_correlation": True,
+                "comment": description,
+            }
+        )
     if kind == "configs":
         config = data.get("config")
         if not isinstance(config, dict) or not isinstance(data.get("locations"), list):
             raise ValueError("Invalid BeaconBeagle configuration")
-        obj(
-            "malware-config",
-            key,
-            [
-                ("config", canonical(config)),
-                ("format", "JSON"),
-                ("description", f"Cobalt Strike configuration; BeaconBeagle hash {key}"),
-            ],
-        )
+        values = [
+            ("config", canonical(config)),
+            ("format", "JSON"),
+            ("description", f"Cobalt Strike configuration; BeaconBeagle hash {key}"),
+        ]
         for location in data["locations"]:
             infrastructure(location["beacon_ip"], location.get("beacon_port"), location.get("protocol"), location)
         settings = config.get("settings", {})
@@ -275,10 +287,15 @@ def convert(kind, key, data):
         for domain in domains.split(",")[::2]:
             if domain.strip():
                 infrastructure(domain, settings.get("SETTING_PORT"), config.get("protocol"))
-        if settings.get("SETTING_USERAGENT"):
-            if not isinstance(settings["SETTING_USERAGENT"], str):
+        user_agent = settings.get("SETTING_USERAGENT")
+        if user_agent:
+            if not isinstance(user_agent, str):
                 raise ValueError("Invalid BeaconBeagle user agent")
-            attribute("user-agent", settings["SETTING_USERAGENT"], "Cobalt Strike configured HTTP user agent")
+            if objects_only:
+                values.append(("user-agent", user_agent))
+            else:
+                attribute("user-agent", user_agent, "Cobalt Strike configured HTTP user agent")
+        obj("malware-config", key, values, template=MALWARE_CONFIG_TEMPLATE if objects_only else None)
     elif kind == "beacons":
         infrastructure(key, observation=data)
         for port, architectures in data.get("ports", {}).items():
@@ -295,7 +312,10 @@ def convert(kind, key, data):
         for url in data.get("URLs", []):
             if not isinstance(url, str) or urlsplit(url).scheme not in ("http", "https") or not urlsplit(url).hostname:
                 raise ValueError("Invalid BeaconBeagle C2 URL")
-            attribute("url", url)
+            if objects_only:
+                obj("url", url, [("url", url)])
+            else:
+                attribute("url", url)
     asns = [item.get("asn") for item in observations]
     if kind == "c2":
         asns.extend(
@@ -303,9 +323,13 @@ def convert(kind, key, data):
         )
     for asn in asns:
         if asn:
-            attribute("AS", "AS" + str(asn).removeprefix("AS"), "BeaconBeagle network ASN")
+            value = "AS" + str(asn).removeprefix("AS")
+            if objects_only:
+                obj("asn", value, [("asn", value)])
+            else:
+                attribute("AS", value, "BeaconBeagle network ASN")
     # Duplicate versions/architectures can describe the same observed endpoint.
-    event["Object"] = list(object_index.values())
+    event["Object"].extend(object_index.values())
     event["Object"].sort(key=lambda item: item["uuid"])
     event["Attribute"].sort(key=lambda item: item["uuid"])
     return event, int(latest.timestamp())

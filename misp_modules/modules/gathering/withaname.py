@@ -1,6 +1,5 @@
 """Gather witha.name DDoSia configuration snapshots without contacting targets."""
 
-import base64
 import copy
 import datetime as dt
 import ipaddress
@@ -13,7 +12,7 @@ from urllib.parse import urljoin, urlsplit
 import requests
 from pymisp import MISPObject
 
-from misp_modules.lib.gathering import NAMESPACE, canonical_json, get_jobs, origin_tags, stable_uuid
+from misp_modules.lib.gathering import NAMESPACE, canonical_json, get_jobs, origin_tags, source_record, stable_uuid
 
 SOURCE = "https://witha.name/data/"
 SOURCE_NAMESPACE = stable_uuid(NAMESPACE, "witha.name/data")
@@ -21,7 +20,7 @@ FILENAME = re.compile(r"^(\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2})_DDoSia-target-lis
 MAX_SOURCE_BYTES = 8 * 1024 * 1024
 
 moduleinfo = {
-    "version": "0.4",
+    "version": "0.5",
     "author": "MISP Project",
     "description": "Gather witha.name DDoSia configurations as a deterministic MISP feed.",
     "module-type": ["gathering"],
@@ -115,23 +114,6 @@ def convert(config, filename, deduplicate=True):
         "Attribute": [],
         "Object": [],
     }
-    for relation, value in (("link", source_url), ("attachment", filename)):
-        attribute = {
-            "uuid": stable_uuid(event_uuid, relation, value),
-            "type": relation,
-            "category": "External analysis" if relation == "link" else "Artifacts dropped",
-            "value": value,
-            "to_ids": False,
-            "disable_correlation": True,
-            "distribution": "5",
-            "comment": "Source configuration; listed systems are DDoS targets, not attacker infrastructure.",
-        }
-        if relation == "attachment":
-            attribute["data"] = base64.b64encode(canonical_json(config).encode()).decode()
-            attribute["comment"] = (
-                "Canonical source JSON, including random substitution definitions and unmapped fields."
-            )
-        event["Attribute"].append(attribute)
     occurrences = Counter()
     for target in config["targets"]:
         identity = canonical_json(target)
@@ -171,6 +153,11 @@ def convert(config, filename, deduplicate=True):
                 last_seen=observed,
             )
         event["Object"].append(json.loads(obj.to_json()))
+    event["Object"].append(
+        source_record(
+            event_uuid, source_url, filename, config, "DDoSia source configuration. Listed systems are DDoS targets."
+        )
+    )
     return event, int(observed.timestamp())
 
 

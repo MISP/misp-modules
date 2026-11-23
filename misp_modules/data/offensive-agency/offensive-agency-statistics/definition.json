@@ -1,0 +1,76 @@
+{
+  "attributes": {
+    "active-ips": {
+      "description": "Number of IPs active in the reporting window.",
+      "disable_correlation": true,
+      "misp-attribute": "counter",
+      "to_ids": false,
+      "ui-priority": 9
+    },
+    "cohosted-c2-ips": {
+      "description": "Number of active IPs with a co-hosted C2.",
+      "disable_correlation": true,
+      "misp-attribute": "counter",
+      "to_ids": false,
+      "ui-priority": 8
+    },
+    "multi-agent-ips": {
+      "description": "Number of active IPs with multiple observed agents.",
+      "disable_correlation": true,
+      "misp-attribute": "counter",
+      "to_ids": false,
+      "ui-priority": 8
+    },
+    "new-ips": {
+      "description": "Number of new IPs in the reporting window.",
+      "disable_correlation": true,
+      "misp-attribute": "counter",
+      "to_ids": false,
+      "ui-priority": 9
+    },
+    "report-date": {
+      "description": "UTC reference day of the published statistics.",
+      "disable_correlation": true,
+      "misp-attribute": "datetime",
+      "to_ids": false,
+      "ui-priority": 10
+    },
+    "source-record": {
+      "description": "Published aggregate JSON with the daily time series and breakdowns.",
+      "disable_correlation": true,
+      "misp-attribute": "attachment",
+      "to_ids": false,
+      "ui-priority": 5
+    },
+    "source-url": {
+      "description": "The Offensive Agency statistics page.",
+      "disable_correlation": true,
+      "misp-attribute": "link",
+      "to_ids": false,
+      "ui-priority": 9
+    },
+    "tracked-ips": {
+      "description": "Number of IPs in the tracker history.",
+      "disable_correlation": true,
+      "misp-attribute": "counter",
+      "to_ids": false,
+      "ui-priority": 9
+    }
+  },
+  "description": "Daily Offensive Agency exposure statistics based on ONYPHE observations.",
+  "meta-category": "network",
+  "name": "offensive-agency-statistics",
+  "required": [
+    "report-date"
+  ],
+  "requiredOneOf": [
+    "tracked-ips",
+    "active-ips",
+    "new-ips",
+    "multi-agent-ips",
+    "cohosted-c2-ips",
+    "source-record"
+  ],
+  "uuid": "c625c004-8406-4abd-b880-8fe0e17ab2e6",
+  "version": 1
+}

@@ -55,6 +55,15 @@ def config():
     }
 
 
+@pytest.fixture
+def mixed_event(config):
+    event, observed = withaname.convert(config, FILENAME)
+    event["Attribute"].append(
+        {"uuid": gathering.stable_uuid(event["uuid"], "standalone"), "type": "text", "value": "standalone"}
+    )
+    return event, observed
+
+
 @pytest.fixture(autouse=True)
 def state_directory(tmp_path, monkeypatch):
     monkeypatch.setenv("MISP_MODULES_GATHERING_STATE_DIR", str(tmp_path / "state"))
@@ -103,6 +112,11 @@ def ready(manager, identifier):
     raise AssertionError("job did not finish")
 
 
+def source_attributes(event):
+    source = next(obj for obj in event["Object"] if obj["name"] == "annotation")
+    return {attribute["object_relation"]: attribute for attribute in source["Attribute"]}
+
+
 def test_standard_feed_round_trip_and_template(config, tmp_path):
     result = bundle(config)
     event, timestamp = withaname.convert(config, FILENAME)
@@ -127,22 +141,34 @@ def test_standard_feed_round_trip_and_template(config, tmp_path):
     ]
     assert event["Tag"] == manifest[event_uuid]["Tag"] == expected_tags
     assert [(tag.name, tag.local) for tag in parsed.tags] == [(tag["name"], True) for tag in expected_tags]
-    assert len(event["Object"]) == 2
-    assert event["Object"][0]["template_uuid"] == "e56d7f93-258e-4ba5-bd8a-463acd6d98c4"
-    assert event["Object"][0]["template_version"] == "3"
+    assert not event.get("Attribute") and not parsed.attributes
+    targets = [obj for obj in event["Object"] if obj["name"] == "ddos-config"]
+    assert len(targets) == 2
+    assert len(event["Object"]) == len(targets) + 1
+    assert targets[0]["template_uuid"] == "e56d7f93-258e-4ba5-bd8a-463acd6d98c4"
+    assert targets[0]["template_version"] == "3"
     for obj in event["Object"]:
         assert UUID(obj["uuid"]).version == 5
         for attribute in obj["Attribute"]:
             assert attribute["to_ids"] is False and attribute["disable_correlation"] is True
             assert UUID(attribute["uuid"]).version == 5
-    attachment = next(a for a in event["Attribute"] if a["type"] == "attachment")
-    assert json.loads(base64.b64decode(attachment["data"])) == withaname.normalized_config(config)
-    values = {a["object_relation"]: a["value"] for a in event["Object"][0]["Attribute"]}
+    source = source_attributes(event)
+    assert source["ref"]["value"] == withaname.SOURCE + FILENAME
+    assert json.loads(base64.b64decode(source["attachment"]["data"])) == withaname.normalized_config(config)
+    values = {a["object_relation"]: a["value"] for a in targets[0]["Attribute"]}
     assert values["path"] == "/?token=$_rule-1"
     assert values["use-ssl"] == "true"
     assert json.loads(values["headers"]) == config["targets"][0]["headers"]
     with pytest.raises(FileExistsError):
         gathering.FeedBuilder(tmp_path / "feed")
+
+
+def test_empty_snapshot_preserves_source_in_an_object():
+    config = {"targets": [], "randoms": []}
+    event = next(iter(bundle(config)["events"].values()))["Event"]
+    assert not event.get("Attribute")
+    assert [obj["name"] for obj in event["Object"]] == ["annotation"]
+    assert json.loads(base64.b64decode(source_attributes(event)["attachment"]["data"])) == config
 
 
 def test_repeated_and_reordered_collection_is_identical(config):
@@ -162,18 +188,19 @@ def test_explicit_revision_store_advances_same_time_corrections(config):
     assert list(second["events"]) == [uuid]
     assert int(second["manifest"][uuid]["timestamp"]) > int(first["manifest"][uuid]["timestamp"])
     before, after = (feed["events"][uuid]["Event"] for feed in (first, second))
-    assert before["Object"] == after["Object"]
-    assert next(a for a in before["Attribute"] if a["type"] == "link") == next(
-        a for a in after["Attribute"] if a["type"] == "link"
-    )
-    old_raw, new_raw = (next(a for a in e["Attribute"] if a["type"] == "attachment") for e in (before, after))
+    assert [obj for obj in before["Object"] if obj["name"] == "ddos-config"] == [
+        obj for obj in after["Object"] if obj["name"] == "ddos-config"
+    ]
+    before_source, after_source = source_attributes(before), source_attributes(after)
+    assert before_source["ref"] == after_source["ref"]
+    old_raw, new_raw = before_source["attachment"], after_source["attachment"]
     assert old_raw["uuid"] == new_raw["uuid"]
     assert new_raw["timestamp"] == after["timestamp"]
     assert bundle(config, revisions=revisions) == second
 
 
-def test_builder_collapses_identical_uuids_and_ignores_order_and_managed_timestamps(config, tmp_path):
-    event, observed = withaname.convert(config, FILENAME)
+def test_builder_collapses_identical_uuids_and_ignores_order_and_managed_timestamps(mixed_event, tmp_path):
+    event, observed = mixed_event
     builder = gathering.FeedBuilder(tmp_path / "feed")
     builder.add(event, observed)
     path = builder.directory / (event["uuid"] + ".json")
@@ -200,8 +227,8 @@ def test_builder_collapses_identical_uuids_and_ignores_order_and_managed_timesta
 
 @pytest.mark.parametrize("location", [(), ("Attribute", 0), ("Object", 0), ("Object", 0, "Attribute", 0)])
 @pytest.mark.parametrize("uuid", [None, "3c324b12-0099-410b-b33d-b32922178698"])
-def test_builder_requires_uuid5_at_every_level(config, tmp_path, location, uuid):
-    event, observed = withaname.convert(config, FILENAME)
+def test_builder_requires_uuid5_at_every_level(mixed_event, tmp_path, location, uuid):
+    event, observed = mixed_event
     item = event
     for key in location:
         item = item[key]
@@ -286,9 +313,10 @@ def test_entry_deduplication_preserves_distinct_rules_and_scopes_observations(co
     config["targets"].append(copy.deepcopy(config["targets"][0]))
     collapsed = next(iter(bundle(config)["events"].values()))["Event"]
     expanded = next(iter(bundle(config, deduplicate=False)["events"].values()))["Event"]
-    assert len(collapsed["Object"]) == 2 and len(expanded["Object"]) == 3
+    assert sum(obj["name"] == "ddos-config" for obj in collapsed["Object"]) == 2
+    assert sum(obj["name"] == "ddos-config" for obj in expanded["Object"]) == 3
     assert collapsed["uuid"] != expanded["uuid"]
-    assert len({obj["uuid"] for obj in expanded["Object"]}) == 3
+    assert len({obj["uuid"] for obj in expanded["Object"]}) == len(expanded["Object"])
     later = next(iter(bundle(config, FILENAME.replace("12-00-00", "13-00-00"))["events"].values()))["Event"]
     assert {o["uuid"] for o in later["Object"]}.isdisjoint(o["uuid"] for o in collapsed["Object"])
 

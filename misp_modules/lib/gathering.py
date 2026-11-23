@@ -4,6 +4,7 @@ Jobs write ordinary manifest.json and <uuid>.json files and return a ZIP artifac
 No consumer-specific import state is kept by this service.
 """
 
+import base64
 import hashlib
 import json
 import logging
@@ -23,6 +24,7 @@ from pathlib import Path
 from uuid import UUID, uuid5
 
 import psutil
+from pymisp import MISPObject
 
 from misp_modules.http_debug import module_context
 
@@ -50,6 +52,21 @@ def origin_tags(module, source):
         {"name": f'misp-gathering:module="{module}"', "local": True},
         {"name": f'misp-gathering:source="{source}"', "local": True},
     ]
+
+
+def source_record(event_uuid, url, filename, data, description):
+    """Bundle a source link and its canonical JSON in a provenance annotation."""
+    obj = MISPObject("annotation", strict=True)
+    obj.uuid = stable_uuid(event_uuid, "source-record")
+    for relation, value, fields in (
+        ("text", description, {}),
+        ("ref", url, {}),
+        ("attachment", filename, {"data": base64.b64encode(canonical_json(data).encode()).decode()}),
+    ):
+        obj.add_attribute(
+            relation, value, uuid=stable_uuid(obj.uuid, relation), to_ids=False, disable_correlation=True, **fields
+        )
+    return json.loads(obj.to_json())
 
 
 def _digest(value):
