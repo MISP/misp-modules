@@ -118,9 +118,17 @@ FIELDS = {
     "vpn_providers": ("list", ("security.vpn_provider_names", "vpn_provider_names", "vpn_provider")),
     "vpn_confidence": ("number", ("security.vpn_confidence_score", "vpn_confidence_score")),
     "vpn_last_seen": ("text", ("security.vpn_last_seen", "vpn_last_seen")),
-    "proxy_providers": ("list", ("security.proxy_provider_names", "proxy_provider_names", "proxy_provider")),
+    # Residential Proxy database v2 lists every provider in proxy_providers; v1 has a single proxy_provider.
+    "proxy_providers": (
+        "list",
+        ("security.proxy_provider_names", "proxy_provider_names", "proxy_providers", "proxy_provider"),
+    ),
     "proxy_confidence": ("number", ("security.proxy_confidence_score", "proxy_confidence_score")),
     "proxy_last_seen": ("text", ("security.proxy_last_seen", "proxy_last_seen")),
+    # Proxy activity counts, in the Security database v4 and the Residential Proxy database v2.
+    "proxy_days_seen_7d": ("number", ("security.proxy_days_seen_7d", "proxy_days_seen_7d")),
+    "proxy_days_seen_30d": ("number", ("security.proxy_days_seen_30d", "proxy_days_seen_30d")),
+    "proxy_provider_count_30d": ("number", ("security.proxy_provider_count_30d", "proxy_provider_count_30d")),
     "relay_provider": ("text", ("security.relay_provider_name", "relay_provider_name", "relay_provider")),
     "cloud_provider": (
         "text",
@@ -164,7 +172,7 @@ _FLAG_MAPPING = (
 # MISP refuses to create an object without its meta-category and template UUID.
 IPGEOLOCATION_TEMPLATE = {
     "uuid": "e1bde989-c8dd-49b1-a45b-b63698dbfcaa",
-    "version": 1,
+    "version": 2,
     "meta-category": "network",
     "description": (
         "IP address intelligence from IPGeolocation.io: threat score, anonymisation signals (VPN, proxy, Tor, relay),"
@@ -180,6 +188,9 @@ _IPGEOLOCATION_MAPPING = (
     ("proxy_providers", "proxy-provider", "text"),
     ("proxy_confidence", "proxy-confidence-score", "integer"),
     ("proxy_last_seen", "proxy-last-seen", "datetime"),
+    ("proxy_days_seen_7d", "proxy-days-seen-7d", "counter"),
+    ("proxy_days_seen_30d", "proxy-days-seen-30d", "counter"),
+    ("proxy_provider_count_30d", "proxy-provider-count-30d", "counter"),
     ("relay_provider", "relay-provider", "text"),
     ("cloud_provider", "cloud-provider", "text"),
     ("bot_operator", "bot-operator", "text"),
@@ -305,7 +316,7 @@ def _expand(record, database_type):
     """Map the single-purpose and older database layouts onto the fields of the current Security database."""
     record = dict(record)
     kind = database_type.lower()
-    if "residential" in kind:  # Residential Proxy database: {"proxy_provider": ..., "last_seen": ...}
+    if "residential" in kind:  # Residential Proxy database: {"proxy_providers" (v1 "proxy_provider"), "last_seen"}
         record.setdefault("is_residential_proxy", True)
         record.setdefault("is_proxy", True)
         record.setdefault("proxy_last_seen", record.get("last_seen"))
@@ -498,7 +509,7 @@ def _input_ip(attribute):
 def _add(misp_object, relation, value, attribute_type=None):
     kwargs = {"type": attribute_type} if attribute_type else {}
     for item in value if isinstance(value, list) else [value]:
-        if isinstance(item, float) and attribute_type == "integer":
+        if isinstance(item, float) and attribute_type in ("integer", "counter"):
             item = int(item)
         misp_object.add_attribute(relation, value=item, **kwargs)
 
@@ -543,11 +554,12 @@ def build_results(attribute, data, ip, source):
         misp_event.add_object(domain_ip)
 
     flags = [relation for field, relation in _FLAG_MAPPING if data.get(field) is True]
-    # A confidence score of 0 only restates that the flag is false.
+    # A confidence score of 0 only restates that the flag is false, and a proxy activity count of 0 that the
+    # address was not seen as a proxy in that period.
     details = [
         entry
         for entry in _IPGEOLOCATION_MAPPING
-        if entry[0] in data and not (entry[0].endswith("_confidence") and data[entry[0]] == 0)
+        if entry[0] in data and not (entry[0].endswith(("_confidence", "_7d", "_30d")) and data[entry[0]] == 0)
     ]
     if flags or details:
         intelligence = MISPObject("ipgeolocation-ip")

@@ -61,6 +61,9 @@ DATABASES = {
                 "vpn_provider_names": [],
                 "vpn_confidence_score": 0,
                 "cloud_provider_name": "",
+                "proxy_days_seen_7d": 0,
+                "proxy_days_seen_30d": 0,
+                "proxy_provider_count_30d": 0,
             }
         },
     ),
@@ -87,6 +90,19 @@ DATABASES = {
         "ipgeolocation.io Residential Database",
         4,
         {"1.0.141.172/32": {"proxy_provider": "ProxyShare", "last_seen": "2026-08-19"}},
+    ),
+    "residential-v2": (  # every provider seen on the address, and proxy activity counts
+        "ipgeolocation.io Residential Database",
+        4,
+        {
+            "1.0.210.236/32": {
+                "proxy_providers": ["BestProxy", "ProxyCC", "AProxy", "Evomi Proxy", "NaProxy"],
+                "last_seen": "2026-11-07",
+                "proxy_days_seen_7d": 0,
+                "proxy_days_seen_30d": 3,
+                "proxy_provider_count_30d": 2,
+            }
+        },
     ),
     "hosting": ("ipgeolocation.io IP Hosting Database", 4, {"104.16.0.0/13": {"hosting_provider": "Cloudflare, Inc."}}),
 }
@@ -226,6 +242,25 @@ def test_api_flagged_ip_and_hostname():
     assert _values(objects["domain-ip"], "hostname") == ["exit.example.net"]
 
 
+def test_api_proxy_activity_counts():
+    payload = copy.deepcopy(PAID)
+    payload["security"].update(
+        is_proxy=True,
+        is_residential_proxy=True,
+        proxy_provider_names=["Proxy-Seller"],
+        proxy_days_seen_7d=2,
+        proxy_days_seen_30d=9,
+        proxy_provider_count_30d=3,
+    )
+    result, _ = _run([MockResponse(payload)])
+
+    intelligence = _objects(result)["ipgeolocation-ip"]
+    assert _values(intelligence, "proxy-provider") == ["Proxy-Seller"]
+    assert _values(intelligence, "proxy-days-seen-7d") == ["2"]
+    assert _values(intelligence, "proxy-days-seen-30d") == ["9"]
+    assert _values(intelligence, "proxy-provider-count-30d") == ["3"]
+
+
 def test_api_bot_and_corporate_gateway_fields():
     payload = copy.deepcopy(PAID)
     payload["security"].update(
@@ -345,6 +380,7 @@ def test_mmdb_layers_location_and_security(tmp_path):
         assert _values(intelligence, flag) == ["1"]
     assert _values(intelligence, "is-vpn") == []
     assert _values(intelligence, "vpn-confidence-score") == []
+    assert _values(intelligence, "proxy-days-seen-7d") == []  # a count of 0 adds nothing
     assert "db-ip-location.mmdb (ipgeolocation.io Database, built 2026-09-30)" in intelligence["comment"]
     assert "db-ip-security.mmdb (ipgeolocation.io IP-Security Database, built 2026-09-30)" in intelligence["comment"]
 
@@ -395,6 +431,19 @@ def test_mmdb_single_purpose_and_older_layouts(tmp_path, ip, expected):
     intelligence = _objects(result)["ipgeolocation-ip"]
     for relation, values in expected.items():
         assert _values(intelligence, relation) == values, relation
+
+
+def test_mmdb_residential_proxy_v2(tmp_path):
+    paths = _databases(tmp_path, {"db-residential-proxy.mmdb": "residential-v2"})
+    result, _ = _run([], value="1.0.210.236", config={"mmdb_paths": paths})
+
+    intelligence = _objects(result)["ipgeolocation-ip"]
+    assert _values(intelligence, "is-residential-proxy") == ["1"]
+    assert _values(intelligence, "proxy-provider") == ["BestProxy", "ProxyCC", "AProxy", "Evomi Proxy", "NaProxy"]
+    assert _values(intelligence, "proxy-last-seen") == ["2026-11-07T00:00:00"]
+    assert _values(intelligence, "proxy-days-seen-7d") == []  # 0 days in the last 7
+    assert _values(intelligence, "proxy-days-seen-30d") == ["3"]
+    assert _values(intelligence, "proxy-provider-count-30d") == ["2"]
 
 
 def test_mmdb_errors(tmp_path):
