@@ -1,0 +1,3 @@
+Source Name,URL,Date Accessed,Name,Value,Program Name,Domain,Username,Data Source
+Cookies,.example.org,2026-11-15 10:30:00 CET,session,fixture-value,Chrome,example.org,analyst,disk-image.E01
+Cookies,.example.net,2026-11-15 10:31:00 CET,session,excluded-fixture-value,Chrome,example.net,analyst,disk-image.E01

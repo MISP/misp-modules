@@ -1,0 +1,76 @@
+{
+  "attributes": {
+    "URL": {
+      "description": "Reported HTTP(S) URL associated with the cookie.",
+      "misp-attribute": "link",
+      "ui-priority": 0
+    },
+    "additional-comments": {
+      "categories": [
+        "External analysis"
+      ],
+      "description": "Comments.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "ui-priority": 0
+    },
+    "browser": {
+      "description": "Browser on which the cookie was created.",
+      "misp-attribute": "text",
+      "sane_default": [
+        "IE",
+        "Safari",
+        "Chrome",
+        "Firefox",
+        "Opera mini",
+        "Chromium"
+      ],
+      "ui-priority": 0
+    },
+    "datetime-accessed": {
+      "description": "Date and time when the cookie was last accessed.",
+      "disable_correlation": true,
+      "misp-attribute": "datetime",
+      "ui-priority": 0
+    },
+    "datetime-created": {
+      "description": "date and time when the cookie was created.",
+      "disable_correlation": true,
+      "misp-attribute": "datetime",
+      "ui-priority": 0
+    },
+    "domain-ip": {
+      "description": "IP of the domain that created the URL.",
+      "misp-attribute": "ip-src",
+      "ui-priority": 0
+    },
+    "domain-name": {
+      "description": "Reported domain or host to which the cookie applies.",
+      "misp-attribute": "text",
+      "ui-priority": 0
+    },
+    "name": {
+      "description": "Name of the cookie ",
+      "misp-attribute": "text",
+      "ui-priority": 0
+    },
+    "value": {
+      "description": "Value assigned to the cookie.",
+      "misp-attribute": "text",
+      "ui-priority": 0
+    }
+  },
+  "description": "An TSK-Autopsy Object Template to represent cookies identified during a forensic investigation.",
+  "meta-category": "misc",
+  "name": "tsk-web-cookie",
+  "required": [
+    "name",
+    "value"
+  ],
+  "requiredOneOf": [
+    "URL",
+    "domain-name"
+  ],
+  "uuid": "40d23a4f-43be-4c9e-8328-382a2188eb1d",
+  "version": 2
+}

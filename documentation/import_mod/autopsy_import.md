@@ -15,8 +15,10 @@ execute report content or infer a malicious verdict.
 ## Autopsy CSV
 
 In Autopsy, select rows from one artifact family and export them to CSV.
-Supply that family's TSK name in config.artifact_type. An illustrative API
-request is:
+Enter that family's TSK name in the MISP import form's artifact type field or
+set config.artifact_type in an API request. The form also accepts row selection,
+case identifiers and the report timezone. An illustrative API request is shown
+below.
 
     {
       "module": "autopsy_import",
@@ -101,7 +103,7 @@ retained explicitly. Unknown context fields remain in source-context.
 | --- | --- | --- |
 | TSK_WEB_HISTORY | tsk-web-history | URL and an unambiguous access time |
 | TSK_WEB_BOOKMARK | tsk-web-bookmark | URL |
-| TSK_WEB_COOKIE | tsk-web-cookie | URL, name and nonempty value |
+| TSK_WEB_COOKIE | tsk-web-cookie | HTTP(S) URL or cookie domain/host, plus name and nonempty value |
 | TSK_WEB_SEARCH_QUERY | tsk-web-search-query | Search domain and query text |
 | TSK_WEB_DOWNLOAD | tsk-web-downloads | URL and name, or a name from an explicit download destination path |
 | TSK_MESSAGE | tsk-chats | Explicit message type and message text |
@@ -113,6 +115,14 @@ application name, subject and explicit sent/received times are added where
 the template supports them. Software display names and package/bundle IDs
 remain distinct. An organization field is retained raw rather than assumed to
 be an application vendor. Program presence does not establish execution.
+
+Cookie creation and last-access times map to separate datetime fields.
+Chromium and Firefox can export a bare cookie host in the URL column. The
+typed cookie uses the reported domain when present, or the host from that column
+when it has no separate domain. The raw record preserves the original values.
+The importer uses version 2 of the tsk-web-cookie template or later, with a
+bundled version 2 for older PyMISP installations. Update the templates on the
+MISP server so its object editor can load the same revision.
 
 Source File is provenance; it is not a download destination. Download names
 can be derived only from an explicit TSK_PATH/Path value that includes a final
