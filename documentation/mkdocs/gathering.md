@@ -6,5 +6,9 @@ Gather witha.name DDoSia configurations as a deterministic MISP feed.
 
 Gather daily exposure statistics, observations for monitored IPs, or the full historical host export.
 
+#### [SinkDB](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/gathering/sinkdb.py)
+
+Gather the abuse.ch sinkhole export into one fixed MISP event.
+
 See the [gathering guide](gathering-guide.md) for the versioned contract, parameters,
 source timestamps and instructions for adding another source.

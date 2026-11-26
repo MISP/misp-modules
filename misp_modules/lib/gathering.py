@@ -324,7 +324,7 @@ class GatheringJobs:
         temporary.write_text(canonical_json(metadata), encoding="utf-8")
         temporary.replace(directory / "status.json")
 
-    def submit(self, module, parameters, config, producer):
+    def submit(self, module, parameters, config, producer, *, keep_revisions=False):
         if not self.slots.acquire(blocking=False):
             raise ValueError("Gathering queue is full; retry later")
         identifier = secrets.token_hex(32)
@@ -342,14 +342,14 @@ class GatheringJobs:
                 "owner_started": psutil.Process().create_time(),
             }
             self._write(directory, metadata)
-            self.executor.submit(self._run, directory, dict(metadata), parameters, config, producer)
+            self.executor.submit(self._run, directory, dict(metadata), parameters, config, producer, keep_revisions)
             return self.public(metadata)
         except Exception:
             shutil.rmtree(directory, ignore_errors=True)
             self.slots.release()
             raise
 
-    def _run(self, directory, metadata, parameters, config, producer):
+    def _run(self, directory, metadata, parameters, config, producer, keep_revisions):
         started = time.monotonic()
         builder = None
         last_progress = started
@@ -368,7 +368,8 @@ class GatheringJobs:
                 check()
                 metadata["status"] = "running"
                 self._write(directory, metadata)
-                builder = FeedBuilder(directory / "feed", check_cancel=check)
+                revisions = RevisionStore(self.directory.parent) if keep_revisions else None
+                builder = FeedBuilder(directory / "feed", revisions=revisions, check_cancel=check)
                 with module_context(metadata["module"]):
                     producer(parameters, builder=builder, config=config)
                 check()
