@@ -60,6 +60,7 @@ tags from the `misp-gathering` taxonomy:
 | WithAName | `misp-gathering:module="withaname"` | `misp-gathering:source="witha.name"` |
 | BeaconBeagle (all datasets) | `misp-gathering:module="beaconbeagle_gathering"` | `misp-gathering:source="beaconbeagle.com"` |
 | Offensive Agency | `misp-gathering:module="offensive_agency"` | `misp-gathering:source="offensive.agency"` |
+| SinkDB | `misp-gathering:module="sinkdb"` | `misp-gathering:source="sinkdb.abuse.ch"` |
 
 `module` identifies the collector by its `/modules` identifier; `source`
 identifies the upstream provider by its canonical domain. Add values to the
@@ -116,8 +117,8 @@ for the event, its publish timestamp, the manifest, and every object and
 attribute. Supply a time intrinsic to the source record, such as its upstream
 modification time or snapshot date. Replicas running the same converter on
 the same source data generate identical records and revisions, even with
-different local histories and clocks. The service ignores old
-`revisions.sqlite3` files.
+different local histories and clocks. Producers using source timestamps ignore
+`revisions.sqlite3`.
 
 MISP looks up the event by UUID. It adds a new UUID and schedules an existing
 event for editing only when the incoming timestamp exceeds the stored one.
@@ -255,15 +256,46 @@ makes requests only to the provider. Analysts can also enrich a single IP
 attribute with [Offensive Agency Lookup](https://github.com/MISP/misp-modules/blob/main/documentation/expansion/offensive_agency_lookup.md).
 [Source methodology and exports](https://offensive.agency/about)
 
+## SinkDB
+
+Enable the `sinkdb` gathering module and set `Plugin.Gathering_sinkdb_api_key`
+to the SinkDB HTTPS API key in MISP. The module also accepts `api_key` in
+[server-local module configuration](module-config.md), which keeps the key
+out of query debug logs. Select `sinkdb` as the gathering feed module and
+leave its parameters empty.
+
+Each successful export contains one event, **abuse.ch SinkDB sinkholes**, with
+one `sinkhole-server` object per distinct registration in the sinkhole export.
+The fixed event UUID is reused on every run. Registrations include typed IP
+addresses, CIDR ranges, name servers, and DNS SOA and WHOIS contacts. Unknown
+indicator types use a text relation. Operator names are included when the source
+marks them as disclosed. Copy the bundled
+[`sinkhole-server` template](https://github.com/MISP/misp-modules/blob/main/misp_modules/data/sinkhole-server/definition.json)
+to `app/files/misp-objects/objects/sinkhole-server/definition.json` on the MISP
+server and refresh Object Templates to make the template available in MISP.
+
+SinkDB classifies its data as TLP:AMBER. The generated event is unpublished
+and uses organisation-only distribution. Set the MISP feed distribution to
+**Your organisation only** or inherit the distribution from the feed. Object
+attributes have IDS export and correlation disabled. [SinkDB access policy](https://sinkdb.abuse.ch/about/)
+
+The export has no snapshot revision, so the module stores content hashes and
+revision timestamps under `MISP_MODULES_GATHERING_STATE_DIR`. Keep this directory
+durable and route refreshes for this feed through the same revision store.
+Identical exports retain their revision. Changed exports advance it while keeping
+the same event UUID. The standard MISP importer merges by UUID and retains
+previously imported objects that are absent from a later export.
+
 ## Durable revisions and additional producers
 
 A custom caller can explicitly pass
 `FeedBuilder(directory, revisions=RevisionStore(path))` when it needs to
 publish corrections whose upstream timestamp stays fixed. This opts into
-history-dependent, per-item revisions. Such callers need a common revision
-store to agree across instances. Standard module handlers use the stateless
-builder. Each job still needs local space for its temporary manifest, status
-and feed ZIP. Credentials and request parameters stay in worker memory.
+history-dependent, per-item revisions. A producer can use the same store for
+background jobs by passing `keep_revisions=True` to `submit()`. Such callers
+need a common revision store to agree across instances. Each job still needs
+local space for its temporary manifest, status and feed ZIP. Credentials and
+request parameters stay in worker memory.
 
 To add another source:
 

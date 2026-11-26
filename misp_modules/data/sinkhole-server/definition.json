@@ -1,0 +1,94 @@
+{
+  "attributes": {
+    "classification": {
+      "description": "Classification assigned to the sinkhole registration by the source.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 7
+    },
+    "date-added": {
+      "description": "When the source added the sinkhole registration.",
+      "disable_correlation": true,
+      "misp-attribute": "datetime",
+      "to_ids": false,
+      "ui-priority": 7
+    },
+    "indicator": {
+      "description": "The indicator as supplied by the source when it has no matching typed relation.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 10
+    },
+    "indicator-type": {
+      "description": "The indicator type reported by the source.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 8
+    },
+    "ip": {
+      "description": "IPv4 or IPv6 address or CIDR range of the sinkhole infrastructure.",
+      "disable_correlation": true,
+      "misp-attribute": "ip-dst",
+      "to_ids": false,
+      "ui-priority": 10
+    },
+    "nameserver": {
+      "description": "Hostname of a nameserver associated with the sinkhole.",
+      "disable_correlation": true,
+      "misp-attribute": "hostname",
+      "to_ids": false,
+      "ui-priority": 10
+    },
+    "operator": {
+      "description": "Operator name disclosed by the source.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 7
+    },
+    "soa-domain": {
+      "description": "DNS Start of Authority domain reported by the source.",
+      "disable_correlation": true,
+      "misp-attribute": "domain",
+      "to_ids": false,
+      "ui-priority": 10
+    },
+    "soa-email": {
+      "description": "DNS Start of Authority contact address reported by the source.",
+      "disable_correlation": true,
+      "misp-attribute": "dns-soa-email",
+      "to_ids": false,
+      "ui-priority": 10
+    },
+    "source": {
+      "description": "Source of the registration as reported by the feed.",
+      "disable_correlation": true,
+      "misp-attribute": "text",
+      "to_ids": false,
+      "ui-priority": 7
+    },
+    "whois-email": {
+      "description": "WHOIS contact address associated with the sinkhole.",
+      "disable_correlation": true,
+      "misp-attribute": "whois-registrant-email",
+      "to_ids": false,
+      "ui-priority": 10
+    }
+  },
+  "description": "An indicator for defensive sinkhole infrastructure and the context of its registration.",
+  "meta-category": "network",
+  "name": "sinkhole-server",
+  "requiredOneOf": [
+    "indicator",
+    "ip",
+    "nameserver",
+    "soa-domain",
+    "soa-email",
+    "whois-email"
+  ],
+  "uuid": "658e3695-f8d3-4118-b516-695fbbfe875a",
+  "version": 1
+}
