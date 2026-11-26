@@ -11,24 +11,26 @@ from datetime import datetime, timedelta, timezone
 from functools import lru_cache
 from importlib import resources
 from io import BytesIO, StringIO
+from urllib.parse import urlsplit
 from uuid import UUID, uuid5
 
 from pymisp import MISPEvent, MISPObject
 from pymisp.exceptions import PyMISPError
 
 mispattributes = {"inputSource": ["file"], "output": ["MISP objects"], "format": "misp_standard"}
-moduleconfig = [
-    "format",
-    "artifact_type",
-    "rows",
-    "case_id",
-    "data_source_id",
-    "device_id",
-    "evidence_id",
-    "report_id",
-    "tool_version",
-    "timezone",
-]
+USER_CONFIG = {
+    "format": {"type": "String", "message": "auto (default), autopsy-csv or selected-json"},
+    "artifact_type": {"type": "String", "message": "Required for CSV, for example TSK_WEB_HISTORY or TSK_WEB_COOKIE"},
+    "rows": {"type": "String", "message": "Comma-separated one-based data rows, for example 2,8. Default is all rows."},
+    "timezone": {"type": "String", "message": "UTC or an explicit offset such as +01:00 for local report timestamps"},
+    "case_id": {"type": "String", "message": "Optional case identifier"},
+    "data_source_id": {"type": "String", "message": "Optional evidence data source identifier"},
+    "device_id": {"type": "String", "message": "Optional device identifier"},
+    "evidence_id": {"type": "String", "message": "Optional evidence or extraction identifier"},
+    "report_id": {"type": "String", "message": "Optional report identifier"},
+    "tool_version": {"type": "String", "message": "Optional Autopsy version or fallback producer version"},
+}
+moduleconfig = list(USER_CONFIG)
 moduleinfo = {
     "version": "1.0",
     "author": "MISP Project",
@@ -122,7 +124,7 @@ PROFILES = {
             "TSK_DOMAIN": "domain-name",
             "TSK_PROG_NAME": "browser",
         },
-        {"TSK_DATETIME_CREATED": "datetime-created"},
+        {"TSK_DATETIME_CREATED": "datetime-created", "TSK_DATETIME_ACCESSED": "datetime-accessed"},
     ),
     "TSK_WEB_SEARCH_QUERY": (
         "tsk-web-search-query",
@@ -380,11 +382,28 @@ def _read(raw, config):
     return rows, format_, producer, context, lexical
 
 
-@lru_cache(maxsize=1)
-def _template():
-    return json.loads(
-        resources.files("misp_modules").joinpath("data", "forensic-artifact", "definition.json").read_text()
-    )
+@lru_cache(maxsize=2)
+def _template(name):
+    return json.loads(resources.files("misp_modules").joinpath("data", name, "definition.json").read_text())
+
+
+def _new_object(name):
+    if name == "forensic-artifact":
+        return MISPObject(name, strict=True, standalone=False, misp_objects_template_custom=_template(name))
+    obj = MISPObject(name, strict=True, standalone=False)
+    if name == "tsk-web-cookie" and obj.template_version < _template(name)["version"]:
+        return MISPObject(name, strict=True, standalone=False, misp_objects_template_custom=_template(name))
+    return obj
+
+
+def _is_http_link(value):
+    if re.search(r"[\x00-\x20\x7f]", value):
+        return False
+    try:
+        parsed = urlsplit(value)
+        return parsed.scheme in ("http", "https") and bool(parsed.hostname)
+    except ValueError:
+        return False
 
 
 class _Builder:
@@ -394,7 +413,7 @@ class _Builder:
         self.producer, self.context, self.offset = producer, context, _offset(config.get("timezone"))
         self.selection = {"rows": sorted(selected), "input_records": count, "source_attached": len(selected) == count}
         self.mapped = 0
-        self.source = self.object("file", _json([self.digest, filename, config, sorted(selected)]))
+        self.source = self.add_object(_new_object("file"), _json([self.digest, filename, config, sorted(selected)]))
         self.source.comment = "Source forensic report; SHA-256 identifies this export, not its underlying device/image."
         for key, value in {"filename": filename, "sha256": self.digest, "size-in-bytes": len(raw)}.items():
             self.add(self.source, key, value)
@@ -403,9 +422,7 @@ class _Builder:
         else:
             self.warnings["Full source attachment omitted because row selection excludes records"] += 1
 
-    def object(self, name, identity):
-        options = {"misp_objects_template_custom": _template()} if name == "forensic-artifact" else {}
-        obj = MISPObject(name, strict=True, standalone=False, **options)
+    def add_object(self, obj, identity):
         obj.uuid = str(uuid5(NAMESPACE, identity))
         self.event.add_object(obj)
         return obj
@@ -479,7 +496,9 @@ class _Builder:
         context.update(self.context)
         context.update(local)
         _bounded(context)
-        record = self.object("forensic-artifact", _json([str(self.source.uuid), number, kind, context]))
+        record = self.add_object(
+            _new_object("forensic-artifact"), _json([str(self.source.uuid), number, kind, context])
+        )
         producer_version = self.producer.get("version")
         if producer_version is None or producer_version == "":
             producer_version = self.config.get("tool_version")
@@ -526,19 +545,27 @@ class _Builder:
             value = self.time(attributes, canonical)
             if value is not None:
                 mapped[relation] = value
+        if kind == "TSK_WEB_COOKIE" and (location := mapped.get("URL")) and not _is_http_link(location):
+            del mapped["URL"]
+            # Autopsy browser parsers put the cookie host in TSK_URL.
+            if re.fullmatch(r"\.?[\w-]+(?:\.[\w-]+)*\.?|\[[0-9a-fA-F:.]+\]", location):
+                mapped.setdefault("domain-name", location)
+            else:
+                self.warnings["Invalid/non-HTTP(S) cookie URL retained raw"] += 1
         if kind == "TSK_EMAIL_MSG":
             mapped["message-type"] = "Email"
         if kind == "TSK_WEB_DOWNLOAD" and "name" not in mapped and mapped.get("path-downloadedTo"):
             path = mapped["path-downloadedTo"].replace("\\", "/")
             if not path.endswith("/"):
                 mapped["name"] = path.rsplit("/", 1)[-1]
-        definition = MISPObject(name, strict=True, standalone=False)._definition
+        obj = _new_object(name)
+        definition = obj._definition
         if any(not mapped.get(key) for key in definition.get("required", [])) or (
             definition.get("requiredOneOf") and not any(mapped.get(key) for key in definition["requiredOneOf"])
         ):
             self.warnings[f"Incomplete {kind} retained without invalid {name} object"] += 1
             return
-        obj = self.object(name, _json([str(record.uuid), name]))
+        self.add_object(obj, _json([str(record.uuid), name]))
         obj.comment = (
             "Selected forensic observation; linked raw row is authoritative and has not been assessed as malicious."
         )
@@ -618,7 +645,7 @@ def handler(q=False):
 
 
 def introspection():
-    return mispattributes
+    return dict(mispattributes, userConfig=USER_CONFIG)
 
 
 def version():

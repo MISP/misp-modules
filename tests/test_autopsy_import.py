@@ -139,6 +139,44 @@ def test_csv_row_selection_omits_excluded_record_bytes():
 
 
 @pytest.mark.parametrize(
+    "location,expected",
+    [
+        ("https://example.org/sign-in", {"URL": "https://example.org/sign-in"}),
+        (".example.org", {"domain-name": ".example.org"}),
+        ("about:blank", None),
+    ],
+)
+def test_cookie_location_uses_the_template_relation_that_matches_the_value(location, expected):
+    doc = document()
+    row = {
+        "artifact_type": "TSK_WEB_COOKIE",
+        "attributes": {
+            "TSK_URL": location,
+            "TSK_NAME": "session",
+            "TSK_VALUE": "fixture-value",
+            "TSK_DATETIME_CREATED": 1700000000,
+            "TSK_DATETIME_ACCESSED": 1700000001,
+        },
+    }
+    doc["artifacts"] = [row]
+    result = imported(doc)
+    assert json.loads(fields(objects(result, "forensic-artifact")[0])["raw-record"]) == row
+    cookies = objects(result, "tsk-web-cookie")
+    if expected is None:
+        assert not cookies
+        assert result["summary"]["unmapped_records"] == 1
+        return
+    [cookie] = cookies
+    assert fields(cookie) == {
+        **expected,
+        "name": "session",
+        "value": "fixture-value",
+        "datetime-created": "2023-11-14T22:13:20+00:00",
+        "datetime-accessed": "2023-11-14T22:13:21+00:00",
+    }
+
+
+@pytest.mark.parametrize(
     "value,config,expected",
     [
         ("2026-11-15 10:00:00", {}, None),
@@ -358,3 +396,33 @@ class TestAutopsyHTTP(AsyncHTTPTestCase):
         result = json.loads(response.body)
         assert result["summary"]["selected_records"] == 2
         assert not result["summary"]["source_attached"]
+
+    def test_discovered_config_supports_selected_autopsy_csv(self):
+        [metadata] = json.loads(self.fetch("/modules").body)
+        user_config = metadata["mispattributes"]["userConfig"]
+        assert user_config.keys() == set(metadata["meta"]["config"])
+        config = {"artifact_type": "TSK_WEB_COOKIE", "rows": "1", "timezone": "+01:00"}
+        assert all(user_config[key]["type"] == "String" for key in config)
+        response = self.fetch(
+            "/query",
+            method="POST",
+            body=request((ROOT / "cookies.csv").read_bytes(), config, module="autopsy_import"),
+        )
+        assert response.code == 200
+        result = json.loads(response.body)
+        assert result["summary"]["mapped_records"] == 1
+        assert not result["summary"]["source_attached"]
+        [cookie] = objects(result, "tsk-web-cookie")
+        assert cookie["template_uuid"] == "40d23a4f-43be-4c9e-8328-382a2188eb1d"
+        assert int(cookie["template_version"]) >= 2
+        assert fields(cookie) == {
+            "browser": "Chrome",
+            "domain-name": "example.org",
+            "name": "session",
+            "value": "fixture-value",
+            "datetime-accessed": "2026-11-15T09:30:00+00:00",
+        }
+        [record] = objects(result, "forensic-artifact")
+        assert references(cookie, "derived-from") == [record["uuid"]]
+        assert json.loads(fields(record)["raw-record"])["URL"] == ".example.org"
+        assert "excluded-fixture-value" not in json.dumps(result)
