@@ -3,7 +3,6 @@
 
 import json
 import logging
-import sys
 
 import requests
 from pymisp import MISPAttribute, MISPEvent, MISPObject
@@ -28,6 +27,10 @@ moduleinfo = {
 
 # config fields that your code expects from the site admin
 moduleconfig = ["api_key", "client_id", "client_secret"]
+
+
+class MVAPIError(Exception):
+    pass
 
 
 class MVAPI:
@@ -73,7 +76,9 @@ class MVAPI:
             self.logger.error(
                 "Could not authenticate to get the IAM token: {0} - {1}".format(res.status_code, res.text)
             )
-            sys.exit()
+            raise MVAPIError(
+                "Could not authenticate to get the IAM token: {0} - {1}".format(res.status_code, res.text)
+            )
         else:
             self.logger.info("Successful authenticated.")
             access_token = res.json()["access_token"]
@@ -94,15 +99,20 @@ class MVAPI:
         if res.ok:
             if len(res.json()["data"]) == 0:
                 self.logger.info("No Hash details in MVISION Insights found.")
+                return None
             else:
                 self.logger.info("Successfully retrieved MVISION Insights details.")
                 self.logger.debug(res.text)
                 return res.json()
         else:
             self.logger.error("Error in search_ioc. HTTP {0} - {1}".format(str(res.status_code), res.text))
-            sys.exit()
+            raise MVAPIError("Error in search_ioc. HTTP {0} - {1}".format(str(res.status_code), res.text))
 
     def prep_result(self, ioc):
+        if ioc is None:
+            misperrors["error"] = "No Hash details in MVISION Insights found."
+            return misperrors
+
         res = ioc["data"][0]
         results = []
 
@@ -243,8 +253,12 @@ def handler(q=False):
     client_secret = request["config"]["client_secret"]
     attribute = request["attribute"]
 
-    mvi = MVAPI(attribute, api_key, client_id, client_secret)
-    res = mvi.search_ioc()
+    try:
+        mvi = MVAPI(attribute, api_key, client_id, client_secret)
+        res = mvi.search_ioc()
+    except MVAPIError as e:
+        misperrors["error"] = str(e)
+        return misperrors
     return mvi.prep_result(res)
 
 
