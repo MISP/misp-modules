@@ -5,6 +5,7 @@ from urllib.parse import parse_qs
 from uuid import UUID
 from zipfile import ZipFile
 
+import certifi
 import pytest
 
 from misp_modules.lib.gathering import GatheringJobs
@@ -61,6 +62,11 @@ def export_api(monkeypatch):
     response.stream.side_effect = lambda *args, **kwargs: iter([json.dumps(export).encode()])
     monkeypatch.setattr(sinkdb.urllib3, "PoolManager", pool)
     return export, request, response
+
+
+def test_export_uses_certifi_ca_bundle(export_api):
+    assert sinkdb.fetch("placeholder", lambda: None) == []
+    sinkdb.urllib3.PoolManager.assert_called_once_with(ca_certs=certifi.where())
 
 
 def test_fixed_event_job_and_revisions(monkeypatch, tmp_path, export_api):

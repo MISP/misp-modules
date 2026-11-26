@@ -7,6 +7,7 @@ import time
 from importlib import resources
 from urllib.parse import urlencode
 
+import certifi
 import urllib3
 from pymisp import MISPObject
 
@@ -56,7 +57,7 @@ def fetch(key, check_cancel):
     # The general requests debug tracer logs request and response bodies. Both are private here.
     try:
         with (
-            urllib3.PoolManager() as client,
+            urllib3.PoolManager(ca_certs=certifi.where()) as client,
             client.request(
                 "POST",
                 EXPORT_URL,
