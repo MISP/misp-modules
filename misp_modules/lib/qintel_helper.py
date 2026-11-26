@@ -76,26 +76,24 @@ def _search(**kwargs):
         if response.code not in [429, 504]:
             raise Exception(f"API connection error: {response}")
 
-        if request_attempts < max_retries:
-            wait_time = _get_request_wait_time(request_attempts)
+        wait_time = _get_request_wait_time(request_attempts)
 
-            if response.code == 429:
-                msg = "rate limit reached on attempt {request_attempts}, waiting {wait_time} seconds"
+        if response.code == 429:
+            msg = "rate limit reached on attempt {request_attempts}, waiting {wait_time} seconds"
 
-                if logger:
-                    logger(msg)
-
-            else:
-                msg = f"connection timed out, retrying in {wait_time} seconds"
-                if logger:
-                    logger(msg)
-
-            sleep(wait_time)
+            if logger:
+                logger(msg)
 
         else:
-            raise Exception("Max API retries exceeded")
+            msg = f"connection timed out, retrying in {wait_time} seconds"
+            if logger:
+                logger(msg)
+
+        sleep(wait_time)
 
         request_attempts += 1
+
+    raise Exception("Max API retries exceeded")
 
 
 def _set_headers(**kwargs):
