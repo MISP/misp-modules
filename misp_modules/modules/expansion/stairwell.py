@@ -130,8 +130,8 @@ def parse_response(response: dict):
                 misp_attribute = {"value": response[feature]}
                 misp_attribute.update(attribute)
                 attr = misp_object.add_attribute(**misp_attribute)
-                if feature in ("md5", "sha1", "sha256"):
-                    for label in response["malEval"]["labels"]:
+                if feature in ("md5", "sha1", "sha256") and "malEval" in response:
+                    for label in response["malEval"].get("labels", []):
                         attr.add_tag(label)
     misp_event.add_object(**misp_object)
 
