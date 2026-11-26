@@ -91,6 +91,7 @@ nav:
       - Gathering Modules: gathering.md
       - Gathering Guide: gathering-guide.md
     - Install Guides: install.md
+    - TLS and Post-Quantum Readiness: tls-pqc.md
     - Local Module Configuration: module-config.md
     - PAP RED Restrictions: pap-red.md
     - Result Caching: caching.md

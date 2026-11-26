@@ -44,6 +44,15 @@ search path used for executables).
 misp-modules
 ~~~~
 
+### TLS and post-quantum key exchange
+
+The default API listener uses HTTP on localhost. For native HTTPS, supply both
+`--tls-certfile /path/to/fullchain.pem` and `--tls-keyfile /path/to/privkey.pem`.
+This listener requires TLS 1.3. Hybrid post-quantum key exchange additionally
+requires a capable TLS runtime, suitable policy, and compatible peers. See
+[TLS and post-quantum readiness](tls-pqc.md) for deployment, verification, and
+the scope of the protocol review.
+
 ### Optional local module defaults
 
 Use `--module-config /etc/misp-modules/modules.json` to provide local defaults for
