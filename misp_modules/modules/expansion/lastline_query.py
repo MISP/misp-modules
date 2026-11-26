@@ -93,7 +93,7 @@ def handler(q=False):
         api_client = lastline_api.PortalClient(
             api_url,
             auth_data,
-            verify_ssl=config.get("verify_ssl", True).lower() in ("true"),
+            verify_ssl=str(config.get("verify_ssl", True)).lower() in ("true", "1", "yes"),
         )
         response = api_client.get_progress(task_uuid)
         if response.get("completed") != 1:
