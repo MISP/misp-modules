@@ -363,6 +363,14 @@ class QueryModule(tornado.web.RequestHandler):
             self.finish()
 
 
+def _installed_version() -> str:
+    """The installed version, or "unknown" when running from a source tree that was never installed."""
+    try:
+        return misp_modules.get_version()
+    except ValueError:
+        return "unknown"
+
+
 def main():
     """Init function."""
     global MODULES_HANDLERS  # noqa: F824
@@ -393,6 +401,7 @@ def main():
         "--cache-config", default=None, help="JSON file enabling optional per-module result caching"
     )
     arg_parser.add_argument("-s", "--system", default=None, help="legacy option that now has no effect")
+    arg_parser.add_argument("-v", "--version", action="version", version=f"misp-modules {_installed_version()}")
     args = arg_parser.parse_args()
 
     global RESTRICT_PAP_RED  # noqa: PLW0603
